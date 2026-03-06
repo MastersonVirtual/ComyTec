@@ -70,6 +70,8 @@
       }
       .top-titles h1 { margin: 0; font-size: 1.28rem; }
       .top-titles p { margin: 4px 0 0; color: #caeeee; font-size: .9rem; }
+      .top-search { margin-left: auto; min-width: 280px; max-width: 420px; width: 36%; }
+      .top-search input { width: 100%; }
 
       .main { max-width: 1280px; margin: 20px auto; padding: 0 16px 24px; }
       .panel {
@@ -130,6 +132,9 @@
       .table-wrap { overflow-x: auto; }
       table { width: 100%; min-width: 950px; border-collapse: separate; border-spacing: 0; overflow: hidden; border-radius: 14px; }
       th, td { padding: 10px; text-align: left; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,.16); }
+      tr.detail-row td { background: rgba(255,255,255,.06); }
+      .detail-box { white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #d8efef; line-height: 1.45; }
+      .link-btn { border: 1px solid rgba(255,255,255,.28); background: rgba(255,255,255,.12); color: #eaf7f7; border-radius: 8px; padding: 6px 8px; cursor: pointer; }
       th { position: sticky; top: 0; background: rgba(255,255,255,.18); }
       .chip { display: inline-block; padding: 4px 8px; border-radius: 999px; color: #fff; font-size: 12px; font-weight: 700; }
       .status-ongoing { background: var(--ok); }
@@ -144,6 +149,7 @@
         .sidebar { width: 285px; }
         .content.shift { transform: translateX(285px); }
         .card-grid, .compact-grid { grid-template-columns: 1fr; }
+        .top-search { width: 100%; min-width: 0; }
       }
     </style>
 
@@ -247,6 +253,8 @@
 
         const [rows, setRows] = useState([]);
         const [saving, setSaving] = useState(false);
+        const [searchTerm, setSearchTerm] = useState('');
+        const [expandedId, setExpandedId] = useState(null);
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio') return 'servicio';
@@ -255,6 +263,45 @@
           if (tipoAccion === 'Movimiento de Obra') return 'movimiento';
           return 'base';
         }, [tipoAccion]);
+
+
+        const filteredRows = useMemo(() => {
+          const q = searchTerm.trim().toLowerCase();
+          if (!q) return rows;
+          return rows.filter((r) =>
+            [r.clienteId, r.nombreServicio, r.cliente, r.representanteComercial, r.razonSocial, r.direccionServicio]
+              .filter(Boolean)
+              .some((v) => String(v).toLowerCase().includes(q))
+          );
+        }, [rows, searchTerm]);
+
+        function buildServiceDetailText(r) {
+          const lines = [
+            `Cliente ID: ${r.clienteId || '-'}`,
+            `Tipo Acción: ${r.tipoAccion || '-'}`,
+            `Nombre Servicio: ${r.nombreServicio || '-'}`,
+            `Tipo Servicio: ${r.tipoServicioBrindar || '-'}`,
+            `Dirección: ${r.direccionServicio || '-'}`,
+            `Unidades: ${r.cantidadUnidades || '-'}`,
+            `Representante: ${r.representanteComercial || '-'}`,
+            `Razón Social: ${r.razonSocial || '-'}`,
+            `RUT: ${r.rut || '-'}`,
+            `Mail Facturación: ${r.mailFacturacion || '-'}`,
+            `Condición Equipamiento: ${r.condicionEquipamiento || '-'} ${r.condicionEquipamientoOtro ? '(' + r.condicionEquipamientoOtro + ')' : ''}`,
+            `Importe Mensual ($): ${r.importeMensualServicioSinIva || '-'}`,
+            `Costo Instalación (US$): ${r.costoInstalacionUsdSinIva || '-'}`,
+            `Presupuesto Proveedor: ${r.presupuestoProveedor || '-'}`,
+            `Control Acceso: ${r.condicionControlAcceso || '-'}`,
+            `Tags por Aptos: ${r.tagsPorAptos || '-'}`,
+            `App Akuvox: ${r.appAkuvox || '-'}`,
+            `Llaves Servicio: ${r.llavesServicio || '-'}`,
+            `Jornales: ${r.cantidadJornalesEstimados || '-'}`,
+            `Fecha ingreso: ${r.fechaIngresoDatos || r.fechaCarga || r.fechaCharla || '-'}`,
+            `Observaciones: ${r.observacionesComentarios || '-'}`,
+            `Excepciones: ${r.excepcionesAcordadas || '-'}`,
+          ];
+          return lines.join('\n');
+        }
 
         useEffect(() => {
           const unsub = db.collection('operaciones').orderBy('creadoEn', 'desc').onSnapshot(
@@ -353,6 +400,9 @@
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
                   <p>Área comercial y Coordinación técnica</p>
+                </div>
+                <div className="top-search">
+                  <input type="text" placeholder="Buscar cliente, ID, razón social o dirección..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                 </div>
               </header>
 
@@ -494,21 +544,35 @@
                     <table>
                       <thead>
                         <tr>
-                          <th>Cliente ID</th><th>Tipo Acción</th><th>Cliente</th><th>Dirección/Detalle</th><th>Status</th><th>Fecha</th>
+                          <th>Cliente ID</th><th>Tipo Acción</th><th>Cliente</th><th>Dirección/Detalle</th><th>Status</th><th>Fecha</th><th>Detalle</th>
                         </tr>
                       </thead>
                       <tbody>
                         {rows.length === 0 ? (
-                          <tr><td colSpan="6" className="muted">Sin datos aún.</td></tr>
-                        ) : rows.map((r) => (
-                          <tr key={r.id}>
-                            <td>{r.clienteId || '-'}</td>
-                            <td>{r.tipoAccion || '-'}</td>
-                            <td>{r.cliente || r.nombreServicio || r.representanteComercial || '-'}</td>
-                            <td>{r.direccionServicio || r.lugar || r.observacionesComentarios || '-'}</td>
-                            <td><span className={statusClass(r.status)}>{r.status || '-'}</span></td>
-                            <td>{r.fechaIngresoDatos || r.fechaCarga || r.fechaCharla || '-'}</td>
-                          </tr>
+                          <tr><td colSpan="7" className="muted">Sin datos aún.</td></tr>
+                        ) : filteredRows.map((r) => (
+                          <React.Fragment key={r.id}>
+                            <tr>
+                              <td>{r.clienteId || '-'}</td>
+                              <td>{r.tipoAccion || '-'}</td>
+                              <td>{r.cliente || r.nombreServicio || r.representanteComercial || '-'}</td>
+                              <td>{r.direccionServicio || r.lugar || r.observacionesComentarios || '-'}</td>
+                              <td><span className={statusClass(r.status)}>{r.status || '-'}</span></td>
+                              <td>{r.fechaIngresoDatos || r.fechaCarga || r.fechaCharla || '-'}</td>
+                              <td>
+                                <button type="button" className="link-btn" onClick={() => setExpandedId(expandedId === r.id ? null : r.id)}>
+                                  {expandedId === r.id ? 'Ocultar' : 'Ver más'}
+                                </button>
+                              </td>
+                            </tr>
+                            {expandedId === r.id && (
+                              <tr className="detail-row">
+                                <td colSpan="7">
+                                  <div className="detail-box">{buildServiceDetailText(r)}</div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
                         ))}
                       </tbody>
                     </table>
