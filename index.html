@@ -6,9 +6,9 @@
     <title>Masterson Seguridad</title>
     <style>
       :root {
-        --base: #0b5d57;
-        --base-900: #073f3a;
-        --base-700: #0a7069;
+        --base: #084846;
+        --base-900: #042f2c;
+        --base-700: #09615b;
         --text: #eaf7f7;
         --muted: #b8d8d8;
         --border-glass: rgba(255, 255, 255, 0.28);
@@ -170,13 +170,26 @@
       .status-default { background: var(--chip); }
       .muted { color: var(--muted); }
 
+      .history-grid { display: grid; grid-template-columns: repeat(3, minmax(220px, 1fr)); gap: 12px; }
+      .widget {
+        background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
+        border: 1px solid rgba(255,255,255,.24);
+        border-radius: 14px;
+        padding: 12px;
+        box-shadow: var(--shadow-soft);
+      }
+      .widget h4 { margin: 0 0 8px; font-size: 13px; color: #d7f4ef; }
+      .kv { font-size: 12px; color: #bfe2df; margin: 4px 0; }
+      .kv b { color: #ffffff; font-weight: 700; }
+      .widget.full { grid-column: 1 / -1; }
+
       @media (max-width: 1080px) {
-        .card-grid, .compact-grid { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
+        .card-grid, .compact-grid, .history-grid { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
       }
       @media (max-width: 980px) {
         .sidebar { width: 285px; }
         .content.shift { transform: translateX(285px); }
-        .card-grid, .compact-grid { grid-template-columns: 1fr; }
+        .card-grid, .compact-grid, .history-grid { grid-template-columns: 1fr; }
         .top-search { width: 100%; min-width: 0; }
       }
     </style>
@@ -285,6 +298,7 @@
         const [saving, setSaving] = useState(false);
         const [searchTerm, setSearchTerm] = useState('');
         const [expandedId, setExpandedId] = useState(null);
+        const [selectedService, setSelectedService] = useState(null);
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
@@ -432,6 +446,7 @@
                   <button className="submenu-button" onClick={() => selectAction('Movimiento de Obra')}>Movimiento de Obra</button>
                 </div>
                 <button className="menu-button" onClick={() => selectAction('Charla')}>Charlas informativas</button>
+                <button className="menu-button" onClick={() => { setSelectedForm('historial'); setMenuOpen(false); }}>Historial de Servicios</button>
               </div>
             </aside>
 
@@ -442,7 +457,7 @@
                 <button className="burger" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
-                  <p>área técnica y comercial</p>
+                  <p>ÁREA TÉCNICA Y COMERCIAL</p>
                 </div>
                 <div className="top-search">
                   <div className="search-wrap">
@@ -460,9 +475,9 @@
                         ) : (
                           filteredRows.slice(0, 8).map((r) => (
                             <div key={r.id}>
-                              <div className="search-item" onClick={() => setExpandedId(expandedId === r.id ? null : r.id)}>
-                                <strong>{r.clienteId || '-'} · {r.nombreServicio || r.cliente || 'Servicio sin nombre'}</strong>
-                                <small>{r.direccionServicio || r.razonSocial || 'Sin dirección'} · {r.tipoAccion || '-'} · {r.status || '-'}</small>
+                              <div className="search-item" onClick={() => { setSelectedService(r); setSelectedForm('historial'); setExpandedId(null); setSearchTerm(''); }}>
+                                <strong>{r.clienteId || '-'} · {r.nombreServicio || 'Servicio sin nombre'}</strong>
+                                <small>Fecha de alta: {r.fechaAlta || '-'}</small>
                               </div>
                               {expandedId === r.id && (
                                 <div className="search-detail">
@@ -482,7 +497,30 @@
                 {selectedForm === 'home' ? (
                   <section className="hero">
                     <h2>Masterson Seguridad</h2>
-                    <p>área técnica y comercial</p>
+                    <p>ÁREA TÉCNICA Y COMERCIAL</p>
+                  </section>
+                ) : selectedForm === 'historial' ? (
+                  <section className="panel">
+                    <h2>Historial de Servicios</h2>
+                    <div className="hint">Vista completa del servicio seleccionado desde la vista previa de búsqueda.</div>
+                    {!selectedService ? (
+                      <div className="hero" style={{padding: '26px 18px'}}>
+                        <h2 style={{fontSize:'1.4rem'}}>Selecciona un servicio desde la búsqueda</h2>
+                        <p style={{fontSize:'1rem'}}>Usa la lupita arriba y toca una vista previa para ver el detalle completo.</p>
+                      </div>
+                    ) : (
+                      <div className="history-grid">
+                        <div className="widget"><h4>Identificación</h4><div className="kv"><b>ID:</b> {selectedService.clienteId || '-'}</div><div className="kv"><b>Nombre:</b> {selectedService.nombreServicio || '-'}</div><div className="kv"><b>Tipo:</b> {selectedService.tipoServicioBrindar || '-'}</div><div className="kv"><b>Dirección:</b> {selectedService.direccionServicio || '-'}</div><div className="kv"><b>Unidades:</b> {selectedService.cantidadUnidades || '-'}</div></div>
+                        <div className="widget"><h4>Comercial / Facturación</h4><div className="kv"><b>Representante:</b> {selectedService.representanteComercial || '-'}</div><div className="kv"><b>Razón Social:</b> {selectedService.razonSocial || '-'}</div><div className="kv"><b>RUT:</b> {selectedService.rut || '-'}</div><div className="kv"><b>Mail:</b> {selectedService.mailFacturacion || '-'}</div><div className="kv"><b>Duración:</b> {selectedService.duracionContratoMeses || '-'}</div></div>
+                        <div className="widget"><h4>Costos</h4><div className="kv"><b>Importe mensual:</b> {selectedService.importeMensualServicioSinIva || '-'}</div><div className="kv"><b>Costo instalación US$:</b> {selectedService.costoInstalacionUsdSinIva || '-'}</div><div className="kv"><b>Presupuesto proveedor:</b> {selectedService.presupuestoProveedor || '-'}</div><div className="kv"><b>Condición equipamiento:</b> {selectedService.condicionEquipamiento || '-'}</div></div>
+                        <div className="widget"><h4>Técnica</h4><div className="kv"><b>Control acceso:</b> {selectedService.condicionControlAcceso || '-'}</div><div className="kv"><b>Tags:</b> {selectedService.tagsPorAptos || '-'}</div><div className="kv"><b>Akuvox:</b> {selectedService.appAkuvox || '-'}</div><div className="kv"><b>Llaves:</b> {selectedService.llavesServicio || '-'}</div></div>
+                        <div className="widget"><h4>Instalación</h4><div className="kv"><b>Referente:</b> {selectedService.referenteInstalacion || '-'}</div><div className="kv"><b>Teléfono:</b> {selectedService.telefonoReferenteInstalacion || '-'}</div><div className="kv"><b>Botti contacto:</b> {selectedService.bottiSeContactaCon || '-'}</div><div className="kv"><b>Jornales:</b> {selectedService.cantidadJornalesEstimados || '-'}</div><div className="kv"><b>Fecha inicio:</b> {selectedService.fechaEspecificaInicio || '-'}</div></div>
+                        <div className="widget"><h4>Seguimiento</h4><div className="kv"><b>Tipo acción:</b> {selectedService.tipoAccion || '-'}</div><div className="kv"><b>Status:</b> {selectedService.status || '-'}</div><div className="kv"><b>Fecha ingreso:</b> {selectedService.fechaIngresoDatos || selectedService.fechaCarga || selectedService.fechaCharla || '-'}</div><div className="kv"><b>Proyecto:</b> {selectedService.proyectoServicio || '-'}</div></div>
+                        <div className="widget full"><h4>Observaciones y Excepciones</h4><div className="detail-box">Observaciones: {selectedService.observacionesComentarios || '-'}
+
+Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
+                      </div>
+                    )}
                   </section>
                 ) : (
                 <section className="panel">
