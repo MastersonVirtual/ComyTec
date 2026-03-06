@@ -11,17 +11,19 @@
         --base-700: #085758;
         --base-600: #0a6768;
         --text: #eaf7f7;
-        --glass: rgba(255, 255, 255, 0.12);
+        --muted: #b8d8d8;
+        --glass: rgba(255, 255, 255, 0.11);
+        --glass-strong: rgba(255, 255, 255, 0.17);
         --border-glass: rgba(255, 255, 255, 0.28);
-        --shadow-deep: 0 18px 45px rgba(2, 25, 25, 0.45);
         --shadow-soft: 0 10px 24px rgba(3, 35, 35, 0.28);
+        --shadow-deep: 0 18px 45px rgba(2, 25, 25, 0.45);
         --ok: #29c46a;
         --pause: #e85555;
-        --default-chip: #6f8383;
+        --chip: #6f8383;
       }
 
       * { box-sizing: border-box; }
-      html, body { margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+      html, body { margin: 0; padding: 0; font-family: Inter, 'Segoe UI', Arial, sans-serif; }
       body {
         min-height: 100vh;
         color: var(--text);
@@ -36,32 +38,32 @@
       .sidebar {
         position: fixed; inset: 0 auto 0 0; width: 330px;
         background: linear-gradient(170deg, rgba(7, 78, 79, 0.95) 0%, rgba(5, 59, 60, 0.92) 100%);
-        backdrop-filter: blur(14px) saturate(130%);
         border-right: 1px solid var(--border-glass);
+        backdrop-filter: blur(14px) saturate(130%);
         box-shadow: var(--shadow-deep);
         transform: translateX(-105%);
-        transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+        transition: transform .42s cubic-bezier(0.22, 1, 0.36, 1);
         z-index: 1000; overflow-y: auto;
       }
       .sidebar.open { transform: translateX(0); }
-      .sidebar-header { padding: 18px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.06); }
+      .sidebar-header { padding: 18px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); }
       .menu { padding: 12px; }
 
       .menu-button, .submenu-button {
         width: 100%; text-align: left; cursor: pointer; color: var(--text);
         padding: 12px 13px; margin-bottom: 8px; border-radius: 12px;
-        border: 1px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.08);
         box-shadow: inset 0 1px 0 rgba(255,255,255,.24), 0 8px 16px rgba(0,0,0,.16);
-        transition: transform .25s ease, background .25s ease, box-shadow .25s ease;
+        transition: transform .25s ease, background .25s ease;
       }
-      .menu-button:hover, .submenu-button:hover { transform: translateX(6px); background: rgba(255,255,255,0.18); }
+      .menu-button:hover, .submenu-button:hover { transform: translateX(6px); background: rgba(255,255,255,.18); }
       .submenu { max-height: 0; overflow: hidden; padding-left: 10px; opacity: 0; transition: max-height .36s cubic-bezier(0.22, 1, 0.36, 1), opacity .3s ease; }
       .submenu.open { max-height: 420px; opacity: 1; }
-      .submenu-button { font-size: 13px; background: rgba(255,255,255,0.05); }
+      .submenu-button { font-size: 13px; background: rgba(255,255,255,.05); }
 
       .overlay { position: fixed; inset: 0; z-index: 999; background: rgba(2, 17, 17, 0.48); backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity .3s ease; }
       .overlay.show { opacity: 1; pointer-events: auto; }
-      .content { width: 100%; transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1), filter .4s ease; }
+      .content { width: 100%; transition: transform .42s cubic-bezier(0.22, 1, 0.36, 1), filter .4s ease; }
       .content.shift { transform: translateX(330px); filter: saturate(90%); }
 
       .topbar {
@@ -80,51 +82,69 @@
       .top-titles h1 { margin: 0; font-size: 1.28rem; }
       .top-titles p { margin: 4px 0 0; color: #caeeee; font-size: .9rem; }
 
-      .main { max-width: 1240px; margin: 20px auto; padding: 0 16px 24px; }
-      .card {
+      .main { max-width: 1280px; margin: 20px auto; padding: 0 16px 24px; }
+      .panel {
         margin-bottom: 16px; border-radius: 18px; padding: 18px;
         background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.08));
         border: 1px solid rgba(255,255,255,.26); backdrop-filter: blur(14px) saturate(120%);
-        box-shadow: var(--shadow-soft); transition: transform .25s ease, box-shadow .25s ease;
+        box-shadow: var(--shadow-soft);
       }
-      .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-deep); }
-      .card h2 { margin: 0 0 8px; color: #e6f8f8; }
-      .hint { color: #c4e4e4; font-size: 13px; margin-bottom: 10px; }
+      .panel h2 { margin: 0 0 8px; }
+      .hint { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
 
-      .grid { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 12px; }
-      .stack { display: grid; grid-template-columns: 1fr; gap: 10px; }
+      .service-layout { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px; }
+      .service-card {
+        grid-column: span 12;
+        background: rgba(255,255,255,.09);
+        border: 1px solid rgba(255,255,255,.2);
+        border-radius: 14px;
+        padding: 14px;
+        box-shadow: 0 8px 18px rgba(0,0,0,.14);
+      }
+      .service-card h3 { margin: 0 0 10px; font-size: 15px; color: #dbf6f6; }
+      .card-grid { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 10px; }
+
       .field { display: flex; flex-direction: column; gap: 6px; }
-      .field.full { grid-column: 1 / -1; }
-      label { font-size: 13px; font-weight: 700; color: #d8f1f1; }
+      .span-2 { grid-column: span 2; }
+      .span-3, .full { grid-column: 1 / -1; }
+      label { font-size: 12.8px; font-weight: 650; color: #d8f1f1; }
+
       input, select, button, textarea {
         border-radius: 10px; border: 1px solid rgba(255,255,255,.28); padding: 10px 12px; font-size: 14px;
         color: #efffff; background: rgba(255,255,255,.10); outline: none;
       }
-      textarea { min-height: 88px; resize: vertical; }
+      textarea { min-height: 90px; resize: vertical; }
       input::placeholder, textarea::placeholder { color: #c5dede; }
       input:focus, select:focus, textarea:focus { border-color: rgba(255,255,255,.48); box-shadow: 0 0 0 3px rgba(255,255,255,.14); }
       option { color: #103233; background: #dff3f3; }
 
+      .save-row { margin-top: 8px; }
       .save-btn {
-        background: linear-gradient(135deg, var(--base-600), var(--base)); border-color: rgba(255,255,255,.34);
+        width: 100%;
+        background: linear-gradient(135deg, var(--base-600), var(--base));
+        border-color: rgba(255,255,255,.34);
         font-weight: 700; cursor: pointer; box-shadow: 0 12px 24px rgba(0,0,0,.22);
       }
       .save-btn:disabled { opacity: .7; cursor: not-allowed; }
 
+      .compact-grid { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 12px; }
       .table-wrap { overflow-x: auto; }
-      table { width: 100%; min-width: 1100px; border-collapse: separate; border-spacing: 0; overflow: hidden; border-radius: 14px; }
-      th, td { padding: 10px; text-align: left; font-size: 13px; vertical-align: top; border-bottom: 1px solid rgba(255,255,255,.16); }
-      th { position: sticky; top: 0; background: rgba(255,255,255,.18); color: #e8ffff; }
+      table { width: 100%; min-width: 950px; border-collapse: separate; border-spacing: 0; overflow: hidden; border-radius: 14px; }
+      th, td { padding: 10px; text-align: left; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,.16); }
+      th { position: sticky; top: 0; background: rgba(255,255,255,.18); }
       .chip { display: inline-block; padding: 4px 8px; border-radius: 999px; color: #fff; font-size: 12px; font-weight: 700; }
       .status-ongoing { background: var(--ok); }
       .status-pausa { background: var(--pause); }
-      .status-default { background: var(--default-chip); }
-      .muted { color: #b7d4d4; }
+      .status-default { background: var(--chip); }
+      .muted { color: var(--muted); }
 
+      @media (max-width: 1080px) {
+        .card-grid, .compact-grid { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
+      }
       @media (max-width: 980px) {
-        .grid { grid-template-columns: 1fr; }
         .sidebar { width: 285px; }
         .content.shift { transform: translateX(285px); }
+        .card-grid, .compact-grid { grid-template-columns: 1fr; }
       }
     </style>
 
@@ -159,15 +179,14 @@
       }
 
       const servicioInicial = {
-        tipoServicioBrindar: '', direccionServicio: '', cantidadUnidades: '', proyectoServicio: '', presupuestoProveedor: '',
-        fechaIngresoDatos: '', representanteComercial: '', razonSocial: '', rut: '', mailFacturacion: '', administracion: '',
-        duracionContratoMeses: '', condicionesComerciales: '', importeMensualServicioSinIva: '', importeMensualArrendamiento: '',
-        costoInstalacionUsdSinIva: '', importeCompraEquipamientoUsd: '', porQueNoSeCobraServicio: '', descuentosNegociados: '',
-        otroServicioGrupo: '', referenteInstalacion: '', telefonoReferenteInstalacion: '', personaReferenteComision: '',
-        bottiSeContactaCon: '', horarioServicioContratado: '', tienePerifoneo: '', controlAccesoEdificio: '',
-        condicionesControlAcceso: '', llevaTotem: '', sensoresAlarma: '', requiereTags: '', tagsPorAptos: '', usaAppAkuvox: '',
-        llevarCartel: '', fechaNegociadaAlta: '', fechaEspecificaInicio: '', cantidadJornalesEstimados: '', llavesServicio: '',
-        excepcionesAcordadas: '', observacionesComentarios: ''
+        nombreServicio: '', tipoServicioBrindar: '', direccionServicio: '', cantidadUnidades: '', fechaIngresoDatos: '',
+        razonSocial: '', rut: '', mailFacturacion: '', administracion: '', duracionContratoMeses: '', otroServicioGrupo: '',
+        representanteComercial: '', personaReferenteComision: '', importeMensualServicioSinIva: '', importeMensualArrendamiento: '',
+        importeCompraEquipamientoUsd: '', costoInstalacionUsdSinIva: '', descuentosNegociados: '', porQueNoSeCobraServicio: '', presupuestoProveedor: '',
+        condicionesComerciales: '', horarioServicioContratado: '', controlAccesoEdificio: '', condicionesControlAcceso: '', requiereTags: '', tagsPorAptos: '',
+        llevaTotem: '', tienePerifoneo: '', sensoresAlarma: '', usaAppAkuvox: '', llevarCartel: '',
+        referenteInstalacion: '', telefonoReferenteInstalacion: '', bottiSeContactaCon: '', llavesServicio: '', cantidadJornalesEstimados: '', fechaNegociadaAlta: '', fechaEspecificaInicio: '',
+        proyectoServicio: '', excepcionesAcordadas: '', observacionesComentarios: ''
       };
 
       function statusClass(value) {
@@ -177,6 +196,88 @@
         if (v.includes('pausa')) return 'chip status-pausa';
         return 'chip status-default';
       }
+
+      const f = (label, key, type = 'text', span = '') => ({ label, key, type, span });
+
+      const SERVICE_SECTIONS = [
+        {
+          title: '1. Identificación del Servicio',
+          fields: [
+            f('Nombre del servicio', 'nombreServicio', 'text', 'span-2'),
+            f('Tipo de servicio a brindar', 'tipoServicioBrindar', 'text'),
+            f('Dirección del servicio (Calle y número de puerta)', 'direccionServicio', 'text', 'span-2'),
+            f('Cantidad de apartamentos / unidades', 'cantidadUnidades', 'number'),
+            f('Fecha de ingreso de datos', 'fechaIngresoDatos', 'date'),
+          ],
+        },
+        {
+          title: '2. Datos de Facturación y Legales',
+          fields: [
+            f('Razón Social (para facturación)', 'razonSocial', 'text', 'span-2'),
+            f('Rut (para facturación)', 'rut', 'text'),
+            f('Mail para facturación', 'mailFacturacion', 'email', 'span-2'),
+            f('Administración', 'administracion', 'text'),
+            f('Duración del contrato (Meses)', 'duracionContratoMeses', 'number'),
+            f('El servicio cuenta con otro servicio del grupo?', 'otroServicioGrupo', 'text', 'span-2'),
+          ],
+        },
+        {
+          title: '3. Información Comercial y Costos',
+          fields: [
+            f('Representante comercial', 'representanteComercial', 'text'),
+            f('Persona Referente de comisión (Nombre de la persona)', 'personaReferenteComision', 'text', 'span-2'),
+            f('Importe mensual en pesos a facturar por servicio sin IVA', 'importeMensualServicioSinIva', 'number'),
+            f('Importe mensual en pesos a facturar por arrendamiento de equipos (Si corresponde)', 'importeMensualArrendamiento', 'number'),
+            f('Importe en dólares facturar por compra de equipamiento (Si corresponde)', 'importeCompraEquipamientoUsd', 'number'),
+            f('Costo de instalación en dólares sin IVA', 'costoInstalacionUsdSinIva', 'number'),
+            f('Presupuesto Proveedor (Chequear que este en Doc: Control de Equipamiento)', 'presupuestoProveedor', 'text', 'span-3'),
+          ],
+          textareas: [
+            ['Descuentos negociados (Si corresponde, detallar)', 'descuentosNegociados'],
+            ['Porqué NO se cobra el Servicio (Si corresponde)', 'porQueNoSeCobraServicio'],
+          ],
+        },
+        {
+          title: '4. Especificaciones Técnicas y Equipamiento',
+          fields: [
+            f('Horario del servicio contratado (No poner cantidad de horas, horario exacto)', 'horarioServicioContratado', 'text', 'span-2'),
+            f('Control de acceso del edificio', 'controlAccesoEdificio', 'text'),
+            f('¿Requiere tags?', 'requiereTags', 'text'),
+            f('Tags por Aptos', 'tagsPorAptos', 'text'),
+            f('¿Lleva tótem?', 'llevaTotem', 'text'),
+            f('¿Tiene perifoneo?', 'tienePerifoneo', 'text'),
+            f('Sensores de alarma', 'sensoresAlarma', 'text'),
+            f('El servicio usará App de Akuvox?', 'usaAppAkuvox', 'text'),
+            f('¿Llevar cartel?', 'llevarCartel', 'text'),
+          ],
+          textareas: [
+            ['Condiciones comerciales del equipamiento a instalar', 'condicionesComerciales'],
+            ['Condiciones control de acceso:', 'condicionesControlAcceso'],
+          ],
+        },
+        {
+          title: '5. Logística de Instalación y Contactos',
+          fields: [
+            f('Referente para la instalación', 'referenteInstalacion', 'text'),
+            f('Teléfono del Referente de la instalación', 'telefonoReferenteInstalacion', 'text'),
+            f('Botti se contacta con:', 'bottiSeContactaCon', 'text'),
+            f('Llaves del servicio', 'llavesServicio', 'text'),
+            f('Cantidad de jornales estimados de instalación', 'cantidadJornalesEstimados', 'number'),
+            f('Fecha negociada con el cliente para alta del servicio (si corresponde)', 'fechaNegociadaAlta', 'date'),
+            f('Se negoció una fecha especifica para iniciar el servicio?', 'fechaEspecificaInicio', 'text', 'span-2'),
+          ],
+        },
+        {
+          title: '6. Documentación y Cierre',
+          fields: [
+            f('Adjuntar Proyecto del Servicio', 'proyectoServicio', 'file', 'span-2'),
+          ],
+          textareas: [
+            ['¿Hay excepciones acordadas con el cliente que debamos tener en cuenta para la instalación y alta del servicio?', 'excepcionesAcordadas'],
+            ['Observaciones / comentarios (Especificaciones necesarias, integraciones, sectores no monitoreados, etc.).', 'observacionesComentarios'],
+          ],
+        },
+      ];
 
       function App() {
         const [menuOpen, setMenuOpen] = useState(false);
@@ -210,17 +311,17 @@
         }, [tipoAccion]);
 
         useEffect(() => {
-          const unsub = db.collection('operaciones').orderBy('creadoEn', 'desc').onSnapshot((snap) => {
-            setRows(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-          }, (err) => console.error('Error onSnapshot:', err));
+          const unsub = db.collection('operaciones').orderBy('creadoEn', 'desc').onSnapshot(
+            (snap) => setRows(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
+            (err) => console.error('Error onSnapshot:', err)
+          );
           return () => unsub();
         }, []);
 
         function resetFields() {
           setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('ONGOING');
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
-          setServicioForm(servicioInicial);
-          setClienteId(generarClienteId());
+          setServicioForm(servicioInicial); setClienteId(generarClienteId());
         }
 
         function setServicioField(key, value) {
@@ -233,19 +334,16 @@
           setMenuOpen(false);
         }
 
-        function toggleGroup(key) { setOpenMenus((prev) => ({ ...prev, [key]: !prev[key] })); }
-
         async function handleSubmit(e) {
           e.preventDefault();
           const doc = { tipoAccion, clienteId, status, creadoEn: firebase.firestore.FieldValue.serverTimestamp() };
 
           if (grupo === 'servicio') {
-            if (!servicioForm.tipoServicioBrindar || !servicioForm.direccionServicio || !servicioForm.fechaIngresoDatos) {
-              return alert('Completá al menos: Tipo de servicio, Dirección y Fecha de ingreso de datos.');
+            if (!servicioForm.nombreServicio || !servicioForm.tipoServicioBrindar || !servicioForm.direccionServicio) {
+              return alert('Completá al menos: Nombre del servicio, Tipo de servicio y Dirección.');
             }
-            Object.assign(doc, { ...servicioForm, formulario: 'nuevo-servicio-completo' });
+            Object.assign(doc, { ...servicioForm, formulario: 'nuevo-servicio-diseno-uiux' });
           }
-
           if (grupo === 'base') {
             if (!cliente || !fechaCarga) return alert('Completá Cliente y Fecha Carga.');
             Object.assign(doc, { cliente, fechaCarga, tiempoInstalacion, fechaAlta, cobro });
@@ -280,7 +378,9 @@
             <aside className={`sidebar ${menuOpen ? 'open' : ''}`}>
               <div className="sidebar-header">MENÚ OPERATIVO</div>
               <div className="menu">
-                <button className="menu-button" onClick={() => toggleGroup('nuevo')}>Nuevo {openMenus.nuevo ? '▾' : '▸'}</button>
+                <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}>
+                  Nuevo {openMenus.nuevo ? '▾' : '▸'}
+                </button>
                 <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
                   <button className="submenu-button" onClick={() => selectAction('Nuevo Servicio')}>Servicio</button>
                   <button className="submenu-button" onClick={() => selectAction('Obra')}>Obra</button>
@@ -290,7 +390,9 @@
                   <button className="submenu-button" onClick={() => selectAction('Baja')}>Baja de Servicio</button>
                 </div>
 
-                <button className="menu-button" onClick={() => toggleGroup('fact')}>Facturación {openMenus.fact ? '▾' : '▸'}</button>
+                <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, fact: !p.fact }))}>
+                  Facturación {openMenus.fact ? '▾' : '▸'}
+                </button>
                 <div className={`submenu ${openMenus.fact ? 'open' : ''}`}>
                   <button className="submenu-button" onClick={() => selectAction('Agregado')}>Equipos agregados</button>
                   <button className="submenu-button" onClick={() => selectAction('Nuevo Servicio')}>Nuevo servicio</button>
@@ -298,12 +400,11 @@
                   <button className="submenu-button" onClick={() => selectAction('Obra')}>Nueva Obra</button>
                   <button className="submenu-button" onClick={() => selectAction('Movimiento de Obra')}>Movimiento de Obra</button>
                 </div>
-
                 <button className="menu-button" onClick={() => selectAction('Charla')}>Charlas informativas</button>
               </div>
             </aside>
 
-            <div className={`overlay ${menuOpen ? 'show' : ''}`} onClick={() => setMenuOpen(false)}></div>
+            <div className={`overlay ${menuOpen ? 'show' : ''}`} onClick={() => setMenuOpen(false)} />
 
             <div className={`content ${menuOpen ? 'shift' : ''}`}>
               <header className="topbar">
@@ -315,112 +416,126 @@
               </header>
 
               <main className="main">
-                <section className="card">
-                  <h2>Carga de Operación</h2>
-                  <div className="hint">Tipo seleccionado: <b>{tipoAccion}</b></div>
+                <section className="panel">
+                  <h2>Formulario Operativo</h2>
+                  <div className="hint">Diseño UI/UX en cards + grilla para mejorar legibilidad y velocidad de carga operativa.</div>
 
-                  <form onSubmit={handleSubmit} className={grupo === 'servicio' ? 'stack' : 'grid'}>
-                    <div className="field">
-                      <label>Tipo de Acción</label>
-                      <select value={tipoAccion} onChange={(e) => { setTipoAccion(e.target.value); resetFields(); }}>
-                        {ACCIONES.map((a) => <option key={a} value={a}>{a}</option>)}
-                      </select>
-                    </div>
-                    <div className="field">
-                      <label>Cliente ID (autogenerado)</label>
-                      <input value={clienteId} readOnly type="text" />
-                    </div>
+                  <form onSubmit={handleSubmit}>
+                    {grupo === 'servicio' ? (
+                      <div className="service-layout">
+                        <div className="service-card">
+                          <h3>Control de Formulario</h3>
+                          <div className="card-grid">
+                            <div className="field">
+                              <label>Tipo de Acción</label>
+                              <select value={tipoAccion} onChange={(e) => { setTipoAccion(e.target.value); resetFields(); }}>
+                                {ACCIONES.map((a) => <option key={a} value={a}>{a}</option>)}
+                              </select>
+                            </div>
+                            <div className="field">
+                              <label>Cliente ID (autogenerado)</label>
+                              <input value={clienteId} readOnly type="text" />
+                            </div>
+                            <div className="field">
+                              <label>Status</label>
+                              <input value={status} onChange={(e) => setStatus(e.target.value)} type="text" placeholder="ONGOING / PAUSA / ..." />
+                            </div>
+                          </div>
+                        </div>
 
-                    {grupo === 'servicio' && (
-                      <>
-                        <div className="field"><label>Tipo de servicio a brindar</label><input value={servicioForm.tipoServicioBrindar} onChange={(e) => setServicioField('tipoServicioBrindar', e.target.value)} type="text" /></div>
-                        <div className="field"><label>Dirección del servicio (Calle y número de puerta)</label><input value={servicioForm.direccionServicio} onChange={(e) => setServicioField('direccionServicio', e.target.value)} type="text" /></div>
-                        <div className="field"><label>Cantidad de apartamentos / unidades</label><input value={servicioForm.cantidadUnidades} onChange={(e) => setServicioField('cantidadUnidades', e.target.value)} type="text" /></div>
-                        <div className="field"><label>Adjuntar Proyecto del Servicio</label><input onChange={(e) => setServicioField('proyectoServicio', e.target.files?.[0]?.name || '')} type="file" /></div>
-                        <div className="field"><label>Presupuesto Proveedor (Chequear que este en Doc: Control de Equipamiento)</label><input value={servicioForm.presupuestoProveedor} onChange={(e) => setServicioField('presupuestoProveedor', e.target.value)} type="text" /></div>
-                        <div className="field"><label>Fecha de ingreso de datos</label><input value={servicioForm.fechaIngresoDatos} onChange={(e) => setServicioField('fechaIngresoDatos', e.target.value)} type="date" /></div>
-                        <div className="field"><label>Representante comercial</label><input value={servicioForm.representanteComercial} onChange={(e) => setServicioField('representanteComercial', e.target.value)} type="text" /></div>
-                        <div className="field"><label>Razón Social (para facturación)</label><input value={servicioForm.razonSocial} onChange={(e) => setServicioField('razonSocial', e.target.value)} type="text" /></div>
-                        <div className="field"><label>Rut (para facturación)</label><input value={servicioForm.rut} onChange={(e) => setServicioField('rut', e.target.value)} type="text" /></div>
-                        <div className="field"><label>Mail para facturación</label><input value={servicioForm.mailFacturacion} onChange={(e) => setServicioField('mailFacturacion', e.target.value)} type="email" /></div>
-                        <div className="field"><label>Administración</label><input value={servicioForm.administracion} onChange={(e) => setServicioField('administracion', e.target.value)} type="text" /></div>
-                        <div className="field"><label>Duración del contrato (Meses)</label><input value={servicioForm.duracionContratoMeses} onChange={(e) => setServicioField('duracionContratoMeses', e.target.value)} type="number" min="0" /></div>
-                        <div className="field"><label>Condiciones comerciales del equipamiento a instalar</label><textarea value={servicioForm.condicionesComerciales} onChange={(e) => setServicioField('condicionesComerciales', e.target.value)} /></div>
-                        <div className="field"><label>Importe mensual en pesos a facturar por servicio sin IVA</label><input value={servicioForm.importeMensualServicioSinIva} onChange={(e) => setServicioField('importeMensualServicioSinIva', e.target.value)} type="number" step="0.01" /></div>
-                        <div className="field"><label>Importe mensual en pesos a facturar por arrendamiento de equipos (Si corresponde)</label><input value={servicioForm.importeMensualArrendamiento} onChange={(e) => setServicioField('importeMensualArrendamiento', e.target.value)} type="number" step="0.01" /></div>
-                        <div className="field"><label>Costo de instalación en dólares sin IVA</label><input value={servicioForm.costoInstalacionUsdSinIva} onChange={(e) => setServicioField('costoInstalacionUsdSinIva', e.target.value)} type="number" step="0.01" /></div>
-                        <div className="field"><label>Importe en dólares facturar por compra de equipamiento (Si corresponde)</label><input value={servicioForm.importeCompraEquipamientoUsd} onChange={(e) => setServicioField('importeCompraEquipamientoUsd', e.target.value)} type="number" step="0.01" /></div>
-                        <div className="field"><label>Porqué NO se cobra el Servicio (Si corresponde)</label><textarea value={servicioForm.porQueNoSeCobraServicio} onChange={(e) => setServicioField('porQueNoSeCobraServicio', e.target.value)} /></div>
-                        <div className="field"><label>Descuentos negociados (Si corresponde, detallar)</label><textarea value={servicioForm.descuentosNegociados} onChange={(e) => setServicioField('descuentosNegociados', e.target.value)} /></div>
-                        <div className="field"><label>El servicio cuenta con otro servicio del grupo?</label><input value={servicioForm.otroServicioGrupo} onChange={(e) => setServicioField('otroServicioGrupo', e.target.value)} type="text" /></div>
-                        <div className="field"><label>Referente para la instalación</label><input value={servicioForm.referenteInstalacion} onChange={(e) => setServicioField('referenteInstalacion', e.target.value)} type="text" /></div>
-                        <div className="field"><label>Teléfono del Referente de la instalación</label><input value={servicioForm.telefonoReferenteInstalacion} onChange={(e) => setServicioField('telefonoReferenteInstalacion', e.target.value)} type="text" /></div>
-                        <div className="field"><label>Persona Referente de comisión (Nombre de la persona)</label><input value={servicioForm.personaReferenteComision} onChange={(e) => setServicioField('personaReferenteComision', e.target.value)} type="text" /></div>
-                        <div className="field"><label>Botti se contacta con:</label><input value={servicioForm.bottiSeContactaCon} onChange={(e) => setServicioField('bottiSeContactaCon', e.target.value)} type="text" /></div>
-                        <div className="field"><label>Horario del servicio contratado (No poner cantidad de horas, horario exacto)</label><input value={servicioForm.horarioServicioContratado} onChange={(e) => setServicioField('horarioServicioContratado', e.target.value)} type="text" /></div>
-                        <div className="field"><label>¿Tiene perifoneo?</label><input value={servicioForm.tienePerifoneo} onChange={(e) => setServicioField('tienePerifoneo', e.target.value)} type="text" /></div>
-                        <div className="field"><label>Control de acceso del edificio</label><input value={servicioForm.controlAccesoEdificio} onChange={(e) => setServicioField('controlAccesoEdificio', e.target.value)} type="text" /></div>
-                        <div className="field"><label>Condiciones control de acceso:</label><textarea value={servicioForm.condicionesControlAcceso} onChange={(e) => setServicioField('condicionesControlAcceso', e.target.value)} /></div>
-                        <div className="field"><label>¿Lleva tótem?</label><input value={servicioForm.llevaTotem} onChange={(e) => setServicioField('llevaTotem', e.target.value)} type="text" /></div>
-                        <div className="field"><label>Sensores de alarma</label><input value={servicioForm.sensoresAlarma} onChange={(e) => setServicioField('sensoresAlarma', e.target.value)} type="text" /></div>
-                        <div className="field"><label>¿Requiere tags?</label><input value={servicioForm.requiereTags} onChange={(e) => setServicioField('requiereTags', e.target.value)} type="text" /></div>
-                        <div className="field"><label>Tags por Aptos</label><input value={servicioForm.tagsPorAptos} onChange={(e) => setServicioField('tagsPorAptos', e.target.value)} type="text" /></div>
-                        <div className="field"><label>El servicio usará App de Akuvox?</label><input value={servicioForm.usaAppAkuvox} onChange={(e) => setServicioField('usaAppAkuvox', e.target.value)} type="text" /></div>
-                        <div className="field"><label>¿Llevar cartel?</label><input value={servicioForm.llevarCartel} onChange={(e) => setServicioField('llevarCartel', e.target.value)} type="text" /></div>
-                        <div className="field"><label>Fecha negociada con el cliente para alta del servicio (Si corresponde)</label><input value={servicioForm.fechaNegociadaAlta} onChange={(e) => setServicioField('fechaNegociadaAlta', e.target.value)} type="date" /></div>
-                        <div className="field"><label>Se negoció una fecha especifica para iniciar el servicio?</label><input value={servicioForm.fechaEspecificaInicio} onChange={(e) => setServicioField('fechaEspecificaInicio', e.target.value)} type="text" /></div>
-                        <div className="field"><label>Cantidad de jornales estimados de instalación</label><input value={servicioForm.cantidadJornalesEstimados} onChange={(e) => setServicioField('cantidadJornalesEstimados', e.target.value)} type="number" min="0" /></div>
-                        <div className="field"><label>Llaves del servicio</label><input value={servicioForm.llavesServicio} onChange={(e) => setServicioField('llavesServicio', e.target.value)} type="text" /></div>
-                        <div className="field"><label>¿Hay excepciones acordadas con el cliente para la instalación y alta?</label><textarea value={servicioForm.excepcionesAcordadas} onChange={(e) => setServicioField('excepcionesAcordadas', e.target.value)} /></div>
-                        <div className="field"><label>Observaciones / comentarios (Especificaciones, integraciones, equipamiento a NO instalar, etc.)</label><textarea value={servicioForm.observacionesComentarios} onChange={(e) => setServicioField('observacionesComentarios', e.target.value)} /></div>
-                      </>
-                    )}
+                        {SERVICE_SECTIONS.map((section) => (
+                          <div className="service-card" key={section.title}>
+                            <h3>{section.title}</h3>
+                            <div className="card-grid">
+                              {section.fields.map((item) => (
+                                <div className={`field ${item.span || ''}`} key={item.key}>
+                                  <label>{item.label}</label>
+                                  {item.type === 'file' ? (
+                                    <input type="file" onChange={(e) => setServicioField(item.key, e.target.files?.[0]?.name || '')} />
+                                  ) : (
+                                    <input
+                                      type={item.type}
+                                      step={item.type === 'number' ? '0.01' : undefined}
+                                      value={servicioForm[item.key] || ''}
+                                      onChange={(e) => setServicioField(item.key, e.target.value)}
+                                    />
+                                  )}
+                                </div>
+                              ))}
 
-                    {grupo === 'base' && (
-                      <>
-                        <div className="field"><label>Cliente</label><input value={cliente} onChange={(e) => setCliente(e.target.value)} type="text" /></div>
-                        <div className="field"><label>Fecha Carga</label><input value={fechaCarga} onChange={(e) => setFechaCarga(e.target.value)} type="date" /></div>
-                        <div className="field"><label>Tiempo Instalación</label><input value={tiempoInstalacion} onChange={(e) => setTiempoInstalacion(e.target.value)} type="text" /></div>
+                              {(section.textareas || []).map(([label, key]) => (
+                                <div className="field span-3" key={key}>
+                                  <label>{label}</label>
+                                  <textarea value={servicioForm[key] || ''} onChange={(e) => setServicioField(key, e.target.value)} />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+
+                        <div className="service-card save-row">
+                          <button className="save-btn" type="submit" disabled={saving}>
+                            {saving ? 'Guardando...' : 'Guardar Operación'}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="compact-grid">
+                        <div className="field">
+                          <label>Tipo de Acción</label>
+                          <select value={tipoAccion} onChange={(e) => { setTipoAccion(e.target.value); resetFields(); }}>
+                            {ACCIONES.map((a) => <option key={a} value={a}>{a}</option>)}
+                          </select>
+                        </div>
+                        <div className="field">
+                          <label>Cliente ID (autogenerado)</label>
+                          <input value={clienteId} readOnly type="text" />
+                        </div>
                         <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
-                        <div className="field"><label>Fecha Alta</label><input value={fechaAlta} onChange={(e) => setFechaAlta(e.target.value)} type="date" /></div>
-                        <div className="field"><label>Cobro</label><input value={cobro} onChange={(e) => setCobro(e.target.value)} type="text" /></div>
-                      </>
-                    )}
 
-                    {grupo === 'movimiento' && (
-                      <>
-                        <div className="field"><label>Cliente</label><input value={cliente} onChange={(e) => setCliente(e.target.value)} type="text" /></div>
-                        <div className="field"><label>Fecha Carga</label><input value={fechaCarga} onChange={(e) => setFechaCarga(e.target.value)} type="date" /></div>
-                        <div className="field"><label>Costo</label><input value={costo} onChange={(e) => setCosto(e.target.value)} type="number" /></div>
-                        <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
-                        <div className="field"><label>Fecha Alta</label><input value={fechaAlta} onChange={(e) => setFechaAlta(e.target.value)} type="date" /></div>
-                        <div className="field"><label>Cobro</label><input value={cobro} onChange={(e) => setCobro(e.target.value)} type="text" /></div>
-                      </>
-                    )}
+                        {grupo === 'base' && (
+                          <>
+                            <div className="field"><label>Cliente</label><input value={cliente} onChange={(e) => setCliente(e.target.value)} type="text" /></div>
+                            <div className="field"><label>Fecha Carga</label><input value={fechaCarga} onChange={(e) => setFechaCarga(e.target.value)} type="date" /></div>
+                            <div className="field"><label>Tiempo Instalación</label><input value={tiempoInstalacion} onChange={(e) => setTiempoInstalacion(e.target.value)} type="text" /></div>
+                            <div className="field"><label>Fecha Alta</label><input value={fechaAlta} onChange={(e) => setFechaAlta(e.target.value)} type="date" /></div>
+                            <div className="field"><label>Cobro</label><input value={cobro} onChange={(e) => setCobro(e.target.value)} type="text" /></div>
+                          </>
+                        )}
 
-                    {grupo === 'baja' && (
-                      <>
-                        <div className="field"><label>Fecha Carga</label><input value={fechaCarga} onChange={(e) => setFechaCarga(e.target.value)} type="date" /></div>
-                        <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
-                        <div className="field"><label>Fecha Realizado</label><input value={fechaRealizado} onChange={(e) => setFechaRealizado(e.target.value)} type="date" /></div>
-                        <div className="field"><label>Verificado</label><input value={verificado} onChange={(e) => setVerificado(e.target.value)} type="text" /></div>
-                      </>
-                    )}
+                        {grupo === 'movimiento' && (
+                          <>
+                            <div className="field"><label>Cliente</label><input value={cliente} onChange={(e) => setCliente(e.target.value)} type="text" /></div>
+                            <div className="field"><label>Fecha Carga</label><input value={fechaCarga} onChange={(e) => setFechaCarga(e.target.value)} type="date" /></div>
+                            <div className="field"><label>Costo</label><input value={costo} onChange={(e) => setCosto(e.target.value)} type="number" /></div>
+                            <div className="field"><label>Fecha Alta</label><input value={fechaAlta} onChange={(e) => setFechaAlta(e.target.value)} type="date" /></div>
+                            <div className="field"><label>Cobro</label><input value={cobro} onChange={(e) => setCobro(e.target.value)} type="text" /></div>
+                          </>
+                        )}
 
-                    {grupo === 'charla' && (
-                      <>
-                        <div className="field"><label>Fecha Charla</label><input value={fechaCharla} onChange={(e) => setFechaCharla(e.target.value)} type="date" /></div>
-                        <div className="field"><label>Hora</label><input value={hora} onChange={(e) => setHora(e.target.value)} type="time" /></div>
-                        <div className="field"><label>Lugar</label><input value={lugar} onChange={(e) => setLugar(e.target.value)} type="text" /></div>
-                        <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
-                      </>
-                    )}
+                        {grupo === 'baja' && (
+                          <>
+                            <div className="field"><label>Fecha Carga</label><input value={fechaCarga} onChange={(e) => setFechaCarga(e.target.value)} type="date" /></div>
+                            <div className="field"><label>Fecha Realizado</label><input value={fechaRealizado} onChange={(e) => setFechaRealizado(e.target.value)} type="date" /></div>
+                            <div className="field"><label>Verificado</label><input value={verificado} onChange={(e) => setVerificado(e.target.value)} type="text" /></div>
+                          </>
+                        )}
 
-                    <div className="field full"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                        {grupo === 'charla' && (
+                          <>
+                            <div className="field"><label>Fecha Charla</label><input value={fechaCharla} onChange={(e) => setFechaCharla(e.target.value)} type="date" /></div>
+                            <div className="field"><label>Hora</label><input value={hora} onChange={(e) => setHora(e.target.value)} type="time" /></div>
+                            <div className="field"><label>Lugar</label><input value={lugar} onChange={(e) => setLugar(e.target.value)} type="text" /></div>
+                          </>
+                        )}
+
+                        <div className="field full"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                      </div>
+                    )}
                   </form>
                 </section>
 
-                <section className="card">
+                <section className="panel">
                   <h2>Registro en tiempo real</h2>
                   <div className="table-wrap">
                     <table>
@@ -430,11 +545,13 @@
                         </tr>
                       </thead>
                       <tbody>
-                        {rows.length === 0 ? <tr><td colSpan="6" className="muted">Sin datos aún.</td></tr> : rows.map((r) => (
+                        {rows.length === 0 ? (
+                          <tr><td colSpan="6" className="muted">Sin datos aún.</td></tr>
+                        ) : rows.map((r) => (
                           <tr key={r.id}>
                             <td>{r.clienteId || '-'}</td>
                             <td>{r.tipoAccion || '-'}</td>
-                            <td>{r.cliente || r.representanteComercial || '-'}</td>
+                            <td>{r.cliente || r.nombreServicio || r.representanteComercial || '-'}</td>
                             <td>{r.direccionServicio || r.lugar || r.observacionesComentarios || '-'}</td>
                             <td><span className={statusClass(r.status)}>{r.status || '-'}</span></td>
                             <td>{r.fechaIngresoDatos || r.fechaCarga || r.fechaCharla || '-'}</td>
