@@ -23,170 +23,196 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 function App() {
-  const [formData, setFormData] = useState({
-    cliente: '',
-    direccion: '',
-    tipoServicio: 'Monitoreo',
-    importe: '',
-  });
-
+  const [cliente, setCliente] = useState('');
+  const [direccion, setDireccion] = useState('');
+  const [tipoServicio, setTipoServicio] = useState('Monitoreo');
+  const [importe, setImporte] = useState('');
   const [servicios, setServicios] = useState([]);
   const [guardando, setGuardando] = useState(false);
 
   useEffect(() => {
-    const serviciosRef = collection(db, 'servicios');
-    const serviciosQuery = query(serviciosRef, orderBy('creadoEn', 'desc'));
+    const q = query(collection(db, 'servicios'), orderBy('creadoEn', 'desc'));
 
-    const unsubscribe = onSnapshot(serviciosQuery, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const lista = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-
-      setServicios(data);
+      setServicios(lista);
     });
 
     return () => unsubscribe();
   }, []);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.cliente.trim() || !formData.direccion.trim() || !formData.importe) {
-      alert('Completa todos los campos antes de guardar.');
+    if (!cliente.trim() || !direccion.trim() || !importe) {
+      alert('Completa todos los campos.');
       return;
     }
 
     try {
       setGuardando(true);
+
       await addDoc(collection(db, 'servicios'), {
-        cliente: formData.cliente.trim(),
-        direccion: formData.direccion.trim(),
-        tipoServicio: formData.tipoServicio,
-        importe: Number(formData.importe),
+        cliente: cliente.trim(),
+        direccion: direccion.trim(),
+        tipoServicio,
+        importe: Number(importe),
         creadoEn: serverTimestamp(),
       });
 
-      setFormData({
-        cliente: '',
-        direccion: '',
-        tipoServicio: 'Monitoreo',
-        importe: '',
-      });
+      setCliente('');
+      setDireccion('');
+      setTipoServicio('Monitoreo');
+      setImporte('');
     } catch (error) {
-      console.error('Error al guardar servicio:', error);
-      alert('No se pudo guardar el servicio. Revisa la consola para más detalles.');
+      console.error('Error al guardar:', error);
+      alert('No se pudo guardar el servicio.');
     } finally {
       setGuardando(false);
     }
   };
 
   return (
-    <main style={{ maxWidth: 900, margin: '0 auto', padding: 24, fontFamily: 'Arial, sans-serif' }}>
-      <h1>MastersonVirtual - Servicios</h1>
+    <>
+      <style>{`
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Arial, sans-serif; background: #f6f7fb; }
+        .contenedor { max-width: 980px; margin: 24px auto; padding: 0 16px; }
+        .tarjeta {
+          background: #fff;
+          border: 1px solid #e5e7eb;
+          border-radius: 10px;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+          padding: 16px;
+          margin-bottom: 16px;
+        }
+        h1, h2 { margin: 0 0 14px; color: #111827; }
+        .grid {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(180px, 1fr));
+          gap: 12px;
+        }
+        label { display: flex; flex-direction: column; gap: 6px; color: #374151; font-weight: 600; }
+        input, select, button {
+          border: 1px solid #d1d5db;
+          border-radius: 8px;
+          padding: 10px 12px;
+          font-size: 14px;
+        }
+        button {
+          cursor: pointer;
+          background: #111827;
+          color: #fff;
+          border-color: #111827;
+          font-weight: 700;
+          grid-column: 1 / -1;
+        }
+        button:disabled { opacity: 0.7; cursor: not-allowed; }
+        .tabla-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; background: #fff; }
+        th, td { padding: 10px; border-bottom: 1px solid #e5e7eb; font-size: 14px; }
+        th { text-align: left; color: #111827; background: #f9fafb; }
+        td.derecha, th.derecha { text-align: right; }
+        .vacio { text-align: center; color: #6b7280; padding: 14px; }
+        @media (max-width: 700px) {
+          .grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 12,
-          marginBottom: 24,
-          padding: 16,
-          border: '1px solid #ddd',
-          borderRadius: 8,
-        }}
-      >
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          Cliente
-          <input
-            type="text"
-            name="cliente"
-            value={formData.cliente}
-            onChange={handleChange}
-            placeholder="Nombre del cliente"
-          />
-        </label>
+      <main className="contenedor">
+        <section className="tarjeta">
+          <h1>MastersonVirtual - Gestión de Servicios</h1>
 
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          Dirección
-          <input
-            type="text"
-            name="direccion"
-            value={formData.direccion}
-            onChange={handleChange}
-            placeholder="Dirección del servicio"
-          />
-        </label>
+          <form className="grid" onSubmit={handleSubmit}>
+            <label>
+              Cliente
+              <input
+                type="text"
+                value={cliente}
+                onChange={(e) => setCliente(e.target.value)}
+                placeholder="Nombre del cliente"
+              />
+            </label>
 
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          Tipo de Servicio
-          <select name="tipoServicio" value={formData.tipoServicio} onChange={handleChange}>
-            <option value="Monitoreo">Monitoreo</option>
-            <option value="CCTV">CCTV</option>
-          </select>
-        </label>
+            <label>
+              Dirección
+              <input
+                type="text"
+                value={direccion}
+                onChange={(e) => setDireccion(e.target.value)}
+                placeholder="Dirección"
+              />
+            </label>
 
-        <label style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          Importe
-          <input
-            type="number"
-            name="importe"
-            value={formData.importe}
-            onChange={handleChange}
-            placeholder="0"
-            min="0"
-            step="0.01"
-          />
-        </label>
+            <label>
+              Tipo de Servicio
+              <select value={tipoServicio} onChange={(e) => setTipoServicio(e.target.value)}>
+                <option value="Monitoreo">Monitoreo</option>
+                <option value="CCTV">CCTV</option>
+              </select>
+            </label>
 
-        <button type="submit" disabled={guardando} style={{ gridColumn: '1 / -1', padding: '10px 14px' }}>
-          {guardando ? 'Guardando...' : 'Guardar servicio'}
-        </button>
-      </form>
+            <label>
+              Importe
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={importe}
+                onChange={(e) => setImporte(e.target.value)}
+                placeholder="0"
+              />
+            </label>
 
-      <h2>Registros en tiempo real</h2>
-      <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr>
-              <th style={{ borderBottom: '1px solid #ddd', textAlign: 'left', padding: 8 }}>Cliente</th>
-              <th style={{ borderBottom: '1px solid #ddd', textAlign: 'left', padding: 8 }}>Dirección</th>
-              <th style={{ borderBottom: '1px solid #ddd', textAlign: 'left', padding: 8 }}>Tipo</th>
-              <th style={{ borderBottom: '1px solid #ddd', textAlign: 'right', padding: 8 }}>Importe</th>
-            </tr>
-          </thead>
-          <tbody>
-            {servicios.length === 0 ? (
-              <tr>
-                <td colSpan="4" style={{ padding: 12, textAlign: 'center', color: '#666' }}>
-                  Sin registros aún.
-                </td>
-              </tr>
-            ) : (
-              servicios.map((servicio) => (
-                <tr key={servicio.id}>
-                  <td style={{ borderBottom: '1px solid #eee', padding: 8 }}>{servicio.cliente}</td>
-                  <td style={{ borderBottom: '1px solid #eee', padding: 8 }}>{servicio.direccion}</td>
-                  <td style={{ borderBottom: '1px solid #eee', padding: 8 }}>{servicio.tipoServicio}</td>
-                  <td style={{ borderBottom: '1px solid #eee', padding: 8, textAlign: 'right' }}>
-                    {Number(servicio.importe || 0).toLocaleString('es-AR', {
-                      style: 'currency',
-                      currency: 'ARS',
-                    })}
-                  </td>
+            <button type="submit" disabled={guardando}>
+              {guardando ? 'Guardando...' : 'Guardar servicio'}
+            </button>
+          </form>
+        </section>
+
+        <section className="tarjeta">
+          <h2>Registros en tiempo real</h2>
+          <div className="tabla-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Dirección</th>
+                  <th>Tipo</th>
+                  <th className="derecha">Importe</th>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    </main>
+              </thead>
+              <tbody>
+                {servicios.length === 0 ? (
+                  <tr>
+                    <td className="vacio" colSpan="4">
+                      Sin registros aún.
+                    </td>
+                  </tr>
+                ) : (
+                  servicios.map((servicio) => (
+                    <tr key={servicio.id}>
+                      <td>{servicio.cliente}</td>
+                      <td>{servicio.direccion}</td>
+                      <td>{servicio.tipoServicio}</td>
+                      <td className="derecha">
+                        {Number(servicio.importe || 0).toLocaleString('es-AR', {
+                          style: 'currency',
+                          currency: 'ARS',
+                        })}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </>
   );
 }
 
