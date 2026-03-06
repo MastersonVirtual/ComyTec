@@ -6,9 +6,9 @@
     <title>Masterson Seguridad</title>
     <style>
       :root {
-        --base: #074e4f;
-        --base-900: #053b3c;
-        --base-700: #085758;
+        --base: #0b5d57;
+        --base-900: #073f3a;
+        --base-700: #0a7069;
         --text: #eaf7f7;
         --muted: #b8d8d8;
         --border-glass: rgba(255, 255, 255, 0.28);
@@ -74,6 +74,25 @@
       .top-search input { width: 100%; }
 
       .main { max-width: 1280px; margin: 20px auto; padding: 0 16px 24px; }
+
+      .hero {
+        border-radius: 18px;
+        padding: 52px 28px;
+        text-align: center;
+        background: linear-gradient(135deg, rgba(255,255,255,.18), rgba(255,255,255,.08));
+        border: 1px solid rgba(255,255,255,.28);
+        box-shadow: var(--shadow-deep);
+      }
+      .hero h2 {
+        margin: 0;
+        font-size: clamp(2rem, 6vw, 4.2rem);
+        letter-spacing: 0.5px;
+      }
+      .hero p {
+        margin: 12px 0 0;
+        font-size: clamp(1rem, 2.2vw, 1.5rem);
+        color: #d7f4ef;
+      }
       .panel {
         margin-bottom: 16px; border-radius: 18px; padding: 18px;
         background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.08));
@@ -235,7 +254,8 @@
         const [menuOpen, setMenuOpen] = useState(false);
         const [openMenus, setOpenMenus] = useState({ nuevo: true, fact: false });
 
-        const [tipoAccion, setTipoAccion] = useState('Nuevo Servicio');
+        const [tipoAccion, setTipoAccion] = useState('');
+        const [selectedForm, setSelectedForm] = useState('home');
         const [clienteId, setClienteId] = useState(generarClienteId());
         const [cliente, setCliente] = useState('');
         const [fechaCarga, setFechaCarga] = useState('');
@@ -257,7 +277,7 @@
         const [expandedId, setExpandedId] = useState(null);
 
         const grupo = useMemo(() => {
-          if (tipoAccion === 'Nuevo Servicio') return 'servicio';
+          if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
           if (tipoAccion === 'Baja') return 'baja';
           if (tipoAccion === 'Charla') return 'charla';
           if (tipoAccion === 'Movimiento de Obra') return 'movimiento';
@@ -324,11 +344,13 @@
         function selectAction(action) {
           setTipoAccion(action);
           resetFields();
+          setSelectedForm(action === 'Nuevo Servicio' ? 'servicio' : 'other');
           setMenuOpen(false);
         }
 
         async function handleSubmit(e) {
           e.preventDefault();
+          if (selectedForm === 'home') return;
           const doc = { tipoAccion, clienteId, status, creadoEn: firebase.firestore.FieldValue.serverTimestamp() };
 
           if (grupo === 'servicio') {
@@ -399,7 +421,7 @@
                 <button className="burger" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
-                  <p>Área comercial y Coordinación técnica</p>
+                  <p>área técnica y comercial</p>
                 </div>
                 <div className="top-search">
                   <input type="text" placeholder="Buscar cliente, ID, razón social o dirección..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
@@ -407,6 +429,12 @@
               </header>
 
               <main className="main">
+                {selectedForm === 'home' ? (
+                  <section className="hero">
+                    <h2>Masterson Seguridad</h2>
+                    <p>área técnica y comercial</p>
+                  </section>
+                ) : (
                 <section className="panel">
                   <h2>Formulario Operativo</h2>
                   <div className="hint">Propuesta de formulario optimizado en 5 bloques visuales + documentación y cierre.</div>
@@ -537,6 +565,7 @@
                     )}
                   </form>
                 </section>
+                )}
 
                 <section className="panel">
                   <h2>Registro en tiempo real</h2>
