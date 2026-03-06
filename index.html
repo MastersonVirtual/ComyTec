@@ -154,6 +154,10 @@
 
       const ACCIONES = ['Nuevo Servicio', 'Novación', 'Obra', 'Agregado', 'Movimiento de Obra', 'Baja', 'Charla'];
 
+      function generarClienteId() {
+        return `CLI-${Math.floor(100000 + Math.random() * 900000)}`;
+      }
+
       const servicioInicial = {
         tipoServicioBrindar: '', direccionServicio: '', cantidadUnidades: '', proyectoServicio: '', presupuestoProveedor: '',
         fechaIngresoDatos: '', representanteComercial: '', razonSocial: '', rut: '', mailFacturacion: '', administracion: '',
@@ -179,6 +183,7 @@
         const [openMenus, setOpenMenus] = useState({ nuevo: true, fact: false });
 
         const [tipoAccion, setTipoAccion] = useState('Nuevo Servicio');
+        const [clienteId, setClienteId] = useState(generarClienteId());
         const [cliente, setCliente] = useState('');
         const [fechaCarga, setFechaCarga] = useState('');
         const [tiempoInstalacion, setTiempoInstalacion] = useState('');
@@ -215,6 +220,7 @@
           setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('ONGOING');
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
           setServicioForm(servicioInicial);
+          setClienteId(generarClienteId());
         }
 
         function setServicioField(key, value) {
@@ -231,7 +237,7 @@
 
         async function handleSubmit(e) {
           e.preventDefault();
-          const doc = { tipoAccion, status, creadoEn: firebase.firestore.FieldValue.serverTimestamp() };
+          const doc = { tipoAccion, clienteId, status, creadoEn: firebase.firestore.FieldValue.serverTimestamp() };
 
           if (grupo === 'servicio') {
             if (!servicioForm.tipoServicioBrindar || !servicioForm.direccionServicio || !servicioForm.fechaIngresoDatos) {
@@ -304,7 +310,7 @@
                 <button className="burger" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
-                  <p>Coordinación técnica y Área comercial</p>
+                  <p>Área comercial y Coordinación técnica</p>
                 </div>
               </header>
 
@@ -319,6 +325,10 @@
                       <select value={tipoAccion} onChange={(e) => { setTipoAccion(e.target.value); resetFields(); }}>
                         {ACCIONES.map((a) => <option key={a} value={a}>{a}</option>)}
                       </select>
+                    </div>
+                    <div className="field">
+                      <label>Cliente ID (autogenerado)</label>
+                      <input value={clienteId} readOnly type="text" />
                     </div>
 
                     {grupo === 'servicio' && (
@@ -416,12 +426,13 @@
                     <table>
                       <thead>
                         <tr>
-                          <th>Tipo Acción</th><th>Cliente</th><th>Dirección/Detalle</th><th>Status</th><th>Fecha</th>
+                          <th>Cliente ID</th><th>Tipo Acción</th><th>Cliente</th><th>Dirección/Detalle</th><th>Status</th><th>Fecha</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {rows.length === 0 ? <tr><td colSpan="5" className="muted">Sin datos aún.</td></tr> : rows.map((r) => (
+                        {rows.length === 0 ? <tr><td colSpan="6" className="muted">Sin datos aún.</td></tr> : rows.map((r) => (
                           <tr key={r.id}>
+                            <td>{r.clienteId || '-'}</td>
                             <td>{r.tipoAccion || '-'}</td>
                             <td>{r.cliente || r.representanteComercial || '-'}</td>
                             <td>{r.direccionServicio || r.lugar || r.observacionesComentarios || '-'}</td>
