@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MastersonVirtual - Servicios</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f6f7fb;
+        color: #111827;
+      }
+      .contenedor {
+        max-width: 980px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+      .tarjeta {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+      h1, h2 {
+        margin: 0 0 14px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(180px, 1fr));
+        gap: 12px;
+      }
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-weight: 600;
+      }
+      input, select, button {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 10px 12px;
+        font-size: 14px;
+      }
+      button {
+        cursor: pointer;
+        background: #111827;
+        color: #fff;
+        border-color: #111827;
+        font-weight: 700;
+        grid-column: 1 / -1;
+      }
+      button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+      .tabla-wrapper { overflow-x: auto; }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th, td {
+        padding: 10px;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 14px;
+      }
+      th {
+        text-align: left;
+        background: #f9fafb;
+      }
+      .derecha { text-align: right; }
+      .vacio {
+        text-align: center;
+        color: #6b7280;
+        padding: 14px;
+      }
+      @media (max-width: 700px) {
+        .grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="contenedor">
+      <section class="tarjeta">
+        <h1>MastersonVirtual - Gestión de Servicios</h1>
+
+        <form id="servicioForm" class="grid">
+          <label>
+            Cliente
+            <input id="cliente" type="text" placeholder="Nombre del cliente" required />
+          </label>
+
+          <label>
+            Dirección
+            <input id="direccion" type="text" placeholder="Dirección" required />
+          </label>
+
+          <label>
+            Tipo de Servicio
+            <select id="tipoServicio">
+              <option value="Monitoreo">Monitoreo</option>
+              <option value="CCTV">CCTV</option>
+            </select>
+          </label>
+
+          <label>
+            Importe
+            <input id="importe" type="number" min="0" step="0.01" placeholder="0" required />
+          </label>
+
+          <button id="btnGuardar" type="submit">Guardar servicio</button>
+        </form>
+      </section>
+
+      <section class="tarjeta">
+        <h2>Registros en tiempo real</h2>
+        <div class="tabla-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Dirección</th>
+                <th>Tipo</th>
+                <th class="derecha">Importe</th>
+              </tr>
+            </thead>
+            <tbody id="serviciosBody">
+              <tr>
+                <td colspan="4" class="vacio">Sin registros aún.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script type="module">
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
+      import {
+        getFirestore,
+        collection,
+        addDoc,
+        onSnapshot,
+        query,
+        orderBy,
+        serverTimestamp,
+      } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+
+      const firebaseConfig = {
+        apiKey: 'AIzaSyCXTX7h33uCXK4K8FSSnD7PcoayjAGV9x4',
+        authDomain: 'mastersonvirtual-c0742.firebaseapp.com',
+        projectId: 'mastersonvirtual-c0742',
+        storageBucket: 'mastersonvirtual-c0742.firebasestorage.app',
+        messagingSenderId: '465591582078',
+        appId: '1:465591582078:web:0a8b71792c842a67e5872f',
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      const form = document.getElementById('servicioForm');
+      const btnGuardar = document.getElementById('btnGuardar');
+      const clienteInput = document.getElementById('cliente');
+      const direccionInput = document.getElementById('direccion');
+      const tipoServicioInput = document.getElementById('tipoServicio');
+      const importeInput = document.getElementById('importe');
+      const serviciosBody = document.getElementById('serviciosBody');
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const cliente = clienteInput.value.trim();
+        const direccion = direccionInput.value.trim();
+        const tipoServicio = tipoServicioInput.value;
+        const importe = Number(importeInput.value);
+
+        if (!cliente || !direccion || !importeInput.value) {
+          alert('Completa todos los campos.');
+          return;
+        }
+
+        try {
+          btnGuardar.disabled = true;
+          btnGuardar.textContent = 'Guardando...';
+
+          await addDoc(collection(db, 'servicios'), {
+            cliente,
+            direccion,
+            tipoServicio,
+            importe,
+            creadoEn: serverTimestamp(),
+          });
+
+          form.reset();
+          tipoServicioInput.value = 'Monitoreo';
+        } catch (error) {
+          console.error('Error al guardar:', error);
+          alert('No se pudo guardar el servicio. Revisa la consola.');
+        } finally {
+          btnGuardar.disabled = false;
+          btnGuardar.textContent = 'Guardar servicio';
+        }
+      });
+
+      const q = query(collection(db, 'servicios'), orderBy('creadoEn', 'desc'));
+
+      onSnapshot(q, (snapshot) => {
+        if (snapshot.empty) {
+          serviciosBody.innerHTML = '<tr><td colspan="4" class="vacio">Sin registros aún.</td></tr>';
+          return;
+        }
+
+        const filas = snapshot.docs
+          .map((doc) => {
+            const servicio = doc.data();
+            const importeFormateado = Number(servicio.importe || 0).toLocaleString('es-AR', {
+              style: 'currency',
+              currency: 'ARS',
+            });
+
+            return `
+              <tr>
+                <td>${servicio.cliente ?? ''}</td>
+                <td>${servicio.direccion ?? ''}</td>
+                <td>${servicio.tipoServicio ?? ''}</td>
+                <td class="derecha">${importeFormateado}</td>
+              </tr>
+            `;
+          })
+          .join('');
+
+        serviciosBody.innerHTML = filas;
+      });
+    </script>
+  </body>
+</html>
