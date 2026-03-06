@@ -3,218 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ComyTec - Gestión de Instalaciones</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-
+    <title>ComyTec - Operaciones</title>
     <style>
       :root {
         --navy: #003366;
-        --navy-soft: #0d457d;
-        --bg: #f3f7fb;
+        --bg: #f2f6fb;
         --card: #ffffff;
-        --border: #d8e2ef;
-        --text: #1f2a37;
-        --muted: #637387;
-        --ok: #14a44d;
-        --pause: #d64545;
-        --pending: #f0ad4e;
-        --contract: #6c757d;
+        --border: #d9e2ee;
+        --text: #1d2b3a;
       }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        margin: 0;
-        font-family: 'Inter', Arial, sans-serif;
-        background: linear-gradient(180deg, #e9f0f8 0%, var(--bg) 180px);
-        color: var(--text);
-      }
-
-      .dashboard {
-        max-width: 1200px;
-        margin: 24px auto;
-        padding: 0 16px 24px;
-      }
-
-      .header {
-        background: var(--navy);
-        color: #fff;
-        border-radius: 14px;
-        padding: 20px;
-        margin-bottom: 16px;
-        box-shadow: 0 10px 28px rgba(0, 30, 60, 0.2);
-      }
-
-      .header h1 {
-        margin: 0;
-        font-size: 1.45rem;
-      }
-
-      .header p {
-        margin: 8px 0 0;
-        color: #d2e6ff;
-        font-size: 0.95rem;
-      }
-
-      .card {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        padding: 16px;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-        margin-bottom: 16px;
-      }
-
-      .card h2 {
-        margin: 0 0 12px;
-        color: var(--navy);
-        font-size: 1.1rem;
-      }
-
-      .form-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(220px, 1fr));
-        gap: 12px;
-      }
-
-      .field {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
-
-      .field.full {
-        grid-column: 1 / -1;
-      }
-
-      label {
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: #27425b;
-      }
-
-      input,
-      select,
-      textarea,
-      button {
-        font-family: inherit;
-        font-size: 0.95rem;
-        border-radius: 10px;
-        border: 1px solid #cbd8e7;
-        padding: 10px 12px;
-        outline: none;
-      }
-
-      input:focus,
-      select:focus,
-      textarea:focus {
-        border-color: var(--navy-soft);
-        box-shadow: 0 0 0 3px rgba(13, 69, 125, 0.14);
-      }
-
-      textarea {
-        min-height: 96px;
-        resize: vertical;
-      }
-
-      .actions {
-        grid-column: 1 / -1;
-      }
-
-      button {
-        background: var(--navy);
-        color: #fff;
-        border: 1px solid var(--navy);
-        font-weight: 600;
-        cursor: pointer;
-      }
-
-      button:hover {
-        background: var(--navy-soft);
-      }
-
-      button:disabled {
-        cursor: not-allowed;
-        opacity: 0.75;
-      }
-
-      .table-wrap {
-        overflow-x: auto;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        min-width: 780px;
-      }
-
-      th,
-      td {
-        text-align: left;
-        padding: 11px;
-        border-bottom: 1px solid #e4edf7;
-        font-size: 0.92rem;
-        vertical-align: top;
-      }
-
-      th {
-        color: var(--navy);
-        background: #f5f9ff;
-        position: sticky;
-        top: 0;
-      }
-
-      .state-badge {
-        display: inline-block;
-        font-size: 0.78rem;
-        font-weight: 700;
-        padding: 5px 9px;
-        border-radius: 999px;
-        color: #fff;
-        letter-spacing: 0.2px;
-      }
-
-      .state-ongoing {
-        background: var(--ok);
-      }
-
-      .state-pausa {
-        background: var(--pause);
-      }
-
-      .state-pendiente {
-        background: var(--pending);
-      }
-
-      .state-contrato {
-        background: var(--contract);
-      }
-
-      .empty {
-        text-align: center;
-        color: var(--muted);
-        padding: 18px;
-      }
-
-      .footer-note {
-        color: var(--muted);
-        margin-top: 8px;
-        font-size: 0.85rem;
-      }
-
-      @media (max-width: 860px) {
-        .form-grid {
-          grid-template-columns: 1fr;
-        }
-      }
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--text); }
+      .wrap { max-width: 1200px; margin: 24px auto; padding: 0 16px; }
+      .head { background: var(--navy); color: #fff; border-radius: 12px; padding: 16px 18px; margin-bottom: 16px; }
+      .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+      .grid { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 12px; }
+      .field { display: flex; flex-direction: column; gap: 6px; }
+      .full { grid-column: 1 / -1; }
+      label { font-size: 13px; font-weight: 700; color: #2d4764; }
+      input, select, button { border: 1px solid #c9d7e7; border-radius: 8px; padding: 10px 12px; font-size: 14px; }
+      button { background: var(--navy); color: #fff; border-color: var(--navy); cursor: pointer; font-weight: 700; }
+      button:disabled { opacity: .7; cursor: not-allowed; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { border-bottom: 1px solid #e4ebf5; padding: 10px; text-align: left; font-size: 13px; vertical-align: top; }
+      th { background: #f3f8ff; color: var(--navy); }
+      .chip { display: inline-block; padding: 4px 8px; border-radius: 999px; color: #fff; font-size: 12px; font-weight: 700; }
+      .status-ongoing { background: #1f9d4d; }
+      .status-pausa { background: #d84444; }
+      .status-default { background: #61748a; }
+      .muted { color: #61748a; }
+      .table-wrap { overflow-x: auto; }
+      @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
     </style>
 
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -228,7 +47,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-      const { useEffect, useState } = React;
+      const { useEffect, useMemo, useState } = React;
 
       const firebaseConfig = {
         apiKey: 'AIzaSyCXTX7h33uCXK4K8FSSnD7PcoayjAGV9x4',
@@ -239,209 +58,269 @@
         appId: '1:465591582078:web:0a8b71792c842a67e5872f',
       };
 
-      if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-      }
-
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
 
-      const TIPO_ACCIONES = [
+      const ACCIONES = [
         'Nuevo Servicio',
-        'Nuevo Servicio Obra',
-        'Agregados/Adicionales',
         'Novación',
+        'Obra',
+        'Agregado',
         'Movimiento de Obra',
-        'Baja de Servicio',
-        'Solicitud de Presupuesto',
+        'Baja',
+        'Charla',
       ];
 
-      const RESPONSABLES = ['Comercial', 'Atención al Cliente', 'Ayrton Oviedo', 'Gaston', 'Gonzalo'];
-
-      const ESTADOS = ['ONGOING', 'PAUSA', 'Pendiente de Agenda', 'Contrato no Firmado'];
-
-      function getStateClass(estado) {
-        if (estado === 'ONGOING') return 'state-badge state-ongoing';
-        if (estado === 'PAUSA') return 'state-badge state-pausa';
-        if (estado === 'Pendiente de Agenda') return 'state-badge state-pendiente';
-        return 'state-badge state-contrato';
+      function statusClass(value) {
+        if (!value) return 'chip status-default';
+        const v = value.toLowerCase();
+        if (v.includes('ongoing')) return 'chip status-ongoing';
+        if (v.includes('pausa')) return 'chip status-pausa';
+        return 'chip status-default';
       }
 
       function App() {
-        const [tipoAccion, setTipoAccion] = useState(TIPO_ACCIONES[0]);
-        const [nombreServicioCliente, setNombreServicioCliente] = useState('');
-        const [responsable, setResponsable] = useState(RESPONSABLES[0]);
-        const [estado, setEstado] = useState(ESTADOS[0]);
-        const [detalles, setDetalles] = useState('');
-        const [instalaciones, setInstalaciones] = useState([]);
-        const [guardando, setGuardando] = useState(false);
+        const [tipoAccion, setTipoAccion] = useState(ACCIONES[0]);
+
+        const [cliente, setCliente] = useState('');
+        const [fechaCarga, setFechaCarga] = useState('');
+        const [tiempoInstalacion, setTiempoInstalacion] = useState('');
+        const [costo, setCosto] = useState('');
+        const [status, setStatus] = useState('ONGOING');
+        const [fechaAlta, setFechaAlta] = useState('');
+        const [cobro, setCobro] = useState('');
+        const [fechaRealizado, setFechaRealizado] = useState('');
+        const [verificado, setVerificado] = useState('');
+        const [fechaCharla, setFechaCharla] = useState('');
+        const [hora, setHora] = useState('');
+        const [lugar, setLugar] = useState('');
+
+        const [rows, setRows] = useState([]);
+        const [saving, setSaving] = useState(false);
 
         useEffect(() => {
-          const ref = db
-            .collection('instalaciones')
+          const unsub = db
+            .collection('operaciones')
             .orderBy('creadoEn', 'desc')
-            .onSnapshot(
-              (snapshot) => {
-                const rows = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-                setInstalaciones(rows);
-              },
-              (error) => {
-                console.error('Error escuchando instalaciones:', error);
-              }
-            );
+            .onSnapshot((snap) => {
+              setRows(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+            }, (err) => console.error('Error onSnapshot:', err));
 
-          return () => ref();
+          return () => unsub();
         }, []);
+
+        const grupo = useMemo(() => {
+          if (tipoAccion === 'Baja') return 'baja';
+          if (tipoAccion === 'Charla') return 'charla';
+          if (tipoAccion === 'Movimiento de Obra') return 'movimiento';
+          return 'base';
+        }, [tipoAccion]);
+
+        function resetByAction() {
+          setCliente('');
+          setFechaCarga('');
+          setTiempoInstalacion('');
+          setCosto('');
+          setStatus('ONGOING');
+          setFechaAlta('');
+          setCobro('');
+          setFechaRealizado('');
+          setVerificado('');
+          setFechaCharla('');
+          setHora('');
+          setLugar('');
+        }
 
         async function handleSubmit(e) {
           e.preventDefault();
 
-          if (!nombreServicioCliente.trim()) {
-            alert('Ingresá el Nombre del Servicio/Cliente.');
-            return;
+          const doc = { tipoAccion, status, creadoEn: firebase.firestore.FieldValue.serverTimestamp() };
+
+          if (grupo === 'base') {
+            if (!cliente || !fechaCarga) return alert('Completá Cliente y Fecha Carga.');
+            Object.assign(doc, { cliente, fechaCarga, tiempoInstalacion, fechaAlta, cobro });
+          }
+
+          if (grupo === 'movimiento') {
+            if (!cliente || !fechaCarga) return alert('Completá Cliente y Fecha Carga.');
+            Object.assign(doc, { cliente, fechaCarga, costo, fechaAlta, cobro });
+          }
+
+          if (grupo === 'baja') {
+            if (!fechaCarga) return alert('Completá Fecha Carga.');
+            Object.assign(doc, { fechaCarga, fechaRealizado, verificado });
+          }
+
+          if (grupo === 'charla') {
+            if (!fechaCharla || !hora || !lugar) return alert('Completá Fecha Charla, Hora y Lugar.');
+            Object.assign(doc, { fechaCharla, hora, lugar });
           }
 
           try {
-            setGuardando(true);
-
-            await db.collection('instalaciones').add({
-              tipoAccion,
-              nombreServicioCliente: nombreServicioCliente.trim(),
-              responsable,
-              estado,
-              detalles: detalles.trim(),
-              creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
-            });
-
-            setTipoAccion(TIPO_ACCIONES[0]);
-            setNombreServicioCliente('');
-            setResponsable(RESPONSABLES[0]);
-            setEstado(ESTADOS[0]);
-            setDetalles('');
+            setSaving(true);
+            await db.collection('operaciones').add(doc);
+            resetByAction();
           } catch (error) {
-            console.error('Error al guardar instalación:', error);
-            alert('No se pudo guardar. Revisá la consola para más detalle.');
+            console.error('Error guardando:', error);
+            alert('No se pudo guardar en operaciones.');
           } finally {
-            setGuardando(false);
+            setSaving(false);
           }
         }
 
         return (
-          <div className="dashboard">
-            <header className="header">
-              <h1>ComyTec - Gestión de Instalaciones</h1>
-              <p>Panel operativo para seguimiento comercial y técnico en tiempo real.</p>
-            </header>
+          <div className="wrap">
+            <div className="head">
+              <h1 style={{ margin: 0 }}>ComyTec - Gestión de Operaciones</h1>
+              <p style={{ margin: '8px 0 0', opacity: 0.9 }}>React + Firebase 9+ (colección: operaciones)</p>
+            </div>
 
-            <section className="card">
-              <h2>Nuevo Registro</h2>
-              <form className="form-grid" onSubmit={handleSubmit}>
+            <div className="card">
+              <h2 style={{ marginTop: 0, color: '#003366' }}>Carga de Operación</h2>
+              <form onSubmit={handleSubmit} className="grid">
                 <div className="field">
                   <label>Tipo de Acción</label>
-                  <select value={tipoAccion} onChange={(e) => setTipoAccion(e.target.value)}>
-                    {TIPO_ACCIONES.map((accion) => (
-                      <option key={accion} value={accion}>
-                        {accion}
-                      </option>
-                    ))}
+                  <select value={tipoAccion} onChange={(e) => { setTipoAccion(e.target.value); resetByAction(); }}>
+                    {ACCIONES.map((a) => <option key={a} value={a}>{a}</option>)}
                   </select>
                 </div>
 
-                <div className="field">
-                  <label>Responsable</label>
-                  <select value={responsable} onChange={(e) => setResponsable(e.target.value)}>
-                    {RESPONSABLES.map((item) => (
-                      <option key={item} value={item}>
-                        {item}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {(grupo === 'base' || grupo === 'movimiento') && (
+                  <>
+                    <div className="field">
+                      <label>Cliente</label>
+                      <input value={cliente} onChange={(e) => setCliente(e.target.value)} type="text" />
+                    </div>
+                    <div className="field">
+                      <label>Fecha Carga</label>
+                      <input value={fechaCarga} onChange={(e) => setFechaCarga(e.target.value)} type="date" />
+                    </div>
+
+                    {grupo === 'base' ? (
+                      <div className="field">
+                        <label>Tiempo Instalación</label>
+                        <input value={tiempoInstalacion} onChange={(e) => setTiempoInstalacion(e.target.value)} type="text" placeholder="Ej: 3 días" />
+                      </div>
+                    ) : (
+                      <div className="field">
+                        <label>Costo</label>
+                        <input value={costo} onChange={(e) => setCosto(e.target.value)} type="number" min="0" step="0.01" />
+                      </div>
+                    )}
+
+                    <div className="field">
+                      <label>Status</label>
+                      <input value={status} onChange={(e) => setStatus(e.target.value)} type="text" placeholder="ONGOING / PAUSA / ..." />
+                    </div>
+
+                    <div className="field">
+                      <label>Fecha Alta</label>
+                      <input value={fechaAlta} onChange={(e) => setFechaAlta(e.target.value)} type="date" />
+                    </div>
+
+                    <div className="field">
+                      <label>Cobro</label>
+                      <input value={cobro} onChange={(e) => setCobro(e.target.value)} type="text" placeholder="Ej: Pendiente / Cobrado" />
+                    </div>
+                  </>
+                )}
+
+                {grupo === 'baja' && (
+                  <>
+                    <div className="field">
+                      <label>Fecha Carga</label>
+                      <input value={fechaCarga} onChange={(e) => setFechaCarga(e.target.value)} type="date" />
+                    </div>
+                    <div className="field">
+                      <label>Status</label>
+                      <input value={status} onChange={(e) => setStatus(e.target.value)} type="text" placeholder="Ej: Realizado" />
+                    </div>
+                    <div className="field">
+                      <label>Fecha Realizado</label>
+                      <input value={fechaRealizado} onChange={(e) => setFechaRealizado(e.target.value)} type="date" />
+                    </div>
+                    <div className="field">
+                      <label>Verificado</label>
+                      <input value={verificado} onChange={(e) => setVerificado(e.target.value)} type="text" placeholder="Sí / No" />
+                    </div>
+                  </>
+                )}
+
+                {grupo === 'charla' && (
+                  <>
+                    <div className="field">
+                      <label>Fecha Charla</label>
+                      <input value={fechaCharla} onChange={(e) => setFechaCharla(e.target.value)} type="date" />
+                    </div>
+                    <div className="field">
+                      <label>Hora</label>
+                      <input value={hora} onChange={(e) => setHora(e.target.value)} type="time" />
+                    </div>
+                    <div className="field">
+                      <label>Lugar</label>
+                      <input value={lugar} onChange={(e) => setLugar(e.target.value)} type="text" />
+                    </div>
+                    <div className="field">
+                      <label>Status</label>
+                      <input value={status} onChange={(e) => setStatus(e.target.value)} type="text" placeholder="Ej: Programada" />
+                    </div>
+                  </>
+                )}
 
                 <div className="field full">
-                  <label>Nombre del Servicio/Cliente</label>
-                  <input
-                    type="text"
-                    value={nombreServicioCliente}
-                    onChange={(e) => setNombreServicioCliente(e.target.value)}
-                    placeholder="Ej: Instalación Cámaras - Cliente X"
-                  />
-                </div>
-
-                <div className="field">
-                  <label>Estado</label>
-                  <select value={estado} onChange={(e) => setEstado(e.target.value)}>
-                    {ESTADOS.map((item) => (
-                      <option key={item} value={item}>
-                        {item}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="field full">
-                  <label>Detalles / Comentarios</label>
-                  <textarea
-                    value={detalles}
-                    onChange={(e) => setDetalles(e.target.value)}
-                    placeholder="Observaciones, avances, bloqueos, condiciones, etc."
-                  ></textarea>
-                </div>
-
-                <div className="actions">
-                  <button type="submit" disabled={guardando}>
-                    {guardando ? 'Guardando...' : 'Guardar en instalaciones'}
-                  </button>
+                  <button type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button>
                 </div>
               </form>
-            </section>
+            </div>
 
-            <section className="card">
-              <h2>Tabla de Control</h2>
+            <div className="card">
+              <h2 style={{ marginTop: 0, color: '#003366' }}>Registro en tiempo real</h2>
               <div className="table-wrap">
                 <table>
                   <thead>
                     <tr>
-                      <th>Tipo de Acción</th>
-                      <th>Servicio / Cliente</th>
-                      <th>Responsable</th>
-                      <th>Estado</th>
-                      <th>Detalles</th>
+                      <th>Tipo Acción</th>
+                      <th>Cliente</th>
+                      <th>Fecha Carga</th>
+                      <th>Tiempo/Costo</th>
+                      <th>Status</th>
+                      <th>Fecha Alta</th>
+                      <th>Cobro</th>
+                      <th>Fecha Realizado</th>
+                      <th>Verificado</th>
+                      <th>Fecha Charla</th>
+                      <th>Hora</th>
+                      <th>Lugar</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {instalaciones.length === 0 ? (
-                      <tr>
-                        <td colSpan="5" className="empty">
-                          Sin registros todavía.
-                        </td>
+                    {rows.length === 0 ? (
+                      <tr><td colSpan="12" className="muted">Sin datos aún.</td></tr>
+                    ) : rows.map((r) => (
+                      <tr key={r.id}>
+                        <td>{r.tipoAccion || '-'}</td>
+                        <td>{r.cliente || '-'}</td>
+                        <td>{r.fechaCarga || '-'}</td>
+                        <td>{r.tiempoInstalacion || r.costo || '-'}</td>
+                        <td><span className={statusClass(r.status)}>{r.status || '-'}</span></td>
+                        <td>{r.fechaAlta || '-'}</td>
+                        <td>{r.cobro || '-'}</td>
+                        <td>{r.fechaRealizado || '-'}</td>
+                        <td>{r.verificado || '-'}</td>
+                        <td>{r.fechaCharla || '-'}</td>
+                        <td>{r.hora || '-'}</td>
+                        <td>{r.lugar || '-'}</td>
                       </tr>
-                    ) : (
-                      instalaciones.map((item) => (
-                        <tr key={item.id}>
-                          <td>{item.tipoAccion || '-'}</td>
-                          <td>{item.nombreServicioCliente || '-'}</td>
-                          <td>{item.responsable || '-'}</td>
-                          <td>
-                            <span className={getStateClass(item.estado || '')}>{item.estado || '-'}</span>
-                          </td>
-                          <td>{item.detalles || '-'}</td>
-                        </tr>
-                      ))
-                    )}
+                    ))}
                   </tbody>
                 </table>
               </div>
-              <p className="footer-note">
-                Estados con color: verde (ONGOING), rojo (PAUSA), ámbar (Pendiente de Agenda), gris
-                (Contrato no Firmado).
-              </p>
-            </section>
+            </div>
           </div>
         );
       }
 
-      const root = ReactDOM.createRoot(document.getElementById('root'));
-      root.render(<App />);
+      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     </script>
   </body>
 </html>
