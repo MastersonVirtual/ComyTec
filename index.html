@@ -71,7 +71,16 @@
       .top-titles h1 { margin: 0; font-size: 1.28rem; }
       .top-titles p { margin: 4px 0 0; color: #caeeee; font-size: .9rem; }
       .top-search { margin-left: auto; min-width: 280px; max-width: 420px; width: 36%; }
-      .top-search input { width: 100%; }
+      .top-search input { width: 100%; padding-left: 38px; }
+      .search-wrap { position: relative; }
+      .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: .85; font-size: 14px; }
+      .search-preview { position: absolute; top: calc(100% + 8px); left: 0; right: 0; z-index: 120; max-height: 52vh; overflow: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,.24); background: rgba(5, 53, 50, .95); backdrop-filter: blur(12px); box-shadow: var(--shadow-deep); }
+      .search-item { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.12); cursor: pointer; }
+      .search-item:hover { background: rgba(255,255,255,.08); }
+      .search-item:last-child { border-bottom: 0; }
+      .search-item strong { display:block; }
+      .search-item small { color: #bfe2df; }
+      .search-detail { padding: 10px 12px; border-top: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.05); }
 
       .main { max-width: 1280px; margin: 20px auto; padding: 0 16px 24px; }
 
@@ -257,6 +266,7 @@
         const [tipoAccion, setTipoAccion] = useState('');
         const [selectedForm, setSelectedForm] = useState('home');
         const [clienteId, setClienteId] = useState(generarClienteId());
+        const [clienteIdAsociado, setClienteIdAsociado] = useState('');
         const [cliente, setCliente] = useState('');
         const [fechaCarga, setFechaCarga] = useState('');
         const [tiempoInstalacion, setTiempoInstalacion] = useState('');
@@ -282,8 +292,12 @@
           if (tipoAccion === 'Charla') return 'charla';
           if (tipoAccion === 'Movimiento de Obra') return 'movimiento';
           return 'base';
-        }, [tipoAccion]);
+        }, [tipoAccion, selectedForm]);
 
+
+        const AUTO_ID_ACTIONS = ['Nuevo Servicio', 'Obra'];
+        const autoIdMode = AUTO_ID_ACTIONS.includes(tipoAccion);
+        const effectiveClienteId = autoIdMode ? clienteId : clienteIdAsociado.trim();
 
         const filteredRows = useMemo(() => {
           const q = searchTerm.trim().toLowerCase();
@@ -334,7 +348,7 @@
         function resetFields() {
           setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('ONGOING');
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
-          setServicioForm(servicioInicial); setClienteId(generarClienteId());
+          setServicioForm(servicioInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
         }
 
         function setServicioField(key, value) {
@@ -344,6 +358,12 @@
         function selectAction(action) {
           setTipoAccion(action);
           resetFields();
+          if (['Nuevo Servicio', 'Obra'].includes(action)) {
+            setClienteId(generarClienteId());
+            setClienteIdAsociado('');
+          } else {
+            setClienteId('');
+          }
           setSelectedForm(action === 'Nuevo Servicio' ? 'servicio' : 'other');
           setMenuOpen(false);
         }
@@ -351,7 +371,8 @@
         async function handleSubmit(e) {
           e.preventDefault();
           if (selectedForm === 'home') return;
-          const doc = { tipoAccion, clienteId, status, creadoEn: firebase.firestore.FieldValue.serverTimestamp() };
+          if (!effectiveClienteId) return alert('Debes indicar un Cliente ID asociado para esta acción.');
+          const doc = { tipoAccion, clienteId: effectiveClienteId, status, creadoEn: firebase.firestore.FieldValue.serverTimestamp() };
 
           if (grupo === 'servicio') {
             if (!servicioForm.nombreServicio || !servicioForm.tipoServicioBrindar || !servicioForm.direccionServicio) {
@@ -424,7 +445,36 @@
                   <p>área técnica y comercial</p>
                 </div>
                 <div className="top-search">
-                  <input type="text" placeholder="Buscar cliente, ID, razón social o dirección..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                  <div className="search-wrap">
+                    <span className="search-icon">🔍</span>
+                    <input
+                      type="text"
+                      placeholder="Buscar cliente, ID, razón social o dirección..."
+                      value={searchTerm}
+                      onChange={(e) => { setSearchTerm(e.target.value); setExpandedId(null); }}
+                    />
+                    {searchTerm.trim() !== '' && (
+                      <div className="search-preview">
+                        {filteredRows.length === 0 ? (
+                          <div className="search-item"><small>Sin resultados.</small></div>
+                        ) : (
+                          filteredRows.slice(0, 8).map((r) => (
+                            <div key={r.id}>
+                              <div className="search-item" onClick={() => setExpandedId(expandedId === r.id ? null : r.id)}>
+                                <strong>{r.clienteId || '-'} · {r.nombreServicio || r.cliente || 'Servicio sin nombre'}</strong>
+                                <small>{r.direccionServicio || r.razonSocial || 'Sin dirección'} · {r.tipoAccion || '-'} · {r.status || '-'}</small>
+                              </div>
+                              {expandedId === r.id && (
+                                <div className="search-detail">
+                                  <div className="detail-box">{buildServiceDetailText(r)}</div>
+                                </div>
+                              )}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </header>
 
@@ -446,7 +496,7 @@
                           <h3>Nuevo Servicio</h3>
                           <div className="card-grid">
                             <div className="field">
-                              <label>Cliente ID (4 dígitos)</label>
+                              <label>Cliente ID (auto 4 dígitos)</label>
                               <input value={clienteId} readOnly type="text" />
                             </div>
                           </div>
@@ -553,7 +603,7 @@
                     ) : (
                       <div className="compact-grid">
                         <div className="field"><label>Tipo de Acción</label><select value={tipoAccion} onChange={(e) => { setTipoAccion(e.target.value); resetFields(); }}>{ACCIONES.map((a) => <option key={a} value={a}>{a}</option>)}</select></div>
-                        <div className="field"><label>Cliente ID (4 dígitos)</label><input value={clienteId} readOnly type="text" /></div>
+                        <div className="field"><label>{autoIdMode ? "Cliente ID (auto 4 dígitos)" : "Cliente ID asociado"}</label>{autoIdMode ? <input value={clienteId} readOnly type="text" /> : <input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" />}</div>
                         <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
 
                         {grupo === 'base' && <><div className="field"><label>Cliente</label><input value={cliente} onChange={(e) => setCliente(e.target.value)} /></div><div className="field"><label>Fecha Carga</label><input value={fechaCarga} onChange={(e) => setFechaCarga(e.target.value)} type="date" /></div><div className="field"><label>Tiempo Instalación</label><input value={tiempoInstalacion} onChange={(e) => setTiempoInstalacion(e.target.value)} /></div><div className="field"><label>Fecha Alta</label><input value={fechaAlta} onChange={(e) => setFechaAlta(e.target.value)} type="date" /></div><div className="field"><label>Cobro</label><input value={cobro} onChange={(e) => setCobro(e.target.value)} /></div></>}
@@ -566,47 +616,6 @@
                   </form>
                 </section>
                 )}
-
-                <section className="panel">
-                  <h2>Registro en tiempo real</h2>
-                  <div className="table-wrap">
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Cliente ID</th><th>Tipo Acción</th><th>Cliente</th><th>Dirección/Detalle</th><th>Status</th><th>Fecha</th><th>Detalle</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {rows.length === 0 ? (
-                          <tr><td colSpan="7" className="muted">Sin datos aún.</td></tr>
-                        ) : filteredRows.map((r) => (
-                          <React.Fragment key={r.id}>
-                            <tr>
-                              <td>{r.clienteId || '-'}</td>
-                              <td>{r.tipoAccion || '-'}</td>
-                              <td>{r.cliente || r.nombreServicio || r.representanteComercial || '-'}</td>
-                              <td>{r.direccionServicio || r.lugar || r.observacionesComentarios || '-'}</td>
-                              <td><span className={statusClass(r.status)}>{r.status || '-'}</span></td>
-                              <td>{r.fechaIngresoDatos || r.fechaCarga || r.fechaCharla || '-'}</td>
-                              <td>
-                                <button type="button" className="link-btn" onClick={() => setExpandedId(expandedId === r.id ? null : r.id)}>
-                                  {expandedId === r.id ? 'Ocultar' : 'Ver más'}
-                                </button>
-                              </td>
-                            </tr>
-                            {expandedId === r.id && (
-                              <tr className="detail-row">
-                                <td colSpan="7">
-                                  <div className="detail-box">{buildServiceDetailText(r)}</div>
-                                </td>
-                              </tr>
-                            )}
-                          </React.Fragment>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </section>
               </main>
             </div>
           </div>
