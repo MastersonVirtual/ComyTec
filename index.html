@@ -3,151 +3,232 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MastersonVirtual - Servicios</title>
+    <title>ComyTec - Gestión de Instalaciones</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
     <style>
-      * { box-sizing: border-box; }
+      :root {
+        --navy: #003366;
+        --navy-soft: #0d457d;
+        --bg: #f3f7fb;
+        --card: #ffffff;
+        --border: #d8e2ef;
+        --text: #1f2a37;
+        --muted: #637387;
+        --ok: #14a44d;
+        --pause: #d64545;
+        --pending: #f0ad4e;
+        --contract: #6c757d;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         margin: 0;
-        font-family: Arial, sans-serif;
-        background: #f6f7fb;
-        color: #111827;
+        font-family: 'Inter', Arial, sans-serif;
+        background: linear-gradient(180deg, #e9f0f8 0%, var(--bg) 180px);
+        color: var(--text);
       }
-      .contenedor {
-        max-width: 980px;
+
+      .dashboard {
+        max-width: 1200px;
         margin: 24px auto;
-        padding: 0 16px;
+        padding: 0 16px 24px;
       }
-      .tarjeta {
-        background: #fff;
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+
+      .header {
+        background: var(--navy);
+        color: #fff;
+        border-radius: 14px;
+        padding: 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 10px 28px rgba(0, 30, 60, 0.2);
+      }
+
+      .header h1 {
+        margin: 0;
+        font-size: 1.45rem;
+      }
+
+      .header p {
+        margin: 8px 0 0;
+        color: #d2e6ff;
+        font-size: 0.95rem;
+      }
+
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
         padding: 16px;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
         margin-bottom: 16px;
       }
-      h1, h2 {
-        margin: 0 0 14px;
+
+      .card h2 {
+        margin: 0 0 12px;
+        color: var(--navy);
+        font-size: 1.1rem;
       }
-      .grid {
+
+      .form-grid {
         display: grid;
-        grid-template-columns: repeat(2, minmax(180px, 1fr));
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
         gap: 12px;
       }
-      label {
+
+      .field {
         display: flex;
         flex-direction: column;
         gap: 6px;
-        font-weight: 600;
       }
-      input, select, button {
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        padding: 10px 12px;
-        font-size: 14px;
-      }
-      button {
-        cursor: pointer;
-        background: #111827;
-        color: #fff;
-        border-color: #111827;
-        font-weight: 700;
+
+      .field.full {
         grid-column: 1 / -1;
       }
-      button:disabled {
-        opacity: 0.7;
-        cursor: not-allowed;
+
+      label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #27425b;
       }
-      .tabla-wrapper { overflow-x: auto; }
+
+      input,
+      select,
+      textarea,
+      button {
+        font-family: inherit;
+        font-size: 0.95rem;
+        border-radius: 10px;
+        border: 1px solid #cbd8e7;
+        padding: 10px 12px;
+        outline: none;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--navy-soft);
+        box-shadow: 0 0 0 3px rgba(13, 69, 125, 0.14);
+      }
+
+      textarea {
+        min-height: 96px;
+        resize: vertical;
+      }
+
+      .actions {
+        grid-column: 1 / -1;
+      }
+
+      button {
+        background: var(--navy);
+        color: #fff;
+        border: 1px solid var(--navy);
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: var(--navy-soft);
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.75;
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+      }
+
       table {
         width: 100%;
         border-collapse: collapse;
+        min-width: 780px;
       }
-      th, td {
-        padding: 10px;
-        border-bottom: 1px solid #e5e7eb;
-        font-size: 14px;
-      }
-      th {
+
+      th,
+      td {
         text-align: left;
-        background: #f9fafb;
+        padding: 11px;
+        border-bottom: 1px solid #e4edf7;
+        font-size: 0.92rem;
+        vertical-align: top;
       }
-      .derecha { text-align: right; }
-      .vacio {
+
+      th {
+        color: var(--navy);
+        background: #f5f9ff;
+        position: sticky;
+        top: 0;
+      }
+
+      .state-badge {
+        display: inline-block;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 5px 9px;
+        border-radius: 999px;
+        color: #fff;
+        letter-spacing: 0.2px;
+      }
+
+      .state-ongoing {
+        background: var(--ok);
+      }
+
+      .state-pausa {
+        background: var(--pause);
+      }
+
+      .state-pendiente {
+        background: var(--pending);
+      }
+
+      .state-contrato {
+        background: var(--contract);
+      }
+
+      .empty {
         text-align: center;
-        color: #6b7280;
-        padding: 14px;
+        color: var(--muted);
+        padding: 18px;
       }
-      @media (max-width: 700px) {
-        .grid { grid-template-columns: 1fr; }
+
+      .footer-note {
+        color: var(--muted);
+        margin-top: 8px;
+        font-size: 0.85rem;
+      }
+
+      @media (max-width: 860px) {
+        .form-grid {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
+
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   </head>
   <body>
-    <main class="contenedor">
-      <section class="tarjeta">
-        <h1>MastersonVirtual - Gestión de Servicios</h1>
+    <div id="root"></div>
 
-        <form id="servicioForm" class="grid">
-          <label>
-            Cliente
-            <input id="cliente" type="text" placeholder="Nombre del cliente" required />
-          </label>
-
-          <label>
-            Dirección
-            <input id="direccion" type="text" placeholder="Dirección" required />
-          </label>
-
-          <label>
-            Tipo de Servicio
-            <select id="tipoServicio">
-              <option value="Monitoreo">Monitoreo</option>
-              <option value="CCTV">CCTV</option>
-            </select>
-          </label>
-
-          <label>
-            Importe
-            <input id="importe" type="number" min="0" step="0.01" placeholder="0" required />
-          </label>
-
-          <button id="btnGuardar" type="submit">Guardar servicio</button>
-        </form>
-      </section>
-
-      <section class="tarjeta">
-        <h2>Registros en tiempo real</h2>
-        <div class="tabla-wrapper">
-          <table>
-            <thead>
-              <tr>
-                <th>Cliente</th>
-                <th>Dirección</th>
-                <th>Tipo</th>
-                <th class="derecha">Importe</th>
-              </tr>
-            </thead>
-            <tbody id="serviciosBody">
-              <tr>
-                <td colspan="4" class="vacio">Sin registros aún.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </main>
-
-    <script type="module">
-      import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js';
-      import {
-        getFirestore,
-        collection,
-        addDoc,
-        onSnapshot,
-        query,
-        orderBy,
-        serverTimestamp,
-      } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+    <script type="text/babel">
+      const { useEffect, useState } = React;
 
       const firebaseConfig = {
         apiKey: 'AIzaSyCXTX7h33uCXK4K8FSSnD7PcoayjAGV9x4',
@@ -158,83 +239,209 @@
         appId: '1:465591582078:web:0a8b71792c842a67e5872f',
       };
 
-      const app = initializeApp(firebaseConfig);
-      const db = getFirestore(app);
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
 
-      const form = document.getElementById('servicioForm');
-      const btnGuardar = document.getElementById('btnGuardar');
-      const clienteInput = document.getElementById('cliente');
-      const direccionInput = document.getElementById('direccion');
-      const tipoServicioInput = document.getElementById('tipoServicio');
-      const importeInput = document.getElementById('importe');
-      const serviciosBody = document.getElementById('serviciosBody');
+      const db = firebase.firestore();
 
-      form.addEventListener('submit', async (e) => {
-        e.preventDefault();
+      const TIPO_ACCIONES = [
+        'Nuevo Servicio',
+        'Nuevo Servicio Obra',
+        'Agregados/Adicionales',
+        'Novación',
+        'Movimiento de Obra',
+        'Baja de Servicio',
+        'Solicitud de Presupuesto',
+      ];
 
-        const cliente = clienteInput.value.trim();
-        const direccion = direccionInput.value.trim();
-        const tipoServicio = tipoServicioInput.value;
-        const importe = Number(importeInput.value);
+      const RESPONSABLES = ['Comercial', 'Atención al Cliente', 'Ayrton Oviedo', 'Gaston', 'Gonzalo'];
 
-        if (!cliente || !direccion || !importeInput.value) {
-          alert('Completa todos los campos.');
-          return;
-        }
+      const ESTADOS = ['ONGOING', 'PAUSA', 'Pendiente de Agenda', 'Contrato no Firmado'];
 
-        try {
-          btnGuardar.disabled = true;
-          btnGuardar.textContent = 'Guardando...';
+      function getStateClass(estado) {
+        if (estado === 'ONGOING') return 'state-badge state-ongoing';
+        if (estado === 'PAUSA') return 'state-badge state-pausa';
+        if (estado === 'Pendiente de Agenda') return 'state-badge state-pendiente';
+        return 'state-badge state-contrato';
+      }
 
-          await addDoc(collection(db, 'servicios'), {
-            cliente,
-            direccion,
-            tipoServicio,
-            importe,
-            creadoEn: serverTimestamp(),
-          });
+      function App() {
+        const [tipoAccion, setTipoAccion] = useState(TIPO_ACCIONES[0]);
+        const [nombreServicioCliente, setNombreServicioCliente] = useState('');
+        const [responsable, setResponsable] = useState(RESPONSABLES[0]);
+        const [estado, setEstado] = useState(ESTADOS[0]);
+        const [detalles, setDetalles] = useState('');
+        const [instalaciones, setInstalaciones] = useState([]);
+        const [guardando, setGuardando] = useState(false);
 
-          form.reset();
-          tipoServicioInput.value = 'Monitoreo';
-        } catch (error) {
-          console.error('Error al guardar:', error);
-          alert('No se pudo guardar el servicio. Revisa la consola.');
-        } finally {
-          btnGuardar.disabled = false;
-          btnGuardar.textContent = 'Guardar servicio';
-        }
-      });
+        useEffect(() => {
+          const ref = db
+            .collection('instalaciones')
+            .orderBy('creadoEn', 'desc')
+            .onSnapshot(
+              (snapshot) => {
+                const rows = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+                setInstalaciones(rows);
+              },
+              (error) => {
+                console.error('Error escuchando instalaciones:', error);
+              }
+            );
 
-      const q = query(collection(db, 'servicios'), orderBy('creadoEn', 'desc'));
+          return () => ref();
+        }, []);
 
-      onSnapshot(q, (snapshot) => {
-        if (snapshot.empty) {
-          serviciosBody.innerHTML = '<tr><td colspan="4" class="vacio">Sin registros aún.</td></tr>';
-          return;
-        }
+        async function handleSubmit(e) {
+          e.preventDefault();
 
-        const filas = snapshot.docs
-          .map((doc) => {
-            const servicio = doc.data();
-            const importeFormateado = Number(servicio.importe || 0).toLocaleString('es-AR', {
-              style: 'currency',
-              currency: 'ARS',
+          if (!nombreServicioCliente.trim()) {
+            alert('Ingresá el Nombre del Servicio/Cliente.');
+            return;
+          }
+
+          try {
+            setGuardando(true);
+
+            await db.collection('instalaciones').add({
+              tipoAccion,
+              nombreServicioCliente: nombreServicioCliente.trim(),
+              responsable,
+              estado,
+              detalles: detalles.trim(),
+              creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
             });
 
-            return `
-              <tr>
-                <td>${servicio.cliente ?? ''}</td>
-                <td>${servicio.direccion ?? ''}</td>
-                <td>${servicio.tipoServicio ?? ''}</td>
-                <td class="derecha">${importeFormateado}</td>
-              </tr>
-            `;
-          })
-          .join('');
+            setTipoAccion(TIPO_ACCIONES[0]);
+            setNombreServicioCliente('');
+            setResponsable(RESPONSABLES[0]);
+            setEstado(ESTADOS[0]);
+            setDetalles('');
+          } catch (error) {
+            console.error('Error al guardar instalación:', error);
+            alert('No se pudo guardar. Revisá la consola para más detalle.');
+          } finally {
+            setGuardando(false);
+          }
+        }
 
-        serviciosBody.innerHTML = filas;
-      });
+        return (
+          <div className="dashboard">
+            <header className="header">
+              <h1>ComyTec - Gestión de Instalaciones</h1>
+              <p>Panel operativo para seguimiento comercial y técnico en tiempo real.</p>
+            </header>
+
+            <section className="card">
+              <h2>Nuevo Registro</h2>
+              <form className="form-grid" onSubmit={handleSubmit}>
+                <div className="field">
+                  <label>Tipo de Acción</label>
+                  <select value={tipoAccion} onChange={(e) => setTipoAccion(e.target.value)}>
+                    {TIPO_ACCIONES.map((accion) => (
+                      <option key={accion} value={accion}>
+                        {accion}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="field">
+                  <label>Responsable</label>
+                  <select value={responsable} onChange={(e) => setResponsable(e.target.value)}>
+                    {RESPONSABLES.map((item) => (
+                      <option key={item} value={item}>
+                        {item}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="field full">
+                  <label>Nombre del Servicio/Cliente</label>
+                  <input
+                    type="text"
+                    value={nombreServicioCliente}
+                    onChange={(e) => setNombreServicioCliente(e.target.value)}
+                    placeholder="Ej: Instalación Cámaras - Cliente X"
+                  />
+                </div>
+
+                <div className="field">
+                  <label>Estado</label>
+                  <select value={estado} onChange={(e) => setEstado(e.target.value)}>
+                    {ESTADOS.map((item) => (
+                      <option key={item} value={item}>
+                        {item}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="field full">
+                  <label>Detalles / Comentarios</label>
+                  <textarea
+                    value={detalles}
+                    onChange={(e) => setDetalles(e.target.value)}
+                    placeholder="Observaciones, avances, bloqueos, condiciones, etc."
+                  ></textarea>
+                </div>
+
+                <div className="actions">
+                  <button type="submit" disabled={guardando}>
+                    {guardando ? 'Guardando...' : 'Guardar en instalaciones'}
+                  </button>
+                </div>
+              </form>
+            </section>
+
+            <section className="card">
+              <h2>Tabla de Control</h2>
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Tipo de Acción</th>
+                      <th>Servicio / Cliente</th>
+                      <th>Responsable</th>
+                      <th>Estado</th>
+                      <th>Detalles</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {instalaciones.length === 0 ? (
+                      <tr>
+                        <td colSpan="5" className="empty">
+                          Sin registros todavía.
+                        </td>
+                      </tr>
+                    ) : (
+                      instalaciones.map((item) => (
+                        <tr key={item.id}>
+                          <td>{item.tipoAccion || '-'}</td>
+                          <td>{item.nombreServicioCliente || '-'}</td>
+                          <td>{item.responsable || '-'}</td>
+                          <td>
+                            <span className={getStateClass(item.estado || '')}>{item.estado || '-'}</span>
+                          </td>
+                          <td>{item.detalles || '-'}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <p className="footer-note">
+                Estados con color: verde (ONGOING), rojo (PAUSA), ámbar (Pendiente de Agenda), gris
+                (Contrato no Firmado).
+              </p>
+            </section>
+          </div>
+        );
+      }
+
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<App />);
     </script>
   </body>
 </html>
-
