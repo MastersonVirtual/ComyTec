@@ -27,7 +27,7 @@
       }
 
       * { box-sizing: border-box; }
-      html, body { margin: 0; padding: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+      html, body { margin: 0; padding: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; overflow-x: hidden; }
       body {
         min-height: 100vh;
         color: var(--text);
@@ -98,8 +98,8 @@
         transition: opacity var(--motion-mid) ease;
       }
       .overlay.show { opacity: 1; pointer-events: auto; }
-      .content { width: 100%; will-change: transform; transition: transform var(--motion-slow) cubic-bezier(.2,.8,.2,1), filter var(--motion-mid) ease; }
-      .content.shift { transform: translateX(320px); }
+      .content { width: 100%; transition: filter var(--motion-mid) ease; }
+      .content.shift { transform: none; }
 
       .topbar {
         position: sticky;
@@ -134,7 +134,7 @@
       .top-titles p { margin: 4px 0 0; color: #caeeee; font-size: .9rem; }
       .subtitle-voga { font-family: 'Voga', 'VOGA', 'Didot', 'Bodoni MT', 'Times New Roman', serif; letter-spacing: .9px; }
 
-      .top-search { margin-left: auto; min-width: 280px; max-width: 430px; width: 38%; }
+      .top-search { margin-left: auto; min-width: 220px; max-width: 430px; width: 38%; }
       .top-search input { width: 100%; padding-left: 38px; }
       .search-wrap { position: relative; }
       .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: .85; font-size: 14px; }
@@ -221,7 +221,7 @@
       .field { display: flex; flex-direction: column; gap: 6px; }
       .span-2 { grid-column: span 2; }
       .span-3, .full { grid-column: 1 / -1; }
-      label { font-size: 12.8px; font-weight: 650; color: #d8f1f1; }
+      label { font-size: 12.8px; font-weight: 650; color: #d8f1f1; line-height: 1.25; word-break: break-word; }
 
       input, select, button, textarea {
         border-radius: 12px;
@@ -303,6 +303,228 @@
       .widget.full { grid-column: 1 / -1; }
 
 
+
+      /* Rebrand visual absoluto: SaaS corporativo #006465 */
+      :root {
+        --base: #006465;
+        --base-900: #004e50;
+        --base-700: #0b7b7b;
+        --text: #0f172a;
+        --muted: #64748b;
+        --accent: #006465;
+        --accent-soft: rgba(0, 100, 101, 0.18);
+        --line: #e2e8f0;
+        --panel: #ffffff;
+        --panel-2: #f8fafc;
+        --shadow-soft: 0 10px 20px rgba(2, 8, 23, 0.08);
+        --shadow-deep: 0 24px 42px rgba(2, 8, 23, 0.12);
+        --ok: #10b981;
+        --pause: #ef4444;
+        --chip: #94a3b8;
+      }
+
+      body {
+        color: var(--text);
+        background:
+          radial-gradient(860px 420px at -12% -10%, rgba(0, 100, 101, .08), transparent 60%),
+          radial-gradient(740px 360px at 112% -12%, rgba(14, 165, 164, .08), transparent 60%),
+          linear-gradient(180deg, #f8fbfb 0%, #f5f7f8 40%, #f5f7f8 100%);
+      }
+
+      .sidebar {
+        width: 272px;
+        background: linear-gradient(180deg, #005a5c 0%, #004e50 100%);
+        border-right: 1px solid rgba(255,255,255,.1);
+        backdrop-filter: saturate(120%);
+        box-shadow: var(--shadow-deep);
+      }
+      .sidebar-header {
+        background: rgba(255,255,255,.08);
+        color: #effdfd;
+        border-bottom-color: rgba(255,255,255,.16);
+      }
+      .menu-button, .submenu-button {
+        color: #e6fffd;
+        border: 1px solid rgba(255,255,255,.14);
+        background: rgba(255,255,255,.08);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+      }
+      .menu-button:hover, .submenu-button:hover {
+        transform: translateX(4px);
+        background: rgba(255,255,255,.16);
+        box-shadow: 0 8px 16px rgba(0,0,0,.18);
+      }
+
+      .topbar {
+        background: rgba(255,255,255,.78);
+        border-bottom: 1px solid var(--line);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 8px 24px rgba(2, 8, 23, .06);
+      }
+      .burger {
+        color: #0f172a;
+        border-color: #d7e0ea;
+        background: #fff;
+        box-shadow: 0 6px 14px rgba(15, 23, 42, .08);
+      }
+      .top-titles h1 {
+        color: #0f172a;
+        letter-spacing: .2px;
+        text-shadow: none;
+      }
+      .top-titles p {
+        color: #475569;
+        letter-spacing: .08em;
+      }
+      .subtitle-voga {
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        font-weight: 700;
+      }
+
+      .search-icon { color: #475569; opacity: 1; }
+      .search-preview {
+        background: #ffffff;
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow-soft);
+      }
+      .search-item { border-bottom: 1px solid #edf2f7; color: #0f172a; }
+      .search-item:hover { background: #f8fafc; }
+      .search-item small { color: #64748b; }
+
+      .hero,
+      .panel,
+      .service-card,
+      .widget {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        backdrop-filter: blur(10px);
+        box-shadow: var(--shadow-soft);
+      }
+      .hero {
+        border-radius: 16px;
+        background: linear-gradient(145deg, #005f60 0%, #006465 60%, #0b7b7b 100%);
+        border-color: rgba(255,255,255,.12);
+        color: #ecfeff;
+      }
+      .hero h2, .hero p { color: #ecfeff; }
+      .panel {
+        border-radius: 14px;
+        padding: 24px;
+      }
+      .service-layout { gap: 20px; }
+      .service-card {
+        border-radius: 14px;
+        padding: 22px;
+        transition: transform 200ms cubic-bezier(.4,0,.2,1), box-shadow 200ms cubic-bezier(.4,0,.2,1), border-color 200ms cubic-bezier(.4,0,.2,1);
+      }
+      .service-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 26px rgba(2,8,23,.1);
+        border-color: #cfd8e3;
+      }
+      .panel h2, .service-card h3, .widget h4 { color: #0f172a; }
+      .service-card h3::before { color: var(--accent); }
+      .hint, .kv { color: #64748b; }
+      .card-grid, .compact-grid, .history-grid { gap: 16px; }
+
+      .kpi-grid {
+        margin-top: 22px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(160px, 1fr));
+        gap: 20px;
+      }
+      .kpi-card {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #ffffff;
+        box-shadow: var(--shadow-soft);
+        padding: 18px 20px;
+        text-align: center;
+      }
+      .kpi-value {
+        font-size: 2rem;
+        line-height: 1;
+        font-weight: 800;
+        color: var(--accent);
+        letter-spacing: -.03em;
+      }
+      .kpi-label {
+        margin-top: 8px;
+        font-size: .82rem;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+      }
+
+      label {
+        color: #334155;
+        font-weight: 600;
+      }
+      input, select, button, textarea {
+        color: #0f172a;
+        background: #ffffff;
+        border: 1px solid #d6dee8;
+        box-shadow: none;
+      }
+      input::placeholder, textarea::placeholder { color: #94a3b8; }
+      input:focus, select:focus, textarea:focus {
+        border-color: #006465;
+        box-shadow: 0 0 0 3px rgba(0,100,101,.15);
+      }
+      option { color: #0f172a; background: #ffffff; }
+
+      .save-btn {
+        background: linear-gradient(135deg, #006465, #005355);
+        border-color: #005355;
+        color: #ecfeff;
+        box-shadow: 0 10px 20px rgba(0, 78, 80, .26);
+      }
+      .save-btn:hover {
+        background: linear-gradient(135deg, #005b5d, #004e50);
+      }
+
+      .chip {
+        border: 1px solid transparent;
+        font-weight: 700;
+      }
+      .status-ongoing { background: rgba(14, 165, 164, .14); color: #0f766e; border-color: rgba(14,165,164,.24); }
+      .status-pausa { background: rgba(239, 68, 68, .14); color: #b91c1c; border-color: rgba(239,68,68,.24); }
+      .status-default { background: rgba(245, 158, 11, .16); color: #7a5200; border-color: rgba(245,158,11,.28); }
+
+      .table-wrap table {
+        background: #ffffff;
+        border: 1px solid var(--line);
+      }
+      th {
+        background: #f8fafc;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        font-size: .72rem;
+      }
+      th, td {
+        border-bottom: 1px solid #eef2f7;
+      }
+
+      .widget {
+        border-radius: 14px;
+      }
+      .widget::after {
+        background: linear-gradient(var(--accent), rgba(0,100,101,0));
+      }
+      .widget h4 { color: #0f172a; }
+      .kv b { color: #0f172a; }
+.bento-grid .service-card:first-child { grid-column: span 12; }
+      .facturacion-module .service-card:nth-child(2) { grid-column: span 7; }
+      .facturacion-module .service-card:nth-child(3) { grid-column: span 5; }
+      .facturacion-module .service-card:nth-child(4),
+      .facturacion-module .service-card:nth-child(5) { grid-column: span 6; }
+      .facturacion-module .service-card:last-child { grid-column: span 12; }
+
+      @media (max-width: 1080px) {
+        .kpi-grid { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
+      }
+
       @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after {
           animation: none !important;
@@ -316,10 +538,58 @@
       }
       @media (max-width: 980px) {
         .sidebar { width: 285px; }
-        .content.shift { transform: translateX(285px); }
+        .content.shift { transform: none; }
         .card-grid, .compact-grid, .history-grid { grid-template-columns: 1fr; }
         .top-search { width: 100%; min-width: 0; }
       }
+
+      @media (max-width: 768px) {
+        .main { margin: 12px auto; padding: 0 10px 18px; }
+        .panel { padding: 14px; border-radius: 16px; }
+        .service-card { padding: 12px; border-radius: 14px; }
+        .hero { padding: 34px 14px; border-radius: 16px; }
+        .topbar {
+          flex-wrap: wrap;
+          align-items: flex-start;
+          gap: 10px;
+          padding: 10px 12px;
+        }
+        .top-titles { min-width: 0; flex: 1; }
+        .top-titles h1 { font-size: 1.1rem; }
+        .top-titles p { font-size: .78rem; }
+        .top-search {
+          order: 3;
+          width: 100%;
+          min-width: 0;
+          max-width: none;
+          margin-left: 0;
+        }
+        .search-preview {
+          max-height: 44vh;
+        }
+        .burger { width: 40px; height: 40px; border-radius: 10px; }
+        .card-grid,
+        .compact-grid,
+        .history-grid {
+          grid-template-columns: minmax(0, 1fr) !important;
+          gap: 9px;
+        }
+        .kpi-grid {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 10px;
+        }
+        .facturacion-module .service-card { grid-column: 1 / -1 !important; }
+        .span-2,
+        .span-3,
+        .full {
+          grid-column: 1 / -1;
+        }
+        input, select, button, textarea {
+          width: 100%;
+          max-width: 100%;
+        }
+      }
+
     </style>
 
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -347,6 +617,7 @@
       const db = firebase.firestore();
 
       const ACCIONES = ['Nuevo Servicio', 'Novación', 'Obra', 'Agregado', 'Movimiento de Obra', 'Baja', 'Charla'];
+      const STATUS_OPTIONS = ['Pendiente', 'En curso', 'En espera', 'Completado', 'Cancelado', 'Pausado'];
 
       function generarClienteId() {
         return String(Math.floor(1000 + Math.random() * 9000));
@@ -432,15 +703,10 @@
 
       const movimientoInicial = {
         nombreServicio: '',
-        fechaIngreso: '',
-        quienSolicita: '',
-        solicitudFormalRecibidaPor: '',
-        motivoMovimiento: '',
-        tipoAlarmaInstalada: '',
-        costoUsd: '',
-        costoIncluyeIva: 'Sin IVA',
-        motivoCostoCero: '',
-        observaciones: '',
+        nombreSolicitante: '',
+        fechaMovimiento: '',
+        montoUsd: '',
+        facturado: 'No',
       };
 
       const bajaInicial = {
@@ -453,6 +719,15 @@
         propietarioEquipamiento: 'S-Video',
         equipamientoRetirar: '',
         observaciones: '',
+      };
+
+      const charlaInicial = {
+        nombreServicio: '',
+        fecha: '',
+        horario: '',
+        lugarReunion: '',
+        direccion: '',
+        contactoReferencia: '',
       };
 
       function statusClass(value) {
@@ -475,7 +750,7 @@
         const [fechaCarga, setFechaCarga] = useState('');
         const [tiempoInstalacion, setTiempoInstalacion] = useState('');
         const [costo, setCosto] = useState('');
-        const [status, setStatus] = useState('ONGOING');
+        const [status, setStatus] = useState('Pendiente');
         const [fechaAlta, setFechaAlta] = useState('');
         const [cobro, setCobro] = useState('');
         const [fechaRealizado, setFechaRealizado] = useState('');
@@ -489,6 +764,7 @@
         const [agregadoForm, setAgregadoForm] = useState(agregadoInicial);
         const [movimientoForm, setMovimientoForm] = useState(movimientoInicial);
         const [bajaForm, setBajaForm] = useState(bajaInicial);
+        const [charlaForm, setCharlaForm] = useState(charlaInicial);
 
         const [rows, setRows] = useState([]);
         const [saving, setSaving] = useState(false);
@@ -502,7 +778,7 @@
           if (tipoAccion === 'Novación') return 'novacion';
           if (tipoAccion === 'Agregado') return 'agregado';
           if (tipoAccion === 'Baja') return 'baja-detalle';
-          if (tipoAccion === 'Charla') return 'charla';
+          if (tipoAccion === 'Charla') return 'charla-detalle';
           if (tipoAccion === 'Movimiento de Obra') return 'movimiento-detalle';
           return 'base';
         }, [tipoAccion, selectedForm]);
@@ -562,9 +838,9 @@
         }, []);
 
         function resetFields() {
-          setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('ONGOING');
+          setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('Pendiente');
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
-          setServicioForm(servicioInicial); setObraForm(obraInicial); setNovacionForm(novacionInicial); setAgregadoForm(agregadoInicial); setMovimientoForm(movimientoInicial); setBajaForm(bajaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
+          setServicioForm(servicioInicial); setObraForm(obraInicial); setNovacionForm(novacionInicial); setAgregadoForm(agregadoInicial); setMovimientoForm(movimientoInicial); setBajaForm(bajaInicial); setCharlaForm(charlaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
         }
 
         function setServicioField(key, value) {
@@ -589,6 +865,10 @@
 
         function setBajaField(key, value) {
           setBajaForm((prev) => ({ ...prev, [key]: value }));
+        }
+
+        function setCharlaField(key, value) {
+          setCharlaForm((prev) => ({ ...prev, [key]: value }));
         }
 
         function selectAction(action) {
@@ -639,8 +919,8 @@
             Object.assign(doc, { cliente, fechaCarga, tiempoInstalacion, fechaAlta, cobro });
           }
           if (grupo === 'movimiento-detalle') {
-            if (!movimientoForm.nombreServicio || !movimientoForm.fechaIngreso) {
-              return alert('Completá al menos: Nombre del servicio y Fecha de ingreso.');
+            if (!movimientoForm.nombreServicio || !movimientoForm.nombreSolicitante || !movimientoForm.fechaMovimiento) {
+              return alert('Completá al menos: Nombre del servicio, Solicitante y Fecha del movimiento.');
             }
             Object.assign(doc, { ...movimientoForm, formulario: 'movimiento-obra' });
           }
@@ -650,9 +930,11 @@
             }
             Object.assign(doc, { ...bajaForm, formulario: 'baja-servicio' });
           }
-          if (grupo === 'charla') {
-            if (!fechaCharla || !hora || !lugar) return alert('Completá Fecha Charla, Hora y Lugar.');
-            Object.assign(doc, { fechaCharla, hora, lugar });
+          if (grupo === 'charla-detalle') {
+            if (!charlaForm.nombreServicio || !charlaForm.fecha || !charlaForm.horario || !charlaForm.lugarReunion) {
+              return alert('Completá al menos: Nombre de servicio, Fecha, Horario y Lugar de reunión.');
+            }
+            Object.assign(doc, { ...charlaForm, formulario: 'charla-informativa' });
           }
 
           try {
@@ -739,10 +1021,18 @@
 
               <main className="main">
                 {selectedForm === 'home' ? (
-                  <section className="hero">
-                    <h2>Masterson Seguridad</h2>
-                    <p className="subtitle-voga">ÁREA TÉCNICA Y COMERCIAL</p>
-                  </section>
+                  <>
+                    <section className="hero">
+                      <h2>Masterson Seguridad</h2>
+                      <p className="subtitle-voga">ÁREA TÉCNICA Y COMERCIAL</p>
+                    </section>
+                    <section className="kpi-grid">
+                      <article className="kpi-card"><div className="kpi-value">{rows.length}</div><div className="kpi-label">Servicios totales</div></article>
+                      <article className="kpi-card"><div className="kpi-value">{rows.filter((r) => (r.status || '').toLowerCase().includes('pend')).length}</div><div className="kpi-label">Pendientes</div></article>
+                      <article className="kpi-card"><div className="kpi-value">{rows.filter((r) => (r.status || '').toLowerCase().includes('curso')).length}</div><div className="kpi-label">En curso</div></article>
+                      <article className="kpi-card"><div className="kpi-value">{rows.filter((r) => (r.status || '').toLowerCase().includes('complet')).length}</div><div className="kpi-label">Completados</div></article>
+                    </section>
+                  </>
                 ) : selectedForm === 'historial' ? (
                   <section className="panel">
                     <h2>Historial de Servicios · Vista Ejecutiva</h2>
@@ -778,7 +1068,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>Nuevo Servicio</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID (auto 4 dígitos)</label><input value={clienteId} readOnly type="text" /></div>
-                            <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
 
@@ -826,7 +1116,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>Nueva Obra</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID (auto 4 dígitos)</label><input value={clienteId} readOnly type="text" /></div>
-                            <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
 
@@ -860,12 +1150,12 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
                       </div>
                     ) : grupo === 'novacion' ? (
-                      <div className="service-layout">
+                      <div className="service-layout bento-grid facturacion-module">
                         <div className="service-card">
                           <h3>Facturación · Novaciones</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
-                            <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
 
@@ -909,7 +1199,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>Equipos Agregados</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
-                            <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
 
@@ -945,41 +1235,24 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>Movimiento de Obra</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
-                            <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>1. Identificación y Registro</h3>
+                          <h3>1. Identificación de la Gestión</h3>
                           <div className="card-grid">
-                            <div className="field span-2"><label>Nombre del servicio</label><input value={movimientoForm.nombreServicio} onChange={(e) => setMovimientoField('nombreServicio', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Fecha de Ingreso</label><input value={movimientoForm.fechaIngreso} onChange={(e) => setMovimientoField('fechaIngreso', e.target.value)} type="date" /></div>
-                            <div className="field span-2"><label>Quien lo solicita (Cliente y Tel)</label><input value={movimientoForm.quienSolicita} onChange={(e) => setMovimientoField('quienSolicita', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Solicitud formal recibida por</label><input value={movimientoForm.solicitudFormalRecibidaPor} onChange={(e) => setMovimientoField('solicitudFormalRecibidaPor', e.target.value)} type="text" /></div>
+                            <div className="field span-2"><label>Nombre de servicio</label><input value={movimientoForm.nombreServicio} onChange={(e) => setMovimientoField('nombreServicio', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Nombre del solicitante</label><input value={movimientoForm.nombreSolicitante} onChange={(e) => setMovimientoField('nombreSolicitante', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Fecha del movimiento</label><input value={movimientoForm.fechaMovimiento} onChange={(e) => setMovimientoField('fechaMovimiento', e.target.value)} type="date" /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>2. Justificación y Alcance</h3>
+                          <h3>2. Liquidación y Cobro</h3>
                           <div className="card-grid">
-                            <div className="field span-2"><label>Motivo del movimiento</label><input value={movimientoForm.motivoMovimiento} onChange={(e) => setMovimientoField('motivoMovimiento', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Tipo de Alarma Instalada</label><input value={movimientoForm.tipoAlarmaInstalada} onChange={(e) => setMovimientoField('tipoAlarmaInstalada', e.target.value)} type="text" /></div>
-                          </div>
-                        </div>
-
-                        <div className="service-card">
-                          <h3>3. Condiciones Económicas</h3>
-                          <div className="card-grid">
-                            <div className="field"><label>Costo (USD)</label><input value={movimientoForm.costoUsd} onChange={(e) => setMovimientoField('costoUsd', e.target.value)} type="number" min="0" /></div>
-                            <div className="field"><label>IVA</label><select value={movimientoForm.costoIncluyeIva} onChange={(e) => setMovimientoField('costoIncluyeIva', e.target.value)}><option>Sin IVA</option><option>Con IVA</option></select></div>
-                            <div className="field span-3"><label>Si costo es 0: por qué NO se cobra (y quién autoriza)</label><textarea value={movimientoForm.motivoCostoCero} onChange={(e) => setMovimientoField('motivoCostoCero', e.target.value)} /></div>
-                          </div>
-                        </div>
-
-                        <div className="service-card">
-                          <h3>4. Cierre y Detalles</h3>
-                          <div className="card-grid">
-                            <div className="field span-3"><label>Observaciones</label><textarea value={movimientoForm.observaciones} onChange={(e) => setMovimientoField('observaciones', e.target.value)} /></div>
+                            <div className="field"><label>Monto en dólares</label><input value={movimientoForm.montoUsd} onChange={(e) => setMovimientoField('montoUsd', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>FACTURADO (Sí / No)</label><select value={movimientoForm.facturado} onChange={(e) => setMovimientoField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
                           </div>
                         </div>
 
@@ -991,7 +1264,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>Baja de Servicio</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
-                            <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
 
@@ -1030,16 +1303,52 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
 
                         <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
                       </div>
+                    ) : grupo === 'charla-detalle' ? (
+                      <div className="service-layout">
+                        <div className="service-card">
+                          <h3>Charla Informativa</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio/proyecto" /></div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>1. Identificación del Evento</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Nombre de servicio</label><input value={charlaForm.nombreServicio} onChange={(e) => setCharlaField('nombreServicio', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Fecha</label><input value={charlaForm.fecha} onChange={(e) => setCharlaField('fecha', e.target.value)} type="date" /></div>
+                            <div className="field"><label>Horario</label><input value={charlaForm.horario} onChange={(e) => setCharlaField('horario', e.target.value)} type="time" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>2. Localización y Logística</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Lugar de Reunión</label><input value={charlaForm.lugarReunion} onChange={(e) => setCharlaField('lugarReunion', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Dirección</label><input value={charlaForm.direccion} onChange={(e) => setCharlaField('direccion', e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>3. Contacto en el Sitio</h3>
+                          <div className="card-grid">
+                            <div className="field span-3"><label>Contacto de Referencia para la Charla</label><input value={charlaForm.contactoReferencia} onChange={(e) => setCharlaField('contactoReferencia', e.target.value)} type="text" placeholder="Nombre y teléfono" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                      </div>
 ) : (
                       <div className="compact-grid">
                         <div className="field"><label>Tipo de Acción</label><select value={tipoAccion} onChange={(e) => { setTipoAccion(e.target.value); resetFields(); }}>{ACCIONES.map((a) => <option key={a} value={a}>{a}</option>)}</select></div>
                         <div className="field"><label>{autoIdMode ? "Cliente ID (auto 4 dígitos)" : "Cliente ID asociado"}</label>{autoIdMode ? <input value={clienteId} readOnly type="text" /> : <input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" />}</div>
-                        <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
+                        <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
 
                         {grupo === 'base' && <><div className="field"><label>Cliente</label><input value={cliente} onChange={(e) => setCliente(e.target.value)} /></div><div className="field"><label>Fecha Carga</label><input value={fechaCarga} onChange={(e) => setFechaCarga(e.target.value)} type="date" /></div><div className="field"><label>Tiempo Instalación</label><input value={tiempoInstalacion} onChange={(e) => setTiempoInstalacion(e.target.value)} /></div><div className="field"><label>Fecha Alta</label><input value={fechaAlta} onChange={(e) => setFechaAlta(e.target.value)} type="date" /></div><div className="field"><label>Cobro</label><input value={cobro} onChange={(e) => setCobro(e.target.value)} /></div></>}
 
 
-                        {grupo === 'charla' && <><div className="field"><label>Fecha Charla</label><input value={fechaCharla} onChange={(e) => setFechaCharla(e.target.value)} type="date" /></div><div className="field"><label>Hora</label><input value={hora} onChange={(e) => setHora(e.target.value)} type="time" /></div><div className="field"><label>Lugar</label><input value={lugar} onChange={(e) => setLugar(e.target.value)} /></div></>}
+
                         <div className="field full"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
                       </div>
                     )}
