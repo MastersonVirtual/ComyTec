@@ -462,20 +462,11 @@
 
       const agregadoInicial = {
         nombreServicio: '',
-        presupuestoTrabajo: '',
-        fechaIngresoDatos: '',
-        responsableAdicionales: '',
-        quienAsumeCostos: 'Cliente',
-        motivoNoCobro: '',
-        importeFacturarCliente: '',
-        administracionFactura: '',
-        referenteInstalacion: '',
-        telefonoReferenteInstalacion: '',
         administracion: '',
-        fechaAltaAgregados: '',
-        plazoInstalacionDias: '',
-        detalleTrabajo: '',
-        observacionesInstalacion: '',
+        detalleAdicional: '',
+        fechaAltaAdicional: '',
+        importeFacturarCliente: '',
+        facturado: 'No',
       };
 
       const movimientoInicial = {
@@ -677,8 +668,8 @@
             Object.assign(doc, { ...novacionForm, formulario: 'novacion' });
           }
           if (grupo === 'agregado') {
-            if (!agregadoForm.nombreServicio || !agregadoForm.fechaIngresoDatos) {
-              return alert('Completá al menos: Nombre del servicio y Fecha de ingreso de datos.');
+            if (!agregadoForm.nombreServicio || !agregadoForm.fechaAltaAdicional) {
+              return alert('Completá al menos: Nombre del servicio y Fecha de alta del adicional.');
             }
             Object.assign(doc, { ...agregadoForm, formulario: 'agregado' });
           }
@@ -1039,7 +1030,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                     ) : grupo === 'agregado' ? (
                       <div className="service-layout">
                         <div className="service-card">
-                          <h3>Agregados</h3>
+                          <h3>Equipos Agregados</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
                             <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
@@ -1047,35 +1038,26 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         </div>
 
                         <div className="service-card">
-                          <h3>Datos principales</h3>
+                          <h3>1. Identificación del Servicio</h3>
                           <div className="card-grid">
-                            <div className="field span-2"><label>Nombre del servicio</label><input value={agregadoForm.nombreServicio} onChange={(e) => setAgregadoField('nombreServicio', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Presupuesto del trabajo a realizar</label><input value={agregadoForm.presupuestoTrabajo} onChange={(e) => setAgregadoField('presupuestoTrabajo', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Fecha de ingreso de datos</label><input value={agregadoForm.fechaIngresoDatos} onChange={(e) => setAgregadoField('fechaIngresoDatos', e.target.value)} type="date" /></div>
-                            <div className="field"><label>Responsable de los adicionales acordados</label><input value={agregadoForm.responsableAdicionales} onChange={(e) => setAgregadoField('responsableAdicionales', e.target.value)} type="text" /></div>
-                            <div className="field"><label>¿Quién asume los costos?</label><select value={agregadoForm.quienAsumeCostos} onChange={(e) => setAgregadoField('quienAsumeCostos', e.target.value)}><option>Cliente</option><option>Masterson</option><option>Compartido</option></select></div>
-                            <div className="field span-3"><label>Aclarar por qué NO se le cobra al cliente (si corresponde)</label><textarea value={agregadoForm.motivoNoCobro} onChange={(e) => setAgregadoField('motivoNoCobro', e.target.value)} /></div>
+                            <div className="field span-2"><label>Nombre de servicio</label><input value={agregadoForm.nombreServicio} onChange={(e) => setAgregadoField('nombreServicio', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Administración</label><input value={agregadoForm.administracion} onChange={(e) => setAgregadoField('administracion', e.target.value)} type="text" placeholder="Consorcio/empresa responsable" /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>Facturación y coordinación</h3>
+                          <h3>2. Detalles del Movimiento</h3>
                           <div className="card-grid">
-                            <div className="field"><label>Importe a facturar al cliente (aclarar moneda)</label><input value={agregadoForm.importeFacturarCliente} onChange={(e) => setAgregadoField('importeFacturarCliente', e.target.value)} type="text" /></div>
-                            <div className="field span-2"><label>Nombre de la Administración del servicio (para factura)</label><input value={agregadoForm.administracionFactura} onChange={(e) => setAgregadoField('administracionFactura', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Referente para instalación</label><input value={agregadoForm.referenteInstalacion} onChange={(e) => setAgregadoField('referenteInstalacion', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Teléfono referente instalación</label><input value={agregadoForm.telefonoReferenteInstalacion} onChange={(e) => setAgregadoField('telefonoReferenteInstalacion', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Administración</label><input value={agregadoForm.administracion} onChange={(e) => setAgregadoField('administracion', e.target.value)} type="text" /></div>
-                            <div className="field span-2"><label>Fecha de alta de agregados negociada con cliente</label><input value={agregadoForm.fechaAltaAgregados} onChange={(e) => setAgregadoField('fechaAltaAgregados', e.target.value)} type="text" placeholder="Si no se negoció fecha, indicarlo" /></div>
-                            <div className="field"><label>Plazo de instalación (fecha en días)</label><input value={agregadoForm.plazoInstalacionDias} onChange={(e) => setAgregadoField('plazoInstalacionDias', e.target.value)} type="text" /></div>
+                            <div className="field span-3"><label>Detalles del adicional agregado</label><textarea value={agregadoForm.detalleAdicional} onChange={(e) => setAgregadoField('detalleAdicional', e.target.value)} placeholder="Qué se instaló: cámaras, sensores, controles, etc." /></div>
+                            <div className="field"><label>Fecha de alta</label><input value={agregadoForm.fechaAltaAdicional} onChange={(e) => setAgregadoField('fechaAltaAdicional', e.target.value)} type="date" /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>Detalle operativo</h3>
+                          <h3>3. Control Administrativo y Contable</h3>
                           <div className="card-grid">
-                            <div className="field span-3"><label>Comentar en detalle en qué consiste el trabajo</label><textarea value={agregadoForm.detalleTrabajo} onChange={(e) => setAgregadoField('detalleTrabajo', e.target.value)} /></div>
-                            <div className="field span-3"><label>Observaciones relevantes para ejecutar la instalación</label><textarea value={agregadoForm.observacionesInstalacion} onChange={(e) => setAgregadoField('observacionesInstalacion', e.target.value)} /></div>
+                            <div className="field span-2"><label>Importe a facturar por el adicional instalado</label><input value={agregadoForm.importeFacturarCliente} onChange={(e) => setAgregadoField('importeFacturarCliente', e.target.value)} type="text" placeholder="Monto acordado" /></div>
+                            <div className="field"><label>FACTURADO (Sí/No)</label><select value={agregadoForm.facturado} onChange={(e) => setAgregadoField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
                           </div>
                         </div>
 
