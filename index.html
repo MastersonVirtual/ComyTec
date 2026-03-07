@@ -6,9 +6,9 @@
     <title>Masterson Seguridad</title>
     <style>
       :root {
-        --base: #084846;
-        --base-900: #042f2c;
-        --base-700: #09615b;
+        --base: #063b38;
+        --base-900: #022422;
+        --base-700: #0a4f4b;
         --text: #eaf7f7;
         --muted: #b8d8d8;
         --border-glass: rgba(255, 255, 255, 0.28);
@@ -70,6 +70,7 @@
       }
       .top-titles h1 { margin: 0; font-size: 1.28rem; }
       .top-titles p { margin: 4px 0 0; color: #caeeee; font-size: .9rem; }
+      .subtitle-voga { font-family: 'Voga', 'VOGA', 'Didot', 'Bodoni MT', 'Times New Roman', serif; letter-spacing: 0.6px; }
       .top-search { margin-left: auto; min-width: 280px; max-width: 420px; width: 36%; }
       .top-search input { width: 100%; padding-left: 38px; }
       .search-wrap { position: relative; }
@@ -457,7 +458,7 @@
                 <button className="burger" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
-                  <p>ÁREA TÉCNICA Y COMERCIAL</p>
+                  <p className="subtitle-voga">ÁREA TÉCNICA Y COMERCIAL</p>
                 </div>
                 <div className="top-search">
                   <div className="search-wrap">
@@ -497,7 +498,7 @@
                 {selectedForm === 'home' ? (
                   <section className="hero">
                     <h2>Masterson Seguridad</h2>
-                    <p>ÁREA TÉCNICA Y COMERCIAL</p>
+                    <p className="subtitle-voga">ÁREA TÉCNICA Y COMERCIAL</p>
                   </section>
                 ) : selectedForm === 'historial' ? (
                   <section className="panel">
