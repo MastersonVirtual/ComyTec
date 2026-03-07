@@ -7,6 +7,9 @@
     <style>
       :root {
         --base: #062f2d;
+        --motion-fast: 160ms;
+        --motion-mid: 240ms;
+        --motion-slow: 320ms;
         --base-900: #041f1e;
         --base-700: #0b4e49;
         --text: #ebf6f5;
@@ -16,8 +19,8 @@
         --line: rgba(255, 255, 255, 0.18);
         --panel: rgba(8, 31, 30, 0.52);
         --panel-2: rgba(10, 44, 42, 0.56);
-        --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.28);
-        --shadow-deep: 0 28px 70px rgba(0, 0, 0, 0.45);
+        --shadow-soft: 0 8px 22px rgba(0, 0, 0, 0.24);
+        --shadow-deep: 0 18px 46px rgba(0, 0, 0, 0.34);
         --ok: #2ecc71;
         --pause: #ff6666;
         --chip: #7f8f9a;
@@ -40,10 +43,10 @@
         position: fixed; inset: 0 auto 0 0; width: 320px;
         background: linear-gradient(180deg, rgba(4, 25, 24, 0.95), rgba(10, 52, 49, 0.9));
         border-right: 1px solid var(--line);
-        backdrop-filter: blur(14px) saturate(140%);
+        backdrop-filter: blur(8px) saturate(120%);
         box-shadow: var(--shadow-deep);
         transform: translateX(-105%);
-        transition: transform .42s cubic-bezier(.2,.8,.2,1);
+        transition: transform var(--motion-slow) cubic-bezier(.2,.8,.2,1);
         z-index: 1000;
         overflow-y: auto;
       }
@@ -67,7 +70,7 @@
         border: 1px solid var(--line);
         background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
         box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 6px 14px rgba(0,0,0,.2);
-        transition: transform .22s ease, background .22s ease, box-shadow .22s ease;
+        transition: transform var(--motion-fast) ease, background var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
       }
       .menu-button:hover, .submenu-button:hover {
         transform: translateX(5px);
@@ -79,7 +82,7 @@
         overflow: hidden;
         padding-left: 10px;
         opacity: 0;
-        transition: max-height .35s ease, opacity .25s ease;
+        transition: max-height var(--motion-mid) ease, opacity var(--motion-fast) ease;
       }
       .submenu.open { max-height: 420px; opacity: 1; }
       .submenu-button { font-size: 13px; }
@@ -89,13 +92,13 @@
         inset: 0;
         z-index: 999;
         background: rgba(0, 0, 0, 0.45);
-        backdrop-filter: blur(4px);
+        backdrop-filter: blur(2px);
         opacity: 0;
         pointer-events: none;
-        transition: opacity .3s ease;
+        transition: opacity var(--motion-mid) ease;
       }
       .overlay.show { opacity: 1; pointer-events: auto; }
-      .content { width: 100%; transition: transform .42s cubic-bezier(.2,.8,.2,1), filter .35s ease; }
+      .content { width: 100%; will-change: transform; transition: transform var(--motion-slow) cubic-bezier(.2,.8,.2,1), filter var(--motion-mid) ease; }
       .content.shift { transform: translateX(320px); }
 
       .topbar {
@@ -108,8 +111,8 @@
         padding: 14px 18px;
         background: linear-gradient(90deg, rgba(3,32,30,.8), rgba(8,66,62,.72));
         border-bottom: 1px solid var(--line);
-        backdrop-filter: blur(16px) saturate(150%);
-        box-shadow: 0 10px 32px rgba(0,0,0,.32);
+        backdrop-filter: blur(10px) saturate(125%);
+        box-shadow: 0 8px 22px rgba(0,0,0,.24);
       }
       .burger {
         width: 44px;
@@ -146,7 +149,7 @@
         border-radius: 12px;
         border: 1px solid var(--line);
         background: rgba(4, 30, 28, .95);
-        backdrop-filter: blur(14px);
+        backdrop-filter: blur(8px);
         box-shadow: var(--shadow-deep);
       }
       .search-item { padding: 11px 12px; border-bottom: 1px solid rgba(255,255,255,.12); cursor: pointer; }
@@ -185,7 +188,7 @@
         padding: 20px;
         background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
         border: 1px solid rgba(255,255,255,.30);
-        backdrop-filter: blur(16px) saturate(140%);
+        backdrop-filter: blur(9px) saturate(120%);
         box-shadow: var(--shadow-soft);
       }
       .panel h2 { margin: 0 0 8px; font-size: 1.25rem; font-weight: 800; letter-spacing: .2px; }
@@ -199,7 +202,7 @@
         border-radius: 16px;
         padding: 14px;
         box-shadow: 0 10px 20px rgba(0,0,0,.2);
-        transition: transform .22s ease, box-shadow .22s ease;
+        transition: transform var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
       }
       .service-card:hover { transform: translateY(-2px); box-shadow: 0 16px 32px rgba(0,0,0,.26); }
       .service-card h3 {
@@ -257,7 +260,7 @@
         font-weight: 800;
         cursor: pointer;
         box-shadow: 0 12px 26px rgba(0,0,0,.28);
-        transition: transform .2s ease, filter .2s ease;
+        transition: transform var(--motion-fast) ease, filter var(--motion-fast) ease;
       }
       .save-btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
 
@@ -299,6 +302,15 @@
       .kv b { color: #ffffff; font-weight: 700; }
       .widget.full { grid-column: 1 / -1; }
 
+
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation: none !important;
+          transition-duration: 1ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+
       @media (max-width: 1080px) {
         .card-grid, .compact-grid, .history-grid { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
       }
@@ -320,7 +332,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-      const { useEffect, useMemo, useState } = React;
+      const { useDeferredValue, useEffect, useMemo, useState } = React;
 
       const firebaseConfig = {
         apiKey: 'AIzaSyCXTX7h33uCXK4K8FSSnD7PcoayjAGV9x4',
@@ -470,15 +482,17 @@
         const autoIdMode = AUTO_ID_ACTIONS.includes(tipoAccion);
         const effectiveClienteId = autoIdMode ? clienteId : clienteIdAsociado.trim();
 
+        const deferredSearchTerm = useDeferredValue(searchTerm);
+
         const filteredRows = useMemo(() => {
-          const q = searchTerm.trim().toLowerCase();
+          const q = deferredSearchTerm.trim().toLowerCase();
           if (!q) return rows;
           return rows.filter((r) =>
             [r.clienteId, r.nombreServicio, r.cliente, r.representanteComercial, r.razonSocial, r.direccionServicio]
               .filter(Boolean)
               .some((v) => String(v).toLowerCase().includes(q))
           );
-        }, [rows, searchTerm]);
+        }, [rows, deferredSearchTerm]);
 
         function buildServiceDetailText(r) {
           const lines = [
