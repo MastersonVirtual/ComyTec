@@ -11,9 +11,11 @@
         --base-700: #0a4f4b;
         --text: #eaf7f7;
         --muted: #b8d8d8;
+        --accent: #2ed7c8;
+        --accent-soft: #7be9df;
         --border-glass: rgba(255, 255, 255, 0.28);
-        --shadow-soft: 0 10px 24px rgba(3, 35, 35, 0.28);
-        --shadow-deep: 0 18px 45px rgba(2, 25, 25, 0.45);
+        --shadow-soft: 0 14px 30px rgba(3, 35, 35, 0.30);
+        --shadow-deep: 0 24px 60px rgba(2, 25, 25, 0.52);
         --ok: #29c46a;
         --pause: #e85555;
         --chip: #6f8383;
@@ -25,9 +27,10 @@
         min-height: 100vh;
         color: var(--text);
         background:
-          radial-gradient(circle at 20% 20%, rgba(15, 120, 121, 0.45) 0%, transparent 34%),
-          radial-gradient(circle at 80% 10%, rgba(13, 124, 125, 0.40) 0%, transparent 30%),
-          linear-gradient(135deg, var(--base-900) 0%, var(--base) 48%, var(--base-700) 100%);
+          radial-gradient(circle at 10% 10%, rgba(46, 215, 200, 0.18) 0%, transparent 28%),
+          radial-gradient(circle at 90% 0%, rgba(21, 155, 145, 0.22) 0%, transparent 30%),
+          radial-gradient(circle at 50% 90%, rgba(8, 79, 75, 0.35) 0%, transparent 36%),
+          linear-gradient(135deg, #011f1d 0%, var(--base-900) 28%, var(--base) 58%, var(--base-700) 100%);
       }
 
       .app-shell { min-height: 100vh; display: flex; }
@@ -61,14 +64,15 @@
 
       .topbar {
         position: sticky; top: 0; z-index: 60; display: flex; align-items: center; gap: 12px;
-        padding: 14px 18px; background: linear-gradient(90deg, rgba(7,78,79,.78), rgba(8,87,88,.72));
-        border-bottom: 1px solid rgba(255,255,255,.22); backdrop-filter: blur(14px) saturate(125%);
+        padding: 14px 18px; background: linear-gradient(90deg, rgba(3,53,51,.82), rgba(8,87,88,.76));
+        border-bottom: 1px solid rgba(255,255,255,.28); backdrop-filter: blur(16px) saturate(150%);
+        box-shadow: 0 12px 34px rgba(0,0,0,.28);
       }
       .burger {
         width: 44px; height: 44px; border-radius: 12px; border: 1px solid rgba(255,255,255,.4);
         background: rgba(255,255,255,.12); color: #fff; font-size: 24px; cursor: pointer;
       }
-      .top-titles h1 { margin: 0; font-size: 1.28rem; }
+      .top-titles h1 { margin: 0; font-size: 1.36rem; font-weight: 800; letter-spacing: .4px; text-shadow: 0 3px 12px rgba(0,0,0,.35); }
       .top-titles p { margin: 4px 0 0; color: #caeeee; font-size: .9rem; }
       .subtitle-voga { font-family: 'Voga', 'VOGA', 'Didot', 'Bodoni MT', 'Times New Roman', serif; letter-spacing: 0.6px; }
       .top-search { margin-left: auto; min-width: 280px; max-width: 420px; width: 36%; }
@@ -86,13 +90,16 @@
       .main { max-width: 1280px; margin: 20px auto; padding: 0 16px 24px; }
 
       .hero {
-        border-radius: 18px;
-        padding: 52px 28px;
+        border-radius: 22px;
+        padding: 58px 30px;
         text-align: center;
-        background: linear-gradient(135deg, rgba(255,255,255,.18), rgba(255,255,255,.08));
-        border: 1px solid rgba(255,255,255,.28);
+        background: linear-gradient(135deg, rgba(255,255,255,.20), rgba(255,255,255,.07));
+        border: 1px solid rgba(255,255,255,.30);
         box-shadow: var(--shadow-deep);
+        position: relative;
+        overflow: hidden;
       }
+      .hero::after { content:''; position:absolute; inset:auto -20% -55% -20%; height:180px; background: radial-gradient(circle, rgba(46,215,200,.20), transparent 65%); }
       .hero h2 {
         margin: 0;
         font-size: clamp(2rem, 6vw, 4.2rem);
@@ -104,9 +111,9 @@
         color: #d7f4ef;
       }
       .panel {
-        margin-bottom: 16px; border-radius: 18px; padding: 18px;
-        background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.08));
-        border: 1px solid rgba(255,255,255,.26); backdrop-filter: blur(14px) saturate(120%);
+        margin-bottom: 18px; border-radius: 20px; padding: 20px;
+        background: linear-gradient(135deg, rgba(255,255,255,.17), rgba(255,255,255,.07));
+        border: 1px solid rgba(255,255,255,.30); backdrop-filter: blur(16px) saturate(140%);
         box-shadow: var(--shadow-soft);
       }
       .panel h2 { margin: 0 0 8px; }
@@ -115,12 +122,16 @@
       .service-layout { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px; }
       .service-card {
         grid-column: span 12;
-        background: rgba(255,255,255,.09);
-        border: 1px solid rgba(255,255,255,.2);
-        border-radius: 14px;
+        background: linear-gradient(135deg, rgba(255,255,255,.13), rgba(255,255,255,.05));
+        border: 1px solid rgba(255,255,255,.24);
+        border-radius: 16px;
         padding: 14px;
+        box-shadow: 0 10px 20px rgba(0,0,0,.18);
+        transition: transform .2s ease, box-shadow .2s ease;
       }
-      .service-card h3 { margin: 0 0 10px; font-size: 15px; color: #dbf6f6; }
+      .service-card:hover { transform: translateY(-2px); box-shadow: 0 16px 30px rgba(0,0,0,.24); }
+      .service-card h3 { margin: 0 0 12px; font-size: 15px; color: #e8fffb; font-weight: 800; letter-spacing: .25px; display:flex; align-items:center; gap:8px; }
+      .service-card h3::before { content:'◈'; color: var(--accent); font-size: 12px; }
       .card-grid { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 10px; }
 
       .field { display: flex; flex-direction: column; gap: 6px; }
@@ -129,12 +140,13 @@
       label { font-size: 12.8px; font-weight: 650; color: #d8f1f1; }
 
       input, select, button, textarea {
-        border-radius: 10px; border: 1px solid rgba(255,255,255,.28); padding: 10px 12px; font-size: 14px;
+        border-radius: 12px; border: 1px solid rgba(255,255,255,.30); padding: 10px 12px; font-size: 14px;
         color: #efffff; background: rgba(255,255,255,.10); outline: none;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.16);
       }
       textarea { min-height: 90px; resize: vertical; }
       input::placeholder, textarea::placeholder { color: #c5dede; }
-      input:focus, select:focus, textarea:focus { border-color: rgba(255,255,255,.48); box-shadow: 0 0 0 3px rgba(255,255,255,.14); }
+      input:focus, select:focus, textarea:focus { border-color: var(--accent-soft); box-shadow: 0 0 0 3px rgba(123,233,223,.22), 0 8px 18px rgba(0,0,0,.18); }
       option { color: #103233; background: #dff3f3; }
 
       .radio-row, .switch-row, .state-row { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -151,11 +163,14 @@
 
       .save-btn {
         width: 100%;
-        background: linear-gradient(135deg, #0a6768, #074e4f);
-        border-color: rgba(255,255,255,.34);
-        font-weight: 700;
+        background: linear-gradient(135deg, #0e756f, #064745);
+        border-color: rgba(255,255,255,.40);
+        font-weight: 800;
         cursor: pointer;
+        box-shadow: 0 12px 26px rgba(0,0,0,.28);
+        transition: transform .2s ease, filter .2s ease;
       }
+      .save-btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
       .compact-grid { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 12px; }
 
       .table-wrap { overflow-x: auto; }
@@ -173,12 +188,14 @@
 
       .history-grid { display: grid; grid-template-columns: repeat(3, minmax(220px, 1fr)); gap: 12px; }
       .widget {
-        background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.06));
-        border: 1px solid rgba(255,255,255,.24);
-        border-radius: 14px;
-        padding: 12px;
+        background: linear-gradient(135deg, rgba(255,255,255,.15), rgba(255,255,255,.06));
+        border: 1px solid rgba(255,255,255,.28);
+        border-radius: 16px;
+        padding: 13px;
         box-shadow: var(--shadow-soft);
+        position: relative;
       }
+      .widget::after { content:''; position:absolute; inset:0 auto 0 0; width:3px; border-radius: 16px 0 0 16px; background: linear-gradient(var(--accent), transparent 70%); opacity:.9; }
       .widget h4 { margin: 0 0 8px; font-size: 13px; color: #d7f4ef; }
       .kv { font-size: 12px; color: #bfe2df; margin: 4px 0; }
       .kv b { color: #ffffff; font-weight: 700; }
@@ -502,7 +519,7 @@
                   </section>
                 ) : selectedForm === 'historial' ? (
                   <section className="panel">
-                    <h2>Historial de Servicios</h2>
+                    <h2>Historial de Servicios · Vista Ejecutiva</h2>
                     <div className="hint">Vista completa del servicio seleccionado desde la vista previa de búsqueda.</div>
                     {!selectedService ? (
                       <div className="hero" style={{padding: '26px 18px'}}>
@@ -525,7 +542,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                   </section>
                 ) : (
                 <section className="panel">
-                  <h2>Formulario Operativo</h2>
+                  <h2>Formulario Operativo · Diseño Premium</h2>
                   <div className="hint">Propuesta de formulario optimizado en 5 bloques visuales + documentación y cierre.</div>
 
                   <form onSubmit={handleSubmit}>
