@@ -491,6 +491,18 @@
         observaciones: '',
       };
 
+      const bajaInicial = {
+        nombreServicio: '',
+        direccionServicio: '',
+        fechaIngreso: '',
+        quienSolicita: '',
+        motivoBaja: '',
+        internetEstado: '',
+        propietarioEquipamiento: 'S-Video',
+        equipamientoRetirar: '',
+        observaciones: '',
+      };
+
       function statusClass(value) {
         if (!value) return 'chip status-default';
         const v = value.toLowerCase();
@@ -524,6 +536,7 @@
         const [novacionForm, setNovacionForm] = useState(novacionInicial);
         const [agregadoForm, setAgregadoForm] = useState(agregadoInicial);
         const [movimientoForm, setMovimientoForm] = useState(movimientoInicial);
+        const [bajaForm, setBajaForm] = useState(bajaInicial);
 
         const [rows, setRows] = useState([]);
         const [saving, setSaving] = useState(false);
@@ -536,7 +549,7 @@
           if (tipoAccion === 'Obra' && selectedForm === 'servicio') return 'obra';
           if (tipoAccion === 'Novación') return 'novacion';
           if (tipoAccion === 'Agregado') return 'agregado';
-          if (tipoAccion === 'Baja') return 'baja';
+          if (tipoAccion === 'Baja') return 'baja-detalle';
           if (tipoAccion === 'Charla') return 'charla';
           if (tipoAccion === 'Movimiento de Obra') return 'movimiento-detalle';
           return 'base';
@@ -599,7 +612,7 @@
         function resetFields() {
           setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('ONGOING');
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
-          setServicioForm(servicioInicial); setObraForm(obraInicial); setNovacionForm(novacionInicial); setAgregadoForm(agregadoInicial); setMovimientoForm(movimientoInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
+          setServicioForm(servicioInicial); setObraForm(obraInicial); setNovacionForm(novacionInicial); setAgregadoForm(agregadoInicial); setMovimientoForm(movimientoInicial); setBajaForm(bajaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
         }
 
         function setServicioField(key, value) {
@@ -620,6 +633,10 @@
 
         function setMovimientoField(key, value) {
           setMovimientoForm((prev) => ({ ...prev, [key]: value }));
+        }
+
+        function setBajaField(key, value) {
+          setBajaForm((prev) => ({ ...prev, [key]: value }));
         }
 
         function selectAction(action) {
@@ -675,9 +692,11 @@
             }
             Object.assign(doc, { ...movimientoForm, formulario: 'movimiento-obra' });
           }
-          if (grupo === 'baja') {
-            if (!fechaCarga) return alert('Completá Fecha Carga.');
-            Object.assign(doc, { fechaCarga, fechaRealizado, verificado });
+          if (grupo === 'baja-detalle') {
+            if (!bajaForm.nombreServicio || !bajaForm.direccionServicio || !bajaForm.fechaIngreso) {
+              return alert('Completá al menos: Nombre del servicio, Dirección y Fecha de ingreso.');
+            }
+            Object.assign(doc, { ...bajaForm, formulario: 'baja-servicio' });
           }
           if (grupo === 'charla') {
             if (!fechaCharla || !hora || !lugar) return alert('Completá Fecha Charla, Hora y Lugar.');
@@ -1108,6 +1127,51 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
 
                         <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
                       </div>
+                    ) : grupo === 'baja-detalle' ? (
+                      <div className="service-layout">
+                        <div className="service-card">
+                          <h3>Baja de Servicio</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
+                            <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>1. Identificación del Punto de Baja</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Nombre del Servicio</label><input value={bajaForm.nombreServicio} onChange={(e) => setBajaField('nombreServicio', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Dirección</label><input value={bajaForm.direccionServicio} onChange={(e) => setBajaField('direccionServicio', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Fecha de Ingreso</label><input value={bajaForm.fechaIngreso} onChange={(e) => setBajaField('fechaIngreso', e.target.value)} type="date" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>2. Contacto y Justificación</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Quien lo Solicita (Cliente y Tel)</label><input value={bajaForm.quienSolicita} onChange={(e) => setBajaField('quienSolicita', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Motivo de Baja</label><input value={bajaForm.motivoBaja} onChange={(e) => setBajaField('motivoBaja', e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>3. Detalles Técnicos y Conectividad</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Internet (estado/conectividad)</label><input value={bajaForm.internetEstado} onChange={(e) => setBajaField('internetEstado', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Propietario de Equipamiento</label><select value={bajaForm.propietarioEquipamiento} onChange={(e) => setBajaField('propietarioEquipamiento', e.target.value)}><option>S-Video</option><option>Cliente</option><option>Mixto</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>4. Logística de Retiro y Cierre</h3>
+                          <div className="card-grid">
+                            <div className="field span-3"><label>Equipamiento a Retirar (adjuntar planilla)</label><input value={bajaForm.equipamientoRetirar} onChange={(e) => setBajaField('equipamientoRetirar', e.target.value)} type="text" placeholder="Referencia o nombre de planilla" /></div>
+                            <div className="field span-3"><label>Observaciones</label><textarea value={bajaForm.observaciones} onChange={(e) => setBajaField('observaciones', e.target.value)} /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                      </div>
 ) : (
                       <div className="compact-grid">
                         <div className="field"><label>Tipo de Acción</label><select value={tipoAccion} onChange={(e) => { setTipoAccion(e.target.value); resetFields(); }}>{ACCIONES.map((a) => <option key={a} value={a}>{a}</option>)}</select></div>
@@ -1116,7 +1180,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
 
                         {grupo === 'base' && <><div className="field"><label>Cliente</label><input value={cliente} onChange={(e) => setCliente(e.target.value)} /></div><div className="field"><label>Fecha Carga</label><input value={fechaCarga} onChange={(e) => setFechaCarga(e.target.value)} type="date" /></div><div className="field"><label>Tiempo Instalación</label><input value={tiempoInstalacion} onChange={(e) => setTiempoInstalacion(e.target.value)} /></div><div className="field"><label>Fecha Alta</label><input value={fechaAlta} onChange={(e) => setFechaAlta(e.target.value)} type="date" /></div><div className="field"><label>Cobro</label><input value={cobro} onChange={(e) => setCobro(e.target.value)} /></div></>}
 
-                        {grupo === 'baja' && <><div className="field"><label>Fecha Carga</label><input value={fechaCarga} onChange={(e) => setFechaCarga(e.target.value)} type="date" /></div><div className="field"><label>Fecha Realizado</label><input value={fechaRealizado} onChange={(e) => setFechaRealizado(e.target.value)} type="date" /></div><div className="field"><label>Verificado</label><input value={verificado} onChange={(e) => setVerificado(e.target.value)} /></div></>}
+
                         {grupo === 'charla' && <><div className="field"><label>Fecha Charla</label><input value={fechaCharla} onChange={(e) => setFechaCharla(e.target.value)} type="date" /></div><div className="field"><label>Hora</label><input value={hora} onChange={(e) => setHora(e.target.value)} type="time" /></div><div className="field"><label>Lugar</label><input value={lugar} onChange={(e) => setLugar(e.target.value)} /></div></>}
                         <div className="field full"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
                       </div>
