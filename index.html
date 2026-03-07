@@ -98,8 +98,8 @@
         transition: opacity var(--motion-mid) ease;
       }
       .overlay.show { opacity: 1; pointer-events: auto; }
-      .content { width: 100%; will-change: transform; transition: transform var(--motion-slow) cubic-bezier(.2,.8,.2,1), filter var(--motion-mid) ease; }
-      .content.shift { transform: translateX(320px); }
+      .content { width: 100%; transition: filter var(--motion-mid) ease; }
+      .content.shift { transform: none; }
 
       .topbar {
         position: sticky;
@@ -316,7 +316,7 @@
       }
       @media (max-width: 980px) {
         .sidebar { width: 285px; }
-        .content.shift { transform: translateX(285px); }
+        .content.shift { transform: none; }
         .card-grid, .compact-grid, .history-grid { grid-template-columns: 1fr; }
         .top-search { width: 100%; min-width: 0; }
       }
@@ -347,6 +347,7 @@
       const db = firebase.firestore();
 
       const ACCIONES = ['Nuevo Servicio', 'Novación', 'Obra', 'Agregado', 'Movimiento de Obra', 'Baja', 'Charla'];
+      const STATUS_OPTIONS = ['Pendiente', 'En curso', 'En espera', 'Completado', 'Cancelado', 'Pausado'];
 
       function generarClienteId() {
         return String(Math.floor(1000 + Math.random() * 9000));
@@ -479,7 +480,7 @@
         const [fechaCarga, setFechaCarga] = useState('');
         const [tiempoInstalacion, setTiempoInstalacion] = useState('');
         const [costo, setCosto] = useState('');
-        const [status, setStatus] = useState('ONGOING');
+        const [status, setStatus] = useState('Pendiente');
         const [fechaAlta, setFechaAlta] = useState('');
         const [cobro, setCobro] = useState('');
         const [fechaRealizado, setFechaRealizado] = useState('');
@@ -567,7 +568,7 @@
         }, []);
 
         function resetFields() {
-          setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('ONGOING');
+          setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('Pendiente');
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
           setServicioForm(servicioInicial); setObraForm(obraInicial); setNovacionForm(novacionInicial); setAgregadoForm(agregadoInicial); setMovimientoForm(movimientoInicial); setBajaForm(bajaInicial); setCharlaForm(charlaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
         }
@@ -789,7 +790,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>Nuevo Servicio</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID (auto 4 dígitos)</label><input value={clienteId} readOnly type="text" /></div>
-                            <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
 
@@ -837,7 +838,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>Nueva Obra</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID (auto 4 dígitos)</label><input value={clienteId} readOnly type="text" /></div>
-                            <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
 
@@ -876,7 +877,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>Facturación · Novaciones</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
-                            <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
 
@@ -920,7 +921,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>Equipos Agregados</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
-                            <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
 
@@ -956,7 +957,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>Movimiento de Obra</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
-                            <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
 
@@ -985,7 +986,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>Baja de Servicio</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
-                            <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
 
@@ -1030,7 +1031,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>Charla Informativa</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio/proyecto" /></div>
-                            <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
 
@@ -1064,7 +1065,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                       <div className="compact-grid">
                         <div className="field"><label>Tipo de Acción</label><select value={tipoAccion} onChange={(e) => { setTipoAccion(e.target.value); resetFields(); }}>{ACCIONES.map((a) => <option key={a} value={a}>{a}</option>)}</select></div>
                         <div className="field"><label>{autoIdMode ? "Cliente ID (auto 4 dígitos)" : "Cliente ID asociado"}</label>{autoIdMode ? <input value={clienteId} readOnly type="text" /> : <input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" />}</div>
-                        <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
+                        <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
 
                         {grupo === 'base' && <><div className="field"><label>Cliente</label><input value={cliente} onChange={(e) => setCliente(e.target.value)} /></div><div className="field"><label>Fecha Carga</label><input value={fechaCarga} onChange={(e) => setFechaCarga(e.target.value)} type="date" /></div><div className="field"><label>Tiempo Instalación</label><input value={tiempoInstalacion} onChange={(e) => setTiempoInstalacion(e.target.value)} /></div><div className="field"><label>Fecha Alta</label><input value={fechaAlta} onChange={(e) => setFechaAlta(e.target.value)} type="date" /></div><div className="field"><label>Cobro</label><input value={cobro} onChange={(e) => setCobro(e.target.value)} /></div></>}
 
