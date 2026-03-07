@@ -6,132 +6,213 @@
     <title>Masterson Seguridad</title>
     <style>
       :root {
-        --base: #063b38;
-        --base-900: #022422;
-        --base-700: #0a4f4b;
-        --text: #eaf7f7;
-        --muted: #b8d8d8;
-        --accent: #2ed7c8;
-        --accent-soft: #7be9df;
-        --border-glass: rgba(255, 255, 255, 0.28);
-        --shadow-soft: 0 14px 30px rgba(3, 35, 35, 0.30);
-        --shadow-deep: 0 24px 60px rgba(2, 25, 25, 0.52);
-        --ok: #29c46a;
-        --pause: #e85555;
-        --chip: #6f8383;
+        --base: #062f2d;
+        --base-900: #041f1e;
+        --base-700: #0b4e49;
+        --text: #ebf6f5;
+        --muted: #a9c8c6;
+        --accent: #4ee3d1;
+        --accent-soft: #97f3e7;
+        --line: rgba(255, 255, 255, 0.18);
+        --panel: rgba(8, 31, 30, 0.52);
+        --panel-2: rgba(10, 44, 42, 0.56);
+        --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.28);
+        --shadow-deep: 0 28px 70px rgba(0, 0, 0, 0.45);
+        --ok: #2ecc71;
+        --pause: #ff6666;
+        --chip: #7f8f9a;
       }
 
       * { box-sizing: border-box; }
-      html, body { margin: 0; padding: 0; font-family: Inter, 'Segoe UI', Arial, sans-serif; }
+      html, body { margin: 0; padding: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
       body {
         min-height: 100vh;
         color: var(--text);
         background:
-          radial-gradient(circle at 10% 10%, rgba(46, 215, 200, 0.18) 0%, transparent 28%),
-          radial-gradient(circle at 90% 0%, rgba(21, 155, 145, 0.22) 0%, transparent 30%),
-          radial-gradient(circle at 50% 90%, rgba(8, 79, 75, 0.35) 0%, transparent 36%),
-          linear-gradient(135deg, #011f1d 0%, var(--base-900) 28%, var(--base) 58%, var(--base-700) 100%);
+          radial-gradient(900px 500px at -10% -10%, rgba(78, 227, 209, 0.22), transparent 62%),
+          radial-gradient(800px 420px at 115% -15%, rgba(25, 164, 151, 0.25), transparent 62%),
+          radial-gradient(700px 500px at 50% 120%, rgba(9, 71, 67, 0.32), transparent 62%),
+          linear-gradient(145deg, #011716 0%, var(--base-900) 28%, var(--base) 55%, var(--base-700) 100%);
       }
 
       .app-shell { min-height: 100vh; display: flex; }
       .sidebar {
         position: fixed; inset: 0 auto 0 0; width: 320px;
-        background: linear-gradient(170deg, rgba(7, 78, 79, 0.95) 0%, rgba(5, 59, 60, 0.92) 100%);
-        border-right: 1px solid var(--border-glass);
-        backdrop-filter: blur(14px) saturate(130%);
+        background: linear-gradient(180deg, rgba(4, 25, 24, 0.95), rgba(10, 52, 49, 0.9));
+        border-right: 1px solid var(--line);
+        backdrop-filter: blur(14px) saturate(140%);
         box-shadow: var(--shadow-deep);
         transform: translateX(-105%);
-        transition: transform .42s cubic-bezier(0.22, 1, 0.36, 1);
-        z-index: 1000; overflow-y: auto;
+        transition: transform .42s cubic-bezier(.2,.8,.2,1);
+        z-index: 1000;
+        overflow-y: auto;
       }
       .sidebar.open { transform: translateX(0); }
-      .sidebar-header { padding: 18px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.06); }
+      .sidebar-header {
+        padding: 18px;
+        font-weight: 800;
+        letter-spacing: .5px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(255,255,255,.06);
+      }
       .menu { padding: 12px; }
       .menu-button, .submenu-button {
-        width: 100%; text-align: left; cursor: pointer; color: var(--text);
-        padding: 12px 13px; margin-bottom: 8px; border-radius: 12px;
-        border: 1px solid rgba(255,255,255,.22); background: rgba(255,255,255,.08);
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        color: var(--text);
+        padding: 12px 13px;
+        margin-bottom: 8px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 6px 14px rgba(0,0,0,.2);
+        transition: transform .22s ease, background .22s ease, box-shadow .22s ease;
       }
-      .menu-button:hover, .submenu-button:hover { transform: translateX(6px); background: rgba(255,255,255,.18); }
-      .submenu { max-height: 0; overflow: hidden; padding-left: 10px; opacity: 0; transition: max-height .36s cubic-bezier(0.22, 1, 0.36, 1), opacity .3s ease; }
+      .menu-button:hover, .submenu-button:hover {
+        transform: translateX(5px);
+        background: linear-gradient(180deg, rgba(255,255,255,.2), rgba(255,255,255,.08));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 10px 18px rgba(0,0,0,.25);
+      }
+      .submenu {
+        max-height: 0;
+        overflow: hidden;
+        padding-left: 10px;
+        opacity: 0;
+        transition: max-height .35s ease, opacity .25s ease;
+      }
       .submenu.open { max-height: 420px; opacity: 1; }
       .submenu-button { font-size: 13px; }
 
-      .overlay { position: fixed; inset: 0; z-index: 999; background: rgba(2, 17, 17, 0.48); opacity: 0; pointer-events: none; transition: opacity .3s ease; }
+      .overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 999;
+        background: rgba(0, 0, 0, 0.45);
+        backdrop-filter: blur(4px);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .3s ease;
+      }
       .overlay.show { opacity: 1; pointer-events: auto; }
-      .content { width: 100%; transition: transform .42s cubic-bezier(0.22, 1, 0.36, 1), filter .4s ease; }
+      .content { width: 100%; transition: transform .42s cubic-bezier(.2,.8,.2,1), filter .35s ease; }
       .content.shift { transform: translateX(320px); }
 
       .topbar {
-        position: sticky; top: 0; z-index: 60; display: flex; align-items: center; gap: 12px;
-        padding: 14px 18px; background: linear-gradient(90deg, rgba(3,53,51,.82), rgba(8,87,88,.76));
-        border-bottom: 1px solid rgba(255,255,255,.28); backdrop-filter: blur(16px) saturate(150%);
-        box-shadow: 0 12px 34px rgba(0,0,0,.28);
+        position: sticky;
+        top: 0;
+        z-index: 60;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        background: linear-gradient(90deg, rgba(3,32,30,.8), rgba(8,66,62,.72));
+        border-bottom: 1px solid var(--line);
+        backdrop-filter: blur(16px) saturate(150%);
+        box-shadow: 0 10px 32px rgba(0,0,0,.32);
       }
       .burger {
-        width: 44px; height: 44px; border-radius: 12px; border: 1px solid rgba(255,255,255,.4);
-        background: rgba(255,255,255,.12); color: #fff; font-size: 24px; cursor: pointer;
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.05));
+        color: #fff;
+        font-size: 24px;
+        cursor: pointer;
       }
-      .top-titles h1 { margin: 0; font-size: 1.36rem; font-weight: 800; letter-spacing: .4px; text-shadow: 0 3px 12px rgba(0,0,0,.35); }
+      .top-titles h1 {
+        margin: 0;
+        font-size: 1.42rem;
+        font-weight: 800;
+        letter-spacing: .4px;
+        text-shadow: 0 4px 16px rgba(0,0,0,.4);
+      }
       .top-titles p { margin: 4px 0 0; color: #caeeee; font-size: .9rem; }
-      .subtitle-voga { font-family: 'Voga', 'VOGA', 'Didot', 'Bodoni MT', 'Times New Roman', serif; letter-spacing: 0.6px; }
-      .top-search { margin-left: auto; min-width: 280px; max-width: 420px; width: 36%; }
+      .subtitle-voga { font-family: 'Voga', 'VOGA', 'Didot', 'Bodoni MT', 'Times New Roman', serif; letter-spacing: .9px; }
+
+      .top-search { margin-left: auto; min-width: 280px; max-width: 430px; width: 38%; }
       .top-search input { width: 100%; padding-left: 38px; }
       .search-wrap { position: relative; }
       .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: .85; font-size: 14px; }
-      .search-preview { position: absolute; top: calc(100% + 8px); left: 0; right: 0; z-index: 120; max-height: 52vh; overflow: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,.24); background: rgba(5, 53, 50, .95); backdrop-filter: blur(12px); box-shadow: var(--shadow-deep); }
-      .search-item { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.12); cursor: pointer; }
+      .search-preview {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        right: 0;
+        z-index: 120;
+        max-height: 52vh;
+        overflow: auto;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: rgba(4, 30, 28, .95);
+        backdrop-filter: blur(14px);
+        box-shadow: var(--shadow-deep);
+      }
+      .search-item { padding: 11px 12px; border-bottom: 1px solid rgba(255,255,255,.12); cursor: pointer; }
       .search-item:hover { background: rgba(255,255,255,.08); }
       .search-item:last-child { border-bottom: 0; }
-      .search-item strong { display:block; }
+      .search-item strong { display: block; }
       .search-item small { color: #bfe2df; }
-      .search-detail { padding: 10px 12px; border-top: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.05); }
+      .search-detail { padding: 10px 12px; border-top: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06); }
 
-      .main { max-width: 1280px; margin: 20px auto; padding: 0 16px 24px; }
-
+      .main { max-width: 1320px; margin: 20px auto; padding: 0 16px 24px; }
       .hero {
-        border-radius: 22px;
-        padding: 58px 30px;
+        border-radius: 24px;
+        padding: 60px 30px;
         text-align: center;
-        background: linear-gradient(135deg, rgba(255,255,255,.20), rgba(255,255,255,.07));
-        border: 1px solid rgba(255,255,255,.30);
+        background: linear-gradient(135deg, rgba(255,255,255,.20), rgba(255,255,255,.06));
+        border: 1px solid rgba(255,255,255,.28);
         box-shadow: var(--shadow-deep);
         position: relative;
         overflow: hidden;
       }
-      .hero::after { content:''; position:absolute; inset:auto -20% -55% -20%; height:180px; background: radial-gradient(circle, rgba(46,215,200,.20), transparent 65%); }
-      .hero h2 {
-        margin: 0;
-        font-size: clamp(2rem, 6vw, 4.2rem);
-        letter-spacing: 0.5px;
+      .hero::before {
+        content: '';
+        position: absolute;
+        width: 480px;
+        height: 480px;
+        top: -260px;
+        right: -120px;
+        background: radial-gradient(circle, rgba(78,227,209,.35), transparent 60%);
       }
-      .hero p {
-        margin: 12px 0 0;
-        font-size: clamp(1rem, 2.2vw, 1.5rem);
-        color: #d7f4ef;
-      }
+      .hero h2 { margin: 0; font-size: clamp(2rem, 6vw, 4.2rem); letter-spacing: 0.4px; }
+      .hero p { margin: 12px 0 0; font-size: clamp(1rem, 2.2vw, 1.5rem); color: #d7f4ef; }
+
       .panel {
-        margin-bottom: 18px; border-radius: 20px; padding: 20px;
-        background: linear-gradient(135deg, rgba(255,255,255,.17), rgba(255,255,255,.07));
-        border: 1px solid rgba(255,255,255,.30); backdrop-filter: blur(16px) saturate(140%);
+        margin-bottom: 18px;
+        border-radius: 22px;
+        padding: 20px;
+        background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
+        border: 1px solid rgba(255,255,255,.30);
+        backdrop-filter: blur(16px) saturate(140%);
         box-shadow: var(--shadow-soft);
       }
-      .panel h2 { margin: 0 0 8px; }
+      .panel h2 { margin: 0 0 8px; font-size: 1.25rem; font-weight: 800; letter-spacing: .2px; }
       .hint { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
 
       .service-layout { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px; }
       .service-card {
         grid-column: span 12;
-        background: linear-gradient(135deg, rgba(255,255,255,.13), rgba(255,255,255,.05));
+        background: linear-gradient(135deg, rgba(255,255,255,.13), rgba(255,255,255,.04));
         border: 1px solid rgba(255,255,255,.24);
         border-radius: 16px;
         padding: 14px;
-        box-shadow: 0 10px 20px rgba(0,0,0,.18);
-        transition: transform .2s ease, box-shadow .2s ease;
+        box-shadow: 0 10px 20px rgba(0,0,0,.2);
+        transition: transform .22s ease, box-shadow .22s ease;
       }
-      .service-card:hover { transform: translateY(-2px); box-shadow: 0 16px 30px rgba(0,0,0,.24); }
-      .service-card h3 { margin: 0 0 12px; font-size: 15px; color: #e8fffb; font-weight: 800; letter-spacing: .25px; display:flex; align-items:center; gap:8px; }
-      .service-card h3::before { content:'◈'; color: var(--accent); font-size: 12px; }
+      .service-card:hover { transform: translateY(-2px); box-shadow: 0 16px 32px rgba(0,0,0,.26); }
+      .service-card h3 {
+        margin: 0 0 12px;
+        font-size: 15px;
+        color: #e8fffb;
+        font-weight: 800;
+        letter-spacing: .25px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .service-card h3::before { content: '◆'; color: var(--accent); font-size: 12px; }
       .card-grid { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 10px; }
 
       .field { display: flex; flex-direction: column; gap: 6px; }
@@ -140,13 +221,21 @@
       label { font-size: 12.8px; font-weight: 650; color: #d8f1f1; }
 
       input, select, button, textarea {
-        border-radius: 12px; border: 1px solid rgba(255,255,255,.30); padding: 10px 12px; font-size: 14px;
-        color: #efffff; background: rgba(255,255,255,.10); outline: none;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,.30);
+        padding: 10px 12px;
+        font-size: 14px;
+        color: #efffff;
+        background: rgba(255,255,255,.10);
+        outline: none;
         box-shadow: inset 0 1px 0 rgba(255,255,255,.16);
       }
       textarea { min-height: 90px; resize: vertical; }
       input::placeholder, textarea::placeholder { color: #c5dede; }
-      input:focus, select:focus, textarea:focus { border-color: var(--accent-soft); box-shadow: 0 0 0 3px rgba(123,233,223,.22), 0 8px 18px rgba(0,0,0,.18); }
+      input:focus, select:focus, textarea:focus {
+        border-color: var(--accent-soft);
+        box-shadow: 0 0 0 3px rgba(123,233,223,.22), 0 8px 18px rgba(0,0,0,.18);
+      }
       option { color: #103233; background: #dff3f3; }
 
       .radio-row, .switch-row, .state-row { display: flex; gap: 12px; flex-wrap: wrap; }
@@ -171,6 +260,7 @@
         transition: transform .2s ease, filter .2s ease;
       }
       .save-btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
+
       .compact-grid { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 12px; }
 
       .table-wrap { overflow-x: auto; }
@@ -188,14 +278,22 @@
 
       .history-grid { display: grid; grid-template-columns: repeat(3, minmax(220px, 1fr)); gap: 12px; }
       .widget {
-        background: linear-gradient(135deg, rgba(255,255,255,.15), rgba(255,255,255,.06));
+        background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
         border: 1px solid rgba(255,255,255,.28);
         border-radius: 16px;
         padding: 13px;
         box-shadow: var(--shadow-soft);
         position: relative;
       }
-      .widget::after { content:''; position:absolute; inset:0 auto 0 0; width:3px; border-radius: 16px 0 0 16px; background: linear-gradient(var(--accent), transparent 70%); opacity:.9; }
+      .widget::after {
+        content: '';
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 3px;
+        border-radius: 16px 0 0 16px;
+        background: linear-gradient(var(--accent), transparent 70%);
+        opacity: .9;
+      }
       .widget h4 { margin: 0 0 8px; font-size: 13px; color: #d7f4ef; }
       .kv { font-size: 12px; color: #bfe2df; margin: 4px 0; }
       .kv b { color: #ffffff; font-weight: 700; }
@@ -282,6 +380,45 @@
         observacionesComentarios: '',
       };
 
+      const obraInicial = {
+        nombreServicio: '',
+        tipoServicioBrindar: 'Portería Virtual',
+        tipoCliente: '',
+        razonSocial: '',
+        rut: '',
+        mailFacturacion: '',
+        departamento: '',
+        direccionServicio: '',
+
+        representanteComercial: 'Gastón Silva',
+        duracionContratoMeses: '',
+        tipoServicioContrato: 'Compra',
+        importeServicioSinIvaDetalle: '',
+        importeMensualPesos: '',
+        importeSVideoUsdSinIva: '',
+        costoInstalacionUsdSinIva: '',
+        porQueNoSeCobraServicio: '',
+
+        proyectoSvideo: 'No corresponde',
+        presupuestoProveedorSvideo: '',
+        sensoresAlarma: '',
+        tienePerifoneo: 'No',
+        internetTipoProveedor: '',
+        llevaCartelObra: 'No',
+
+        referenteInstalacion: '',
+        telefonoReferenteInstalacion: '',
+        bottiSeContactaCon: '',
+        horarioCoberturaExacto: '',
+        fechaAltaNegociada: '',
+        plazoInstalacionDiasFecha: '',
+        cantidadDiasInstalacion: '',
+        llavesServicio: '',
+        observacionesComentarios: '',
+
+        fechaIngresoDatos: '',
+      };
+
       function statusClass(value) {
         if (!value) return 'chip status-default';
         const v = value.toLowerCase();
@@ -311,6 +448,7 @@
         const [hora, setHora] = useState('');
         const [lugar, setLugar] = useState('');
         const [servicioForm, setServicioForm] = useState(servicioInicial);
+        const [obraForm, setObraForm] = useState(obraInicial);
 
         const [rows, setRows] = useState([]);
         const [saving, setSaving] = useState(false);
@@ -320,6 +458,7 @@
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
+          if (tipoAccion === 'Obra' && selectedForm === 'servicio') return 'obra';
           if (tipoAccion === 'Baja') return 'baja';
           if (tipoAccion === 'Charla') return 'charla';
           if (tipoAccion === 'Movimiento de Obra') return 'movimiento';
@@ -347,24 +486,25 @@
             `Tipo Acción: ${r.tipoAccion || '-'}`,
             `Nombre Servicio: ${r.nombreServicio || '-'}`,
             `Tipo Servicio: ${r.tipoServicioBrindar || '-'}`,
+            `Tipo Cliente: ${r.tipoCliente || '-'}`,
+            `Departamento: ${r.departamento || '-'}`,
             `Dirección: ${r.direccionServicio || '-'}`,
-            `Unidades: ${r.cantidadUnidades || '-'}`,
             `Representante: ${r.representanteComercial || '-'}`,
             `Razón Social: ${r.razonSocial || '-'}`,
             `RUT: ${r.rut || '-'}`,
             `Mail Facturación: ${r.mailFacturacion || '-'}`,
-            `Condición Equipamiento: ${r.condicionEquipamiento || '-'} ${r.condicionEquipamientoOtro ? '(' + r.condicionEquipamientoOtro + ')' : ''}`,
-            `Importe Mensual ($): ${r.importeMensualServicioSinIva || '-'}`,
+            `Condición/Tipo Servicio: ${r.tipoServicioContrato || r.condicionEquipamiento || '-'}`,
+            `Importe Servicio sin IVA: ${r.importeServicioSinIvaDetalle || r.importeMensualServicioSinIva || '-'}`,
+            `Importe Mensual ($): ${r.importeMensualPesos || r.importeMensualServicioSinIva || '-'}`,
+            `Importe S-Video (US$): ${r.importeSVideoUsdSinIva || '-'}`,
             `Costo Instalación (US$): ${r.costoInstalacionUsdSinIva || '-'}`,
-            `Presupuesto Proveedor: ${r.presupuestoProveedor || '-'}`,
-            `Control Acceso: ${r.condicionControlAcceso || '-'}`,
-            `Tags por Aptos: ${r.tagsPorAptos || '-'}`,
-            `App Akuvox: ${r.appAkuvox || '-'}`,
+            `Presupuesto Proveedor: ${r.presupuestoProveedorSvideo || r.presupuestoProveedor || '-'}`,
+            `Internet: ${r.internetTipoProveedor || '-'}`,
             `Llaves Servicio: ${r.llavesServicio || '-'}`,
-            `Jornales: ${r.cantidadJornalesEstimados || '-'}`,
+            `Plazo instalación: ${r.plazoInstalacionDiasFecha || '-'} / ${r.cantidadDiasInstalacion || '-'} días`,
             `Fecha ingreso: ${r.fechaIngresoDatos || r.fechaCarga || r.fechaCharla || '-'}`,
             `Observaciones: ${r.observacionesComentarios || '-'}`,
-            `Excepciones: ${r.excepcionesAcordadas || '-'}`,
+            `Fecha alta negociada: ${r.fechaAltaNegociada || '-'}`,
           ];
           return lines.join('\n');
         }
@@ -380,11 +520,15 @@
         function resetFields() {
           setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('ONGOING');
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
-          setServicioForm(servicioInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
+          setServicioForm(servicioInicial); setObraForm(obraInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
         }
 
         function setServicioField(key, value) {
           setServicioForm((prev) => ({ ...prev, [key]: value }));
+        }
+
+        function setObraField(key, value) {
+          setObraForm((prev) => ({ ...prev, [key]: value }));
         }
 
         function selectAction(action) {
@@ -396,7 +540,7 @@
           } else {
             setClienteId('');
           }
-          setSelectedForm(action === 'Nuevo Servicio' ? 'servicio' : 'other');
+          setSelectedForm(['Nuevo Servicio', 'Obra'].includes(action) ? 'servicio' : 'other');
           setMenuOpen(false);
         }
 
@@ -411,6 +555,12 @@
               return alert('Completá al menos: Nombre del servicio, Tipo de servicio y Dirección.');
             }
             Object.assign(doc, { ...servicioForm, formulario: 'nuevo-servicio-optimizado' });
+          }
+          if (grupo === 'obra') {
+            if (!obraForm.nombreServicio || !obraForm.tipoCliente || !obraForm.direccionServicio) {
+              return alert('Completá al menos: Nombre del servicio, Tipo de cliente y Dirección del servicio.');
+            }
+            Object.assign(doc, { ...obraForm, formulario: 'servicio-obra' });
           }
           if (grupo === 'base') {
             if (!cliente || !fechaCarga) return alert('Completá Cliente y Fecha Carga.');
@@ -542,8 +692,8 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                   </section>
                 ) : (
                 <section className="panel">
-                  <h2>Formulario Operativo · Diseño Premium</h2>
-                  <div className="hint">Propuesta de formulario optimizado en 5 bloques visuales + documentación y cierre.</div>
+                  <h2>Formulario Operativo · Gestión de Acciones</h2>
+                  <div className="hint">Nuevo Servicio conserva su formulario actual y Obra usa el formulario nuevo solicitado.</div>
 
                   <form onSubmit={handleSubmit}>
                     {grupo === 'servicio' ? (
@@ -581,25 +731,11 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>Bloque 3: Finanzas y Condiciones</h3>
                           <div className="card-grid">
-                            <div className="field span-3">
-                              <label>Condiciones Comerciales del Equipamiento</label>
-                              <div className="radio-row">
-                                {['Compra', 'Arrendamiento', 'Otros (Especificar)'].map((opt) => (
-                                  <label key={opt} className={`radio-pill ${servicioForm.condicionEquipamiento === opt ? 'active' : ''}`}>
-                                    <input type="radio" name="condicion" checked={servicioForm.condicionEquipamiento === opt} onChange={() => setServicioField('condicionEquipamiento', opt)} />{opt}
-                                  </label>
-                                ))}
-                              </div>
-                            </div>
-                            {servicioForm.condicionEquipamiento === 'Otros (Especificar)' && (
-                              <div className="field span-3"><label>Detalle de condición</label><input value={servicioForm.condicionEquipamientoOtro} onChange={(e) => setServicioField('condicionEquipamientoOtro', e.target.value)} type="text" /></div>
-                            )}
-                            <div className="field"><label>Importe Mensual ($)</label><input value={servicioForm.importeMensualServicioSinIva} onChange={(e) => setServicioField('importeMensualServicioSinIva', e.target.value)} type="number" step="0.01" /></div>
-                            <div className="field"><label>Costo Instalación (US$)</label><input value={servicioForm.costoInstalacionUsdSinIva} onChange={(e) => setServicioField('costoInstalacionUsdSinIva', e.target.value)} type="number" step="0.01" /></div>
-                            <div className="field"><label>Presupuesto Proveedor</label><input value={servicioForm.presupuestoProveedor} onChange={(e) => setServicioField('presupuestoProveedor', e.target.value)} type="text" /></div>
-                            {(Number(servicioForm.importeMensualServicioSinIva || 0) === 0) && (
-                              <div className="field span-3"><label>¿Por qué NO se cobra?</label><textarea value={servicioForm.porQueNoSeCobraServicio} onChange={(e) => setServicioField('porQueNoSeCobraServicio', e.target.value)} /></div>
-                            )}
+                            <div className="field"><label>Condiciones comerciales del equipamiento</label><select value={servicioForm.condicionEquipamiento} onChange={(e) => setServicioField('condicionEquipamiento', e.target.value)}><option>Compra</option><option>Arrendamiento</option><option>Otros</option></select></div>
+                            {servicioForm.condicionEquipamiento === 'Otros' && <div className="field"><label>Detalle Otros</label><input value={servicioForm.condicionEquipamientoOtro} onChange={(e) => setServicioField('condicionEquipamientoOtro', e.target.value)} type="text" /></div>}
+                            <div className="field"><label>Importe Mensual ($)</label><input value={servicioForm.importeMensualServicioSinIva} onChange={(e) => setServicioField('importeMensualServicioSinIva', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Costo Instalación (US$)</label><input value={servicioForm.costoInstalacionUsdSinIva} onChange={(e) => setServicioField('costoInstalacionUsdSinIva', e.target.value)} type="number" min="0" /></div>
+                            <div className="field span-3"><label>¿Por qué NO se cobra?</label><textarea value={servicioForm.porQueNoSeCobraServicio} onChange={(e) => setServicioField('porQueNoSeCobraServicio', e.target.value)} /></div>
                           </div>
                         </div>
 
@@ -609,35 +745,15 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                             <div className="field"><label>Condiciones Control de Acceso</label><select value={servicioForm.condicionControlAcceso} onChange={(e) => setServicioField('condicionControlAcceso', e.target.value)}><option>Control de acceso nuestro</option><option>Edificio mantiene su control</option><option>Mixto (detallar)</option><option>No corresponde</option></select></div>
                             <div className="field"><label>Tags por Aptos</label><select value={servicioForm.tagsPorAptos} onChange={(e) => setServicioField('tagsPorAptos', e.target.value)}><option>Sí (3 por unidad)</option><option>No</option></select></div>
                             <div className="field"><label>¿App de Akuvox?</label><select value={servicioForm.appAkuvox} onChange={(e) => setServicioField('appAkuvox', e.target.value)}><option>Sí (con apertura)</option><option>Sí (sin apertura)</option><option>No usará app</option></select></div>
-                            <div className="field span-2">
-                              <label>Llaves del Servicio</label>
-                              <div className="state-row">
-                                {['Entregadas', 'Pendientes', 'No corresponde'].map((opt) => (
-                                  <label key={opt} className={`state-pill ${servicioForm.llavesServicio === opt ? 'active' : ''}`}>
-                                    <input type="radio" name="llaves" checked={servicioForm.llavesServicio === opt} onChange={() => setServicioField('llavesServicio', opt)} />{opt}
-                                  </label>
-                                ))}
-                              </div>
-                            </div>
+                            <div className="field"><label>Llaves del Servicio</label><select value={servicioForm.llavesServicio} onChange={(e) => setServicioField('llavesServicio', e.target.value)}><option>Entregadas</option><option>Pendientes</option><option>No corresponde</option></select></div>
                           </div>
                         </div>
 
                         <div className="service-card">
                           <h3>Bloque 5: Tiempos e Instalación</h3>
                           <div className="card-grid">
-                            <div className="field">
-                              <label>¿Fecha específica de inicio?</label>
-                              <div className="switch-row">
-                                {['Sí', 'No'].map((opt) => (
-                                  <label key={opt} className={`radio-pill ${(servicioForm.fechaEspecificaInicioActiva ? 'Sí' : 'No') === opt ? 'active' : ''}`}>
-                                    <input type="radio" name="switchInicio" checked={(servicioForm.fechaEspecificaInicioActiva ? 'Sí' : 'No') === opt} onChange={() => setServicioField('fechaEspecificaInicioActiva', opt === 'Sí')} />{opt}
-                                  </label>
-                                ))}
-                              </div>
-                            </div>
-                            {servicioForm.fechaEspecificaInicioActiva && (
-                              <div className="field"><label>Calendario</label><input value={servicioForm.fechaEspecificaInicio} onChange={(e) => setServicioField('fechaEspecificaInicio', e.target.value)} type="date" /></div>
-                            )}
+                            <div className="field"><label>¿Fecha específica de inicio?</label><select value={servicioForm.fechaEspecificaInicioActiva ? 'si' : 'no'} onChange={(e) => setServicioField('fechaEspecificaInicioActiva', e.target.value === 'si')}><option value="no">No</option><option value="si">Sí</option></select></div>
+                            {servicioForm.fechaEspecificaInicioActiva && (<div className="field"><label>Fecha específica</label><input value={servicioForm.fechaEspecificaInicio} onChange={(e) => setServicioField('fechaEspecificaInicio', e.target.value)} type="date" /></div>)}
                             <div className="field"><label>Jornales estimados</label><input value={servicioForm.cantidadJornalesEstimados} onChange={(e) => setServicioField('cantidadJornalesEstimados', e.target.value)} type="number" min="0" /></div>
                             <div className="field"><label>Referente para la instalación</label><input value={servicioForm.referenteInstalacion} onChange={(e) => setServicioField('referenteInstalacion', e.target.value)} type="text" /></div>
                             <div className="field"><label>Teléfono del Referente</label><input value={servicioForm.telefonoReferenteInstalacion} onChange={(e) => setServicioField('telefonoReferenteInstalacion', e.target.value)} type="text" /></div>
@@ -651,6 +767,82 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                             <div className="field span-2"><label>Adjuntar Proyecto del Servicio</label><input type="file" onChange={(e) => setServicioField('proyectoServicio', e.target.files?.[0]?.name || '')} /></div>
                             <div className="field span-3"><label>¿Hay excepciones acordadas con el cliente?</label><textarea value={servicioForm.excepcionesAcordadas} onChange={(e) => setServicioField('excepcionesAcordadas', e.target.value)} /></div>
                             <div className="field span-3"><label>Observaciones / Excepciones</label><textarea value={servicioForm.observacionesComentarios} onChange={(e) => setServicioField('observacionesComentarios', e.target.value)} /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                      </div>
+                    ) : grupo === 'obra' ? (
+                      <div className="service-layout">
+                        <div className="service-card">
+                          <h3>Obra</h3>
+                          <div className="card-grid">
+                            <div className="field">
+                              <label>Cliente ID (auto 4 dígitos)</label>
+                              <input value={clienteId} readOnly type="text" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>Bloque 1: Datos del Cliente y Facturación</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Nombre del Servicio</label><input value={obraForm.nombreServicio} onChange={(e) => setObraField('nombreServicio', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Tipo de servicio a brindar</label><select value={obraForm.tipoServicioBrindar} onChange={(e) => setObraField('tipoServicioBrindar', e.target.value)}><option>Portería Virtual</option><option>Monitoreo</option><option>Control de Acceso</option></select></div>
+                            <div className="field"><label>Tipo de cliente</label><input value={obraForm.tipoCliente} onChange={(e) => setObraField('tipoCliente', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Razón Social (Facturación)</label><input value={obraForm.razonSocial} onChange={(e) => setObraField('razonSocial', e.target.value)} type="text" /></div>
+                            <div className="field"><label>RUT para facturación</label><input value={obraForm.rut} onChange={(e) => setObraField('rut', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Mail para facturación</label><input value={obraForm.mailFacturacion} onChange={(e) => setObraField('mailFacturacion', e.target.value)} type="email" /></div>
+                            <div className="field"><label>Departamento</label><input value={obraForm.departamento} onChange={(e) => setObraField('departamento', e.target.value)} type="text" /></div>
+                            <div className="field span-2"><label>Dirección del servicio</label><input value={obraForm.direccionServicio} onChange={(e) => setObraField('direccionServicio', e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>Bloque 2: Condiciones Comerciales y Contrato</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Representante comercial</label><select value={obraForm.representanteComercial} onChange={(e) => setObraField('representanteComercial', e.target.value)}><option>Gastón Silva</option><option>Gonzalo Claudio</option><option>Francisco Bartellone</option><option>Nicolás Leguizamón</option></select></div>
+                            <div className="field"><label>Duración del contrato (Meses)</label><input value={obraForm.duracionContratoMeses} onChange={(e) => setObraField('duracionContratoMeses', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Tipo de servicio (Compra/Arrendamiento)</label><select value={obraForm.tipoServicioContrato} onChange={(e) => setObraField('tipoServicioContrato', e.target.value)}><option>Compra</option><option>Arrendamiento de equipamiento</option></select></div>
+                            <div className="field span-2"><label>Importe del servicio sin IVA (aclarar moneda)</label><input value={obraForm.importeServicioSinIvaDetalle} onChange={(e) => setObraField('importeServicioSinIvaDetalle', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Importe mensual en pesos</label><input value={obraForm.importeMensualPesos} onChange={(e) => setObraField('importeMensualPesos', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Importe de S-Video en u$s sin IVA</label><input value={obraForm.importeSVideoUsdSinIva} onChange={(e) => setObraField('importeSVideoUsdSinIva', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Costo instalación en dólares sin IVA</label><input value={obraForm.costoInstalacionUsdSinIva} onChange={(e) => setObraField('costoInstalacionUsdSinIva', e.target.value)} type="number" min="0" /></div>
+                            <div className="field span-3"><label>Por qué NO se cobra el servicio (y quién autoriza)</label><textarea value={obraForm.porQueNoSeCobraServicio} onChange={(e) => setObraField('porQueNoSeCobraServicio', e.target.value)} /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>Bloque 3: Información Técnica y Proveedores</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Proyecto S-Video</label><select value={obraForm.proyectoSvideo} onChange={(e) => setObraField('proyectoSvideo', e.target.value)}><option>No corresponde</option><option>Sí</option><option>No</option></select></div>
+                            <div className="field span-2"><label>Presupuesto Proveedor - S-Video</label><input value={obraForm.presupuestoProveedorSvideo} onChange={(e) => setObraField('presupuestoProveedorSvideo', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Sensores de alarma</label><input value={obraForm.sensoresAlarma} onChange={(e) => setObraField('sensoresAlarma', e.target.value)} type="text" /></div>
+                            <div className="field"><label>¿Tiene perifoneo?</label><select value={obraForm.tienePerifoneo} onChange={(e) => setObraField('tienePerifoneo', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                            <div className="field"><label>Internet (Tipo/Proveedor)</label><input value={obraForm.internetTipoProveedor} onChange={(e) => setObraField('internetTipoProveedor', e.target.value)} type="text" /></div>
+                            <div className="field"><label>¿Lleva cartel de Obra?</label><select value={obraForm.llevaCartelObra} onChange={(e) => setObraField('llevaCartelObra', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>Bloque 4: Coordinación de Instalación y Contactos</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Referente para instalación</label><input value={obraForm.referenteInstalacion} onChange={(e) => setObraField('referenteInstalacion', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Teléfono referente instalación</label><input value={obraForm.telefonoReferenteInstalacion} onChange={(e) => setObraField('telefonoReferenteInstalacion', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Botti se contacta con</label><input value={obraForm.bottiSeContactaCon} onChange={(e) => setObraField('bottiSeContactaCon', e.target.value)} type="text" /></div>
+                            <div className="field span-2"><label>Horario exacto de cobertura</label><input value={obraForm.horarioCoberturaExacto} onChange={(e) => setObraField('horarioCoberturaExacto', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Fecha de alta negociada</label><input value={obraForm.fechaAltaNegociada} onChange={(e) => setObraField('fechaAltaNegociada', e.target.value)} type="date" /></div>
+                            <div className="field"><label>Plazo de instalación (fecha en días)</label><input value={obraForm.plazoInstalacionDiasFecha} onChange={(e) => setObraField('plazoInstalacionDiasFecha', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Cantidad de días de instalación</label><input value={obraForm.cantidadDiasInstalacion} onChange={(e) => setObraField('cantidadDiasInstalacion', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Llave del servicio</label><input value={obraForm.llavesServicio} onChange={(e) => setObraField('llavesServicio', e.target.value)} type="text" /></div>
+                            <div className="field span-3"><label>Observaciones relevantes</label><textarea value={obraForm.observacionesComentarios} onChange={(e) => setObraField('observacionesComentarios', e.target.value)} /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>Bloque 5: Control Interno (Log)</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Fecha de ingreso de datos</label><input value={obraForm.fechaIngresoDatos} onChange={(e) => setObraField('fechaIngresoDatos', e.target.value)} type="date" /></div>
                           </div>
                         </div>
 
