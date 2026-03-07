@@ -303,6 +303,132 @@
       .widget.full { grid-column: 1 / -1; }
 
 
+
+      /* Rebrand visual: Light SaaS (Linear/Stripe inspired) */
+      :root {
+        --base: #f5f7fb;
+        --base-900: #eef2f8;
+        --base-700: #e8edf7;
+        --text: #0f172a;
+        --muted: #64748b;
+        --accent: #2563eb;
+        --accent-soft: #93c5fd;
+        --line: rgba(15, 23, 42, 0.08);
+        --panel: #ffffff;
+        --panel-2: #f8fafc;
+        --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.06);
+        --shadow-deep: 0 24px 50px rgba(15, 23, 42, 0.08);
+        --ok: #16a34a;
+        --pause: #ef4444;
+        --chip: #64748b;
+      }
+
+      body {
+        color: var(--text);
+        background:
+          radial-gradient(920px 560px at -10% -20%, rgba(37, 99, 235, .11), transparent 58%),
+          radial-gradient(760px 480px at 115% -10%, rgba(59, 130, 246, .10), transparent 60%),
+          linear-gradient(180deg, #f8fbff 0%, #f4f7fc 55%, #eef3fa 100%);
+      }
+
+      .sidebar {
+        background: linear-gradient(180deg, #0f172a, #111d36 65%, #14213e);
+        border-right: 1px solid rgba(148, 163, 184, .24);
+        box-shadow: 0 22px 46px rgba(2, 6, 23, .35);
+      }
+      .sidebar-header { background: rgba(255,255,255,.06); color: #e2e8f0; }
+      .menu-button, .submenu-button {
+        color: #dbeafe;
+        background: rgba(255,255,255,.04);
+        border: 1px solid rgba(255,255,255,.12);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+      }
+      .menu-button:hover, .submenu-button:hover {
+        background: rgba(255,255,255,.12);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 12px 24px rgba(2, 6, 23, .2);
+      }
+
+      .topbar {
+        background: rgba(255, 255, 255, .9);
+        border-bottom: 1px solid rgba(15, 23, 42, .08);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 6px 20px rgba(15, 23, 42, .06);
+      }
+      .burger {
+        color: #1e293b;
+        background: #ffffff;
+        border-color: rgba(15, 23, 42, .14);
+      }
+      .top-titles p { color: #475569; }
+
+      .search-preview {
+        background: #ffffff;
+        border: 1px solid rgba(15, 23, 42, .1);
+        box-shadow: var(--shadow-soft);
+      }
+      .search-item { border-bottom: 1px solid rgba(15, 23, 42, .06); }
+      .search-item:hover { background: #f8fafc; }
+      .search-item small { color: #475569; }
+      .search-detail { background: #f8fafc; border-top: 1px solid rgba(15,23,42,.08); }
+
+      .hero,
+      .panel,
+      .service-card,
+      .widget {
+        background: #ffffff;
+        border: 1px solid rgba(15, 23, 42, .08);
+        box-shadow: var(--shadow-soft);
+      }
+      .hero { border-radius: 16px; }
+      .hero h2 { color: #0f172a; }
+      .hero p { color: #475569; }
+      .panel { border-radius: 16px; padding: 24px; }
+      .service-card { border-radius: 14px; padding: 18px; }
+      .service-layout { gap: 16px; }
+      .card-grid, .compact-grid, .history-grid { gap: 14px; }
+      .panel h2, .service-card h3 { color: #0f172a; }
+      .service-card h3::before { color: #2563eb; }
+      .hint { color: #64748b; }
+
+      input, select, button, textarea {
+        color: #0f172a;
+        background: #f8fafc;
+        border: 1px solid rgba(15, 23, 42, .12);
+        box-shadow: none;
+      }
+      input::placeholder, textarea::placeholder { color: #94a3b8; }
+      input:focus, select:focus, textarea:focus {
+        border-color: rgba(37, 99, 235, .45);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
+      }
+      option { color: #0f172a; background: #ffffff; }
+      .save-btn {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        color: #ffffff;
+        border-color: transparent;
+      }
+
+      .chip {
+        border: 1px solid transparent;
+        font-weight: 700;
+      }
+      .status-ongoing { background: rgba(22, 163, 74, .12); color: #15803d; border-color: rgba(22,163,74,.2); }
+      .status-pausa { background: rgba(239, 68, 68, .12); color: #dc2626; border-color: rgba(239,68,68,.2); }
+      .status-default { background: rgba(71, 85, 105, .12); color: #475569; border-color: rgba(71,85,105,.2); }
+
+      .table-wrap table { background: #ffffff; border: 1px solid rgba(15,23,42,.08); }
+      th { background: #f8fafc; }
+      th, td { border-bottom: 1px solid rgba(15, 23, 42, .08); color: #0f172a; }
+      .detail-box, .kv { color: #334155; }
+      .kv b { color: #0f172a; }
+
+      .bento-grid .service-card:first-child { grid-column: span 12; }
+      .facturacion-module .service-card:nth-child(2) { grid-column: span 7; }
+      .facturacion-module .service-card:nth-child(3) { grid-column: span 5; }
+      .facturacion-module .service-card:nth-child(4),
+      .facturacion-module .service-card:nth-child(5) { grid-column: span 6; }
+      .facturacion-module .service-card:last-child { grid-column: span 12; }
+
       @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after {
           animation: none !important;
@@ -352,6 +478,7 @@
           grid-template-columns: minmax(0, 1fr) !important;
           gap: 9px;
         }
+        .facturacion-module .service-card { grid-column: 1 / -1 !important; }
         .span-2,
         .span-3,
         .full {
@@ -915,7 +1042,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
                       </div>
                     ) : grupo === 'novacion' ? (
-                      <div className="service-layout">
+                      <div className="service-layout bento-grid facturacion-module">
                         <div className="service-card">
                           <h3>Facturación · Novaciones</h3>
                           <div className="card-grid">
