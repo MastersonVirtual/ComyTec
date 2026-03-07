@@ -450,6 +450,15 @@
         observaciones: '',
       };
 
+      const charlaInicial = {
+        nombreServicio: '',
+        fecha: '',
+        horario: '',
+        lugarReunion: '',
+        direccion: '',
+        contactoReferencia: '',
+      };
+
       function statusClass(value) {
         if (!value) return 'chip status-default';
         const v = value.toLowerCase();
@@ -484,6 +493,7 @@
         const [agregadoForm, setAgregadoForm] = useState(agregadoInicial);
         const [movimientoForm, setMovimientoForm] = useState(movimientoInicial);
         const [bajaForm, setBajaForm] = useState(bajaInicial);
+        const [charlaForm, setCharlaForm] = useState(charlaInicial);
 
         const [rows, setRows] = useState([]);
         const [saving, setSaving] = useState(false);
@@ -497,7 +507,7 @@
           if (tipoAccion === 'Novación') return 'novacion';
           if (tipoAccion === 'Agregado') return 'agregado';
           if (tipoAccion === 'Baja') return 'baja-detalle';
-          if (tipoAccion === 'Charla') return 'charla';
+          if (tipoAccion === 'Charla') return 'charla-detalle';
           if (tipoAccion === 'Movimiento de Obra') return 'movimiento-detalle';
           return 'base';
         }, [tipoAccion, selectedForm]);
@@ -559,7 +569,7 @@
         function resetFields() {
           setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('ONGOING');
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
-          setServicioForm(servicioInicial); setObraForm(obraInicial); setNovacionForm(novacionInicial); setAgregadoForm(agregadoInicial); setMovimientoForm(movimientoInicial); setBajaForm(bajaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
+          setServicioForm(servicioInicial); setObraForm(obraInicial); setNovacionForm(novacionInicial); setAgregadoForm(agregadoInicial); setMovimientoForm(movimientoInicial); setBajaForm(bajaInicial); setCharlaForm(charlaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
         }
 
         function setServicioField(key, value) {
@@ -584,6 +594,10 @@
 
         function setBajaField(key, value) {
           setBajaForm((prev) => ({ ...prev, [key]: value }));
+        }
+
+        function setCharlaField(key, value) {
+          setCharlaForm((prev) => ({ ...prev, [key]: value }));
         }
 
         function selectAction(action) {
@@ -645,9 +659,11 @@
             }
             Object.assign(doc, { ...bajaForm, formulario: 'baja-servicio' });
           }
-          if (grupo === 'charla') {
-            if (!fechaCharla || !hora || !lugar) return alert('Completá Fecha Charla, Hora y Lugar.');
-            Object.assign(doc, { fechaCharla, hora, lugar });
+          if (grupo === 'charla-detalle') {
+            if (!charlaForm.nombreServicio || !charlaForm.fecha || !charlaForm.horario || !charlaForm.lugarReunion) {
+              return alert('Completá al menos: Nombre de servicio, Fecha, Horario y Lugar de reunión.');
+            }
+            Object.assign(doc, { ...charlaForm, formulario: 'charla-informativa' });
           }
 
           try {
@@ -1008,6 +1024,42 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
 
                         <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
                       </div>
+                    ) : grupo === 'charla-detalle' ? (
+                      <div className="service-layout">
+                        <div className="service-card">
+                          <h3>Charla Informativa</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio/proyecto" /></div>
+                            <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>1. Identificación del Evento</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Nombre de servicio</label><input value={charlaForm.nombreServicio} onChange={(e) => setCharlaField('nombreServicio', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Fecha</label><input value={charlaForm.fecha} onChange={(e) => setCharlaField('fecha', e.target.value)} type="date" /></div>
+                            <div className="field"><label>Horario</label><input value={charlaForm.horario} onChange={(e) => setCharlaField('horario', e.target.value)} type="time" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>2. Localización y Logística</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Lugar de Reunión</label><input value={charlaForm.lugarReunion} onChange={(e) => setCharlaField('lugarReunion', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Dirección</label><input value={charlaForm.direccion} onChange={(e) => setCharlaField('direccion', e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>3. Contacto en el Sitio</h3>
+                          <div className="card-grid">
+                            <div className="field span-3"><label>Contacto de Referencia para la Charla</label><input value={charlaForm.contactoReferencia} onChange={(e) => setCharlaField('contactoReferencia', e.target.value)} type="text" placeholder="Nombre y teléfono" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                      </div>
 ) : (
                       <div className="compact-grid">
                         <div className="field"><label>Tipo de Acción</label><select value={tipoAccion} onChange={(e) => { setTipoAccion(e.target.value); resetFields(); }}>{ACCIONES.map((a) => <option key={a} value={a}>{a}</option>)}</select></div>
@@ -1017,7 +1069,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         {grupo === 'base' && <><div className="field"><label>Cliente</label><input value={cliente} onChange={(e) => setCliente(e.target.value)} /></div><div className="field"><label>Fecha Carga</label><input value={fechaCarga} onChange={(e) => setFechaCarga(e.target.value)} type="date" /></div><div className="field"><label>Tiempo Instalación</label><input value={tiempoInstalacion} onChange={(e) => setTiempoInstalacion(e.target.value)} /></div><div className="field"><label>Fecha Alta</label><input value={fechaAlta} onChange={(e) => setFechaAlta(e.target.value)} type="date" /></div><div className="field"><label>Cobro</label><input value={cobro} onChange={(e) => setCobro(e.target.value)} /></div></>}
 
 
-                        {grupo === 'charla' && <><div className="field"><label>Fecha Charla</label><input value={fechaCharla} onChange={(e) => setFechaCharla(e.target.value)} type="date" /></div><div className="field"><label>Hora</label><input value={hora} onChange={(e) => setHora(e.target.value)} type="time" /></div><div className="field"><label>Lugar</label><input value={lugar} onChange={(e) => setLugar(e.target.value)} /></div></>}
+
                         <div className="field full"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
                       </div>
                     )}
