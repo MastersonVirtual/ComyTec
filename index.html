@@ -431,6 +431,35 @@
         fechaIngresoDatos: '',
       };
 
+      const novacionInicial = {
+        nombreServicio: '',
+        fechaIngresoDatos: '',
+        representanteComercial: 'Francisco Bartellone',
+        motivoRepresentante: '',
+        cambiaMensualidad: 'No',
+        duracionNuevoContratoMeses: '',
+
+        cambiosEquipos: '',
+        detalleCambioImpacto: '',
+        incluyeAppPorteriaVirtual: 'No',
+        modificaHorarioCobertura: 'No',
+        nuevoHorarioCobertura: '',
+
+        nuevoImporteNovacion: '',
+        nuevoImporteArrendamiento: '',
+        importeVentaEquipos: '',
+        hayBonificacionDescuento: 'No',
+        indicarDescuento: '',
+
+        presupuestoProveedor: '',
+        importeSVideoUsd: '',
+
+        referenteInstalacion: '',
+        telefonoReferenteInstalacion: '',
+        fechaAltaNegociada: '',
+        plazoInstalacionDiasFecha: '',
+      };
+
       function statusClass(value) {
         if (!value) return 'chip status-default';
         const v = value.toLowerCase();
@@ -461,6 +490,7 @@
         const [lugar, setLugar] = useState('');
         const [servicioForm, setServicioForm] = useState(servicioInicial);
         const [obraForm, setObraForm] = useState(obraInicial);
+        const [novacionForm, setNovacionForm] = useState(novacionInicial);
 
         const [rows, setRows] = useState([]);
         const [saving, setSaving] = useState(false);
@@ -471,6 +501,7 @@
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
           if (tipoAccion === 'Obra' && selectedForm === 'servicio') return 'obra';
+          if (tipoAccion === 'Novación') return 'novacion';
           if (tipoAccion === 'Baja') return 'baja';
           if (tipoAccion === 'Charla') return 'charla';
           if (tipoAccion === 'Movimiento de Obra') return 'movimiento';
@@ -534,7 +565,7 @@
         function resetFields() {
           setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('ONGOING');
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
-          setServicioForm(servicioInicial); setObraForm(obraInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
+          setServicioForm(servicioInicial); setObraForm(obraInicial); setNovacionForm(novacionInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
         }
 
         function setServicioField(key, value) {
@@ -543,6 +574,10 @@
 
         function setObraField(key, value) {
           setObraForm((prev) => ({ ...prev, [key]: value }));
+        }
+
+        function setNovacionField(key, value) {
+          setNovacionForm((prev) => ({ ...prev, [key]: value }));
         }
 
         function selectAction(action) {
@@ -575,6 +610,12 @@
               return alert('Completá al menos: Nombre del servicio, Tipo de cliente y Dirección del servicio.');
             }
             Object.assign(doc, { ...obraForm, formulario: 'servicio-obra' });
+          }
+          if (grupo === 'novacion') {
+            if (!novacionForm.nombreServicio || !novacionForm.fechaIngresoDatos) {
+              return alert('Completá al menos: Nombre del servicio y Fecha de ingreso de datos.');
+            }
+            Object.assign(doc, { ...novacionForm, formulario: 'novacion' });
           }
           if (grupo === 'base') {
             if (!cliente || !fechaCarga) return alert('Completá Cliente y Fecha Carga.');
@@ -862,7 +903,71 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
 
                         <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
                       </div>
-                    ) : (
+                                        ) : grupo === 'novacion' ? (
+                      <div className="service-layout">
+                        <div className="service-card">
+                          <h3>Novación</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
+                            <div className="field"><label>Status</label><input value={status} onChange={(e) => setStatus(e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>1. Identificación y Gestión Comercial</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Nombre del servicio</label><input value={novacionForm.nombreServicio} onChange={(e) => setNovacionField('nombreServicio', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Fecha de ingreso de datos</label><input value={novacionForm.fechaIngresoDatos} onChange={(e) => setNovacionField('fechaIngresoDatos', e.target.value)} type="date" /></div>
+                            <div className="field"><label>Representante comercial</label><select value={novacionForm.representanteComercial} onChange={(e) => setNovacionField('representanteComercial', e.target.value)}><option>Francisco Bartellone</option><option>Gastón Silva</option><option>Gonzalo Claudio</option><option>Nicolás Leguizamón</option></select></div>
+                            <div className="field span-2"><label>Si no es Pancho, indicar quién es y motivo</label><input value={novacionForm.motivoRepresentante} onChange={(e) => setNovacionField('motivoRepresentante', e.target.value)} type="text" /></div>
+                            <div className="field"><label>¿Cambia la mensualidad por novación?</label><select value={novacionForm.cambiaMensualidad} onChange={(e) => setNovacionField('cambiaMensualidad', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                            <div className="field"><label>Duración nuevo contrato (meses)</label><input value={novacionForm.duracionNuevoContratoMeses} onChange={(e) => setNovacionField('duracionNuevoContratoMeses', e.target.value)} type="number" min="0" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>2. Definición del Alcance</h3>
+                          <div className="card-grid">
+                            <div className="field span-3"><label>¿Qué cambios y/o equipos nuevos incluye?</label><textarea value={novacionForm.cambiosEquipos} onChange={(e) => setNovacionField('cambiosEquipos', e.target.value)} /></div>
+                            <div className="field span-3"><label>Detalle del cambio y su impacto en el servicio esperado</label><textarea value={novacionForm.detalleCambioImpacto} onChange={(e) => setNovacionField('detalleCambioImpacto', e.target.value)} /></div>
+                            <div className="field"><label>¿Incluye App de portería virtual?</label><select value={novacionForm.incluyeAppPorteriaVirtual} onChange={(e) => setNovacionField('incluyeAppPorteriaVirtual', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                            <div className="field"><label>¿Modifica horario de cobertura?</label><select value={novacionForm.modificaHorarioCobertura} onChange={(e) => setNovacionField('modificaHorarioCobertura', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                            <div className="field span-2"><label>Nuevo horario de cobertura (si corresponde)</label><input value={novacionForm.nuevoHorarioCobertura} onChange={(e) => setNovacionField('nuevoHorarioCobertura', e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>3. Condiciones Económicas</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Nuevo importe de la novación</label><input value={novacionForm.nuevoImporteNovacion} onChange={(e) => setNovacionField('nuevoImporteNovacion', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Nuevo importe por arrendamiento</label><input value={novacionForm.nuevoImporteArrendamiento} onChange={(e) => setNovacionField('nuevoImporteArrendamiento', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Importe por venta de equipos</label><input value={novacionForm.importeVentaEquipos} onChange={(e) => setNovacionField('importeVentaEquipos', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>¿Hay bonificación o descuento?</label><select value={novacionForm.hayBonificacionDescuento} onChange={(e) => setNovacionField('hayBonificacionDescuento', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                            <div className="field span-2"><label>Indicar descuento (si corresponde)</label><input value={novacionForm.indicarDescuento} onChange={(e) => setNovacionField('indicarDescuento', e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>4. Costos Internos y Proveedores</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Presupuesto Proveedor</label><input value={novacionForm.presupuestoProveedor} onChange={(e) => setNovacionField('presupuestoProveedor', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Importe de S-Video en dólares</label><input value={novacionForm.importeSVideoUsd} onChange={(e) => setNovacionField('importeSVideoUsd', e.target.value)} type="number" min="0" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>5. Logística e Instalación</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Referente para la instalación</label><input value={novacionForm.referenteInstalacion} onChange={(e) => setNovacionField('referenteInstalacion', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Teléfono del referente</label><input value={novacionForm.telefonoReferenteInstalacion} onChange={(e) => setNovacionField('telefonoReferenteInstalacion', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Fecha de alta negociada</label><input value={novacionForm.fechaAltaNegociada} onChange={(e) => setNovacionField('fechaAltaNegociada', e.target.value)} type="date" /></div>
+                            <div className="field"><label>Plazo de instalación (fecha en días)</label><input value={novacionForm.plazoInstalacionDiasFecha} onChange={(e) => setNovacionField('plazoInstalacionDiasFecha', e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                      </div>
+) : (
                       <div className="compact-grid">
                         <div className="field"><label>Tipo de Acción</label><select value={tipoAccion} onChange={(e) => { setTipoAccion(e.target.value); resetFields(); }}>{ACCIONES.map((a) => <option key={a} value={a}>{a}</option>)}</select></div>
                         <div className="field"><label>{autoIdMode ? "Cliente ID (auto 4 dígitos)" : "Cliente ID asociado"}</label>{autoIdMode ? <input value={clienteId} readOnly type="text" /> : <input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" />}</div>
