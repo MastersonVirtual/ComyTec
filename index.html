@@ -753,8 +753,32 @@
       }
 
 
+      .notification-btn {
+        margin-top: 14px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: 1px solid rgba(255,255,255,.35);
+        background: rgba(230,255,253,.10);
+        color: #e6fffd;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .notification-btn:hover { background: rgba(230,255,253,.2); }
+      .notification-count {
+        min-width: 22px;
+        padding: 2px 7px;
+        border-radius: 999px;
+        background: #e6fffd;
+        color: #005255;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
       .logout-btn {
-        margin-top: 16px;
+        margin-top: 10px;
         width: 100%;
         border: 1px solid rgba(255,255,255,.35);
         background: rgba(0,0,0,.18);
@@ -1110,6 +1134,7 @@
         const [openMenus, setOpenMenus] = useState({ nuevo: false, fact: false });
         const [user, setUser] = useState(null);
         const [authLoading, setAuthLoading] = useState(true);
+        const [notificationsCount, setNotificationsCount] = useState(0);
 
         const [tipoAccion, setTipoAccion] = useState('');
         const [selectedForm, setSelectedForm] = useState('home');
@@ -1331,6 +1356,18 @@
           return () => unsub();
         }, []);
 
+        useEffect(() => {
+          if (!user) {
+            setNotificationsCount(0);
+            return () => {};
+          }
+          const unsub = db.collection('notificaciones_admin').onSnapshot(
+            (snap) => setNotificationsCount(snap.size),
+            (err) => console.error('Error notificaciones_admin:', err)
+          );
+          return () => unsub();
+        }, [user]);
+
         function resetFields() {
           setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('Pendiente');
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
@@ -1489,6 +1526,9 @@
                 </div>
                 <button className="menu-button" onClick={() => selectAction('Charla')}>Charlas informativas</button>
                 <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
+                <button className="notification-btn" type="button" title="Notificaciones de contacto admin">
+                  🔔 <span className="notification-count">{notificationsCount}</span>
+                </button>
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
               </div>
             </aside>
