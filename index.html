@@ -1053,7 +1053,8 @@
         duracionContratoMeses: '',
         otroServicioGrupo: 'No tiene servicio del Grupo',
 
-        representanteComercial: 'Gastón Silva',
+        representanteComercial: '',
+        creadoPor: '',
         personaReferenteComision: '',
         condicionEquipamiento: 'Compra',
         condicionEquipamientoOtro: '',
@@ -1086,6 +1087,8 @@
       };
 
       const obraInicial = {
+        representanteComercial: '',
+        creadoPor: '',
         razonSocial: '',
         rut: '',
         mailFacturacion: '',
@@ -1098,6 +1101,8 @@
       };
 
       const novacionInicial = {
+        representanteComercial: '',
+        creadoPor: '',
         nombreServicio: '',
         duracionNuevoContratoMeses: '',
         nuevoImporteNovacion: '',
@@ -1326,6 +1331,7 @@
         const [authLoading, setAuthLoading] = useState(true);
         const [userRole, setUserRole] = useState('');
         const [userArea, setUserArea] = useState('');
+        const [userData, setUserData] = useState({ nombre: '', rol: '', area: '' });
         const [roleLoading, setRoleLoading] = useState(true);
         const [notificacion, setNotificacion] = useState({ mensaje: '', tipo: '' });
 
@@ -1464,6 +1470,14 @@
           return new Date().toLocaleString('es-UY', { dateStyle: 'medium', timeStyle: 'short' });
         }
 
+        function formatUruguayDateTime() {
+          return new Date().toLocaleString('es-UY', {
+            timeZone: 'America/Montevideo',
+            dateStyle: 'short',
+            timeStyle: 'medium',
+          });
+        }
+
         async function handleDownloadPdf(service) {
           if (!service || !window.jspdf?.jsPDF) {
             alert('No se pudo cargar el generador de PDF.');
@@ -1549,6 +1563,7 @@
             if (!currentUser) {
               setUserRole('');
               setUserArea('');
+              setUserData({ nombre: '', rol: '', area: '' });
               setRoleLoading(false);
               return;
             }
@@ -1564,8 +1579,12 @@
                 if (!snap.empty) profile = snap.docs[0].data();
               }
 
-              setUserRole((profile?.rol || 'admin').toLowerCase());
-              setUserArea((profile?.area || '').toLowerCase());
+              const rol = (profile?.rol || 'admin').toLowerCase();
+              const area = (profile?.area || '').toLowerCase();
+              const nombre = String(profile?.nombre || currentUser.displayName || (currentUser.email || '').split('@')[0] || 'Usuario').trim();
+              setUserRole(rol);
+              setUserArea(area);
+              setUserData({ nombre, rol, area });
               if ((profile?.rol || '').toLowerCase() === 'gerentes') {
                 setSelectedForm('dashboard-gerencia');
               }
@@ -1573,6 +1592,7 @@
               console.error('Error leyendo config_usuarios:', err);
               setUserRole('admin');
               setUserArea('');
+              setUserData({ nombre: (currentUser?.email || 'admin').split('@')[0], rol: 'admin', area: '' });
             } finally {
               setRoleLoading(false);
             }
@@ -1607,10 +1627,39 @@
 
         const effectiveSelectedForm = isGerencia ? 'dashboard-gerencia' : selectedForm;
 
+        const [formOpenAudit, setFormOpenAudit] = useState(null);
+        const currentUserName = useMemo(() => (userData.nombre || (user?.email || '').split('@')[0] || 'Usuario').trim(), [userData, user]);
+        const isAdminUser = userRole === 'admin';
+        const isSalesOrTechUser = /vendedor|tecnic/.test(userRole) || /tecnic/.test(userArea);
+        const lockCommercialField = isSalesOrTechUser && !isAdminUser;
+
+        function applyUserDefaultsToForms() {
+          const stamp = formatUruguayDateTime();
+          setServicioForm((prev) => ({ ...prev, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: prev.fechaIngresoDatos || stamp }));
+          setObraForm((prev) => ({ ...prev, representanteComercial: currentUserName, creadoPor: currentUserName }));
+          setNovacionForm((prev) => ({ ...prev, representanteComercial: currentUserName, creadoPor: currentUserName }));
+        }
+
+        function captureFormOpen(action) {
+          const payload = {
+            accion: action,
+            nombreUsuario: currentUserName,
+            rol: userRole || userData.rol || 'sin-rol',
+            fechaHoraUy: formatUruguayDateTime(),
+          };
+          setFormOpenAudit(payload);
+          console.info('[AUDITORIA_FORMULARIO]', payload);
+        }
+
+        useEffect(() => {
+          applyUserDefaultsToForms();
+        }, [currentUserName, isAdminUser, isSalesOrTechUser]);
+
         function resetFields() {
           setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('Pendiente');
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
-          setServicioForm(servicioInicial); setObraForm(obraInicial); setNovacionForm(novacionInicial); setAgregadoForm(agregadoInicial); setMovimientoForm(movimientoInicial); setBajaForm(bajaInicial); setCharlaForm(charlaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
+          const stamp = formatUruguayDateTime();
+          setServicioForm({ ...servicioInicial, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: stamp }); setObraForm({ ...obraInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setNovacionForm({ ...novacionInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setAgregadoForm(agregadoInicial); setMovimientoForm(movimientoInicial); setBajaForm(bajaInicial); setCharlaForm(charlaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
         }
 
         function setServicioField(key, value) {
@@ -1664,6 +1713,10 @@
             setClienteId('');
           }
           setSelectedForm(['Nuevo Servicio', 'Obra'].includes(action) ? 'servicio' : 'other');
+          if (['Nuevo Servicio', 'Obra', 'Novación'].includes(action)) {
+            captureFormOpen(action);
+            applyUserDefaultsToForms();
+          }
           closeSidebar();
         }
 
@@ -1671,25 +1724,25 @@
           e.preventDefault();
           if (selectedForm === 'home') return;
           if (!effectiveClienteId) return alert('Debes indicar un Cliente ID asociado para esta acción.');
-          const doc = { tipoAccion, clienteId: effectiveClienteId, status, creadoEn: firebase.firestore.FieldValue.serverTimestamp() };
+          const doc = { tipoAccion, clienteId: effectiveClienteId, status, creadoEn: firebase.firestore.FieldValue.serverTimestamp(), creadoPor: currentUserName };
 
           if (grupo === 'servicio') {
             if (!servicioForm.nombreServicio || !servicioForm.razonSocial || !servicioForm.rut || !servicioForm.fechaAltaServicio) {
               return alert('Completá al menos: Nombre del servicio, Razón social, RUT y Fecha de alta.');
             }
-            Object.assign(doc, { ...servicioForm, formulario: 'nuevo-servicio-optimizado' });
+            Object.assign(doc, { ...servicioForm, formulario: 'nuevo-servicio-optimizado', creadoPor: servicioForm.creadoPor || currentUserName, auditoriaApertura: formOpenAudit });
           }
           if (grupo === 'obra') {
             if (!obraForm.razonSocial || !obraForm.rut || !obraForm.mailFacturacion || !obraForm.nombreServicio || !obraForm.fechaAlta) {
               return alert('Completá al menos: Razón social, RUT, Mail, Nombre de servicio y Fecha de alta.');
             }
-            Object.assign(doc, { ...obraForm, formulario: 'servicio-obra' });
+            Object.assign(doc, { ...obraForm, formulario: 'servicio-obra', creadoPor: obraForm.creadoPor || currentUserName, auditoriaApertura: formOpenAudit });
           }
           if (grupo === 'novacion') {
             if (!novacionForm.nombreServicio || !novacionForm.duracionNuevoContratoMeses) {
               return alert('Completá al menos: Nombre del servicio y Duración del nuevo contrato.');
             }
-            Object.assign(doc, { ...novacionForm, formulario: 'novacion' });
+            Object.assign(doc, { ...novacionForm, formulario: 'novacion', creadoPor: novacionForm.creadoPor || currentUserName, auditoriaApertura: formOpenAudit });
           }
           if (grupo === 'agregado') {
             if (!agregadoForm.nombreServicio || !agregadoForm.fechaAltaAdicional) {
@@ -1973,6 +2026,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID</label><input value={clienteId} readOnly type="text" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                            <div className="field"><label>Representante Comercial</label><input value={servicioForm.representanteComercial} onChange={(e) => setServicioField('representanteComercial', e.target.value)} type="text" readOnly={lockCommercialField} /></div>
                           </div>
                         </div>
 
@@ -2021,6 +2075,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID</label><input value={clienteId} readOnly type="text" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                            <div className="field"><label>Representante Comercial</label><input value={obraForm.representanteComercial} onChange={(e) => setObraField('representanteComercial', e.target.value)} type="text" readOnly={lockCommercialField} /></div>
                           </div>
                         </div>
 
@@ -2060,6 +2115,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                            <div className="field"><label>Representante Comercial</label><input value={novacionForm.representanteComercial} onChange={(e) => setNovacionField('representanteComercial', e.target.value)} type="text" readOnly={lockCommercialField} /></div>
                           </div>
                         </div>
 
