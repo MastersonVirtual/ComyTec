@@ -447,14 +447,14 @@
       .service-card,
       .widget,
       .kpi-card {
-        background: var(--card);
-        border: 1px solid var(--line);
+        background: #006465;
+        border: 1px solid rgba(230,255,253,.25);
         box-shadow: var(--shadow-soft);
       }
       .hero {
         border-radius: 18px;
         padding: 64px 34px;
-        background: linear-gradient(140deg, #004c4d 0%, var(--base) 58%, var(--base-700) 100%);
+        background: linear-gradient(140deg, #004c4d 0%, #006465 58%, #0b7b7b 100%);
       }
       .hero::before {
         background: radial-gradient(circle, rgba(230,255,253,.28), transparent 62%);
@@ -466,18 +466,16 @@
         padding: 24px;
       }
       .panel h2, .service-card h3, .widget h4 {
-        color: #0f172a;
+        color: #e6fffd;
       }
       .hint, .kv {
-        color: #64748b;
+        color: #d1faf5;
       }
 
       .service-layout { gap: 18px; }
       .service-card {
         border-radius: 14px;
         padding: 22px;
-        background: #2b3440;
-        border-color: #3f4b59;
       }
       .service-card h3,
       .service-card label,
@@ -485,7 +483,7 @@
       .service-card .muted,
       .service-card .kv,
       .service-card .detail-box {
-        color: #e6edf5;
+        color: #e6fffd;
       }
       .service-card h3::before {
         color: var(--base);
@@ -522,11 +520,11 @@
         font-size: 2rem;
         font-weight: 800;
         line-height: 1;
-        color: var(--base);
+        color: #e6fffd;
       }
       .kpi-label {
         margin-top: 8px;
-        color: #64748b;
+        color: #d1faf5;
         font-size: .8rem;
         text-transform: uppercase;
         letter-spacing: .08em;
@@ -691,20 +689,18 @@
 
       .widget {
         border-radius: 14px;
-        background: #2b3440;
-        border-color: #3f4b59;
       }
       .widget h4,
       .widget .kv,
       .widget .kv b,
       .widget .detail-box {
-        color: #e6edf5;
+        color: #e6fffd;
       }
       .widget::after {
         background: linear-gradient(var(--base), rgba(0,100,101,0));
       }
-      .widget h4 { color: #e6edf5; }
-      .kv b { color: #e6edf5; }
+      .widget h4 { color: #e6fffd; }
+      .kv b { color: #e6fffd; }
       .bento-grid .service-card:first-child { grid-column: span 12; }
       .facturacion-module .service-card:nth-child(2) { grid-column: span 7; }
       .facturacion-module .service-card:nth-child(3) { grid-column: span 5; }
