@@ -1707,19 +1707,25 @@
           const { jsPDF } = window.jspdf;
           const doc = new jsPDF({ unit: 'mm', format: 'a4' });
           const pageWidth = doc.internal.pageSize.getWidth();
-          const margin = 14;
-          const topBarHeight = 28;
+          const pageHeight = doc.internal.pageSize.getHeight();
+          const margin = 16;
+          const topBarHeight = 22;
+          const lineColor = [0, 100, 101];
           const logoUrl = 'https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png';
 
-          doc.setFillColor(0, 100, 101);
-          doc.rect(0, 0, pageWidth, topBarHeight, 'F');
-          doc.setTextColor(230, 255, 253);
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(16);
-          doc.text('Masterson Seguridad', margin, 10);
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(10.5);
-          doc.text('Área de Coordinación Técnica y Comercial', margin, 17);
+          function drawHeader() {
+            doc.setFillColor(0, 0, 0);
+            doc.rect(0, 0, pageWidth, topBarHeight, 'F');
+          }
+
+          function ensureSpace(y, needed = 12) {
+            if (y + needed <= pageHeight - margin - 18) return y;
+            doc.addPage();
+            drawHeader();
+            return margin + 8;
+          }
+
+          drawHeader();
 
           try {
             const imgData = await fetch(logoUrl)
@@ -1729,34 +1735,95 @@
                 reader.onloadend = () => resolve(reader.result);
                 reader.readAsDataURL(blob);
               }));
-            doc.addImage(imgData, 'PNG', pageWidth - 24, 5, 14, 14, undefined, 'FAST');
+            const logoHeight = topBarHeight - 2;
+            const logoWidth = 24;
+            doc.addImage(imgData, 'PNG', pageWidth - logoWidth - 2, 1, logoWidth, logoHeight, undefined, 'FAST');
           } catch (err) {
             console.warn('No se pudo cargar el logo para PDF', err);
           }
 
-          let y = 36;
-          doc.setTextColor(20, 23, 28);
+          doc.setTextColor(0, 100, 101);
           doc.setFont('helvetica', 'bold');
           doc.setFontSize(12);
-          doc.text(`Servicio: ${service.nombreServicio || '-'}`, margin, y);
-          y += 7;
-          doc.text(`ID: ${service.clienteId || '-'}`, margin, y);
-          y += 7;
-          doc.setFont('helvetica', 'normal');
-          doc.text(`Fecha de descarga: ${formatNow()}`, margin, y);
-          y += 9;
+          doc.text('Masterson Seguridad – Área de Coordinación Técnica y Comercial', margin, topBarHeight + 10);
 
-          const detailLines = buildServiceDetailText(service).split('\n');
-          doc.setFontSize(10.5);
-          detailLines.forEach((line) => {
-            const wrapped = doc.splitTextToSize(line, pageWidth - margin * 2);
-            if (y > 280) {
-              doc.addPage();
-              y = 18;
-            }
-            doc.text(wrapped, margin, y);
-            y += wrapped.length * 5 + 1;
-          });
+          let y = topBarHeight + 16;
+
+          function drawSection(title, fields) {
+            y = ensureSpace(y, 18 + fields.length * 7);
+            const boxX = margin;
+            const boxW = pageWidth - margin * 2;
+            const startY = y;
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10.5);
+            doc.setTextColor(0, 100, 101);
+            doc.text(title, boxX + 2, y + 5);
+            y += 9;
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            doc.setTextColor(20, 23, 28);
+
+            fields.forEach(([k, v]) => {
+              y = ensureSpace(y, 7);
+              const line = `${k}: ${v || '-'}`;
+              const wrapped = doc.splitTextToSize(line, boxW - 6);
+              doc.text(wrapped, boxX + 3, y);
+              y += wrapped.length * 4.6 + 1;
+            });
+
+            doc.setDrawColor(...lineColor);
+            doc.setLineWidth(0.18);
+            doc.rect(boxX, startY, boxW, y - startY + 2);
+            y += 7;
+          }
+
+          drawSection('Resumen del Servicio', [
+            ['Servicio', service.nombreServicio],
+            ['Cliente ID', service.clienteId],
+            ['Tipo de Acción', service.tipoAccion],
+            ['Status', service.status],
+            ['Fecha de descarga', formatNow()],
+          ]);
+
+          drawSection('Cliente y Facturación', [
+            ['Representante Comercial', service.representanteComercial],
+            ['Razón Social', service.razonSocial],
+            ['RUT', service.rut],
+            ['Mail Facturación', service.mailFacturacion],
+            ['Duración Contrato', service.duracionContratoMeses],
+          ]);
+
+          drawSection('Operación Técnica y Económica', [
+            ['Tipo Servicio', service.tipoServicioBrindar],
+            ['Dirección', service.direccionServicio],
+            ['Importe Mensual sin IVA', service.importeMensualServicioSinIva],
+            ['Costo Instalación US$', service.costoInstalacionUsdSinIva],
+            ['Presupuesto Proveedor', service.presupuestoProveedor],
+            ['Fecha Ingreso', service.fechaIngresoDatos || service.fechaCarga || service.fechaCharla],
+          ]);
+
+          drawSection('Observaciones', [
+            ['Proyecto', service.proyectoServicio],
+            ['Observaciones', service.observacionesComentarios],
+            ['Excepciones', service.excepcionesAcordadas],
+          ]);
+
+          // Firma automática al final de la última página
+          if (y > pageHeight - 30) {
+            doc.addPage();
+            drawHeader();
+            y = margin + 8;
+          }
+          const signatureY = pageHeight - 18;
+          doc.setDrawColor(...lineColor);
+          doc.setLineWidth(0.18);
+          doc.line(margin, signatureY - 3, pageWidth - margin, signatureY - 3);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(10);
+          doc.setTextColor(20, 23, 28);
+          doc.text(`Emitido por: ${currentUserName || 'Usuario'}`, margin, signatureY + 2);
 
           const safeId = String(service.clienteId || 'servicio').replace(/[^a-z0-9_-]/gi, '_');
           const safeName = String(service.nombreServicio || 'detalle').replace(/[^a-z0-9_-]/gi, '_');
