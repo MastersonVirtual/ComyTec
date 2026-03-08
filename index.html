@@ -382,24 +382,28 @@
       }
 
       .topbar {
-        background: rgba(255,255,255,.82);
-        border-bottom: 1px solid #dbe4ec;
+        background: #006465;
+        border-bottom: 1px solid #0b7b7b;
         backdrop-filter: blur(12px);
-        box-shadow: 0 10px 24px rgba(0,0,0,.08);
+        box-shadow: 0 10px 24px rgba(0,0,0,.18);
       }
       .burger {
-        color: #0f172a;
-        border-color: #d6dee8;
-        background: #ffffff;
-        box-shadow: 0 8px 16px rgba(0,0,0,.08);
+        color: transparent;
+        border-color: rgba(230,255,253,.45);
+        background-color: rgba(255,255,255,.08);
+        background-image: url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png');
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: 78% 78%;
+        box-shadow: 0 8px 16px rgba(0,0,0,.18);
       }
       .top-titles h1 {
-        color: #0f172a;
+        color: #e6fffd;
         letter-spacing: .2px;
         text-shadow: none;
       }
       .top-titles p {
-        color: #475569;
+        color: #d8fbf8;
         letter-spacing: .07em;
       }
       .subtitle-voga {
@@ -1045,7 +1049,7 @@
 
             <div className={`content ${menuOpen ? 'shift' : ''}`}>
               <header className="topbar">
-                <button className="burger" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
+                <button className="burger" aria-label="Abrir menú" onClick={() => setMenuOpen(!menuOpen)} />
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
                   <p className="subtitle-voga">ÁREA TÉCNICA Y COMERCIAL</p>
