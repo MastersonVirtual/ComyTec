@@ -667,6 +667,42 @@
         color: #f5d08a;
         font-size: 11px;
       }
+      .danger-btn {
+        border: 1px solid rgba(239,68,68,.45);
+        background: rgba(127,29,29,.82);
+        color: #ffe4e6;
+        border-radius: 10px;
+        padding: 8px 10px;
+      }
+      .danger-btn[disabled] {
+        opacity: .6;
+        cursor: not-allowed;
+      }
+      .confirm-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 1305;
+        display: grid;
+        place-items: center;
+        background: rgba(2,8,10,.64);
+        backdrop-filter: blur(6px);
+        padding: 16px;
+      }
+      .confirm-modal-card {
+        width: min(520px, 100%);
+        background: #0a1515;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 16px;
+        color: #fff;
+        box-shadow: var(--shadow-deep);
+      }
+      .confirm-modal-actions {
+        margin-top: 12px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
       .micro-log-list {
         list-style: none;
         margin: 0;
@@ -1363,6 +1399,7 @@
               </div>
               <button className="save-btn" type="submit" disabled={loading}>{loading ? 'Ingresando...' : 'Iniciar Sesión'}</button>
               </form>
+
             </div>
           </div>
         );
@@ -1413,6 +1450,7 @@
             <h3>{title}</h3>
             <div className="gerencia-chart-shell">
               <canvas ref={canvasRef} className="gerencia-chart-canvas" aria-label={`${title}-${chartId}`} />
+
             </div>
           </div>
         );
@@ -1535,6 +1573,8 @@
         const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
         const [mobileTab, setMobileTab] = useState('home');
         const [fabOpen, setFabOpen] = useState(false);
+        const [deleteTargetService, setDeleteTargetService] = useState(null);
+        const [deletingService, setDeletingService] = useState(false);
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
@@ -1554,24 +1594,26 @@
 
         const deferredSearchTerm = useDeferredValue(searchTerm);
 
+        const visibleRows = useMemo(() => rows.filter((r) => !r.estado_borrado), [rows]);
+
         const filteredRows = useMemo(() => {
           const q = deferredSearchTerm.trim().toLowerCase();
-          if (!q) return rows;
-          return rows.filter((r) =>
+          if (!q) return visibleRows;
+          return visibleRows.filter((r) =>
             [r.clienteId, r.nombreServicio, r.cliente, r.representanteComercial, r.razonSocial, r.direccionServicio]
               .filter(Boolean)
               .some((v) => String(v).toLowerCase().includes(q))
           );
-        }, [rows, deferredSearchTerm]);
+        }, [visibleRows, deferredSearchTerm]);
 
         const [activeKpi, setActiveKpi] = useState(null);
         const [selectedCommercial, setSelectedCommercial] = useState('');
 
         function getKpiRows(type) {
-          if (type === 'total') return rows;
-          if (type === 'pending') return rows.filter((r) => (r.status || '').toLowerCase().includes('pend'));
-          if (type === 'inprogress') return rows.filter((r) => (r.status || '').toLowerCase().includes('curso'));
-          if (type === 'completed') return rows.filter((r) => (r.status || '').toLowerCase().includes('complet'));
+          if (type === 'total') return visibleRows;
+          if (type === 'pending') return visibleRows.filter((r) => (r.status || '').toLowerCase().includes('pend'));
+          if (type === 'inprogress') return visibleRows.filter((r) => (r.status || '').toLowerCase().includes('curso'));
+          if (type === 'completed') return visibleRows.filter((r) => (r.status || '').toLowerCase().includes('complet'));
           return [];
         }
 
@@ -1602,11 +1644,11 @@
         }
 
         const kpiStats = useMemo(() => ({
-          total: rows.length,
-          pending: rows.filter((r) => (r.status || '').toLowerCase().includes('pend')).length,
-          inprogress: rows.filter((r) => (r.status || '').toLowerCase().includes('curso')).length,
-          completed: rows.filter((r) => (r.status || '').toLowerCase().includes('complet')).length,
-        }), [rows]);
+          total: visibleRows.length,
+          pending: visibleRows.filter((r) => (r.status || '').toLowerCase().includes('pend')).length,
+          inprogress: visibleRows.filter((r) => (r.status || '').toLowerCase().includes('curso')).length,
+          completed: visibleRows.filter((r) => (r.status || '').toLowerCase().includes('complet')).length,
+        }), [visibleRows]);
 
         function buildServiceDetailText(r) {
           const lines = [
@@ -1949,6 +1991,41 @@
           closeSidebar();
         }
 
+        async function handleDeleteServiceConfirm() {
+          if (!deleteTargetService?.id || !isAdminUser) {
+            setDeleteTargetService(null);
+            return;
+          }
+          setDeletingService(true);
+          try {
+            const nowLabel = formatUruguayDateTime();
+            const logsActuales = Array.isArray(deleteTargetService.logs_cambios) ? deleteTargetService.logs_cambios : [];
+            const nuevoLog = {
+              fecha: new Date().toISOString(),
+              usuario: currentUserName,
+              accion: `Eliminación solicitada por ${currentUserName} el ${nowLabel}`,
+            };
+
+            await db.collection('operaciones').doc(deleteTargetService.id).set({
+              estado_borrado: true,
+              fecha_solicitud_borrado: firebase.firestore.FieldValue.serverTimestamp(),
+              logs_cambios: [...logsActuales, nuevoLog],
+              editadoPor: currentUserName,
+              actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+            }, { merge: true });
+
+            setNotificacion({ mensaje: '✔ Servicio ocultado y marcado para eliminación diferida', tipo: 'ok' });
+            if (selectedService?.id === deleteTargetService.id) setSelectedService(null);
+            if (editingServiceId === deleteTargetService.id) resetFields();
+          } catch (error) {
+            console.error('Error solicitando borrado:', error);
+            setNotificacion({ mensaje: '✖ Error al solicitar borrado', tipo: 'error' });
+          } finally {
+            setDeletingService(false);
+            setDeleteTargetService(null);
+          }
+        }
+
         async function handleSubmit(e) {
           e.preventDefault();
           if (selectedForm === 'home') return;
@@ -2036,7 +2113,7 @@
           return (
             <section className="panel" style={{ background: 'transparent', border: 0, padding: 0, boxShadow: 'none' }}>
               <div className="mobile-bento">
-                <article className="mobile-capsule"><div className="title">Servicios</div><div className="value">{rows.length}</div></article>
+                <article className="mobile-capsule"><div className="title">Servicios</div><div className="value">{visibleRows.length}</div></article>
                 <article className="mobile-capsule"><div className="title">Pendientes</div><div className="value">{kpiStats.pending}</div></article>
                 <article className="mobile-capsule"><div className="title">En curso</div><div className="value">{kpiStats.inprogress}</div></article>
                 <article className="mobile-capsule"><div className="title">Completados</div><div className="value">{kpiStats.completed}</div></article>
@@ -2049,7 +2126,7 @@
           return (
             <section className="panel" style={{ background: 'transparent', border: 0, padding: 0, boxShadow: 'none' }}>
               <div className="mobile-service-stack">
-                {rows.slice(0, 30).map((r) => (
+                {visibleRows.slice(0, 30).map((r) => (
                   <article key={r.id} className="mobile-service-card" onClick={() => { setSelectedService(r); setSelectedForm('historial'); }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
                       <strong>{r.nombreServicio || r.cliente || 'Servicio sin nombre'}</strong>
@@ -2153,7 +2230,7 @@
 
               <main className="main">
                 {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : isMobile && mobileTab === 'mapa' ? (<section className="panel"><h2>Mapa</h2><div className="hint">Vista de mapa próxima versión.</div></section>) : isMobile && mobileTab === 'perfil' ? (<section className="panel"><h2>Mi Perfil</h2><div className="hint">{currentUserName} · {topbarSubtitle}</div></section>) : effectiveSelectedForm === 'dashboard-gerencia' ? (
-                  <DashboardGerencia rows={rows} />
+                  <DashboardGerencia rows={visibleRows} />
                 ) : effectiveSelectedForm === 'home' ? (
                   <>
                     <section className="hero">
@@ -2280,9 +2357,9 @@
                     <h2>Historial de Servicios · Vista Ejecutiva</h2>
                     <div className="hint">Lista completa visible para todos los usuarios. Selecciona un servicio para ver su detalle.</div>
                     <section className="panel" style={{ background: 'rgba(255,255,255,.04)', marginBottom: 12 }}>
-                      <h3 style={{ marginTop: 0 }}>Servicios ({rows.length})</h3>
+                      <h3 style={{ marginTop: 0 }}>Servicios ({visibleRows.length})</h3>
                       <div className="ranking-services">
-                        {rows.map((service) => {
+                        {visibleRows.map((service) => {
                           const allowedEdit = canEditService(service);
                           return (
                             <div className="ranking-service-row" key={`hist-${service.id}`}>
@@ -2325,6 +2402,15 @@
                           >
                             {canEditService(selectedService) ? '✎ Editar servicio' : '🔒 Editar'}
                           </button>
+                          {isAdminUser && (
+                            <button
+                              className="danger-btn"
+                              type="button"
+                              onClick={() => setDeleteTargetService(selectedService)}
+                            >
+                              🗑 Eliminar
+                            </button>
+                          )}
                           {!isAdminUser && !canEditService(selectedService) && <span className="lock-hint">🔒 Solo lectura</span>}
                         </div>
                         <div className="history-grid">
@@ -2667,6 +2753,22 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                 </section>
                 )}
               </main>
+
+              {deleteTargetService && isAdminUser && (
+                <div className="confirm-modal" onClick={() => { if (!deletingService) setDeleteTargetService(null); }}>
+                  <div className="confirm-modal-card" onClick={(e) => e.stopPropagation()}>
+                    <h3 style={{ marginTop: 0 }}>Confirmar eliminación segura</h3>
+                    <p style={{ margin: '6px 0 0', color: '#d7f4ef' }}>
+                      ¿Estás seguro de eliminar este servicio? Se generará un registro de esta acción. El servicio permanecerá oculto pero recuperable por 24 horas antes de su eliminación definitiva.
+                    </p>
+                    <div className="confirm-modal-actions">
+                      <button type="button" className="edit-btn" onClick={() => setDeleteTargetService(null)} disabled={deletingService}>Cancelar</button>
+                      <button type="button" className="danger-btn" onClick={handleDeleteServiceConfirm} disabled={deletingService}>{deletingService ? 'Procesando...' : 'Confirmar eliminación'}</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {isMobile && !isGerencia && (
                 <>
                   {fabOpen && <div className="mobile-fab-overlay" onClick={() => setFabOpen(false)} />}
