@@ -559,6 +559,29 @@
         background: linear-gradient(135deg, #004b4d, #003f41);
       }
 
+      .pdf-toolbar {
+        display: flex;
+        justify-content: flex-end;
+        margin: 6px 0 14px;
+      }
+      .pdf-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid #0a6666;
+        border-radius: 10px;
+        padding: 10px 14px;
+        background: linear-gradient(135deg, #005255, #003f41);
+        color: #e6fffd;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+      }
+      .pdf-btn:hover {
+        transform: translateY(-1px);
+        background: linear-gradient(135deg, #00474a, #003537);
+      }
+
       .table-wrap table {
         background: #ffffff;
         border: 1px solid #e2e8f0;
@@ -669,6 +692,7 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   </head>
   <body>
     <div id="root"></div>
@@ -901,6 +925,75 @@
           return lines.join('\n');
         }
 
+        function formatNow() {
+          return new Date().toLocaleString('es-UY', { dateStyle: 'medium', timeStyle: 'short' });
+        }
+
+        async function handleDownloadPdf(service) {
+          if (!service || !window.jspdf?.jsPDF) {
+            alert('No se pudo cargar el generador de PDF.');
+            return;
+          }
+
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+          const pageWidth = doc.internal.pageSize.getWidth();
+          const margin = 14;
+          const topBarHeight = 28;
+          const logoUrl = 'https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png';
+
+          doc.setFillColor(0, 100, 101);
+          doc.rect(0, 0, pageWidth, topBarHeight, 'F');
+          doc.setTextColor(230, 255, 253);
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(16);
+          doc.text('Masterson Seguridad', margin, 10);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(10.5);
+          doc.text('Área de Coordinación Técnica y Comercial', margin, 17);
+
+          try {
+            const imgData = await fetch(logoUrl)
+              .then((r) => r.blob())
+              .then((blob) => new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(blob);
+              }));
+            doc.addImage(imgData, 'PNG', pageWidth - 24, 5, 14, 14, undefined, 'FAST');
+          } catch (err) {
+            console.warn('No se pudo cargar el logo para PDF', err);
+          }
+
+          let y = 36;
+          doc.setTextColor(20, 23, 28);
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(12);
+          doc.text(`Servicio: ${service.nombreServicio || '-'}`, margin, y);
+          y += 7;
+          doc.text(`ID: ${service.clienteId || '-'}`, margin, y);
+          y += 7;
+          doc.setFont('helvetica', 'normal');
+          doc.text(`Fecha de descarga: ${formatNow()}`, margin, y);
+          y += 9;
+
+          const detailLines = buildServiceDetailText(service).split('\n');
+          doc.setFontSize(10.5);
+          detailLines.forEach((line) => {
+            const wrapped = doc.splitTextToSize(line, pageWidth - margin * 2);
+            if (y > 280) {
+              doc.addPage();
+              y = 18;
+            }
+            doc.text(wrapped, margin, y);
+            y += wrapped.length * 5 + 1;
+          });
+
+          const safeId = String(service.clienteId || 'servicio').replace(/[^a-z0-9_-]/gi, '_');
+          const safeName = String(service.nombreServicio || 'detalle').replace(/[^a-z0-9_-]/gi, '_');
+          doc.save(`Masterson_${safeId}_${safeName}.pdf`);
+        }
+
         useEffect(() => {
           const unsub = db.collection('operaciones').orderBy('creadoEn', 'desc').onSnapshot(
             (snap) => setRows(snap.docs.map((d) => ({ id: d.id, ...d.data() }))),
@@ -1128,7 +1221,11 @@
                         <p style={{fontSize:'1rem'}}>Usa la lupita arriba y toca una vista previa para ver el detalle completo.</p>
                       </div>
                     ) : (
-                      <div className="history-grid">
+                      <>
+                        <div className="pdf-toolbar">
+                          <button className="pdf-btn" type="button" onClick={() => handleDownloadPdf(selectedService)}>📄 Descargar PDF</button>
+                        </div>
+                        <div className="history-grid">
                         <div className="widget"><h4>Identificación</h4><div className="kv"><b>ID:</b> {selectedService.clienteId || '-'}</div><div className="kv"><b>Nombre:</b> {selectedService.nombreServicio || '-'}</div><div className="kv"><b>Tipo:</b> {selectedService.tipoServicioBrindar || '-'}</div><div className="kv"><b>Dirección:</b> {selectedService.direccionServicio || '-'}</div><div className="kv"><b>Unidades:</b> {selectedService.cantidadUnidades || '-'}</div></div>
                         <div className="widget"><h4>Comercial / Facturación</h4><div className="kv"><b>Representante:</b> {selectedService.representanteComercial || '-'}</div><div className="kv"><b>Razón Social:</b> {selectedService.razonSocial || '-'}</div><div className="kv"><b>RUT:</b> {selectedService.rut || '-'}</div><div className="kv"><b>Mail:</b> {selectedService.mailFacturacion || '-'}</div><div className="kv"><b>Duración:</b> {selectedService.duracionContratoMeses || '-'}</div></div>
                         <div className="widget"><h4>Costos</h4><div className="kv"><b>Importe mensual:</b> {selectedService.importeMensualServicioSinIva || '-'}</div><div className="kv"><b>Costo instalación US$:</b> {selectedService.costoInstalacionUsdSinIva || '-'}</div><div className="kv"><b>Presupuesto proveedor:</b> {selectedService.presupuestoProveedor || '-'}</div><div className="kv"><b>Condición equipamiento:</b> {selectedService.condicionEquipamiento || '-'}</div></div>
@@ -1139,6 +1236,7 @@
 
 Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                       </div>
+                      </>
                     )}
                   </section>
                 ) : (
