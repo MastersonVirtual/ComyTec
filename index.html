@@ -846,7 +846,7 @@
       }
       .gerencia-card h3 {
         margin: 0;
-        color: var(--text);
+        color: #ffffff;
         font-size: .82rem;
         text-transform: uppercase;
         letter-spacing: .05em;
@@ -855,7 +855,7 @@
       .gerencia-chart-card .hint,
       .gerencia-chart-card h3,
       .gerencia-chart-card b {
-        color: var(--text);
+        color: #ffffff;
       }
       .gerencia-value,
       .gerencia-card .kpi-value,
@@ -863,8 +863,8 @@
         margin-top: 8px;
         font-size: 1.6rem;
         font-weight: 800;
-        color: var(--accent);
-        text-shadow: 0 0 14px color-mix(in srgb, var(--accent) 35%, transparent);
+        color: #ffffff;
+        text-shadow: 0 0 10px rgba(255,255,255,.18);
       }
       .dashboard-gerencia-panel {
         padding-bottom: 18px;
@@ -880,7 +880,7 @@
         border: 1px solid var(--line);
         border-radius: 14px;
         padding: 14px;
-        color: var(--text);
+        color: #ffffff;
       }
       .gerencia-chart {
         width: 150px;
@@ -894,7 +894,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 8px;
-        color: var(--text);
+        color: #ffffff;
         font-size: 12px;
         padding: 4px 0;
       }
@@ -904,20 +904,6 @@
         height: 10px;
         border-radius: 999px;
         background: var(--legend-color, #e6fffd);
-      }
-      .gerente-float-logout {
-        position: fixed;
-        right: 14px;
-        bottom: 18px;
-        z-index: 1300;
-        border: 1px solid rgba(239,68,68,.45);
-        background: rgba(127,29,29,.92);
-        color: #ffe4e6;
-        border-radius: 999px;
-        width: 56px;
-        height: 56px;
-        font-size: 18px;
-        box-shadow: 0 10px 20px rgba(0,0,0,.22);
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -1229,7 +1215,7 @@
 
             <div className="gerencia-charts">
               <div className="gerencia-chart-card">
-                <h3 style={{ color: 'var(--text)', margin: 0 }}>Distribución por ACCIONES</h3>
+                <h3 style={{ color: '#ffffff', margin: 0 }}>Distribución por ACCIONES</h3>
                 <div className="gerencia-chart" style={{ background: chartGradient(actionCounts) }} />
                 {actionCounts.map((item, idx) => (
                   <div className="legend-item" key={`ac-${item.name}`}>
@@ -1239,7 +1225,7 @@
                 ))}
               </div>
               <div className="gerencia-chart-card">
-                <h3 style={{ color: 'var(--text)', margin: 0 }}>Distribución por STATUS</h3>
+                <h3 style={{ color: '#ffffff', margin: 0 }}>Distribución por STATUS</h3>
                 <div className="gerencia-chart" style={{ background: chartGradient(statusCounts) }} />
                 {statusCounts.map((item, idx) => (
                   <div className="legend-item" key={`st-${item.name}`}>
@@ -1714,7 +1700,6 @@
             {notificacion.mensaje && (
               <div className={`toast ${notificacion.tipo === 'error' ? 'error' : ''}`}>{notificacion.mensaje}</div>
             )}
-            {isGerencia && <button className="gerente-float-logout" type="button" onClick={() => auth.signOut()} title="Cerrar sesión">⎋</button>}
 
             <div className={`content ${menuOpen ? 'shift' : ''}`}>
               <header className="topbar">
