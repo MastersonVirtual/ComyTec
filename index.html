@@ -960,6 +960,30 @@
         to { opacity: 1; transform: translateY(0) scale(1); }
       }
 
+      .app-footer {
+        position: fixed;
+        right: 14px;
+        bottom: 12px;
+        z-index: 1600;
+        font-size: 10px;
+        line-height: 1.2;
+        letter-spacing: .01em;
+        color: rgba(230,255,253,.72);
+        background: rgba(3, 10, 10, .55);
+        border: 1px solid rgba(0, 100, 101, .28);
+        border-radius: 10px;
+        padding: 5px 8px;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow: 0 6px 20px rgba(0,0,0,.36);
+        pointer-events: none;
+      }
+      .app-footer strong {
+        color: #00fbff;
+        text-shadow: 0 0 8px rgba(0,251,255,.45);
+        font-weight: 700;
+      }
+
       @media (max-width: 1080px) {
         .kpi-grid { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
       }
@@ -1311,6 +1335,12 @@
           min-width: 0;
           max-width: none;
         }
+        .app-footer {
+          right: 10px;
+          bottom: 124px;
+          z-index: 1700;
+          font-size: 10px;
+        }
         .gerencia-widgets { grid-template-columns: 1fr; }
         .card-grid,
         .compact-grid,
@@ -1367,6 +1397,13 @@
 
       const ACCIONES = ['Nuevo Servicio', 'Novación', 'Obra', 'Agregado', 'Movimiento de Obra', 'Baja', 'Charla'];
       const STATUS_OPTIONS = ['Pendiente', 'En curso', 'En espera', 'Completado', 'Cancelado', 'Pausado'];
+      const APP_VERSION = (() => {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        return `v1.${yyyy}${mm}${dd}`;
+      })();
 
       function generarClienteId() {
         return String(Math.floor(1000 + Math.random() * 9000));
@@ -2950,6 +2987,10 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                 </section>
                 )}
               </main>
+
+              <div className="app-footer" aria-label="version">
+                <strong>Powered by Alfonso Carballo</strong> · {APP_VERSION}
+              </div>
 
               {deleteTargetService && isAdminUser && (
                 <div className="confirm-modal" onClick={() => { if (!deletingService) setDeleteTargetService(null); }}>
