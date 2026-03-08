@@ -769,6 +769,7 @@
         display: grid;
         place-items: center;
         padding: 20px;
+        background: #000000;
       }
       .login-panel {
         width: min(460px, 100%);
@@ -786,6 +787,15 @@
         width: 100%;
         background: #ffffff;
         color: #0f172a;
+      }
+      .login-logo {
+        width: 74px;
+        height: 74px;
+        margin: 0 auto 12px;
+        border-radius: 18px;
+        background: rgba(230,255,253,.12) url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png') center/cover no-repeat;
+        border: 1px solid rgba(230,255,253,.3);
+        box-shadow: 0 10px 20px rgba(0,0,0,.25);
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -1027,15 +1037,16 @@
         return (
           <div className="login-shell">
             <form className="login-panel" onSubmit={handleLogin}>
-              <h2>Ingreso al Dashboard</h2>
-              <div className="hint">Área de Coordinación Técnica y Comercial</div>
+              <div className="login-logo" aria-hidden="true" />
+              <h2>Masterson Seguridad</h2>
+              <div className="hint">Área técnica y Comercial</div>
               {error && <div className="login-error">{error}</div>}
               <div className="field">
                 <label>Email</label>
                 <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
               </div>
               <div className="field">
-                <label>Password</label>
+                <label>Contraseña</label>
                 <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
               </div>
               <button className="save-btn" type="submit" disabled={loading}>{loading ? 'Ingresando...' : 'Iniciar Sesión'}</button>
