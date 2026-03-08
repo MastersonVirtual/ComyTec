@@ -511,6 +511,9 @@
         padding: 20px;
         text-align: center;
         cursor: pointer;
+        background: #0a1515;
+        border: 1px solid var(--line);
+        color: var(--text);
       }
       .kpi-card.active {
         border-color: #006465;
@@ -638,6 +641,49 @@
       .ranking-service-btn:hover {
         background: rgba(230,255,253,.22);
       }
+      .ranking-service-row {
+        display: grid;
+        gap: 6px;
+      }
+      .ranking-service-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .edit-btn {
+        text-align: left;
+        border: 1px solid rgba(230,255,253,.2);
+        border-radius: 10px;
+        background: rgba(230,255,253,.12);
+        color: #e6fffd;
+        padding: 8px 10px;
+        cursor: pointer;
+      }
+      .edit-btn[disabled] {
+        opacity: .55;
+        cursor: not-allowed;
+      }
+      .lock-hint {
+        color: #f5d08a;
+        font-size: 11px;
+      }
+      .micro-log-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 6px;
+      }
+      .micro-log-item {
+        font-size: 11px;
+        color: var(--muted);
+        border-bottom: 1px dashed rgba(255,255,255,.12);
+        padding-bottom: 6px;
+      }
+      .micro-log-item:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
 
       label {
         color: #334155;
@@ -755,13 +801,40 @@
       .logout-btn {
         margin-top: 10px;
         width: 100%;
-        border: 1px solid rgba(255,255,255,.35);
-        background: rgba(0,0,0,.18);
-        color: #e6fffd;
+        border: 1px solid rgba(239,68,68,.45);
+        background: rgba(127,29,29,.18);
+        color: #ffe4e6;
         font-weight: 700;
         cursor: pointer;
       }
-      .logout-btn:hover { background: rgba(0,0,0,.28); }
+      .logout-btn:hover { background: rgba(127,29,29,.28); }
+
+      .toast {
+        position: fixed;
+        top: 18px;
+        right: 18px;
+        z-index: 1200;
+        min-width: 260px;
+        max-width: 360px;
+        border-radius: 12px;
+        padding: 10px 12px;
+        border: 1px solid var(--accent);
+        background: rgba(0, 100, 101, .92);
+        color: #e6fffd;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+        animation: toast-in-out 3s ease forwards;
+      }
+      .toast.error {
+        border-color: var(--pause);
+        color: #ffd4d4;
+      }
+      @keyframes toast-in-out {
+        0% { opacity: 0; transform: translateY(-10px); }
+        12% { opacity: 1; transform: translateY(0); }
+        82% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(-10px); }
+      }
 
       .login-shell {
         min-height: 100vh;
@@ -801,6 +874,172 @@
         box-shadow: 0 10px 20px rgba(0,0,0,.25);
       }
 
+
+      .dashboard-gerencia-panel {
+        padding-bottom: 18px;
+      }
+      .gerencia-widgets {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 14px;
+      }
+      .gerencia-widget {
+        background: #0a1515;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: var(--shadow-soft);
+        color: #ffffff;
+        min-height: 280px;
+        transition: transform var(--motion-fast) ease, border-color var(--motion-fast) ease;
+      }
+      .gerencia-widget.active {
+        transform: translateY(-2px);
+        border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+      }
+      .gerencia-widget-toggle {
+        all: unset;
+        display: inline-block;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        color: #ffffff;
+        font-size: .76rem;
+        padding: 4px 10px;
+        margin-bottom: 12px;
+        cursor: pointer;
+      }
+      .gerencia-widget h3 {
+        margin: 0 0 12px;
+        color: #ffffff;
+        font-size: .9rem;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+      }
+      .gerencia-billing {
+        display: grid;
+        gap: 14px;
+        margin-top: 6px;
+      }
+      .gerencia-value {
+        font-size: 1.9rem;
+        font-weight: 800;
+        color: #ffffff;
+      }
+      .gerencia-status-list,
+      .gerencia-ranking-list,
+      .gerencia-legend {
+        display: grid;
+        gap: 8px;
+      }
+      .gerencia-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        border: 1px solid rgba(255,255,255,.14);
+        border-radius: 10px;
+        padding: 8px 10px;
+        color: #ffffff;
+        background: rgba(255,255,255,.03);
+      }
+      .gerencia-chart-shell {
+        position: relative;
+        width: 100%;
+        max-width: 320px;
+        margin: 0 auto 10px;
+      }
+      .gerencia-chart-canvas {
+        width: 100% !important;
+        height: auto !important;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        color: #ffffff;
+        font-size: 12px;
+        padding: 4px 0;
+      }
+      .legend-left { display: flex; align-items: center; gap: 8px; }
+      .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: var(--legend-color, #e6fffd);
+      }
+
+
+      .mobile-bottom-nav {
+        display: none;
+      }
+      .mobile-fab {
+        display: none;
+      }
+      .mobile-fab-overlay {
+        display: none;
+      }
+      .mobile-bento {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .mobile-capsule {
+        border-radius: 24px;
+        padding: 14px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255,255,255,.14);
+        backdrop-filter: blur(10px);
+        min-height: 110px;
+      }
+      .mobile-capsule .title {
+        font-size: 13px;
+        color: #dff7f5;
+      }
+      .mobile-capsule .value {
+        margin-top: 8px;
+        font-size: 1.55rem;
+        font-weight: 800;
+        color: #ffffff;
+      }
+      .mobile-service-stack {
+        display: grid;
+        gap: 10px;
+      }
+      .mobile-service-card {
+        border-radius: 18px;
+        padding: 12px;
+        background: rgba(255,255,255,.06);
+        border: 1px solid rgba(255,255,255,.14);
+        backdrop-filter: blur(10px);
+        transition: transform var(--motion-fast) ease;
+      }
+      .mobile-service-card:active { transform: scale(.99); }
+      .status-badge {
+        display: inline-flex;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #022;
+        background: linear-gradient(135deg, #5ff5d5, #7be6ff);
+      }
+      .mobile-rep {
+        margin-top: 8px;
+        text-align: right;
+        color: #b8d8d5;
+        font-size: 12px;
+      }
+      .mobile-fab-menu {
+        position: fixed;
+        right: 18px;
+        bottom: 132px;
+        z-index: 1210;
+        background: rgba(10,21,21,.95);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 10px;
+      }
+
       @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after {
           animation: none !important;
@@ -812,6 +1051,7 @@
       @media (max-width: 1080px) {
         .card-grid, .compact-grid, .history-grid { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
         .ranking-grid { grid-template-columns: 1fr; }
+        .gerencia-widgets { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
       }
       @media (max-width: 980px) {
         .sidebar { width: 285px; }
@@ -821,7 +1061,59 @@
       }
 
       @media (max-width: 768px) {
-        .main { margin: 12px auto; padding: 0 10px 18px; }
+        .main { margin: 10px auto; padding: 0 10px 110px; }
+        .dashboard-gerencia-panel { padding-bottom: 96px; }
+        .sidebar { display: none; }
+        .burger { display: none !important; }
+        .top-search { display: none !important; }
+        .mobile-bottom-nav {
+          position: fixed;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          height: 72px;
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          z-index: 1205;
+          background: rgba(4,22,22,.95);
+          border-top: 1px solid var(--line);
+          backdrop-filter: blur(14px);
+        }
+        .mobile-bottom-nav button {
+          border: 0;
+          border-radius: 0;
+          background: transparent;
+          color: #dff7f5;
+          display: grid;
+          place-items: center;
+          font-size: 11px;
+          gap: 2px;
+          padding: 6px 0;
+        }
+        .mobile-bottom-nav button.active { color: #5ff5d5; }
+        .mobile-fab {
+          position: fixed;
+          right: 18px;
+          bottom: 84px;
+          width: 58px;
+          height: 58px;
+          border-radius: 999px;
+          border: 1px solid var(--line);
+          background: linear-gradient(135deg, #0d8f88, #0a6f6a);
+          color: #fff;
+          font-size: 30px;
+          z-index: 1210;
+          display: grid;
+          place-items: center;
+          box-shadow: 0 12px 24px rgba(0,0,0,.25);
+        }
+        .mobile-fab-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0,0,0,.2);
+          z-index: 1208;
+          display: block;
+        }
         .panel { padding: 14px; border-radius: 16px; }
         .service-card { padding: 12px; border-radius: 14px; }
         .hero { padding: 34px 14px; border-radius: 16px; }
@@ -845,6 +1137,15 @@
           max-height: 44vh;
         }
         .burger { width: 40px; height: 40px; border-radius: 12px; }
+        .toast {
+          top: auto;
+          right: 10px;
+          left: 10px;
+          bottom: 82px;
+          min-width: 0;
+          max-width: none;
+        }
+        .gerencia-widgets { grid-template-columns: 1fr; }
         .card-grid,
         .compact-grid,
         .history-grid {
@@ -876,12 +1177,14 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
   </head>
   <body>
     <div id="root"></div>
 
     <script type="text/babel">
-      const { useDeferredValue, useEffect, useMemo, useState } = React;
+      const { useDeferredValue, useEffect, useMemo, useRef, useState } = React;
 
       const firebaseConfig = {
         apiKey: 'AIzaSyCXTX7h33uCXK4K8FSSnD7PcoayjAGV9x4',
@@ -917,7 +1220,8 @@
         duracionContratoMeses: '',
         otroServicioGrupo: 'No tiene servicio del Grupo',
 
-        representanteComercial: 'Gastón Silva',
+        representanteComercial: '',
+        creadoPor: '',
         personaReferenteComision: '',
         condicionEquipamiento: 'Compra',
         condicionEquipamientoOtro: '',
@@ -950,6 +1254,8 @@
       };
 
       const obraInicial = {
+        representanteComercial: '',
+        creadoPor: '',
         razonSocial: '',
         rut: '',
         mailFacturacion: '',
@@ -962,6 +1268,8 @@
       };
 
       const novacionInicial = {
+        representanteComercial: '',
+        creadoPor: '',
         nombreServicio: '',
         duracionNuevoContratoMeses: '',
         nuevoImporteNovacion: '',
@@ -1060,11 +1368,139 @@
         );
       }
 
+
+      function PieChartWidget({ chartId, title, items }) {
+        const canvasRef = useRef(null);
+
+        useEffect(() => {
+          if (!canvasRef.current || !window.Chart) return () => {};
+          const filtered = items.filter((i) => i.value > 0);
+          const palette = ['#34d399', '#60a5fa', '#f59e0b', '#a78bfa', '#f472b6', '#22d3ee', '#f87171', '#84cc16'];
+          const dataItems = filtered.length > 0 ? filtered : [{ name: 'Sin datos', value: 1 }];
+          const chart = new window.Chart(canvasRef.current, {
+            type: 'pie',
+            data: {
+              labels: dataItems.map((i) => i.name),
+              datasets: [{
+                data: dataItems.map((i) => i.value),
+                backgroundColor: dataItems.map((_, idx) => palette[idx % palette.length]),
+                borderWidth: 1,
+                borderColor: 'rgba(255,255,255,.16)',
+              }],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              aspectRatio: 1,
+              plugins: {
+                legend: {
+                  position: 'bottom',
+                  labels: {
+                    color: '#ffffff',
+                    boxWidth: 10,
+                    boxHeight: 10,
+                    padding: 14,
+                  },
+                },
+              },
+            },
+          });
+          return () => chart.destroy();
+        }, [items]);
+
+        return (
+          <div>
+            <h3>{title}</h3>
+            <div className="gerencia-chart-shell">
+              <canvas ref={canvasRef} className="gerencia-chart-canvas" aria-label={`${title}-${chartId}`} />
+            </div>
+          </div>
+        );
+      }
+
+      function DashboardGerencia({ rows }) {
+        const [activeWidget, setActiveWidget] = useState('facturacion');
+
+        const totalAbonos = rows.reduce((acc, r) => acc + (Number(r.importeMensualServicioSinIva) || 0), 0);
+        const totalVentasEquipos = rows.reduce((acc, r) => acc + (Number(r.costoInstalacionUsdSinIva) || 0), 0);
+
+        const actionCounts = ACCIONES.map((name) => ({ name, value: rows.filter((r) => (r.tipoAccion || '') === name).length }));
+        const statusCounts = STATUS_OPTIONS.map((name) => ({ name, value: rows.filter((r) => (r.status || '') === name).length }));
+
+        const comercialRanking = rows.reduce((acc, row) => {
+          const rep = (row.representanteComercial || 'Sin asignar').trim();
+          acc[rep] = (acc[rep] || 0) + 1;
+          return acc;
+        }, {});
+        const rankingList = Object.entries(comercialRanking)
+          .map(([name, value]) => ({ name, value }))
+          .sort((a, b) => b.value - a.value);
+        const topSeller = rankingList[0] || { name: 'Sin datos', value: 0 };
+        const lowSeller = rankingList[rankingList.length - 1] || { name: 'Sin datos', value: 0 };
+
+        return (
+          <section className="panel dashboard-gerencia-panel">
+            <h2>Dashboard Gerencia</h2>
+            <div className="hint">Vista ejecutiva con widgets de facturación, status, acciones y ranking comercial.</div>
+
+            <div className="gerencia-widgets">
+              <article className={`gerencia-widget ${activeWidget === 'facturacion' ? 'active' : ''}`}>
+                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('facturacion')}>Widget de Facturación</button>
+                <h3>Facturación</h3>
+                <div className="gerencia-billing">
+                  <div>
+                    <div className="hint" style={{ marginBottom: 4, color: '#ffffff' }}>Total Abonos Mensuales</div>
+                    <div className="gerencia-value">US$ {totalAbonos.toLocaleString('es-UY')}</div>
+                  </div>
+                  <div>
+                    <div className="hint" style={{ marginBottom: 4, color: '#ffffff' }}>Total Ventas Equipos</div>
+                    <div className="gerencia-value">US$ {totalVentasEquipos.toLocaleString('es-UY')}</div>
+                  </div>
+                </div>
+              </article>
+
+              <article className={`gerencia-widget ${activeWidget === 'status' ? 'active' : ''}`}>
+                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('status')}>Widget de Status</button>
+                <h3>Servicios por Estado</h3>
+                <div className="gerencia-status-list">
+                  {statusCounts.map((item) => (
+                    <div className="gerencia-item" key={`status-${item.name}`}>
+                      <span>{item.name}</span>
+                      <b>{item.value}</b>
+                    </div>
+                  ))}
+                </div>
+              </article>
+
+              <article className={`gerencia-widget ${activeWidget === 'acciones' ? 'active' : ''}`}>
+                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('acciones')}>Widget de Acciones</button>
+                <PieChartWidget chartId="acciones" title="Tipos de Servicio" items={actionCounts} />
+              </article>
+
+              <article className={`gerencia-widget ${activeWidget === 'ranking' ? 'active' : ''}`}>
+                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('ranking')}>Widget Ranking Comercial</button>
+                <h3>Ranking Comercial</h3>
+                <div className="gerencia-ranking-list" style={{ marginBottom: 10 }}>
+                  <div className="gerencia-item"><span>Mayor vendedor</span><b>{topSeller.name} · {topSeller.value}</b></div>
+                  <div className="gerencia-item"><span>Menor vendedor</span><b>{lowSeller.name} · {lowSeller.value}</b></div>
+                </div>
+                <PieChartWidget chartId="status" title="Distribución por STATUS" items={statusCounts} />
+              </article>
+            </div>
+          </section>
+        );
+      }
+
       function App() {
         const [menuOpen, setMenuOpen] = useState(false);
         const [openMenus, setOpenMenus] = useState({ nuevo: false, fact: false });
         const [user, setUser] = useState(null);
         const [authLoading, setAuthLoading] = useState(true);
+        const [userRole, setUserRole] = useState('');
+        const [userArea, setUserArea] = useState('');
+        const [userData, setUserData] = useState({ nombre: '', rol: '', area: '' });
+        const [roleLoading, setRoleLoading] = useState(true);
+        const [notificacion, setNotificacion] = useState({ mensaje: '', tipo: '' });
 
         const [tipoAccion, setTipoAccion] = useState('');
         const [selectedForm, setSelectedForm] = useState('home');
@@ -1095,6 +1531,10 @@
         const [searchTerm, setSearchTerm] = useState('');
         const [expandedId, setExpandedId] = useState(null);
         const [selectedService, setSelectedService] = useState(null);
+        const [editingServiceId, setEditingServiceId] = useState(null);
+        const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
+        const [mobileTab, setMobileTab] = useState('home');
+        const [fabOpen, setFabOpen] = useState(false);
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
@@ -1201,6 +1641,21 @@
           return new Date().toLocaleString('es-UY', { dateStyle: 'medium', timeStyle: 'short' });
         }
 
+        function formatUruguayDateTime() {
+          return new Date().toLocaleString('es-UY', {
+            timeZone: 'America/Montevideo',
+            dateStyle: 'short',
+            timeStyle: 'medium',
+          });
+        }
+
+        function formatLogDate(value) {
+          if (!value) return '-';
+          if (typeof value.toDate === 'function') return value.toDate().toLocaleString('es-UY', { timeZone: 'America/Montevideo' });
+          const parsed = new Date(value);
+          return Number.isNaN(parsed.getTime()) ? String(value) : parsed.toLocaleString('es-UY', { timeZone: 'America/Montevideo' });
+        }
+
         async function handleDownloadPdf(service) {
           if (!service || !window.jspdf?.jsPDF) {
             alert('No se pudo cargar el generador de PDF.');
@@ -1279,17 +1734,161 @@
         }, [user]);
 
         useEffect(() => {
-          const unsub = auth.onAuthStateChanged((currentUser) => {
+          const unsub = auth.onAuthStateChanged(async (currentUser) => {
             setUser(currentUser);
             setAuthLoading(false);
+
+            if (!currentUser) {
+              setUserRole('');
+              setUserArea('');
+              setUserData({ nombre: '', rol: '', area: '' });
+              setRoleLoading(false);
+              return;
+            }
+
+            setRoleLoading(true);
+            try {
+              let profile = null;
+              const byId = await db.collection('config_usuarios').doc(currentUser.email || currentUser.uid).get();
+              if (byId.exists) profile = byId.data();
+
+              if (!profile && currentUser.email) {
+                const snap = await db.collection('config_usuarios').where('email', '==', currentUser.email).limit(1).get();
+                if (!snap.empty) profile = snap.docs[0].data();
+              }
+
+              const rol = (profile?.rol || 'admin').toLowerCase();
+              const area = (profile?.area || '').toLowerCase();
+              const nombre = String(profile?.nombre || currentUser.displayName || (currentUser.email || '').split('@')[0] || 'Usuario').trim();
+              setUserRole(rol);
+              setUserArea(area);
+              setUserData({ nombre, rol, area });
+              if ((profile?.rol || '').toLowerCase() === 'gerentes') {
+                setSelectedForm('dashboard-gerencia');
+              }
+            } catch (err) {
+              console.error('Error leyendo config_usuarios:', err);
+              setUserRole('admin');
+              setUserArea('');
+              setUserData({ nombre: (currentUser?.email || 'admin').split('@')[0], rol: 'admin', area: '' });
+            } finally {
+              setRoleLoading(false);
+            }
           });
           return () => unsub();
         }, []);
 
+        useEffect(() => {
+          if (!notificacion.mensaje) return;
+          const timer = setTimeout(() => setNotificacion({ mensaje: '', tipo: '' }), 3000);
+          return () => clearTimeout(timer);
+        }, [notificacion]);
+
+        useEffect(() => {
+          function onResize() {
+            const mobile = window.innerWidth <= 768;
+            setIsMobile(mobile);
+            if (!mobile) setFabOpen(false);
+          }
+          window.addEventListener('resize', onResize);
+          onResize();
+          return () => window.removeEventListener('resize', onResize);
+        }, []);
+
+        useEffect(() => {
+          if (window.lucide?.createIcons) window.lucide.createIcons();
+        }, [mobileTab, selectedForm, fabOpen, rows.length]);
+
+        const isGerencia = userRole === 'gerentes';
+        const isVendedor = userRole.includes('vendedor');
+
+        const topbarSubtitle = useMemo(() => {
+          if (userRole === 'gerentes') return 'Dashboard Gerencia';
+          if (userRole === 'admin') return 'Administrador';
+          if (userArea === 'comercial' || isVendedor) return 'Área Comercial';
+          if (userArea === 'tecnica') return 'Área Técnica';
+          return 'Área Técnica y Comercial';
+        }, [userRole, userArea, isVendedor]);
+
+        useEffect(() => {
+          if (isGerencia && selectedForm !== 'dashboard-gerencia') {
+            setSelectedForm('dashboard-gerencia');
+            setSelectedService(null);
+            setTipoAccion('');
+          }
+        }, [isGerencia, selectedForm]);
+
+        const effectiveSelectedForm = isGerencia ? 'dashboard-gerencia' : selectedForm;
+
+        const [formOpenAudit, setFormOpenAudit] = useState(null);
+        const currentUserName = useMemo(() => (userData.nombre || (user?.email || '').split('@')[0] || 'Usuario').trim(), [userData, user]);
+        const isAdminUser = userRole === 'admin';
+        const isSalesOrTechUser = /vendedor|tecnic/.test(userRole) || /tecnic/.test(userArea);
+        const lockCommercialField = isSalesOrTechUser && !isAdminUser;
+        const isTechnicalUser = /tecnic/.test(userRole) || /tecnic/.test(userArea);
+        const isCommercialUser = userArea === 'comercial' || userRole.includes('vendedor');
+
+        function canEditService(service) {
+          if (!service) return false;
+          if (isAdminUser) return true;
+          const current = String(currentUserName || '').trim();
+          const creator = String(service.creadoPor || '').trim();
+          const owner = String(service.representanteComercial || '').trim();
+          return current !== '' && (current === creator || current === owner);
+        }
+
+        function startEditService(service) {
+          if (!canEditService(service)) return;
+          const action = service.tipoAccion || 'Nuevo Servicio';
+          setEditingServiceId(service.id || null);
+          setSelectedService(service);
+          setStatus(service.status || 'Pendiente');
+          setTipoAccion(action);
+
+          const stamp = formatUruguayDateTime();
+          setServicioForm({ ...servicioInicial, ...service, representanteComercial: service.representanteComercial || currentUserName, creadoPor: service.creadoPor || currentUserName, fechaIngresoDatos: service.fechaIngresoDatos || stamp });
+          setObraForm({ ...obraInicial, ...service, representanteComercial: service.representanteComercial || currentUserName, creadoPor: service.creadoPor || currentUserName });
+          setNovacionForm({ ...novacionInicial, ...service, representanteComercial: service.representanteComercial || currentUserName, creadoPor: service.creadoPor || currentUserName });
+
+          if (['Nuevo Servicio', 'Obra'].includes(action)) {
+            setClienteId(service.clienteId || generarClienteId());
+            setClienteIdAsociado('');
+            setSelectedForm('servicio');
+          } else {
+            setClienteId('');
+            setClienteIdAsociado(service.clienteId || '');
+            setSelectedForm('other');
+          }
+        }
+
+        function applyUserDefaultsToForms() {
+          const stamp = formatUruguayDateTime();
+          setServicioForm((prev) => ({ ...prev, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: prev.fechaIngresoDatos || stamp }));
+          setObraForm((prev) => ({ ...prev, representanteComercial: currentUserName, creadoPor: currentUserName }));
+          setNovacionForm((prev) => ({ ...prev, representanteComercial: currentUserName, creadoPor: currentUserName }));
+        }
+
+        function captureFormOpen(action) {
+          const payload = {
+            accion: action,
+            nombreUsuario: currentUserName,
+            rol: userRole || userData.rol || 'sin-rol',
+            fechaHoraUy: formatUruguayDateTime(),
+          };
+          setFormOpenAudit(payload);
+          console.info('[AUDITORIA_FORMULARIO]', payload);
+        }
+
+        useEffect(() => {
+          applyUserDefaultsToForms();
+        }, [currentUserName, isAdminUser, isSalesOrTechUser]);
+
         function resetFields() {
           setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('Pendiente');
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
-          setServicioForm(servicioInicial); setObraForm(obraInicial); setNovacionForm(novacionInicial); setAgregadoForm(agregadoInicial); setMovimientoForm(movimientoInicial); setBajaForm(bajaInicial); setCharlaForm(charlaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
+          setEditingServiceId(null);
+          const stamp = formatUruguayDateTime();
+          setServicioForm({ ...servicioInicial, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: stamp }); setObraForm({ ...obraInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setNovacionForm({ ...novacionInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setAgregadoForm(agregadoInicial); setMovimientoForm(movimientoInicial); setBajaForm(bajaInicial); setCharlaForm(charlaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
         }
 
         function setServicioField(key, value) {
@@ -1343,6 +1942,10 @@
             setClienteId('');
           }
           setSelectedForm(['Nuevo Servicio', 'Obra'].includes(action) ? 'servicio' : 'other');
+          if (['Nuevo Servicio', 'Obra', 'Novación'].includes(action)) {
+            captureFormOpen(action);
+            applyUserDefaultsToForms();
+          }
           closeSidebar();
         }
 
@@ -1350,25 +1953,25 @@
           e.preventDefault();
           if (selectedForm === 'home') return;
           if (!effectiveClienteId) return alert('Debes indicar un Cliente ID asociado para esta acción.');
-          const doc = { tipoAccion, clienteId: effectiveClienteId, status, creadoEn: firebase.firestore.FieldValue.serverTimestamp() };
+          const doc = { tipoAccion, clienteId: effectiveClienteId, status, creadoEn: firebase.firestore.FieldValue.serverTimestamp(), creadoPor: currentUserName, logs_cambios: [] };
 
           if (grupo === 'servicio') {
             if (!servicioForm.nombreServicio || !servicioForm.razonSocial || !servicioForm.rut || !servicioForm.fechaAltaServicio) {
               return alert('Completá al menos: Nombre del servicio, Razón social, RUT y Fecha de alta.');
             }
-            Object.assign(doc, { ...servicioForm, formulario: 'nuevo-servicio-optimizado' });
+            Object.assign(doc, { ...servicioForm, formulario: 'nuevo-servicio-optimizado', creadoPor: servicioForm.creadoPor || currentUserName, auditoriaApertura: formOpenAudit });
           }
           if (grupo === 'obra') {
             if (!obraForm.razonSocial || !obraForm.rut || !obraForm.mailFacturacion || !obraForm.nombreServicio || !obraForm.fechaAlta) {
               return alert('Completá al menos: Razón social, RUT, Mail, Nombre de servicio y Fecha de alta.');
             }
-            Object.assign(doc, { ...obraForm, formulario: 'servicio-obra' });
+            Object.assign(doc, { ...obraForm, formulario: 'servicio-obra', creadoPor: obraForm.creadoPor || currentUserName, auditoriaApertura: formOpenAudit });
           }
           if (grupo === 'novacion') {
             if (!novacionForm.nombreServicio || !novacionForm.duracionNuevoContratoMeses) {
               return alert('Completá al menos: Nombre del servicio y Duración del nuevo contrato.');
             }
-            Object.assign(doc, { ...novacionForm, formulario: 'novacion' });
+            Object.assign(doc, { ...novacionForm, formulario: 'novacion', creadoPor: novacionForm.creadoPor || currentUserName, auditoriaApertura: formOpenAudit });
           }
           if (grupo === 'agregado') {
             if (!agregadoForm.nombreServicio || !agregadoForm.fechaAltaAdicional) {
@@ -1399,19 +2002,67 @@
             Object.assign(doc, { ...charlaForm, formulario: 'charla-informativa' });
           }
 
-          try {
-            setSaving(true);
-            await db.collection('operaciones').add(doc);
-            resetFields();
-          } catch (error) {
-            console.error('Error guardando:', error);
-            alert('No se pudo guardar en operaciones.');
-          } finally {
-            setSaving(false);
-          }
+          setSaving(true);
+          const nextLog = {
+            fecha: new Date().toISOString(),
+            usuario: currentUserName,
+            accion: 'Actualización de datos',
+          };
+          const existingLogs = Array.isArray(selectedService?.logs_cambios) ? selectedService.logs_cambios : [];
+
+          const payload = editingServiceId
+            ? { ...doc, actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(), editadoPor: currentUserName, logs_cambios: [...existingLogs, nextLog] }
+            : { ...doc, logs_cambios: [] };
+
+          const writeOp = editingServiceId
+            ? db.collection('operaciones').doc(editingServiceId).set(payload, { merge: true })
+            : db.collection('operaciones').add(payload);
+
+          writeOp
+            .then(() => {
+              resetFields();
+              setNotificacion({ mensaje: editingServiceId ? '✔ Servicio actualizado correctamente' : '✔ Datos guardados correctamente', tipo: 'ok' });
+            })
+            .catch((error) => {
+              console.error('Error guardando:', error);
+              setNotificacion({ mensaje: '✖ Error al guardar datos', tipo: 'error' });
+            })
+            .finally(() => {
+              setSaving(false);
+            });
         }
 
-        if (authLoading) {
+        function renderMobileHome() {
+          return (
+            <section className="panel" style={{ background: 'transparent', border: 0, padding: 0, boxShadow: 'none' }}>
+              <div className="mobile-bento">
+                <article className="mobile-capsule"><div className="title">Servicios</div><div className="value">{rows.length}</div></article>
+                <article className="mobile-capsule"><div className="title">Pendientes</div><div className="value">{kpiStats.pending}</div></article>
+                <article className="mobile-capsule"><div className="title">En curso</div><div className="value">{kpiStats.inprogress}</div></article>
+                <article className="mobile-capsule"><div className="title">Completados</div><div className="value">{kpiStats.completed}</div></article>
+              </div>
+            </section>
+          );
+        }
+
+        function renderMobileServices() {
+          return (
+            <section className="panel" style={{ background: 'transparent', border: 0, padding: 0, boxShadow: 'none' }}>
+              <div className="mobile-service-stack">
+                {rows.slice(0, 30).map((r) => (
+                  <article key={r.id} className="mobile-service-card" onClick={() => { setSelectedService(r); setSelectedForm('historial'); }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
+                      <strong>{r.nombreServicio || r.cliente || 'Servicio sin nombre'}</strong>
+                      <span className="status-badge">{r.status || 'Pendiente'}</span>
+                    </div>
+                    <div className="mobile-rep">{r.representanteComercial || 'Sin representante'}</div>
+                  </article>
+                ))}
+              </div>
+            </section>
+          );
+        }
+        if (authLoading || roleLoading) {
           return <div className="login-shell"><div className="login-panel"><h2>Cargando...</h2></div></div>;
         }
 
@@ -1424,75 +2075,86 @@
             <aside className={`sidebar ${menuOpen ? 'open' : ''}`}>
               <div className="sidebar-header">MENÚ OPERATIVO</div>
               <div className="menu">
-                <button className="menu-button" onClick={() => { setSelectedForm('home'); setSelectedService(null); setTipoAccion(''); closeSidebar(); }}>Inicio</button>
-                <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}>Nuevo {openMenus.nuevo ? '▾' : '▸'}</button>
-                <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
-                  <button className="submenu-button" onClick={() => selectAction('Nuevo Servicio')}>Servicio</button>
-                  <button className="submenu-button" onClick={() => selectAction('Obra')}>Obra</button>
-                  <button className="submenu-button" onClick={() => selectAction('Novación')}>Novaciones</button>
-                  <button className="submenu-button" onClick={() => selectAction('Agregado')}>Agregados</button>
-                  <button className="submenu-button" onClick={() => selectAction('Movimiento de Obra')}>Movimiento de obra</button>
-                  <button className="submenu-button" onClick={() => selectAction('Baja')}>Baja de Servicio</button>
-                </div>
-                <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, fact: !p.fact }))}>Facturación {openMenus.fact ? '▾' : '▸'}</button>
-                <div className={`submenu ${openMenus.fact ? 'open' : ''}`}>
-                  <button className="submenu-button" onClick={() => selectAction('Agregado')}>Equipos agregados</button>
-                  <button className="submenu-button" onClick={() => selectAction('Nuevo Servicio')}>Nuevo servicio</button>
-                  <button className="submenu-button" onClick={() => selectAction('Novación')}>Novaciones</button>
-                  <button className="submenu-button" onClick={() => selectAction('Obra')}>Nueva Obra</button>
-                  <button className="submenu-button" onClick={() => selectAction('Movimiento de Obra')}>Movimiento de Obra</button>
-                </div>
-                <button className="menu-button" onClick={() => selectAction('Charla')}>Charlas informativas</button>
-                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
+                <button className="menu-button" onClick={() => { setSelectedForm(isGerencia ? 'dashboard-gerencia' : 'home'); setSelectedService(null); setTipoAccion(''); closeSidebar(); }}>Inicio</button>
+                {!isGerencia && !isMobile && (
+                  <>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}>Nuevo {openMenus.nuevo ? '▾' : '▸'}</button>
+                    <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
+                      <button className="submenu-button" onClick={() => selectAction('Nuevo Servicio')}>Servicio</button>
+                      <button className="submenu-button" onClick={() => selectAction('Obra')}>Obra</button>
+                      <button className="submenu-button" onClick={() => selectAction('Novación')}>Novaciones</button>
+                      <button className="submenu-button" onClick={() => selectAction('Agregado')}>Agregados</button>
+                      <button className="submenu-button" onClick={() => selectAction('Movimiento de Obra')}>Movimiento de obra</button>
+                      <button className="submenu-button" onClick={() => selectAction('Baja')}>Baja de Servicio</button>
+                    </div>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, fact: !p.fact }))}>Facturación {openMenus.fact ? '▾' : '▸'}</button>
+                    <div className={`submenu ${openMenus.fact ? 'open' : ''}`}>
+                      <button className="submenu-button" onClick={() => selectAction('Agregado')}>Equipos agregados</button>
+                      <button className="submenu-button" onClick={() => selectAction('Nuevo Servicio')}>Nuevo servicio</button>
+                      <button className="submenu-button" onClick={() => selectAction('Novación')}>Novaciones</button>
+                      <button className="submenu-button" onClick={() => selectAction('Obra')}>Nueva Obra</button>
+                      <button className="submenu-button" onClick={() => selectAction('Movimiento de Obra')}>Movimiento de Obra</button>
+                    </div>
+                    <button className="menu-button" onClick={() => selectAction('Charla')}>Charlas informativas</button>
+                    <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
+                  </>
+                )}
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
               </div>
             </aside>
 
-            <div className={`overlay ${menuOpen ? 'show' : ''}`} onClick={closeSidebar} />
+            <div className={`overlay ${(menuOpen || fabOpen) ? 'show' : ''}`} onClick={() => { closeSidebar(); setFabOpen(false); }} />
+            {notificacion.mensaje && (
+              <div className={`toast ${notificacion.tipo === 'error' ? 'error' : ''}`}>{notificacion.mensaje}</div>
+            )}
 
             <div className={`content ${menuOpen ? 'shift' : ''}`}>
               <header className="topbar">
-                <button className="burger" aria-label="Abrir menú" onClick={toggleSidebar} />
+                {!isMobile && <button className="burger" aria-label="Abrir menú" onClick={toggleSidebar} />}
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
-                  <p className="subtitle-voga">ÁREA TÉCNICA Y COMERCIAL</p>
+                  <p className="subtitle-voga">{topbarSubtitle}</p>
                 </div>
-                <div className="top-search">
-                  <div className="search-wrap">
-                    <span className="search-icon">🔍</span>
-                    <input
-                      type="text"
-                      placeholder="Buscar cliente, ID, razón social o dirección..."
-                      value={searchTerm}
-                      onChange={(e) => { setSearchTerm(e.target.value); setExpandedId(null); }}
-                    />
-                    {searchTerm.trim() !== '' && (
-                      <div className="search-preview">
-                        {filteredRows.length === 0 ? (
-                          <div className="search-item"><small>Sin resultados.</small></div>
-                        ) : (
-                          filteredRows.slice(0, 8).map((r) => (
-                            <div key={r.id}>
-                              <div className="search-item" onClick={() => { setSelectedService(r); setSelectedForm('historial'); setExpandedId(null); setSearchTerm(''); }}>
-                                <strong>{r.clienteId || '-'} · {r.nombreServicio || 'Servicio sin nombre'}</strong>
-                                <small>Fecha de alta: {r.fechaAlta || '-'}</small>
-                              </div>
-                              {expandedId === r.id && (
-                                <div className="search-detail">
-                                  <div className="detail-box">{buildServiceDetailText(r)}</div>
+                {!isGerencia && (
+                  <div className="top-search">
+                    <div className="search-wrap">
+                      <span className="search-icon">🔍</span>
+                      <input
+                        type="text"
+                        placeholder="Buscar cliente, ID, razón social o dirección..."
+                        value={searchTerm}
+                        onChange={(e) => { setSearchTerm(e.target.value); setExpandedId(null); }}
+                      />
+                      {searchTerm.trim() !== '' && (
+                        <div className="search-preview">
+                          {filteredRows.length === 0 ? (
+                            <div className="search-item"><small>Sin resultados.</small></div>
+                          ) : (
+                            filteredRows.slice(0, 8).map((r) => (
+                              <div key={r.id}>
+                                <div className="search-item" onClick={() => { setSelectedService(r); setSelectedForm('historial'); setExpandedId(null); setSearchTerm(''); }}>
+                                  <strong>{r.clienteId || '-'} · {r.nombreServicio || 'Servicio sin nombre'}</strong>
+                                  <small>Fecha de alta: {r.fechaAlta || '-'}</small>
                                 </div>
-                              )}
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    )}
+                                {expandedId === r.id && (
+                                  <div className="search-detail">
+                                    <div className="detail-box">{buildServiceDetailText(r)}</div>
+                                  </div>
+                                )}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </header>
 
               <main className="main">
-                {selectedForm === 'home' ? (
+                {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : isMobile && mobileTab === 'mapa' ? (<section className="panel"><h2>Mapa</h2><div className="hint">Vista de mapa próxima versión.</div></section>) : isMobile && mobileTab === 'perfil' ? (<section className="panel"><h2>Mi Perfil</h2><div className="hint">{currentUserName} · {topbarSubtitle}</div></section>) : effectiveSelectedForm === 'dashboard-gerencia' ? (
+                  <DashboardGerencia rows={rows} />
+                ) : effectiveSelectedForm === 'home' ? (
                   <>
                     <section className="hero">
                       <h2>Masterson Seguridad</h2>
@@ -1553,7 +2215,7 @@
                     </section>
                   </>
 
-                ) : selectedForm === 'ranking-comercial' ? (
+                ) : effectiveSelectedForm === 'ranking-comercial' ? (
                   <section className="panel">
                     <h2>Listado de servicios por vendedor</h2>
                     <div className="ranking-toolbar">
@@ -1577,19 +2239,35 @@
                               <div className="hint" style={{ color: '#d1faf5', marginBottom: 0 }}>Sin servicios en esta sección.</div>
                             ) : (
                               <div className="ranking-services">
-                                {list.map((service) => (
-                                  <button
-                                    type="button"
-                                    key={service.id}
-                                    className="ranking-service-btn"
-                                    onClick={() => {
-                                      setSelectedService(service);
-                                      setSelectedForm('historial');
-                                    }}
-                                  >
-                                    {service.nombreServicio || 'Servicio sin nombre'} · ID {service.clienteId || '-'}
-                                  </button>
-                                ))}
+                                {list.map((service) => {
+                                  const allowedEdit = canEditService(service);
+                                  const showRestriction = !isAdminUser && !allowedEdit;
+                                  return (
+                                    <div className="ranking-service-row" key={service.id}>
+                                      <button
+                                        type="button"
+                                        className="ranking-service-btn"
+                                        onClick={() => {
+                                          setSelectedService(service);
+                                          setSelectedForm('historial');
+                                        }}
+                                      >
+                                        {service.nombreServicio || 'Servicio sin nombre'} · ID {service.clienteId || '-'}
+                                      </button>
+                                      <div className="ranking-service-actions">
+                                        <button
+                                          type="button"
+                                          className="edit-btn"
+                                          disabled={!allowedEdit}
+                                          onClick={() => startEditService(service)}
+                                        >
+                                          {allowedEdit ? '✎ Editar servicio' : '🔒 Editar'}
+                                        </button>
+                                        {showRestriction && <span className="lock-hint">🔒 Solo lectura</span>}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
                               </div>
                             )}
                           </div>
@@ -1597,10 +2275,39 @@
                       })}
                     </div>
                   </section>
-) : selectedForm === 'historial' ? (
+) : effectiveSelectedForm === 'historial' ? (
                   <section className="panel">
                     <h2>Historial de Servicios · Vista Ejecutiva</h2>
-                    <div className="hint">Vista completa del servicio seleccionado desde la vista previa de búsqueda.</div>
+                    <div className="hint">Lista completa visible para todos los usuarios. Selecciona un servicio para ver su detalle.</div>
+                    <section className="panel" style={{ background: 'rgba(255,255,255,.04)', marginBottom: 12 }}>
+                      <h3 style={{ marginTop: 0 }}>Servicios ({rows.length})</h3>
+                      <div className="ranking-services">
+                        {rows.map((service) => {
+                          const allowedEdit = canEditService(service);
+                          return (
+                            <div className="ranking-service-row" key={`hist-${service.id}`}>
+                              <button
+                                type="button"
+                                className="ranking-service-btn"
+                                onClick={() => setSelectedService(service)}
+                              >
+                                <b>{service.nombreServicio || service.cliente || 'Servicio sin nombre'}</b> · ID {service.clienteId || '-'}
+                              </button>
+                              <div className="ranking-service-actions">
+                                <button
+                                  type="button"
+                                  className="edit-btn"
+                                  disabled={!allowedEdit}
+                                  onClick={() => startEditService(service)}
+                                >
+                                  {allowedEdit ? '✎ Editar servicio' : '🔒 Solo lectura'}
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </section>
                     {!selectedService ? (
                       <div className="hero" style={{padding: '26px 18px'}}>
                         <h2 style={{fontSize:'1.4rem'}}>Selecciona un servicio desde la búsqueda</h2>
@@ -1608,8 +2315,17 @@
                       </div>
                     ) : (
                       <>
-                        <div className="pdf-toolbar">
+                        <div className="pdf-toolbar" style={{ gap: 8, flexWrap: 'wrap' }}>
                           <button className="pdf-btn" type="button" onClick={() => handleDownloadPdf(selectedService)}>📄 Descargar PDF</button>
+                          <button
+                            className="edit-btn"
+                            type="button"
+                            disabled={!canEditService(selectedService)}
+                            onClick={() => startEditService(selectedService)}
+                          >
+                            {canEditService(selectedService) ? '✎ Editar servicio' : '🔒 Editar'}
+                          </button>
+                          {!isAdminUser && !canEditService(selectedService) && <span className="lock-hint">🔒 Solo lectura</span>}
                         </div>
                         <div className="history-grid">
                         <div className="widget"><h4>Identificación</h4><div className="kv"><b>ID:</b> {selectedService.clienteId || '-'}</div><div className="kv"><b>Nombre:</b> {selectedService.nombreServicio || '-'}</div><div className="kv"><b>Tipo:</b> {selectedService.tipoServicioBrindar || '-'}</div><div className="kv"><b>Dirección:</b> {selectedService.direccionServicio || '-'}</div><div className="kv"><b>Unidades:</b> {selectedService.cantidadUnidades || '-'}</div></div>
@@ -1621,6 +2337,29 @@
                         <div className="widget full"><h4>Observaciones y Excepciones</h4><div className="detail-box">Observaciones: {selectedService.observacionesComentarios || '-'}
 
 Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
+                        <div className="widget full">
+                          <h4>Micro-Historial de Cambios</h4>
+                          {!Array.isArray(selectedService.logs_cambios) || selectedService.logs_cambios.length === 0 ? (
+                            <div className="hint" style={{ marginBottom: 0 }}>Sin cambios registrados aún.</div>
+                          ) : (
+                            <ul className="micro-log-list">
+                              {selectedService.logs_cambios
+                                .slice()
+                                .sort((a, b) => {
+                                  const av = a?.fecha;
+                                  const bv = b?.fecha;
+                                  const at = av && typeof av.toDate === 'function' ? av.toDate().getTime() : new Date(av || 0).getTime();
+                                  const bt = bv && typeof bv.toDate === 'function' ? bv.toDate().getTime() : new Date(bv || 0).getTime();
+                                  return at - bt;
+                                })
+                                .map((log, idx) => (
+                                  <li key={`log-${idx}`} className="micro-log-item">
+                                    {formatLogDate(log?.fecha)} · {log?.usuario || '-'} · {log?.accion || 'Actualización de datos'}
+                                  </li>
+                                ))}
+                            </ul>
+                          )}
+                        </div>
                       </div>
                       </>
                     )}
@@ -1638,6 +2377,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID</label><input value={clienteId} readOnly type="text" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                            <div className="field"><label>Representante Comercial</label><input value={servicioForm.representanteComercial} onChange={(e) => setServicioField('representanteComercial', e.target.value)} type="text" readOnly={lockCommercialField} /></div>
                           </div>
                         </div>
 
@@ -1677,7 +2417,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           </div>
                         </div>
 
-                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     ) : grupo === 'obra' ? (
                       <div className="service-layout">
@@ -1686,6 +2426,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID</label><input value={clienteId} readOnly type="text" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                            <div className="field"><label>Representante Comercial</label><input value={obraForm.representanteComercial} onChange={(e) => setObraField('representanteComercial', e.target.value)} type="text" readOnly={lockCommercialField} /></div>
                           </div>
                         </div>
 
@@ -1716,7 +2457,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           </div>
                         </div>
 
-                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     ) : grupo === 'novacion' ? (
                       <div className="service-layout bento-grid facturacion-module">
@@ -1725,6 +2466,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                            <div className="field"><label>Representante Comercial</label><input value={novacionForm.representanteComercial} onChange={(e) => setNovacionField('representanteComercial', e.target.value)} type="text" readOnly={lockCommercialField} /></div>
                           </div>
                         </div>
 
@@ -1760,7 +2502,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           </div>
                         </div>
 
-                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     ) : grupo === 'agregado' ? (
                       <div className="service-layout">
@@ -1796,7 +2538,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           </div>
                         </div>
 
-                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     ) : grupo === 'movimiento-detalle' ? (
                       <div className="service-layout">
@@ -1825,7 +2567,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           </div>
                         </div>
 
-                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     ) : grupo === 'baja-detalle' ? (
                       <div className="service-layout">
@@ -1870,7 +2612,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           </div>
                         </div>
 
-                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     ) : grupo === 'charla-detalle' ? (
                       <div className="service-layout">
@@ -1906,7 +2648,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           </div>
                         </div>
 
-                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
 ) : (
                       <div className="compact-grid">
@@ -1918,13 +2660,31 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
 
 
 
-                        <div className="field full"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                        <div className="field full"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     )}
                   </form>
                 </section>
                 )}
               </main>
+              {isMobile && !isGerencia && (
+                <>
+                  {fabOpen && <div className="mobile-fab-overlay" onClick={() => setFabOpen(false)} />}
+                  {fabOpen && (
+                    <div className="mobile-fab-menu">
+                      <button className="edit-btn" type="button" onClick={() => { setFabOpen(false); selectAction('Nuevo Servicio'); }}>Nuevo Servicio</button>
+                    </div>
+                  )}
+                  <button className="mobile-fab" type="button" onClick={() => setFabOpen((v) => !v)} aria-label="Nuevo Servicio">+</button>
+                  <nav className="mobile-bottom-nav">
+                    <button className={mobileTab === 'home' ? 'active' : ''} type="button" onClick={() => { setMobileTab('home'); setSelectedForm('home'); }}><i data-lucide="house" />Inicio</button>
+                    <button className={mobileTab === 'servicios' ? 'active' : ''} type="button" onClick={() => { setMobileTab('servicios'); setSelectedForm('home'); }}><i data-lucide="layers" />Servicios</button>
+                    <button className={mobileTab === 'mapa' ? 'active' : ''} type="button" onClick={() => { setMobileTab('mapa'); setSelectedForm('home'); }}><i data-lucide="map" />Mapa</button>
+                    <button className={mobileTab === 'perfil' ? 'active' : ''} type="button" onClick={() => { setMobileTab('perfil'); setSelectedForm('home'); }}><i data-lucide="user-circle" />Mi Perfil</button>
+                  </nav>
+                </>
+              )}
+
             </div>
           </div>
         );
