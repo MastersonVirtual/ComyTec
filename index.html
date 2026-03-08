@@ -503,6 +503,10 @@
         display: grid;
         grid-template-columns: repeat(4, minmax(160px, 1fr));
         gap: 18px;
+        align-items: start;
+      }
+      .kpi-card-wrap {
+        position: relative;
       }
       .kpi-card {
         border-radius: 14px;
@@ -528,7 +532,7 @@
         letter-spacing: .08em;
       }
       .kpi-breakdown {
-        margin-top: 16px;
+        margin-top: 10px;
         border-radius: 14px;
         padding: 14px;
         background: #006465;
@@ -549,6 +553,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
         gap: 12px;
         padding: 10px 12px;
         border-radius: 10px;
@@ -568,6 +573,32 @@
       }
       .kpi-breakdown-count {
         font-weight: 700;
+        background: transparent;
+        border: 0;
+        color: #e6fffd;
+        cursor: pointer;
+        padding: 0;
+      }
+      .kpi-breakdown-services {
+        width: 100%;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dashed rgba(230,255,253,.4);
+        display: grid;
+        gap: 6px;
+      }
+      .kpi-service-link {
+        text-align: left;
+        border: 0;
+        border-radius: 8px;
+        background: rgba(230,255,253,.16);
+        color: #e6fffd;
+        font-size: 12px;
+        padding: 8px 10px;
+        cursor: pointer;
+      }
+      .kpi-service-link:hover {
+        background: rgba(230,255,253,.28);
       }
 
       label {
@@ -763,7 +794,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-      const { useDeferredValue, useEffect, useMemo, useState } = React;
+      const { useDeferredValue, useEffect, useMemo, useRef, useState } = React;
 
       const firebaseConfig = {
         apiKey: 'AIzaSyCXTX7h33uCXK4K8FSSnD7PcoayjAGV9x4',
@@ -962,6 +993,8 @@
         }, [rows, deferredSearchTerm]);
 
         const [activeKpi, setActiveKpi] = useState(null);
+        const [expandedCommercial, setExpandedCommercial] = useState(null);
+        const kpiContainerRef = useRef(null);
 
         function getKpiRows(type) {
           if (type === 'total') return rows;
@@ -991,12 +1024,31 @@
           return `hsl(${hue} 70% 45%)`;
         }
 
+        function getServicesByCommercial(type, commercial) {
+          return getKpiRows(type)
+            .filter((r) => ((r.representanteComercial || 'Sin asignar').trim() === commercial))
+            .sort((a, b) => String(a.nombreServicio || '').localeCompare(String(b.nombreServicio || '')));
+        }
+
         const kpiStats = useMemo(() => ({
           total: rows.length,
           pending: rows.filter((r) => (r.status || '').toLowerCase().includes('pend')).length,
           inprogress: rows.filter((r) => (r.status || '').toLowerCase().includes('curso')).length,
           completed: rows.filter((r) => (r.status || '').toLowerCase().includes('complet')).length,
         }), [rows]);
+
+        useEffect(() => {
+          function handleOutsideKpiClick(event) {
+            if (!kpiContainerRef.current) return;
+            if (!kpiContainerRef.current.contains(event.target)) {
+              setActiveKpi(null);
+              setExpandedCommercial(null);
+            }
+          }
+
+          document.addEventListener('mousedown', handleOutsideKpiClick);
+          return () => document.removeEventListener('mousedown', handleOutsideKpiClick);
+        }, []);
 
         function buildServiceDetailText(r) {
           const lines = [
@@ -1307,32 +1359,77 @@
                       <h2>Masterson Seguridad</h2>
                       <p className="subtitle-voga">ÁREA TÉCNICA Y COMERCIAL</p>
                     </section>
-                    <section className="kpi-grid">
-                      <article className={`kpi-card ${activeKpi === 'total' ? 'active' : ''}`} onClick={() => setActiveKpi((prev) => prev === 'total' ? null : 'total')}><div className="kpi-value">{kpiStats.total}</div><div className="kpi-label">Servicios totales</div></article>
-                      <article className={`kpi-card ${activeKpi === 'pending' ? 'active' : ''}`} onClick={() => setActiveKpi((prev) => prev === 'pending' ? null : 'pending')}><div className="kpi-value">{kpiStats.pending}</div><div className="kpi-label">Pendientes</div></article>
-                      <article className={`kpi-card ${activeKpi === 'inprogress' ? 'active' : ''}`} onClick={() => setActiveKpi((prev) => prev === 'inprogress' ? null : 'inprogress')}><div className="kpi-value">{kpiStats.inprogress}</div><div className="kpi-label">En curso</div></article>
-                      <article className={`kpi-card ${activeKpi === 'completed' ? 'active' : ''}`} onClick={() => setActiveKpi((prev) => prev === 'completed' ? null : 'completed')}><div className="kpi-value">{kpiStats.completed}</div><div className="kpi-label">Completados</div></article>
-                    </section>
-                    {activeKpi && (
-                      <section className="kpi-breakdown">
-                        <h3>{activeKpi === 'total' ? 'Ranking Comercial · Servicios Totales' : activeKpi === 'pending' ? 'Ranking Comercial · Pendientes' : activeKpi === 'inprogress' ? 'Ranking Comercial · En curso' : 'Ranking Comercial · Completados'}</h3>
-                        {getCommercialBreakdown(activeKpi).length === 0 ? (
-                          <div className="hint" style={{ color: '#d1faf5', marginBottom: 0 }}>Sin datos para este indicador.</div>
-                        ) : (
-                          <div className="kpi-breakdown-list">
-                            {getCommercialBreakdown(activeKpi).map((item, index, arr) => (
-                              <div className="kpi-breakdown-item" key={`${activeKpi}-${item.name}`}>
-                                <div className="kpi-breakdown-left">
-                                  <span className="kpi-dot" style={{ '--dot-color': getRankColor(index, arr.length) }} />
-                                  <span>{item.name}</span>
+                    <section className="kpi-grid" ref={kpiContainerRef}>
+                      {[
+                        { key: 'total', label: 'Servicios totales', value: kpiStats.total },
+                        { key: 'pending', label: 'Pendientes', value: kpiStats.pending },
+                        { key: 'inprogress', label: 'En curso', value: kpiStats.inprogress },
+                        { key: 'completed', label: 'Completados', value: kpiStats.completed },
+                      ].map((card) => (
+                        <div className="kpi-card-wrap" key={card.key}>
+                          <article
+                            className={`kpi-card ${activeKpi === card.key ? 'active' : ''}`}
+                            onClick={() => {
+                              setActiveKpi((prev) => prev === card.key ? null : card.key);
+                              setExpandedCommercial(null);
+                            }}
+                          >
+                            <div className="kpi-value">{card.value}</div>
+                            <div className="kpi-label">{card.label}</div>
+                          </article>
+                          {activeKpi === card.key && (
+                            <section className="kpi-breakdown">
+                              <h3>{card.key === 'total' ? 'Ranking Comercial · Servicios Totales' : card.key === 'pending' ? 'Ranking Comercial · Pendientes' : card.key === 'inprogress' ? 'Ranking Comercial · En curso' : 'Ranking Comercial · Completados'}</h3>
+                              {getCommercialBreakdown(card.key).length === 0 ? (
+                                <div className="hint" style={{ color: '#d1faf5', marginBottom: 0 }}>Sin datos para este indicador.</div>
+                              ) : (
+                                <div className="kpi-breakdown-list">
+                                  {getCommercialBreakdown(card.key).map((item, index, arr) => (
+                                    <div className="kpi-breakdown-item" key={`${card.key}-${item.name}`}>
+                                      <div className="kpi-breakdown-left">
+                                        <span className="kpi-dot" style={{ '--dot-color': getRankColor(index, arr.length) }} />
+                                        <span>{item.name}</span>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        className="kpi-breakdown-count"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const id = `${card.key}-${item.name}`;
+                                          setExpandedCommercial((prev) => prev === id ? null : id);
+                                        }}
+                                      >
+                                        {item.value} servicios
+                                      </button>
+                                      {expandedCommercial === `${card.key}-${item.name}` && (
+                                        <div className="kpi-breakdown-services">
+                                          {getServicesByCommercial(card.key, item.name).map((service) => (
+                                            <button
+                                              type="button"
+                                              key={service.id}
+                                              className="kpi-service-link"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedService(service);
+                                                setSelectedForm('historial');
+                                                setActiveKpi(null);
+                                                setExpandedCommercial(null);
+                                              }}
+                                            >
+                                              {service.nombreServicio || 'Servicio sin nombre'} · ID {service.clienteId || '-'}
+                                            </button>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
                                 </div>
-                                <span className="kpi-breakdown-count">{item.value} servicios</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </section>
-                    )}
+                              )}
+                            </section>
+                          )}
+                        </div>
+                      ))}
+                    </section>
                   </>
                 ) : selectedForm === 'historial' ? (
                   <section className="panel">
