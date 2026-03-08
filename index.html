@@ -599,6 +599,46 @@
         background: rgba(230,255,253,.28);
       }
 
+      .ranking-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin: 8px 0 14px;
+      }
+      .ranking-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(260px, 1fr));
+        gap: 14px;
+      }
+      .ranking-section {
+        background: #006465;
+        border: 1px solid rgba(230,255,253,.25);
+        border-radius: 14px;
+        padding: 14px;
+      }
+      .ranking-section h3 {
+        margin: 0 0 8px;
+        color: #e6fffd;
+        font-size: 1rem;
+      }
+      .ranking-services {
+        display: grid;
+        gap: 8px;
+      }
+      .ranking-service-btn {
+        text-align: left;
+        border: 1px solid rgba(230,255,253,.2);
+        border-radius: 10px;
+        background: rgba(230,255,253,.12);
+        color: #e6fffd;
+        padding: 9px 10px;
+        cursor: pointer;
+      }
+      .ranking-service-btn:hover {
+        background: rgba(230,255,253,.22);
+      }
+
       label {
         color: #334155;
         font-weight: 600;
@@ -722,6 +762,7 @@
 
       @media (max-width: 1080px) {
         .card-grid, .compact-grid, .history-grid { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
+        .ranking-grid { grid-template-columns: 1fr; }
       }
       @media (max-width: 980px) {
         .sidebar { width: 285px; }
@@ -989,7 +1030,7 @@
         }, [rows, deferredSearchTerm]);
 
         const [activeKpi, setActiveKpi] = useState(null);
-        const [expandedCommercial, setExpandedCommercial] = useState(null);
+        const [selectedCommercial, setSelectedCommercial] = useState('');
         const kpiContainerRef = useRef(null);
 
         function getKpiRows(type) {
@@ -1038,7 +1079,6 @@
             if (!kpiContainerRef.current) return;
             if (!kpiContainerRef.current.contains(event.target)) {
               setActiveKpi(null);
-              setExpandedCommercial(null);
             }
           }
 
@@ -1367,7 +1407,6 @@
                             className={`kpi-card ${activeKpi === card.key ? 'active' : ''}`}
                             onClick={() => {
                               setActiveKpi((prev) => prev === card.key ? null : card.key);
-                              setExpandedCommercial(null);
                             }}
                           >
                             <div className="kpi-value">{card.value}</div>
@@ -1391,32 +1430,13 @@
                                         className="kpi-breakdown-count"
                                         onClick={(e) => {
                                           e.stopPropagation();
-                                          const id = `${card.key}-${item.name}`;
-                                          setExpandedCommercial((prev) => prev === id ? null : id);
+                                          setSelectedCommercial(item.name);
+                                          setSelectedForm('ranking-comercial');
+                                          setActiveKpi(null);
                                         }}
                                       >
                                         {item.value} servicios
                                       </button>
-                                      {expandedCommercial === `${card.key}-${item.name}` && (
-                                        <div className="kpi-breakdown-services">
-                                          {getServicesByCommercial(card.key, item.name).map((service) => (
-                                            <button
-                                              type="button"
-                                              key={service.id}
-                                              className="kpi-service-link"
-                                              onClick={(e) => {
-                                                e.stopPropagation();
-                                                setSelectedService(service);
-                                                setSelectedForm('historial');
-                                                setActiveKpi(null);
-                                                setExpandedCommercial(null);
-                                              }}
-                                            >
-                                              {service.nombreServicio || 'Servicio sin nombre'} · ID {service.clienteId || '-'}
-                                            </button>
-                                          ))}
-                                        </div>
-                                      )}
                                     </div>
                                   ))}
                                 </div>
@@ -1427,7 +1447,52 @@
                       ))}
                     </section>
                   </>
-                ) : selectedForm === 'historial' ? (
+
+                ) : selectedForm === 'ranking-comercial' ? (
+                  <section className="panel">
+                    <h2>Listado de servicios por vendedor</h2>
+                    <div className="ranking-toolbar">
+                      <div className="hint" style={{ marginBottom: 0 }}>
+                        Vendedor seleccionado: <b style={{ color: '#e6fffd' }}>{selectedCommercial || 'Sin asignar'}</b>
+                      </div>
+                      <button className="pdf-btn" type="button" onClick={() => setSelectedForm('home')}>← Volver a Inicio</button>
+                    </div>
+                    <div className="ranking-grid">
+                      {[
+                        { key: 'total', label: 'Servicios totales' },
+                        { key: 'pending', label: 'Pendientes' },
+                        { key: 'inprogress', label: 'En curso' },
+                        { key: 'completed', label: 'Completados' },
+                      ].map((section) => {
+                        const list = getServicesByCommercial(section.key, selectedCommercial || 'Sin asignar');
+                        return (
+                          <div className="ranking-section" key={section.key}>
+                            <h3>{section.label} · {list.length}</h3>
+                            {list.length === 0 ? (
+                              <div className="hint" style={{ color: '#d1faf5', marginBottom: 0 }}>Sin servicios en esta sección.</div>
+                            ) : (
+                              <div className="ranking-services">
+                                {list.map((service) => (
+                                  <button
+                                    type="button"
+                                    key={service.id}
+                                    className="ranking-service-btn"
+                                    onClick={() => {
+                                      setSelectedService(service);
+                                      setSelectedForm('historial');
+                                    }}
+                                  >
+                                    {service.nombreServicio || 'Servicio sin nombre'} · ID {service.clienteId || '-'}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </section>
+) : selectedForm === 'historial' ? (
                   <section className="panel">
                     <h2>Historial de Servicios · Vista Ejecutiva</h2>
                     <div className="hint">Vista completa del servicio seleccionado desde la vista previa de búsqueda.</div>
