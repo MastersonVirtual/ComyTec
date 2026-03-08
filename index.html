@@ -345,9 +345,9 @@
       body {
         color: var(--text);
         background:
-          radial-gradient(860px 420px at -12% -10%, rgba(0, 100, 101, .08), transparent 60%),
-          radial-gradient(740px 360px at 112% -12%, rgba(14, 165, 164, .08), transparent 60%),
-          linear-gradient(180deg, #f8fbfb 0%, #f8fbfb 40%, #f3f7f7 100%);
+          radial-gradient(860px 420px at -12% -10%, rgba(0, 100, 101, .18), transparent 60%),
+          radial-gradient(740px 360px at 112% -12%, rgba(11, 123, 123, .16), transparent 60%),
+          linear-gradient(180deg, #1f2937 0%, #111827 55%, #0f172a 100%);
       }
 
       .sidebar {
@@ -412,13 +412,14 @@
         box-shadow: 0 2px 6px rgba(15, 23, 42, .05);
       }
       .search-preview {
-        background: #ffffff;
-        border: 1px solid var(--line);
+        background: #006465;
+        border: 1px solid rgba(230,255,253,.38);
         box-shadow: var(--shadow-soft);
       }
-      .search-item { border-bottom: 1px solid #edf2f7; color: #0f172a; }
-      .search-item:hover { background: #f8fafc; }
-      .search-item small { color: #64748b; }
+      .search-item { border-bottom: 1px solid rgba(230,255,253,.24); color: #ffffff; }
+      .search-item:hover { background: #0b7b7b; }
+      .search-item small { color: #e6fffd; }
+      .search-detail { color: #e6fffd; background: rgba(0, 78, 80, .85); }
 
       .hero,
       .panel,
@@ -502,7 +503,7 @@
         border-color: #006465;
         box-shadow: 0 0 0 3px rgba(0,100,101,.15);
       }
-      option { color: #0f172a; background: #ffffff; }
+      option { color: #e6fffd; background: #006465; }
 
       .save-btn {
         background: linear-gradient(135deg, #006465, #005355);
