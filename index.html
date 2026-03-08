@@ -476,6 +476,16 @@
       .service-card {
         border-radius: 14px;
         padding: 22px;
+        background: #2b3440;
+        border-color: #3f4b59;
+      }
+      .service-card h3,
+      .service-card label,
+      .service-card .hint,
+      .service-card .muted,
+      .service-card .kv,
+      .service-card .detail-box {
+        color: #e6edf5;
       }
       .service-card h3::before {
         color: var(--base);
@@ -603,12 +613,20 @@
 
       .widget {
         border-radius: 14px;
+        background: #2b3440;
+        border-color: #3f4b59;
+      }
+      .widget h4,
+      .widget .kv,
+      .widget .kv b,
+      .widget .detail-box {
+        color: #e6edf5;
       }
       .widget::after {
         background: linear-gradient(var(--base), rgba(0,100,101,0));
       }
-      .widget h4 { color: #0f172a; }
-      .kv b { color: #0f172a; }
+      .widget h4 { color: #e6edf5; }
+      .kv b { color: #e6edf5; }
       .bento-grid .service-card:first-child { grid-column: span 12; }
       .facturacion-module .service-card:nth-child(2) { grid-column: span 7; }
       .facturacion-module .service-card:nth-child(3) { grid-column: span 5; }
@@ -1132,6 +1150,7 @@
             <aside className={`sidebar ${menuOpen ? 'open' : ''}`}>
               <div className="sidebar-header">MENÚ OPERATIVO</div>
               <div className="menu">
+                <button className="menu-button" onClick={() => { setSelectedForm('home'); setSelectedService(null); setTipoAccion(''); closeSidebar(); }}>Inicio</button>
                 <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}>Nuevo {openMenus.nuevo ? '▾' : '▸'}</button>
                 <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
                   <button className="submenu-button" onClick={() => selectAction('Nuevo Servicio')}>Servicio</button>
@@ -1250,7 +1269,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>Nuevo Servicio</h3>
                           <div className="card-grid">
-                            <div className="field"><label>Cliente ID (auto 4 dígitos)</label><input value={clienteId} readOnly type="text" /></div>
+                            <div className="field"><label>Cliente ID</label><input value={clienteId} readOnly type="text" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
@@ -1262,7 +1281,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                             <div className="field"><label>Administración</label><input value={servicioForm.administracion} onChange={(e) => setServicioField('administracion', e.target.value)} type="text" /></div>
                             <div className="field"><label>Razón social</label><input value={servicioForm.razonSocial} onChange={(e) => setServicioField('razonSocial', e.target.value)} type="text" /></div>
                             <div className="field"><label>RUT</label><input value={servicioForm.rut} onChange={(e) => setServicioField('rut', e.target.value)} type="text" /></div>
-                            <div className="field span-2"><label>Mail (factura electrónica)</label><input value={servicioForm.mailFacturacion} onChange={(e) => setServicioField('mailFacturacion', e.target.value)} type="email" /></div>
+                            <div className="field span-2"><label>Mail</label><input value={servicioForm.mailFacturacion} onChange={(e) => setServicioField('mailFacturacion', e.target.value)} type="email" /></div>
                           </div>
                         </div>
 
@@ -1287,7 +1306,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>4. Control de Cierre</h3>
                           <div className="card-grid">
-                            <div className="field"><label>FACTURADO (Sí/No)</label><select value={servicioForm.facturado} onChange={(e) => setServicioField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                            <div className="field"><label>FACTURADO</label><select value={servicioForm.facturado} onChange={(e) => setServicioField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
                           </div>
                         </div>
 
@@ -1298,7 +1317,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>Nueva Obra</h3>
                           <div className="card-grid">
-                            <div className="field"><label>Cliente ID (auto 4 dígitos)</label><input value={clienteId} readOnly type="text" /></div>
+                            <div className="field"><label>Cliente ID</label><input value={clienteId} readOnly type="text" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
@@ -1308,7 +1327,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <div className="card-grid">
                             <div className="field"><label>Razón social</label><input value={obraForm.razonSocial} onChange={(e) => setObraField('razonSocial', e.target.value)} type="text" /></div>
                             <div className="field"><label>RUT</label><input value={obraForm.rut} onChange={(e) => setObraField('rut', e.target.value)} type="text" /></div>
-                            <div className="field span-2"><label>Mail (facturación electrónica)</label><input value={obraForm.mailFacturacion} onChange={(e) => setObraField('mailFacturacion', e.target.value)} type="email" /></div>
+                            <div className="field span-2"><label>Mail</label><input value={obraForm.mailFacturacion} onChange={(e) => setObraField('mailFacturacion', e.target.value)} type="email" /></div>
                             <div className="field span-2"><label>Nombre de servicio</label><input value={obraForm.nombreServicio} onChange={(e) => setObraField('nombreServicio', e.target.value)} type="text" /></div>
                           </div>
                         </div>
@@ -1326,7 +1345,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>3. Control de Ciclo y Estado</h3>
                           <div className="card-grid">
                             <div className="field"><label>Fecha de alta</label><input value={obraForm.fechaAlta} onChange={(e) => setObraField('fechaAlta', e.target.value)} type="date" /></div>
-                            <div className="field"><label>FACTURADO (Sí / No)</label><select value={obraForm.facturado} onChange={(e) => setObraField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                            <div className="field"><label>FACTURADO</label><select value={obraForm.facturado} onChange={(e) => setObraField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
                           </div>
                         </div>
 
@@ -1346,7 +1365,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>1. Identificación y Vigencia</h3>
                           <div className="card-grid">
                             <div className="field span-2"><label>Nombre de servicio</label><input value={novacionForm.nombreServicio} onChange={(e) => setNovacionField('nombreServicio', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Duración del nuevo contrato (Meses)</label><input value={novacionForm.duracionNuevoContratoMeses} onChange={(e) => setNovacionField('duracionNuevoContratoMeses', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Duración del nuevo contrato</label><input value={novacionForm.duracionNuevoContratoMeses} onChange={(e) => setNovacionField('duracionNuevoContratoMeses', e.target.value)} type="number" min="0" /></div>
                           </div>
                         </div>
 
@@ -1370,7 +1389,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>4. Ajustes y Cierre de Ciclo</h3>
                           <div className="card-grid">
                             <div className="field span-2"><label>Descuentos en el pago</label><textarea value={novacionForm.descuentosPago} onChange={(e) => setNovacionField('descuentosPago', e.target.value)} /></div>
-                            <div className="field"><label>FACTURADO (Sí / No)</label><select value={novacionForm.facturado} onChange={(e) => setNovacionField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                            <div className="field"><label>FACTURADO</label><select value={novacionForm.facturado} onChange={(e) => setNovacionField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
                           </div>
                         </div>
 
@@ -1406,7 +1425,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>3. Control Administrativo y Contable</h3>
                           <div className="card-grid">
                             <div className="field span-2"><label>Importe a facturar por el adicional instalado</label><input value={agregadoForm.importeFacturarCliente} onChange={(e) => setAgregadoField('importeFacturarCliente', e.target.value)} type="text" placeholder="Monto acordado" /></div>
-                            <div className="field"><label>FACTURADO (Sí/No)</label><select value={agregadoForm.facturado} onChange={(e) => setAgregadoField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                            <div className="field"><label>FACTURADO</label><select value={agregadoForm.facturado} onChange={(e) => setAgregadoField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
                           </div>
                         </div>
 
@@ -1435,7 +1454,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>2. Liquidación y Cobro</h3>
                           <div className="card-grid">
                             <div className="field"><label>Monto en dólares</label><input value={movimientoForm.montoUsd} onChange={(e) => setMovimientoField('montoUsd', e.target.value)} type="number" min="0" /></div>
-                            <div className="field"><label>FACTURADO (Sí / No)</label><select value={movimientoForm.facturado} onChange={(e) => setMovimientoField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                            <div className="field"><label>FACTURADO</label><select value={movimientoForm.facturado} onChange={(e) => setMovimientoField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
                           </div>
                         </div>
 
@@ -1463,7 +1482,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>2. Contacto y Justificación</h3>
                           <div className="card-grid">
-                            <div className="field span-2"><label>Quien lo Solicita (Cliente y Tel)</label><input value={bajaForm.quienSolicita} onChange={(e) => setBajaField('quienSolicita', e.target.value)} type="text" /></div>
+                            <div className="field span-2"><label>Quien lo Solicita</label><input value={bajaForm.quienSolicita} onChange={(e) => setBajaField('quienSolicita', e.target.value)} type="text" /></div>
                             <div className="field"><label>Motivo de Baja</label><input value={bajaForm.motivoBaja} onChange={(e) => setBajaField('motivoBaja', e.target.value)} type="text" /></div>
                           </div>
                         </div>
@@ -1471,7 +1490,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>3. Detalles Técnicos y Conectividad</h3>
                           <div className="card-grid">
-                            <div className="field span-2"><label>Internet (estado/conectividad)</label><input value={bajaForm.internetEstado} onChange={(e) => setBajaField('internetEstado', e.target.value)} type="text" /></div>
+                            <div className="field span-2"><label>Internet</label><input value={bajaForm.internetEstado} onChange={(e) => setBajaField('internetEstado', e.target.value)} type="text" /></div>
                             <div className="field"><label>Propietario de Equipamiento</label><select value={bajaForm.propietarioEquipamiento} onChange={(e) => setBajaField('propietarioEquipamiento', e.target.value)}><option>S-Video</option><option>Cliente</option><option>Mixto</option></select></div>
                           </div>
                         </div>
@@ -1479,7 +1498,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>4. Logística de Retiro y Cierre</h3>
                           <div className="card-grid">
-                            <div className="field span-3"><label>Equipamiento a Retirar (adjuntar planilla)</label><input value={bajaForm.equipamientoRetirar} onChange={(e) => setBajaField('equipamientoRetirar', e.target.value)} type="text" placeholder="Referencia o nombre de planilla" /></div>
+                            <div className="field span-3"><label>Equipamiento a Retirar</label><input value={bajaForm.equipamientoRetirar} onChange={(e) => setBajaField('equipamientoRetirar', e.target.value)} type="text" placeholder="Referencia o nombre de planilla" /></div>
                             <div className="field span-3"><label>Observaciones</label><textarea value={bajaForm.observaciones} onChange={(e) => setBajaField('observaciones', e.target.value)} /></div>
                           </div>
                         </div>
@@ -1525,7 +1544,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
 ) : (
                       <div className="compact-grid">
                         <div className="field"><label>Tipo de Acción</label><select value={tipoAccion} onChange={(e) => { setTipoAccion(e.target.value); resetFields(); }}>{ACCIONES.map((a) => <option key={a} value={a}>{a}</option>)}</select></div>
-                        <div className="field"><label>{autoIdMode ? "Cliente ID (auto 4 dígitos)" : "Cliente ID asociado"}</label>{autoIdMode ? <input value={clienteId} readOnly type="text" /> : <input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" />}</div>
+                        <div className="field"><label>{autoIdMode ? "Cliente ID" : "Cliente ID asociado"}</label>{autoIdMode ? <input value={clienteId} readOnly type="text" /> : <input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" />}</div>
                         <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
 
                         {grupo === 'base' && <><div className="field"><label>Cliente</label><input value={cliente} onChange={(e) => setCliente(e.target.value)} /></div><div className="field"><label>Fecha Carga</label><input value={fechaCarga} onChange={(e) => setFechaCarga(e.target.value)} type="date" /></div><div className="field"><label>Tiempo Instalación</label><input value={tiempoInstalacion} onChange={(e) => setTiempoInstalacion(e.target.value)} /></div><div className="field"><label>Fecha Alta</label><input value={fechaAlta} onChange={(e) => setFechaAlta(e.target.value)} type="date" /></div><div className="field"><label>Cobro</label><input value={cobro} onChange={(e) => setCobro(e.target.value)} /></div></>}
