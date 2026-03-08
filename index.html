@@ -771,16 +771,19 @@
         padding: 20px;
         background: #000000;
       }
-      .login-panel {
+      .login-stack {
         width: min(460px, 100%);
+      }
+      .login-panel {
+        width: 100%;
         background: #006465;
         border: 1px solid rgba(230,255,253,.28);
         border-radius: 16px;
         box-shadow: var(--shadow-deep);
         padding: 24px;
       }
-      .login-panel h2 { margin: 0 0 8px; color: #e6fffd; }
-      .login-panel .hint { color: #d1faf5; }
+      .login-panel h2 { margin: 0 0 8px; color: #e6fffd; text-align: center; }
+      .login-panel .hint { color: #d1faf5; text-align: center; }
       .login-error { color: #ffd4d4; font-size: 13px; margin-bottom: 10px; }
       .login-panel label { color: #e6fffd; }
       .login-panel input {
@@ -789,13 +792,29 @@
         color: #0f172a;
       }
       .login-logo {
-        width: 74px;
-        height: 74px;
-        margin: 0 auto 12px;
+        width: 98px;
+        height: 98px;
+        margin: 0 auto 14px;
         border-radius: 18px;
         background: rgba(230,255,253,.12) url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png') center/cover no-repeat;
         border: 1px solid rgba(230,255,253,.3);
         box-shadow: 0 10px 20px rgba(0,0,0,.25);
+      }
+
+      .contact-admin-btn {
+        width: 100%;
+        margin-top: 8px;
+        border: 1px solid rgba(230,255,253,.35);
+        border-radius: 10px;
+        background: rgba(230,255,253,.12);
+        color: #e6fffd;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 8px 10px;
+        cursor: pointer;
+      }
+      .contact-admin-btn:hover {
+        background: rgba(230,255,253,.24);
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -1020,6 +1039,8 @@
         const [password, setPassword] = useState('');
         const [loading, setLoading] = useState(false);
         const [error, setError] = useState('');
+        const [failedEmail, setFailedEmail] = useState('');
+        const [contactingAdmin, setContactingAdmin] = useState(false);
 
         async function handleLogin(e) {
           e.preventDefault();
@@ -1028,18 +1049,45 @@
             setLoading(true);
             await auth.signInWithEmailAndPassword(email.trim(), password);
           } catch (err) {
+            setFailedEmail(email.trim());
             setError('No se pudo iniciar sesión. Verificá email y contraseña.');
           } finally {
             setLoading(false);
           }
         }
 
+
+        async function handleContactAdmin() {
+          const contactEmail = failedEmail || email.trim();
+          if (!contactEmail) {
+            setError('Ingresá tu email para contactar al admin.');
+            return;
+          }
+
+          try {
+            setContactingAdmin(true);
+            await db.collection('notificaciones_admin').add({
+              tipo: 'solicitud-contacto-login',
+              email: contactEmail,
+              mensaje: `El usuario con email ${contactEmail} no pudo iniciar sesión y solicita contacto del admin.`,
+              creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+            alert('Notificación enviada al admin. Te contactarán a la brevedad.');
+          } catch (err) {
+            console.error('No se pudo notificar al admin:', err);
+            alert('No se pudo enviar la notificación al admin.');
+          } finally {
+            setContactingAdmin(false);
+          }
+        }
+
         return (
           <div className="login-shell">
-            <form className="login-panel" onSubmit={handleLogin}>
+            <div className="login-stack">
               <div className="login-logo" aria-hidden="true" />
-              <h2>Masterson Seguridad</h2>
-              <div className="hint">Área técnica y Comercial</div>
+              <form className="login-panel" onSubmit={handleLogin}>
+                <h2>Masterson Seguridad</h2>
+                <div className="hint">Área técnica y Comercial</div>
               {error && <div className="login-error">{error}</div>}
               <div className="field">
                 <label>Email</label>
@@ -1050,7 +1098,9 @@
                 <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
               </div>
               <button className="save-btn" type="submit" disabled={loading}>{loading ? 'Ingresando...' : 'Iniciar Sesión'}</button>
-            </form>
+              <button className="contact-admin-btn" type="button" disabled={contactingAdmin} onClick={handleContactAdmin}>{contactingAdmin ? 'Enviando aviso...' : 'Contactar al Admin'}</button>
+              </form>
+            </div>
           </div>
         );
       }
