@@ -641,6 +641,32 @@
       .ranking-service-btn:hover {
         background: rgba(230,255,253,.22);
       }
+      .ranking-service-row {
+        display: grid;
+        gap: 6px;
+      }
+      .ranking-service-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .edit-btn {
+        text-align: left;
+        border: 1px solid rgba(230,255,253,.2);
+        border-radius: 10px;
+        background: rgba(230,255,253,.12);
+        color: #e6fffd;
+        padding: 8px 10px;
+        cursor: pointer;
+      }
+      .edit-btn[disabled] {
+        opacity: .55;
+        cursor: not-allowed;
+      }
+      .lock-hint {
+        color: #f5d08a;
+        font-size: 11px;
+      }
 
       label {
         color: #334155;
@@ -1364,6 +1390,7 @@
         const [searchTerm, setSearchTerm] = useState('');
         const [expandedId, setExpandedId] = useState(null);
         const [selectedService, setSelectedService] = useState(null);
+        const [editingServiceId, setEditingServiceId] = useState(null);
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
@@ -1632,6 +1659,41 @@
         const isAdminUser = userRole === 'admin';
         const isSalesOrTechUser = /vendedor|tecnic/.test(userRole) || /tecnic/.test(userArea);
         const lockCommercialField = isSalesOrTechUser && !isAdminUser;
+        const isTechnicalUser = /tecnic/.test(userRole) || /tecnic/.test(userArea);
+        const isCommercialUser = userArea === 'comercial' || userRole.includes('vendedor');
+
+        function canEditService(service) {
+          if (!service) return false;
+          if (isAdminUser || isTechnicalUser) return true;
+          if (isCommercialUser) {
+            return String(service.representanteComercial || '').trim() === String(userData.nombre || '').trim();
+          }
+          return false;
+        }
+
+        function startEditService(service) {
+          if (!canEditService(service)) return;
+          const action = service.tipoAccion || 'Nuevo Servicio';
+          setEditingServiceId(service.id || null);
+          setSelectedService(service);
+          setStatus(service.status || 'Pendiente');
+          setTipoAccion(action);
+
+          const stamp = formatUruguayDateTime();
+          setServicioForm({ ...servicioInicial, ...service, representanteComercial: service.representanteComercial || currentUserName, creadoPor: service.creadoPor || currentUserName, fechaIngresoDatos: service.fechaIngresoDatos || stamp });
+          setObraForm({ ...obraInicial, ...service, representanteComercial: service.representanteComercial || currentUserName, creadoPor: service.creadoPor || currentUserName });
+          setNovacionForm({ ...novacionInicial, ...service, representanteComercial: service.representanteComercial || currentUserName, creadoPor: service.creadoPor || currentUserName });
+
+          if (['Nuevo Servicio', 'Obra'].includes(action)) {
+            setClienteId(service.clienteId || generarClienteId());
+            setClienteIdAsociado('');
+            setSelectedForm('servicio');
+          } else {
+            setClienteId('');
+            setClienteIdAsociado(service.clienteId || '');
+            setSelectedForm('other');
+          }
+        }
 
         function applyUserDefaultsToForms() {
           const stamp = formatUruguayDateTime();
@@ -1658,6 +1720,7 @@
         function resetFields() {
           setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('Pendiente');
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
+          setEditingServiceId(null);
           const stamp = formatUruguayDateTime();
           setServicioForm({ ...servicioInicial, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: stamp }); setObraForm({ ...obraInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setNovacionForm({ ...novacionInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setAgregadoForm(agregadoInicial); setMovimientoForm(movimientoInicial); setBajaForm(bajaInicial); setCharlaForm(charlaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
         }
@@ -1774,10 +1837,18 @@
           }
 
           setSaving(true);
-          db.collection('operaciones').add(doc)
+          const payload = editingServiceId
+            ? { ...doc, actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(), editadoPor: currentUserName }
+            : doc;
+
+          const writeOp = editingServiceId
+            ? db.collection('operaciones').doc(editingServiceId).set(payload, { merge: true })
+            : db.collection('operaciones').add(payload);
+
+          writeOp
             .then(() => {
               resetFields();
-              setNotificacion({ mensaje: '✔ Datos guardados correctamente', tipo: 'ok' });
+              setNotificacion({ mensaje: editingServiceId ? '✔ Servicio actualizado correctamente' : '✔ Datos guardados correctamente', tipo: 'ok' });
             })
             .catch((error) => {
               console.error('Error guardando:', error);
@@ -1965,19 +2036,35 @@
                               <div className="hint" style={{ color: '#d1faf5', marginBottom: 0 }}>Sin servicios en esta sección.</div>
                             ) : (
                               <div className="ranking-services">
-                                {list.map((service) => (
-                                  <button
-                                    type="button"
-                                    key={service.id}
-                                    className="ranking-service-btn"
-                                    onClick={() => {
-                                      setSelectedService(service);
-                                      setSelectedForm('historial');
-                                    }}
-                                  >
-                                    {service.nombreServicio || 'Servicio sin nombre'} · ID {service.clienteId || '-'}
-                                  </button>
-                                ))}
+                                {list.map((service) => {
+                                  const allowedEdit = canEditService(service);
+                                  const showRestriction = isCommercialUser && !allowedEdit;
+                                  return (
+                                    <div className="ranking-service-row" key={service.id}>
+                                      <button
+                                        type="button"
+                                        className="ranking-service-btn"
+                                        onClick={() => {
+                                          setSelectedService(service);
+                                          setSelectedForm('historial');
+                                        }}
+                                      >
+                                        {service.nombreServicio || 'Servicio sin nombre'} · ID {service.clienteId || '-'}
+                                      </button>
+                                      <div className="ranking-service-actions">
+                                        <button
+                                          type="button"
+                                          className="edit-btn"
+                                          disabled={!allowedEdit}
+                                          onClick={() => startEditService(service)}
+                                        >
+                                          {allowedEdit ? '✎ Editar servicio' : '🔒 Editar'}
+                                        </button>
+                                        {showRestriction && <span className="lock-hint">Edición restringida al propietario.</span>}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
                               </div>
                             )}
                           </div>
@@ -1996,8 +2083,17 @@
                       </div>
                     ) : (
                       <>
-                        <div className="pdf-toolbar">
+                        <div className="pdf-toolbar" style={{ gap: 8, flexWrap: 'wrap' }}>
                           <button className="pdf-btn" type="button" onClick={() => handleDownloadPdf(selectedService)}>📄 Descargar PDF</button>
+                          <button
+                            className="edit-btn"
+                            type="button"
+                            disabled={!canEditService(selectedService)}
+                            onClick={() => startEditService(selectedService)}
+                          >
+                            {canEditService(selectedService) ? '✎ Editar servicio' : '🔒 Editar'}
+                          </button>
+                          {isCommercialUser && !canEditService(selectedService) && <span className="lock-hint">Edición restringida al propietario.</span>}
                         </div>
                         <div className="history-grid">
                         <div className="widget"><h4>Identificación</h4><div className="kv"><b>ID:</b> {selectedService.clienteId || '-'}</div><div className="kv"><b>Nombre:</b> {selectedService.nombreServicio || '-'}</div><div className="kv"><b>Tipo:</b> {selectedService.tipoServicioBrindar || '-'}</div><div className="kv"><b>Dirección:</b> {selectedService.direccionServicio || '-'}</div><div className="kv"><b>Unidades:</b> {selectedService.cantidadUnidades || '-'}</div></div>
@@ -2066,7 +2162,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           </div>
                         </div>
 
-                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     ) : grupo === 'obra' ? (
                       <div className="service-layout">
@@ -2106,7 +2202,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           </div>
                         </div>
 
-                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     ) : grupo === 'novacion' ? (
                       <div className="service-layout bento-grid facturacion-module">
@@ -2151,7 +2247,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           </div>
                         </div>
 
-                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     ) : grupo === 'agregado' ? (
                       <div className="service-layout">
@@ -2187,7 +2283,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           </div>
                         </div>
 
-                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     ) : grupo === 'movimiento-detalle' ? (
                       <div className="service-layout">
@@ -2216,7 +2312,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           </div>
                         </div>
 
-                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     ) : grupo === 'baja-detalle' ? (
                       <div className="service-layout">
@@ -2261,7 +2357,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           </div>
                         </div>
 
-                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     ) : grupo === 'charla-detalle' ? (
                       <div className="service-layout">
@@ -2297,7 +2393,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           </div>
                         </div>
 
-                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
 ) : (
                       <div className="compact-grid">
@@ -2309,7 +2405,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
 
 
 
-                        <div className="field full"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Guardar Operación'}</button></div>
+                        <div className="field full"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     )}
                   </form>
