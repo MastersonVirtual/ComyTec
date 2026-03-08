@@ -828,6 +828,82 @@
         box-shadow: 0 10px 20px rgba(0,0,0,.25);
       }
 
+
+      .gerencia-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(180px, 1fr));
+        gap: 14px;
+      }
+      .gerencia-card {
+        background: var(--panel);
+        border: 1px solid rgba(230,255,253,.25);
+        border-radius: 14px;
+        padding: 16px;
+        box-shadow: var(--shadow-soft);
+      }
+      .gerencia-card h3 {
+        margin: 0;
+        color: #d1faf5;
+        font-size: .82rem;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+      }
+      .gerencia-value {
+        margin-top: 8px;
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: #e6fffd;
+      }
+      .gerencia-charts {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(260px, 1fr));
+        gap: 14px;
+      }
+      .gerencia-chart-card {
+        background: var(--panel);
+        border: 1px solid rgba(230,255,253,.25);
+        border-radius: 14px;
+        padding: 14px;
+      }
+      .gerencia-chart {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        margin: 6px auto 12px;
+        border: 2px solid rgba(230,255,253,.3);
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        color: #e6fffd;
+        font-size: 12px;
+        padding: 4px 0;
+      }
+      .legend-left { display: flex; align-items: center; gap: 8px; }
+      .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: var(--legend-color, #e6fffd);
+      }
+      .gerente-float-logout {
+        position: fixed;
+        right: 14px;
+        bottom: 18px;
+        z-index: 1300;
+        border: 1px solid rgba(239,68,68,.45);
+        background: rgba(127,29,29,.92);
+        color: #ffe4e6;
+        border-radius: 999px;
+        width: 56px;
+        height: 56px;
+        font-size: 18px;
+        box-shadow: 0 10px 20px rgba(0,0,0,.22);
+      }
+
       @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after {
           animation: none !important;
@@ -839,6 +915,8 @@
       @media (max-width: 1080px) {
         .card-grid, .compact-grid, .history-grid { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
         .ranking-grid { grid-template-columns: 1fr; }
+        .gerencia-grid { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
+        .gerencia-charts { grid-template-columns: 1fr; }
       }
       @media (max-width: 980px) {
         .sidebar { width: 285px; }
@@ -876,10 +954,11 @@
           top: auto;
           right: 10px;
           left: 10px;
-          bottom: 14px;
+          bottom: 82px;
           min-width: 0;
           max-width: none;
         }
+        .gerencia-grid { grid-template-columns: 1fr; }
         .card-grid,
         .compact-grid,
         .history-grid {
@@ -1095,11 +1174,76 @@
         );
       }
 
+
+      function DashboardGerencia({ rows }) {
+        const totalAbonos = rows.reduce((acc, r) => acc + (Number(r.importeMensualServicioSinIva) || 0), 0);
+        const totalVentasEquipos = rows.reduce((acc, r) => acc + (Number(r.costoInstalacionUsdSinIva) || 0), 0);
+        const pendientes = rows.filter((r) => (r.status || '').toLowerCase().includes('pend')).length;
+        const enCurso = rows.filter((r) => (r.status || '').toLowerCase().includes('curso')).length;
+        const factSi = rows.filter((r) => String(r.facturado || '').toLowerCase().includes('sí') || String(r.facturado || '').toLowerCase().includes('si')).length;
+        const factNo = rows.filter((r) => String(r.facturado || '').toLowerCase().includes('no')).length;
+
+        const actionCounts = ACCIONES.map((name) => ({ name, value: rows.filter((r) => (r.tipoAccion || '') === name).length }));
+        const statusCounts = STATUS_OPTIONS.map((name) => ({ name, value: rows.filter((r) => (r.status || '') === name).length }));
+
+        function chartGradient(items) {
+          const palette = ['#34d399', '#60a5fa', '#f59e0b', '#a78bfa', '#f472b6', '#22d3ee', '#f87171', '#84cc16'];
+          const total = Math.max(1, items.reduce((a, b) => a + b.value, 0));
+          let current = 0;
+          const parts = items.map((item, idx) => {
+            const start = (current / total) * 360;
+            current += item.value;
+            const end = (current / total) * 360;
+            return `${palette[idx % palette.length]} ${start}deg ${end}deg`;
+          });
+          return `conic-gradient(${parts.join(',')})`;
+        }
+
+        return (
+          <section className="panel">
+            <h2>Dashboard Gerencia</h2>
+            <div className="hint">Vista ejecutiva con datos reales de servicios y facturación.</div>
+            <div className="gerencia-grid">
+              <div className="gerencia-card"><h3>Total Abonos Mensuales</h3><div className="gerencia-value">US$ {totalAbonos.toLocaleString('es-UY')}</div></div>
+              <div className="gerencia-card"><h3>Total Ventas Equipos</h3><div className="gerencia-value">US$ {totalVentasEquipos.toLocaleString('es-UY')}</div></div>
+              <div className="gerencia-card"><h3>Servicios por Estado</h3><div className="gerencia-value">{pendientes} / {enCurso}</div><div className="hint" style={{ marginBottom: 0 }}>Pendiente / En curso</div></div>
+              <div className="gerencia-card"><h3>Estado Facturación</h3><div className="gerencia-value">{factSi} / {factNo}</div><div className="hint" style={{ marginBottom: 0 }}>Sí / No</div></div>
+            </div>
+
+            <div className="gerencia-charts">
+              <div className="gerencia-chart-card">
+                <h3 style={{ color: '#e6fffd', margin: 0 }}>Distribución por ACCIONES</h3>
+                <div className="gerencia-chart" style={{ background: chartGradient(actionCounts) }} />
+                {actionCounts.map((item, idx) => (
+                  <div className="legend-item" key={`ac-${item.name}`}>
+                    <div className="legend-left"><span className="legend-dot" style={{ '--legend-color': ['#34d399', '#60a5fa', '#f59e0b', '#a78bfa', '#f472b6', '#22d3ee', '#f87171', '#84cc16'][idx % 8] }} />{item.name}</div>
+                    <b>{item.value}</b>
+                  </div>
+                ))}
+              </div>
+              <div className="gerencia-chart-card">
+                <h3 style={{ color: '#e6fffd', margin: 0 }}>Distribución por STATUS</h3>
+                <div className="gerencia-chart" style={{ background: chartGradient(statusCounts) }} />
+                {statusCounts.map((item, idx) => (
+                  <div className="legend-item" key={`st-${item.name}`}>
+                    <div className="legend-left"><span className="legend-dot" style={{ '--legend-color': ['#34d399', '#60a5fa', '#f59e0b', '#a78bfa', '#f472b6', '#22d3ee', '#f87171', '#84cc16'][idx % 8] }} />{item.name}</div>
+                    <b>{item.value}</b>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      }
+
       function App() {
         const [menuOpen, setMenuOpen] = useState(false);
         const [openMenus, setOpenMenus] = useState({ nuevo: false, fact: false });
         const [user, setUser] = useState(null);
         const [authLoading, setAuthLoading] = useState(true);
+        const [userRole, setUserRole] = useState('');
+        const [userArea, setUserArea] = useState('');
+        const [roleLoading, setRoleLoading] = useState(true);
         const [notificacion, setNotificacion] = useState({ mensaje: '', tipo: '' });
 
         const [tipoAccion, setTipoAccion] = useState('');
@@ -1315,9 +1459,40 @@
         }, [user]);
 
         useEffect(() => {
-          const unsub = auth.onAuthStateChanged((currentUser) => {
+          const unsub = auth.onAuthStateChanged(async (currentUser) => {
             setUser(currentUser);
             setAuthLoading(false);
+
+            if (!currentUser) {
+              setUserRole('');
+              setUserArea('');
+              setRoleLoading(false);
+              return;
+            }
+
+            setRoleLoading(true);
+            try {
+              let profile = null;
+              const byId = await db.collection('config_usuarios').doc(currentUser.email || currentUser.uid).get();
+              if (byId.exists) profile = byId.data();
+
+              if (!profile && currentUser.email) {
+                const snap = await db.collection('config_usuarios').where('email', '==', currentUser.email).limit(1).get();
+                if (!snap.empty) profile = snap.docs[0].data();
+              }
+
+              setUserRole((profile?.rol || 'admin').toLowerCase());
+              setUserArea((profile?.area || '').toLowerCase());
+              if ((profile?.rol || '').toLowerCase() === 'gerentes' && (profile?.area || '').toLowerCase() === 'gerencia') {
+                setSelectedForm('dashboard-gerencia');
+              }
+            } catch (err) {
+              console.error('Error leyendo config_usuarios:', err);
+              setUserRole('admin');
+              setUserArea('');
+            } finally {
+              setRoleLoading(false);
+            }
           });
           return () => unsub();
         }, []);
@@ -1327,6 +1502,8 @@
           const timer = setTimeout(() => setNotificacion({ mensaje: '', tipo: '' }), 3000);
           return () => clearTimeout(timer);
         }, [notificacion]);
+
+        const isGerencia = userRole === 'gerentes' && userArea === 'gerencia';
 
         function resetFields() {
           setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('Pendiente');
@@ -1456,7 +1633,7 @@
             });
         }
 
-        if (authLoading) {
+        if (authLoading || roleLoading) {
           return <div className="login-shell"><div className="login-panel"><h2>Cargando...</h2></div></div>;
         }
 
@@ -1469,26 +1646,30 @@
             <aside className={`sidebar ${menuOpen ? 'open' : ''}`}>
               <div className="sidebar-header">MENÚ OPERATIVO</div>
               <div className="menu">
-                <button className="menu-button" onClick={() => { setSelectedForm('home'); setSelectedService(null); setTipoAccion(''); closeSidebar(); }}>Inicio</button>
-                <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}>Nuevo {openMenus.nuevo ? '▾' : '▸'}</button>
-                <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
-                  <button className="submenu-button" onClick={() => selectAction('Nuevo Servicio')}>Servicio</button>
-                  <button className="submenu-button" onClick={() => selectAction('Obra')}>Obra</button>
-                  <button className="submenu-button" onClick={() => selectAction('Novación')}>Novaciones</button>
-                  <button className="submenu-button" onClick={() => selectAction('Agregado')}>Agregados</button>
-                  <button className="submenu-button" onClick={() => selectAction('Movimiento de Obra')}>Movimiento de obra</button>
-                  <button className="submenu-button" onClick={() => selectAction('Baja')}>Baja de Servicio</button>
-                </div>
-                <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, fact: !p.fact }))}>Facturación {openMenus.fact ? '▾' : '▸'}</button>
-                <div className={`submenu ${openMenus.fact ? 'open' : ''}`}>
-                  <button className="submenu-button" onClick={() => selectAction('Agregado')}>Equipos agregados</button>
-                  <button className="submenu-button" onClick={() => selectAction('Nuevo Servicio')}>Nuevo servicio</button>
-                  <button className="submenu-button" onClick={() => selectAction('Novación')}>Novaciones</button>
-                  <button className="submenu-button" onClick={() => selectAction('Obra')}>Nueva Obra</button>
-                  <button className="submenu-button" onClick={() => selectAction('Movimiento de Obra')}>Movimiento de Obra</button>
-                </div>
-                <button className="menu-button" onClick={() => selectAction('Charla')}>Charlas informativas</button>
-                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
+                <button className="menu-button" onClick={() => { setSelectedForm(isGerencia ? 'dashboard-gerencia' : 'home'); setSelectedService(null); setTipoAccion(''); closeSidebar(); }}>Inicio</button>
+                {!isGerencia && (
+                  <>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}>Nuevo {openMenus.nuevo ? '▾' : '▸'}</button>
+                    <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
+                      <button className="submenu-button" onClick={() => selectAction('Nuevo Servicio')}>Servicio</button>
+                      <button className="submenu-button" onClick={() => selectAction('Obra')}>Obra</button>
+                      <button className="submenu-button" onClick={() => selectAction('Novación')}>Novaciones</button>
+                      <button className="submenu-button" onClick={() => selectAction('Agregado')}>Agregados</button>
+                      <button className="submenu-button" onClick={() => selectAction('Movimiento de Obra')}>Movimiento de obra</button>
+                      <button className="submenu-button" onClick={() => selectAction('Baja')}>Baja de Servicio</button>
+                    </div>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, fact: !p.fact }))}>Facturación {openMenus.fact ? '▾' : '▸'}</button>
+                    <div className={`submenu ${openMenus.fact ? 'open' : ''}`}>
+                      <button className="submenu-button" onClick={() => selectAction('Agregado')}>Equipos agregados</button>
+                      <button className="submenu-button" onClick={() => selectAction('Nuevo Servicio')}>Nuevo servicio</button>
+                      <button className="submenu-button" onClick={() => selectAction('Novación')}>Novaciones</button>
+                      <button className="submenu-button" onClick={() => selectAction('Obra')}>Nueva Obra</button>
+                      <button className="submenu-button" onClick={() => selectAction('Movimiento de Obra')}>Movimiento de Obra</button>
+                    </div>
+                    <button className="menu-button" onClick={() => selectAction('Charla')}>Charlas informativas</button>
+                    <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
+                  </>
+                )}
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
               </div>
             </aside>
@@ -1497,6 +1678,7 @@
             {notificacion.mensaje && (
               <div className={`toast ${notificacion.tipo === 'error' ? 'error' : ''}`}>{notificacion.mensaje}</div>
             )}
+            {isGerencia && <button className="gerente-float-logout" type="button" onClick={() => auth.signOut()} title="Cerrar sesión">⎋</button>}
 
             <div className={`content ${menuOpen ? 'shift' : ''}`}>
               <header className="topbar">
@@ -1540,7 +1722,9 @@
               </header>
 
               <main className="main">
-                {selectedForm === 'home' ? (
+                {selectedForm === 'dashboard-gerencia' ? (
+                  <DashboardGerencia rows={rows} />
+                ) : selectedForm === 'home' ? (
                   <>
                     <section className="hero">
                       <h2>Masterson Seguridad</h2>
