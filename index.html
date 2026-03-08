@@ -304,11 +304,14 @@
 
 
 
-      /* Rebrand visual absoluto: SaaS corporativo #006465 */
+      /* Dashboard ERP corporativo SaaS */
       :root {
         --base: #006465;
         --base-900: #004e50;
         --base-700: #0b7b7b;
+        --highlight: #e6fffd;
+        --bg-main: #f8fbfb;
+        --card: #ffffff;
         --text: #0f172a;
         --muted: #64748b;
         --accent: #006465;
@@ -316,11 +319,27 @@
         --line: #e2e8f0;
         --panel: #ffffff;
         --panel-2: #f8fafc;
-        --shadow-soft: 0 10px 20px rgba(2, 8, 23, 0.08);
-        --shadow-deep: 0 24px 42px rgba(2, 8, 23, 0.12);
+        --shadow-soft: 0 10px 20px rgba(0,0,0,0.08);
+        --shadow-deep: 0 20px 40px rgba(0,0,0,0.12);
         --ok: #10b981;
         --pause: #ef4444;
         --chip: #94a3b8;
+      }
+
+      * {
+        transition: all 0.2s cubic-bezier(.4,0,.2,1);
+      }
+
+      *::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      *::-webkit-scrollbar-thumb {
+        background: #006465;
+        border-radius: 10px;
+      }
+      *::-webkit-scrollbar-track {
+        background: #e6fffd;
       }
 
       body {
@@ -328,12 +347,12 @@
         background:
           radial-gradient(860px 420px at -12% -10%, rgba(0, 100, 101, .08), transparent 60%),
           radial-gradient(740px 360px at 112% -12%, rgba(14, 165, 164, .08), transparent 60%),
-          linear-gradient(180deg, #f8fbfb 0%, #f5f7f8 40%, #f5f7f8 100%);
+          linear-gradient(180deg, #f8fbfb 0%, #f8fbfb 40%, #f3f7f7 100%);
       }
 
       .sidebar {
         width: 272px;
-        background: linear-gradient(180deg, #005a5c 0%, #004e50 100%);
+        background: linear-gradient(180deg,#006465,#004e50);
         border-right: 1px solid rgba(255,255,255,.1);
         backdrop-filter: saturate(120%);
         box-shadow: var(--shadow-deep);
@@ -344,6 +363,9 @@
         border-bottom-color: rgba(255,255,255,.16);
       }
       .menu-button, .submenu-button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
         color: #e6fffd;
         border: 1px solid rgba(255,255,255,.14);
         background: rgba(255,255,255,.08);
@@ -360,6 +382,7 @@
         border-bottom: 1px solid var(--line);
         backdrop-filter: blur(12px);
         box-shadow: 0 8px 24px rgba(2, 8, 23, .06);
+        border-radius: 0 0 14px 14px;
       }
       .burger {
         color: #0f172a;
@@ -382,6 +405,12 @@
       }
 
       .search-icon { color: #475569; opacity: 1; }
+      .top-search input {
+        border-radius: 12px;
+        border: 1px solid #d6dee8;
+        background: #ffffff;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, .05);
+      }
       .search-preview {
         background: #ffffff;
         border: 1px solid var(--line);
@@ -437,8 +466,8 @@
         border: 1px solid var(--line);
         border-radius: 14px;
         background: #ffffff;
-        box-shadow: var(--shadow-soft);
-        padding: 18px 20px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+        padding: 20px;
         text-align: center;
       }
       .kpi-value {
@@ -465,6 +494,8 @@
         background: #ffffff;
         border: 1px solid #d6dee8;
         box-shadow: none;
+        border-radius: 10px;
+        padding: 10px 12px;
       }
       input::placeholder, textarea::placeholder { color: #94a3b8; }
       input:focus, select:focus, textarea:focus {
@@ -494,6 +525,7 @@
       .table-wrap table {
         background: #ffffff;
         border: 1px solid var(--line);
+        border-radius: 12px;
       }
       th {
         background: #f8fafc;
