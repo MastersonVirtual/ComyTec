@@ -752,31 +752,6 @@
         .kpi-grid { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
       }
 
-
-      .notification-btn {
-        margin-top: 14px;
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        border: 1px solid rgba(255,255,255,.35);
-        background: rgba(230,255,253,.10);
-        color: #e6fffd;
-        font-weight: 700;
-        cursor: pointer;
-      }
-      .notification-btn:hover { background: rgba(230,255,253,.2); }
-      .notification-count {
-        min-width: 22px;
-        padding: 2px 7px;
-        border-radius: 999px;
-        background: #e6fffd;
-        color: #005255;
-        font-size: 12px;
-        font-weight: 800;
-      }
-
       .logout-btn {
         margin-top: 10px;
         width: 100%;
@@ -816,29 +791,14 @@
         color: #0f172a;
       }
       .login-logo {
-        width: 98px;
-        height: 98px;
+        width: 50%;
+        max-width: 220px;
+        aspect-ratio: 1 / 1;
         margin: 0 auto 14px;
         border-radius: 18px;
         background: rgba(230,255,253,.12) url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png') center/cover no-repeat;
         border: 1px solid rgba(230,255,253,.3);
         box-shadow: 0 10px 20px rgba(0,0,0,.25);
-      }
-
-      .contact-admin-btn {
-        width: 100%;
-        margin-top: 8px;
-        border: 1px solid rgba(230,255,253,.35);
-        border-radius: 10px;
-        background: rgba(230,255,253,.12);
-        color: #e6fffd;
-        font-size: 12px;
-        font-weight: 600;
-        padding: 8px 10px;
-        cursor: pointer;
-      }
-      .contact-admin-btn:hover {
-        background: rgba(230,255,253,.24);
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -1063,8 +1023,6 @@
         const [password, setPassword] = useState('');
         const [loading, setLoading] = useState(false);
         const [error, setError] = useState('');
-        const [failedEmail, setFailedEmail] = useState('');
-        const [contactingAdmin, setContactingAdmin] = useState(false);
 
         async function handleLogin(e) {
           e.preventDefault();
@@ -1073,35 +1031,9 @@
             setLoading(true);
             await auth.signInWithEmailAndPassword(email.trim(), password);
           } catch (err) {
-            setFailedEmail(email.trim());
             setError('No se pudo iniciar sesión. Verificá email y contraseña.');
           } finally {
             setLoading(false);
-          }
-        }
-
-
-        async function handleContactAdmin() {
-          const contactEmail = failedEmail || email.trim();
-          if (!contactEmail) {
-            setError('Ingresá tu email para contactar al admin.');
-            return;
-          }
-
-          try {
-            setContactingAdmin(true);
-            await db.collection('notificaciones_admin').add({
-              tipo: 'solicitud-contacto-login',
-              email: contactEmail,
-              mensaje: `El usuario con email ${contactEmail} no pudo iniciar sesión y solicita contacto del admin.`,
-              creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
-            });
-            alert('Notificación enviada al admin. Te contactarán a la brevedad.');
-          } catch (err) {
-            console.error('No se pudo notificar al admin:', err);
-            alert('No se pudo enviar la notificación al admin.');
-          } finally {
-            setContactingAdmin(false);
           }
         }
 
@@ -1122,7 +1054,6 @@
                 <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
               </div>
               <button className="save-btn" type="submit" disabled={loading}>{loading ? 'Ingresando...' : 'Iniciar Sesión'}</button>
-              <button className="contact-admin-btn" type="button" disabled={contactingAdmin} onClick={handleContactAdmin}>{contactingAdmin ? 'Enviando aviso...' : 'Contactar al Admin'}</button>
               </form>
             </div>
           </div>
@@ -1134,7 +1065,6 @@
         const [openMenus, setOpenMenus] = useState({ nuevo: false, fact: false });
         const [user, setUser] = useState(null);
         const [authLoading, setAuthLoading] = useState(true);
-        const [notificationsCount, setNotificationsCount] = useState(0);
 
         const [tipoAccion, setTipoAccion] = useState('');
         const [selectedForm, setSelectedForm] = useState('home');
@@ -1356,18 +1286,6 @@
           return () => unsub();
         }, []);
 
-        useEffect(() => {
-          if (!user) {
-            setNotificationsCount(0);
-            return () => {};
-          }
-          const unsub = db.collection('notificaciones_admin').onSnapshot(
-            (snap) => setNotificationsCount(snap.size),
-            (err) => console.error('Error notificaciones_admin:', err)
-          );
-          return () => unsub();
-        }, [user]);
-
         function resetFields() {
           setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('Pendiente');
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
@@ -1526,9 +1444,6 @@
                 </div>
                 <button className="menu-button" onClick={() => selectAction('Charla')}>Charlas informativas</button>
                 <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
-                <button className="notification-btn" type="button" title="Notificaciones de contacto admin">
-                  🔔 <span className="notification-count">{notificationsCount}</span>
-                </button>
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
               </div>
             </aside>
