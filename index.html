@@ -755,13 +755,40 @@
       .logout-btn {
         margin-top: 10px;
         width: 100%;
-        border: 1px solid rgba(255,255,255,.35);
-        background: rgba(0,0,0,.18);
-        color: #e6fffd;
+        border: 1px solid rgba(239,68,68,.45);
+        background: rgba(127,29,29,.18);
+        color: #ffe4e6;
         font-weight: 700;
         cursor: pointer;
       }
-      .logout-btn:hover { background: rgba(0,0,0,.28); }
+      .logout-btn:hover { background: rgba(127,29,29,.28); }
+
+      .toast {
+        position: fixed;
+        top: 18px;
+        right: 18px;
+        z-index: 1200;
+        min-width: 260px;
+        max-width: 360px;
+        border-radius: 12px;
+        padding: 10px 12px;
+        border: 1px solid var(--accent);
+        background: rgba(0, 100, 101, .92);
+        color: #e6fffd;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+        animation: toast-in-out 3s ease forwards;
+      }
+      .toast.error {
+        border-color: var(--pause);
+        color: #ffd4d4;
+      }
+      @keyframes toast-in-out {
+        0% { opacity: 0; transform: translateY(-10px); }
+        12% { opacity: 1; transform: translateY(0); }
+        82% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(-10px); }
+      }
 
       .login-shell {
         min-height: 100vh;
@@ -845,6 +872,14 @@
           max-height: 44vh;
         }
         .burger { width: 40px; height: 40px; border-radius: 12px; }
+        .toast {
+          top: auto;
+          right: 10px;
+          left: 10px;
+          bottom: 14px;
+          min-width: 0;
+          max-width: none;
+        }
         .card-grid,
         .compact-grid,
         .history-grid {
@@ -1065,6 +1100,7 @@
         const [openMenus, setOpenMenus] = useState({ nuevo: false, fact: false });
         const [user, setUser] = useState(null);
         const [authLoading, setAuthLoading] = useState(true);
+        const [notificacion, setNotificacion] = useState({ mensaje: '', tipo: '' });
 
         const [tipoAccion, setTipoAccion] = useState('');
         const [selectedForm, setSelectedForm] = useState('home');
@@ -1286,6 +1322,12 @@
           return () => unsub();
         }, []);
 
+        useEffect(() => {
+          if (!notificacion.mensaje) return;
+          const timer = setTimeout(() => setNotificacion({ mensaje: '', tipo: '' }), 3000);
+          return () => clearTimeout(timer);
+        }, [notificacion]);
+
         function resetFields() {
           setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('Pendiente');
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
@@ -1399,16 +1441,19 @@
             Object.assign(doc, { ...charlaForm, formulario: 'charla-informativa' });
           }
 
-          try {
-            setSaving(true);
-            await db.collection('operaciones').add(doc);
-            resetFields();
-          } catch (error) {
-            console.error('Error guardando:', error);
-            alert('No se pudo guardar en operaciones.');
-          } finally {
-            setSaving(false);
-          }
+          setSaving(true);
+          db.collection('operaciones').add(doc)
+            .then(() => {
+              resetFields();
+              setNotificacion({ mensaje: '✔ Datos guardados correctamente', tipo: 'ok' });
+            })
+            .catch((error) => {
+              console.error('Error guardando:', error);
+              setNotificacion({ mensaje: '✖ Error al guardar datos', tipo: 'error' });
+            })
+            .finally(() => {
+              setSaving(false);
+            });
         }
 
         if (authLoading) {
@@ -1449,6 +1494,9 @@
             </aside>
 
             <div className={`overlay ${menuOpen ? 'show' : ''}`} onClick={closeSidebar} />
+            {notificacion.mensaje && (
+              <div className={`toast ${notificacion.tipo === 'error' ? 'error' : ''}`}>{notificacion.mensaje}</div>
+            )}
 
             <div className={`content ${menuOpen ? 'shift' : ''}`}>
               <header className="topbar">
