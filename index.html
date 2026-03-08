@@ -835,8 +835,8 @@
         gap: 14px;
       }
       .gerencia-card {
-        background: var(--panel);
-        border: 1px solid rgba(230,255,253,.25);
+        background: #002829;
+        border: 1px solid var(--line);
         border-radius: 14px;
         padding: 16px;
         box-shadow: var(--shadow-soft);
@@ -848,11 +848,17 @@
         text-transform: uppercase;
         letter-spacing: .05em;
       }
-      .gerencia-value {
+      .gerencia-value,
+      .gerencia-card .kpi-value,
+      .gerencia-kpi-value {
         margin-top: 8px;
         font-size: 1.6rem;
         font-weight: 800;
-        color: #e6fffd;
+        color: var(--accent);
+        text-shadow: 0 0 14px color-mix(in srgb, var(--accent) 35%, transparent);
+      }
+      .dashboard-gerencia-panel {
+        padding-bottom: 18px;
       }
       .gerencia-charts {
         margin-top: 14px;
@@ -927,6 +933,7 @@
 
       @media (max-width: 768px) {
         .main { margin: 12px auto; padding: 0 10px 18px; }
+        .dashboard-gerencia-panel { padding-bottom: 86px; }
         .panel { padding: 14px; border-radius: 16px; }
         .service-card { padding: 12px; border-radius: 14px; }
         .hero { padding: 34px 14px; border-radius: 16px; }
@@ -1200,14 +1207,14 @@
         }
 
         return (
-          <section className="panel">
+          <section className="panel dashboard-gerencia-panel">
             <h2>Dashboard Gerencia</h2>
             <div className="hint">Vista ejecutiva con datos reales de servicios y facturación.</div>
             <div className="gerencia-grid">
-              <div className="gerencia-card"><h3>Total Abonos Mensuales</h3><div className="gerencia-value">US$ {totalAbonos.toLocaleString('es-UY')}</div></div>
-              <div className="gerencia-card"><h3>Total Ventas Equipos</h3><div className="gerencia-value">US$ {totalVentasEquipos.toLocaleString('es-UY')}</div></div>
-              <div className="gerencia-card"><h3>Servicios por Estado</h3><div className="gerencia-value">{pendientes} / {enCurso}</div><div className="hint" style={{ marginBottom: 0 }}>Pendiente / En curso</div></div>
-              <div className="gerencia-card"><h3>Estado Facturación</h3><div className="gerencia-value">{factSi} / {factNo}</div><div className="hint" style={{ marginBottom: 0 }}>Sí / No</div></div>
+              <div className="gerencia-card"><h3>Total Abonos Mensuales</h3><div className="kpi-value gerencia-kpi-value">US$ {totalAbonos.toLocaleString('es-UY')}</div></div>
+              <div className="gerencia-card"><h3>Total Ventas Equipos</h3><div className="kpi-value gerencia-kpi-value">US$ {totalVentasEquipos.toLocaleString('es-UY')}</div></div>
+              <div className="gerencia-card"><h3>Servicios por Estado</h3><div className="kpi-value gerencia-kpi-value">{pendientes} / {enCurso}</div><div className="hint" style={{ marginBottom: 0 }}>Pendiente / En curso</div></div>
+              <div className="gerencia-card"><h3>Estado Facturación</h3><div className="kpi-value gerencia-kpi-value">{factSi} / {factNo}</div><div className="hint" style={{ marginBottom: 0 }}>Sí / No</div></div>
             </div>
 
             <div className="gerencia-charts">
@@ -1504,6 +1511,25 @@
         }, [notificacion]);
 
         const isGerencia = userRole === 'gerentes' && userArea === 'gerencia';
+        const isVendedor = userRole.includes('vendedor');
+
+        const topbarSubtitle = useMemo(() => {
+          if (userRole === 'gerentes') return 'Dashboard Gerencia';
+          if (userRole === 'admin') return 'Administrador';
+          if (userArea === 'comercial' || isVendedor) return 'Área Comercial';
+          if (userArea === 'tecnica') return 'Área Técnica';
+          return 'Área Técnica y Comercial';
+        }, [userRole, userArea, isVendedor]);
+
+        useEffect(() => {
+          if (isGerencia && selectedForm !== 'dashboard-gerencia') {
+            setSelectedForm('dashboard-gerencia');
+            setSelectedService(null);
+            setTipoAccion('');
+          }
+        }, [isGerencia, selectedForm]);
+
+        const effectiveSelectedForm = isGerencia ? 'dashboard-gerencia' : selectedForm;
 
         function resetFields() {
           setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('Pendiente');
@@ -1685,7 +1711,7 @@
                 <button className="burger" aria-label="Abrir menú" onClick={toggleSidebar} />
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
-                  <p className="subtitle-voga">ÁREA TÉCNICA Y COMERCIAL</p>
+                  <p className="subtitle-voga">{topbarSubtitle}</p>
                 </div>
                 <div className="top-search">
                   <div className="search-wrap">
@@ -1722,9 +1748,9 @@
               </header>
 
               <main className="main">
-                {selectedForm === 'dashboard-gerencia' ? (
+                {effectiveSelectedForm === 'dashboard-gerencia' ? (
                   <DashboardGerencia rows={rows} />
-                ) : selectedForm === 'home' ? (
+                ) : effectiveSelectedForm === 'home' ? (
                   <>
                     <section className="hero">
                       <h2>Masterson Seguridad</h2>
@@ -1785,7 +1811,7 @@
                     </section>
                   </>
 
-                ) : selectedForm === 'ranking-comercial' ? (
+                ) : effectiveSelectedForm === 'ranking-comercial' ? (
                   <section className="panel">
                     <h2>Listado de servicios por vendedor</h2>
                     <div className="ranking-toolbar">
@@ -1829,7 +1855,7 @@
                       })}
                     </div>
                   </section>
-) : selectedForm === 'historial' ? (
+) : effectiveSelectedForm === 'historial' ? (
                   <section className="panel">
                     <h2>Historial de Servicios · Vista Ejecutiva</h2>
                     <div className="hint">Vista completa del servicio seleccionado desde la vista previa de búsqueda.</div>
