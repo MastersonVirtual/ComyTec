@@ -304,156 +304,299 @@
 
 
 
-      /* Rebrand visual absoluto: SaaS corporativo #006465 */
+      /* Dashboard ERP corporativo SaaS */
       :root {
-        --base: #006465;
-        --base-900: #004e50;
-        --base-700: #0b7b7b;
+        --base: #005255;
+        --base-900: #003f41;
+        --base-700: #0a6666;
+        --highlight: #e6fffd;
+        --bg-main: #0f172a;
+        --bg-surface: #1f2937;
+        --card: #ffffff;
         --text: #0f172a;
         --muted: #64748b;
-        --accent: #006465;
+        --accent: #005255;
         --accent-soft: rgba(0, 100, 101, 0.18);
-        --line: #e2e8f0;
+        --line: #d8e1ea;
         --panel: #ffffff;
-        --panel-2: #f8fafc;
-        --shadow-soft: 0 10px 20px rgba(2, 8, 23, 0.08);
-        --shadow-deep: 0 24px 42px rgba(2, 8, 23, 0.12);
+        --panel-2: #f8fbfb;
+        --shadow-soft: 0 10px 20px rgba(0,0,0,0.08);
+        --shadow-deep: 0 20px 40px rgba(0,0,0,0.12);
         --ok: #10b981;
         --pause: #ef4444;
         --chip: #94a3b8;
       }
 
+      * {
+        transition: all 0.2s cubic-bezier(.4,0,.2,1);
+      }
+
+      *::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      *::-webkit-scrollbar-thumb {
+        background: var(--base);
+        border-radius: 10px;
+      }
+      *::-webkit-scrollbar-track {
+        background: rgba(230,255,253,.14);
+      }
+
       body {
         color: var(--text);
         background:
-          radial-gradient(860px 420px at -12% -10%, rgba(0, 100, 101, .08), transparent 60%),
-          radial-gradient(740px 360px at 112% -12%, rgba(14, 165, 164, .08), transparent 60%),
-          linear-gradient(180deg, #f8fbfb 0%, #f5f7f8 40%, #f5f7f8 100%);
+          radial-gradient(860px 420px at -12% -10%, rgba(0, 100, 101, .23), transparent 60%),
+          radial-gradient(740px 360px at 112% -12%, rgba(11, 123, 123, .18), transparent 60%),
+          linear-gradient(180deg, #1f2937 0%, #111827 50%, #0b1220 100%);
       }
 
       .sidebar {
-        width: 272px;
-        background: linear-gradient(180deg, #005a5c 0%, #004e50 100%);
-        border-right: 1px solid rgba(255,255,255,.1);
-        backdrop-filter: saturate(120%);
+        width: 286px;
+        background: linear-gradient(180deg, var(--base) 0%, var(--base-900) 100%);
+        border-right: 1px solid rgba(230,255,253,.16);
         box-shadow: var(--shadow-deep);
       }
       .sidebar-header {
-        background: rgba(255,255,255,.08);
-        color: #effdfd;
-        border-bottom-color: rgba(255,255,255,.16);
+        background: rgba(230,255,253,.08);
+        color: #e6fffd;
+        border-bottom-color: rgba(230,255,253,.16);
+      }
+      .menu {
+        padding: 14px;
       }
       .menu-button, .submenu-button {
+        display: flex;
+        align-items: center;
+        gap: 10px;
         color: #e6fffd;
-        border: 1px solid rgba(255,255,255,.14);
-        background: rgba(255,255,255,.08);
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+        border: 1px solid rgba(230,255,253,.18);
+        background: rgba(230,255,253,.08);
+        border-radius: 12px;
+        padding: 12px 14px;
       }
       .menu-button:hover, .submenu-button:hover {
         transform: translateX(4px);
-        background: rgba(255,255,255,.16);
-        box-shadow: 0 8px 16px rgba(0,0,0,.18);
+        background: rgba(230,255,253,.18);
+        box-shadow: 0 10px 20px rgba(0,0,0,.2);
       }
 
       .topbar {
-        background: rgba(255,255,255,.78);
-        border-bottom: 1px solid var(--line);
+        background: var(--base);
+        border-bottom: 1px solid var(--base-700);
         backdrop-filter: blur(12px);
-        box-shadow: 0 8px 24px rgba(2, 8, 23, .06);
+        box-shadow: 0 10px 24px rgba(0,0,0,.18);
       }
       .burger {
-        color: #0f172a;
-        border-color: #d7e0ea;
-        background: #fff;
-        box-shadow: 0 6px 14px rgba(15, 23, 42, .08);
+        color: transparent;
+        border-color: rgba(230,255,253,.45);
+        border-radius: 14px;
+        padding: 0;
+        overflow: hidden;
+        background-color: rgba(255,255,255,.08);
+        background-image: url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png');
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        box-shadow: 0 8px 16px rgba(0,0,0,.18);
       }
       .top-titles h1 {
-        color: #0f172a;
+        color: #e6fffd;
         letter-spacing: .2px;
         text-shadow: none;
       }
       .top-titles p {
-        color: #475569;
-        letter-spacing: .08em;
+        color: #d8fbf8;
+        letter-spacing: .07em;
       }
       .subtitle-voga {
         font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
         font-weight: 700;
       }
 
-      .search-icon { color: #475569; opacity: 1; }
-      .search-preview {
-        background: #ffffff;
-        border: 1px solid var(--line);
-        box-shadow: var(--shadow-soft);
+      .top-search {
+        max-width: 460px;
       }
-      .search-item { border-bottom: 1px solid #edf2f7; color: #0f172a; }
-      .search-item:hover { background: #f8fafc; }
-      .search-item small { color: #64748b; }
+      .search-icon { color: #64748b; opacity: 1; }
+      .top-search input {
+        border-radius: 12px;
+        border: 1px solid #d6dee8;
+        background: #ffffff;
+        box-shadow: 0 4px 10px rgba(15, 23, 42, .05);
+      }
+      .search-preview {
+        background: var(--base);
+        border: 1px solid rgba(230,255,253,.3);
+        box-shadow: var(--shadow-deep);
+      }
+      .search-item { border-bottom: 1px solid rgba(230,255,253,.2); color: #ffffff; }
+      .search-item:hover { background: var(--base-700); }
+      .search-item small { color: #e6fffd; }
+      .search-detail {
+        color: #e6fffd;
+        border-top-color: rgba(230,255,253,.3);
+        background: rgba(0, 78, 80, .86);
+      }
 
+      .main {
+        max-width: 1360px;
+        margin: 26px auto;
+      }
       .hero,
       .panel,
       .service-card,
-      .widget {
-        background: var(--panel);
-        border: 1px solid var(--line);
-        backdrop-filter: blur(10px);
+      .widget,
+      .kpi-card {
+        background: #006465;
+        border: 1px solid rgba(230,255,253,.25);
         box-shadow: var(--shadow-soft);
       }
       .hero {
-        border-radius: 16px;
-        background: linear-gradient(145deg, #005f60 0%, #006465 60%, #0b7b7b 100%);
-        border-color: rgba(255,255,255,.12);
-        color: #ecfeff;
+        border-radius: 18px;
+        padding: 64px 34px;
+        background: linear-gradient(140deg, #004c4d 0%, #006465 58%, #0b7b7b 100%);
       }
-      .hero h2, .hero p { color: #ecfeff; }
+      .hero::before {
+        background: radial-gradient(circle, rgba(230,255,253,.28), transparent 62%);
+      }
+      .hero h2, .hero p { color: #e6fffd; }
+
       .panel {
         border-radius: 14px;
         padding: 24px;
       }
-      .service-layout { gap: 20px; }
+      .panel h2, .service-card h3, .widget h4 {
+        color: #e6fffd;
+      }
+      .hint, .kv {
+        color: #d1faf5;
+      }
+
+      .service-layout { gap: 18px; }
       .service-card {
         border-radius: 14px;
         padding: 22px;
-        transition: transform 200ms cubic-bezier(.4,0,.2,1), box-shadow 200ms cubic-bezier(.4,0,.2,1), border-color 200ms cubic-bezier(.4,0,.2,1);
       }
-      .service-card:hover {
+      .service-card h3,
+      .service-card label,
+      .service-card .hint,
+      .service-card .muted,
+      .service-card .kv,
+      .service-card .detail-box {
+        color: #e6fffd;
+      }
+      .service-card h3::before {
+        color: var(--base);
+      }
+      .service-card:hover,
+      .widget:hover,
+      .kpi-card:hover {
         transform: translateY(-2px);
-        box-shadow: 0 16px 26px rgba(2,8,23,.1);
-        border-color: #cfd8e3;
+        box-shadow: 0 16px 26px rgba(0,0,0,0.12);
       }
-      .panel h2, .service-card h3, .widget h4 { color: #0f172a; }
-      .service-card h3::before { color: var(--accent); }
-      .hint, .kv { color: #64748b; }
       .card-grid, .compact-grid, .history-grid { gap: 16px; }
 
       .kpi-grid {
-        margin-top: 22px;
+        margin-top: 24px;
         display: grid;
         grid-template-columns: repeat(4, minmax(160px, 1fr));
-        gap: 20px;
+        gap: 18px;
+        align-items: start;
+      }
+      .kpi-card-wrap {
+        position: relative;
       }
       .kpi-card {
-        border: 1px solid var(--line);
         border-radius: 14px;
-        background: #ffffff;
-        box-shadow: var(--shadow-soft);
-        padding: 18px 20px;
+        padding: 20px;
         text-align: center;
+        cursor: pointer;
+      }
+      .kpi-card.active {
+        border-color: #006465;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.12);
       }
       .kpi-value {
         font-size: 2rem;
-        line-height: 1;
         font-weight: 800;
-        color: var(--accent);
-        letter-spacing: -.03em;
+        line-height: 1;
+        color: #e6fffd;
       }
       .kpi-label {
         margin-top: 8px;
-        font-size: .82rem;
-        color: #64748b;
+        color: #d1faf5;
+        font-size: .8rem;
         text-transform: uppercase;
-        letter-spacing: .06em;
+        letter-spacing: .08em;
+      }
+      .kpi-breakdown {
+        margin-top: 10px;
+        border-radius: 14px;
+        padding: 14px;
+        background: #006465;
+        border: 1px solid rgba(230,255,253,.25);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+        color: #e6fffd;
+      }
+      .kpi-breakdown h3 {
+        margin: 0 0 12px;
+        font-size: 0.95rem;
+        color: #e6fffd;
+      }
+      .kpi-breakdown-list {
+        display: grid;
+        gap: 8px;
+      }
+      .kpi-breakdown-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: rgba(230,255,253,.1);
+      }
+      .kpi-breakdown-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .kpi-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: var(--dot-color, #22c55e);
+        box-shadow: 0 0 0 2px rgba(255,255,255,.18);
+      }
+      .kpi-breakdown-count {
+        font-weight: 700;
+        background: transparent;
+        border: 0;
+        color: #e6fffd;
+        cursor: pointer;
+        padding: 0;
+      }
+      .kpi-breakdown-services {
+        width: 100%;
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px dashed rgba(230,255,253,.4);
+        display: grid;
+        gap: 6px;
+      }
+      .kpi-service-link {
+        text-align: left;
+        border: 0;
+        border-radius: 8px;
+        background: rgba(230,255,253,.16);
+        color: #e6fffd;
+        font-size: 12px;
+        padding: 8px 10px;
+        cursor: pointer;
+      }
+      .kpi-service-link:hover {
+        background: rgba(230,255,253,.28);
       }
 
       label {
@@ -464,57 +607,101 @@
         color: #0f172a;
         background: #ffffff;
         border: 1px solid #d6dee8;
+        border-radius: 10px;
+        padding: 10px 12px;
         box-shadow: none;
       }
-      input::placeholder, textarea::placeholder { color: #94a3b8; }
+      input::placeholder, textarea::placeholder {
+        color: #94a3b8;
+      }
       input:focus, select:focus, textarea:focus {
-        border-color: #006465;
+        border-color: var(--base);
         box-shadow: 0 0 0 3px rgba(0,100,101,.15);
       }
-      option { color: #0f172a; background: #ffffff; }
+      option {
+        color: #e6fffd;
+        background: var(--base);
+      }
+
+      .radio-pill, .state-pill {
+        border-color: #cdd8e3;
+        background: #f8fbfb;
+        color: #334155;
+      }
+      .radio-pill.active, .state-pill.active {
+        border-color: var(--base);
+        background: #e6fffd;
+        color: #005355;
+      }
 
       .save-btn {
-        background: linear-gradient(135deg, #006465, #005355);
+        background: linear-gradient(135deg, #005255, #004547);
         border-color: #005355;
-        color: #ecfeff;
-        box-shadow: 0 10px 20px rgba(0, 78, 80, .26);
+        color: #ffffff;
+        font-weight: 700;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.12);
       }
       .save-btn:hover {
-        background: linear-gradient(135deg, #005b5d, #004e50);
+        background: linear-gradient(135deg, #004b4d, #003f41);
       }
 
-      .chip {
-        border: 1px solid transparent;
-        font-weight: 700;
+      .pdf-toolbar {
+        display: flex;
+        justify-content: flex-end;
+        margin: 6px 0 14px;
       }
-      .status-ongoing { background: rgba(14, 165, 164, .14); color: #0f766e; border-color: rgba(14,165,164,.24); }
-      .status-pausa { background: rgba(239, 68, 68, .14); color: #b91c1c; border-color: rgba(239,68,68,.24); }
-      .status-default { background: rgba(245, 158, 11, .16); color: #7a5200; border-color: rgba(245,158,11,.28); }
+      .pdf-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border: 1px solid #0a6666;
+        border-radius: 10px;
+        padding: 10px 14px;
+        background: linear-gradient(135deg, #005255, #003f41);
+        color: #e6fffd;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+      }
+      .pdf-btn:hover {
+        transform: translateY(-1px);
+        background: linear-gradient(135deg, #00474a, #003537);
+      }
 
       .table-wrap table {
         background: #ffffff;
-        border: 1px solid var(--line);
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
       }
       th {
         background: #f8fafc;
         color: #475569;
         text-transform: uppercase;
         letter-spacing: .05em;
-        font-size: .72rem;
+        font-size: 12px;
       }
       th, td {
-        border-bottom: 1px solid #eef2f7;
+        border-bottom: 1px solid #eaf0f6;
+      }
+      tr:hover td {
+        background: #f8fbfb;
       }
 
       .widget {
         border-radius: 14px;
       }
-      .widget::after {
-        background: linear-gradient(var(--accent), rgba(0,100,101,0));
+      .widget h4,
+      .widget .kv,
+      .widget .kv b,
+      .widget .detail-box {
+        color: #e6fffd;
       }
-      .widget h4 { color: #0f172a; }
-      .kv b { color: #0f172a; }
-.bento-grid .service-card:first-child { grid-column: span 12; }
+      .widget::after {
+        background: linear-gradient(var(--base), rgba(0,100,101,0));
+      }
+      .widget h4 { color: #e6fffd; }
+      .kv b { color: #e6fffd; }
+      .bento-grid .service-card:first-child { grid-column: span 12; }
       .facturacion-module .service-card:nth-child(2) { grid-column: span 7; }
       .facturacion-module .service-card:nth-child(3) { grid-column: span 5; }
       .facturacion-module .service-card:nth-child(4),
@@ -567,7 +754,7 @@
         .search-preview {
           max-height: 44vh;
         }
-        .burger { width: 40px; height: 40px; border-radius: 10px; }
+        .burger { width: 40px; height: 40px; border-radius: 12px; }
         .card-grid,
         .compact-grid,
         .history-grid {
@@ -597,12 +784,13 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   </head>
   <body>
     <div id="root"></div>
 
     <script type="text/babel">
-      const { useDeferredValue, useEffect, useMemo, useState } = React;
+      const { useDeferredValue, useEffect, useMemo, useRef, useState } = React;
 
       const firebaseConfig = {
         apiKey: 'AIzaSyCXTX7h33uCXK4K8FSSnD7PcoayjAGV9x4',
@@ -740,7 +928,7 @@
 
       function App() {
         const [menuOpen, setMenuOpen] = useState(false);
-        const [openMenus, setOpenMenus] = useState({ nuevo: true, fact: false });
+        const [openMenus, setOpenMenus] = useState({ nuevo: false, fact: false });
 
         const [tipoAccion, setTipoAccion] = useState('');
         const [selectedForm, setSelectedForm] = useState('home');
@@ -800,6 +988,64 @@
           );
         }, [rows, deferredSearchTerm]);
 
+        const [activeKpi, setActiveKpi] = useState(null);
+        const [expandedCommercial, setExpandedCommercial] = useState(null);
+        const kpiContainerRef = useRef(null);
+
+        function getKpiRows(type) {
+          if (type === 'total') return rows;
+          if (type === 'pending') return rows.filter((r) => (r.status || '').toLowerCase().includes('pend'));
+          if (type === 'inprogress') return rows.filter((r) => (r.status || '').toLowerCase().includes('curso'));
+          if (type === 'completed') return rows.filter((r) => (r.status || '').toLowerCase().includes('complet'));
+          return [];
+        }
+
+        function getCommercialBreakdown(type) {
+          const pool = getKpiRows(type);
+          const counts = pool.reduce((acc, row) => {
+            const rep = (row.representanteComercial || 'Sin asignar').trim();
+            acc[rep] = (acc[rep] || 0) + 1;
+            return acc;
+          }, {});
+
+          return Object.entries(counts)
+            .map(([name, value]) => ({ name, value }))
+            .sort((a, b) => b.value - a.value);
+        }
+
+        function getRankColor(index, total) {
+          if (total <= 1) return 'hsl(120 70% 45%)';
+          const ratio = index / (total - 1);
+          const hue = Math.round(120 - ratio * 120);
+          return `hsl(${hue} 70% 45%)`;
+        }
+
+        function getServicesByCommercial(type, commercial) {
+          return getKpiRows(type)
+            .filter((r) => ((r.representanteComercial || 'Sin asignar').trim() === commercial))
+            .sort((a, b) => String(a.nombreServicio || '').localeCompare(String(b.nombreServicio || '')));
+        }
+
+        const kpiStats = useMemo(() => ({
+          total: rows.length,
+          pending: rows.filter((r) => (r.status || '').toLowerCase().includes('pend')).length,
+          inprogress: rows.filter((r) => (r.status || '').toLowerCase().includes('curso')).length,
+          completed: rows.filter((r) => (r.status || '').toLowerCase().includes('complet')).length,
+        }), [rows]);
+
+        useEffect(() => {
+          function handleOutsideKpiClick(event) {
+            if (!kpiContainerRef.current) return;
+            if (!kpiContainerRef.current.contains(event.target)) {
+              setActiveKpi(null);
+              setExpandedCommercial(null);
+            }
+          }
+
+          document.addEventListener('mousedown', handleOutsideKpiClick);
+          return () => document.removeEventListener('mousedown', handleOutsideKpiClick);
+        }, []);
+
         function buildServiceDetailText(r) {
           const lines = [
             `Cliente ID: ${r.clienteId || '-'}`,
@@ -827,6 +1073,75 @@
             `Fecha alta negociada: ${r.fechaAltaNegociada || '-'}`,
           ];
           return lines.join('\n');
+        }
+
+        function formatNow() {
+          return new Date().toLocaleString('es-UY', { dateStyle: 'medium', timeStyle: 'short' });
+        }
+
+        async function handleDownloadPdf(service) {
+          if (!service || !window.jspdf?.jsPDF) {
+            alert('No se pudo cargar el generador de PDF.');
+            return;
+          }
+
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+          const pageWidth = doc.internal.pageSize.getWidth();
+          const margin = 14;
+          const topBarHeight = 28;
+          const logoUrl = 'https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png';
+
+          doc.setFillColor(0, 100, 101);
+          doc.rect(0, 0, pageWidth, topBarHeight, 'F');
+          doc.setTextColor(230, 255, 253);
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(16);
+          doc.text('Masterson Seguridad', margin, 10);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(10.5);
+          doc.text('Área de Coordinación Técnica y Comercial', margin, 17);
+
+          try {
+            const imgData = await fetch(logoUrl)
+              .then((r) => r.blob())
+              .then((blob) => new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(blob);
+              }));
+            doc.addImage(imgData, 'PNG', pageWidth - 24, 5, 14, 14, undefined, 'FAST');
+          } catch (err) {
+            console.warn('No se pudo cargar el logo para PDF', err);
+          }
+
+          let y = 36;
+          doc.setTextColor(20, 23, 28);
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(12);
+          doc.text(`Servicio: ${service.nombreServicio || '-'}`, margin, y);
+          y += 7;
+          doc.text(`ID: ${service.clienteId || '-'}`, margin, y);
+          y += 7;
+          doc.setFont('helvetica', 'normal');
+          doc.text(`Fecha de descarga: ${formatNow()}`, margin, y);
+          y += 9;
+
+          const detailLines = buildServiceDetailText(service).split('\n');
+          doc.setFontSize(10.5);
+          detailLines.forEach((line) => {
+            const wrapped = doc.splitTextToSize(line, pageWidth - margin * 2);
+            if (y > 280) {
+              doc.addPage();
+              y = 18;
+            }
+            doc.text(wrapped, margin, y);
+            y += wrapped.length * 5 + 1;
+          });
+
+          const safeId = String(service.clienteId || 'servicio').replace(/[^a-z0-9_-]/gi, '_');
+          const safeName = String(service.nombreServicio || 'detalle').replace(/[^a-z0-9_-]/gi, '_');
+          doc.save(`Masterson_${safeId}_${safeName}.pdf`);
         }
 
         useEffect(() => {
@@ -871,6 +1186,19 @@
           setCharlaForm((prev) => ({ ...prev, [key]: value }));
         }
 
+        function closeSidebar() {
+          setMenuOpen(false);
+          setOpenMenus({ nuevo: false, fact: false });
+        }
+
+        function toggleSidebar() {
+          if (menuOpen) {
+            closeSidebar();
+            return;
+          }
+          setMenuOpen(true);
+        }
+
         function selectAction(action) {
           setTipoAccion(action);
           resetFields();
@@ -881,7 +1209,7 @@
             setClienteId('');
           }
           setSelectedForm(['Nuevo Servicio', 'Obra'].includes(action) ? 'servicio' : 'other');
-          setMenuOpen(false);
+          closeSidebar();
         }
 
         async function handleSubmit(e) {
@@ -954,6 +1282,7 @@
             <aside className={`sidebar ${menuOpen ? 'open' : ''}`}>
               <div className="sidebar-header">MENÚ OPERATIVO</div>
               <div className="menu">
+                <button className="menu-button" onClick={() => { setSelectedForm('home'); setSelectedService(null); setTipoAccion(''); closeSidebar(); }}>Inicio</button>
                 <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}>Nuevo {openMenus.nuevo ? '▾' : '▸'}</button>
                 <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
                   <button className="submenu-button" onClick={() => selectAction('Nuevo Servicio')}>Servicio</button>
@@ -972,15 +1301,15 @@
                   <button className="submenu-button" onClick={() => selectAction('Movimiento de Obra')}>Movimiento de Obra</button>
                 </div>
                 <button className="menu-button" onClick={() => selectAction('Charla')}>Charlas informativas</button>
-                <button className="menu-button" onClick={() => { setSelectedForm('historial'); setMenuOpen(false); }}>Historial de Servicios</button>
+                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
               </div>
             </aside>
 
-            <div className={`overlay ${menuOpen ? 'show' : ''}`} onClick={() => setMenuOpen(false)} />
+            <div className={`overlay ${menuOpen ? 'show' : ''}`} onClick={closeSidebar} />
 
             <div className={`content ${menuOpen ? 'shift' : ''}`}>
               <header className="topbar">
-                <button className="burger" onClick={() => setMenuOpen(!menuOpen)}>☰</button>
+                <button className="burger" aria-label="Abrir menú" onClick={toggleSidebar} />
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
                   <p className="subtitle-voga">ÁREA TÉCNICA Y COMERCIAL</p>
@@ -1026,11 +1355,76 @@
                       <h2>Masterson Seguridad</h2>
                       <p className="subtitle-voga">ÁREA TÉCNICA Y COMERCIAL</p>
                     </section>
-                    <section className="kpi-grid">
-                      <article className="kpi-card"><div className="kpi-value">{rows.length}</div><div className="kpi-label">Servicios totales</div></article>
-                      <article className="kpi-card"><div className="kpi-value">{rows.filter((r) => (r.status || '').toLowerCase().includes('pend')).length}</div><div className="kpi-label">Pendientes</div></article>
-                      <article className="kpi-card"><div className="kpi-value">{rows.filter((r) => (r.status || '').toLowerCase().includes('curso')).length}</div><div className="kpi-label">En curso</div></article>
-                      <article className="kpi-card"><div className="kpi-value">{rows.filter((r) => (r.status || '').toLowerCase().includes('complet')).length}</div><div className="kpi-label">Completados</div></article>
+                    <section className="kpi-grid" ref={kpiContainerRef}>
+                      {[
+                        { key: 'total', label: 'Servicios totales', value: kpiStats.total },
+                        { key: 'pending', label: 'Pendientes', value: kpiStats.pending },
+                        { key: 'inprogress', label: 'En curso', value: kpiStats.inprogress },
+                        { key: 'completed', label: 'Completados', value: kpiStats.completed },
+                      ].map((card) => (
+                        <div className="kpi-card-wrap" key={card.key}>
+                          <article
+                            className={`kpi-card ${activeKpi === card.key ? 'active' : ''}`}
+                            onClick={() => {
+                              setActiveKpi((prev) => prev === card.key ? null : card.key);
+                              setExpandedCommercial(null);
+                            }}
+                          >
+                            <div className="kpi-value">{card.value}</div>
+                            <div className="kpi-label">{card.label}</div>
+                          </article>
+                          {activeKpi === card.key && (
+                            <section className="kpi-breakdown">
+                              <h3>{card.key === 'total' ? 'Ranking Comercial · Servicios Totales' : card.key === 'pending' ? 'Ranking Comercial · Pendientes' : card.key === 'inprogress' ? 'Ranking Comercial · En curso' : 'Ranking Comercial · Completados'}</h3>
+                              {getCommercialBreakdown(card.key).length === 0 ? (
+                                <div className="hint" style={{ color: '#d1faf5', marginBottom: 0 }}>Sin datos para este indicador.</div>
+                              ) : (
+                                <div className="kpi-breakdown-list">
+                                  {getCommercialBreakdown(card.key).map((item, index, arr) => (
+                                    <div className="kpi-breakdown-item" key={`${card.key}-${item.name}`}>
+                                      <div className="kpi-breakdown-left">
+                                        <span className="kpi-dot" style={{ '--dot-color': getRankColor(index, arr.length) }} />
+                                        <span>{item.name}</span>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        className="kpi-breakdown-count"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          const id = `${card.key}-${item.name}`;
+                                          setExpandedCommercial((prev) => prev === id ? null : id);
+                                        }}
+                                      >
+                                        {item.value} servicios
+                                      </button>
+                                      {expandedCommercial === `${card.key}-${item.name}` && (
+                                        <div className="kpi-breakdown-services">
+                                          {getServicesByCommercial(card.key, item.name).map((service) => (
+                                            <button
+                                              type="button"
+                                              key={service.id}
+                                              className="kpi-service-link"
+                                              onClick={(e) => {
+                                                e.stopPropagation();
+                                                setSelectedService(service);
+                                                setSelectedForm('historial');
+                                                setActiveKpi(null);
+                                                setExpandedCommercial(null);
+                                              }}
+                                            >
+                                              {service.nombreServicio || 'Servicio sin nombre'} · ID {service.clienteId || '-'}
+                                            </button>
+                                          ))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </section>
+                          )}
+                        </div>
+                      ))}
                     </section>
                   </>
                 ) : selectedForm === 'historial' ? (
@@ -1043,7 +1437,11 @@
                         <p style={{fontSize:'1rem'}}>Usa la lupita arriba y toca una vista previa para ver el detalle completo.</p>
                       </div>
                     ) : (
-                      <div className="history-grid">
+                      <>
+                        <div className="pdf-toolbar">
+                          <button className="pdf-btn" type="button" onClick={() => handleDownloadPdf(selectedService)}>📄 Descargar PDF</button>
+                        </div>
+                        <div className="history-grid">
                         <div className="widget"><h4>Identificación</h4><div className="kv"><b>ID:</b> {selectedService.clienteId || '-'}</div><div className="kv"><b>Nombre:</b> {selectedService.nombreServicio || '-'}</div><div className="kv"><b>Tipo:</b> {selectedService.tipoServicioBrindar || '-'}</div><div className="kv"><b>Dirección:</b> {selectedService.direccionServicio || '-'}</div><div className="kv"><b>Unidades:</b> {selectedService.cantidadUnidades || '-'}</div></div>
                         <div className="widget"><h4>Comercial / Facturación</h4><div className="kv"><b>Representante:</b> {selectedService.representanteComercial || '-'}</div><div className="kv"><b>Razón Social:</b> {selectedService.razonSocial || '-'}</div><div className="kv"><b>RUT:</b> {selectedService.rut || '-'}</div><div className="kv"><b>Mail:</b> {selectedService.mailFacturacion || '-'}</div><div className="kv"><b>Duración:</b> {selectedService.duracionContratoMeses || '-'}</div></div>
                         <div className="widget"><h4>Costos</h4><div className="kv"><b>Importe mensual:</b> {selectedService.importeMensualServicioSinIva || '-'}</div><div className="kv"><b>Costo instalación US$:</b> {selectedService.costoInstalacionUsdSinIva || '-'}</div><div className="kv"><b>Presupuesto proveedor:</b> {selectedService.presupuestoProveedor || '-'}</div><div className="kv"><b>Condición equipamiento:</b> {selectedService.condicionEquipamiento || '-'}</div></div>
@@ -1054,6 +1452,7 @@
 
 Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                       </div>
+                      </>
                     )}
                   </section>
                 ) : (
@@ -1067,7 +1466,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>Nuevo Servicio</h3>
                           <div className="card-grid">
-                            <div className="field"><label>Cliente ID (auto 4 dígitos)</label><input value={clienteId} readOnly type="text" /></div>
+                            <div className="field"><label>Cliente ID</label><input value={clienteId} readOnly type="text" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
@@ -1079,7 +1478,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                             <div className="field"><label>Administración</label><input value={servicioForm.administracion} onChange={(e) => setServicioField('administracion', e.target.value)} type="text" /></div>
                             <div className="field"><label>Razón social</label><input value={servicioForm.razonSocial} onChange={(e) => setServicioField('razonSocial', e.target.value)} type="text" /></div>
                             <div className="field"><label>RUT</label><input value={servicioForm.rut} onChange={(e) => setServicioField('rut', e.target.value)} type="text" /></div>
-                            <div className="field span-2"><label>Mail (factura electrónica)</label><input value={servicioForm.mailFacturacion} onChange={(e) => setServicioField('mailFacturacion', e.target.value)} type="email" /></div>
+                            <div className="field span-2"><label>Mail</label><input value={servicioForm.mailFacturacion} onChange={(e) => setServicioField('mailFacturacion', e.target.value)} type="email" /></div>
                           </div>
                         </div>
 
@@ -1104,7 +1503,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>4. Control de Cierre</h3>
                           <div className="card-grid">
-                            <div className="field"><label>FACTURADO (Sí/No)</label><select value={servicioForm.facturado} onChange={(e) => setServicioField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                            <div className="field"><label>FACTURADO</label><select value={servicioForm.facturado} onChange={(e) => setServicioField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
                           </div>
                         </div>
 
@@ -1115,7 +1514,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>Nueva Obra</h3>
                           <div className="card-grid">
-                            <div className="field"><label>Cliente ID (auto 4 dígitos)</label><input value={clienteId} readOnly type="text" /></div>
+                            <div className="field"><label>Cliente ID</label><input value={clienteId} readOnly type="text" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
@@ -1125,7 +1524,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <div className="card-grid">
                             <div className="field"><label>Razón social</label><input value={obraForm.razonSocial} onChange={(e) => setObraField('razonSocial', e.target.value)} type="text" /></div>
                             <div className="field"><label>RUT</label><input value={obraForm.rut} onChange={(e) => setObraField('rut', e.target.value)} type="text" /></div>
-                            <div className="field span-2"><label>Mail (facturación electrónica)</label><input value={obraForm.mailFacturacion} onChange={(e) => setObraField('mailFacturacion', e.target.value)} type="email" /></div>
+                            <div className="field span-2"><label>Mail</label><input value={obraForm.mailFacturacion} onChange={(e) => setObraField('mailFacturacion', e.target.value)} type="email" /></div>
                             <div className="field span-2"><label>Nombre de servicio</label><input value={obraForm.nombreServicio} onChange={(e) => setObraField('nombreServicio', e.target.value)} type="text" /></div>
                           </div>
                         </div>
@@ -1143,7 +1542,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>3. Control de Ciclo y Estado</h3>
                           <div className="card-grid">
                             <div className="field"><label>Fecha de alta</label><input value={obraForm.fechaAlta} onChange={(e) => setObraField('fechaAlta', e.target.value)} type="date" /></div>
-                            <div className="field"><label>FACTURADO (Sí / No)</label><select value={obraForm.facturado} onChange={(e) => setObraField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                            <div className="field"><label>FACTURADO</label><select value={obraForm.facturado} onChange={(e) => setObraField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
                           </div>
                         </div>
 
@@ -1163,7 +1562,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>1. Identificación y Vigencia</h3>
                           <div className="card-grid">
                             <div className="field span-2"><label>Nombre de servicio</label><input value={novacionForm.nombreServicio} onChange={(e) => setNovacionField('nombreServicio', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Duración del nuevo contrato (Meses)</label><input value={novacionForm.duracionNuevoContratoMeses} onChange={(e) => setNovacionField('duracionNuevoContratoMeses', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Duración del nuevo contrato</label><input value={novacionForm.duracionNuevoContratoMeses} onChange={(e) => setNovacionField('duracionNuevoContratoMeses', e.target.value)} type="number" min="0" /></div>
                           </div>
                         </div>
 
@@ -1187,7 +1586,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>4. Ajustes y Cierre de Ciclo</h3>
                           <div className="card-grid">
                             <div className="field span-2"><label>Descuentos en el pago</label><textarea value={novacionForm.descuentosPago} onChange={(e) => setNovacionField('descuentosPago', e.target.value)} /></div>
-                            <div className="field"><label>FACTURADO (Sí / No)</label><select value={novacionForm.facturado} onChange={(e) => setNovacionField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                            <div className="field"><label>FACTURADO</label><select value={novacionForm.facturado} onChange={(e) => setNovacionField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
                           </div>
                         </div>
 
@@ -1223,7 +1622,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>3. Control Administrativo y Contable</h3>
                           <div className="card-grid">
                             <div className="field span-2"><label>Importe a facturar por el adicional instalado</label><input value={agregadoForm.importeFacturarCliente} onChange={(e) => setAgregadoField('importeFacturarCliente', e.target.value)} type="text" placeholder="Monto acordado" /></div>
-                            <div className="field"><label>FACTURADO (Sí/No)</label><select value={agregadoForm.facturado} onChange={(e) => setAgregadoField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                            <div className="field"><label>FACTURADO</label><select value={agregadoForm.facturado} onChange={(e) => setAgregadoField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
                           </div>
                         </div>
 
@@ -1252,7 +1651,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>2. Liquidación y Cobro</h3>
                           <div className="card-grid">
                             <div className="field"><label>Monto en dólares</label><input value={movimientoForm.montoUsd} onChange={(e) => setMovimientoField('montoUsd', e.target.value)} type="number" min="0" /></div>
-                            <div className="field"><label>FACTURADO (Sí / No)</label><select value={movimientoForm.facturado} onChange={(e) => setMovimientoField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                            <div className="field"><label>FACTURADO</label><select value={movimientoForm.facturado} onChange={(e) => setMovimientoField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
                           </div>
                         </div>
 
@@ -1280,7 +1679,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>2. Contacto y Justificación</h3>
                           <div className="card-grid">
-                            <div className="field span-2"><label>Quien lo Solicita (Cliente y Tel)</label><input value={bajaForm.quienSolicita} onChange={(e) => setBajaField('quienSolicita', e.target.value)} type="text" /></div>
+                            <div className="field span-2"><label>Quien lo Solicita</label><input value={bajaForm.quienSolicita} onChange={(e) => setBajaField('quienSolicita', e.target.value)} type="text" /></div>
                             <div className="field"><label>Motivo de Baja</label><input value={bajaForm.motivoBaja} onChange={(e) => setBajaField('motivoBaja', e.target.value)} type="text" /></div>
                           </div>
                         </div>
@@ -1288,7 +1687,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>3. Detalles Técnicos y Conectividad</h3>
                           <div className="card-grid">
-                            <div className="field span-2"><label>Internet (estado/conectividad)</label><input value={bajaForm.internetEstado} onChange={(e) => setBajaField('internetEstado', e.target.value)} type="text" /></div>
+                            <div className="field span-2"><label>Internet</label><input value={bajaForm.internetEstado} onChange={(e) => setBajaField('internetEstado', e.target.value)} type="text" /></div>
                             <div className="field"><label>Propietario de Equipamiento</label><select value={bajaForm.propietarioEquipamiento} onChange={(e) => setBajaField('propietarioEquipamiento', e.target.value)}><option>S-Video</option><option>Cliente</option><option>Mixto</option></select></div>
                           </div>
                         </div>
@@ -1296,7 +1695,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>4. Logística de Retiro y Cierre</h3>
                           <div className="card-grid">
-                            <div className="field span-3"><label>Equipamiento a Retirar (adjuntar planilla)</label><input value={bajaForm.equipamientoRetirar} onChange={(e) => setBajaField('equipamientoRetirar', e.target.value)} type="text" placeholder="Referencia o nombre de planilla" /></div>
+                            <div className="field span-3"><label>Equipamiento a Retirar</label><input value={bajaForm.equipamientoRetirar} onChange={(e) => setBajaField('equipamientoRetirar', e.target.value)} type="text" placeholder="Referencia o nombre de planilla" /></div>
                             <div className="field span-3"><label>Observaciones</label><textarea value={bajaForm.observaciones} onChange={(e) => setBajaField('observaciones', e.target.value)} /></div>
                           </div>
                         </div>
@@ -1342,7 +1741,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
 ) : (
                       <div className="compact-grid">
                         <div className="field"><label>Tipo de Acción</label><select value={tipoAccion} onChange={(e) => { setTipoAccion(e.target.value); resetFields(); }}>{ACCIONES.map((a) => <option key={a} value={a}>{a}</option>)}</select></div>
-                        <div className="field"><label>{autoIdMode ? "Cliente ID (auto 4 dígitos)" : "Cliente ID asociado"}</label>{autoIdMode ? <input value={clienteId} readOnly type="text" /> : <input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" />}</div>
+                        <div className="field"><label>{autoIdMode ? "Cliente ID" : "Cliente ID asociado"}</label>{autoIdMode ? <input value={clienteId} readOnly type="text" /> : <input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" />}</div>
                         <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
 
                         {grupo === 'base' && <><div className="field"><label>Cliente</label><input value={cliente} onChange={(e) => setCliente(e.target.value)} /></div><div className="field"><label>Fecha Carga</label><input value={fechaCarga} onChange={(e) => setFechaCarga(e.target.value)} type="date" /></div><div className="field"><label>Tiempo Instalación</label><input value={tiempoInstalacion} onChange={(e) => setTiempoInstalacion(e.target.value)} /></div><div className="field"><label>Fecha Alta</label><input value={fechaAlta} onChange={(e) => setFechaAlta(e.target.value)} type="date" /></div><div className="field"><label>Cobro</label><input value={cobro} onChange={(e) => setCobro(e.target.value)} /></div></>}
