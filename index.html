@@ -1830,11 +1830,11 @@
 
         function canEditService(service) {
           if (!service) return false;
-          if (isAdminUser || isTechnicalUser) return true;
-          if (isCommercialUser) {
-            return String(service.representanteComercial || '').trim() === String(userData.nombre || '').trim();
-          }
-          return false;
+          if (isAdminUser) return true;
+          const current = String(currentUserName || '').trim();
+          const creator = String(service.creadoPor || '').trim();
+          const owner = String(service.representanteComercial || '').trim();
+          return current !== '' && (current === creator || current === owner);
         }
 
         function startEditService(service) {
@@ -2241,7 +2241,7 @@
                               <div className="ranking-services">
                                 {list.map((service) => {
                                   const allowedEdit = canEditService(service);
-                                  const showRestriction = isCommercialUser && !allowedEdit;
+                                  const showRestriction = !isAdminUser && !allowedEdit;
                                   return (
                                     <div className="ranking-service-row" key={service.id}>
                                       <button
@@ -2263,7 +2263,7 @@
                                         >
                                           {allowedEdit ? '✎ Editar servicio' : '🔒 Editar'}
                                         </button>
-                                        {showRestriction && <span className="lock-hint">Edición restringida al propietario.</span>}
+                                        {showRestriction && <span className="lock-hint">🔒 Solo lectura</span>}
                                       </div>
                                     </div>
                                   );
@@ -2278,7 +2278,36 @@
 ) : effectiveSelectedForm === 'historial' ? (
                   <section className="panel">
                     <h2>Historial de Servicios · Vista Ejecutiva</h2>
-                    <div className="hint">Vista completa del servicio seleccionado desde la vista previa de búsqueda.</div>
+                    <div className="hint">Lista completa visible para todos los usuarios. Selecciona un servicio para ver su detalle.</div>
+                    <section className="panel" style={{ background: 'rgba(255,255,255,.04)', marginBottom: 12 }}>
+                      <h3 style={{ marginTop: 0 }}>Servicios ({rows.length})</h3>
+                      <div className="ranking-services">
+                        {rows.map((service) => {
+                          const allowedEdit = canEditService(service);
+                          return (
+                            <div className="ranking-service-row" key={`hist-${service.id}`}>
+                              <button
+                                type="button"
+                                className="ranking-service-btn"
+                                onClick={() => setSelectedService(service)}
+                              >
+                                <b>{service.nombreServicio || service.cliente || 'Servicio sin nombre'}</b> · ID {service.clienteId || '-'}
+                              </button>
+                              <div className="ranking-service-actions">
+                                <button
+                                  type="button"
+                                  className="edit-btn"
+                                  disabled={!allowedEdit}
+                                  onClick={() => startEditService(service)}
+                                >
+                                  {allowedEdit ? '✎ Editar servicio' : '🔒 Solo lectura'}
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </section>
                     {!selectedService ? (
                       <div className="hero" style={{padding: '26px 18px'}}>
                         <h2 style={{fontSize:'1.4rem'}}>Selecciona un servicio desde la búsqueda</h2>
@@ -2296,7 +2325,7 @@
                           >
                             {canEditService(selectedService) ? '✎ Editar servicio' : '🔒 Editar'}
                           </button>
-                          {isCommercialUser && !canEditService(selectedService) && <span className="lock-hint">Edición restringida al propietario.</span>}
+                          {!isAdminUser && !canEditService(selectedService) && <span className="lock-hint">🔒 Solo lectura</span>}
                         </div>
                         <div className="history-grid">
                         <div className="widget"><h4>Identificación</h4><div className="kv"><b>ID:</b> {selectedService.clienteId || '-'}</div><div className="kv"><b>Nombre:</b> {selectedService.nombreServicio || '-'}</div><div className="kv"><b>Tipo:</b> {selectedService.tipoServicioBrindar || '-'}</div><div className="kv"><b>Dirección:</b> {selectedService.direccionServicio || '-'}</div><div className="kv"><b>Unidades:</b> {selectedService.cantidadUnidades || '-'}</div></div>
