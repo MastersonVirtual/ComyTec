@@ -508,6 +508,11 @@
         border-radius: 14px;
         padding: 20px;
         text-align: center;
+        cursor: pointer;
+      }
+      .kpi-card.active {
+        border-color: #006465;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.12);
       }
       .kpi-value {
         font-size: 2rem;
@@ -521,6 +526,48 @@
         font-size: .8rem;
         text-transform: uppercase;
         letter-spacing: .08em;
+      }
+      .kpi-breakdown {
+        margin-top: 16px;
+        border-radius: 14px;
+        padding: 14px;
+        background: #006465;
+        border: 1px solid rgba(230,255,253,.25);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+        color: #e6fffd;
+      }
+      .kpi-breakdown h3 {
+        margin: 0 0 12px;
+        font-size: 0.95rem;
+        color: #e6fffd;
+      }
+      .kpi-breakdown-list {
+        display: grid;
+        gap: 8px;
+      }
+      .kpi-breakdown-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: rgba(230,255,253,.1);
+      }
+      .kpi-breakdown-left {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .kpi-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: var(--dot-color, #22c55e);
+        box-shadow: 0 0 0 2px rgba(255,255,255,.18);
+      }
+      .kpi-breakdown-count {
+        font-weight: 700;
       }
 
       label {
@@ -914,6 +961,43 @@
           );
         }, [rows, deferredSearchTerm]);
 
+        const [activeKpi, setActiveKpi] = useState(null);
+
+        function getKpiRows(type) {
+          if (type === 'total') return rows;
+          if (type === 'pending') return rows.filter((r) => (r.status || '').toLowerCase().includes('pend'));
+          if (type === 'inprogress') return rows.filter((r) => (r.status || '').toLowerCase().includes('curso'));
+          if (type === 'completed') return rows.filter((r) => (r.status || '').toLowerCase().includes('complet'));
+          return [];
+        }
+
+        function getCommercialBreakdown(type) {
+          const pool = getKpiRows(type);
+          const counts = pool.reduce((acc, row) => {
+            const rep = (row.representanteComercial || 'Sin asignar').trim();
+            acc[rep] = (acc[rep] || 0) + 1;
+            return acc;
+          }, {});
+
+          return Object.entries(counts)
+            .map(([name, value]) => ({ name, value }))
+            .sort((a, b) => b.value - a.value);
+        }
+
+        function getRankColor(index, total) {
+          if (total <= 1) return 'hsl(120 70% 45%)';
+          const ratio = index / (total - 1);
+          const hue = Math.round(120 - ratio * 120);
+          return `hsl(${hue} 70% 45%)`;
+        }
+
+        const kpiStats = useMemo(() => ({
+          total: rows.length,
+          pending: rows.filter((r) => (r.status || '').toLowerCase().includes('pend')).length,
+          inprogress: rows.filter((r) => (r.status || '').toLowerCase().includes('curso')).length,
+          completed: rows.filter((r) => (r.status || '').toLowerCase().includes('complet')).length,
+        }), [rows]);
+
         function buildServiceDetailText(r) {
           const lines = [
             `Cliente ID: ${r.clienteId || '-'}`,
@@ -1224,11 +1308,31 @@
                       <p className="subtitle-voga">ÁREA TÉCNICA Y COMERCIAL</p>
                     </section>
                     <section className="kpi-grid">
-                      <article className="kpi-card"><div className="kpi-value">{rows.length}</div><div className="kpi-label">Servicios totales</div></article>
-                      <article className="kpi-card"><div className="kpi-value">{rows.filter((r) => (r.status || '').toLowerCase().includes('pend')).length}</div><div className="kpi-label">Pendientes</div></article>
-                      <article className="kpi-card"><div className="kpi-value">{rows.filter((r) => (r.status || '').toLowerCase().includes('curso')).length}</div><div className="kpi-label">En curso</div></article>
-                      <article className="kpi-card"><div className="kpi-value">{rows.filter((r) => (r.status || '').toLowerCase().includes('complet')).length}</div><div className="kpi-label">Completados</div></article>
+                      <article className={`kpi-card ${activeKpi === 'total' ? 'active' : ''}`} onClick={() => setActiveKpi((prev) => prev === 'total' ? null : 'total')}><div className="kpi-value">{kpiStats.total}</div><div className="kpi-label">Servicios totales</div></article>
+                      <article className={`kpi-card ${activeKpi === 'pending' ? 'active' : ''}`} onClick={() => setActiveKpi((prev) => prev === 'pending' ? null : 'pending')}><div className="kpi-value">{kpiStats.pending}</div><div className="kpi-label">Pendientes</div></article>
+                      <article className={`kpi-card ${activeKpi === 'inprogress' ? 'active' : ''}`} onClick={() => setActiveKpi((prev) => prev === 'inprogress' ? null : 'inprogress')}><div className="kpi-value">{kpiStats.inprogress}</div><div className="kpi-label">En curso</div></article>
+                      <article className={`kpi-card ${activeKpi === 'completed' ? 'active' : ''}`} onClick={() => setActiveKpi((prev) => prev === 'completed' ? null : 'completed')}><div className="kpi-value">{kpiStats.completed}</div><div className="kpi-label">Completados</div></article>
                     </section>
+                    {activeKpi && (
+                      <section className="kpi-breakdown">
+                        <h3>{activeKpi === 'total' ? 'Ranking Comercial · Servicios Totales' : activeKpi === 'pending' ? 'Ranking Comercial · Pendientes' : activeKpi === 'inprogress' ? 'Ranking Comercial · En curso' : 'Ranking Comercial · Completados'}</h3>
+                        {getCommercialBreakdown(activeKpi).length === 0 ? (
+                          <div className="hint" style={{ color: '#d1faf5', marginBottom: 0 }}>Sin datos para este indicador.</div>
+                        ) : (
+                          <div className="kpi-breakdown-list">
+                            {getCommercialBreakdown(activeKpi).map((item, index, arr) => (
+                              <div className="kpi-breakdown-item" key={`${activeKpi}-${item.name}`}>
+                                <div className="kpi-breakdown-left">
+                                  <span className="kpi-dot" style={{ '--dot-color': getRankColor(index, arr.length) }} />
+                                  <span>{item.name}</span>
+                                </div>
+                                <span className="kpi-breakdown-count">{item.value} servicios</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </section>
+                    )}
                   </>
                 ) : selectedForm === 'historial' ? (
                   <section className="panel">
