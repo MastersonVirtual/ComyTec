@@ -832,62 +832,81 @@
       }
 
 
-      .gerencia-grid {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(180px, 1fr));
-        gap: 14px;
-      }
-      .gerencia-card {
-        background: #0a1515;
-        border: 1px solid var(--line);
-        border-radius: 14px;
-        padding: 16px;
-        box-shadow: var(--shadow-soft);
-      }
-      .gerencia-card h3 {
-        margin: 0;
-        color: #ffffff;
-        font-size: .82rem;
-        text-transform: uppercase;
-        letter-spacing: .05em;
-      }
-      .gerencia-card .hint,
-      .gerencia-chart-card .hint,
-      .gerencia-chart-card h3,
-      .gerencia-chart-card b {
-        color: #ffffff;
-      }
-      .gerencia-value,
-      .gerencia-card .kpi-value,
-      .gerencia-kpi-value {
-        margin-top: 8px;
-        font-size: 1.6rem;
-        font-weight: 800;
-        color: #ffffff;
-        text-shadow: 0 0 10px rgba(255,255,255,.18);
-      }
       .dashboard-gerencia-panel {
         padding-bottom: 18px;
       }
-      .gerencia-charts {
-        margin-top: 14px;
+      .gerencia-widgets {
         display: grid;
-        grid-template-columns: repeat(2, minmax(260px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 14px;
       }
-      .gerencia-chart-card {
+      .gerencia-widget {
         background: #0a1515;
         border: 1px solid var(--line);
-        border-radius: 14px;
-        padding: 14px;
+        border-radius: 16px;
+        padding: 16px;
+        box-shadow: var(--shadow-soft);
+        color: #ffffff;
+        min-height: 280px;
+        transition: transform var(--motion-fast) ease, border-color var(--motion-fast) ease;
+      }
+      .gerencia-widget.active {
+        transform: translateY(-2px);
+        border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+      }
+      .gerencia-widget-toggle {
+        all: unset;
+        display: inline-block;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        color: #ffffff;
+        font-size: .76rem;
+        padding: 4px 10px;
+        margin-bottom: 12px;
+        cursor: pointer;
+      }
+      .gerencia-widget h3 {
+        margin: 0 0 12px;
+        color: #ffffff;
+        font-size: .9rem;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+      }
+      .gerencia-billing {
+        display: grid;
+        gap: 14px;
+        margin-top: 6px;
+      }
+      .gerencia-value {
+        font-size: 1.9rem;
+        font-weight: 800;
         color: #ffffff;
       }
-      .gerencia-chart {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-        margin: 6px auto 12px;
-        border: 2px solid rgba(230,255,253,.3);
+      .gerencia-status-list,
+      .gerencia-ranking-list,
+      .gerencia-legend {
+        display: grid;
+        gap: 8px;
+      }
+      .gerencia-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        border: 1px solid rgba(255,255,255,.14);
+        border-radius: 10px;
+        padding: 8px 10px;
+        color: #ffffff;
+        background: rgba(255,255,255,.03);
+      }
+      .gerencia-chart-shell {
+        position: relative;
+        width: 100%;
+        max-width: 320px;
+        margin: 0 auto 10px;
+      }
+      .gerencia-chart-canvas {
+        width: 100% !important;
+        height: auto !important;
       }
       .legend-item {
         display: flex;
@@ -917,8 +936,7 @@
       @media (max-width: 1080px) {
         .card-grid, .compact-grid, .history-grid { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
         .ranking-grid { grid-template-columns: 1fr; }
-        .gerencia-grid { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
-        .gerencia-charts { grid-template-columns: 1fr; }
+        .gerencia-widgets { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
       }
       @media (max-width: 980px) {
         .sidebar { width: 285px; }
@@ -961,7 +979,7 @@
           min-width: 0;
           max-width: none;
         }
-        .gerencia-grid { grid-template-columns: 1fr; }
+        .gerencia-widgets { grid-template-columns: 1fr; }
         .card-grid,
         .compact-grid,
         .history-grid {
@@ -993,12 +1011,13 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
     <div id="root"></div>
 
     <script type="text/babel">
-      const { useDeferredValue, useEffect, useMemo, useState } = React;
+      const { useDeferredValue, useEffect, useMemo, useRef, useState } = React;
 
       const firebaseConfig = {
         apiKey: 'AIzaSyCXTX7h33uCXK4K8FSSnD7PcoayjAGV9x4',
@@ -1178,62 +1197,123 @@
       }
 
 
+      function PieChartWidget({ chartId, title, items }) {
+        const canvasRef = useRef(null);
+
+        useEffect(() => {
+          if (!canvasRef.current || !window.Chart) return () => {};
+          const filtered = items.filter((i) => i.value > 0);
+          const palette = ['#34d399', '#60a5fa', '#f59e0b', '#a78bfa', '#f472b6', '#22d3ee', '#f87171', '#84cc16'];
+          const dataItems = filtered.length > 0 ? filtered : [{ name: 'Sin datos', value: 1 }];
+          const chart = new window.Chart(canvasRef.current, {
+            type: 'pie',
+            data: {
+              labels: dataItems.map((i) => i.name),
+              datasets: [{
+                data: dataItems.map((i) => i.value),
+                backgroundColor: dataItems.map((_, idx) => palette[idx % palette.length]),
+                borderWidth: 1,
+                borderColor: 'rgba(255,255,255,.16)',
+              }],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: true,
+              aspectRatio: 1,
+              plugins: {
+                legend: {
+                  position: 'bottom',
+                  labels: {
+                    color: '#ffffff',
+                    boxWidth: 10,
+                    boxHeight: 10,
+                    padding: 14,
+                  },
+                },
+              },
+            },
+          });
+          return () => chart.destroy();
+        }, [items]);
+
+        return (
+          <div>
+            <h3>{title}</h3>
+            <div className="gerencia-chart-shell">
+              <canvas ref={canvasRef} className="gerencia-chart-canvas" aria-label={`${title}-${chartId}`} />
+            </div>
+          </div>
+        );
+      }
+
       function DashboardGerencia({ rows }) {
+        const [activeWidget, setActiveWidget] = useState('facturacion');
+
         const totalAbonos = rows.reduce((acc, r) => acc + (Number(r.importeMensualServicioSinIva) || 0), 0);
         const totalVentasEquipos = rows.reduce((acc, r) => acc + (Number(r.costoInstalacionUsdSinIva) || 0), 0);
-        const pendientes = rows.filter((r) => (r.status || '').toLowerCase().includes('pend')).length;
-        const enCurso = rows.filter((r) => (r.status || '').toLowerCase().includes('curso')).length;
-        const factSi = rows.filter((r) => String(r.facturado || '').toLowerCase().includes('sí') || String(r.facturado || '').toLowerCase().includes('si')).length;
-        const factNo = rows.filter((r) => String(r.facturado || '').toLowerCase().includes('no')).length;
 
         const actionCounts = ACCIONES.map((name) => ({ name, value: rows.filter((r) => (r.tipoAccion || '') === name).length }));
         const statusCounts = STATUS_OPTIONS.map((name) => ({ name, value: rows.filter((r) => (r.status || '') === name).length }));
 
-        function chartGradient(items) {
-          const palette = ['#34d399', '#60a5fa', '#f59e0b', '#a78bfa', '#f472b6', '#22d3ee', '#f87171', '#84cc16'];
-          const total = Math.max(1, items.reduce((a, b) => a + b.value, 0));
-          let current = 0;
-          const parts = items.map((item, idx) => {
-            const start = (current / total) * 360;
-            current += item.value;
-            const end = (current / total) * 360;
-            return `${palette[idx % palette.length]} ${start}deg ${end}deg`;
-          });
-          return `conic-gradient(${parts.join(',')})`;
-        }
+        const comercialRanking = rows.reduce((acc, row) => {
+          const rep = (row.representanteComercial || 'Sin asignar').trim();
+          acc[rep] = (acc[rep] || 0) + 1;
+          return acc;
+        }, {});
+        const rankingList = Object.entries(comercialRanking)
+          .map(([name, value]) => ({ name, value }))
+          .sort((a, b) => b.value - a.value);
+        const topSeller = rankingList[0] || { name: 'Sin datos', value: 0 };
+        const lowSeller = rankingList[rankingList.length - 1] || { name: 'Sin datos', value: 0 };
 
         return (
           <section className="panel dashboard-gerencia-panel">
             <h2>Dashboard Gerencia</h2>
-            <div className="hint">Vista ejecutiva con datos reales de servicios y facturación.</div>
-            <div className="gerencia-grid">
-              <div className="gerencia-card"><h3>Total Abonos Mensuales</h3><div className="kpi-value gerencia-kpi-value">US$ {totalAbonos.toLocaleString('es-UY')}</div></div>
-              <div className="gerencia-card"><h3>Total Ventas Equipos</h3><div className="kpi-value gerencia-kpi-value">US$ {totalVentasEquipos.toLocaleString('es-UY')}</div></div>
-              <div className="gerencia-card"><h3>Servicios por Estado</h3><div className="kpi-value gerencia-kpi-value">{pendientes} / {enCurso}</div><div className="hint" style={{ marginBottom: 0 }}>Pendiente / En curso</div></div>
-              <div className="gerencia-card"><h3>Estado Facturación</h3><div className="kpi-value gerencia-kpi-value">{factSi} / {factNo}</div><div className="hint" style={{ marginBottom: 0 }}>Sí / No</div></div>
-            </div>
+            <div className="hint">Vista ejecutiva con widgets de facturación, status, acciones y ranking comercial.</div>
 
-            <div className="gerencia-charts">
-              <div className="gerencia-chart-card">
-                <h3 style={{ color: '#ffffff', margin: 0 }}>Distribución por ACCIONES</h3>
-                <div className="gerencia-chart" style={{ background: chartGradient(actionCounts) }} />
-                {actionCounts.map((item, idx) => (
-                  <div className="legend-item" key={`ac-${item.name}`}>
-                    <div className="legend-left"><span className="legend-dot" style={{ '--legend-color': ['#34d399', '#60a5fa', '#f59e0b', '#a78bfa', '#f472b6', '#22d3ee', '#f87171', '#84cc16'][idx % 8] }} />{item.name}</div>
-                    <b>{item.value}</b>
+            <div className="gerencia-widgets">
+              <article className={`gerencia-widget ${activeWidget === 'facturacion' ? 'active' : ''}`}>
+                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('facturacion')}>Widget de Facturación</button>
+                <h3>Facturación</h3>
+                <div className="gerencia-billing">
+                  <div>
+                    <div className="hint" style={{ marginBottom: 4, color: '#ffffff' }}>Total Abonos Mensuales</div>
+                    <div className="gerencia-value">US$ {totalAbonos.toLocaleString('es-UY')}</div>
                   </div>
-                ))}
-              </div>
-              <div className="gerencia-chart-card">
-                <h3 style={{ color: '#ffffff', margin: 0 }}>Distribución por STATUS</h3>
-                <div className="gerencia-chart" style={{ background: chartGradient(statusCounts) }} />
-                {statusCounts.map((item, idx) => (
-                  <div className="legend-item" key={`st-${item.name}`}>
-                    <div className="legend-left"><span className="legend-dot" style={{ '--legend-color': ['#34d399', '#60a5fa', '#f59e0b', '#a78bfa', '#f472b6', '#22d3ee', '#f87171', '#84cc16'][idx % 8] }} />{item.name}</div>
-                    <b>{item.value}</b>
+                  <div>
+                    <div className="hint" style={{ marginBottom: 4, color: '#ffffff' }}>Total Ventas Equipos</div>
+                    <div className="gerencia-value">US$ {totalVentasEquipos.toLocaleString('es-UY')}</div>
                   </div>
-                ))}
-              </div>
+                </div>
+              </article>
+
+              <article className={`gerencia-widget ${activeWidget === 'status' ? 'active' : ''}`}>
+                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('status')}>Widget de Status</button>
+                <h3>Servicios por Estado</h3>
+                <div className="gerencia-status-list">
+                  {statusCounts.map((item) => (
+                    <div className="gerencia-item" key={`status-${item.name}`}>
+                      <span>{item.name}</span>
+                      <b>{item.value}</b>
+                    </div>
+                  ))}
+                </div>
+              </article>
+
+              <article className={`gerencia-widget ${activeWidget === 'acciones' ? 'active' : ''}`}>
+                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('acciones')}>Widget de Acciones</button>
+                <PieChartWidget chartId="acciones" title="Tipos de Servicio" items={actionCounts} />
+              </article>
+
+              <article className={`gerencia-widget ${activeWidget === 'ranking' ? 'active' : ''}`}>
+                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('ranking')}>Widget Ranking Comercial</button>
+                <h3>Ranking Comercial</h3>
+                <div className="gerencia-ranking-list" style={{ marginBottom: 10 }}>
+                  <div className="gerencia-item"><span>Mayor vendedor</span><b>{topSeller.name} · {topSeller.value}</b></div>
+                  <div className="gerencia-item"><span>Menor vendedor</span><b>{lowSeller.name} · {lowSeller.value}</b></div>
+                </div>
+                <PieChartWidget chartId="status" title="Distribución por STATUS" items={statusCounts} />
+              </article>
             </div>
           </section>
         );
@@ -1486,7 +1566,7 @@
 
               setUserRole((profile?.rol || 'admin').toLowerCase());
               setUserArea((profile?.area || '').toLowerCase());
-              if ((profile?.rol || '').toLowerCase() === 'gerentes' && (profile?.area || '').toLowerCase() === 'gerencia') {
+              if ((profile?.rol || '').toLowerCase() === 'gerentes') {
                 setSelectedForm('dashboard-gerencia');
               }
             } catch (err) {
@@ -1506,7 +1586,7 @@
           return () => clearTimeout(timer);
         }, [notificacion]);
 
-        const isGerencia = userRole === 'gerentes' && userArea === 'gerencia';
+        const isGerencia = userRole === 'gerentes';
         const isVendedor = userRole.includes('vendedor');
 
         const topbarSubtitle = useMemo(() => {
@@ -1708,38 +1788,40 @@
                   <h1>Masterson Seguridad</h1>
                   <p className="subtitle-voga">{topbarSubtitle}</p>
                 </div>
-                <div className="top-search">
-                  <div className="search-wrap">
-                    <span className="search-icon">🔍</span>
-                    <input
-                      type="text"
-                      placeholder="Buscar cliente, ID, razón social o dirección..."
-                      value={searchTerm}
-                      onChange={(e) => { setSearchTerm(e.target.value); setExpandedId(null); }}
-                    />
-                    {searchTerm.trim() !== '' && (
-                      <div className="search-preview">
-                        {filteredRows.length === 0 ? (
-                          <div className="search-item"><small>Sin resultados.</small></div>
-                        ) : (
-                          filteredRows.slice(0, 8).map((r) => (
-                            <div key={r.id}>
-                              <div className="search-item" onClick={() => { setSelectedService(r); setSelectedForm('historial'); setExpandedId(null); setSearchTerm(''); }}>
-                                <strong>{r.clienteId || '-'} · {r.nombreServicio || 'Servicio sin nombre'}</strong>
-                                <small>Fecha de alta: {r.fechaAlta || '-'}</small>
-                              </div>
-                              {expandedId === r.id && (
-                                <div className="search-detail">
-                                  <div className="detail-box">{buildServiceDetailText(r)}</div>
+                {!isGerencia && (
+                  <div className="top-search">
+                    <div className="search-wrap">
+                      <span className="search-icon">🔍</span>
+                      <input
+                        type="text"
+                        placeholder="Buscar cliente, ID, razón social o dirección..."
+                        value={searchTerm}
+                        onChange={(e) => { setSearchTerm(e.target.value); setExpandedId(null); }}
+                      />
+                      {searchTerm.trim() !== '' && (
+                        <div className="search-preview">
+                          {filteredRows.length === 0 ? (
+                            <div className="search-item"><small>Sin resultados.</small></div>
+                          ) : (
+                            filteredRows.slice(0, 8).map((r) => (
+                              <div key={r.id}>
+                                <div className="search-item" onClick={() => { setSelectedService(r); setSelectedForm('historial'); setExpandedId(null); setSearchTerm(''); }}>
+                                  <strong>{r.clienteId || '-'} · {r.nombreServicio || 'Servicio sin nombre'}</strong>
+                                  <small>Fecha de alta: {r.fechaAlta || '-'}</small>
                                 </div>
-                              )}
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    )}
+                                {expandedId === r.id && (
+                                  <div className="search-detail">
+                                    <div className="detail-box">{buildServiceDetailText(r)}</div>
+                                  </div>
+                                )}
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </header>
 
               <main className="main">
