@@ -831,7 +831,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-      const { useDeferredValue, useEffect, useMemo, useRef, useState } = React;
+      const { useDeferredValue, useEffect, useMemo, useState } = React;
 
       const firebaseConfig = {
         apiKey: 'AIzaSyCXTX7h33uCXK4K8FSSnD7PcoayjAGV9x4',
@@ -1031,7 +1031,6 @@
 
         const [activeKpi, setActiveKpi] = useState(null);
         const [selectedCommercial, setSelectedCommercial] = useState('');
-        const kpiContainerRef = useRef(null);
 
         function getKpiRows(type) {
           if (type === 'total') return rows;
@@ -1073,18 +1072,6 @@
           inprogress: rows.filter((r) => (r.status || '').toLowerCase().includes('curso')).length,
           completed: rows.filter((r) => (r.status || '').toLowerCase().includes('complet')).length,
         }), [rows]);
-
-        useEffect(() => {
-          function handleOutsideKpiClick(event) {
-            if (!kpiContainerRef.current) return;
-            if (!kpiContainerRef.current.contains(event.target)) {
-              setActiveKpi(null);
-            }
-          }
-
-          document.addEventListener('mousedown', handleOutsideKpiClick);
-          return () => document.removeEventListener('mousedown', handleOutsideKpiClick);
-        }, []);
 
         function buildServiceDetailText(r) {
           const lines = [
@@ -1395,19 +1382,21 @@
                       <h2>Masterson Seguridad</h2>
                       <p className="subtitle-voga">ÁREA TÉCNICA Y COMERCIAL</p>
                     </section>
-                    <section className="kpi-grid" ref={kpiContainerRef}>
+                    <section className="kpi-grid">
                       {[
                         { key: 'total', label: 'Servicios totales', value: kpiStats.total },
                         { key: 'pending', label: 'Pendientes', value: kpiStats.pending },
                         { key: 'inprogress', label: 'En curso', value: kpiStats.inprogress },
                         { key: 'completed', label: 'Completados', value: kpiStats.completed },
                       ].map((card) => (
-                        <div className="kpi-card-wrap" key={card.key}>
+                        <div
+                          className="kpi-card-wrap"
+                          key={card.key}
+                          onMouseEnter={() => setActiveKpi(card.key)}
+                          onMouseLeave={() => setActiveKpi((prev) => (prev === card.key ? null : prev))}
+                        >
                           <article
                             className={`kpi-card ${activeKpi === card.key ? 'active' : ''}`}
-                            onClick={() => {
-                              setActiveKpi((prev) => prev === card.key ? null : card.key);
-                            }}
                           >
                             <div className="kpi-value">{card.value}</div>
                             <div className="kpi-label">{card.label}</div>
