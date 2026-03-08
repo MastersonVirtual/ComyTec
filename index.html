@@ -306,16 +306,16 @@
 
       /* Dashboard ERP corporativo SaaS */
       :root {
-        --base: #006465;
-        --base-900: #004e50;
-        --base-700: #0b7b7b;
+        --base: #005255;
+        --base-900: #003f41;
+        --base-700: #0a6666;
         --highlight: #e6fffd;
         --bg-main: #0f172a;
         --bg-surface: #1f2937;
         --card: #ffffff;
         --text: #0f172a;
         --muted: #64748b;
-        --accent: #006465;
+        --accent: #005255;
         --accent-soft: rgba(0, 100, 101, 0.18);
         --line: #d8e1ea;
         --panel: #ffffff;
@@ -336,7 +336,7 @@
         height: 8px;
       }
       *::-webkit-scrollbar-thumb {
-        background: #006465;
+        background: var(--base);
         border-radius: 10px;
       }
       *::-webkit-scrollbar-track {
@@ -353,7 +353,7 @@
 
       .sidebar {
         width: 286px;
-        background: linear-gradient(180deg, #006465 0%, #004e50 100%);
+        background: linear-gradient(180deg, var(--base) 0%, var(--base-900) 100%);
         border-right: 1px solid rgba(230,255,253,.16);
         box-shadow: var(--shadow-deep);
       }
@@ -382,19 +382,22 @@
       }
 
       .topbar {
-        background: #006465;
-        border-bottom: 1px solid #0b7b7b;
+        background: var(--base);
+        border-bottom: 1px solid var(--base-700);
         backdrop-filter: blur(12px);
         box-shadow: 0 10px 24px rgba(0,0,0,.18);
       }
       .burger {
         color: transparent;
         border-color: rgba(230,255,253,.45);
+        border-radius: 14px;
+        padding: 0;
+        overflow: hidden;
         background-color: rgba(255,255,255,.08);
         background-image: url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png');
         background-position: center;
         background-repeat: no-repeat;
-        background-size: 78% 78%;
+        background-size: cover;
         box-shadow: 0 8px 16px rgba(0,0,0,.18);
       }
       .top-titles h1 {
@@ -422,12 +425,12 @@
         box-shadow: 0 4px 10px rgba(15, 23, 42, .05);
       }
       .search-preview {
-        background: #006465;
+        background: var(--base);
         border: 1px solid rgba(230,255,253,.3);
         box-shadow: var(--shadow-deep);
       }
       .search-item { border-bottom: 1px solid rgba(230,255,253,.2); color: #ffffff; }
-      .search-item:hover { background: #0b7b7b; }
+      .search-item:hover { background: var(--base-700); }
       .search-item small { color: #e6fffd; }
       .search-detail {
         color: #e6fffd;
@@ -451,7 +454,7 @@
       .hero {
         border-radius: 18px;
         padding: 64px 34px;
-        background: linear-gradient(140deg, #00585a 0%, #006465 58%, #0b7b7b 100%);
+        background: linear-gradient(140deg, #004c4d 0%, var(--base) 58%, var(--base-700) 100%);
       }
       .hero::before {
         background: radial-gradient(circle, rgba(230,255,253,.28), transparent 62%);
@@ -475,7 +478,7 @@
         padding: 22px;
       }
       .service-card h3::before {
-        color: #006465;
+        color: var(--base);
       }
       .service-card:hover,
       .widget:hover,
@@ -500,7 +503,7 @@
         font-size: 2rem;
         font-weight: 800;
         line-height: 1;
-        color: #006465;
+        color: var(--base);
       }
       .kpi-label {
         margin-top: 8px;
@@ -526,12 +529,12 @@
         color: #94a3b8;
       }
       input:focus, select:focus, textarea:focus {
-        border-color: #006465;
+        border-color: var(--base);
         box-shadow: 0 0 0 3px rgba(0,100,101,.15);
       }
       option {
         color: #e6fffd;
-        background: #006465;
+        background: var(--base);
       }
 
       .radio-pill, .state-pill {
@@ -540,20 +543,20 @@
         color: #334155;
       }
       .radio-pill.active, .state-pill.active {
-        border-color: #006465;
+        border-color: var(--base);
         background: #e6fffd;
         color: #005355;
       }
 
       .save-btn {
-        background: linear-gradient(135deg, #006465, #005355);
+        background: linear-gradient(135deg, #005255, #004547);
         border-color: #005355;
         color: #ffffff;
         font-weight: 700;
         box-shadow: 0 10px 20px rgba(0,0,0,0.12);
       }
       .save-btn:hover {
-        background: linear-gradient(135deg, #005b5d, #004e50);
+        background: linear-gradient(135deg, #004b4d, #003f41);
       }
 
       .table-wrap table {
@@ -579,7 +582,7 @@
         border-radius: 14px;
       }
       .widget::after {
-        background: linear-gradient(#006465, rgba(0,100,101,0));
+        background: linear-gradient(var(--base), rgba(0,100,101,0));
       }
       .widget h4 { color: #0f172a; }
       .kv b { color: #0f172a; }
@@ -636,7 +639,7 @@
         .search-preview {
           max-height: 44vh;
         }
-        .burger { width: 40px; height: 40px; border-radius: 10px; }
+        .burger { width: 40px; height: 40px; border-radius: 12px; }
         .card-grid,
         .compact-grid,
         .history-grid {
@@ -809,7 +812,7 @@
 
       function App() {
         const [menuOpen, setMenuOpen] = useState(false);
-        const [openMenus, setOpenMenus] = useState({ nuevo: true, fact: false });
+        const [openMenus, setOpenMenus] = useState({ nuevo: false, fact: false });
 
         const [tipoAccion, setTipoAccion] = useState('');
         const [selectedForm, setSelectedForm] = useState('home');
@@ -940,6 +943,19 @@
           setCharlaForm((prev) => ({ ...prev, [key]: value }));
         }
 
+        function closeSidebar() {
+          setMenuOpen(false);
+          setOpenMenus({ nuevo: false, fact: false });
+        }
+
+        function toggleSidebar() {
+          if (menuOpen) {
+            closeSidebar();
+            return;
+          }
+          setMenuOpen(true);
+        }
+
         function selectAction(action) {
           setTipoAccion(action);
           resetFields();
@@ -950,7 +966,7 @@
             setClienteId('');
           }
           setSelectedForm(['Nuevo Servicio', 'Obra'].includes(action) ? 'servicio' : 'other');
-          setMenuOpen(false);
+          closeSidebar();
         }
 
         async function handleSubmit(e) {
@@ -1041,15 +1057,15 @@
                   <button className="submenu-button" onClick={() => selectAction('Movimiento de Obra')}>Movimiento de Obra</button>
                 </div>
                 <button className="menu-button" onClick={() => selectAction('Charla')}>Charlas informativas</button>
-                <button className="menu-button" onClick={() => { setSelectedForm('historial'); setMenuOpen(false); }}>Historial de Servicios</button>
+                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
               </div>
             </aside>
 
-            <div className={`overlay ${menuOpen ? 'show' : ''}`} onClick={() => setMenuOpen(false)} />
+            <div className={`overlay ${menuOpen ? 'show' : ''}`} onClick={closeSidebar} />
 
             <div className={`content ${menuOpen ? 'shift' : ''}`}>
               <header className="topbar">
-                <button className="burger" aria-label="Abrir menú" onClick={() => setMenuOpen(!menuOpen)} />
+                <button className="burger" aria-label="Abrir menú" onClick={toggleSidebar} />
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
                   <p className="subtitle-voga">ÁREA TÉCNICA Y COMERCIAL</p>
