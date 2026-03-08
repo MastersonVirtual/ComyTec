@@ -511,6 +511,9 @@
         padding: 20px;
         text-align: center;
         cursor: pointer;
+        background: #0a1515;
+        border: 1px solid var(--line);
+        color: var(--text);
       }
       .kpi-card.active {
         border-color: #006465;
@@ -835,7 +838,7 @@
         gap: 14px;
       }
       .gerencia-card {
-        background: #002829;
+        background: #0a1515;
         border: 1px solid var(--line);
         border-radius: 14px;
         padding: 16px;
@@ -843,10 +846,16 @@
       }
       .gerencia-card h3 {
         margin: 0;
-        color: #d1faf5;
+        color: var(--text);
         font-size: .82rem;
         text-transform: uppercase;
         letter-spacing: .05em;
+      }
+      .gerencia-card .hint,
+      .gerencia-chart-card .hint,
+      .gerencia-chart-card h3,
+      .gerencia-chart-card b {
+        color: var(--text);
       }
       .gerencia-value,
       .gerencia-card .kpi-value,
@@ -867,10 +876,11 @@
         gap: 14px;
       }
       .gerencia-chart-card {
-        background: var(--panel);
-        border: 1px solid rgba(230,255,253,.25);
+        background: #0a1515;
+        border: 1px solid var(--line);
         border-radius: 14px;
         padding: 14px;
+        color: var(--text);
       }
       .gerencia-chart {
         width: 150px;
@@ -884,7 +894,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 8px;
-        color: #e6fffd;
+        color: var(--text);
         font-size: 12px;
         padding: 4px 0;
       }
@@ -1219,7 +1229,7 @@
 
             <div className="gerencia-charts">
               <div className="gerencia-chart-card">
-                <h3 style={{ color: '#e6fffd', margin: 0 }}>Distribución por ACCIONES</h3>
+                <h3 style={{ color: 'var(--text)', margin: 0 }}>Distribución por ACCIONES</h3>
                 <div className="gerencia-chart" style={{ background: chartGradient(actionCounts) }} />
                 {actionCounts.map((item, idx) => (
                   <div className="legend-item" key={`ac-${item.name}`}>
@@ -1229,7 +1239,7 @@
                 ))}
               </div>
               <div className="gerencia-chart-card">
-                <h3 style={{ color: '#e6fffd', margin: 0 }}>Distribución por STATUS</h3>
+                <h3 style={{ color: 'var(--text)', margin: 0 }}>Distribución por STATUS</h3>
                 <div className="gerencia-chart" style={{ background: chartGradient(statusCounts) }} />
                 {statusCounts.map((item, idx) => (
                   <div className="legend-item" key={`st-${item.name}`}>
