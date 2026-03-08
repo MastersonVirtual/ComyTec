@@ -1709,7 +1709,7 @@
           const pageWidth = doc.internal.pageSize.getWidth();
           const pageHeight = doc.internal.pageSize.getHeight();
           const margin = 16;
-          const topBarHeight = 22;
+          const topBarHeight = 28;
           const lineColor = [0, 100, 101];
           const logoUrl = 'https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png';
 
@@ -1736,7 +1736,7 @@
                 reader.readAsDataURL(blob);
               }));
             const logoHeight = topBarHeight - 2;
-            const logoWidth = 24;
+            const logoWidth = 26;
             doc.addImage(imgData, 'PNG', pageWidth - logoWidth - 2, 1, logoWidth, logoHeight, undefined, 'FAST');
           } catch (err) {
             console.warn('No se pudo cargar el logo para PDF', err);
@@ -1745,7 +1745,7 @@
           doc.setTextColor(0, 100, 101);
           doc.setFont('helvetica', 'bold');
           doc.setFontSize(12);
-          doc.text('Masterson Seguridad – Área de Coordinación Técnica y Comercial', margin, topBarHeight + 10);
+          doc.text('Masterson Seguridad – Área de Coordinación Técnica y Comercial', margin, (topBarHeight / 2) + 2);
 
           let y = topBarHeight + 16;
 
