@@ -2031,11 +2031,27 @@
         const [activeKpi, setActiveKpi] = useState(null);
         const [selectedCommercial, setSelectedCommercial] = useState('');
 
+        function getStatusLabel(row) {
+          return String(row?.status || row?.estado || '').trim().toLowerCase();
+        }
+
+        function isPendingStatus(label) {
+          return label.includes('pend') || label.includes('espera') || label.includes('paus');
+        }
+
+        function isInProgressStatus(label) {
+          return label.includes('curso') || label.includes('proceso') || label.includes('instal') || label.includes('verific');
+        }
+
+        function isCompletedStatus(label) {
+          return label.includes('complet') || label.includes('finaliz') || label.includes('alta');
+        }
+
         function getKpiRows(type) {
           if (type === 'total') return visibleRows;
-          if (type === 'pending') return visibleRows.filter((r) => (r.status || '').toLowerCase().includes('pend'));
-          if (type === 'inprogress') return visibleRows.filter((r) => (r.status || '').toLowerCase().includes('curso'));
-          if (type === 'completed') return visibleRows.filter((r) => (r.status || '').toLowerCase().includes('complet'));
+          if (type === 'pending') return visibleRows.filter((r) => isPendingStatus(getStatusLabel(r)));
+          if (type === 'inprogress') return visibleRows.filter((r) => isInProgressStatus(getStatusLabel(r)));
+          if (type === 'completed') return visibleRows.filter((r) => isCompletedStatus(getStatusLabel(r)));
           return [];
         }
 
@@ -2067,9 +2083,9 @@
 
         const kpiStats = useMemo(() => ({
           total: visibleRows.length,
-          pending: visibleRows.filter((r) => (r.status || '').toLowerCase().includes('pend')).length,
-          inprogress: visibleRows.filter((r) => (r.status || '').toLowerCase().includes('curso')).length,
-          completed: visibleRows.filter((r) => (r.status || '').toLowerCase().includes('complet')).length,
+          pending: visibleRows.filter((r) => isPendingStatus(getStatusLabel(r))).length,
+          inprogress: visibleRows.filter((r) => isInProgressStatus(getStatusLabel(r))).length,
+          completed: visibleRows.filter((r) => isCompletedStatus(getStatusLabel(r))).length,
         }), [visibleRows]);
 
         function buildServiceDetailText(r) {
