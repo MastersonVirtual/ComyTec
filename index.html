@@ -2403,7 +2403,7 @@
           const action = service.tipoAccion || 'Nuevo Servicio';
           setEditingServiceId(service.id || null);
           setSelectedService(service);
-          setStatus(service.status || 'Pendiente');
+          setStatus(service.status || service.estado || 'Pendiente');
           setTipoAccion(action);
 
           const stamp = formatUruguayDateTime();
@@ -2549,7 +2549,7 @@
           e.preventDefault();
           if (selectedForm === 'home') return;
           if (!effectiveClienteId) return alert('Debes indicar un Cliente ID asociado para esta acción.');
-          const doc = { tipoAccion, clienteId: effectiveClienteId, status, creadoEn: firebase.firestore.FieldValue.serverTimestamp(), creadoPor: currentUserName, logs_cambios: [] };
+          const doc = { tipoAccion, clienteId: effectiveClienteId, status, estado: status, creadoEn: firebase.firestore.FieldValue.serverTimestamp(), creadoPor: currentUserName, logs_cambios: [] };
 
           if (grupo === 'servicio') {
             if (!servicioForm.nombreServicio || !servicioForm.razonSocial || !servicioForm.rut || !servicioForm.fechaAltaServicio) {
@@ -2649,7 +2649,7 @@
                   <article key={r.id} className="mobile-service-card" onClick={() => { setSelectedService(r); setSelectedForm('historial'); }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
                       <strong>{r.nombreServicio || r.cliente || 'Servicio sin nombre'}</strong>
-                      <span className="status-badge">{r.status || 'Pendiente'}</span>
+                      <span className="status-badge">{r.status || r.estado || 'Pendiente'}</span>
                     </div>
                     <div className="mobile-rep">{r.representanteComercial || 'Sin representante'}</div>
                   </article>
@@ -2955,7 +2955,7 @@
                         <div className="widget"><h4>Costos</h4><div className="kv"><b>Importe mensual:</b> {selectedService.importeMensualServicioSinIva || '-'}</div><div className="kv"><b>Costo instalación US$:</b> {selectedService.costoInstalacionUsdSinIva || '-'}</div><div className="kv"><b>Presupuesto proveedor:</b> {selectedService.presupuestoProveedor || '-'}</div><div className="kv"><b>Condición equipamiento:</b> {selectedService.condicionEquipamiento || '-'}</div></div>
                         <div className="widget"><h4>Técnica</h4><div className="kv"><b>Control acceso:</b> {selectedService.condicionControlAcceso || '-'}</div><div className="kv"><b>Tags:</b> {selectedService.tagsPorAptos || '-'}</div><div className="kv"><b>Akuvox:</b> {selectedService.appAkuvox || '-'}</div><div className="kv"><b>Llaves:</b> {selectedService.llavesServicio || '-'}</div></div>
                         <div className="widget"><h4>Instalación</h4><div className="kv"><b>Referente:</b> {selectedService.referenteInstalacion || '-'}</div><div className="kv"><b>Teléfono:</b> {selectedService.telefonoReferenteInstalacion || '-'}</div><div className="kv"><b>Botti contacto:</b> {selectedService.bottiSeContactaCon || '-'}</div><div className="kv"><b>Jornales:</b> {selectedService.cantidadJornalesEstimados || '-'}</div><div className="kv"><b>Fecha inicio:</b> {selectedService.fechaEspecificaInicio || '-'}</div></div>
-                        <div className="widget"><h4>Seguimiento</h4><div className="kv"><b>Tipo acción:</b> {selectedService.tipoAccion || '-'}</div><div className="kv"><b>Status:</b> {selectedService.status || '-'}</div><div className="kv"><b>Fecha ingreso:</b> {selectedService.fechaIngresoDatos || selectedService.fechaCarga || selectedService.fechaCharla || '-'}</div><div className="kv"><b>Proyecto:</b> {selectedService.proyectoServicio || '-'}</div></div>
+                        <div className="widget"><h4>Seguimiento</h4><div className="kv"><b>Tipo acción:</b> {selectedService.tipoAccion || '-'}</div><div className="kv"><b>Status:</b> {selectedService.status || selectedService.estado || '-'}</div><div className="kv"><b>Fecha ingreso:</b> {selectedService.fechaIngresoDatos || selectedService.fechaCarga || selectedService.fechaCharla || '-'}</div><div className="kv"><b>Proyecto:</b> {selectedService.proyectoServicio || '-'}</div></div>
                         <div className="widget full"><h4>Observaciones y Excepciones</h4><div className="detail-box">Observaciones: {selectedService.observacionesComentarios || '-'}
 
 Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
