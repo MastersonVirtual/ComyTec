@@ -1821,7 +1821,7 @@
             }
             const data = { id: doc.id, ...doc.data() };
             const estadoActual = String(data?.estado || data?.status || '').trim().toLowerCase();
-            const finalizado = estadoActual === 'finalizado';
+            const finalizado = estadoActual === 'finalizado' || estadoActual.includes('alta finalizada') || estadoActual.includes('completado') || estadoActual.includes('dado de alta');
             setTrackingBlocked(finalizado);
             setTrackingData(data);
             setTrackingError('');
@@ -1931,7 +1931,7 @@
             ) : trackingError ? (
               <section className="panel"><h2 className="tracking-title">Error</h2><div className="hint">{trackingError}</div><div className="tracking-data" style={{ marginTop: 8 }}>Este enlace está diseñado para abrir sin login manual.</div></section>
             ) : trackingBlocked ? (
-              <section className="panel"><h2 className="tracking-title">Acceso bloqueado</h2><div className="hint">El servicio ha concluido. Por razones de seguridad, este enlace ya no está activo.</div></section>
+              <section className="panel"><h2 className="tracking-title">Acceso bloqueado</h2><div className="hint">Este edificio ya fue dado de alta. Gracias por confiar en Masterson Seguridad. Por razones de seguridad, este enlace ya no está activo.</div></section>
             ) : (
               <section className="tracking-grid">
                 <article className="tracking-card wide">
@@ -2309,6 +2309,19 @@
           return () => unsub();
         }, []);
 
+
+        useEffect(() => {
+          if (!selectedService?.id) return;
+          const fresh = rows.find((r) => r.id === selectedService.id);
+          if (fresh) {
+            setSelectedService((prev) => {
+              if (!prev || prev.id !== fresh.id) return fresh;
+              const prevStatus = JSON.stringify(prev);
+              const nextStatus = JSON.stringify(fresh);
+              return prevStatus === nextStatus ? prev : fresh;
+            });
+          }
+        }, [rows, selectedService?.id]);
 
         useEffect(() => {
           if (!notificacion.mensaje) return;
