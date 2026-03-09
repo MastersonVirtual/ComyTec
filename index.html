@@ -2710,22 +2710,42 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <div className="card-grid">
                             <div className="field"><label>Tipo de servicio</label><select value={servicioForm.tipoServicioBrindar} onChange={(e) => setServicioField('tipoServicioBrindar', e.target.value)}><option>Monitoreo</option><option>Portería</option><option>Mantenimiento</option><option>Control de Acceso</option><option>Portería Virtual</option></select></div>
                             <div className="field"><label>Fecha de alta</label><input value={servicioForm.fechaAltaServicio} onChange={(e) => setServicioField('fechaAltaServicio', e.target.value)} type="date" /></div>
+                            <div className="field"><label>Fecha específica de inicio</label><input value={servicioForm.fechaEspecificaInicio} onChange={(e) => setServicioField('fechaEspecificaInicio', e.target.value)} type="date" /></div>
+                            <div className="field"><label>Duración del contrato (meses)</label><input value={servicioForm.duracionContratoMeses} onChange={(e) => setServicioField('duracionContratoMeses', e.target.value)} type="number" min="0" /></div>
+                            <div className="field span-2"><label>Dirección de servicio</label><input value={servicioForm.direccionServicio} onChange={(e) => setServicioField('direccionServicio', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Cantidad de unidades</label><input value={servicioForm.cantidadUnidades} onChange={(e) => setServicioField('cantidadUnidades', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Jornales estimados</label><input value={servicioForm.cantidadJornalesEstimados} onChange={(e) => setServicioField('cantidadJornalesEstimados', e.target.value)} type="number" min="0" /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>3. Liquidación Económica (Conceptos a Cobrar)</h3>
+                          <h3>3. Instalación y Coordinación Técnica</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Referente de instalación</label><input value={servicioForm.referenteInstalacion} onChange={(e) => setServicioField('referenteInstalacion', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Teléfono referente</label><input value={servicioForm.telefonoReferenteInstalacion} onChange={(e) => setServicioField('telefonoReferenteInstalacion', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Contacto Botti</label><input value={servicioForm.bottiSeContactaCon} onChange={(e) => setServicioField('bottiSeContactaCon', e.target.value)} type="text" /></div>
+                            <div className="field span-2"><label>Proyecto / Servicio</label><input value={servicioForm.proyectoServicio} onChange={(e) => setServicioField('proyectoServicio', e.target.value)} type="text" placeholder="Ej: Nostrum Bay" /></div>
+                            <div className="field span-2"><label>Comisión / Referente</label><input value={servicioForm.personaReferenteComision} onChange={(e) => setServicioField('personaReferenteComision', e.target.value)} type="text" /></div>
+                            <div className="field span-3"><label>Observaciones de comisión</label><textarea value={servicioForm.excepcionesAcordadas} onChange={(e) => setServicioField('excepcionesAcordadas', e.target.value)} /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>4. Liquidación Económica (Conceptos a Cobrar)</h3>
                           <div className="card-grid">
                             <div className="field"><label>Importe mensual por servicio</label><input value={servicioForm.importeMensualServicioSinIva} onChange={(e) => setServicioField('importeMensualServicioSinIva', e.target.value)} type="number" min="0" /></div>
                             <div className="field"><label>Importe mensual por arrendamiento</label><input value={servicioForm.importeMensualArrendamiento} onChange={(e) => setServicioField('importeMensualArrendamiento', e.target.value)} type="number" min="0" /></div>
                             <div className="field"><label>Importe por compra de equipamiento</label><input value={servicioForm.importeCompraEquipamiento} onChange={(e) => setServicioField('importeCompraEquipamiento', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Costo instalación (USD sin IVA)</label><input value={servicioForm.costoInstalacionUsdSinIva} onChange={(e) => setServicioField('costoInstalacionUsdSinIva', e.target.value)} type="number" min="0" /></div>
+                            <div className="field span-2"><label>Motivo de no cobro</label><input value={servicioForm.porQueNoSeCobraServicio} onChange={(e) => setServicioField('porQueNoSeCobraServicio', e.target.value)} type="text" /></div>
                             <div className="field span-3"><label>Descuentos negociados</label><textarea value={servicioForm.descuentosNegociados} onChange={(e) => setServicioField('descuentosNegociados', e.target.value)} /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>4. Control de Cierre</h3>
+                          <h3>5. Observaciones y Control de Cierre</h3>
                           <div className="card-grid">
+                            <div className="field span-3"><label>Observaciones y comentarios</label><textarea value={servicioForm.observacionesComentarios} onChange={(e) => setServicioField('observacionesComentarios', e.target.value)} /></div>
                             <div className="field"><label>FACTURADO</label><select value={servicioForm.facturado} onChange={(e) => setServicioField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
                           </div>
                         </div>
