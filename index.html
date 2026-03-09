@@ -703,6 +703,93 @@
         justify-content: flex-end;
         gap: 8px;
       }
+      .client-view-modal {
+        width: min(440px, 100%);
+        background: rgba(10, 21, 21, .96);
+        border: 1px solid #006465;
+        border-radius: 16px;
+        padding: 16px;
+        color: #e6fffd;
+        box-shadow: var(--shadow-deep);
+      }
+      .client-view-modal h3 { margin: 0 0 6px; }
+      .client-view-modal .hint { margin-bottom: 10px; }
+      .client-view-actions {
+        margin-top: 10px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+      .tracking-shell {
+        min-height: 100vh;
+        padding: 22px;
+        color: var(--text);
+      }
+      .tracking-header {
+        position: relative;
+        margin-bottom: 14px;
+      }
+      .tracking-logo {
+        position: absolute;
+        top: -6px;
+        right: 0;
+        width: 120px;
+        height: 120px;
+        border-radius: 16px;
+        border: 0.5px solid rgba(0,100,101,.7);
+        background: url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png') center/cover no-repeat;
+      }
+      .tracking-grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0,1fr));
+        gap: 12px;
+      }
+      .tracking-card {
+        grid-column: span 4;
+        border-radius: 16px;
+        background: rgba(15,25,25,.72);
+        border: 0.5px solid rgba(0,100,101,.75);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 14px;
+      }
+      .tracking-card.wide { grid-column: span 8; }
+      .tracking-progress {
+        width: 100%;
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(255,255,255,.1);
+        overflow: hidden;
+      }
+      .tracking-progress > span {
+        display: block;
+        height: 100%;
+        background: linear-gradient(90deg, #006465, #00b0b3);
+      }
+      .tracking-steps {
+        margin-top: 8px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0,1fr));
+        gap: 6px;
+        font-size: 11px;
+        color: #c8eaea;
+      }
+      .help-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(0,100,101,.6);
+        background: linear-gradient(135deg, #041313, #006465);
+        color: #fff;
+        font-weight: 700;
+        text-decoration: none;
+      }
+      @media (max-width: 900px) {
+        .tracking-card, .tracking-card.wide { grid-column: 1 / -1; }
+        .tracking-logo { width: 88px; height: 88px; }
+      }
       .micro-log-list {
         list-style: none;
         margin: 0;
@@ -1688,6 +1775,123 @@
         );
       }
 
+
+      function TrackingView() {
+        const [trackingData, setTrackingData] = useState(null);
+        const [trackingLoading, setTrackingLoading] = useState(true);
+        const [trackingError, setTrackingError] = useState('');
+        const [trackingBlocked, setTrackingBlocked] = useState(false);
+
+        const operationId = useMemo(() => {
+          const params = new URLSearchParams(window.location.search || '');
+          return String(params.get('id') || '').trim();
+        }, []);
+
+        useEffect(() => {
+          if (!operationId) {
+            setTrackingError('Debes ingresar un ID de operación válido.');
+            setTrackingLoading(false);
+            return () => {};
+          }
+
+          let unsub = () => {};
+          db.collection('operaciones').where('clienteId', '==', operationId).limit(1).get()
+            .then((snap) => {
+              if (!snap.empty) {
+                unsub = db.collection('operaciones').doc(snap.docs[0].id).onSnapshot((doc) => {
+                  const data = doc.exists ? { id: doc.id, ...doc.data() } : null;
+                  const finalizada = String(data?.status || '').toLowerCase().includes('alta finalizada');
+                  setTrackingBlocked(finalizada);
+                  setTrackingData(data);
+                  setTrackingLoading(false);
+                }, (err) => {
+                  console.error('Error tracking onSnapshot:', err);
+                  setTrackingError('No se pudo consultar la operación.');
+                  setTrackingLoading(false);
+                });
+                return;
+              }
+
+              unsub = db.collection('operaciones').doc(operationId).onSnapshot((doc) => {
+                if (!doc.exists) {
+                  setTrackingError('No encontramos una operación con ese ID.');
+                  setTrackingLoading(false);
+                  return;
+                }
+                const data = { id: doc.id, ...doc.data() };
+                const finalizada = String(data?.status || '').toLowerCase().includes('alta finalizada');
+                setTrackingBlocked(finalizada);
+                setTrackingData(data);
+                setTrackingLoading(false);
+              }, (err) => {
+                console.error('Error tracking by doc id:', err);
+                setTrackingError('No se pudo consultar la operación.');
+                setTrackingLoading(false);
+              });
+            })
+            .catch((err) => {
+              console.error('Error buscando operación:', err);
+              setTrackingError('No se pudo consultar la operación.');
+              setTrackingLoading(false);
+            });
+
+          return () => unsub();
+        }, [operationId]);
+
+        const progressPct = useMemo(() => {
+          const s = String(trackingData?.status || '').toLowerCase();
+          if (s.includes('alta finalizada') || s.includes('complet')) return 100;
+          if (s.includes('curso')) return 65;
+          if (s.includes('espera') || s.includes('material')) return 45;
+          if (s.includes('pend')) return 25;
+          return 10;
+        }, [trackingData]);
+
+        const whatsappHref = `https://wa.me/59800000000?text=${encodeURIComponent(`Hola, necesito ayuda con el servicio ID ${operationId}`)}`;
+
+        return (
+          <div className="tracking-shell">
+            <header className="tracking-header">
+              <h1 style={{ margin: 0 }}>Seguimiento de Operación</h1>
+              <p className="hint" style={{ marginTop: 6 }}>ID consultado: {operationId || '-'}</p>
+              <div className="tracking-logo" aria-hidden="true" />
+            </header>
+
+            {trackingLoading ? (
+              <section className="panel"><h2>Cargando seguimiento...</h2></section>
+            ) : trackingError ? (
+              <section className="panel"><h2>Error</h2><div className="hint">{trackingError}</div></section>
+            ) : trackingBlocked ? (
+              <section className="panel"><h2>Acceso bloqueado</h2><div className="hint">Este servicio figura con estado "Alta Finalizada" y ya no admite seguimiento de cliente.</div></section>
+            ) : (
+              <section className="tracking-grid">
+                <article className="tracking-card wide">
+                  <h3 style={{ marginTop: 0 }}>Progreso del Servicio</h3>
+                  <div className="tracking-progress"><span style={{ width: `${progressPct}%` }} /></div>
+                  <div className="tracking-steps">
+                    <div>Coordinación</div><div>Materiales</div><div>Instalación</div><div>Verificación</div>
+                  </div>
+                </article>
+
+                <article className="tracking-card">
+                  <h3 style={{ marginTop: 0 }}>Información</h3>
+                  <div className="kv"><b>Proyecto Servicio:</b> {trackingData?.proyectoServicio || '-'}</div>
+                  <div className="kv"><b>Dirección de Servicio:</b> {trackingData?.direccionServicio || '-'}</div>
+                  <div className="kv"><b>Fecha específica inicio:</b> {trackingData?.fechaEspecificaInicio || '-'}</div>
+                </article>
+
+                <article className="tracking-card">
+                  <h3 style={{ marginTop: 0 }}>Ayuda</h3>
+                  <a className="help-btn" href={whatsappHref} target="_blank" rel="noreferrer">Contactar por WhatsApp</a>
+                </article>
+              </section>
+            )}
+
+            <div className="app-footer" aria-label="signature"><strong>v1.0 | Powered by Alfonso Carballo</strong></div>
+          </div>
+        );
+      }
+
       function App() {
         const [menuOpen, setMenuOpen] = useState(false);
         const [openMenus, setOpenMenus] = useState({ nuevo: false, fact: false });
@@ -1734,6 +1938,8 @@
         const [fabOpen, setFabOpen] = useState(false);
         const [deleteTargetService, setDeleteTargetService] = useState(null);
         const [deletingService, setDeletingService] = useState(false);
+        const [showClientViewModal, setShowClientViewModal] = useState(false);
+        const [clientOperationId, setClientOperationId] = useState('');
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
@@ -2366,6 +2572,21 @@
             </section>
           );
         }
+        const isTrackingRoute = typeof window !== 'undefined' && window.location.pathname === '/seguimiento';
+
+        function openClientTrackingView() {
+          const cleanId = String(clientOperationId || '').trim();
+          if (!cleanId) return;
+          const target = `${window.location.origin}/seguimiento?id=${encodeURIComponent(cleanId)}`;
+          window.open(target, '_blank', 'noopener,noreferrer');
+          setShowClientViewModal(false);
+          setClientOperationId('');
+        }
+
+        if (isTrackingRoute) {
+          return <TrackingView />;
+        }
+
         if (authLoading || roleLoading) {
           return <div className="login-shell"><div className="login-panel"><h2>Cargando...</h2></div></div>;
         }
@@ -2401,6 +2622,8 @@
                     </div>
                     <button className="menu-button" onClick={() => selectAction('Charla')}>Charlas informativas</button>
                     <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
+                    {isAdminUser && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}>Vista Clientes</button>}
+                    {isAdminUser && <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}>Vista Gerencia</button>}
                   </>
                 )}
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
@@ -3002,8 +3225,25 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
               </main>
 
               <div className="app-footer" aria-label="signature">
-                <strong>Powered by Alfonso C.</strong>
+                <strong>v1.0 | Powered by Alfonso Carballo</strong>
               </div>
+
+              {showClientViewModal && isAdminUser && (
+                <div className="confirm-modal" onClick={() => setShowClientViewModal(false)}>
+                  <div className="client-view-modal" onClick={(e) => e.stopPropagation()}>
+                    <h3>Vista Clientes</h3>
+                    <div className="hint">Ingresá el ID de operación para abrir seguimiento en una pestaña nueva.</div>
+                    <div className="field">
+                      <label>ID de Operación</label>
+                      <input value={clientOperationId} onChange={(e) => setClientOperationId(e.target.value)} type="text" placeholder="Ej: 1024" />
+                    </div>
+                    <div className="client-view-actions">
+                      <button type="button" className="edit-btn" onClick={() => setShowClientViewModal(false)}>Cancelar</button>
+                      <button type="button" className="save-btn" onClick={openClientTrackingView}>Ingresar</button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {deleteTargetService && isAdminUser && (
                 <div className="confirm-modal" onClick={() => { if (!deletingService) setDeleteTargetService(null); }}>
