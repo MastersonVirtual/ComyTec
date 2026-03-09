@@ -6,15 +6,15 @@
     <title>Masterson Seguridad</title>
     <style>
       :root {
-        --base: #010a0a;
+        --base: #062f2d;
         --motion-fast: 160ms;
         --motion-mid: 240ms;
         --motion-slow: 320ms;
-        --base-900: #000000;
-        --base-700: #002b2b;
-        --text: #ffffff;
-        --muted: #a3c2c2;
-        --accent: #00FBFF;
+        --base-900: #041f1e;
+        --base-700: #0b4e49;
+        --text: #ebf6f5;
+        --muted: #a9c8c6;
+        --accent: #4ee3d1;
         --accent-soft: #97f3e7;
         --line: rgba(255, 255, 255, 0.18);
         --panel: rgba(8, 31, 30, 0.52);
@@ -703,6 +703,93 @@
         justify-content: flex-end;
         gap: 8px;
       }
+      .client-view-modal {
+        width: min(440px, 100%);
+        background: rgba(10, 21, 21, .96);
+        border: 1px solid #006465;
+        border-radius: 16px;
+        padding: 16px;
+        color: #e6fffd;
+        box-shadow: var(--shadow-deep);
+      }
+      .client-view-modal h3 { margin: 0 0 6px; }
+      .client-view-modal .hint { margin-bottom: 10px; }
+      .client-view-actions {
+        margin-top: 10px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+      .tracking-shell {
+        min-height: 100vh;
+        padding: 22px;
+        color: var(--text);
+      }
+      .tracking-header {
+        position: relative;
+        margin-bottom: 14px;
+      }
+      .tracking-logo {
+        position: absolute;
+        top: -6px;
+        right: 0;
+        width: 120px;
+        height: 120px;
+        border-radius: 16px;
+        border: 0.5px solid rgba(0,100,101,.7);
+        background: url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png') center/cover no-repeat;
+      }
+      .tracking-grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0,1fr));
+        gap: 12px;
+      }
+      .tracking-card {
+        grid-column: span 4;
+        border-radius: 16px;
+        background: rgba(15,25,25,.72);
+        border: 0.5px solid rgba(0,100,101,.75);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 14px;
+      }
+      .tracking-card.wide { grid-column: span 8; }
+      .tracking-progress {
+        width: 100%;
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(255,255,255,.1);
+        overflow: hidden;
+      }
+      .tracking-progress > span {
+        display: block;
+        height: 100%;
+        background: linear-gradient(90deg, #006465, #00b0b3);
+      }
+      .tracking-steps {
+        margin-top: 8px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0,1fr));
+        gap: 6px;
+        font-size: 11px;
+        color: #c8eaea;
+      }
+      .help-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(0,100,101,.6);
+        background: linear-gradient(135deg, #041313, #006465);
+        color: #fff;
+        font-weight: 700;
+        text-decoration: none;
+      }
+      @media (max-width: 900px) {
+        .tracking-card, .tracking-card.wide { grid-column: 1 / -1; }
+        .tracking-logo { width: 88px; height: 88px; }
+      }
       .micro-log-list {
         list-style: none;
         margin: 0;
@@ -976,14 +1063,13 @@
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
         box-shadow: 0 6px 20px rgba(0,0,0,.36);
-        pointer-events: none;
+        pointer-events: auto;
       }
       .app-footer strong {
         color: #00fbff;
         text-shadow: 0 0 8px rgba(0,251,255,.45);
         font-weight: 700;
       }
-
       @media (max-width: 1080px) {
         .kpi-grid { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
       }
@@ -1338,7 +1424,7 @@
         .app-footer {
           right: 10px;
           bottom: 124px;
-          z-index: 1700;
+          z-index: 9999;
           font-size: 10px;
         }
         .gerencia-widgets { grid-template-columns: 1fr; }
@@ -1364,246 +1450,7 @@
         }
       }
 
-    
-/* ========================================= */
-/* BENTO BOX & DEEP TEAL MODERN OVERRIDES  */
-/* ========================================= */
-body {
-  background: #010A0A !important;
-  background-image: 
-    radial-gradient(circle at 10% 20%, rgba(0, 100, 101, 0.15), transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(0, 251, 255, 0.08), transparent 40%) !important;
-  background-attachment: fixed !important;
-}
-
-body::before {
-  content: '';
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 100vh;
-  height: 100vh;
-  transform: translate(-50%, -50%);
-  background: url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png') center/contain no-repeat;
-  opacity: 0.02;
-  z-index: -1;
-  pointer-events: none;
-  filter: grayscale(100%) brightness(200%) contrast(150%);
-}
-
-.panel, .widget, .service-card, .login-panel, .gerencia-widget, .kpi-card {
-  border-radius: 28px !important;
-  background: rgba(3, 16, 16, 0.65) !important;
-  border: 1px solid rgba(0, 251, 255, 0.1) !important;
-  backdrop-filter: blur(28px) !important;
-  -webkit-backdrop-filter: blur(28px) !important;
-  box-shadow: 0 24px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05) !important;
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
-  color: #ffffff !important;
-}
-
-.panel h2, .widget h4, .service-card h3, .kpi-label, .kpi-value {
-  color: #ffffff !important;
-}
-
-.kv b, .detail-box { color: #00FBFF !important; }
-.hint, .muted, .kv { color: #a3c2c2 !important; }
-
-.panel:hover, .widget:hover, .service-card:hover, .kpi-card:hover {
-  transform: translateY(-4px) !important;
-  border-color: rgba(0, 251, 255, 0.3) !important;
-  box-shadow: 0 30px 60px rgba(0,0,0,0.6), 0 0 25px rgba(0, 100, 101, 0.3) !important;
-}
-
-.save-btn, .mobile-fab, .status-ongoing {
-  background: linear-gradient(135deg, #006465, #004d4d) !important;
-  border: 1px solid rgba(0, 251, 255, 0.3) !important;
-  border-radius: 16px !important;
-  color: #ffffff !important;
-  box-shadow: 0 8px 24px rgba(0, 100, 101, 0.5) !important;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: 800 !important;
-  transition: all 0.3s ease;
-}
-
-.save-btn:hover {
-  background: linear-gradient(135deg, #008082, #006465) !important;
-  box-shadow: 0 12px 32px rgba(0, 251, 255, 0.3) !important;
-  transform: translateY(-2px);
-}
-
-.sidebar {
-  background: rgba(1, 10, 10, 0.85) !important;
-  backdrop-filter: blur(32px) !important;
-  border-right: 1px solid rgba(0, 251, 255, 0.1) !important;
-}
-
-.menu-button, .submenu-button {
-  border-radius: 12px !important;
-  margin-bottom: 4px !important;
-}
-.menu-button:hover, .submenu-button:hover {
-  background: rgba(0, 100, 101, 0.3) !important;
-  color: #00FBFF !important;
-}
-
-input, select, textarea {
-  border-radius: 16px !important;
-  background: rgba(0, 0, 0, 0.4) !important;
-  border: 1px solid rgba(0, 100, 101, 0.5) !important;
-  color: #ffffff !important;
-  padding: 16px !important;
-  box-shadow: inset 0 2px 8px rgba(0,0,0,0.5) !important;
-  transition: all 0.3s ease;
-}
-
-input:focus, select:focus, textarea:focus {
-  border-color: #00FBFF !important;
-  background: rgba(0, 20, 20, 0.8) !important;
-  box-shadow: 0 0 0 4px rgba(0, 251, 255, 0.15), inset 0 2px 8px rgba(0,0,0,0.5) !important;
-  outline: none !important;
-}
-
-.field > label {
-  background: #010A0A !important;
-  color: #00FBFF !important;
-  border: 1px solid rgba(0, 251, 255, 0.3) !important;
-  padding: 4px 12px !important;
-  font-size: 11px !important;
-  border-radius: 10px !important;
-  top: -10px !important;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
-}
-
-.hero {
-  border-radius: 36px !important;
-  background: linear-gradient(135deg, rgba(0, 100, 101, 0.4), rgba(0, 34, 34, 0.8)) !important;
-  border: 1px solid rgba(0, 251, 255, 0.2) !important;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6) !important;
-  backdrop-filter: blur(20px) !important;
-  position: relative;
-  overflow: hidden;
-  padding: 60px 40px !important;
-}
-
-.hero h2 {
-    background: linear-gradient(to right, #ffffff, #00FBFF) !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    font-size: clamp(2.5rem, 6vw, 4rem) !important;
-    letter-spacing: -1px;
-}
-
-.hero::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  right: -10%;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(0, 251, 255, 0.15), transparent 60%);
-  pointer-events: none;
-}
-
-.topbar {
-  background: rgba(1, 10, 10, 0.6) !important;
-  backdrop-filter: blur(24px) !important;
-  border-bottom: 1px solid rgba(0, 251, 255, 0.1) !important;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
-}
-
-.top-search input {
-    border-radius: 99px !important;
-    padding-left: 48px !important;
-}
-
-.login-logo {
-  border-radius: 36px !important;
-  box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 0 2px rgba(0, 251, 255, 0.2) !important;
-  border: none !important;
-  background-color: transparent !important;
-}
-
-.radio-row, .switch-row, .state-row {
-    gap: 16px !important;
-}
-
-.radio-pill, .state-pill {
-    border-radius: 99px !important;
-    padding: 12px 20px !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    background: rgba(255, 255, 255, 0.03) !important;
-}
-
-.radio-pill:hover, .state-pill:hover {
-    background: rgba(0, 251, 255, 0.05) !important;
-}
-
-.radio-pill.active, .state-pill.active {
-    background: rgba(0, 100, 101, 0.3) !important;
-    border-color: #00FBFF !important;
-    color: #00FBFF !important;
-    box-shadow: inset 0 0 20px rgba(0, 251, 255, 0.2), 0 0 15px rgba(0, 251, 255, 0.1) !important;
-}
-
-.toast {
-    background: rgba(0, 100, 101, 0.9) !important;
-    border-left: 4px solid #00FBFF !important;
-    border-radius: 16px !important;
-    backdrop-filter: blur(16px) !important;
-    color: #ffffff !important;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.6) !important;
-}
-
-table {
-    border-collapse: separate !important;
-    border-spacing: 0 6px !important;
-}
-
-th {
-    background: transparent !important;
-    border-bottom: 2px solid rgba(0, 251, 255, 0.1) !important;
-    color: #00FBFF !important;
-}
-
-td {
-    background: rgba(0, 0, 0, 0.2) !important;
-    border: 1px solid rgba(255, 255, 255, 0.03) !important;
-    border-width: 1px 0 !important;
-}
-
-td:first-child { border-left-width: 1px !important; border-top-left-radius: 12px !important; border-bottom-left-radius: 12px !important; }
-td:last-child { border-right-width: 1px !important; border-top-right-radius: 12px !important; border-bottom-right-radius: 12px !important; }
-
-tr:hover td {
-    background: rgba(0, 100, 101, 0.2) !important;
-}
-
-.chip {
-    border-radius: 99px !important;
-    padding: 6px 14px !important;
-    font-weight: 800 !important;
-    font-size: 0.75rem !important;
-}
-
-/* Specific Scrollbar Tweak */
-*::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-*::-webkit-scrollbar-thumb {
-  background: rgba(0, 100, 101, 0.6);
-  border-radius: 10px;
-  border: 2px solid #010A0A;
-}
-*::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 251, 255, 0.8);
-}
-*::-webkit-scrollbar-track {
-  background: transparent;
-}
-</style>
+    </style>
 
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -1636,13 +1483,6 @@ tr:hover td {
 
       const ACCIONES = ['Nuevo Servicio', 'Novación', 'Obra', 'Agregado', 'Movimiento de Obra', 'Baja', 'Charla'];
       const STATUS_OPTIONS = ['Pendiente', 'En curso', 'En espera', 'Completado', 'Cancelado', 'Pausado'];
-      const APP_VERSION = (() => {
-        const now = new Date();
-        const yyyy = now.getFullYear();
-        const mm = String(now.getMonth() + 1).padStart(2, '0');
-        const dd = String(now.getDate()).padStart(2, '0');
-        return `v1.${yyyy}${mm}${dd}`;
-      })();
 
       function generarClienteId() {
         return String(Math.floor(1000 + Math.random() * 9000));
@@ -1935,6 +1775,153 @@ tr:hover td {
         );
       }
 
+
+      function TrackingView() {
+        const [trackingData, setTrackingData] = useState(null);
+        const [trackingLoading, setTrackingLoading] = useState(true);
+        const [trackingError, setTrackingError] = useState('');
+        const [trackingBlocked, setTrackingBlocked] = useState(false);
+
+        const operationId = useMemo(() => {
+          const params = new URLSearchParams(window.location.search || '');
+          return String(params.get('id') || '').trim();
+        }, []);
+
+        useEffect(() => {
+          if (!operationId) {
+            setTrackingError('Debes ingresar un ID de operación válido.');
+            setTrackingLoading(false);
+            return () => {};
+          }
+
+          const normalizeId = (value) => String(value || '').trim().toUpperCase().replace(/\s+/g, '');
+          const targetId = normalizeId(operationId);
+          let unsub = () => {};
+          let cancelled = false;
+
+          const subscribeToDoc = (docId) => {
+            unsub = db.collection('operaciones').doc(docId).onSnapshot((doc) => {
+              if (cancelled) return;
+              if (!doc.exists) {
+                setTrackingError('No encontramos una operación con ese ID.');
+                setTrackingLoading(false);
+                return;
+              }
+              const data = { id: doc.id, ...doc.data() };
+              const finalizada = String(data?.status || '').toLowerCase().includes('alta finalizada');
+              setTrackingBlocked(finalizada);
+              setTrackingData(data);
+              setTrackingLoading(false);
+            }, (err) => {
+              if (cancelled) return;
+              console.error('Error leyendo operación de seguimiento:', err);
+              setTrackingError('No se pudo consultar la operación.');
+              setTrackingLoading(false);
+            });
+          };
+
+          (async () => {
+            try {
+              const byClientId = await db.collection('operaciones').where('clienteId', '==', operationId).limit(1).get();
+              if (!byClientId.empty) {
+                subscribeToDoc(byClientId.docs[0].id);
+                return;
+              }
+
+              const byDocId = await db.collection('operaciones').doc(operationId).get();
+              if (byDocId.exists) {
+                subscribeToDoc(byDocId.id);
+                return;
+              }
+
+              const scan = await db.collection('operaciones').limit(500).get();
+              const match = scan.docs.find((d) => {
+                const data = d.data() || {};
+                const candidates = [
+                  d.id,
+                  data.clienteId,
+                  data.clienteID,
+                  data.idCliente,
+                  data.idOperacion,
+                ].map(normalizeId).filter(Boolean);
+                return candidates.includes(targetId);
+              });
+
+              if (match) {
+                subscribeToDoc(match.id);
+                return;
+              }
+
+              setTrackingError('No encontramos una operación con ese ID. Verificá si es el clienteId o el ID del documento en Firestore.');
+              setTrackingLoading(false);
+            } catch (err) {
+              if (cancelled) return;
+              console.error('Error buscando operación:', err);
+              setTrackingError('No se pudo consultar la operación.');
+              setTrackingLoading(false);
+            }
+          })();
+
+          return () => {
+            cancelled = true;
+            unsub();
+          };
+        }, [operationId]);
+
+        const progressPct = useMemo(() => {
+          const s = String(trackingData?.status || '').toLowerCase();
+          if (s.includes('alta finalizada') || s.includes('complet')) return 100;
+          if (s.includes('curso')) return 65;
+          if (s.includes('espera') || s.includes('material')) return 45;
+          if (s.includes('pend')) return 25;
+          return 10;
+        }, [trackingData]);
+
+        const whatsappHref = `https://wa.me/59800000000?text=${encodeURIComponent(`Hola, necesito ayuda con el servicio ID ${operationId}`)}`;
+
+        return (
+          <div className="tracking-shell">
+            <header className="tracking-header">
+              <h1 style={{ margin: 0 }}>Seguimiento de Operación</h1>
+              <p className="hint" style={{ marginTop: 6 }}>ID consultado: {operationId || '-'}</p>
+              <div className="tracking-logo" aria-hidden="true" />
+            </header>
+
+            {trackingLoading ? (
+              <section className="panel"><h2>Cargando seguimiento...</h2></section>
+            ) : trackingError ? (
+              <section className="panel"><h2>Error</h2><div className="hint">{trackingError}</div></section>
+            ) : trackingBlocked ? (
+              <section className="panel"><h2>Acceso bloqueado</h2><div className="hint">Este servicio figura con estado "Alta Finalizada" y ya no admite seguimiento de cliente.</div></section>
+            ) : (
+              <section className="tracking-grid">
+                <article className="tracking-card wide">
+                  <h3 style={{ marginTop: 0 }}>Progreso del Servicio</h3>
+                  <div className="tracking-progress"><span style={{ width: `${progressPct}%` }} /></div>
+                  <div className="tracking-steps">
+                    <div>Coordinación</div><div>Materiales</div><div>Instalación</div><div>Verificación</div>
+                  </div>
+                </article>
+
+                <article className="tracking-card">
+                  <h3 style={{ marginTop: 0 }}>Información</h3>
+                  <div className="kv"><b>Proyecto Servicio:</b> {trackingData?.proyectoServicio || '-'}</div>
+                  <div className="kv"><b>Dirección de Servicio:</b> {trackingData?.direccionServicio || '-'}</div>
+                  <div className="kv"><b>Fecha específica inicio:</b> {trackingData?.fechaEspecificaInicio || '-'}</div>
+                </article>
+
+                <article className="tracking-card">
+                  <h3 style={{ marginTop: 0 }}>Ayuda</h3>
+                  <a className="help-btn" href={whatsappHref} target="_blank" rel="noreferrer">Contactar por WhatsApp</a>
+                </article>
+              </section>
+            )}
+
+            <div className="app-footer" aria-label="signature"><strong>v1.0 | Powered by Alfonso Carballo</strong></div>
+          </div>
+        );
+      }
+
       function App() {
         const [menuOpen, setMenuOpen] = useState(false);
         const [openMenus, setOpenMenus] = useState({ nuevo: false, fact: false });
@@ -1981,6 +1968,8 @@ tr:hover td {
         const [fabOpen, setFabOpen] = useState(false);
         const [deleteTargetService, setDeleteTargetService] = useState(null);
         const [deletingService, setDeletingService] = useState(false);
+        const [showClientViewModal, setShowClientViewModal] = useState(false);
+        const [clientOperationId, setClientOperationId] = useState('');
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
@@ -2292,6 +2281,7 @@ tr:hover td {
           });
           return () => unsub();
         }, []);
+
 
         useEffect(() => {
           if (!notificacion.mensaje) return;
@@ -2612,6 +2602,21 @@ tr:hover td {
             </section>
           );
         }
+        const isTrackingRoute = typeof window !== 'undefined' && (window.location.pathname === '/seguimiento' || new URLSearchParams(window.location.search || '').get('view') === 'seguimiento');
+
+        function openClientTrackingView() {
+          const cleanId = String(clientOperationId || '').trim();
+          if (!cleanId) return;
+          const target = `${window.location.origin}${window.location.pathname}?view=seguimiento&id=${encodeURIComponent(cleanId)}`;
+          window.open(target, '_blank', 'noopener,noreferrer');
+          setShowClientViewModal(false);
+          setClientOperationId('');
+        }
+
+        if (isTrackingRoute) {
+          return <TrackingView />;
+        }
+
         if (authLoading || roleLoading) {
           return <div className="login-shell"><div className="login-panel"><h2>Cargando...</h2></div></div>;
         }
@@ -2647,6 +2652,8 @@ tr:hover td {
                     </div>
                     <button className="menu-button" onClick={() => selectAction('Charla')}>Charlas informativas</button>
                     <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
+                    {isAdminUser && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}>Vista Clientes</button>}
+                    {isAdminUser && <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}>Vista Gerencia</button>}
                   </>
                 )}
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
@@ -2956,22 +2963,42 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <div className="card-grid">
                             <div className="field"><label>Tipo de servicio</label><select value={servicioForm.tipoServicioBrindar} onChange={(e) => setServicioField('tipoServicioBrindar', e.target.value)}><option>Monitoreo</option><option>Portería</option><option>Mantenimiento</option><option>Control de Acceso</option><option>Portería Virtual</option></select></div>
                             <div className="field"><label>Fecha de alta</label><input value={servicioForm.fechaAltaServicio} onChange={(e) => setServicioField('fechaAltaServicio', e.target.value)} type="date" /></div>
+                            <div className="field"><label>Fecha específica de inicio</label><input value={servicioForm.fechaEspecificaInicio} onChange={(e) => setServicioField('fechaEspecificaInicio', e.target.value)} type="date" /></div>
+                            <div className="field"><label>Duración del contrato (meses)</label><input value={servicioForm.duracionContratoMeses} onChange={(e) => setServicioField('duracionContratoMeses', e.target.value)} type="number" min="0" /></div>
+                            <div className="field span-2"><label>Dirección de servicio</label><input value={servicioForm.direccionServicio} onChange={(e) => setServicioField('direccionServicio', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Cantidad de unidades</label><input value={servicioForm.cantidadUnidades} onChange={(e) => setServicioField('cantidadUnidades', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Jornales estimados</label><input value={servicioForm.cantidadJornalesEstimados} onChange={(e) => setServicioField('cantidadJornalesEstimados', e.target.value)} type="number" min="0" /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>3. Liquidación Económica (Conceptos a Cobrar)</h3>
+                          <h3>3. Instalación y Coordinación Técnica</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Referente de instalación</label><input value={servicioForm.referenteInstalacion} onChange={(e) => setServicioField('referenteInstalacion', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Teléfono referente</label><input value={servicioForm.telefonoReferenteInstalacion} onChange={(e) => setServicioField('telefonoReferenteInstalacion', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Contacto Botti</label><input value={servicioForm.bottiSeContactaCon} onChange={(e) => setServicioField('bottiSeContactaCon', e.target.value)} type="text" /></div>
+                            <div className="field span-2"><label>Proyecto / Servicio</label><input value={servicioForm.proyectoServicio} onChange={(e) => setServicioField('proyectoServicio', e.target.value)} type="text" placeholder="Ej: Nostrum Bay" /></div>
+                            <div className="field span-2"><label>Comisión / Referente</label><input value={servicioForm.personaReferenteComision} onChange={(e) => setServicioField('personaReferenteComision', e.target.value)} type="text" /></div>
+                            <div className="field span-3"><label>Observaciones de comisión</label><textarea value={servicioForm.excepcionesAcordadas} onChange={(e) => setServicioField('excepcionesAcordadas', e.target.value)} /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>4. Liquidación Económica (Conceptos a Cobrar)</h3>
                           <div className="card-grid">
                             <div className="field"><label>Importe mensual por servicio</label><input value={servicioForm.importeMensualServicioSinIva} onChange={(e) => setServicioField('importeMensualServicioSinIva', e.target.value)} type="number" min="0" /></div>
                             <div className="field"><label>Importe mensual por arrendamiento</label><input value={servicioForm.importeMensualArrendamiento} onChange={(e) => setServicioField('importeMensualArrendamiento', e.target.value)} type="number" min="0" /></div>
                             <div className="field"><label>Importe por compra de equipamiento</label><input value={servicioForm.importeCompraEquipamiento} onChange={(e) => setServicioField('importeCompraEquipamiento', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Costo instalación (USD sin IVA)</label><input value={servicioForm.costoInstalacionUsdSinIva} onChange={(e) => setServicioField('costoInstalacionUsdSinIva', e.target.value)} type="number" min="0" /></div>
+                            <div className="field span-2"><label>Motivo de no cobro</label><input value={servicioForm.porQueNoSeCobraServicio} onChange={(e) => setServicioField('porQueNoSeCobraServicio', e.target.value)} type="text" /></div>
                             <div className="field span-3"><label>Descuentos negociados</label><textarea value={servicioForm.descuentosNegociados} onChange={(e) => setServicioField('descuentosNegociados', e.target.value)} /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>4. Control de Cierre</h3>
+                          <h3>5. Observaciones y Control de Cierre</h3>
                           <div className="card-grid">
+                            <div className="field span-3"><label>Observaciones y comentarios</label><textarea value={servicioForm.observacionesComentarios} onChange={(e) => setServicioField('observacionesComentarios', e.target.value)} /></div>
                             <div className="field"><label>FACTURADO</label><select value={servicioForm.facturado} onChange={(e) => setServicioField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
                           </div>
                         </div>
@@ -3227,9 +3254,26 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                 )}
               </main>
 
-              <div className="app-footer" aria-label="version">
-                <strong>Powered by Alfonso Carballo</strong> · {APP_VERSION}
+              <div className="app-footer" aria-label="signature">
+                <strong>v1.0 | Powered by Alfonso Carballo</strong>
               </div>
+
+              {showClientViewModal && isAdminUser && (
+                <div className="confirm-modal" onClick={() => setShowClientViewModal(false)}>
+                  <div className="client-view-modal" onClick={(e) => e.stopPropagation()}>
+                    <h3>Vista Clientes</h3>
+                    <div className="hint">Ingresá el Cliente ID (ej: CLI-949017) o el ID del documento de Firebase (ej: 2TC1hWWzANjGrC48HCzA).</div>
+                    <div className="field">
+                      <label>ID de Operación</label>
+                      <input value={clientOperationId} onChange={(e) => setClientOperationId(e.target.value)} type="text" placeholder="Ej: 1024" />
+                    </div>
+                    <div className="client-view-actions">
+                      <button type="button" className="edit-btn" onClick={() => setShowClientViewModal(false)}>Cancelar</button>
+                      <button type="button" className="save-btn" onClick={openClientTrackingView}>Ingresar</button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {deleteTargetService && isAdminUser && (
                 <div className="confirm-modal" onClick={() => { if (!deletingService) setDeleteTargetService(null); }}>
