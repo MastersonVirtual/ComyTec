@@ -2572,12 +2572,12 @@
             </section>
           );
         }
-        const isTrackingRoute = typeof window !== 'undefined' && window.location.pathname === '/seguimiento';
+        const isTrackingRoute = typeof window !== 'undefined' && (window.location.pathname === '/seguimiento' || new URLSearchParams(window.location.search || '').get('view') === 'seguimiento');
 
         function openClientTrackingView() {
           const cleanId = String(clientOperationId || '').trim();
           if (!cleanId) return;
-          const target = `${window.location.origin}/seguimiento?id=${encodeURIComponent(cleanId)}`;
+          const target = `${window.location.origin}${window.location.pathname}?view=seguimiento&id=${encodeURIComponent(cleanId)}`;
           window.open(target, '_blank', 'noopener,noreferrer');
           setShowClientViewModal(false);
           setClientOperationId('');
