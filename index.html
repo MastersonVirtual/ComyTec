@@ -1810,6 +1810,7 @@
 
           let unsub = () => {};
           let cancelled = false;
+          let authIssue = '';
 
           const applyDoc = (doc) => {
             if (!doc || !doc.exists || cancelled) {
@@ -1833,8 +1834,17 @@
               if (!auth.currentUser) {
                 try {
                   await auth.signInAnonymously();
+                  authIssue = '';
                 } catch (authErr) {
+                  const authCode = String(authErr?.code || '');
                   console.warn('No se pudo iniciar sesión anónima para tracking:', authErr);
+                  if (authCode.includes('operation-not-allowed')) {
+                    authIssue = 'auth/operation-not-allowed';
+                  } else if (authCode.includes('unauthorized-domain')) {
+                    authIssue = 'auth/unauthorized-domain';
+                  } else {
+                    authIssue = 'auth/error';
+                  }
                 }
               }
 
@@ -1885,9 +1895,16 @@
               console.error('Error leyendo operación de seguimiento:', err);
               const msg = String(err?.message || '').toLowerCase();
               const denied = msg.includes('permission') || msg.includes('missing or insufficient permissions');
-              setTrackingError(denied
-                ? 'No se pudo consultar la operación por permisos de seguridad. Contactá al administrador para habilitar lectura pública de seguimiento.'
-                : 'No se pudo consultar la operación.');
+              const basePermissionMsg = 'No se pudo consultar la operación por permisos de seguridad.';
+              if (!denied) {
+                setTrackingError('No se pudo consultar la operación.');
+              } else if (authIssue === 'auth/operation-not-allowed') {
+                setTrackingError(`${basePermissionMsg} Debes habilitar Anonymous en Firebase Auth para links públicos.`);
+              } else if (authIssue === 'auth/unauthorized-domain') {
+                setTrackingError(`${basePermissionMsg} Agregá el dominio mastersonvirtual.github.io en Authorized domains de Firebase Auth.`);
+              } else {
+                setTrackingError(`${basePermissionMsg} Verificá reglas de Firestore para permitir lectura de seguimiento sin login manual.`);
+              }
               setTrackingLoading(false);
             }
           })();
@@ -1912,7 +1929,7 @@
             {trackingLoading ? (
               <section className="panel"><h2 className="tracking-title">Cargando seguimiento...</h2></section>
             ) : trackingError ? (
-              <section className="panel"><h2 className="tracking-title">Error</h2><div className="hint">{trackingError}</div></section>
+              <section className="panel"><h2 className="tracking-title">Error</h2><div className="hint">{trackingError}</div><div className="tracking-data" style={{ marginTop: 8 }}>Este enlace está diseñado para abrir sin login manual.</div></section>
             ) : trackingBlocked ? (
               <section className="panel"><h2 className="tracking-title">Acceso bloqueado</h2><div className="hint">El servicio ha concluido. Por razones de seguridad, este enlace ya no está activo.</div></section>
             ) : (
