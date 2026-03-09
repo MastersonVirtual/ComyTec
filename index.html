@@ -725,6 +725,15 @@
         padding: 22px;
         color: var(--text);
       }
+      .tracking-title,
+      .tracking-card h3 {
+        color: #006465;
+      }
+      .tracking-data {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+        color: #dff8f6;
+        line-height: 1.5;
+      }
       .tracking-header {
         position: relative;
         margin-bottom: 14px;
@@ -1794,125 +1803,57 @@
             return () => {};
           }
 
-          const normalizeId = (value) => String(value || '').trim().toUpperCase().replace(/\s+/g, '');
-          const targetId = normalizeId(operationId);
-          let unsub = () => {};
-          let cancelled = false;
-
-          const subscribeToDoc = (docId) => {
-            unsub = db.collection('operaciones').doc(docId).onSnapshot((doc) => {
-              if (cancelled) return;
-              if (!doc.exists) {
-                setTrackingError('No encontramos una operación con ese ID.');
-                setTrackingLoading(false);
-                return;
-              }
-              const data = { id: doc.id, ...doc.data() };
-              const finalizada = String(data?.status || '').toLowerCase().includes('alta finalizada');
-              setTrackingBlocked(finalizada);
-              setTrackingData(data);
+          const unsub = db.collection('operaciones').where('clienteId', '==', operationId).limit(1).onSnapshot((snap) => {
+            if (snap.empty) {
+              setTrackingData(null);
+              setTrackingError('No encontramos una operación asociada al Cliente ID ingresado.');
               setTrackingLoading(false);
-            }, (err) => {
-              if (cancelled) return;
-              console.error('Error leyendo operación de seguimiento:', err);
-              setTrackingError('No se pudo consultar la operación.');
-              setTrackingLoading(false);
-            });
-          };
-
-          (async () => {
-            try {
-              const byClientId = await db.collection('operaciones').where('clienteId', '==', operationId).limit(1).get();
-              if (!byClientId.empty) {
-                subscribeToDoc(byClientId.docs[0].id);
-                return;
-              }
-
-              const byDocId = await db.collection('operaciones').doc(operationId).get();
-              if (byDocId.exists) {
-                subscribeToDoc(byDocId.id);
-                return;
-              }
-
-              const scan = await db.collection('operaciones').limit(500).get();
-              const match = scan.docs.find((d) => {
-                const data = d.data() || {};
-                const candidates = [
-                  d.id,
-                  data.clienteId,
-                  data.clienteID,
-                  data.idCliente,
-                  data.idOperacion,
-                ].map(normalizeId).filter(Boolean);
-                return candidates.includes(targetId);
-              });
-
-              if (match) {
-                subscribeToDoc(match.id);
-                return;
-              }
-
-              setTrackingError('No encontramos una operación con ese ID. Verificá si es el clienteId o el ID del documento en Firestore.');
-              setTrackingLoading(false);
-            } catch (err) {
-              if (cancelled) return;
-              console.error('Error buscando operación:', err);
-              setTrackingError('No se pudo consultar la operación.');
-              setTrackingLoading(false);
+              return;
             }
-          })();
 
-          return () => {
-            cancelled = true;
-            unsub();
-          };
+            const doc = snap.docs[0];
+            const data = { id: doc.id, ...doc.data() };
+            const estadoActual = String(data?.estado || data?.status || '').trim().toLowerCase();
+            const finalizado = estadoActual === 'finalizado';
+
+            setTrackingBlocked(finalizado);
+            setTrackingData(data);
+            setTrackingError('');
+            setTrackingLoading(false);
+          }, (err) => {
+            console.error('Error leyendo operación de seguimiento:', err);
+            setTrackingError('No se pudo consultar la operación.');
+            setTrackingLoading(false);
+          });
+
+          return () => unsub();
         }, [operationId]);
 
-        const progressPct = useMemo(() => {
-          const s = String(trackingData?.status || '').toLowerCase();
-          if (s.includes('alta finalizada') || s.includes('complet')) return 100;
-          if (s.includes('curso')) return 65;
-          if (s.includes('espera') || s.includes('material')) return 45;
-          if (s.includes('pend')) return 25;
-          return 10;
-        }, [trackingData]);
-
-        const whatsappHref = `https://wa.me/59800000000?text=${encodeURIComponent(`Hola, necesito ayuda con el servicio ID ${operationId}`)}`;
+        const nombreServicio = trackingData?.nombreServicio || 'Servicio';
+        const estadoVisible = trackingData?.estado || trackingData?.status || '-';
 
         return (
           <div className="tracking-shell">
             <header className="tracking-header">
-              <h1 style={{ margin: 0 }}>Seguimiento de Operación</h1>
-              <p className="hint" style={{ marginTop: 6 }}>ID consultado: {operationId || '-'}</p>
+              <h1 className="tracking-title" style={{ margin: 0 }}>Seguimiento de Servicio: {nombreServicio}</h1>
+              <p className="hint" style={{ marginTop: 6 }}>Cliente ID consultado: {operationId || '-'}</p>
               <div className="tracking-logo" aria-hidden="true" />
             </header>
 
             {trackingLoading ? (
-              <section className="panel"><h2>Cargando seguimiento...</h2></section>
+              <section className="panel"><h2 className="tracking-title">Cargando seguimiento...</h2></section>
             ) : trackingError ? (
-              <section className="panel"><h2>Error</h2><div className="hint">{trackingError}</div></section>
+              <section className="panel"><h2 className="tracking-title">Error</h2><div className="hint">{trackingError}</div></section>
             ) : trackingBlocked ? (
-              <section className="panel"><h2>Acceso bloqueado</h2><div className="hint">Este servicio figura con estado "Alta Finalizada" y ya no admite seguimiento de cliente.</div></section>
+              <section className="panel"><h2 className="tracking-title">Acceso bloqueado</h2><div className="hint">El servicio ha concluido. Por razones de seguridad, este enlace ya no está activo.</div></section>
             ) : (
               <section className="tracking-grid">
                 <article className="tracking-card wide">
-                  <h3 style={{ marginTop: 0 }}>Progreso del Servicio</h3>
-                  <div className="tracking-progress"><span style={{ width: `${progressPct}%` }} /></div>
-                  <div className="tracking-steps">
-                    <div>Coordinación</div><div>Materiales</div><div>Instalación</div><div>Verificación</div>
-                  </div>
-                </article>
-
-                <article className="tracking-card">
-                  <h3 style={{ marginTop: 0 }}>Información</h3>
-                  <div className="kv"><b>Proyecto Servicio:</b> {trackingData?.proyectoServicio || '-'}</div>
-                  <div className="kv"><b>Dirección de Servicio:</b> {trackingData?.direccionServicio || '-'}</div>
-                  <div className="kv"><b>Fecha específica inicio:</b> {trackingData?.fechaEspecificaInicio || '-'}</div>
-                </article>
-
-                <article className="tracking-card">
-                  <h3 style={{ marginTop: 0 }}>Ayuda</h3>
-                  <a className="help-btn" href={whatsappHref} target="_blank" rel="noreferrer">Contactar por WhatsApp</a>
+                  <h3 style={{ marginTop: 0 }}>Detalle de Seguimiento</h3>
+                  <div className="tracking-data"><b>Vendedor:</b> {trackingData?.representanteComercial || '-'}</div>
+                  <div className="tracking-data"><b>Fecha de Alta:</b> {trackingData?.fechaEspecificaInicio || trackingData?.fechaAltaServicio || '-'}</div>
+                  <div className="tracking-data"><b>Jornales:</b> {trackingData?.cantidadJornalesEstimados || '-'}</div>
+                  <div className="tracking-data"><b>Estado:</b> {estadoVisible}</div>
                 </article>
               </section>
             )}
