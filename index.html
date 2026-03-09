@@ -1794,48 +1794,78 @@
             return () => {};
           }
 
+          const normalizeId = (value) => String(value || '').trim().toUpperCase().replace(/\s+/g, '');
+          const targetId = normalizeId(operationId);
           let unsub = () => {};
-          db.collection('operaciones').where('clienteId', '==', operationId).limit(1).get()
-            .then((snap) => {
-              if (!snap.empty) {
-                unsub = db.collection('operaciones').doc(snap.docs[0].id).onSnapshot((doc) => {
-                  const data = doc.exists ? { id: doc.id, ...doc.data() } : null;
-                  const finalizada = String(data?.status || '').toLowerCase().includes('alta finalizada');
-                  setTrackingBlocked(finalizada);
-                  setTrackingData(data);
-                  setTrackingLoading(false);
-                }, (err) => {
-                  console.error('Error tracking onSnapshot:', err);
-                  setTrackingError('No se pudo consultar la operación.');
-                  setTrackingLoading(false);
-                });
+          let cancelled = false;
+
+          const subscribeToDoc = (docId) => {
+            unsub = db.collection('operaciones').doc(docId).onSnapshot((doc) => {
+              if (cancelled) return;
+              if (!doc.exists) {
+                setTrackingError('No encontramos una operación con ese ID.');
+                setTrackingLoading(false);
                 return;
               }
-
-              unsub = db.collection('operaciones').doc(operationId).onSnapshot((doc) => {
-                if (!doc.exists) {
-                  setTrackingError('No encontramos una operación con ese ID.');
-                  setTrackingLoading(false);
-                  return;
-                }
-                const data = { id: doc.id, ...doc.data() };
-                const finalizada = String(data?.status || '').toLowerCase().includes('alta finalizada');
-                setTrackingBlocked(finalizada);
-                setTrackingData(data);
-                setTrackingLoading(false);
-              }, (err) => {
-                console.error('Error tracking by doc id:', err);
-                setTrackingError('No se pudo consultar la operación.');
-                setTrackingLoading(false);
-              });
-            })
-            .catch((err) => {
-              console.error('Error buscando operación:', err);
+              const data = { id: doc.id, ...doc.data() };
+              const finalizada = String(data?.status || '').toLowerCase().includes('alta finalizada');
+              setTrackingBlocked(finalizada);
+              setTrackingData(data);
+              setTrackingLoading(false);
+            }, (err) => {
+              if (cancelled) return;
+              console.error('Error leyendo operación de seguimiento:', err);
               setTrackingError('No se pudo consultar la operación.');
               setTrackingLoading(false);
             });
+          };
 
-          return () => unsub();
+          (async () => {
+            try {
+              const byClientId = await db.collection('operaciones').where('clienteId', '==', operationId).limit(1).get();
+              if (!byClientId.empty) {
+                subscribeToDoc(byClientId.docs[0].id);
+                return;
+              }
+
+              const byDocId = await db.collection('operaciones').doc(operationId).get();
+              if (byDocId.exists) {
+                subscribeToDoc(byDocId.id);
+                return;
+              }
+
+              const scan = await db.collection('operaciones').limit(500).get();
+              const match = scan.docs.find((d) => {
+                const data = d.data() || {};
+                const candidates = [
+                  d.id,
+                  data.clienteId,
+                  data.clienteID,
+                  data.idCliente,
+                  data.idOperacion,
+                ].map(normalizeId).filter(Boolean);
+                return candidates.includes(targetId);
+              });
+
+              if (match) {
+                subscribeToDoc(match.id);
+                return;
+              }
+
+              setTrackingError('No encontramos una operación con ese ID. Verificá si es el clienteId o el ID del documento en Firestore.');
+              setTrackingLoading(false);
+            } catch (err) {
+              if (cancelled) return;
+              console.error('Error buscando operación:', err);
+              setTrackingError('No se pudo consultar la operación.');
+              setTrackingLoading(false);
+            }
+          })();
+
+          return () => {
+            cancelled = true;
+            unsub();
+          };
         }, [operationId]);
 
         const progressPct = useMemo(() => {
@@ -3232,7 +3262,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                 <div className="confirm-modal" onClick={() => setShowClientViewModal(false)}>
                   <div className="client-view-modal" onClick={(e) => e.stopPropagation()}>
                     <h3>Vista Clientes</h3>
-                    <div className="hint">Ingresá el ID de operación para abrir seguimiento en una pestaña nueva.</div>
+                    <div className="hint">Ingresá el Cliente ID (ej: CLI-949017) o el ID del documento de Firebase (ej: 2TC1hWWzANjGrC48HCzA).</div>
                     <div className="field">
                       <label>ID de Operación</label>
                       <input value={clientOperationId} onChange={(e) => setClientOperationId(e.target.value)} type="text" placeholder="Ej: 1024" />
