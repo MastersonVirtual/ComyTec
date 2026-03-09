@@ -1829,6 +1829,15 @@
 
           (async () => {
             try {
+              // Permite acceso desde links públicos en móviles sin login previo
+              if (!auth.currentUser) {
+                try {
+                  await auth.signInAnonymously();
+                } catch (authErr) {
+                  console.warn('No se pudo iniciar sesión anónima para tracking:', authErr);
+                }
+              }
+
               const exact = await db.collection('operaciones').where('clienteId', '==', operationId).limit(1).get();
               if (!exact.empty) {
                 unsub = db.collection('operaciones').doc(exact.docs[0].id).onSnapshot(applyDoc, (err) => {
@@ -1874,7 +1883,11 @@
             } catch (err) {
               if (cancelled) return;
               console.error('Error leyendo operación de seguimiento:', err);
-              setTrackingError('No se pudo consultar la operación.');
+              const msg = String(err?.message || '').toLowerCase();
+              const denied = msg.includes('permission') || msg.includes('missing or insufficient permissions');
+              setTrackingError(denied
+                ? 'No se pudo consultar la operación por permisos de seguridad. Contactá al administrador para habilitar lectura pública de seguimiento.'
+                : 'No se pudo consultar la operación.');
               setTrackingLoading(false);
             }
           })();
