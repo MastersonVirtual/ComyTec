@@ -1803,30 +1803,86 @@
             return () => {};
           }
 
-          const unsub = db.collection('operaciones').where('clienteId', '==', operationId).limit(1).onSnapshot((snap) => {
-            if (snap.empty) {
+          const normalize = (v) => String(v || '').trim().toUpperCase();
+          const compact = (v) => normalize(v).replace(/[^A-Z0-9]/g, '');
+          const stripCli = (v) => compact(v).replace(/^CLI/, '');
+          const inputVariants = new Set([normalize(operationId), compact(operationId), stripCli(operationId)].filter(Boolean));
+
+          let unsub = () => {};
+          let cancelled = false;
+
+          const applyDoc = (doc) => {
+            if (!doc || !doc.exists || cancelled) {
               setTrackingData(null);
               setTrackingError('No encontramos una operación asociada al Cliente ID ingresado.');
               setTrackingLoading(false);
               return;
             }
-
-            const doc = snap.docs[0];
             const data = { id: doc.id, ...doc.data() };
             const estadoActual = String(data?.estado || data?.status || '').trim().toLowerCase();
             const finalizado = estadoActual === 'finalizado';
-
             setTrackingBlocked(finalizado);
             setTrackingData(data);
             setTrackingError('');
             setTrackingLoading(false);
-          }, (err) => {
-            console.error('Error leyendo operación de seguimiento:', err);
-            setTrackingError('No se pudo consultar la operación.');
-            setTrackingLoading(false);
-          });
+          };
 
-          return () => unsub();
+          (async () => {
+            try {
+              const exact = await db.collection('operaciones').where('clienteId', '==', operationId).limit(1).get();
+              if (!exact.empty) {
+                unsub = db.collection('operaciones').doc(exact.docs[0].id).onSnapshot(applyDoc, (err) => {
+                  if (cancelled) return;
+                  console.error('Error leyendo operación exacta:', err);
+                  setTrackingError('No se pudo consultar la operación.');
+                  setTrackingLoading(false);
+                });
+                return;
+              }
+
+              // Fallback robusto por formato de ID (CLI-5404 vs 5404, guiones/espacios/case)
+              const scan = await db.collection('operaciones').limit(1000).get();
+              const match = scan.docs.find((d) => {
+                const data = d.data() || {};
+                const candidates = [
+                  data.clienteId,
+                  data.clienteID,
+                  data.idCliente,
+                ];
+                const variants = new Set();
+                candidates.forEach((c) => {
+                  variants.add(normalize(c));
+                  variants.add(compact(c));
+                  variants.add(stripCli(c));
+                });
+                return [...variants].some((v) => v && inputVariants.has(v));
+              });
+
+              if (match) {
+                unsub = db.collection('operaciones').doc(match.id).onSnapshot(applyDoc, (err) => {
+                  if (cancelled) return;
+                  console.error('Error leyendo operación normalizada:', err);
+                  setTrackingError('No se pudo consultar la operación.');
+                  setTrackingLoading(false);
+                });
+                return;
+              }
+
+              setTrackingData(null);
+              setTrackingError('No encontramos una operación asociada al Cliente ID ingresado.');
+              setTrackingLoading(false);
+            } catch (err) {
+              if (cancelled) return;
+              console.error('Error leyendo operación de seguimiento:', err);
+              setTrackingError('No se pudo consultar la operación.');
+              setTrackingLoading(false);
+            }
+          })();
+
+          return () => {
+            cancelled = true;
+            unsub();
+          };
         }, [operationId]);
 
         const nombreServicio = trackingData?.nombreServicio || 'Servicio';
