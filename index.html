@@ -983,62 +983,6 @@
         text-shadow: 0 0 8px rgba(0,251,255,.45);
         font-weight: 700;
       }
-      .app-footer-version {
-        margin-left: 4px;
-        font-weight: 700;
-        color: #c9ffff;
-      }
-      .app-footer-version.editable {
-        pointer-events: auto;
-        cursor: pointer;
-        text-decoration: underline;
-        text-decoration-style: dotted;
-        text-underline-offset: 2px;
-      }
-      .app-footer-version-input {
-        width: 68px;
-        min-width: 68px;
-        padding: 2px 6px;
-        border-radius: 7px;
-        border: 1px solid rgba(0, 251, 255, .55);
-        background: rgba(2, 17, 17, .92);
-        color: #e6fffd;
-        font-size: 10px;
-        pointer-events: auto;
-      }
-      .global-message-pill {
-        position: fixed;
-        right: 10px;
-        bottom: 42px;
-        z-index: 9998;
-        max-width: min(360px, calc(100vw - 24px));
-        font-size: 10px;
-        color: #dffefe;
-        background: rgba(2, 15, 15, .82);
-        border: 1px solid rgba(0, 100, 101, .4);
-        border-radius: 999px;
-        padding: 5px 10px;
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        box-shadow: 0 8px 18px rgba(0,0,0,.3);
-      }
-      .owner-message-editor {
-        margin-top: 12px;
-        display: grid;
-        gap: 8px;
-      }
-      .owner-message-editor label {
-        color: #e6fffd;
-        font-size: 12px;
-        font-weight: 700;
-      }
-      .owner-message-editor textarea {
-        min-height: 86px;
-      }
-      .owner-message-editor .hint {
-        font-size: 11px;
-      }
-
       @media (max-width: 1080px) {
         .kpi-grid { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
       }
@@ -1396,12 +1340,6 @@
           z-index: 9999;
           font-size: 10px;
         }
-        .global-message-pill {
-          right: 10px;
-          bottom: 154px;
-          z-index: 9999;
-          max-width: calc(100vw - 20px);
-        }
         .gerencia-widgets { grid-template-columns: 1fr; }
         .card-grid,
         .compact-grid,
@@ -1458,7 +1396,6 @@
 
       const ACCIONES = ['Nuevo Servicio', 'Novación', 'Obra', 'Agregado', 'Movimiento de Obra', 'Baja', 'Charla'];
       const STATUS_OPTIONS = ['Pendiente', 'En curso', 'En espera', 'Completado', 'Cancelado', 'Pausado'];
-      const OWNER_EMAIL = 'alfonso332estigarribia@gmail.com';
 
       function generarClienteId() {
         return String(Math.floor(1000 + Math.random() * 9000));
@@ -1797,11 +1734,6 @@
         const [fabOpen, setFabOpen] = useState(false);
         const [deleteTargetService, setDeleteTargetService] = useState(null);
         const [deletingService, setDeletingService] = useState(false);
-        const [appStatus, setAppStatus] = useState({ version: '1.0', mensajeGlobal: '' });
-        const [versionDraft, setVersionDraft] = useState('1.0');
-        const [isEditingVersion, setIsEditingVersion] = useState(false);
-        const [profileMessageDraft, setProfileMessageDraft] = useState('');
-        const [savingGlobalMessage, setSavingGlobalMessage] = useState(false);
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
@@ -2114,20 +2046,6 @@
           return () => unsub();
         }, []);
 
-        useEffect(() => {
-          const unsub = db.collection('configuracion').doc('app_status').onSnapshot(
-            (doc) => {
-              const data = doc.exists ? doc.data() : {};
-              const nextVersion = String(data?.version || '1.0').replace(/^v/i, '').trim() || '1.0';
-              const nextMessage = String(data?.mensajeGlobal || '').trim();
-              setAppStatus({ version: nextVersion, mensajeGlobal: nextMessage });
-              setVersionDraft(nextVersion);
-              setProfileMessageDraft(nextMessage);
-            },
-            (err) => console.error('Error leyendo configuracion/app_status:', err)
-          );
-          return () => unsub();
-        }, []);
 
         useEffect(() => {
           if (!notificacion.mensaje) return;
@@ -2173,7 +2091,6 @@
 
         const [formOpenAudit, setFormOpenAudit] = useState(null);
         const currentUserName = useMemo(() => (userData.nombre || (user?.email || '').split('@')[0] || 'Usuario').trim(), [userData, user]);
-        const isOwner = (user?.email || '') === OWNER_EMAIL;
         const isAdminUser = userRole === 'admin';
         const isSalesOrTechUser = /vendedor|tecnic/.test(userRole) || /tecnic/.test(userArea);
         const lockCommercialField = isSalesOrTechUser && !isAdminUser;
@@ -2449,39 +2366,6 @@
             </section>
           );
         }
-        async function saveVersionDraft() {
-          if (!isOwner) return;
-          const cleanVersion = String(versionDraft || '').replace(/^v/i, '').trim();
-          if (!cleanVersion) {
-            setIsEditingVersion(false);
-            setVersionDraft(appStatus.version || '1.0');
-            return;
-          }
-          try {
-            await db.collection('configuracion').doc('app_status').set({ version: cleanVersion }, { merge: true });
-            setNotificacion({ mensaje: '✔ Versión global actualizada', tipo: 'ok' });
-          } catch (err) {
-            console.error('Error actualizando version:', err);
-            setNotificacion({ mensaje: '✖ Error al actualizar versión', tipo: 'error' });
-          } finally {
-            setIsEditingVersion(false);
-          }
-        }
-
-        async function saveGlobalMessageFromProfile() {
-          if (!isOwner) return;
-          setSavingGlobalMessage(true);
-          try {
-            await db.collection('configuracion').doc('app_status').set({ mensajeGlobal: String(profileMessageDraft || '').trim() }, { merge: true });
-            setNotificacion({ mensaje: '✔ Mensaje global actualizado', tipo: 'ok' });
-          } catch (err) {
-            console.error('Error guardando mensaje global:', err);
-            setNotificacion({ mensaje: '✖ Error al guardar mensaje global', tipo: 'error' });
-          } finally {
-            setSavingGlobalMessage(false);
-          }
-        }
-
         if (authLoading || roleLoading) {
           return <div className="login-shell"><div className="login-panel"><h2>Cargando...</h2></div></div>;
         }
@@ -2572,7 +2456,7 @@
               </header>
 
               <main className="main">
-                {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : isMobile && mobileTab === 'mapa' ? (<section className="panel"><h2>Mapa</h2><div className="hint">Vista de mapa próxima versión.</div></section>) : isMobile && mobileTab === 'perfil' ? (<section className="panel"><h2>Mi Perfil</h2><div className="hint">{currentUserName} · {topbarSubtitle}</div>{isOwner && (<div className="owner-message-editor"><label>Mensaje global del equipo</label><textarea value={profileMessageDraft} onChange={(e) => setProfileMessageDraft(e.target.value)} placeholder="Escribe un mensaje breve para todo el equipo" /><button className="save-btn" type="button" onClick={saveGlobalMessageFromProfile} disabled={savingGlobalMessage}>{savingGlobalMessage ? 'Guardando...' : 'Guardar mensaje global'}</button><div className="hint">Este mensaje se sincroniza en tiempo real desde configuracion/app_status.</div></div>)}</section>) : effectiveSelectedForm === 'dashboard-gerencia' ? (
+                {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : isMobile && mobileTab === 'mapa' ? (<section className="panel"><h2>Mapa</h2><div className="hint">Vista de mapa próxima versión.</div></section>) : isMobile && mobileTab === 'perfil' ? (<section className="panel"><h2>Mi Perfil</h2><div className="hint">{currentUserName} · {topbarSubtitle}</div></section>) : effectiveSelectedForm === 'dashboard-gerencia' ? (
                   <DashboardGerencia rows={visibleRows} />
                 ) : effectiveSelectedForm === 'home' ? (
                   <>
@@ -3097,52 +2981,8 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                 )}
               </main>
 
-              {appStatus.mensajeGlobal && (
-                <div className="global-message-pill" role="status" aria-live="polite">{appStatus.mensajeGlobal}</div>
-              )}
-
-              <div className="app-footer" aria-label="version">
-                <strong>Powered by Alfonso Carballo</strong>
-                {isOwner && isEditingVersion ? (
-                  <input
-                    className="app-footer-version-input"
-                    value={versionDraft}
-                    onChange={(e) => setVersionDraft(e.target.value)}
-                    onBlur={saveVersionDraft}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        saveVersionDraft();
-                      }
-                      if (e.key === 'Escape') {
-                        setIsEditingVersion(false);
-                        setVersionDraft(appStatus.version || '1.0');
-                      }
-                    }}
-                    autoFocus
-                  />
-                ) : (
-                  <span
-                    className={`app-footer-version ${isOwner ? 'editable' : ''}`}
-                    onClick={() => {
-                      if (!isOwner) return;
-                      setVersionDraft(appStatus.version || '1.0');
-                      setIsEditingVersion(true);
-                    }}
-                    role={isOwner ? 'button' : undefined}
-                    tabIndex={isOwner ? 0 : -1}
-                    onKeyDown={(e) => {
-                      if (!isOwner) return;
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        setVersionDraft(appStatus.version || '1.0');
-                        setIsEditingVersion(true);
-                      }
-                    }}
-                  >
-                    · v{appStatus.version}
-                  </span>
-                )}
+              <div className="app-footer" aria-label="signature">
+                <strong>Powered by Alfonso C.</strong>
               </div>
 
               {deleteTargetService && isAdminUser && (
