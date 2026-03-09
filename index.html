@@ -4,8 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Masterson Seguridad</title>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-
+    <style>
       :root {
         --base: #010a0a;
         --motion-fast: 160ms;
@@ -15,7 +14,7 @@
         --base-700: #002b2b;
         --text: #ffffff;
         --muted: #a3c2c2;
-        --accent: #00FFCC;
+        --accent: #00FBFF;
         --accent-soft: #97f3e7;
         --line: rgba(255, 255, 255, 0.18);
         --panel: rgba(8, 31, 30, 0.52);
@@ -1367,232 +1366,242 @@
 
     
 /* ========================================= */
-/* VIA LIBRE: TOTAL BENTO BOX & FLOATING UI  */
+/* BENTO BOX & DEEP TEAL MODERN OVERRIDES  */
 /* ========================================= */
-
-* {
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif !important;
-  transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
-}
-
 body {
-  background: #010606 !important;
-  color: #ffffff !important;
+  background: #010A0A !important;
+  background-image: 
+    radial-gradient(circle at 10% 20%, rgba(0, 100, 101, 0.15), transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(0, 251, 255, 0.08), transparent 40%) !important;
+  background-attachment: fixed !important;
 }
 
-/* Watermark Background */
 body::before {
   content: '';
   position: fixed;
-  inset: 0;
+  top: 50%;
+  left: 50%;
+  width: 100vh;
+  height: 100vh;
+  transform: translate(-50%, -50%);
+  background: url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png') center/contain no-repeat;
+  opacity: 0.02;
   z-index: -1;
   pointer-events: none;
-  background: 
-    radial-gradient(circle at 10% 20%, rgba(0, 100, 101, 0.15), transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(0, 255, 204, 0.08), transparent 40%),
-    url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png') center/50% no-repeat !important;
-  opacity: 0.05 !important;
-  filter: grayscale(100%) brightness(1.5) contrast(1.2) !important;
-  background-blend-mode: screen !important;
+  filter: grayscale(100%) brightness(200%) contrast(150%);
 }
 
-/* 1. FLOATING SIDEBAR */
-.sidebar {
-  top: 16px !important;
-  bottom: 16px !important;
-  left: 16px !important;
-  height: calc(100vh - 32px) !important;
-  border-radius: 24px !important;
-  background: rgba(1, 12, 12, 0.65) !important;
+.panel, .widget, .service-card, .login-panel, .gerencia-widget, .kpi-card {
+  border-radius: 28px !important;
+  background: rgba(3, 16, 16, 0.65) !important;
+  border: 1px solid rgba(0, 251, 255, 0.1) !important;
   backdrop-filter: blur(28px) !important;
   -webkit-backdrop-filter: blur(28px) !important;
-  border: 1px solid rgba(0, 255, 204, 0.12) !important;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.6) !important;
-  /* Retain original width and functionality */
-}
-
-.sidebar-header {
-  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
-  background: transparent !important;
-  text-transform: uppercase !important;
-  letter-spacing: 1px !important;
-  font-weight: 800 !important;
-  padding: 24px !important;
-}
-
-.menu-button, .submenu-button {
-  background: rgba(0,0,0,0.2) !important;
-  border: 1px solid transparent !important;
-  border-radius: 12px !important;
-  font-weight: 600 !important;
-  margin-bottom: 6px !important;
-  box-shadow: none !important;
-}
-
-.menu-button:hover, .submenu-button:hover {
-  background: rgba(0, 100, 101, 0.3) !important;
-  border-color: rgba(0, 255, 204, 0.15) !important;
-  color: #00FFCC !important;
-  transform: translateX(4px) !important;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.2) !important;
-}
-
-/* Content adjustment for floating sidebar */
-.content {
-  padding-left: 16px; /* give some room from the floating sidebar container if width allows */
-}
-
-/* 2. FLOATING TOPBAR */
-.topbar {
-  position: sticky !important;
-  top: 16px !important;
-  z-index: 900 !important;
-  margin: 16px 32px 16px 16px !important;
-  border-radius: 999px !important;
-  background: rgba(2, 16, 16, 0.65) !important;
-  backdrop-filter: blur(28px) !important;
-  -webkit-backdrop-filter: blur(28px) !important;
-  border: 1px solid rgba(0, 255, 204, 0.12) !important;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
-}
-
-.top-titles h1 { font-size: 1.3rem !important; letter-spacing: 0 !important; text-shadow: none !important;}
-.top-titles p { color: #00FFCC !important; font-weight: 700 !important; letter-spacing: 1px !important;}
-
-.top-search input {
-  background: rgba(0,0,0,0.4) !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
-  border-radius: 999px !important;
-  padding: 12px 16px 12px 42px !important;
-}
-
-/* 3. BENTO BOX PANELS & GLASSMORPHISM */
-.panel, .widget, .service-card, .kpi-card, .gerencia-widget, .ranking-section, .hero, .login-panel {
-  border-radius: 32px !important;
-  background: rgba(2, 16, 16, 0.45) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
-  border: 1px solid rgba(0, 255, 204, 0.12) !important;
-  box-shadow: 0 12px 24px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05) !important;
-}
-
-.panel:hover, .widget:hover, .service-card:hover, .kpi-card:hover, .gerencia-widget:hover {
-  transform: translateY(-4px) !important;
-  border-color: rgba(0, 255, 204, 0.3) !important;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.5), 0 0 25px rgba(0, 100, 101, 0.4) !important;
-}
-
-.panel h2, .widget h4, .service-card h3, .gerencia-widget h3 {
+  box-shadow: 0 24px 48px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05) !important;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.3s ease, box-shadow 0.3s ease;
   color: #ffffff !important;
-  font-weight: 800 !important;
 }
 
-.service-card h3::before { color: #00FFCC !important; content: '◆' !important; text-shadow: 0 0 8px #00FFCC !important; }
+.panel h2, .widget h4, .service-card h3, .kpi-label, .kpi-value {
+  color: #ffffff !important;
+}
 
-/* 4. BUTTONS & INPUTS */
+.kv b, .detail-box { color: #00FBFF !important; }
+.hint, .muted, .kv { color: #a3c2c2 !important; }
+
+.panel:hover, .widget:hover, .service-card:hover, .kpi-card:hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(0, 251, 255, 0.3) !important;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.6), 0 0 25px rgba(0, 100, 101, 0.3) !important;
+}
+
 .save-btn, .mobile-fab, .status-ongoing {
-  background: linear-gradient(135deg, #006465, #003b3b) !important;
-  border: 1px solid rgba(0, 255, 204, 0.3) !important;
+  background: linear-gradient(135deg, #006465, #004d4d) !important;
+  border: 1px solid rgba(0, 251, 255, 0.3) !important;
   border-radius: 16px !important;
   color: #ffffff !important;
-  font-weight: 800 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 1px !important;
   box-shadow: 0 8px 24px rgba(0, 100, 101, 0.5) !important;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 800 !important;
+  transition: all 0.3s ease;
 }
 
 .save-btn:hover {
-  background: linear-gradient(135deg, #008f8f, #006465) !important;
-  box-shadow: 0 12px 32px rgba(0, 100, 101, 0.7), 0 0 20px rgba(0, 255, 204, 0.4) !important;
-  transform: translateY(-2px) !important;
-  filter: brightness(1.2) !important;
+  background: linear-gradient(135deg, #008082, #006465) !important;
+  box-shadow: 0 12px 32px rgba(0, 251, 255, 0.3) !important;
+  transform: translateY(-2px);
+}
+
+.sidebar {
+  background: rgba(1, 10, 10, 0.85) !important;
+  backdrop-filter: blur(32px) !important;
+  border-right: 1px solid rgba(0, 251, 255, 0.1) !important;
+}
+
+.menu-button, .submenu-button {
+  border-radius: 12px !important;
+  margin-bottom: 4px !important;
+}
+.menu-button:hover, .submenu-button:hover {
+  background: rgba(0, 100, 101, 0.3) !important;
+  color: #00FBFF !important;
 }
 
 input, select, textarea {
   border-radius: 16px !important;
-  background: rgba(0,0,0,0.4) !important;
-  border: 1px solid rgba(255,255,255,0.1) !important;
-  padding: 14px 16px !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid rgba(0, 100, 101, 0.5) !important;
   color: #ffffff !important;
-  font-weight: 500 !important;
+  padding: 16px !important;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.5) !important;
+  transition: all 0.3s ease;
 }
 
 input:focus, select:focus, textarea:focus {
-  border-color: #00FFCC !important;
-  background: rgba(0, 26, 26, 0.6) !important;
-  box-shadow: 0 0 0 3px rgba(0, 255, 204, 0.15) !important;
+  border-color: #00FBFF !important;
+  background: rgba(0, 20, 20, 0.8) !important;
+  box-shadow: 0 0 0 4px rgba(0, 251, 255, 0.15), inset 0 2px 8px rgba(0,0,0,0.5) !important;
   outline: none !important;
 }
 
 .field > label {
-  background: transparent !important;
-  border: none !important;
-  color: #a3c2c2 !important;
-  font-size: 0.75rem !important;
-  font-weight: 700 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.5px !important;
-  position: static !important;
-  padding: 0 0 4px 4px !important;
-  box-shadow: none !important;
+  background: #010A0A !important;
+  color: #00FBFF !important;
+  border: 1px solid rgba(0, 251, 255, 0.3) !important;
+  padding: 4px 12px !important;
+  font-size: 11px !important;
+  border-radius: 10px !important;
+  top: -10px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
 }
 
-/* 5. TYPOGRAPHY UPDATES */
-.kv b { color: #ffffff !important; font-weight: 700 !important; }
-.hint, .muted { color: #a3c2c2 !important; }
-
-/* 6. LOGO RESTYLE */
-.login-logo {
-  border-radius: 40px !important;
-  box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 0 0 2px rgba(0, 255, 204, 0.2) !important;
-  border: none !important;
-}
-
-/* 7. TOASTS */
-.toast {
-  background: rgba(0, 100, 101, 0.95) !important;
-  border-left: 4px solid #00FFCC !important;
-  border-radius: 16px !important;
+.hero {
+  border-radius: 36px !important;
+  background: linear-gradient(135deg, rgba(0, 100, 101, 0.4), rgba(0, 34, 34, 0.8)) !important;
+  border: 1px solid rgba(0, 251, 255, 0.2) !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6) !important;
   backdrop-filter: blur(20px) !important;
-  color: #ffffff !important;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.7) !important;
-  font-weight: 600 !important;
+  position: relative;
+  overflow: hidden;
+  padding: 60px 40px !important;
 }
 
-/* 8. TABLES */
+.hero h2 {
+    background: linear-gradient(to right, #ffffff, #00FBFF) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    font-size: clamp(2.5rem, 6vw, 4rem) !important;
+    letter-spacing: -1px;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(0, 251, 255, 0.15), transparent 60%);
+  pointer-events: none;
+}
+
+.topbar {
+  background: rgba(1, 10, 10, 0.6) !important;
+  backdrop-filter: blur(24px) !important;
+  border-bottom: 1px solid rgba(0, 251, 255, 0.1) !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+}
+
+.top-search input {
+    border-radius: 99px !important;
+    padding-left: 48px !important;
+}
+
+.login-logo {
+  border-radius: 36px !important;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 0 2px rgba(0, 251, 255, 0.2) !important;
+  border: none !important;
+  background-color: transparent !important;
+}
+
+.radio-row, .switch-row, .state-row {
+    gap: 16px !important;
+}
+
+.radio-pill, .state-pill {
+    border-radius: 99px !important;
+    padding: 12px 20px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+}
+
+.radio-pill:hover, .state-pill:hover {
+    background: rgba(0, 251, 255, 0.05) !important;
+}
+
+.radio-pill.active, .state-pill.active {
+    background: rgba(0, 100, 101, 0.3) !important;
+    border-color: #00FBFF !important;
+    color: #00FBFF !important;
+    box-shadow: inset 0 0 20px rgba(0, 251, 255, 0.2), 0 0 15px rgba(0, 251, 255, 0.1) !important;
+}
+
+.toast {
+    background: rgba(0, 100, 101, 0.9) !important;
+    border-left: 4px solid #00FBFF !important;
+    border-radius: 16px !important;
+    backdrop-filter: blur(16px) !important;
+    color: #ffffff !important;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6) !important;
+}
+
+table {
+    border-collapse: separate !important;
+    border-spacing: 0 6px !important;
+}
+
 th {
-  background: rgba(0,0,0,0.3) !important;
-  border-bottom: 2px solid rgba(0, 255, 204, 0.1) !important;
-  color: #a3c2c2 !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.5px !important;
+    background: transparent !important;
+    border-bottom: 2px solid rgba(0, 251, 255, 0.1) !important;
+    color: #00FBFF !important;
 }
+
 td {
-  background: rgba(0,0,0,0.2) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.05) !important;
-  color: #ffffff !important;
-  font-weight: 500 !important;
+    background: rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid rgba(255, 255, 255, 0.03) !important;
+    border-width: 1px 0 !important;
 }
+
+td:first-child { border-left-width: 1px !important; border-top-left-radius: 12px !important; border-bottom-left-radius: 12px !important; }
+td:last-child { border-right-width: 1px !important; border-top-right-radius: 12px !important; border-bottom-right-radius: 12px !important; }
+
 tr:hover td {
-  background: rgba(0, 100, 101, 0.3) !important;
+    background: rgba(0, 100, 101, 0.2) !important;
+}
+
+.chip {
+    border-radius: 99px !important;
+    padding: 6px 14px !important;
+    font-weight: 800 !important;
+    font-size: 0.75rem !important;
 }
 
 /* Specific Scrollbar Tweak */
-*::-webkit-scrollbar { width: 10px; height: 10px; }
-*::-webkit-scrollbar-thumb { background: rgba(0, 100, 101, 0.6); border-radius: 10px; border: 2px solid #010606; }
-*::-webkit-scrollbar-thumb:hover { background: #00FFCC; }
-*::-webkit-scrollbar-track { background: transparent; }
-
-/* Responsive specifics */
-@media (max-width: 980px) {
-  .sidebar { top: 0 !important; bottom: 0 !important; left: 0 !important; height: 100vh !important; border-radius: 0 !important; width: 320px !important; transform: translateX(-105%) !important;}
-  .sidebar.open { transform: translateX(0) !important; }
-  .topbar { margin: 16px !important; }
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
-
-@media (max-width: 768px) {
-  .topbar { flex-wrap: wrap !important;}
-  .panel, .widget, .service-card, .login-panel, .hero { border-radius: 24px !important; padding: 20px !important; }
+*::-webkit-scrollbar-thumb {
+  background: rgba(0, 100, 101, 0.6);
+  border-radius: 10px;
+  border: 2px solid #010A0A;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 251, 255, 0.8);
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
 }
 </style>
 
@@ -2984,4 +2993,283 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>1. Datos Fiscales (Cabezal de Factura)</h3>
                           <div className="card-grid">
                             <div className="field"><label>Razón social</label><input value={obraForm.razonSocial} onChange={(e) => setObraField('razonSocial', e.target.value)} type="text" /></div>
-                            <div className="field"><label>RUT</label><input value={obraForm.rut} onChange={(e) =>
+                            <div className="field"><label>RUT</label><input value={obraForm.rut} onChange={(e) => setObraField('rut', e.target.value)} type="text" /></div>
+                            <div className="field span-2"><label>Mail</label><input value={obraForm.mailFacturacion} onChange={(e) => setObraField('mailFacturacion', e.target.value)} type="email" /></div>
+                            <div className="field span-2"><label>Nombre de servicio</label><input value={obraForm.nombreServicio} onChange={(e) => setObraField('nombreServicio', e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>2. Configuración del Abono</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Tipo de servicio</label><select value={obraForm.tipoServicioBrindar} onChange={(e) => setObraField('tipoServicioBrindar', e.target.value)}><option>Monitoreo</option><option>Portería</option><option>Mantenimiento</option><option>Control de Acceso</option><option>Portería Virtual</option></select></div>
+                            <div className="field"><label>Importe mensual por servicio</label><input value={obraForm.importeMensualServicio} onChange={(e) => setObraField('importeMensualServicio', e.target.value)} type="number" min="0" /></div>
+                            <div className="field span-2"><label>Descuentos negociados</label><textarea value={obraForm.descuentosNegociados} onChange={(e) => setObraField('descuentosNegociados', e.target.value)} /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>3. Control de Ciclo y Estado</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Fecha de alta</label><input value={obraForm.fechaAlta} onChange={(e) => setObraField('fechaAlta', e.target.value)} type="date" /></div>
+                            <div className="field"><label>FACTURADO</label><select value={obraForm.facturado} onChange={(e) => setObraField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
+                      </div>
+                    ) : grupo === 'novacion' ? (
+                      <div className="service-layout bento-grid facturacion-module">
+                        <div className="service-card">
+                          <h3>Facturación · Novaciones</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                            <div className="field"><label>Representante Comercial</label><input value={novacionForm.representanteComercial} onChange={(e) => setNovacionField('representanteComercial', e.target.value)} type="text" readOnly={lockCommercialField} /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>1. Identificación y Vigencia</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Nombre de servicio</label><input value={novacionForm.nombreServicio} onChange={(e) => setNovacionField('nombreServicio', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Duración del nuevo contrato</label><input value={novacionForm.duracionNuevoContratoMeses} onChange={(e) => setNovacionField('duracionNuevoContratoMeses', e.target.value)} type="number" min="0" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>2. Actualización de Abonos Mensuales</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Nuevo importe de la novación</label><input value={novacionForm.nuevoImporteNovacion} onChange={(e) => setNovacionField('nuevoImporteNovacion', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Nuevo importe por arrendamiento</label><input value={novacionForm.nuevoImporteArrendamiento} onChange={(e) => setNovacionField('nuevoImporteArrendamiento', e.target.value)} type="number" min="0" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>3. Cargos por Única Vez y Respaldo</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Importe por venta de equipos</label><input value={novacionForm.importeVentaEquipos} onChange={(e) => setNovacionField('importeVentaEquipos', e.target.value)} type="number" min="0" /></div>
+                            <div className="field span-2"><label>Detalle del equipamiento</label><textarea value={novacionForm.detalleEquipamiento} onChange={(e) => setNovacionField('detalleEquipamiento', e.target.value)} /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>4. Ajustes y Cierre de Ciclo</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Descuentos en el pago</label><textarea value={novacionForm.descuentosPago} onChange={(e) => setNovacionField('descuentosPago', e.target.value)} /></div>
+                            <div className="field"><label>FACTURADO</label><select value={novacionForm.facturado} onChange={(e) => setNovacionField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
+                      </div>
+                    ) : grupo === 'agregado' ? (
+                      <div className="service-layout">
+                        <div className="service-card">
+                          <h3>Equipos Agregados</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>1. Identificación del Servicio</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Nombre de servicio</label><input value={agregadoForm.nombreServicio} onChange={(e) => setAgregadoField('nombreServicio', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Administración</label><input value={agregadoForm.administracion} onChange={(e) => setAgregadoField('administracion', e.target.value)} type="text" placeholder="Consorcio/empresa responsable" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>2. Detalles del Movimiento</h3>
+                          <div className="card-grid">
+                            <div className="field span-3"><label>Detalles del adicional agregado</label><textarea value={agregadoForm.detalleAdicional} onChange={(e) => setAgregadoField('detalleAdicional', e.target.value)} placeholder="Qué se instaló: cámaras, sensores, controles, etc." /></div>
+                            <div className="field"><label>Fecha de alta</label><input value={agregadoForm.fechaAltaAdicional} onChange={(e) => setAgregadoField('fechaAltaAdicional', e.target.value)} type="date" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>3. Control Administrativo y Contable</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Importe a facturar por el adicional instalado</label><input value={agregadoForm.importeFacturarCliente} onChange={(e) => setAgregadoField('importeFacturarCliente', e.target.value)} type="text" placeholder="Monto acordado" /></div>
+                            <div className="field"><label>FACTURADO</label><select value={agregadoForm.facturado} onChange={(e) => setAgregadoField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
+                      </div>
+                    ) : grupo === 'movimiento-detalle' ? (
+                      <div className="service-layout">
+                        <div className="service-card">
+                          <h3>Movimiento de Obra</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>1. Identificación de la Gestión</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Nombre de servicio</label><input value={movimientoForm.nombreServicio} onChange={(e) => setMovimientoField('nombreServicio', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Nombre del solicitante</label><input value={movimientoForm.nombreSolicitante} onChange={(e) => setMovimientoField('nombreSolicitante', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Fecha del movimiento</label><input value={movimientoForm.fechaMovimiento} onChange={(e) => setMovimientoField('fechaMovimiento', e.target.value)} type="date" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>2. Liquidación y Cobro</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Monto en dólares</label><input value={movimientoForm.montoUsd} onChange={(e) => setMovimientoField('montoUsd', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>FACTURADO</label><select value={movimientoForm.facturado} onChange={(e) => setMovimientoField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
+                      </div>
+                    ) : grupo === 'baja-detalle' ? (
+                      <div className="service-layout">
+                        <div className="service-card">
+                          <h3>Baja de Servicio</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>1. Identificación del Punto de Baja</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Nombre del Servicio</label><input value={bajaForm.nombreServicio} onChange={(e) => setBajaField('nombreServicio', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Dirección</label><input value={bajaForm.direccionServicio} onChange={(e) => setBajaField('direccionServicio', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Fecha de Ingreso</label><input value={bajaForm.fechaIngreso} onChange={(e) => setBajaField('fechaIngreso', e.target.value)} type="date" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>2. Contacto y Justificación</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Quien lo Solicita</label><input value={bajaForm.quienSolicita} onChange={(e) => setBajaField('quienSolicita', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Motivo de Baja</label><input value={bajaForm.motivoBaja} onChange={(e) => setBajaField('motivoBaja', e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>3. Detalles Técnicos y Conectividad</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Internet</label><input value={bajaForm.internetEstado} onChange={(e) => setBajaField('internetEstado', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Propietario de Equipamiento</label><select value={bajaForm.propietarioEquipamiento} onChange={(e) => setBajaField('propietarioEquipamiento', e.target.value)}><option>S-Video</option><option>Cliente</option><option>Mixto</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>4. Logística de Retiro y Cierre</h3>
+                          <div className="card-grid">
+                            <div className="field span-3"><label>Equipamiento a Retirar</label><input value={bajaForm.equipamientoRetirar} onChange={(e) => setBajaField('equipamientoRetirar', e.target.value)} type="text" placeholder="Referencia o nombre de planilla" /></div>
+                            <div className="field span-3"><label>Observaciones</label><textarea value={bajaForm.observaciones} onChange={(e) => setBajaField('observaciones', e.target.value)} /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
+                      </div>
+                    ) : grupo === 'charla-detalle' ? (
+                      <div className="service-layout">
+                        <div className="service-card">
+                          <h3>Charla Informativa</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio/proyecto" /></div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>1. Identificación del Evento</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Nombre de servicio</label><input value={charlaForm.nombreServicio} onChange={(e) => setCharlaField('nombreServicio', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Fecha</label><input value={charlaForm.fecha} onChange={(e) => setCharlaField('fecha', e.target.value)} type="date" /></div>
+                            <div className="field"><label>Horario</label><input value={charlaForm.horario} onChange={(e) => setCharlaField('horario', e.target.value)} type="time" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>2. Localización y Logística</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Lugar de Reunión</label><input value={charlaForm.lugarReunion} onChange={(e) => setCharlaField('lugarReunion', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Dirección</label><input value={charlaForm.direccion} onChange={(e) => setCharlaField('direccion', e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>3. Contacto en el Sitio</h3>
+                          <div className="card-grid">
+                            <div className="field span-3"><label>Contacto de Referencia para la Charla</label><input value={charlaForm.contactoReferencia} onChange={(e) => setCharlaField('contactoReferencia', e.target.value)} type="text" placeholder="Nombre y teléfono" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
+                      </div>
+) : (
+                      <div className="compact-grid">
+                        <div className="field"><label>Tipo de Acción</label><select value={tipoAccion} onChange={(e) => { setTipoAccion(e.target.value); resetFields(); }}>{ACCIONES.map((a) => <option key={a} value={a}>{a}</option>)}</select></div>
+                        <div className="field"><label>{autoIdMode ? "Cliente ID" : "Cliente ID asociado"}</label>{autoIdMode ? <input value={clienteId} readOnly type="text" /> : <input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" />}</div>
+                        <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+
+                        {grupo === 'base' && <><div className="field"><label>Cliente</label><input value={cliente} onChange={(e) => setCliente(e.target.value)} /></div><div className="field"><label>Fecha Carga</label><input value={fechaCarga} onChange={(e) => setFechaCarga(e.target.value)} type="date" /></div><div className="field"><label>Tiempo Instalación</label><input value={tiempoInstalacion} onChange={(e) => setTiempoInstalacion(e.target.value)} /></div><div className="field"><label>Fecha Alta</label><input value={fechaAlta} onChange={(e) => setFechaAlta(e.target.value)} type="date" /></div><div className="field"><label>Cobro</label><input value={cobro} onChange={(e) => setCobro(e.target.value)} /></div></>}
+
+
+
+                        <div className="field full"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
+                      </div>
+                    )}
+                  </form>
+                </section>
+                )}
+              </main>
+
+              <div className="app-footer" aria-label="version">
+                <strong>Powered by Alfonso Carballo</strong> · {APP_VERSION}
+              </div>
+
+              {deleteTargetService && isAdminUser && (
+                <div className="confirm-modal" onClick={() => { if (!deletingService) setDeleteTargetService(null); }}>
+                  <div className="confirm-modal-card" onClick={(e) => e.stopPropagation()}>
+                    <h3 style={{ marginTop: 0 }}>Confirmar eliminación segura</h3>
+                    <p style={{ margin: '6px 0 0', color: '#d7f4ef' }}>
+                      ¿Estás seguro de eliminar este servicio? Se generará un registro de esta acción. El servicio permanecerá oculto pero recuperable por 24 horas antes de su eliminación definitiva.
+                    </p>
+                    <div className="confirm-modal-actions">
+                      <button type="button" className="edit-btn" onClick={() => setDeleteTargetService(null)} disabled={deletingService}>Cancelar</button>
+                      <button type="button" className="danger-btn" onClick={handleDeleteServiceConfirm} disabled={deletingService}>{deletingService ? 'Procesando...' : 'Confirmar eliminación'}</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {isMobile && !isGerencia && (
+                <>
+                  {fabOpen && <div className="mobile-fab-overlay" onClick={() => setFabOpen(false)} />}
+                  {fabOpen && (
+                    <div className="mobile-fab-menu">
+                      <button className="edit-btn" type="button" onClick={() => { setFabOpen(false); selectAction('Nuevo Servicio'); }}>Nuevo Servicio</button>
+                    </div>
+                  )}
+                  <button className="mobile-fab" type="button" onClick={() => setFabOpen((v) => !v)} aria-label="Nuevo Servicio">+</button>
+                  <nav className="mobile-bottom-nav">
+                    <button className={mobileTab === 'home' ? 'active' : ''} type="button" onClick={() => { setMobileTab('home'); setSelectedForm('home'); }}><i data-lucide="house" />Inicio</button>
+                    <button className={mobileTab === 'servicios' ? 'active' : ''} type="button" onClick={() => { setMobileTab('servicios'); setSelectedForm('home'); }}><i data-lucide="layers" />Servicios</button>
+                    <button className={mobileTab === 'mapa' ? 'active' : ''} type="button" onClick={() => { setMobileTab('mapa'); setSelectedForm('home'); }}><i data-lucide="map" />Mapa</button>
+                    <button className={mobileTab === 'perfil' ? 'active' : ''} type="button" onClick={() => { setMobileTab('perfil'); setSelectedForm('home'); }}><i data-lucide="user-circle" />Mi Perfil</button>
+                  </nav>
+                </>
+              )}
+
+            </div>
+          </div>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+  </body>
+</html>
