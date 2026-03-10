@@ -1492,6 +1492,8 @@
 
       const ACCIONES = ['Nuevo Servicio', 'Novación', 'Obra', 'Agregado', 'Movimiento de Obra', 'Baja', 'Charla'];
       const STATUS_OPTIONS = ['Pendiente', 'En curso', 'En espera', 'Completado', 'Cancelado', 'Pausado'];
+      // Toggle rápido para reactivar Vista Cliente/Tracking público cuando se solicite.
+      const ENABLE_CLIENT_TRACKING_VIEW = false;
 
       function generarClienteId() {
         return String(Math.floor(1000 + Math.random() * 9000));
@@ -2658,7 +2660,7 @@
             </section>
           );
         }
-        const isTrackingRoute = typeof window !== 'undefined' && (window.location.pathname === '/seguimiento' || new URLSearchParams(window.location.search || '').get('view') === 'seguimiento');
+        const isTrackingRoute = ENABLE_CLIENT_TRACKING_VIEW && typeof window !== 'undefined' && (window.location.pathname === '/seguimiento' || new URLSearchParams(window.location.search || '').get('view') === 'seguimiento');
 
         function openClientTrackingView() {
           const cleanId = String(clientOperationId || '').trim();
@@ -2708,7 +2710,7 @@
                     </div>
                     <button className="menu-button" onClick={() => selectAction('Charla')}>Charlas informativas</button>
                     <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
-                    {isAdminUser && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}>Vista Clientes</button>}
+                    {ENABLE_CLIENT_TRACKING_VIEW && isAdminUser && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}>Vista Clientes</button>}
                     {isAdminUser && <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}>Vista Gerencia</button>}
                   </>
                 )}
@@ -3314,7 +3316,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                 <strong>v1.0 | Powered by Alfonso Carballo</strong>
               </div>
 
-              {showClientViewModal && isAdminUser && (
+              {ENABLE_CLIENT_TRACKING_VIEW && showClientViewModal && isAdminUser && (
                 <div className="confirm-modal" onClick={() => setShowClientViewModal(false)}>
                   <div className="client-view-modal" onClick={(e) => e.stopPropagation()}>
                     <h3>Vista Clientes</h3>
