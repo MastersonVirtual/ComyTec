@@ -1208,17 +1208,32 @@
         padding: clamp(16px, 3vw, 28px);
         background: transparent !important;
       }
-      .login-shell::before {
-        content: '';
+      .login-bg {
         position: absolute;
         inset: -18px;
         z-index: 0;
-        background-image: var(--login-bg-1), var(--login-bg-2), var(--login-bg-3), var(--login-bg-4);
-        background-size: cover, cover, cover, cover;
-        background-position: center, center, center, center;
-        background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
         filter: blur(14px);
         transform: scale(1.06);
+      }
+      .login-bg-layer {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        animation: login-bg-fade 40s infinite;
+      }
+      .login-bg-layer:nth-child(1) { background-image: var(--login-bg-1); animation-delay: 0s; }
+      .login-bg-layer:nth-child(2) { background-image: var(--login-bg-2); animation-delay: 10s; }
+      .login-bg-layer:nth-child(3) { background-image: var(--login-bg-3); animation-delay: 20s; }
+      .login-bg-layer:nth-child(4) { background-image: var(--login-bg-4); animation-delay: 30s; }
+      @keyframes login-bg-fade {
+        0% { opacity: 0; }
+        5% { opacity: 1; }
+        20% { opacity: 1; }
+        25% { opacity: 0; }
+        100% { opacity: 0; }
       }
       .login-shell::after {
         content: '';
@@ -2164,6 +2179,12 @@
 
         return (
           <div className="login-shell">
+            <div className="login-bg" aria-hidden="true">
+              <span className="login-bg-layer" />
+              <span className="login-bg-layer" />
+              <span className="login-bg-layer" />
+              <span className="login-bg-layer" />
+            </div>
             <div className="login-stack">
               <div className="login-logo" aria-hidden="true" />
               <form className="login-panel" onSubmit={handleLogin}>
@@ -2189,6 +2210,12 @@
       function LoadingScreen() {
         return (
           <div className="login-shell">
+            <div className="login-bg" aria-hidden="true">
+              <span className="login-bg-layer" />
+              <span className="login-bg-layer" />
+              <span className="login-bg-layer" />
+              <span className="login-bg-layer" />
+            </div>
             <div className="login-stack">
               <div className="login-logo" aria-hidden="true" />
               <section className="login-panel" aria-live="polite">
