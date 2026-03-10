@@ -1195,15 +1195,44 @@
       }
 
       .login-shell {
+        --login-bg-1: url('file:///C:/Users/hadam/OneDrive/Desktop/trabajo/Gemini_Generated_Image_h5k8zvh5k8zvh5k8.png');
+        --login-bg-2: url('file:///C:/Users/hadam/OneDrive/Desktop/trabajo/Gemini_Generated_Image_irrsw0irrsw0irrs.png');
+        --login-bg-3: url('file:///C:/Users/hadam/OneDrive/Desktop/trabajo/Gemini_Generated_Image_4ynkgo4ynkgo4ynk.png');
+        --login-bg-4: url('file:///C:/Users/hadam/OneDrive/Desktop/trabajo/Gemini_Generated_Image_ojn49gojn49gojn4.png');
         min-height: 100vh;
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
         display: grid;
         place-items: center;
         padding: clamp(16px, 3vw, 28px);
+        background: transparent !important;
+      }
+      .login-shell::before {
+        content: '';
+        position: absolute;
+        inset: -18px;
+        z-index: 0;
+        background-image: var(--login-bg-1), var(--login-bg-2), var(--login-bg-3), var(--login-bg-4);
+        background-size: cover, cover, cover, cover;
+        background-position: center, center, center, center;
+        background-repeat: no-repeat, no-repeat, no-repeat, no-repeat;
+        filter: blur(14px);
+        transform: scale(1.06);
+      }
+      .login-shell::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        background: linear-gradient(180deg, rgba(5, 16, 16, .38), rgba(4, 12, 12, .52));
       }
       .login-stack {
         width: min(460px, 100%);
         display: grid;
         gap: 14px;
+        position: relative;
+        z-index: 2;
       }
       .login-panel {
         position: relative;
@@ -1734,9 +1763,11 @@
 
       /* Strict glassmorphism override (client requested) */
       body,
-      .tracking-shell,
-      .login-shell {
+      .tracking-shell {
         background: linear-gradient(145deg, #e0f7f7 0%, #d0ebeb 100%) !important;
+        color: #000000 !important;
+      }
+      .login-shell {
         color: #000000 !important;
       }
 
