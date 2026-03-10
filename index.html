@@ -1325,6 +1325,99 @@
         padding: 10px;
       }
 
+      /* Glassmorphism refresh */
+      body {
+        background: linear-gradient(145deg, #f0f4f4 0%, #d9e2e2 100%) !important;
+        color: #1a1a1a !important;
+      }
+      .panel,
+      .service-card,
+      .widget,
+      .kpi-card,
+      .gerencia-widget,
+      .gerencia-card,
+      .gerencia-chart-card,
+      .ranking-section,
+      .mobile-service-card,
+      .mobile-capsule {
+        background: rgba(255, 255, 255, 0.7) !important;
+        border: 1px solid rgba(255,255,255,.55) !important;
+        border-radius: 16px !important;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        box-shadow: 0 10px 30px rgba(0,0,0,.12) !important;
+      }
+      .topbar,
+      .hero {
+        background: rgba(255, 255, 255, 0.65) !important;
+        border: 1px solid rgba(255,255,255,.55) !important;
+        backdrop-filter: blur(15px);
+      }
+      .top-titles h1,
+      .panel h2,
+      .service-card h3,
+      .widget h4,
+      .kpi-label,
+      .tracking-title,
+      .tracking-card h3,
+      .hero h2,
+      .hero p {
+        color: #006465 !important;
+      }
+      .hint,
+      .muted,
+      .kv,
+      .detail-box,
+      .tracking-data,
+      .mobile-rep,
+      .search-item,
+      .search-item small,
+      .search-detail,
+      .legend-left,
+      .kpi-value,
+      td,
+      th,
+      label {
+        color: #1a1a1a !important;
+      }
+      input,
+      select,
+      textarea {
+        background: rgba(255,255,255,.75) !important;
+        border: 1px solid rgba(0,100,101,.35) !important;
+        color: #1a1a1a !important;
+        text-align: center;
+      }
+      .field > label {
+        background: rgba(255,255,255,.78) !important;
+        color: #1a1a1a !important;
+      }
+      .panel form {
+        max-width: 1220px;
+        margin: 0 auto;
+      }
+      .save-btn,
+      .pdf-btn,
+      .help-btn,
+      .menu-button,
+      .submenu-button,
+      .kpi-breakdown-count,
+      .ranking-service-btn,
+      .edit-btn {
+        background: #006465 !important;
+        color: #ffffff !important;
+        border-color: rgba(0,100,101,.9) !important;
+      }
+      .mobile-fab {
+        background: #006465 !important;
+        color: #fff !important;
+        border: 1px solid rgba(0,100,101,.9) !important;
+        border-radius: 999px !important;
+      }
+      .mobile-fab-overlay {
+        background: rgba(0,0,0,.16) !important;
+      }
+
       @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after {
           animation: none !important;
@@ -1459,6 +1552,151 @@
         }
       }
 
+
+
+      /* Strict glassmorphism override (client requested) */
+      body,
+      .tracking-shell,
+      .login-shell {
+        background: linear-gradient(145deg, #e0f7f7 0%, #d0ebeb 100%) !important;
+        color: #000000 !important;
+      }
+
+      .sidebar,
+      .panel,
+      .service-card,
+      .widget,
+      .kpi-card,
+      .kpi-breakdown,
+      .ranking-section,
+      .gerencia-widget,
+      .tracking-card,
+      .search-preview,
+      .confirm-modal-card,
+      .client-view-modal,
+      .login-panel,
+      .hero {
+        background: rgba(180, 188, 188, 0.35) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        backdrop-filter: blur(15px) !important;
+        -webkit-backdrop-filter: blur(15px) !important;
+      }
+
+      .top-titles h1,
+      .sidebar-header,
+      .panel h2,
+      .service-card h3,
+      .widget h4,
+      .kpi-breakdown h3,
+      .ranking-section h3,
+      .tracking-title,
+      .tracking-card h3,
+      .hero h2,
+      .login-panel h2,
+      h1, h2, h3, h4 {
+        color: #006465 !important;
+      }
+
+      p,
+      .hint,
+      .muted,
+      .kv,
+      .kv b,
+      label,
+      .menu-button,
+      .submenu-button,
+      .search-item,
+      .search-item small,
+      .search-detail,
+      .mobile-capsule .title,
+      .mobile-capsule .value,
+      .mobile-rep,
+      .kpi-label,
+      .kpi-value,
+      .kpi-breakdown-item,
+      .kpi-breakdown-count,
+      .kpi-service-link,
+      .ranking-service-btn,
+      .edit-btn,
+      .link-btn,
+      .detail-box,
+      .tracking-data,
+      .tracking-steps,
+      .micro-log-item,
+      th, td,
+      .top-titles p,
+      .mobile-bottom-nav button,
+      .mobile-bottom-nav button.active {
+        color: #000000 !important;
+      }
+
+      input,
+      select,
+      textarea,
+      option,
+      .radio-pill,
+      .state-pill {
+        color: #000000 !important;
+        background: rgba(255, 255, 255, 0.72) !important;
+      }
+
+      .logout-btn {
+        background: #006465 !important;
+        color: #ffffff !important;
+        border: 1px solid #006465 !important;
+      }
+
+      .mobile-fab,
+      .burger {
+        width: 56px !important;
+        height: 56px !important;
+        border-radius: 999px !important;
+        background: #006465 !important;
+        color: #ffffff !important;
+        border: 1px solid #006465 !important;
+        background-image: none !important;
+      }
+
+      .mobile-fab i,
+      .mobile-fab svg,
+      .burger i,
+      .burger svg {
+        color: #ffffff !important;
+        stroke: #ffffff !important;
+      }
+
+
+
+      .burger {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .burger-icon {
+        width: 100%;
+        height: 100%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        line-height: 1;
+        color: #ffffff;
+      }
+
+      .loading-spinner {
+        width: 84px;
+        height: 84px;
+        margin: 14px auto 0;
+        border-radius: 999px;
+        border: 7px solid rgba(0, 100, 101, 0.22);
+        border-top-color: #006465;
+        border-right-color: #006465;
+        animation: spin 0.95s linear infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
     </style>
 
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -1492,6 +1730,8 @@
 
       const ACCIONES = ['Nuevo Servicio', 'Novación', 'Obra', 'Agregado', 'Movimiento de Obra', 'Baja', 'Charla'];
       const STATUS_OPTIONS = ['Pendiente', 'En curso', 'En espera', 'Completado', 'Cancelado', 'Pausado'];
+      // Toggle rápido para reactivar Vista Cliente/Tracking público cuando se solicite.
+      const ENABLE_CLIENT_TRACKING_VIEW = false;
 
       function generarClienteId() {
         return String(Math.floor(1000 + Math.random() * 9000));
@@ -1660,6 +1900,20 @@
         );
       }
 
+      function LoadingScreen() {
+        return (
+          <div className="login-shell">
+            <div className="login-stack">
+              <div className="login-logo" aria-hidden="true" />
+              <section className="login-panel" aria-live="polite">
+                <h2>Masterson Seguridad</h2>
+                <div className="hint">Cargando plataforma...</div>
+                <div className="loading-spinner" aria-hidden="true" />
+              </section>
+            </div>
+          </div>
+        );
+      }
 
       function PieChartWidget({ chartId, title, items }) {
         const canvasRef = useRef(null);
@@ -2658,7 +2912,7 @@
             </section>
           );
         }
-        const isTrackingRoute = typeof window !== 'undefined' && (window.location.pathname === '/seguimiento' || new URLSearchParams(window.location.search || '').get('view') === 'seguimiento');
+        const isTrackingRoute = ENABLE_CLIENT_TRACKING_VIEW && typeof window !== 'undefined' && (window.location.pathname === '/seguimiento' || new URLSearchParams(window.location.search || '').get('view') === 'seguimiento');
 
         function openClientTrackingView() {
           const cleanId = String(clientOperationId || '').trim();
@@ -2674,7 +2928,7 @@
         }
 
         if (authLoading || roleLoading) {
-          return <div className="login-shell"><div className="login-panel"><h2>Cargando...</h2></div></div>;
+          return <LoadingScreen />;
         }
 
         if (!user) {
@@ -2708,7 +2962,7 @@
                     </div>
                     <button className="menu-button" onClick={() => selectAction('Charla')}>Charlas informativas</button>
                     <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
-                    {isAdminUser && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}>Vista Clientes</button>}
+                    {ENABLE_CLIENT_TRACKING_VIEW && isAdminUser && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}>Vista Clientes</button>}
                     {isAdminUser && <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}>Vista Gerencia</button>}
                   </>
                 )}
@@ -2723,7 +2977,7 @@
 
             <div className={`content ${menuOpen ? 'shift' : ''}`}>
               <header className="topbar">
-                {!isMobile && <button className="burger" aria-label="Abrir menú" onClick={toggleSidebar} />}
+                {!isMobile && <button className="burger" aria-label="Abrir menú" onClick={toggleSidebar}><span className="burger-icon" aria-hidden="true">☰</span></button>}
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
                   <p className="subtitle-voga">{topbarSubtitle}</p>
@@ -3314,7 +3568,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                 <strong>v1.0 | Powered by Alfonso Carballo</strong>
               </div>
 
-              {showClientViewModal && isAdminUser && (
+              {ENABLE_CLIENT_TRACKING_VIEW && showClientViewModal && isAdminUser && (
                 <div className="confirm-modal" onClick={() => setShowClientViewModal(false)}>
                   <div className="client-view-modal" onClick={(e) => e.stopPropagation()}>
                     <h3>Vista Clientes</h3>
