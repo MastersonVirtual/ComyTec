@@ -1015,7 +1015,7 @@
       .kpi-card:hover,
       .gerencia-widget:hover,
       .ranking-section:hover {
-        transform: translateY(-2px) scale(1.02);
+        transform: translateY(-2px);
         border-color: rgba(0, 100, 101, 0.9) !important;
         box-shadow: 0 18px 38px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(43, 235, 214, 0.42), 0 0 26px rgba(0, 100, 101, 0.38);
       }
@@ -1198,38 +1198,71 @@
         min-height: 100vh;
         display: grid;
         place-items: center;
-        padding: 20px;
-        background: #000000;
+        padding: clamp(16px, 3vw, 28px);
       }
       .login-stack {
         width: min(460px, 100%);
+        display: grid;
+        gap: 14px;
       }
       .login-panel {
+        position: relative;
         width: 100%;
-        background: #006465;
-        border: 1px solid rgba(230,255,253,.28);
-        border-radius: 16px;
-        box-shadow: var(--shadow-deep);
-        padding: 24px;
+        border-radius: 22px;
+        box-shadow: 0 22px 44px rgba(0,0,0,.24);
+        padding: clamp(20px, 4vw, 30px);
+        overflow: hidden;
       }
-      .login-panel h2 { margin: 0 0 8px; color: #e6fffd; text-align: center; }
-      .login-panel .hint { color: #d1faf5; text-align: center; }
-      .login-error { color: #ffd4d4; font-size: 13px; margin-bottom: 10px; }
-      .login-panel label { color: #e6fffd; }
+      .login-panel::before {
+        content: '';
+        position: absolute;
+        width: 220px;
+        height: 220px;
+        top: -110px;
+        right: -65px;
+        background: radial-gradient(circle, rgba(78,227,209,.28), transparent 68%);
+        pointer-events: none;
+      }
+      .login-panel h2 {
+        margin: 0 0 8px;
+        text-align: center;
+        font-size: clamp(1.3rem, 4vw, 1.6rem);
+        letter-spacing: .02em;
+      }
+      .login-panel .hint { text-align: center; margin-bottom: 14px; }
+      .login-error {
+        color: #ffd4d4;
+        font-size: 13px;
+        margin-bottom: 12px;
+        border: 1px solid rgba(255,130,130,.35);
+        background: rgba(127,29,29,.26);
+        border-radius: 10px;
+        padding: 8px 10px;
+      }
+      .login-panel label { font-weight: 700; }
+      .login-panel .field { margin-bottom: 10px; }
       .login-panel input {
         width: 100%;
-        background: #ffffff;
-        color: #0f172a;
+        min-height: 46px;
+        border-radius: 12px;
+      }
+      .login-panel .save-btn {
+        margin-top: 8px;
+        min-height: 46px;
+        font-size: 15px;
       }
       .login-logo {
-        width: 50%;
-        max-width: 220px;
+        width: min(42vw, 160px);
         aspect-ratio: 1 / 1;
-        margin: 0 auto 14px;
-        border-radius: 18px;
+        margin: 0 auto;
+        border-radius: 22px;
         background: rgba(230,255,253,.12) url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png') center/cover no-repeat;
-        border: 1px solid rgba(230,255,253,.3);
-        box-shadow: 0 10px 20px rgba(0,0,0,.25);
+        border: 1px solid rgba(230,255,253,.36);
+        box-shadow: 0 14px 26px rgba(0,0,0,.25);
+      }
+      @media (max-width: 520px) {
+        .login-stack { width: 100%; }
+        .login-panel { border-radius: 18px; }
       }
 
 
@@ -1727,6 +1760,35 @@
         -webkit-backdrop-filter: blur(15px) !important;
       }
 
+
+      .login-panel {
+        background: linear-gradient(165deg, rgba(2,68,69,.92), rgba(0,100,101,.84)) !important;
+        border: 1px solid rgba(230,255,253,.34) !important;
+        backdrop-filter: blur(10px) saturate(112%) !important;
+        -webkit-backdrop-filter: blur(10px) saturate(112%) !important;
+      }
+      .login-panel label,
+      .login-panel .hint,
+      .login-panel h2 {
+        color: #e6fffd !important;
+      }
+      .login-panel h2 {
+        color: #ff9f2f !important;
+        text-shadow: none;
+      }
+      .login-panel .hint,
+      .login-panel label {
+        color: #ff9f2f !important;
+      }
+      .login-panel input {
+        background: rgba(3,24,24,.62) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(230,255,253,.28) !important;
+      }
+      .login-panel input::placeholder {
+        color: #97b9b6 !important;
+      }
+
       .top-titles h1,
       .sidebar-header,
       .panel h2,
@@ -1740,6 +1802,10 @@
       .login-panel h2,
       h1, h2, h3, h4 {
         color: #006465 !important;
+      }
+      .login-panel h2 {
+        color: #ff9f2f !important;
+        text-shadow: none !important;
       }
 
       p,
