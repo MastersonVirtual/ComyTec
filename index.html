@@ -1325,6 +1325,99 @@
         padding: 10px;
       }
 
+      /* Glassmorphism refresh */
+      body {
+        background: linear-gradient(145deg, #f0f4f4 0%, #d9e2e2 100%) !important;
+        color: #1a1a1a !important;
+      }
+      .panel,
+      .service-card,
+      .widget,
+      .kpi-card,
+      .gerencia-widget,
+      .gerencia-card,
+      .gerencia-chart-card,
+      .ranking-section,
+      .mobile-service-card,
+      .mobile-capsule {
+        background: rgba(255, 255, 255, 0.7) !important;
+        border: 1px solid rgba(255,255,255,.55) !important;
+        border-radius: 16px !important;
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        box-shadow: 0 10px 30px rgba(0,0,0,.12) !important;
+      }
+      .topbar,
+      .hero {
+        background: rgba(255, 255, 255, 0.65) !important;
+        border: 1px solid rgba(255,255,255,.55) !important;
+        backdrop-filter: blur(15px);
+      }
+      .top-titles h1,
+      .panel h2,
+      .service-card h3,
+      .widget h4,
+      .kpi-label,
+      .tracking-title,
+      .tracking-card h3,
+      .hero h2,
+      .hero p {
+        color: #006465 !important;
+      }
+      .hint,
+      .muted,
+      .kv,
+      .detail-box,
+      .tracking-data,
+      .mobile-rep,
+      .search-item,
+      .search-item small,
+      .search-detail,
+      .legend-left,
+      .kpi-value,
+      td,
+      th,
+      label {
+        color: #1a1a1a !important;
+      }
+      input,
+      select,
+      textarea {
+        background: rgba(255,255,255,.75) !important;
+        border: 1px solid rgba(0,100,101,.35) !important;
+        color: #1a1a1a !important;
+        text-align: center;
+      }
+      .field > label {
+        background: rgba(255,255,255,.78) !important;
+        color: #1a1a1a !important;
+      }
+      .panel form {
+        max-width: 1220px;
+        margin: 0 auto;
+      }
+      .save-btn,
+      .pdf-btn,
+      .help-btn,
+      .menu-button,
+      .submenu-button,
+      .kpi-breakdown-count,
+      .ranking-service-btn,
+      .edit-btn {
+        background: #006465 !important;
+        color: #ffffff !important;
+        border-color: rgba(0,100,101,.9) !important;
+      }
+      .mobile-fab {
+        background: #006465 !important;
+        color: #fff !important;
+        border: 1px solid rgba(0,100,101,.9) !important;
+        border-radius: 999px !important;
+      }
+      .mobile-fab-overlay {
+        background: rgba(0,0,0,.16) !important;
+      }
+
       @media (prefers-reduced-motion: reduce) {
         *, *::before, *::after {
           animation: none !important;
