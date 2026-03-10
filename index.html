@@ -1706,6 +1706,41 @@
         to { transform: rotate(360deg); }
       }
 
+
+      /* Dashboard gerencia readability + title hierarchy */
+      .dashboard-gerencia-panel,
+      .dashboard-gerencia-panel .hint,
+      .dashboard-gerencia-panel .gerencia-item,
+      .dashboard-gerencia-panel .gerencia-item span,
+      .dashboard-gerencia-panel .gerencia-item b,
+      .dashboard-gerencia-panel .gerencia-value,
+      .dashboard-gerencia-panel .gerencia-widget-toggle,
+      .dashboard-gerencia-panel .legend-item,
+      .dashboard-gerencia-panel .legend-left,
+      .dashboard-gerencia-panel .legend-item b {
+        color: #000000 !important;
+      }
+
+      .dashboard-gerencia-panel h3,
+      .dashboard-gerencia-panel .gerencia-widget h3,
+      .dashboard-gerencia-panel .gerencia-chart-shell + .gerencia-legend,
+      .dashboard-gerencia-panel .gerencia-widget:nth-child(1) h3,
+      .dashboard-gerencia-panel .gerencia-widget:nth-child(2) h3,
+      .dashboard-gerencia-panel .gerencia-widget:nth-child(3) h3,
+      .dashboard-gerencia-panel .gerencia-widget:nth-child(4) h3 {
+        color: #006465 !important;
+      }
+
+      .dashboard-gerencia-panel .gerencia-item {
+        border-color: rgba(0, 0, 0, 0.16) !important;
+        background: rgba(255, 255, 255, 0.28) !important;
+      }
+
+      .dashboard-gerencia-panel .legend-dot,
+      .dashboard-gerencia-panel .kpi-dot {
+        border-radius: 999px !important;
+      }
+
     </style>
 
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -1951,7 +1986,9 @@
                 legend: {
                   position: 'bottom',
                   labels: {
-                    color: '#ffffff',
+                    color: '#000000',
+                    usePointStyle: true,
+                    pointStyle: 'circle',
                     boxWidth: 10,
                     boxHeight: 10,
                     padding: 14,
