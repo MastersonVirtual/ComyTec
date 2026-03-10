@@ -650,6 +650,72 @@
         gap: 8px;
         flex-wrap: wrap;
       }
+      .history-toolbar {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 10px;
+        margin: 12px 0;
+      }
+      .history-toolbar .field {
+        grid-column: span 3;
+      }
+      .history-list-shell {
+        border: 1px solid rgba(0, 100, 101, 0.45);
+        border-radius: 14px;
+        overflow: hidden;
+        background: rgba(3, 15, 15, .55);
+      }
+      .history-list-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(230,255,253,.22);
+        background: rgba(230,255,253,.08);
+      }
+      .history-list {
+        max-height: 54vh;
+        overflow: auto;
+        display: grid;
+      }
+      .history-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: center;
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(230,255,253,.14);
+      }
+      .history-row:last-child {
+        border-bottom: 0;
+      }
+      .history-row-main {
+        display: grid;
+        gap: 5px;
+      }
+      .history-row-main strong {
+        color: #e6fffd;
+      }
+      .history-row-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        font-size: 12px;
+        color: #b9e9e4;
+      }
+      .history-pagination {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+      .history-page-actions {
+        display: flex;
+        gap: 8px;
+      }
       .edit-btn {
         text-align: left;
         border: 1px solid rgba(230,255,253,.2);
@@ -1081,6 +1147,13 @@
       }
       @media (max-width: 1080px) {
         .kpi-grid { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
+        .history-toolbar .field {
+          grid-column: span 6;
+        }
+        .history-row {
+          grid-template-columns: 1fr;
+          align-items: stretch;
+        }
       }
 
       .logout-btn {
@@ -1896,8 +1969,8 @@
       function statusClass(value) {
         if (!value) return 'chip status-default';
         const v = value.toLowerCase();
-        if (v.includes('ongoing')) return 'chip status-ongoing';
-        if (v.includes('pausa')) return 'chip status-pausa';
+        if (v.includes('curso') || v.includes('proceso') || v.includes('ongoing') || v.includes('complet') || v.includes('finaliz')) return 'chip status-ongoing';
+        if (v.includes('pausa') || v.includes('cancel') || v.includes('espera') || v.includes('pend')) return 'chip status-pausa';
         return 'chip status-default';
       }
 
@@ -2330,6 +2403,10 @@
 
         const [activeKpi, setActiveKpi] = useState(null);
         const [selectedCommercial, setSelectedCommercial] = useState('');
+        const [historySearchTerm, setHistorySearchTerm] = useState('');
+        const [historyStatusFilter, setHistoryStatusFilter] = useState('todos');
+        const [historyCommercialFilter, setHistoryCommercialFilter] = useState('todos');
+        const [historyPage, setHistoryPage] = useState(1);
 
         function getStatusLabel(row) {
           return String(row?.status || row?.estado || '').trim().toLowerCase();
@@ -2387,6 +2464,57 @@
           inprogress: visibleRows.filter((r) => isInProgressStatus(getStatusLabel(r))).length,
           completed: visibleRows.filter((r) => isCompletedStatus(getStatusLabel(r))).length,
         }), [visibleRows]);
+
+        const historyStatusOptions = useMemo(() => {
+          const set = new Set();
+          visibleRows.forEach((r) => {
+            const value = String(r.status || r.estado || '').trim();
+            if (value) set.add(value);
+          });
+          return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+        }, [visibleRows]);
+
+        const historyCommercialOptions = useMemo(() => {
+          const set = new Set();
+          visibleRows.forEach((r) => {
+            const value = String(r.representanteComercial || '').trim();
+            if (value) set.add(value);
+          });
+          return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+        }, [visibleRows]);
+
+        const historyFilteredRows = useMemo(() => {
+          const query = historySearchTerm.trim().toLowerCase();
+          const filtered = visibleRows.filter((r) => {
+            const statusValue = String(r.status || r.estado || '').trim();
+            const commercialValue = String(r.representanteComercial || '').trim();
+            const matchStatus = historyStatusFilter === 'todos' || statusValue === historyStatusFilter;
+            const matchCommercial = historyCommercialFilter === 'todos' || commercialValue === historyCommercialFilter;
+            const matchQuery = !query || [
+              r.nombreServicio,
+              r.cliente,
+              r.clienteId,
+              r.razonSocial,
+              r.rut,
+              r.direccionServicio,
+            ].filter(Boolean).some((v) => String(v).toLowerCase().includes(query));
+            return matchStatus && matchCommercial && matchQuery;
+          });
+
+          return filtered.sort((a, b) => {
+            const aTs = a.actualizadoEn?.seconds || a.creadoEn?.seconds || 0;
+            const bTs = b.actualizadoEn?.seconds || b.creadoEn?.seconds || 0;
+            return bTs - aTs;
+          });
+        }, [visibleRows, historySearchTerm, historyStatusFilter, historyCommercialFilter]);
+
+        const HISTORY_PAGE_SIZE = 18;
+        const totalHistoryPages = Math.max(1, Math.ceil(historyFilteredRows.length / HISTORY_PAGE_SIZE));
+        const safeHistoryPage = Math.min(historyPage, totalHistoryPages);
+        const historyRowsPage = useMemo(() => {
+          const start = (safeHistoryPage - 1) * HISTORY_PAGE_SIZE;
+          return historyFilteredRows.slice(start, start + HISTORY_PAGE_SIZE);
+        }, [historyFilteredRows, safeHistoryPage]);
 
         function buildServiceDetailText(r) {
           const lines = [
@@ -2744,6 +2872,16 @@
           applyUserDefaultsToForms();
         }, [currentUserName, isAdminUser, isSalesOrTechUser]);
 
+        useEffect(() => {
+          setHistoryPage(1);
+        }, [historySearchTerm, historyStatusFilter, historyCommercialFilter]);
+
+        useEffect(() => {
+          if (historyPage > totalHistoryPages) {
+            setHistoryPage(totalHistoryPages);
+          }
+        }, [historyPage, totalHistoryPages]);
+
         function resetFields() {
           setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('Pendiente');
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
@@ -2897,6 +3035,9 @@
             }
             Object.assign(doc, { ...charlaForm, formulario: 'charla-informativa' });
           }
+
+          doc.status = status;
+          doc.estado = status;
 
           setSaving(true);
           const nextLog = {
@@ -3191,34 +3332,57 @@
 ) : effectiveSelectedForm === 'historial' ? (
                   <section className="panel">
                     <h2>Historial de Servicios · Vista Ejecutiva</h2>
-                    <div className="hint">Lista completa visible para todos los usuarios. Selecciona un servicio para ver su detalle.</div>
+                    <div className="hint">Rediseño escalable con filtros, paginación y vista rápida para manejar alto volumen de servicios.</div>
                     <section className="panel" style={{ background: 'rgba(255,255,255,.04)', marginBottom: 12 }}>
-                      <h3 style={{ marginTop: 0 }}>Servicios ({visibleRows.length})</h3>
-                      <div className="ranking-services">
-                        {visibleRows.map((service) => {
-                          const allowedEdit = canEditService(service);
-                          return (
-                            <div className="ranking-service-row" key={`hist-${service.id}`}>
-                              <button
-                                type="button"
-                                className="ranking-service-btn"
-                                onClick={() => setSelectedService(service)}
-                              >
-                                <b>{service.nombreServicio || service.cliente || 'Servicio sin nombre'}</b> · ID {service.clienteId || '-'}
-                              </button>
-                              <div className="ranking-service-actions">
-                                <button
-                                  type="button"
-                                  className="edit-btn"
-                                  disabled={!allowedEdit}
-                                  onClick={() => startEditService(service)}
-                                >
-                                  {allowedEdit ? '✎ Editar servicio' : '🔒 Solo lectura'}
+                      <h3 style={{ marginTop: 0 }}>Servicios ({historyFilteredRows.length} filtrados de {visibleRows.length})</h3>
+                      <div className="history-toolbar">
+                        <div className="field span-2"><label>Buscar</label><input value={historySearchTerm} onChange={(e) => setHistorySearchTerm(e.target.value)} placeholder="ID, servicio, razón social, RUT, dirección..." /></div>
+                        <div className="field"><label>Status</label><select value={historyStatusFilter} onChange={(e) => setHistoryStatusFilter(e.target.value)}><option value="todos">Todos</option>{historyStatusOptions.map((st) => <option key={`hs-${st}`} value={st}>{st}</option>)}</select></div>
+                        <div className="field"><label>Comercial</label><select value={historyCommercialFilter} onChange={(e) => setHistoryCommercialFilter(e.target.value)}><option value="todos">Todos</option>{historyCommercialOptions.map((cm) => <option key={`hc-${cm}`} value={cm}>{cm}</option>)}</select></div>
+                      </div>
+
+                      <div className="history-list-shell">
+                        <div className="history-list-head">
+                          <strong>Listado paginado</strong>
+                          <span className="hint" style={{ margin: 0 }}>Página {safeHistoryPage} de {totalHistoryPages}</span>
+                        </div>
+                        <div className="history-list">
+                          {historyRowsPage.length === 0 ? (
+                            <div className="hint" style={{ padding: 14, margin: 0 }}>No hay resultados con los filtros aplicados.</div>
+                          ) : historyRowsPage.map((service) => {
+                            const allowedEdit = canEditService(service);
+                            return (
+                              <div className="history-row" key={`hist-${service.id}`}>
+                                <button type="button" className="ranking-service-btn" onClick={() => setSelectedService(service)}>
+                                  <div className="history-row-main">
+                                    <strong>{service.nombreServicio || service.cliente || 'Servicio sin nombre'}</strong>
+                                    <div className="history-row-meta">
+                                      <span>ID {service.clienteId || '-'}</span>
+                                      <span>·</span>
+                                      <span>{service.razonSocial || 'Sin razón social'}</span>
+                                      <span>·</span>
+                                      <span>{service.representanteComercial || 'Sin comercial'}</span>
+                                    </div>
+                                  </div>
                                 </button>
+                                <span className={statusClass(service.status || service.estado)}>{service.status || service.estado || 'Pendiente'}</span>
+                                <div className="ranking-service-actions">
+                                  <button type="button" className="edit-btn" disabled={!allowedEdit} onClick={() => startEditService(service)}>
+                                    {allowedEdit ? '✎ Editar' : '🔒 Solo lectura'}
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                          );
-                        })}
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="history-pagination">
+                        <span className="hint" style={{ margin: 0 }}>Mostrando {historyRowsPage.length} registros en esta página.</span>
+                        <div className="history-page-actions">
+                          <button type="button" className="link-btn" disabled={safeHistoryPage <= 1} onClick={() => setHistoryPage((p) => Math.max(1, p - 1))}>← Anterior</button>
+                          <button type="button" className="link-btn" disabled={safeHistoryPage >= totalHistoryPages} onClick={() => setHistoryPage((p) => Math.min(totalHistoryPages, p + 1))}>Siguiente →</button>
+                        </div>
                       </div>
                     </section>
                     {!selectedService ? (
