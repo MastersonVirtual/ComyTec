@@ -1327,6 +1327,78 @@
       }
 
 
+      .gerencia-mobile-app {
+        display: grid;
+        gap: 12px;
+      }
+      .gerencia-mobile-card {
+        background: rgba(4, 22, 22, 0.92);
+        border: 1px solid rgba(0, 148, 150, 0.45);
+        border-radius: 16px;
+        padding: 14px;
+        color: #e6fffd;
+        box-shadow: 0 8px 20px rgba(0,0,0,.24);
+      }
+      .gerencia-mobile-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+      .gerencia-mobile-header h3 {
+        margin: 0;
+        font-size: .92rem;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: #e6fffd;
+      }
+      .gerencia-mobile-tag {
+        font-size: 11px;
+        border: 1px solid rgba(230,255,253,.28);
+        border-radius: 999px;
+        padding: 3px 8px;
+        color: #d1faf5;
+      }
+      .gerencia-mobile-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #ffffff;
+      }
+      .gerencia-mobile-list {
+        display: grid;
+        gap: 8px;
+      }
+      .gerencia-mobile-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        border: 1px solid rgba(230,255,253,.16);
+        border-radius: 10px;
+        padding: 8px 10px;
+        background: rgba(230,255,253,.06);
+        font-size: 12px;
+      }
+      .gerencia-mobile-service {
+        display: grid;
+        gap: 6px;
+      }
+      .gerencia-mobile-service strong {
+        color: #ffffff;
+        font-size: .96rem;
+      }
+      .gerencia-mobile-meta {
+        color: #bfe2df;
+        font-size: 12px;
+      }
+      .gerencia-mobile-loader {
+        width: 100%;
+        text-align: center;
+        color: #bfe2df;
+        font-size: 12px;
+        padding: 8px 0 2px;
+      }
+
       .mobile-bottom-nav {
         display: none;
       }
@@ -2084,8 +2156,10 @@
         );
       }
 
-      function DashboardGerencia({ rows }) {
+      function DashboardGerencia({ rows, isMobileNative = false }) {
         const [activeWidget, setActiveWidget] = useState('facturacion');
+        const [mobileVisibleCount, setMobileVisibleCount] = useState(8);
+        const mobileSentinelRef = useRef(null);
 
         const totalAbonos = rows.reduce((acc, r) => acc + (Number(r.importeMensualServicioSinIva) || 0), 0);
         const totalVentasEquipos = rows.reduce((acc, r) => acc + (Number(r.costoInstalacionUsdSinIva) || 0), 0);
@@ -2103,6 +2177,110 @@
           .sort((a, b) => b.value - a.value);
         const topSeller = rankingList[0] || { name: 'Sin datos', value: 0 };
         const lowSeller = rankingList[rankingList.length - 1] || { name: 'Sin datos', value: 0 };
+
+        useEffect(() => {
+          setMobileVisibleCount(8);
+        }, [rows.length]);
+
+        const serviceCards = useMemo(() => rows
+          .slice()
+          .sort((a, b) => {
+            const aTs = a.actualizadoEn?.seconds || a.creadoEn?.seconds || 0;
+            const bTs = b.actualizadoEn?.seconds || b.creadoEn?.seconds || 0;
+            return bTs - aTs;
+          }), [rows]);
+
+        const mobileCards = useMemo(() => {
+          const widgets = [
+            { id: 'm-total-abono', type: 'metric', title: 'Facturación Mensual', tag: 'Widget', value: `US$ ${totalAbonos.toLocaleString('es-UY')}` },
+            { id: 'm-total-equipos', type: 'metric', title: 'Ventas Equipos', tag: 'Widget', value: `US$ ${totalVentasEquipos.toLocaleString('es-UY')}` },
+            { id: 'm-status', type: 'status' },
+            { id: 'm-ranking', type: 'ranking' },
+            { id: 'm-acciones', type: 'actions' },
+          ];
+          const services = serviceCards.map((service) => ({ id: `svc-${service.id}`, type: 'service', service }));
+          return [...widgets, ...services];
+        }, [totalAbonos, totalVentasEquipos, serviceCards]);
+
+        const hasMoreCards = mobileVisibleCount < mobileCards.length;
+        const visibleMobileCards = mobileCards.slice(0, mobileVisibleCount);
+
+        useEffect(() => {
+          if (!isMobileNative || !hasMoreCards || !mobileSentinelRef.current) return () => {};
+          const observer = new IntersectionObserver((entries) => {
+            const first = entries[0];
+            if (first && first.isIntersecting) {
+              setMobileVisibleCount((prev) => Math.min(prev + 6, mobileCards.length));
+            }
+          }, { threshold: 0.1, rootMargin: '180px' });
+
+          observer.observe(mobileSentinelRef.current);
+          return () => observer.disconnect();
+        }, [isMobileNative, hasMoreCards, mobileCards.length]);
+
+        if (isMobileNative) {
+          return (
+            <section className="panel dashboard-gerencia-panel">
+              <h2>Dashboard Gerencia</h2>
+              <div className="hint">Vista móvil estilo app nativa, tarjetas unificadas y scroll continuo.</div>
+              <div className="gerencia-mobile-app">
+                {visibleMobileCards.map((card) => {
+                  if (card.type === 'metric') {
+                    return (
+                      <article key={card.id} className="gerencia-mobile-card">
+                        <div className="gerencia-mobile-header"><h3>{card.title}</h3><span className="gerencia-mobile-tag">{card.tag}</span></div>
+                        <div className="gerencia-mobile-value">{card.value}</div>
+                      </article>
+                    );
+                  }
+
+                  if (card.type === 'status') {
+                    return (
+                      <article key={card.id} className="gerencia-mobile-card">
+                        <div className="gerencia-mobile-header"><h3>Status de Servicios</h3><span className="gerencia-mobile-tag">Widget</span></div>
+                        <div className="gerencia-mobile-list">
+                          {statusCounts.map((item) => (<div key={`m-status-${item.name}`} className="gerencia-mobile-row"><span>{item.name}</span><b>{item.value}</b></div>))}
+                        </div>
+                      </article>
+                    );
+                  }
+
+                  if (card.type === 'ranking') {
+                    return (
+                      <article key={card.id} className="gerencia-mobile-card">
+                        <div className="gerencia-mobile-header"><h3>Ranking Comercial</h3><span className="gerencia-mobile-tag">Widget</span></div>
+                        <div className="gerencia-mobile-list">
+                          <div className="gerencia-mobile-row"><span>Mayor vendedor</span><b>{topSeller.name} · {topSeller.value}</b></div>
+                          <div className="gerencia-mobile-row"><span>Menor vendedor</span><b>{lowSeller.name} · {lowSeller.value}</b></div>
+                        </div>
+                      </article>
+                    );
+                  }
+
+                  if (card.type === 'actions') {
+                    return (
+                      <article key={card.id} className="gerencia-mobile-card">
+                        <div className="gerencia-mobile-header"><h3>Acciones</h3><span className="gerencia-mobile-tag">Widget</span></div>
+                        <div className="gerencia-mobile-list">
+                          {actionCounts.map((item) => (<div key={`m-action-${item.name}`} className="gerencia-mobile-row"><span>{item.name}</span><b>{item.value}</b></div>))}
+                        </div>
+                      </article>
+                    );
+                  }
+
+                  return (
+                    <article key={card.id} className="gerencia-mobile-card gerencia-mobile-service">
+                      <div className="gerencia-mobile-header"><h3>{card.service.nombreServicio || 'Servicio sin nombre'}</h3><span className={statusClass(card.service.status || card.service.estado)}>{card.service.status || card.service.estado || 'Pendiente'}</span></div>
+                      <strong>{card.service.razonSocial || 'Sin razón social'}</strong>
+                      <div className="gerencia-mobile-meta">ID {card.service.clienteId || '-'} · {card.service.representanteComercial || 'Sin comercial'}</div>
+                    </article>
+                  );
+                })}
+                <div ref={mobileSentinelRef} className="gerencia-mobile-loader">{hasMoreCards ? 'Cargando más tarjetas...' : 'Fin del tablero móvil.'}</div>
+              </div>
+            </section>
+          );
+        }
 
         return (
           <section className="panel dashboard-gerencia-panel">
@@ -3207,7 +3385,7 @@
 
               <main className="main">
                 {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : isMobile && mobileTab === 'mapa' ? (<section className="panel"><h2>Mapa</h2><div className="hint">Vista de mapa próxima versión.</div></section>) : isMobile && mobileTab === 'perfil' ? (<section className="panel"><h2>Mi Perfil</h2><div className="hint">{currentUserName} · {topbarSubtitle}</div></section>) : effectiveSelectedForm === 'dashboard-gerencia' ? (
-                  <DashboardGerencia rows={visibleRows} />
+                  <DashboardGerencia rows={visibleRows} isMobileNative={isMobile && isGerencia} />
                 ) : effectiveSelectedForm === 'home' ? (
                   <>
                     <section className="hero">
