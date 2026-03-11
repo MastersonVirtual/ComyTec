@@ -2413,33 +2413,40 @@
         background: rgba(78, 22, 22, .38) !important;
       }
 
+      .main.charla-main-wide {
+        max-width: min(96vw, 1780px);
+      }
+
       .charla-studio {
         display: grid;
-        grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
-        gap: 18px;
-        align-items: start;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 16px;
+        align-items: stretch;
       }
-      .charla-main,
-      .charla-side {
-        display: grid;
-        gap: 14px;
-      }
-      .charla-panel {
+      .charla-card {
         border: 1px solid rgba(230,255,253,.24);
         border-radius: 16px;
-        background: linear-gradient(145deg, rgba(0, 82, 85, .52), rgba(15, 23, 42, .38));
+        background: linear-gradient(145deg, rgba(0, 82, 85, .50), rgba(15, 23, 42, .34));
         padding: 14px;
         box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 10px 22px rgba(0,0,0,.16);
       }
-      .charla-panel h4 {
+      .charla-card h4 {
         margin: 0 0 12px;
         color: #e6fffd;
         font-size: 14px;
         letter-spacing: .02em;
       }
-      .charla-core-grid {
+      .charla-card.context { grid-column: span 4; }
+      .charla-card.agenda { grid-column: span 4; }
+      .charla-card.observ { grid-column: span 4; }
+      .charla-card.map { grid-column: span 8; }
+      .charla-card.summary { grid-column: span 4; }
+      .charla-card.save { grid-column: span 12; padding: 10px; }
+
+      .charla-core-grid,
+      .charla-agenda {
         display: grid;
-        grid-template-columns: 1.1fr .9fr;
+        grid-template-columns: 1fr;
         gap: 10px;
       }
       .charla-status-chip {
@@ -2453,20 +2460,15 @@
         color: #e6fffd;
         font-weight: 700;
       }
-      .charla-agenda {
-        display: grid;
-        grid-template-columns: 1.4fr .8fr .7fr;
-        gap: 10px;
-      }
       .charla-map-wrap {
         border: 1px solid rgba(230,255,253,.24);
         border-radius: 12px;
         overflow: hidden;
         background: rgba(8,25,26,.45);
-        min-height: 300px;
+        min-height: 340px;
       }
       .charla-map-empty {
-        min-height: 300px;
+        min-height: 340px;
         display: grid;
         place-items: center;
         color: #c8efeb;
@@ -2476,10 +2478,10 @@
       }
       .charla-map-wrap iframe {
         width: 100%;
-        min-height: 300px;
+        min-height: 340px;
         border: 0;
       }
-      .charla-observ textarea { min-height: 140px; }
+      .charla-observ textarea { min-height: 190px; }
       .charla-summary-item {
         border: 1px solid rgba(230,255,253,.2);
         border-radius: 10px;
@@ -2490,13 +2492,24 @@
       .charla-summary-item:last-child { margin-bottom: 0; }
       .charla-summary-item small { color: #bfe9e5; display: block; margin-bottom: 2px; }
       .charla-summary-item strong { color: #fff; font-size: 13px; }
-      @media (max-width: 1100px) {
-        .charla-studio { grid-template-columns: 1fr; }
+
+      @media (max-width: 1280px) {
+        .charla-card.context,
+        .charla-card.agenda,
+        .charla-card.observ { grid-column: span 6; }
+        .charla-card.map,
+        .charla-card.summary { grid-column: span 12; }
       }
       @media (max-width: 760px) {
-        .charla-core-grid,
-        .charla-agenda { grid-template-columns: 1fr; }
+        .main.charla-main-wide { max-width: calc(100vw - 12px); }
+        .charla-card.context,
+        .charla-card.agenda,
+        .charla-card.observ,
+        .charla-card.map,
+        .charla-card.summary,
+        .charla-card.save { grid-column: span 12; }
       }
+
 
       /* Sidebar overlay improvement */
       .overlay.show {
@@ -4423,7 +4436,7 @@
                 </div>
               </header>
 
-              <main className="main">
+              <main className={`main ${grupo === 'charla-detalle' ? 'charla-main-wide' : ''}`}>
                 {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : isMobile && mobileTab === 'mapa' ? (<section className="panel"><h2>Mapa</h2><div className="hint">Vista de mapa próxima versión.</div></section>) : effectiveSelectedForm === 'notificaciones' ? (
                   <section className="panel profile-view">
                     <h2>Notificaciones</h2>
@@ -5028,59 +5041,50 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                       </div>
                     ) : grupo === 'charla-detalle' ? (
                       <div className="charla-studio">
-                        <div className="charla-main">
-                          <section className="charla-panel">
-                            <h4>Charla Informativa · Planificación</h4>
-                            <div className="charla-core-grid">
-                              <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio/proyecto" /></div>
-                              <div className="field"><label>Nombre del servicio</label><input value={charlaForm.nombreServicio} onChange={(e) => setCharlaField('nombreServicio', e.target.value)} type="text" placeholder="Servicio a presentar" /></div>
-                              <div className="field"><label>Estado automático</label><div className="charla-status-chip">{charlaAutoStatus}</div></div>
-                            </div>
-                          </section>
+                        <section className="charla-card context">
+                          <h4>Charla · Planificación</h4>
+                          <div className="charla-core-grid">
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio/proyecto" /></div>
+                            <div className="field"><label>Nombre del servicio</label><input value={charlaForm.nombreServicio} onChange={(e) => setCharlaField('nombreServicio', e.target.value)} type="text" placeholder="Servicio a presentar" /></div>
+                            <div className="field"><label>Estado automático</label><div className="charla-status-chip">{charlaAutoStatus}</div></div>
+                          </div>
+                        </section>
 
-                          <section className="charla-panel">
-                            <h4>Agenda y responsable</h4>
-                            <div className="charla-agenda">
-                              <div className="field"><label>Responsable de la charla</label><input value={charlaForm.responsableCharla} onChange={(e) => setCharlaField('responsableCharla', e.target.value)} type="text" placeholder="Nombre y apellido" /></div>
-                              <div className="field"><label>Fecha</label><input value={charlaForm.fecha} onChange={(e) => setCharlaField('fecha', e.target.value)} type="date" /></div>
-                              <div className="field"><label>Hora</label><input value={charlaForm.horario} onChange={(e) => setCharlaField('horario', e.target.value)} type="time" /></div>
-                            </div>
-                          </section>
+                        <section className="charla-card agenda">
+                          <h4>Agenda y responsable</h4>
+                          <div className="charla-agenda">
+                            <div className="field"><label>Responsable de la charla</label><input value={charlaForm.responsableCharla} onChange={(e) => setCharlaField('responsableCharla', e.target.value)} type="text" placeholder="Nombre y apellido" /></div>
+                            <div className="field"><label>Fecha</label><input value={charlaForm.fecha} onChange={(e) => setCharlaField('fecha', e.target.value)} type="date" /></div>
+                            <div className="field"><label>Hora</label><input value={charlaForm.horario} onChange={(e) => setCharlaField('horario', e.target.value)} type="time" /></div>
+                          </div>
+                        </section>
 
-                          <section className="charla-panel charla-observ">
-                            <h4>Observaciones para el día de la charla</h4>
-                            <textarea value={charlaForm.observaciones} onChange={(e) => setCharlaField('observaciones', e.target.value)} placeholder="Accesos, comisión/administración, recomendaciones logísticas, etc." />
-                          </section>
+                        <section className="charla-card observ charla-observ">
+                          <h4>Observaciones del día</h4>
+                          <textarea value={charlaForm.observaciones} onChange={(e) => setCharlaField('observaciones', e.target.value)} placeholder="Accesos, comisión/administración, recomendaciones logísticas, etc." />
+                        </section>
 
-                          <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
-                        </div>
+                        <section className="charla-card map">
+                          <h4>Ubicación y mapa</h4>
+                          <div className="field" style={{ marginBottom: 10 }}><label>Dirección completa</label><input value={charlaForm.direccion} onChange={(e) => setCharlaField('direccion', e.target.value)} type="text" placeholder="Calle, altura, ciudad" /></div>
+                          <div className="charla-map-wrap">
+                            {charlaMapUrl ? (
+                              <iframe title="Mapa charla" src={charlaMapUrl} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+                            ) : (
+                              <div className="charla-map-empty">Ingresá la dirección para previsualizar el lugar de la presentación.</div>
+                            )}
+                          </div>
+                        </section>
 
-                        <aside className="charla-side">
-                          <section className="charla-panel">
-                            <h4>Ubicación y mapa</h4>
-                            <div className="field" style={{ marginBottom: 10 }}><label>Dirección completa</label><input value={charlaForm.direccion} onChange={(e) => setCharlaField('direccion', e.target.value)} type="text" placeholder="Calle, altura, ciudad" /></div>
-                            <div className="charla-map-wrap">
-                              {charlaMapUrl ? (
-                                <iframe
-                                  title="Mapa charla"
-                                  src={charlaMapUrl}
-                                  loading="lazy"
-                                  referrerPolicy="no-referrer-when-downgrade"
-                                />
-                              ) : (
-                                <div className="charla-map-empty">Ingresá la dirección para previsualizar el lugar de la presentación.</div>
-                              )}
-                            </div>
-                          </section>
+                        <section className="charla-card summary">
+                          <h4>Resumen rápido</h4>
+                          <div className="charla-summary-item"><small>Estado</small><strong>{charlaAutoStatus}</strong></div>
+                          <div className="charla-summary-item"><small>Responsable</small><strong>{charlaForm.responsableCharla || '-'}</strong></div>
+                          <div className="charla-summary-item"><small>Fecha y hora</small><strong>{charlaForm.fecha || '-'} · {charlaForm.horario || '--:--'}</strong></div>
+                          <div className="charla-summary-item"><small>Dirección</small><strong>{charlaForm.direccion || '-'}</strong></div>
+                        </section>
 
-                          <section className="charla-panel">
-                            <h4>Resumen rápido</h4>
-                            <div className="charla-summary-item"><small>Estado</small><strong>{charlaAutoStatus}</strong></div>
-                            <div className="charla-summary-item"><small>Responsable</small><strong>{charlaForm.responsableCharla || '-'}</strong></div>
-                            <div className="charla-summary-item"><small>Fecha y hora</small><strong>{charlaForm.fecha || '-'} · {charlaForm.horario || '--:--'}</strong></div>
-                            <div className="charla-summary-item"><small>Dirección</small><strong>{charlaForm.direccion || '-'}</strong></div>
-                          </section>
-                        </aside>
+                        <section className="charla-card save"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></section>
                       </div>
 ) : (
                       <div className="compact-grid">
