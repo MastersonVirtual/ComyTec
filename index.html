@@ -2341,6 +2341,28 @@
         border: 2px solid rgba(15,23,42,.9);
       }
 
+      .topbar-back-btn {
+        border: 1px solid rgba(230,255,253,.3) !important;
+        background: rgba(31,41,55,.92) !important;
+        color: #e6fffd !important;
+        border-radius: 12px !important;
+        min-width: 86px;
+        min-height: 46px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .topbar-back-btn:hover { background: rgba(51,65,85,.96) !important; }
+
+      .topbar {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1700 !important;
+      }
+      .content { padding-top: 84px !important; }
+      @media (max-width: 768px) { .content { padding-top: 76px !important; } }
+
 
       .profile-view {
         display: grid;
@@ -2364,6 +2386,46 @@
       .profile-save-btn {
         max-width: 280px;
       }
+      .request-status-row {
+        margin-top: 10px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .status-action-btn {
+        border-radius: 10px;
+        padding: 8px 10px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .status-action-btn.resolve {
+        background: rgba(16, 185, 129, .25) !important;
+        border: 1px solid rgba(16, 185, 129, .45) !important;
+        color: #d1fae5 !important;
+      }
+      .status-action-btn.reject {
+        background: rgba(185, 28, 28, .25) !important;
+        border: 1px solid rgba(248, 113, 113, .45) !important;
+        color: #fee2e2 !important;
+      }
+      .status-action-btn.accept {
+        background: rgba(59, 130, 246, .24) !important;
+        border: 1px solid rgba(96, 165, 250, .48) !important;
+        color: #dbeafe !important;
+      }
+      .status-chip-inline {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .status-chip-inline.pending { background: rgba(245, 158, 11, .22); color: #fde68a; }
+      .status-chip-inline.resolved { background: rgba(16, 185, 129, .22); color: #bbf7d0; }
+      .status-chip-inline.rejected { background: rgba(239, 68, 68, .22); color: #fecaca; }
+
       .profile-logout-btn {
         background: rgba(78, 22, 22, .25) !important;
         border-color: rgba(170, 35, 35, .45) !important;
@@ -2372,6 +2434,104 @@
       .profile-logout-btn:hover {
         background: rgba(78, 22, 22, .38) !important;
       }
+
+      .main.charla-main-wide {
+        max-width: min(96vw, 1780px);
+      }
+
+      .charla-studio {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 16px;
+        align-items: stretch;
+      }
+      .charla-card {
+        border: 1px solid rgba(230,255,253,.24);
+        border-radius: 16px;
+        background: linear-gradient(145deg, rgba(0, 82, 85, .50), rgba(15, 23, 42, .34));
+        padding: 14px;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 10px 22px rgba(0,0,0,.16);
+      }
+      .charla-card h4 {
+        margin: 0 0 12px;
+        color: #e6fffd;
+        font-size: 14px;
+        letter-spacing: .02em;
+      }
+      .charla-card.context { grid-column: span 4; }
+      .charla-card.agenda { grid-column: span 4; }
+      .charla-card.observ { grid-column: span 4; }
+      .charla-card.map { grid-column: span 8; }
+      .charla-card.summary { grid-column: span 4; }
+      .charla-card.save { grid-column: span 12; padding: 10px; }
+
+      .charla-core-grid,
+      .charla-agenda {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .charla-status-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        border-radius: 12px;
+        border: 1px solid rgba(230,255,253,.24);
+        background: rgba(2,43,45,.46);
+        color: #e6fffd;
+        font-weight: 700;
+      }
+      .charla-map-wrap {
+        border: 1px solid rgba(230,255,253,.24);
+        border-radius: 12px;
+        overflow: hidden;
+        background: rgba(8,25,26,.45);
+        min-height: 340px;
+      }
+      .charla-map-empty {
+        min-height: 340px;
+        display: grid;
+        place-items: center;
+        color: #c8efeb;
+        font-size: 13px;
+        padding: 16px;
+        text-align: center;
+      }
+      .charla-map-wrap iframe {
+        width: 100%;
+        min-height: 340px;
+        border: 0;
+      }
+      .charla-observ textarea { min-height: 190px; }
+      .charla-summary-item {
+        border: 1px solid rgba(230,255,253,.2);
+        border-radius: 10px;
+        padding: 9px 10px;
+        background: rgba(255,255,255,.06);
+        margin-bottom: 8px;
+      }
+      .charla-summary-item:last-child { margin-bottom: 0; }
+      .charla-summary-item small { color: #bfe9e5; display: block; margin-bottom: 2px; }
+      .charla-summary-item strong { color: #fff; font-size: 13px; }
+
+      @media (max-width: 1280px) {
+        .charla-card.context,
+        .charla-card.agenda,
+        .charla-card.observ { grid-column: span 6; }
+        .charla-card.map,
+        .charla-card.summary { grid-column: span 12; }
+      }
+      @media (max-width: 760px) {
+        .main.charla-main-wide { max-width: calc(100vw - 12px); }
+        .charla-card.context,
+        .charla-card.agenda,
+        .charla-card.observ,
+        .charla-card.map,
+        .charla-card.summary,
+        .charla-card.save { grid-column: span 12; }
+      }
+
 
       /* Sidebar overlay improvement */
       .overlay.show {
@@ -2697,11 +2857,11 @@
 
       const charlaInicial = {
         nombreServicio: '',
+        responsableCharla: '',
         fecha: '',
         horario: '',
-        lugarReunion: '',
         direccion: '',
-        contactoReferencia: '',
+        observaciones: '',
       };
 
       function statusClass(value) {
@@ -3191,6 +3351,8 @@
 
         const [tipoAccion, setTipoAccion] = useState('');
         const [selectedForm, setSelectedForm] = useState('home');
+        const [formHistory, setFormHistory] = useState(['home']);
+        const skipHistoryPushRef = useRef(false);
         const [clienteId, setClienteId] = useState(generarClienteId());
         const [clienteIdAsociado, setClienteIdAsociado] = useState('');
         const [cliente, setCliente] = useState('');
@@ -3229,6 +3391,9 @@
         const [profileUserRequest, setProfileUserRequest] = useState('');
         const [profilePasswordRequest, setProfilePasswordRequest] = useState('');
         const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
+        const [userCredentialRequests, setUserCredentialRequests] = useState([]);
+        const [updatingRequestId, setUpdatingRequestId] = useState('');
+        const [acceptingRequestId, setAcceptingRequestId] = useState('');
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
@@ -3374,6 +3539,21 @@
           const start = (safeHistoryPage - 1) * HISTORY_PAGE_SIZE;
           return historyFilteredRows.slice(start, start + HISTORY_PAGE_SIZE);
         }, [historyFilteredRows, safeHistoryPage]);
+
+        function parseCharlaDateTime(row) {
+          const d = String(row?.fecha || '').trim();
+          const h = String(row?.horario || '').trim() || '00:00';
+          if (!d) return null;
+          const dt = new Date(`${d}T${h}`);
+          return Number.isNaN(dt.getTime()) ? null : dt;
+        }
+
+        const charlaHistoryRows = useMemo(() => (
+          visibleRows
+            .filter((r) => (r?.tipoAccion || '') === 'Charla' || (r?.formulario || '') === 'charla-informativa')
+            .slice()
+            .sort((a, b) => (parseCharlaDateTime(b)?.getTime() || 0) - (parseCharlaDateTime(a)?.getTime() || 0))
+        ), [visibleRows]);
 
         function buildServiceDetailText(r) {
           const lines = [
@@ -3656,15 +3836,35 @@
             .orderBy('creadoEn', 'desc')
             .limit(80)
             .onSnapshot((snapshot) => {
-              const next = snapshot.docs
-                .map((doc) => ({ id: doc.id, ...doc.data() }))
-                .filter((req) => req?.estado !== 'resuelta');
+              const next = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
               setAdminCredentialRequests(next);
             }, (error) => {
               console.error('Error leyendo solicitudes_credenciales:', error);
             });
           return () => unsub();
         }, [user, userRole]);
+
+        useEffect(() => {
+          if (!user?.uid) {
+            setUserCredentialRequests([]);
+            return;
+          }
+          const unsub = db.collection('solicitudes_credenciales')
+            .where('solicitanteUid', '==', user.uid)
+            .limit(50)
+            .onSnapshot((snapshot) => {
+              const next = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+              next.sort((a, b) => {
+                const av = a?.creadoEn?.seconds || 0;
+                const bv = b?.creadoEn?.seconds || 0;
+                return bv - av;
+              });
+              setUserCredentialRequests(next);
+            }, (error) => {
+              console.error('Error leyendo solicitudes del usuario:', error);
+            });
+          return () => unsub();
+        }, [user?.uid]);
 
         const isGerencia = userRole === 'gerentes';
         const isVendedor = userRole.includes('vendedor');
@@ -3684,6 +3884,17 @@
             setTipoAccion('');
           }
         }, [isGerencia, selectedForm]);
+
+        useEffect(() => {
+          if (skipHistoryPushRef.current) {
+            skipHistoryPushRef.current = false;
+            return;
+          }
+          setFormHistory((prev) => {
+            if (prev[prev.length - 1] === selectedForm) return prev;
+            return [...prev, selectedForm].slice(-40);
+          });
+        }, [selectedForm]);
 
         const effectiveSelectedForm = isGerencia ? 'dashboard-gerencia' : selectedForm;
 
@@ -3834,6 +4045,36 @@
           setCharlaForm((prev) => ({ ...prev, [key]: value }));
         }
 
+        function handleCharlaClienteIdChange(value) {
+          const nextId = value;
+          setClienteIdAsociado(nextId);
+          const clean = String(nextId || '').trim().toLowerCase();
+          if (!clean) return;
+          const match = visibleRows.find((r) => String(r?.clienteId || '').trim().toLowerCase() === clean);
+          if (!match) return;
+          const nextName = String(match?.nombreServicio || match?.cliente || '').trim();
+          if (nextName) setCharlaField('nombreServicio', nextName);
+        }
+
+        const charlaMapUrl = useMemo(() => {
+          const q = encodeURIComponent(String(charlaForm.direccion || '').trim());
+          if (!q) return '';
+          return `https://www.google.com/maps?q=${q}&output=embed`;
+        }, [charlaForm.direccion]);
+
+        const charlaAutoStatus = useMemo(() => {
+          if (!charlaForm.fecha) return 'Pendiente';
+          const base = `${charlaForm.fecha}T${charlaForm.horario || '00:00'}`;
+          const dt = new Date(base);
+          if (Number.isNaN(dt.getTime())) return 'Pendiente';
+          return dt.getTime() < Date.now() ? 'Realizada' : 'Pendiente';
+        }, [charlaForm.fecha, charlaForm.horario]);
+
+        useEffect(() => {
+          if (grupo !== 'charla-detalle') return;
+          setStatus((prev) => (prev === charlaAutoStatus ? prev : charlaAutoStatus));
+        }, [grupo, charlaAutoStatus]);
+
         function closeSidebar() {
           setMenuOpen(false);
           setOpenMenus({ nuevo: false, fact: false });
@@ -3946,8 +4187,8 @@
             Object.assign(doc, { ...bajaForm, formulario: 'baja-servicio' });
           }
           if (grupo === 'charla-detalle') {
-            if (!charlaForm.nombreServicio || !charlaForm.fecha || !charlaForm.horario || !charlaForm.lugarReunion) {
-              return alert('Completá al menos: Nombre de servicio, Fecha, Horario y Lugar de reunión.');
+            if (!charlaForm.responsableCharla || !charlaForm.fecha || !charlaForm.horario || !charlaForm.direccion) {
+              return alert('Completá al menos: Responsable, Fecha, Hora y Dirección.');
             }
             Object.assign(doc, { ...charlaForm, formulario: 'charla-informativa' });
           }
@@ -4026,6 +4267,26 @@
           setClientOperationId('');
         }
 
+        function goBackOneStep() {
+          if (selectedService) {
+            setSelectedService(null);
+            return;
+          }
+          if (formHistory.length <= 1) {
+            setSelectedForm('home');
+            setMobileTab('home');
+            setTipoAccion('');
+            return;
+          }
+          const previous = formHistory[formHistory.length - 2] || 'home';
+          skipHistoryPushRef.current = true;
+          setFormHistory((prev) => prev.slice(0, -1));
+          setSelectedForm(previous);
+          if (previous === 'home') setMobileTab('home');
+          if (previous !== 'servicio' && previous !== 'other') setTipoAccion('');
+          closeSidebar();
+        }
+
         function openProfileView() {
           setSelectedForm('perfil');
           setMobileTab('perfil');
@@ -4059,6 +4320,61 @@
             await batch.commit();
           } catch (error) {
             console.error('Error marcando notificaciones como leídas:', error);
+          }
+        }
+
+        function requestStatusLabel(status) {
+          if (status === 'aprobada') return 'Aprobada (esperando aceptación del usuario)';
+          if (status === 'aplicada') return 'Aplicada';
+          if (status === 'rechazada') return 'Rechazada';
+          return 'Pendiente';
+        }
+
+        async function updateCredentialRequestStatus(req, nextStatus) {
+          if (!isAdminUser || !req?.id) return;
+          setUpdatingRequestId(req.id);
+          try {
+            const patch = {
+              estado: nextStatus,
+              leidaPorAdmin: true,
+              actualizadaEn: firebase.firestore.FieldValue.serverTimestamp(),
+              resueltaPorUid: user?.uid || '',
+              resueltaPorEmail: user?.email || '',
+            };
+            if (nextStatus === 'aprobada') {
+              patch.credencialesInformadas = {
+                usuario: req?.nuevoUsuarioSolicitado || '',
+                password: req?.nuevaPasswordSolicitada || '',
+              };
+              patch.aceptadoPorUsuario = false;
+            }
+            await db.collection('solicitudes_credenciales').doc(req.id).set(patch, { merge: true });
+            setNotificacion({ mensaje: `✔ Solicitud marcada como ${nextStatus === 'aprobada' ? 'aprobada' : 'rechazada'}`, tipo: 'ok' });
+          } catch (error) {
+            console.error('Error actualizando estado de solicitud:', error);
+            setNotificacion({ mensaje: '✖ No se pudo actualizar la solicitud', tipo: 'error' });
+          } finally {
+            setUpdatingRequestId('');
+          }
+        }
+
+        async function handleUserAcceptCredentialChanges(req) {
+          if (!req?.id || !user?.uid) return;
+          setAcceptingRequestId(req.id);
+          try {
+            await db.collection('solicitudes_credenciales').doc(req.id).set({
+              estado: 'aplicada',
+              aceptadoPorUsuario: true,
+              aceptadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+              actualizadaEn: firebase.firestore.FieldValue.serverTimestamp(),
+            }, { merge: true });
+            setNotificacion({ mensaje: '✔ Cambios aceptados. Se cerrará tu sesión para ingresar con las nuevas credenciales.', tipo: 'ok' });
+            setTimeout(() => auth.signOut(), 900);
+          } catch (error) {
+            console.error('Error aceptando cambios de credenciales:', error);
+            setNotificacion({ mensaje: '✖ No se pudieron aceptar los cambios', tipo: 'error' });
+          } finally {
+            setAcceptingRequestId('');
           }
         }
 
@@ -4130,6 +4446,7 @@
                     </div>
                     <button className="menu-button" onClick={() => selectAction('Charla')}>Charlas informativas</button>
                     <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
+                    <button className="menu-button" onClick={() => { setSelectedForm('historial-charlas'); closeSidebar(); }}>Historial de Charlas</button>
                     {ENABLE_CLIENT_TRACKING_VIEW && isAdminUser && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}>Vista Clientes</button>}
                     {isAdminUser && <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}>Vista Gerencia</button>}
                   </>
@@ -4146,6 +4463,7 @@
             <div className={`content ${menuOpen ? 'shift' : ''}`}>
               <header className="topbar">
                 {!isMobile && <button className="burger" aria-label="Abrir menú" onClick={toggleSidebar}><span className="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>}
+                {(selectedForm !== 'home' || !!selectedService) && <button className="topbar-back-btn" type="button" onClick={goBackOneStep}>← Atrás</button>}
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
                   <p className="subtitle-voga">{topbarSubtitle}</p>
@@ -4201,22 +4519,39 @@
                 </div>
               </header>
 
-              <main className="main">
+              <main className={`main ${grupo === 'charla-detalle' ? 'charla-main-wide' : ''}`}>
                 {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : isMobile && mobileTab === 'mapa' ? (<section className="panel"><h2>Mapa</h2><div className="hint">Vista de mapa próxima versión.</div></section>) : effectiveSelectedForm === 'notificaciones' ? (
                   <section className="panel profile-view">
                     <h2>Notificaciones</h2>
                     <div className="hint">Solicitudes recibidas para cambio de usuario y contraseña.</div>
-                    {adminPendingRequests.length === 0 ? (
-                      <div className="profile-option">No hay solicitudes pendientes.</div>
+                    {!isAdminUser ? (
+                      <div className="profile-option">Solo administradores pueden ver esta sección.</div>
+                    ) : adminCredentialRequests.length === 0 ? (
+                      <div className="profile-option">No hay solicitudes registradas.</div>
                     ) : (
-                      adminPendingRequests.map((req) => (
+                      adminCredentialRequests.map((req) => (
                         <article className="profile-option" key={req.id}>
-                          <h3>{req.solicitanteNombre || req.solicitanteEmail || 'Usuario'}</h3>
+                          <h3>
+                            {req.solicitanteNombre || req.solicitanteEmail || 'Usuario'}
+                            <span className={`status-chip-inline ${req.estado === 'aprobada' || req.estado === 'aplicada' ? 'resolved' : req.estado === 'rechazada' ? 'rejected' : 'pending'}`} style={{ marginLeft: 8 }}>
+                              {requestStatusLabel(req.estado)}
+                            </span>
+                          </h3>
                           <div className="kv"><b>Email:</b> {req.solicitanteEmail || '-'}</div>
                           <div className="kv"><b>Usuario solicitado:</b> {req.nuevoUsuarioSolicitado || '-'}</div>
                           <div className="kv"><b>Contraseña solicitada:</b> {req.nuevaPasswordSolicitada || '-'}</div>
-                          <div className="kv"><b>Estado:</b> {req.estado || 'pendiente'}</div>
-                          <div className="kv"><b>Fecha y hora:</b> {formatRequestDateTime(req.creadoEn)}</div>
+                          <div className="kv"><b>Fecha y hora de solicitud:</b> {formatRequestDateTime(req.creadoEn)}</div>
+                          <div className="kv"><b>Última actualización:</b> {formatRequestDateTime(req.actualizadaEn)}</div>
+                          {req.estado === 'pendiente' && (
+                            <div className="request-status-row">
+                              <button type="button" className="status-action-btn resolve" disabled={updatingRequestId === req.id} onClick={() => updateCredentialRequestStatus(req, 'aprobada')}>
+                                {updatingRequestId === req.id ? 'Actualizando...' : 'Marcar aprobada'}
+                              </button>
+                              <button type="button" className="status-action-btn reject" disabled={updatingRequestId === req.id} onClick={() => updateCredentialRequestStatus(req, 'rechazada')}>
+                                {updatingRequestId === req.id ? 'Actualizando...' : 'Marcar rechazada'}
+                              </button>
+                            </div>
+                          )}
                         </article>
                       ))
                     )}
@@ -4242,6 +4577,34 @@
                         />
                         <button className="save-btn profile-save-btn" type="submit">Enviar solicitud</button>
                       </form>
+                    </article>
+                    <article className="profile-option">
+                      <h3>Estado de mis solicitudes</h3>
+                      {userCredentialRequests.length === 0 ? (
+                        <div className="kv">Todavía no registraste solicitudes.</div>
+                      ) : (
+                        userCredentialRequests.slice(0, 5).map((req) => (
+                          <div key={req.id} style={{ marginBottom: 8 }}>
+                            <div className="kv"><b>Estado:</b> {requestStatusLabel(req.estado)}</div>
+                            <div className="kv"><b>Fecha:</b> {formatRequestDateTime(req.creadoEn)}</div>
+                            {(req.estado === 'aprobada' || req.estado === 'aplicada') && req?.credencialesInformadas && (
+                              <div className="kv"><b>Credenciales informadas:</b> {req.credencialesInformadas.usuario || '-'} / {req.credencialesInformadas.password || '-'}</div>
+                            )}
+                            {req.estado === 'aprobada' && !req.aceptadoPorUsuario && (
+                              <div className="request-status-row">
+                                <button
+                                  type="button"
+                                  className="status-action-btn accept"
+                                  onClick={() => handleUserAcceptCredentialChanges(req)}
+                                  disabled={acceptingRequestId === req.id}
+                                >
+                                  {acceptingRequestId === req.id ? 'Aplicando...' : 'Aceptar cambios y cerrar sesión'}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        ))
+                      )}
                     </article>
                     <button className="logout-btn profile-logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar sesión</button>
                   </section>
@@ -4368,7 +4731,33 @@
                       })}
                     </div>
                   </section>
-) : effectiveSelectedForm === 'historial' ? (
+) : effectiveSelectedForm === 'historial-charlas' ? (
+                  <section className="panel">
+                    <h2>Historial de Charlas Informativas</h2>
+                    <div className="hint">Charlas registradas por fecha y hora (más reciente primero).</div>
+                    {charlaHistoryRows.length === 0 ? (
+                      <div className="hint" style={{ marginBottom: 0 }}>No hay charlas registradas todavía.</div>
+                    ) : (
+                      <div className="history-list">
+                        {charlaHistoryRows.map((row) => (
+                          <div className="history-row" key={`charla-${row.id}`}>
+                            <button type="button" className="ranking-service-btn" onClick={() => { setSelectedService(row); setSelectedForm('historial'); }}>
+                              <div className="history-row-main">
+                                <strong>{row.nombreServicio || 'Charla sin nombre'}</strong>
+                                <div className="history-row-meta">
+                                  <span>ID {row.clienteId || '-'}</span><span>·</span>
+                                  <span>{row.responsableCharla || 'Sin responsable'}</span><span>·</span>
+                                  <span>{row.fecha || '-'} {row.horario || '--:--'}</span>
+                                </div>
+                              </div>
+                            </button>
+                            <span className={statusClass(row.status || row.estado)}>{row.status || row.estado || 'Pendiente'}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                ) : effectiveSelectedForm === 'historial' ? (
                   <section className="panel">
                     <h2>Historial de Servicios · Vista Ejecutiva</h2>
                     <div className="hint">Rediseño escalable con filtros, paginación y vista rápida para manejar alto volumen de servicios.</div>
@@ -4760,40 +5149,51 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     ) : grupo === 'charla-detalle' ? (
-                      <div className="service-layout">
-                        <div className="service-card">
-                          <h3>Charla Informativa</h3>
-                          <div className="card-grid">
-                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio/proyecto" /></div>
-                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                      <div className="charla-studio">
+                        <section className="charla-card context">
+                          <h4>Charla · Planificación</h4>
+                          <div className="charla-core-grid">
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => handleCharlaClienteIdChange(e.target.value)} type="text" placeholder="ID del servicio/proyecto" /></div>
+                            <div className="field"><label>Nombre del servicio</label><input value={charlaForm.nombreServicio} onChange={(e) => setCharlaField('nombreServicio', e.target.value)} type="text" placeholder="Servicio a presentar" /></div>
+                            <div className="field"><label>Estado automático</label><div className="charla-status-chip">{charlaAutoStatus}</div></div>
                           </div>
-                        </div>
+                        </section>
 
-                        <div className="service-card">
-                          <h3>1. Identificación del Evento</h3>
-                          <div className="card-grid">
-                            <div className="field span-2"><label>Nombre de servicio</label><input value={charlaForm.nombreServicio} onChange={(e) => setCharlaField('nombreServicio', e.target.value)} type="text" /></div>
+                        <section className="charla-card agenda">
+                          <h4>Agenda y responsable</h4>
+                          <div className="charla-agenda">
+                            <div className="field"><label>Responsable de la charla</label><input value={charlaForm.responsableCharla} onChange={(e) => setCharlaField('responsableCharla', e.target.value)} type="text" placeholder="Nombre y apellido" /></div>
                             <div className="field"><label>Fecha</label><input value={charlaForm.fecha} onChange={(e) => setCharlaField('fecha', e.target.value)} type="date" /></div>
-                            <div className="field"><label>Horario</label><input value={charlaForm.horario} onChange={(e) => setCharlaField('horario', e.target.value)} type="time" /></div>
+                            <div className="field"><label>Hora</label><input value={charlaForm.horario} onChange={(e) => setCharlaField('horario', e.target.value)} type="time" /></div>
                           </div>
-                        </div>
+                        </section>
 
-                        <div className="service-card">
-                          <h3>2. Localización y Logística</h3>
-                          <div className="card-grid">
-                            <div className="field span-2"><label>Lugar de Reunión</label><input value={charlaForm.lugarReunion} onChange={(e) => setCharlaField('lugarReunion', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Dirección</label><input value={charlaForm.direccion} onChange={(e) => setCharlaField('direccion', e.target.value)} type="text" /></div>
+                        <section className="charla-card observ charla-observ">
+                          <h4>Observaciones del día</h4>
+                          <textarea value={charlaForm.observaciones} onChange={(e) => setCharlaField('observaciones', e.target.value)} placeholder="Accesos, comisión/administración, recomendaciones logísticas, etc." />
+                        </section>
+
+                        <section className="charla-card map">
+                          <h4>Ubicación y mapa</h4>
+                          <div className="field" style={{ marginBottom: 10 }}><label>Dirección completa</label><input value={charlaForm.direccion} onChange={(e) => setCharlaField('direccion', e.target.value)} type="text" placeholder="Calle, altura, ciudad" /></div>
+                          <div className="charla-map-wrap">
+                            {charlaMapUrl ? (
+                              <iframe title="Mapa charla" src={charlaMapUrl} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
+                            ) : (
+                              <div className="charla-map-empty">Ingresá la dirección para previsualizar el lugar de la presentación.</div>
+                            )}
                           </div>
-                        </div>
+                        </section>
 
-                        <div className="service-card">
-                          <h3>3. Contacto en el Sitio</h3>
-                          <div className="card-grid">
-                            <div className="field span-3"><label>Contacto de Referencia para la Charla</label><input value={charlaForm.contactoReferencia} onChange={(e) => setCharlaField('contactoReferencia', e.target.value)} type="text" placeholder="Nombre y teléfono" /></div>
-                          </div>
-                        </div>
+                        <section className="charla-card summary">
+                          <h4>Resumen rápido</h4>
+                          <div className="charla-summary-item"><small>Estado</small><strong>{charlaAutoStatus}</strong></div>
+                          <div className="charla-summary-item"><small>Responsable</small><strong>{charlaForm.responsableCharla || '-'}</strong></div>
+                          <div className="charla-summary-item"><small>Fecha y hora</small><strong>{charlaForm.fecha || '-'} · {charlaForm.horario || '--:--'}</strong></div>
+                          <div className="charla-summary-item"><small>Dirección</small><strong>{charlaForm.direccion || '-'}</strong></div>
+                        </section>
 
-                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
+                        <section className="charla-card save"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></section>
                       </div>
 ) : (
                       <div className="compact-grid">
@@ -4869,6 +5269,9 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                       <div className="mobile-fab-section mobile-fab-links">
                         <button className="mobile-fab-link" type="button" onClick={() => { setFabOpen(false); setSelectedForm('historial'); setMobileTab('historial'); }}>
                           Historial de servicios
+                        </button>
+                        <button className="mobile-fab-link" type="button" onClick={() => { setFabOpen(false); setSelectedForm('historial-charlas'); setMobileTab('historial'); }}>
+                          Historial de charlas
                         </button>
                         {ENABLE_CLIENT_TRACKING_VIEW && isAdminUser && (
                           <button className="mobile-fab-link" type="button" onClick={() => { setFabOpen(false); setShowClientViewModal(true); }}>
