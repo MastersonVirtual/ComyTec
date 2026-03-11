@@ -1526,6 +1526,49 @@
         display: grid;
         gap: 10px;
       }
+      .mobile-section-stack {
+        display: grid;
+        gap: 12px;
+      }
+      .mobile-section-card {
+        border-radius: 18px;
+        padding: 14px;
+        background: rgba(255,255,255,.06);
+        border: 1px solid rgba(255,255,255,.14);
+      }
+      .mobile-section-title {
+        margin: 0 0 10px;
+        font-size: .9rem;
+        font-weight: 800;
+        letter-spacing: .03em;
+      }
+      .mobile-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .mobile-action-btn {
+        min-height: 44px;
+        border-radius: 12px;
+        border: 1px solid rgba(0,100,101,.2);
+        background: rgba(255,255,255,.74);
+        color: #006465;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 10px;
+        text-align: left;
+      }
+      .mobile-list-button {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid rgba(0,100,101,.2);
+        background: rgba(255,255,255,.74);
+        color: #006465;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 10px;
+        text-align: left;
+      }
       .mobile-service-card {
         border-radius: 18px;
         padding: 12px;
@@ -1546,9 +1589,23 @@
       }
       .mobile-rep {
         margin-top: 8px;
-        text-align: right;
+        text-align: left;
         color: #b8d8d5;
         font-size: 12px;
+      }
+      .mobile-service-meta {
+        margin-top: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .mobile-meta-pill {
+        border-radius: 999px;
+        border: 1px solid rgba(0,100,101,.2);
+        background: rgba(255,255,255,.74);
+        color: #006465;
+        font-size: 10px;
+        padding: 3px 8px;
       }
       .mobile-fab-menu {
         position: fixed;
@@ -2671,6 +2728,33 @@
 
         .service-card {
           padding: 12px !important;
+        }
+
+        .mobile-section-card {
+          border-radius: 16px;
+          background: linear-gradient(170deg, rgba(12, 46, 45, .9), rgba(6, 29, 29, .92)) !important;
+          border: 1px solid rgba(120, 226, 213, .22) !important;
+        }
+
+        .mobile-section-title {
+          color: #efffff !important;
+          font-size: .86rem;
+          text-transform: uppercase;
+        }
+
+        .mobile-action-btn,
+        .mobile-list-button {
+          background: rgba(5, 59, 56, .7) !important;
+          border: 1px solid rgba(120, 226, 213, .2) !important;
+          color: #e9ffff !important;
+          min-height: 42px;
+          font-size: 11.5px;
+        }
+
+        .mobile-meta-pill {
+          background: rgba(5, 59, 56, .62) !important;
+          border: 1px solid rgba(120, 226, 213, .2) !important;
+          color: #d7fffa;
         }
 
         .field {
@@ -4373,13 +4457,77 @@
         }
 
         function renderMobileHome() {
+          const today = new Date().toLocaleDateString('es-AR', { weekday: 'long', day: '2-digit', month: 'short' });
+          const recentServices = visibleRows.slice(0, 4);
           return (
-            <section className="panel" style={{ background: 'transparent', border: 0, padding: 0, boxShadow: 'none' }}>
-              <div className="mobile-bento">
-                <article className="mobile-capsule"><div className="title">Servicios</div><div className="value">{visibleRows.length}</div></article>
-                <article className="mobile-capsule"><div className="title">Pendientes</div><div className="value">{kpiStats.pending}</div></article>
-                <article className="mobile-capsule"><div className="title">En curso</div><div className="value">{kpiStats.inprogress}</div></article>
-                <article className="mobile-capsule"><div className="title">Completados</div><div className="value">{kpiStats.completed}</div></article>
+            <section className="mobile-section-stack">
+              <div className="mobile-section-card">
+                <h3 className="mobile-section-title">Resumen operativo</h3>
+                <div className="hint" style={{ marginBottom: 10 }}>{today}</div>
+                <div className="mobile-bento">
+                  <article className="mobile-capsule"><div className="title">Servicios</div><div className="value">{visibleRows.length}</div></article>
+                  <article className="mobile-capsule"><div className="title">Pendientes</div><div className="value">{kpiStats.pending}</div></article>
+                  <article className="mobile-capsule"><div className="title">En curso</div><div className="value">{kpiStats.inprogress}</div></article>
+                  <article className="mobile-capsule"><div className="title">Completados</div><div className="value">{kpiStats.completed}</div></article>
+                </div>
+              </div>
+
+              <div className="mobile-section-card">
+                <h3 className="mobile-section-title">Accesos rápidos</h3>
+                <div className="mobile-actions-grid">
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Nuevo Servicio')}>Nuevo servicio</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Obra')}>Nueva obra</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Novación')}>Novación</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Agregado')}>Agregado</button>
+                </div>
+              </div>
+
+              <div className="mobile-section-card">
+                <h3 className="mobile-section-title">Actividad reciente</h3>
+                <div className="mobile-service-stack">
+                  {recentServices.length === 0 ? <div className="hint">No hay servicios cargados.</div> : recentServices.map((r) => (
+                    <article key={r.id} className="mobile-service-card" onClick={() => { setSelectedService(r); setSelectedForm('historial'); }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
+                        <strong>{r.nombreServicio || r.cliente || 'Servicio sin nombre'}</strong>
+                        <span className={statusClass(getStatusLabel(r))}>{getStatusLabel(r)}</span>
+                      </div>
+                      <div className="mobile-rep">{r.representanteComercial || 'Sin representante'}</div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </section>
+          );
+        }
+
+        function renderMobileActions() {
+          return (
+            <section className="mobile-section-stack">
+              <div className="mobile-section-card">
+                <h3 className="mobile-section-title">Carga operativa</h3>
+                <div className="mobile-actions-grid">
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Nuevo Servicio')}>Servicio</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Obra')}>Obra</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Movimiento de Obra')}>Movimiento</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Baja')}>Baja</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Agregado')}>Agregado</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Charla')}>Charla</button>
+                </div>
+              </div>
+
+              <div className="mobile-section-card">
+                <h3 className="mobile-section-title">Módulos de consulta</h3>
+                <button type="button" className="mobile-list-button" onClick={() => { setMobileTab('historial'); setSelectedForm('historial'); setSelectedService(null); }}>Ver historial de servicios</button>
+                <div style={{ height: 8 }} />
+                <button type="button" className="mobile-list-button" onClick={() => { setMobileTab('historial'); setSelectedForm('historial-charlas'); setSelectedService(null); }}>Ver historial de charlas</button>
+                <div style={{ height: 8 }} />
+                <button type="button" className="mobile-list-button" onClick={() => setSelectedForm('ranking-comercial')}>Ranking comercial</button>
+                {isAdminUser && (
+                  <>
+                    <div style={{ height: 8 }} />
+                    <button type="button" className="mobile-list-button" onClick={() => setSelectedForm('dashboard-gerencia')}>Dashboard gerencia</button>
+                  </>
+                )}
               </div>
             </section>
           );
@@ -4387,17 +4535,25 @@
 
         function renderMobileServices() {
           return (
-            <section className="panel" style={{ background: 'transparent', border: 0, padding: 0, boxShadow: 'none' }}>
+            <section className="mobile-section-stack">
+              <div className="mobile-section-card">
+                <h3 className="mobile-section-title">Servicios activos</h3>
+                <div className="hint" style={{ marginBottom: 10 }}>Toque un servicio para abrir su detalle.</div>
               <div className="mobile-service-stack">
                 {visibleRows.slice(0, 30).map((r) => (
                   <article key={r.id} className="mobile-service-card" onClick={() => { setSelectedService(r); setSelectedForm('historial'); }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
                       <strong>{r.nombreServicio || r.cliente || 'Servicio sin nombre'}</strong>
-                      <span className="status-badge">{r.status || r.estado || 'Pendiente'}</span>
+                      <span className={statusClass(getStatusLabel(r))}>{getStatusLabel(r)}</span>
                     </div>
                     <div className="mobile-rep">{r.representanteComercial || 'Sin representante'}</div>
+                    <div className="mobile-service-meta">
+                      <span className="mobile-meta-pill">ID: {r.clienteId || '-'}</span>
+                      <span className="mobile-meta-pill">Alta: {r.fechaAlta || '-'}</span>
+                    </div>
                   </article>
                 ))}
+              </div>
               </div>
             </section>
           );
@@ -4672,7 +4828,7 @@
               </header>
 
               <main className={`main ${grupo === 'charla-detalle' ? 'charla-main-wide' : ''}`}>
-                {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : isMobile && mobileTab === 'mapa' ? (<section className="panel"><h2>Mapa</h2><div className="hint">Vista de mapa próxima versión.</div></section>) : effectiveSelectedForm === 'notificaciones' ? (
+                {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'acciones' && effectiveSelectedForm === 'home' ? renderMobileActions() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : effectiveSelectedForm === 'notificaciones' ? (
                   <section className="panel profile-view">
                     <h2>Notificaciones</h2>
                     <div className="hint">Solicitudes recibidas para cambio de usuario y contraseña.</div>
@@ -5404,6 +5560,10 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                     <button className={mobileTab === 'home' && selectedForm === 'home' ? 'active' : ''} type="button" onClick={() => { setMobileTab('home'); setSelectedForm('home'); }}>
                       <i data-lucide="house" />
                       <span className="mobile-nav-label">Inicio</span>
+                    </button>
+                    <button className={mobileTab === 'acciones' && selectedForm === 'home' ? 'active' : ''} type="button" onClick={() => { setMobileTab('acciones'); setSelectedForm('home'); }}>
+                      <i data-lucide="sparkles" />
+                      <span className="mobile-nav-label">Acciones</span>
                     </button>
                     <button className={mobileTab === 'servicios' ? 'active' : ''} type="button" onClick={() => { setMobileTab('servicios'); setSelectedForm('home'); }}>
                       <i data-lucide="layers" />
