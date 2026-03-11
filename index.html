@@ -2978,6 +2978,142 @@
         }
       }
 
+
+      @media (max-width: 768px) {
+        body {
+          background:
+            radial-gradient(70% 35% at 50% -5%, rgba(0, 251, 255, .2), transparent 70%),
+            radial-gradient(60% 40% at 100% 0%, rgba(0, 100, 101, .36), transparent 80%),
+            linear-gradient(180deg, #010508 0%, #030a13 45%, #02070d 100%) !important;
+          color: #e9fdff !important;
+        }
+        .topbar {
+          border-radius: 0 0 22px 22px !important;
+          padding: 12px !important;
+          background: rgba(4, 14, 23, .7) !important;
+          border-bottom: 1px solid rgba(0, 251, 255, .28) !important;
+          box-shadow: 0 0 0 .5px rgba(0, 251, 255, .5), 0 14px 30px rgba(0, 5, 14, .55) !important;
+          backdrop-filter: blur(22px) saturate(130%);
+          display: flex !important;
+          align-items: center !important;
+        }
+        .top-titles h1 {
+          font-size: .98rem !important;
+          color: #e9fdff !important;
+          margin: 0 !important;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .top-titles h1::before {
+          content: 'M';
+          width: 30px;
+          height: 30px;
+          border-radius: 9px;
+          display: inline-grid;
+          place-items: center;
+          color: #00fbff;
+          background: rgba(0, 100, 101, .35);
+          box-shadow: 0 0 16px rgba(0,251,255,.42);
+        }
+        .top-titles p { color: #8cc1c8 !important; font-size: .68rem !important; margin-top: 2px !important; }
+        .mobile-admin { font-size:.66rem; color:#00fbff; text-transform: uppercase; letter-spacing: .07em; margin-left:auto; }
+        .main { margin: 0; padding: 12px 12px calc(var(--mobile-nav-height) + 24px) !important; }
+        .mobile-neural-screen { display: grid; gap: 14px; }
+        .mobile-neural-card {
+          background: rgba(6, 16, 26, 0.58) !important;
+          backdrop-filter: blur(25px) saturate(140%);
+          border: 1px solid transparent !important;
+          border-radius: 18px;
+          padding: 14px;
+          position: relative;
+          box-shadow: 0 0 0 .5px rgba(0, 251, 255, .55), 0 0 30px rgba(0, 251, 255, .18), 0 20px 44px rgba(0, 8, 18, .58);
+          animation: levitate 4s ease-in-out infinite;
+        }
+        .mobile-neural-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: inherit;
+          padding: .5px;
+          background: linear-gradient(120deg, #006465, #00fbff, rgba(0, 251, 255, .1));
+          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          pointer-events: none;
+        }
+        .mobile-section-title { color:#dfffff !important; font-size:.78rem; letter-spacing:.08em; text-transform:uppercase; margin-bottom:10px; }
+        .mobile-bento { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+        .mobile-capsule {
+          background: rgba(255,255,255,.08) !important;
+          border: 1px solid rgba(255,255,255,.08) !important;
+          border-radius: 14px;
+          min-height: 88px;
+          box-shadow: 0 0 18px rgba(0, 251, 255, .12);
+        }
+        .mobile-capsule .title { color:#a8cdcf !important; font-size:.68rem; text-transform:uppercase; }
+        .mobile-capsule .value { color:#f4ffff !important; font-family: 'Orbitron', 'Rajdhani', monospace; font-size: 2rem; line-height:1; }
+        .capsule-active { box-shadow: 0 0 22px rgba(0, 251, 255, .24); }
+        .capsule-danger { box-shadow: 0 0 22px rgba(255, 88, 125, .3); }
+        .capsule-warn { box-shadow: 0 0 22px rgba(255, 192, 92, .3); }
+        .mobile-actions-grid { grid-template-columns: repeat(4,minmax(0,1fr)); gap:10px; }
+        .mobile-action-btn {
+          min-height: 74px;
+          display:flex; flex-direction:column; justify-content:center; align-items:center; gap:5px;
+          border-radius: 999px !important;
+          background: rgba(4, 20, 30, .72) !important;
+          border: 1px solid rgba(0,251,255,.3) !important;
+          color:#dffcff !important;
+          font-size:.62rem;
+          text-transform: uppercase;
+          box-shadow: 0 0 16px rgba(0,251,255,.2);
+        }
+        .mobile-action-btn span { font-size: 1.25rem; line-height:1; }
+        .mobile-timeline { display:grid; gap:10px; position:relative; padding-left: 10px; }
+        .mobile-timeline::before { content:''; position:absolute; left: 6px; top: 2px; bottom: 2px; width:2px; background: linear-gradient(#00fbff, rgba(0,251,255,.12)); }
+        .mobile-service-card {
+          position:relative;
+          background: rgba(255,255,255,.06) !important;
+          border: 1px solid rgba(0, 251, 255, .25) !important;
+          padding: 12px 10px 12px 16px;
+          border-radius: 14px;
+        }
+        .timeline-dot { position:absolute; left:-9px; top: 22px; width:10px; height:10px; border-radius:999px; }
+        .timeline-ok { background:#3dff9f; box-shadow:0 0 12px rgba(61,255,159,.8); }
+        .timeline-alert { background:#ff4b73; box-shadow:0 0 12px rgba(255,75,115,.8); }
+        .timeline-neutral { background:#8ea3b8; box-shadow:0 0 10px rgba(142,163,184,.5); }
+        .timeline-status { font-size:.62rem; text-transform:uppercase; letter-spacing:.06em; padding:3px 6px; border-radius: 999px; border:1px solid currentColor; }
+        .mobile-rep { color:#9ec7ce !important; font-size:.69rem; }
+        .mobile-service-meta { display:grid; grid-template-columns:1fr; gap:6px; }
+        .mobile-meta-pill {
+          background: rgba(1, 10, 16, .76) !important;
+          border: 1px solid rgba(0, 251, 255, .2) !important;
+          color: #d9f9ff !important;
+          font-size:.62rem;
+        }
+        .mobile-bottom-nav {
+          background: rgba(2, 10, 16, .94) !important;
+          border-top: 1px solid rgba(0,251,255,.2);
+          box-shadow: 0 -8px 24px rgba(0, 0, 0, .42), 0 -1px 0 rgba(0,251,255,.3);
+        }
+        .mobile-bottom-nav button,
+        .mobile-bottom-nav button i,
+        .mobile-bottom-nav button svg { color:#8fdce2 !important; stroke:#8fdce2 !important; }
+        .mobile-bottom-nav button.active,
+        .mobile-bottom-nav button.active i,
+        .mobile-bottom-nav button.active svg { color:#00fbff !important; stroke:#00fbff !important; text-shadow:0 0 10px rgba(0,251,255,.7); }
+        .app-footer {
+          opacity: .3;
+          color: #00fbff !important;
+          text-shadow: 0 0 8px rgba(0,251,255,.45);
+        }
+      }
+
+      @keyframes levitate {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-2px); }
+      }
+
     </style>
 
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -4493,43 +4629,54 @@
         }
 
         function renderMobileHome() {
-          const today = new Date().toLocaleDateString('es-AR', { weekday: 'long', day: '2-digit', month: 'short' });
           const recentServices = visibleRows.slice(0, 4);
           return (
-            <section className="mobile-section-stack">
-              <div className="mobile-section-card">
-                <h3 className="mobile-section-title">Resumen operativo</h3>
-                <div className="hint" style={{ marginBottom: 10 }}>{today}</div>
+            <section className="mobile-neural-screen">
+              <div className="mobile-neural-card">
+                <h3 className="mobile-section-title">Resumen Operativo Neural</h3>
                 <div className="mobile-bento">
-                  <article className="mobile-capsule"><div className="title">Servicios</div><div className="value">{visibleRows.length}</div></article>
-                  <article className="mobile-capsule"><div className="title">Pendientes</div><div className="value">{kpiStats.pending}</div></article>
-                  <article className="mobile-capsule"><div className="title">En curso</div><div className="value">{kpiStats.inprogress}</div></article>
-                  <article className="mobile-capsule"><div className="title">Completados</div><div className="value">{kpiStats.completed}</div></article>
+                  <article className="mobile-capsule capsule-active"><div className="title">Proyecto</div><div className="value">{visibleRows.length}</div></article>
+                  <article className="mobile-capsule capsule-danger"><div className="title">Pendientes críticos</div><div className="value">{kpiStats.pending}</div></article>
+                  <article className="mobile-capsule capsule-warn"><div className="title">Jornales</div><div className="value">{visibleRows.reduce((acc, r) => acc + (Number(r.cantidadJornalesEstimados) || 0), 0)}</div></article>
+                  <article className="mobile-capsule capsule-neutral"><div className="title">Referentes</div><div className="value">{visibleRows.filter((r) => (r.referenteInstalacion || r.personaReferenteComision)).length}</div></article>
                 </div>
               </div>
 
-              <div className="mobile-section-card">
-                <h3 className="mobile-section-title">Accesos rápidos</h3>
+              <div className="mobile-neural-card">
+                <h3 className="mobile-section-title">Accesos rápidos espaciales</h3>
                 <div className="mobile-actions-grid">
-                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Nuevo Servicio')}>Nuevo servicio</button>
-                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Obra')}>Nueva obra</button>
-                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Novación')}>Novación</button>
-                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Agregado')}>Agregado</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Nuevo Servicio')}><span>✚</span>Nuevo Servicio</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Obra')}><span>🏗</span>Nueva Obra</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Novación')}><span>⇄</span>Novación</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Agregado')}><span>◉</span>Agregado</button>
                 </div>
               </div>
 
-              <div className="mobile-section-card">
-                <h3 className="mobile-section-title">Actividad reciente</h3>
-                <div className="mobile-service-stack">
-                  {recentServices.length === 0 ? <div className="hint">No hay servicios cargados.</div> : recentServices.map((r) => (
-                    <article key={r.id} className="mobile-service-card" onClick={() => { setSelectedService(r); setSelectedForm('historial'); }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
-                        <strong>{r.nombreServicio || r.cliente || 'Servicio sin nombre'}</strong>
-                        <span className={statusClass(getStatusLabel(r))}>{getStatusLabel(r)}</span>
-                      </div>
-                      <div className="mobile-rep">{r.representanteComercial || 'Sin representante'}</div>
-                    </article>
-                  ))}
+              <div className="mobile-neural-card">
+                <h3 className="mobile-section-title">Actividad reciente en tiempo real</h3>
+                <div className="mobile-timeline">
+                  {recentServices.length === 0 ? <div className="hint">No hay servicios cargados.</div> : recentServices.map((r) => {
+                    const statusText = getStatusLabel(r);
+                    const statusClassName = /en curso/i.test(statusText) ? 'timeline-ok' : /pendiente/i.test(statusText) ? 'timeline-alert' : 'timeline-neutral';
+                    return (
+                      <article key={r.id} className="mobile-service-card" onClick={() => { setSelectedService(r); setSelectedForm('historial'); }}>
+                        <span className={`timeline-dot ${statusClassName}`} />
+                        <div style={{ display: 'grid', gap: 5 }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
+                            <strong>{r.nombreServicio || r.cliente || 'Servicio sin nombre'}</strong>
+                            <span className={`timeline-status ${statusClassName}`}>{statusText}</span>
+                          </div>
+                          <div className="mobile-rep">{r.representanteComercial || 'Sin representante'}</div>
+                          <div className="mobile-service-meta">
+                            <span className="mobile-meta-pill">Dirección: {r.direccionServicio || '-'}</span>
+                            <span className="mobile-meta-pill">Jornales: {r.cantidadJornalesEstimados || '-'}</span>
+                            <span className="mobile-meta-pill">Referente: {r.referenteInstalacion || r.personaReferenteComision || '-'}</span>
+                            <span className="mobile-meta-pill">Boti: {r.bottiSeContactaCon || '-'}</span>
+                          </div>
+                        </div>
+                      </article>
+                    );
+                  })}
                 </div>
               </div>
             </section>
@@ -4810,6 +4957,7 @@
                   <h1>Masterson Seguridad</h1>
                   <p className="subtitle-voga">{topbarSubtitle}</p>
                 </div>
+                {isMobile && <div className="mobile-admin">{currentUserName || topbarSubtitle}</div>}
                 {!isGerencia && (
                   <div className="top-search">
                     <div className="search-wrap">
