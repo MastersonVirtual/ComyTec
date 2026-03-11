@@ -2415,8 +2415,9 @@
 
       .charla-studio {
         display: grid;
-        grid-template-columns: 1.15fr .85fr;
-        gap: 16px;
+        grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
+        gap: 18px;
+        align-items: start;
       }
       .charla-main,
       .charla-side {
@@ -2426,36 +2427,35 @@
       .charla-panel {
         border: 1px solid rgba(230,255,253,.24);
         border-radius: 16px;
-        background: linear-gradient(145deg, rgba(0, 82, 85, .55), rgba(15, 23, 42, .35));
+        background: linear-gradient(145deg, rgba(0, 82, 85, .52), rgba(15, 23, 42, .38));
         padding: 14px;
         box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 10px 22px rgba(0,0,0,.16);
       }
       .charla-panel h4 {
-        margin: 0 0 10px;
+        margin: 0 0 12px;
         color: #e6fffd;
         font-size: 14px;
         letter-spacing: .02em;
       }
-      .charla-hero {
+      .charla-core-grid {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: 1.1fr .9fr;
         gap: 10px;
       }
-      .charla-micro {
-        border: 1px solid rgba(230,255,253,.22);
+      .charla-status-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
         border-radius: 12px;
-        padding: 10px;
-        background: rgba(2, 43, 45, .5);
-      }
-      .charla-micro b {
-        display: block;
-        color: #bff7f3;
-        font-size: 11px;
-        margin-bottom: 4px;
+        border: 1px solid rgba(230,255,253,.24);
+        background: rgba(2,43,45,.46);
+        color: #e6fffd;
+        font-weight: 700;
       }
       .charla-agenda {
         display: grid;
-        grid-template-columns: 1.5fr .8fr .7fr;
+        grid-template-columns: 1.4fr .8fr .7fr;
         gap: 10px;
       }
       .charla-map-wrap {
@@ -2463,10 +2463,10 @@
         border-radius: 12px;
         overflow: hidden;
         background: rgba(8,25,26,.45);
-        min-height: 290px;
+        min-height: 300px;
       }
       .charla-map-empty {
-        min-height: 290px;
+        min-height: 300px;
         display: grid;
         place-items: center;
         color: #c8efeb;
@@ -2476,12 +2476,10 @@
       }
       .charla-map-wrap iframe {
         width: 100%;
-        min-height: 290px;
+        min-height: 300px;
         border: 0;
       }
-      .charla-observ textarea {
-        min-height: 140px;
-      }
+      .charla-observ textarea { min-height: 140px; }
       .charla-summary-item {
         border: 1px solid rgba(230,255,253,.2);
         border-radius: 10px;
@@ -2492,10 +2490,12 @@
       .charla-summary-item:last-child { margin-bottom: 0; }
       .charla-summary-item small { color: #bfe9e5; display: block; margin-bottom: 2px; }
       .charla-summary-item strong { color: #fff; font-size: 13px; }
-      @media (max-width: 980px) {
-        .charla-studio,
-        .charla-agenda,
-        .charla-hero { grid-template-columns: 1fr; }
+      @media (max-width: 1100px) {
+        .charla-studio { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 760px) {
+        .charla-core-grid,
+        .charla-agenda { grid-template-columns: 1fr; }
       }
 
       /* Sidebar overlay improvement */
@@ -3988,6 +3988,19 @@
           return `https://www.google.com/maps?q=${q}&output=embed`;
         }, [charlaForm.direccion]);
 
+        const charlaAutoStatus = useMemo(() => {
+          if (!charlaForm.fecha) return 'Pendiente';
+          const base = `${charlaForm.fecha}T${charlaForm.horario || '00:00'}`;
+          const dt = new Date(base);
+          if (Number.isNaN(dt.getTime())) return 'Pendiente';
+          return dt.getTime() < Date.now() ? 'Realizada' : 'Pendiente';
+        }, [charlaForm.fecha, charlaForm.horario]);
+
+        useEffect(() => {
+          if (grupo !== 'charla-detalle') return;
+          setStatus((prev) => (prev === charlaAutoStatus ? prev : charlaAutoStatus));
+        }, [grupo, charlaAutoStatus]);
+
         function closeSidebar() {
           setMenuOpen(false);
           setOpenMenus({ nuevo: false, fact: false });
@@ -5017,11 +5030,11 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                       <div className="charla-studio">
                         <div className="charla-main">
                           <section className="charla-panel">
-                            <h4>Charla Informativa · Diseño operativo</h4>
-                            <div className="charla-hero">
-                              <div className="charla-micro"><b>Cliente ID asociado</b><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio/proyecto" /></div>
-                              <div className="charla-micro"><b>Status</b><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
-                              <div className="charla-micro"><b>Nombre del servicio</b><input value={charlaForm.nombreServicio} onChange={(e) => setCharlaField('nombreServicio', e.target.value)} type="text" placeholder="Servicio a presentar" /></div>
+                            <h4>Charla Informativa · Planificación</h4>
+                            <div className="charla-core-grid">
+                              <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio/proyecto" /></div>
+                              <div className="field"><label>Nombre del servicio</label><input value={charlaForm.nombreServicio} onChange={(e) => setCharlaField('nombreServicio', e.target.value)} type="text" placeholder="Servicio a presentar" /></div>
+                              <div className="field"><label>Estado automático</label><div className="charla-status-chip">{charlaAutoStatus}</div></div>
                             </div>
                           </section>
 
@@ -5034,11 +5047,9 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                             </div>
                           </section>
 
-                          <section className="charla-panel">
-                            <h4>Observaciones del día</h4>
-                            <div className="charla-observ">
-                              <textarea value={charlaForm.observaciones} onChange={(e) => setCharlaField('observaciones', e.target.value)} placeholder="Accesos, comisión/administración, recomendaciones logísticas, etc." />
-                            </div>
+                          <section className="charla-panel charla-observ">
+                            <h4>Observaciones para el día de la charla</h4>
+                            <textarea value={charlaForm.observaciones} onChange={(e) => setCharlaField('observaciones', e.target.value)} placeholder="Accesos, comisión/administración, recomendaciones logísticas, etc." />
                           </section>
 
                           <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
@@ -5064,10 +5075,10 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
 
                           <section className="charla-panel">
                             <h4>Resumen rápido</h4>
+                            <div className="charla-summary-item"><small>Estado</small><strong>{charlaAutoStatus}</strong></div>
                             <div className="charla-summary-item"><small>Responsable</small><strong>{charlaForm.responsableCharla || '-'}</strong></div>
                             <div className="charla-summary-item"><small>Fecha y hora</small><strong>{charlaForm.fecha || '-'} · {charlaForm.horario || '--:--'}</strong></div>
                             <div className="charla-summary-item"><small>Dirección</small><strong>{charlaForm.direccion || '-'}</strong></div>
-                            <div className="charla-summary-item"><small>Observaciones</small><strong>{charlaForm.observaciones || '-'}</strong></div>
                           </section>
                         </aside>
                       </div>
