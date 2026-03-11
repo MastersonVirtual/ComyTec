@@ -2737,11 +2737,11 @@
 
       const charlaInicial = {
         nombreServicio: '',
+        responsableCharla: '',
         fecha: '',
         horario: '',
-        lugarReunion: '',
         direccion: '',
-        contactoReferencia: '',
+        observaciones: '',
       };
 
       function statusClass(value) {
@@ -3897,6 +3897,12 @@
           setCharlaForm((prev) => ({ ...prev, [key]: value }));
         }
 
+        const charlaMapUrl = useMemo(() => {
+          const q = encodeURIComponent(String(charlaForm.direccion || '').trim());
+          if (!q) return '';
+          return `https://www.google.com/maps?q=${q}&output=embed`;
+        }, [charlaForm.direccion]);
+
         function closeSidebar() {
           setMenuOpen(false);
           setOpenMenus({ nuevo: false, fact: false });
@@ -4009,8 +4015,8 @@
             Object.assign(doc, { ...bajaForm, formulario: 'baja-servicio' });
           }
           if (grupo === 'charla-detalle') {
-            if (!charlaForm.nombreServicio || !charlaForm.fecha || !charlaForm.horario || !charlaForm.lugarReunion) {
-              return alert('Completá al menos: Nombre de servicio, Fecha, Horario y Lugar de reunión.');
+            if (!charlaForm.responsableCharla || !charlaForm.fecha || !charlaForm.horario || !charlaForm.direccion) {
+              return alert('Completá al menos: Responsable, Fecha, Hora y Dirección.');
             }
             Object.assign(doc, { ...charlaForm, formulario: 'charla-informativa' });
           }
@@ -4925,34 +4931,48 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                     ) : grupo === 'charla-detalle' ? (
                       <div className="service-layout">
                         <div className="service-card">
-                          <h3>Charla Informativa</h3>
+                          <h3>Charla Informativa · Presentación de nuevo servicio</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio/proyecto" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                            <div className="field"><label>Nombre del servicio</label><input value={charlaForm.nombreServicio} onChange={(e) => setCharlaField('nombreServicio', e.target.value)} type="text" placeholder="Servicio a presentar" /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>1. Identificación del Evento</h3>
+                          <h3>1. Responsable y agenda</h3>
                           <div className="card-grid">
-                            <div className="field span-2"><label>Nombre de servicio</label><input value={charlaForm.nombreServicio} onChange={(e) => setCharlaField('nombreServicio', e.target.value)} type="text" /></div>
+                            <div className="field span-2"><label>Responsable de la charla</label><input value={charlaForm.responsableCharla} onChange={(e) => setCharlaField('responsableCharla', e.target.value)} type="text" placeholder="Nombre y apellido" /></div>
                             <div className="field"><label>Fecha</label><input value={charlaForm.fecha} onChange={(e) => setCharlaField('fecha', e.target.value)} type="date" /></div>
-                            <div className="field"><label>Horario</label><input value={charlaForm.horario} onChange={(e) => setCharlaField('horario', e.target.value)} type="time" /></div>
+                            <div className="field"><label>Hora</label><input value={charlaForm.horario} onChange={(e) => setCharlaField('horario', e.target.value)} type="time" /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>2. Localización y Logística</h3>
+                          <h3>2. Ubicación y mapa</h3>
                           <div className="card-grid">
-                            <div className="field span-2"><label>Lugar de Reunión</label><input value={charlaForm.lugarReunion} onChange={(e) => setCharlaField('lugarReunion', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Dirección</label><input value={charlaForm.direccion} onChange={(e) => setCharlaField('direccion', e.target.value)} type="text" /></div>
+                            <div className="field span-3"><label>Dirección completa</label><input value={charlaForm.direccion} onChange={(e) => setCharlaField('direccion', e.target.value)} type="text" placeholder="Calle, altura, ciudad" /></div>
+                            <div className="field span-3">
+                              <label>Mapa de referencia</label>
+                              {charlaMapUrl ? (
+                                <iframe
+                                  title="Mapa charla"
+                                  src={charlaMapUrl}
+                                  style={{ width: '100%', minHeight: 280, border: '1px solid rgba(255,255,255,.24)', borderRadius: 12 }}
+                                  loading="lazy"
+                                  referrerPolicy="no-referrer-when-downgrade"
+                                />
+                              ) : (
+                                <div className="hint" style={{ marginBottom: 0 }}>Ingresá una dirección para visualizar el mapa de la charla.</div>
+                              )}
+                            </div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>3. Contacto en el Sitio</h3>
+                          <h3>3. Observaciones para el día de la charla</h3>
                           <div className="card-grid">
-                            <div className="field span-3"><label>Contacto de Referencia para la Charla</label><input value={charlaForm.contactoReferencia} onChange={(e) => setCharlaField('contactoReferencia', e.target.value)} type="text" placeholder="Nombre y teléfono" /></div>
+                            <div className="field span-3"><label>Observaciones</label><textarea value={charlaForm.observaciones} onChange={(e) => setCharlaField('observaciones', e.target.value)} placeholder="Accesos, comisión/administración, recomendaciones logísticas, etc." /></div>
                           </div>
                         </div>
 
