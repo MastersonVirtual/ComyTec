@@ -2276,6 +2276,128 @@
         transform: translateY(-1px) !important;
       }
 
+      .topbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-left: 12px;
+        position: relative;
+      }
+      .topbar-action-btn {
+        border: 1px solid rgba(255,255,255,.22) !important;
+        background: rgba(31,41,55,.92) !important;
+        color: #e6fffd !important;
+        border-radius: 14px !important;
+        min-width: 112px;
+        min-height: 68px;
+        display: flex !important;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        cursor: pointer;
+        font-weight: 700;
+      }
+      .topbar-action-btn:hover {
+        transform: translateY(-1px);
+        background: rgba(51,65,85,.96) !important;
+      }
+      .topbar-action-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 999px;
+        background: #ffffff;
+        border: 1px solid rgba(230,255,253,.6);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .topbar-action-icon i,
+      .topbar-action-icon svg {
+        width: 20px;
+        height: 20px;
+        stroke-width: 2.2;
+        color: #006465;
+        stroke: #006465;
+      }
+      .topbar-action-btn span {
+        font-size: 12px;
+        letter-spacing: .01em;
+      }
+      .notify-badge {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        min-width: 22px;
+        height: 22px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 800;
+        color: #fff;
+        background: #ef4444;
+        border: 2px solid rgba(15,23,42,.9);
+      }
+      .notifications-popover {
+        position: absolute;
+        right: 122px;
+        top: calc(100% + 10px);
+        width: min(460px, 70vw);
+        max-height: 56vh;
+        overflow: auto;
+        background: rgba(15,23,42,.96);
+        border: 1px solid rgba(230,255,253,.24);
+        border-radius: 14px;
+        box-shadow: var(--shadow-deep);
+        z-index: 180;
+      }
+      .notifications-head {
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(230,255,253,.2);
+        font-weight: 700;
+        color: #e6fffd;
+      }
+      .notifications-item {
+        padding: 11px 12px;
+        border-bottom: 1px solid rgba(230,255,253,.14);
+        color: #e6fffd;
+      }
+      .notifications-item:last-child { border-bottom: 0; }
+      .notifications-item small { color: #bde9e5; display: block; margin-top: 4px; }
+
+      .profile-view {
+        display: grid;
+        gap: 14px;
+      }
+      .profile-option {
+        border: 1px solid rgba(230,255,253,.25);
+        border-radius: 14px;
+        padding: 16px;
+        background: rgba(0, 82, 85, .55);
+      }
+      .profile-option h3 {
+        margin: 0 0 12px;
+        color: #e6fffd;
+        font-size: 1rem;
+      }
+      .profile-form {
+        display: grid;
+        gap: 10px;
+      }
+      .profile-save-btn {
+        max-width: 280px;
+      }
+      .profile-logout-btn {
+        background: rgba(78, 22, 22, .25) !important;
+        border-color: rgba(170, 35, 35, .45) !important;
+        color: #ffd2d2 !important;
+      }
+      .profile-logout-btn:hover {
+        background: rgba(78, 22, 22, .38) !important;
+      }
+
       /* Sidebar overlay improvement */
       .overlay.show {
         background: rgba(0, 20, 20, .55) !important;
@@ -3129,6 +3251,10 @@
         const [deletingService, setDeletingService] = useState(false);
         const [showClientViewModal, setShowClientViewModal] = useState(false);
         const [clientOperationId, setClientOperationId] = useState('');
+        const [profileUserRequest, setProfileUserRequest] = useState('');
+        const [profilePasswordRequest, setProfilePasswordRequest] = useState('');
+        const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
+        const [showAdminNotifications, setShowAdminNotifications] = useState(false);
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
@@ -3545,7 +3671,27 @@
 
         useEffect(() => {
           if (window.lucide?.createIcons) window.lucide.createIcons();
-        }, [mobileTab, selectedForm, fabOpen, rows.length]);
+        }, [mobileTab, selectedForm, fabOpen, rows.length, showAdminNotifications, adminCredentialRequests.length]);
+
+        useEffect(() => {
+          if (!user || userRole !== 'admin') {
+            setAdminCredentialRequests([]);
+            setShowAdminNotifications(false);
+            return;
+          }
+          const unsub = db.collection('solicitudes_credenciales')
+            .orderBy('creadoEn', 'desc')
+            .limit(80)
+            .onSnapshot((snapshot) => {
+              const next = snapshot.docs
+                .map((doc) => ({ id: doc.id, ...doc.data() }))
+                .filter((req) => req?.estado !== 'resuelta');
+              setAdminCredentialRequests(next);
+            }, (error) => {
+              console.error('Error leyendo solicitudes_credenciales:', error);
+            });
+          return () => unsub();
+        }, [user, userRole]);
 
         const isGerencia = userRole === 'gerentes';
         const isVendedor = userRole.includes('vendedor');
@@ -3571,6 +3717,8 @@
         const [formOpenAudit, setFormOpenAudit] = useState(null);
         const currentUserName = useMemo(() => (userData.nombre || (user?.email || '').split('@')[0] || 'Usuario').trim(), [userData, user]);
         const isAdminUser = userRole === 'admin';
+        const adminPendingRequests = useMemo(() => adminCredentialRequests.filter((r) => r?.estado === 'pendiente'), [adminCredentialRequests]);
+        const adminUnreadCount = useMemo(() => adminPendingRequests.filter((r) => !r?.leidaPorAdmin).length, [adminPendingRequests]);
         const isSalesOrTechUser = /vendedor|tecnic/.test(userRole) || /tecnic/.test(userArea);
         const lockCommercialField = isSalesOrTechUser && !isAdminUser;
         const isTechnicalUser = /tecnic/.test(userRole) || /tecnic/.test(userArea);
@@ -3905,6 +4053,58 @@
           setClientOperationId('');
         }
 
+        function openProfileView() {
+          setSelectedForm('perfil');
+          setMobileTab('perfil');
+          closeSidebar();
+        }
+
+        async function toggleAdminNotifications() {
+          const nextOpen = !showAdminNotifications;
+          setShowAdminNotifications(nextOpen);
+          if (!nextOpen || !isAdminUser) return;
+          const unread = adminPendingRequests.filter((item) => !item?.leidaPorAdmin);
+          if (unread.length === 0) return;
+          const batch = db.batch();
+          unread.forEach((item) => {
+            batch.set(db.collection('solicitudes_credenciales').doc(item.id), { leidaPorAdmin: true }, { merge: true });
+          });
+          try {
+            await batch.commit();
+          } catch (error) {
+            console.error('Error marcando notificaciones como leídas:', error);
+          }
+        }
+
+        async function handleProfileCredentialsRequest(e) {
+          e.preventDefault();
+          const nextUser = profileUserRequest.trim();
+          const nextPass = profilePasswordRequest.trim();
+          if (!nextUser || !nextPass) {
+            setNotificacion({ mensaje: 'Ingresá usuario y contraseña para solicitar el cambio', tipo: 'error' });
+            return;
+          }
+          try {
+            await db.collection('solicitudes_credenciales').add({
+              tipo: 'cambio_usuario_password',
+              solicitanteUid: user?.uid || '',
+              solicitanteEmail: user?.email || '',
+              solicitanteNombre: currentUserName,
+              nuevoUsuarioSolicitado: nextUser,
+              nuevaPasswordSolicitada: nextPass,
+              estado: 'pendiente',
+              leidaPorAdmin: false,
+              creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+            setNotificacion({ mensaje: '✔ Solicitud enviada al administrador', tipo: 'ok' });
+            setProfileUserRequest('');
+            setProfilePasswordRequest('');
+          } catch (error) {
+            console.error('Error enviando solicitud de credenciales:', error);
+            setNotificacion({ mensaje: '✖ No se pudo enviar la solicitud', tipo: 'error' });
+          }
+        }
+
         if (isTrackingRoute) {
           return <TrackingView />;
         }
@@ -3998,10 +4198,65 @@
                     </div>
                   </div>
                 )}
+                <div className="topbar-actions">
+                  {isAdminUser && (
+                    <div style={{ position: 'relative' }}>
+                      <button className="topbar-action-btn" type="button" onClick={toggleAdminNotifications}>
+                        <span className="topbar-action-icon"><i data-lucide="bell" /></span>
+                        <span>Notificaciones</span>
+                      </button>
+                      {adminUnreadCount > 0 && <span className="notify-badge">{adminUnreadCount > 99 ? '99+' : adminUnreadCount}</span>}
+                    </div>
+                  )}
+                  <button className="topbar-action-btn" type="button" onClick={openProfileView}>
+                    <span className="topbar-action-icon"><i data-lucide="user-round" /></span>
+                    <span>Perfil</span>
+                  </button>
+                  {isAdminUser && showAdminNotifications && (
+                    <div className="notifications-popover">
+                      <div className="notifications-head">Solicitudes pendientes ({adminPendingRequests.length})</div>
+                      {adminPendingRequests.length === 0 ? (
+                        <div className="notifications-item">No hay solicitudes pendientes.</div>
+                      ) : (
+                        adminPendingRequests.map((req) => (
+                          <div key={req.id} className="notifications-item">
+                            <strong>{req.solicitanteNombre || req.solicitanteEmail || 'Usuario'}</strong>
+                            <small>Solicita cambio a usuario: {req.nuevoUsuarioSolicitado || '-'}</small>
+                            <small>Estado: {req.estado || 'pendiente'} · {req.leidaPorAdmin ? 'Leída' : 'Nueva'}</small>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  )}
+                </div>
               </header>
 
               <main className="main">
-                {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : isMobile && mobileTab === 'mapa' ? (<section className="panel"><h2>Mapa</h2><div className="hint">Vista de mapa próxima versión.</div></section>) : isMobile && mobileTab === 'perfil' ? (<section className="panel"><h2>Mi Perfil</h2><div className="hint">{currentUserName} · {topbarSubtitle}</div></section>) : effectiveSelectedForm === 'dashboard-gerencia' ? (
+                {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : isMobile && mobileTab === 'mapa' ? (<section className="panel"><h2>Mapa</h2><div className="hint">Vista de mapa próxima versión.</div></section>) : effectiveSelectedForm === 'perfil' ? (
+                  <section className="panel profile-view">
+                    <h2>Mi perfil</h2>
+                    <div className="hint">{currentUserName} · {topbarSubtitle}</div>
+                    <article className="profile-option">
+                      <h3>Solicitar cambio de usuario y contraseña</h3>
+                      <form className="profile-form" onSubmit={handleProfileCredentialsRequest}>
+                        <input
+                          type="text"
+                          placeholder="Nuevo usuario"
+                          value={profileUserRequest}
+                          onChange={(e) => setProfileUserRequest(e.target.value)}
+                        />
+                        <input
+                          type="password"
+                          placeholder="Nueva contraseña"
+                          value={profilePasswordRequest}
+                          onChange={(e) => setProfilePasswordRequest(e.target.value)}
+                        />
+                        <button className="save-btn profile-save-btn" type="submit">Enviar solicitud</button>
+                      </form>
+                    </article>
+                    <button className="logout-btn profile-logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar sesión</button>
+                  </section>
+                ) : effectiveSelectedForm === 'dashboard-gerencia' ? (
                   <DashboardGerencia rows={visibleRows} isMobileNative={isMobile && isGerencia} />
                 ) : effectiveSelectedForm === 'home' ? (
                   <>
@@ -4645,6 +4900,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                     <button className={mobileTab === 'servicios' ? 'active' : ''} type="button" onClick={() => { setMobileTab('servicios'); setSelectedForm('home'); }}><i data-lucide="layers" />Servicios</button>
                     <button className={selectedForm === 'historial' ? 'active' : ''} type="button" onClick={() => { setMobileTab('historial'); setSelectedForm('historial'); setSelectedService(null); }}><i data-lucide="history" />Historial</button>
                     <button className={fabOpen ? 'active' : ''} type="button" onClick={() => setFabOpen((v) => !v)}><i data-lucide="plus-circle" />Formularios</button>
+                    <button className={selectedForm === 'perfil' ? 'active' : ''} type="button" onClick={openProfileView}><i data-lucide="user-round" />Perfil</button>
                   </nav>
                 </>
               )}
