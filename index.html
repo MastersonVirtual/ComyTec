@@ -2364,6 +2364,41 @@
       .profile-save-btn {
         max-width: 280px;
       }
+      .request-status-row {
+        margin-top: 10px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .status-action-btn {
+        border-radius: 10px;
+        padding: 8px 10px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .status-action-btn.resolve {
+        background: rgba(16, 185, 129, .25) !important;
+        border: 1px solid rgba(16, 185, 129, .45) !important;
+        color: #d1fae5 !important;
+      }
+      .status-action-btn.reject {
+        background: rgba(185, 28, 28, .25) !important;
+        border: 1px solid rgba(248, 113, 113, .45) !important;
+        color: #fee2e2 !important;
+      }
+      .status-chip-inline {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .status-chip-inline.pending { background: rgba(245, 158, 11, .22); color: #fde68a; }
+      .status-chip-inline.resolved { background: rgba(16, 185, 129, .22); color: #bbf7d0; }
+      .status-chip-inline.rejected { background: rgba(239, 68, 68, .22); color: #fecaca; }
+
       .profile-logout-btn {
         background: rgba(78, 22, 22, .25) !important;
         border-color: rgba(170, 35, 35, .45) !important;
@@ -3229,6 +3264,8 @@
         const [profileUserRequest, setProfileUserRequest] = useState('');
         const [profilePasswordRequest, setProfilePasswordRequest] = useState('');
         const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
+        const [userCredentialRequests, setUserCredentialRequests] = useState([]);
+        const [updatingRequestId, setUpdatingRequestId] = useState('');
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
@@ -3656,15 +3693,35 @@
             .orderBy('creadoEn', 'desc')
             .limit(80)
             .onSnapshot((snapshot) => {
-              const next = snapshot.docs
-                .map((doc) => ({ id: doc.id, ...doc.data() }))
-                .filter((req) => req?.estado !== 'resuelta');
+              const next = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
               setAdminCredentialRequests(next);
             }, (error) => {
               console.error('Error leyendo solicitudes_credenciales:', error);
             });
           return () => unsub();
         }, [user, userRole]);
+
+        useEffect(() => {
+          if (!user?.uid) {
+            setUserCredentialRequests([]);
+            return;
+          }
+          const unsub = db.collection('solicitudes_credenciales')
+            .where('solicitanteUid', '==', user.uid)
+            .limit(50)
+            .onSnapshot((snapshot) => {
+              const next = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+              next.sort((a, b) => {
+                const av = a?.creadoEn?.seconds || 0;
+                const bv = b?.creadoEn?.seconds || 0;
+                return bv - av;
+              });
+              setUserCredentialRequests(next);
+            }, (error) => {
+              console.error('Error leyendo solicitudes del usuario:', error);
+            });
+          return () => unsub();
+        }, [user?.uid]);
 
         const isGerencia = userRole === 'gerentes';
         const isVendedor = userRole.includes('vendedor');
@@ -4062,6 +4119,39 @@
           }
         }
 
+        function requestStatusLabel(status) {
+          if (status === 'resuelta') return 'Resuelta';
+          if (status === 'rechazada') return 'Rechazada';
+          return 'Pendiente';
+        }
+
+        async function updateCredentialRequestStatus(req, nextStatus) {
+          if (!isAdminUser || !req?.id) return;
+          setUpdatingRequestId(req.id);
+          try {
+            const patch = {
+              estado: nextStatus,
+              leidaPorAdmin: true,
+              actualizadaEn: firebase.firestore.FieldValue.serverTimestamp(),
+              resueltaPorUid: user?.uid || '',
+              resueltaPorEmail: user?.email || '',
+            };
+            if (nextStatus === 'resuelta') {
+              patch.credencialesInformadas = {
+                usuario: req?.nuevoUsuarioSolicitado || '',
+                password: req?.nuevaPasswordSolicitada || '',
+              };
+            }
+            await db.collection('solicitudes_credenciales').doc(req.id).set(patch, { merge: true });
+            setNotificacion({ mensaje: `✔ Solicitud marcada como ${requestStatusLabel(nextStatus).toLowerCase()}`, tipo: 'ok' });
+          } catch (error) {
+            console.error('Error actualizando estado de solicitud:', error);
+            setNotificacion({ mensaje: '✖ No se pudo actualizar la solicitud', tipo: 'error' });
+          } finally {
+            setUpdatingRequestId('');
+          }
+        }
+
         async function handleProfileCredentialsRequest(e) {
           e.preventDefault();
           const nextUser = profileUserRequest.trim();
@@ -4206,17 +4296,34 @@
                   <section className="panel profile-view">
                     <h2>Notificaciones</h2>
                     <div className="hint">Solicitudes recibidas para cambio de usuario y contraseña.</div>
-                    {adminPendingRequests.length === 0 ? (
-                      <div className="profile-option">No hay solicitudes pendientes.</div>
+                    {!isAdminUser ? (
+                      <div className="profile-option">Solo administradores pueden ver esta sección.</div>
+                    ) : adminCredentialRequests.length === 0 ? (
+                      <div className="profile-option">No hay solicitudes registradas.</div>
                     ) : (
-                      adminPendingRequests.map((req) => (
+                      adminCredentialRequests.map((req) => (
                         <article className="profile-option" key={req.id}>
-                          <h3>{req.solicitanteNombre || req.solicitanteEmail || 'Usuario'}</h3>
+                          <h3>
+                            {req.solicitanteNombre || req.solicitanteEmail || 'Usuario'}
+                            <span className={`status-chip-inline ${req.estado === 'resuelta' ? 'resolved' : req.estado === 'rechazada' ? 'rejected' : 'pending'}`} style={{ marginLeft: 8 }}>
+                              {requestStatusLabel(req.estado)}
+                            </span>
+                          </h3>
                           <div className="kv"><b>Email:</b> {req.solicitanteEmail || '-'}</div>
                           <div className="kv"><b>Usuario solicitado:</b> {req.nuevoUsuarioSolicitado || '-'}</div>
                           <div className="kv"><b>Contraseña solicitada:</b> {req.nuevaPasswordSolicitada || '-'}</div>
-                          <div className="kv"><b>Estado:</b> {req.estado || 'pendiente'}</div>
-                          <div className="kv"><b>Fecha y hora:</b> {formatRequestDateTime(req.creadoEn)}</div>
+                          <div className="kv"><b>Fecha y hora de solicitud:</b> {formatRequestDateTime(req.creadoEn)}</div>
+                          <div className="kv"><b>Última actualización:</b> {formatRequestDateTime(req.actualizadaEn)}</div>
+                          {req.estado === 'pendiente' && (
+                            <div className="request-status-row">
+                              <button type="button" className="status-action-btn resolve" disabled={updatingRequestId === req.id} onClick={() => updateCredentialRequestStatus(req, 'resuelta')}>
+                                {updatingRequestId === req.id ? 'Actualizando...' : 'Marcar resuelta'}
+                              </button>
+                              <button type="button" className="status-action-btn reject" disabled={updatingRequestId === req.id} onClick={() => updateCredentialRequestStatus(req, 'rechazada')}>
+                                {updatingRequestId === req.id ? 'Actualizando...' : 'Marcar rechazada'}
+                              </button>
+                            </div>
+                          )}
                         </article>
                       ))
                     )}
@@ -4242,6 +4349,22 @@
                         />
                         <button className="save-btn profile-save-btn" type="submit">Enviar solicitud</button>
                       </form>
+                    </article>
+                    <article className="profile-option">
+                      <h3>Estado de mis solicitudes</h3>
+                      {userCredentialRequests.length === 0 ? (
+                        <div className="kv">Todavía no registraste solicitudes.</div>
+                      ) : (
+                        userCredentialRequests.slice(0, 5).map((req) => (
+                          <div key={req.id} style={{ marginBottom: 8 }}>
+                            <div className="kv"><b>Estado:</b> {requestStatusLabel(req.estado)}</div>
+                            <div className="kv"><b>Fecha:</b> {formatRequestDateTime(req.creadoEn)}</div>
+                            {req.estado === 'resuelta' && req?.credencialesInformadas && (
+                              <div className="kv"><b>Credenciales informadas:</b> {req.credencialesInformadas.usuario || '-'} / {req.credencialesInformadas.password || '-'}</div>
+                            )}
+                          </div>
+                        ))
+                      )}
                     </article>
                     <button className="logout-btn profile-logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar sesión</button>
                   </section>
