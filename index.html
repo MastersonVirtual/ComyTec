@@ -2341,6 +2341,28 @@
         border: 2px solid rgba(15,23,42,.9);
       }
 
+      .topbar-back-btn {
+        border: 1px solid rgba(230,255,253,.3) !important;
+        background: rgba(31,41,55,.92) !important;
+        color: #e6fffd !important;
+        border-radius: 12px !important;
+        min-width: 86px;
+        min-height: 46px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .topbar-back-btn:hover { background: rgba(51,65,85,.96) !important; }
+
+      .topbar {
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1700 !important;
+      }
+      .content { padding-top: 84px !important; }
+      @media (max-width: 768px) { .content { padding-top: 76px !important; } }
+
 
       .profile-view {
         display: grid;
@@ -3329,6 +3351,8 @@
 
         const [tipoAccion, setTipoAccion] = useState('');
         const [selectedForm, setSelectedForm] = useState('home');
+        const [formHistory, setFormHistory] = useState(['home']);
+        const skipHistoryPushRef = useRef(false);
         const [clienteId, setClienteId] = useState(generarClienteId());
         const [clienteIdAsociado, setClienteIdAsociado] = useState('');
         const [cliente, setCliente] = useState('');
@@ -3861,6 +3885,17 @@
           }
         }, [isGerencia, selectedForm]);
 
+        useEffect(() => {
+          if (skipHistoryPushRef.current) {
+            skipHistoryPushRef.current = false;
+            return;
+          }
+          setFormHistory((prev) => {
+            if (prev[prev.length - 1] === selectedForm) return prev;
+            return [...prev, selectedForm].slice(-40);
+          });
+        }, [selectedForm]);
+
         const effectiveSelectedForm = isGerencia ? 'dashboard-gerencia' : selectedForm;
 
         const [formOpenAudit, setFormOpenAudit] = useState(null);
@@ -4232,6 +4267,26 @@
           setClientOperationId('');
         }
 
+        function goBackOneStep() {
+          if (selectedService) {
+            setSelectedService(null);
+            return;
+          }
+          if (formHistory.length <= 1) {
+            setSelectedForm('home');
+            setMobileTab('home');
+            setTipoAccion('');
+            return;
+          }
+          const previous = formHistory[formHistory.length - 2] || 'home';
+          skipHistoryPushRef.current = true;
+          setFormHistory((prev) => prev.slice(0, -1));
+          setSelectedForm(previous);
+          if (previous === 'home') setMobileTab('home');
+          if (previous !== 'servicio' && previous !== 'other') setTipoAccion('');
+          closeSidebar();
+        }
+
         function openProfileView() {
           setSelectedForm('perfil');
           setMobileTab('perfil');
@@ -4408,6 +4463,7 @@
             <div className={`content ${menuOpen ? 'shift' : ''}`}>
               <header className="topbar">
                 {!isMobile && <button className="burger" aria-label="Abrir menú" onClick={toggleSidebar}><span className="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>}
+                {(selectedForm !== 'home' || !!selectedService) && <button className="topbar-back-btn" type="button" onClick={goBackOneStep}>← Atrás</button>}
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
                   <p className="subtitle-voga">{topbarSubtitle}</p>
