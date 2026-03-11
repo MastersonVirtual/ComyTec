@@ -1166,6 +1166,18 @@
         cursor: pointer;
       }
       .logout-btn:hover { background: rgba(127,29,29,.28); }
+      .sidebar-signature {
+        margin-top: 10px;
+        text-align: center;
+        font-size: 10px;
+        line-height: 1.25;
+        color: rgba(230,255,253,.72);
+      }
+      .sidebar-signature strong {
+        color: #00fbff;
+        text-shadow: 0 0 8px rgba(0,251,255,.45);
+        font-weight: 700;
+      }
 
       .toast {
         position: fixed;
@@ -2053,6 +2065,7 @@
         align-items: center !important;
         gap: 14px !important;
         overflow: hidden;
+        color: #ff9f1a !important;
       }
       .sidebar-header::before {
         content: '';
@@ -2362,6 +2375,12 @@
         transform: translateX(-50%);
         border-radius: 18px;
         z-index: 1700 !important;
+      }
+      .sidebar.open ~ .content .topbar {
+        left: 334px;
+        right: 14px;
+        width: auto;
+        transform: none;
       }
       .content { padding-top: 72px !important; }
       @media (max-width: 768px) { .content { padding-top: 70px !important; } }
@@ -4468,6 +4487,7 @@
                   </>
                 )}
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
+                <div className="sidebar-signature" aria-label="signature"><strong>v1.0 | Powered by Alfonso Carballo</strong></div>
               </div>
             </aside>
 
@@ -5229,9 +5249,6 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                 )}
               </main>
 
-              <div className="app-footer" aria-label="signature">
-                <strong>v1.0 | Powered by Alfonso Carballo</strong>
-              </div>
 
               {ENABLE_CLIENT_TRACKING_VIEW && showClientViewModal && isAdminUser && (
                 <div className="confirm-modal" onClick={() => setShowClientViewModal(false)}>
