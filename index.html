@@ -108,7 +108,7 @@
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 14px 18px;
+        padding: 10px 14px;
         background: linear-gradient(90deg, rgba(3,32,30,.8), rgba(8,66,62,.72));
         border-bottom: 1px solid var(--line);
         backdrop-filter: blur(10px) saturate(125%);
@@ -2360,8 +2360,8 @@
         right: 0;
         z-index: 1700 !important;
       }
-      .content { padding-top: 84px !important; }
-      @media (max-width: 768px) { .content { padding-top: 76px !important; } }
+      .content { padding-top: 74px !important; }
+      @media (max-width: 768px) { .content { padding-top: 70px !important; } }
 
 
       .profile-view {
@@ -3340,7 +3340,7 @@
 
       function App() {
         const [menuOpen, setMenuOpen] = useState(false);
-        const [openMenus, setOpenMenus] = useState({ nuevo: false, fact: false });
+        const [openMenus, setOpenMenus] = useState({ nuevo: false, fact: false, historial: false });
         const [user, setUser] = useState(null);
         const [authLoading, setAuthLoading] = useState(true);
         const [userRole, setUserRole] = useState('');
@@ -4077,7 +4077,7 @@
 
         function closeSidebar() {
           setMenuOpen(false);
-          setOpenMenus({ nuevo: false, fact: false });
+          setOpenMenus({ nuevo: false, fact: false, historial: false });
         }
 
         function toggleSidebar() {
@@ -4445,8 +4445,11 @@
                       <button className="submenu-button" onClick={() => selectAction('Movimiento de Obra')}>Movimiento de Obra</button>
                     </div>
                     <button className="menu-button" onClick={() => selectAction('Charla')}>Charlas informativas</button>
-                    <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
-                    <button className="menu-button" onClick={() => { setSelectedForm('historial-charlas'); closeSidebar(); }}>Historial de Charlas</button>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, historial: !p.historial }))}>Historial {openMenus.historial ? '▾' : '▸'}</button>
+                    <div className={`submenu ${openMenus.historial ? 'open' : ''}`}>
+                      <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
+                      <button className="submenu-button" onClick={() => { setSelectedForm('historial-charlas'); closeSidebar(); }}>Historial de Charlas</button>
+                    </div>
                     {ENABLE_CLIENT_TRACKING_VIEW && isAdminUser && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}>Vista Clientes</button>}
                     {isAdminUser && <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}>Vista Gerencia</button>}
                   </>
