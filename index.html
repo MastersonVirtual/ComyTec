@@ -2641,6 +2641,12 @@
       @media (max-width: 768px) {
         :root {
           --mobile-nav-height: calc(78px + env(safe-area-inset-bottom));
+          --mobile-brand: #006465;
+          --mobile-brand-soft: #e8f5f4;
+          --mobile-surface: #ffffff;
+          --mobile-line: #d8e8e6;
+          --mobile-text: #0f2f2e;
+          --mobile-muted: #5f7f7d;
         }
 
         html,
@@ -2649,7 +2655,8 @@
         }
 
         body {
-          background: radial-gradient(circle at 20% 0%, #0c4b49 0%, #072f2e 45%, #041e1d 100%) !important;
+          background: linear-gradient(180deg, #f5fbfb 0%, #eef7f6 100%) !important;
+          color: var(--mobile-text) !important;
         }
 
         .topbar {
@@ -2661,15 +2668,15 @@
           transform: none;
           z-index: 1400;
           padding: 10px 12px;
-          border-radius: 0 0 20px 20px;
-          background: rgba(3, 23, 23, .92) !important;
-          border: 0 !important;
-          box-shadow: 0 10px 22px rgba(0,0,0,.28);
+          border-radius: 0 0 18px 18px;
+          background: rgba(255, 255, 255, .96) !important;
+          border-bottom: 1px solid var(--mobile-line) !important;
+          box-shadow: 0 8px 20px rgba(15, 47, 46, .08);
         }
 
         .top-titles h1,
         .top-titles p {
-          color: #e9ffff !important;
+          color: var(--mobile-brand) !important;
         }
 
         .main {
@@ -2697,10 +2704,10 @@
         .ranking-section,
         .kpi-card,
         .history-list-shell {
-          border-radius: 18px !important;
-          background: linear-gradient(170deg, rgba(12, 46, 45, .9), rgba(6, 29, 29, .92)) !important;
-          border: 1px solid rgba(120, 226, 213, .22) !important;
-          box-shadow: 0 8px 18px rgba(0,0,0,.26) !important;
+          border-radius: 16px !important;
+          background: var(--mobile-surface) !important;
+          border: 1px solid var(--mobile-line) !important;
+          box-shadow: 0 10px 24px rgba(15, 47, 46, .06) !important;
         }
 
         .panel {
@@ -2732,29 +2739,43 @@
 
         .mobile-section-card {
           border-radius: 16px;
-          background: linear-gradient(170deg, rgba(12, 46, 45, .9), rgba(6, 29, 29, .92)) !important;
-          border: 1px solid rgba(120, 226, 213, .22) !important;
+          background: var(--mobile-surface) !important;
+          border: 1px solid var(--mobile-line) !important;
+          box-shadow: 0 6px 16px rgba(15, 47, 46, .06);
+        }
+
+        .mobile-capsule,
+        .mobile-service-card {
+          background: #f7fbfb !important;
+          border: 1px solid #d8e8e6 !important;
+          box-shadow: none !important;
+        }
+
+        .mobile-capsule .title,
+        .mobile-capsule .value,
+        .mobile-rep {
+          color: var(--mobile-brand) !important;
         }
 
         .mobile-section-title {
-          color: #efffff !important;
+          color: var(--mobile-brand) !important;
           font-size: .86rem;
           text-transform: uppercase;
         }
 
         .mobile-action-btn,
         .mobile-list-button {
-          background: rgba(5, 59, 56, .7) !important;
-          border: 1px solid rgba(120, 226, 213, .2) !important;
-          color: #e9ffff !important;
+          background: var(--mobile-brand-soft) !important;
+          border: 1px solid #cbe2e0 !important;
+          color: var(--mobile-brand) !important;
           min-height: 42px;
           font-size: 11.5px;
         }
 
         .mobile-meta-pill {
-          background: rgba(5, 59, 56, .62) !important;
-          border: 1px solid rgba(120, 226, 213, .2) !important;
-          color: #d7fffa;
+          background: #f1f8f8 !important;
+          border: 1px solid #d1e6e4 !important;
+          color: var(--mobile-brand);
         }
 
         .field {
@@ -2774,7 +2795,7 @@
         p,
         td,
         th {
-          color: #bfe9e4 !important;
+          color: var(--mobile-muted) !important;
         }
 
         h1, h2, h3, h4,
@@ -2784,7 +2805,7 @@
         .kpi-value,
         .kpi-label,
         .ranking-section h3 {
-          color: #efffff !important;
+          color: var(--mobile-brand) !important;
         }
 
         input,
@@ -2794,6 +2815,21 @@
           min-height: 44px;
           border-radius: 14px !important;
           font-size: 14px;
+          color: var(--mobile-text) !important;
+        }
+
+        input,
+        select,
+        textarea {
+          background: #ffffff !important;
+          border: 1px solid #d5e6e4 !important;
+          box-shadow: none !important;
+        }
+
+        .field > label {
+          background: #ffffff !important;
+          color: var(--mobile-muted) !important;
+          border-color: #d6e6e4 !important;
         }
 
         textarea {
@@ -2819,13 +2855,13 @@
         .mobile-bottom-nav {
           height: var(--mobile-nav-height);
           padding-bottom: env(safe-area-inset-bottom);
-          border-top: 1px solid rgba(0, 100, 101, .14);
-          background: rgba(239, 248, 247, .96) !important;
+          border-top: 1px solid #d4e5e3;
+          background: rgba(255, 255, 255, .98) !important;
           backdrop-filter: blur(16px) saturate(115%);
-          box-shadow: 0 -8px 20px rgba(0,0,0,.12);
+          box-shadow: 0 -8px 20px rgba(15,47,46,.08);
           display: grid;
           grid-auto-flow: column;
-          grid-auto-columns: minmax(60px, 1fr);
+          grid-auto-columns: minmax(64px, 1fr);
           overflow-x: auto;
           overscroll-behavior-x: contain;
           scrollbar-width: none;
@@ -2841,8 +2877,8 @@
           font-weight: 620;
           padding: 6px 2px 4px;
           min-height: calc(var(--mobile-nav-height) - env(safe-area-inset-bottom));
-          min-width: 60px;
-          border-right: 1px solid rgba(0, 100, 101, .08);
+          min-width: 64px;
+          border-right: 1px solid #edf4f4;
           white-space: nowrap;
           gap: 0;
           line-height: 1;
@@ -2865,7 +2901,7 @@
 
         .mobile-bottom-nav button.active {
           color: #006465 !important;
-          background: linear-gradient(180deg, rgba(0, 100, 101, .1), rgba(0, 100, 101, .16));
+          background: linear-gradient(180deg, rgba(0, 100, 101, .08), rgba(0, 100, 101, .13));
         }
 
         .mobile-bottom-nav button.active i,
