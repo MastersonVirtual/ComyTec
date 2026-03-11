@@ -3516,6 +3516,21 @@
           return historyFilteredRows.slice(start, start + HISTORY_PAGE_SIZE);
         }, [historyFilteredRows, safeHistoryPage]);
 
+        function parseCharlaDateTime(row) {
+          const d = String(row?.fecha || '').trim();
+          const h = String(row?.horario || '').trim() || '00:00';
+          if (!d) return null;
+          const dt = new Date(`${d}T${h}`);
+          return Number.isNaN(dt.getTime()) ? null : dt;
+        }
+
+        const charlaHistoryRows = useMemo(() => (
+          visibleRows
+            .filter((r) => (r?.tipoAccion || '') === 'Charla' || (r?.formulario || '') === 'charla-informativa')
+            .slice()
+            .sort((a, b) => (parseCharlaDateTime(b)?.getTime() || 0) - (parseCharlaDateTime(a)?.getTime() || 0))
+        ), [visibleRows]);
+
         function buildServiceDetailText(r) {
           const lines = [
             `Cliente ID: ${r.clienteId || '-'}`,
@@ -3995,6 +4010,17 @@
           setCharlaForm((prev) => ({ ...prev, [key]: value }));
         }
 
+        function handleCharlaClienteIdChange(value) {
+          const nextId = value;
+          setClienteIdAsociado(nextId);
+          const clean = String(nextId || '').trim().toLowerCase();
+          if (!clean) return;
+          const match = visibleRows.find((r) => String(r?.clienteId || '').trim().toLowerCase() === clean);
+          if (!match) return;
+          const nextName = String(match?.nombreServicio || match?.cliente || '').trim();
+          if (nextName) setCharlaField('nombreServicio', nextName);
+        }
+
         const charlaMapUrl = useMemo(() => {
           const q = encodeURIComponent(String(charlaForm.direccion || '').trim());
           if (!q) return '';
@@ -4365,6 +4391,7 @@
                     </div>
                     <button className="menu-button" onClick={() => selectAction('Charla')}>Charlas informativas</button>
                     <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
+                    <button className="menu-button" onClick={() => { setSelectedForm('historial-charlas'); closeSidebar(); }}>Historial de Charlas</button>
                     {ENABLE_CLIENT_TRACKING_VIEW && isAdminUser && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}>Vista Clientes</button>}
                     {isAdminUser && <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}>Vista Gerencia</button>}
                   </>
@@ -4648,7 +4675,33 @@
                       })}
                     </div>
                   </section>
-) : effectiveSelectedForm === 'historial' ? (
+) : effectiveSelectedForm === 'historial-charlas' ? (
+                  <section className="panel">
+                    <h2>Historial de Charlas Informativas</h2>
+                    <div className="hint">Charlas registradas por fecha y hora (más reciente primero).</div>
+                    {charlaHistoryRows.length === 0 ? (
+                      <div className="hint" style={{ marginBottom: 0 }}>No hay charlas registradas todavía.</div>
+                    ) : (
+                      <div className="history-list">
+                        {charlaHistoryRows.map((row) => (
+                          <div className="history-row" key={`charla-${row.id}`}>
+                            <button type="button" className="ranking-service-btn" onClick={() => { setSelectedService(row); setSelectedForm('historial'); }}>
+                              <div className="history-row-main">
+                                <strong>{row.nombreServicio || 'Charla sin nombre'}</strong>
+                                <div className="history-row-meta">
+                                  <span>ID {row.clienteId || '-'}</span><span>·</span>
+                                  <span>{row.responsableCharla || 'Sin responsable'}</span><span>·</span>
+                                  <span>{row.fecha || '-'} {row.horario || '--:--'}</span>
+                                </div>
+                              </div>
+                            </button>
+                            <span className={statusClass(row.status || row.estado)}>{row.status || row.estado || 'Pendiente'}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                ) : effectiveSelectedForm === 'historial' ? (
                   <section className="panel">
                     <h2>Historial de Servicios · Vista Ejecutiva</h2>
                     <div className="hint">Rediseño escalable con filtros, paginación y vista rápida para manejar alto volumen de servicios.</div>
@@ -5044,7 +5097,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <section className="charla-card context">
                           <h4>Charla · Planificación</h4>
                           <div className="charla-core-grid">
-                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio/proyecto" /></div>
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => handleCharlaClienteIdChange(e.target.value)} type="text" placeholder="ID del servicio/proyecto" /></div>
                             <div className="field"><label>Nombre del servicio</label><input value={charlaForm.nombreServicio} onChange={(e) => setCharlaField('nombreServicio', e.target.value)} type="text" placeholder="Servicio a presentar" /></div>
                             <div className="field"><label>Estado automático</label><div className="charla-status-chip">{charlaAutoStatus}</div></div>
                           </div>
@@ -5160,6 +5213,9 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                       <div className="mobile-fab-section mobile-fab-links">
                         <button className="mobile-fab-link" type="button" onClick={() => { setFabOpen(false); setSelectedForm('historial'); setMobileTab('historial'); }}>
                           Historial de servicios
+                        </button>
+                        <button className="mobile-fab-link" type="button" onClick={() => { setFabOpen(false); setSelectedForm('historial-charlas'); setMobileTab('historial'); }}>
+                          Historial de charlas
                         </button>
                         {ENABLE_CLIENT_TRACKING_VIEW && isAdminUser && (
                           <button className="mobile-fab-link" type="button" onClick={() => { setFabOpen(false); setShowClientViewModal(true); }}>
