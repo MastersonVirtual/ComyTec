@@ -2276,6 +2276,60 @@
         transform: translateY(-1px) !important;
       }
 
+      .topbar-profile-btn {
+        margin-left: 12px;
+        border: 1px solid rgba(230,255,253,.34) !important;
+        background: rgba(230,255,253,.09) !important;
+        color: #e6fffd !important;
+        border-radius: 14px !important;
+        min-width: 86px;
+        min-height: 68px;
+        display: flex !important;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        cursor: pointer;
+        font-weight: 700;
+      }
+      .topbar-profile-btn i,
+      .topbar-profile-btn svg {
+        width: 18px;
+        height: 18px;
+        stroke-width: 2.2;
+      }
+      .topbar-profile-btn span {
+        font-size: 12px;
+        letter-spacing: .01em;
+      }
+      .topbar-profile-btn:hover {
+        transform: translateY(-1px);
+        background: rgba(230,255,253,.18) !important;
+      }
+
+      .profile-view {
+        display: grid;
+        gap: 14px;
+      }
+      .profile-option {
+        border: 1px solid rgba(230,255,253,.25);
+        border-radius: 14px;
+        padding: 16px;
+        background: rgba(0, 82, 85, .55);
+      }
+      .profile-option h3 {
+        margin: 0 0 12px;
+        color: #e6fffd;
+        font-size: 1rem;
+      }
+      .profile-form {
+        display: grid;
+        gap: 10px;
+      }
+      .profile-save-btn {
+        max-width: 280px;
+      }
+
       /* Sidebar overlay improvement */
       .overlay.show {
         background: rgba(0, 20, 20, .55) !important;
@@ -3129,6 +3183,9 @@
         const [deletingService, setDeletingService] = useState(false);
         const [showClientViewModal, setShowClientViewModal] = useState(false);
         const [clientOperationId, setClientOperationId] = useState('');
+        const [profilePassword, setProfilePassword] = useState('');
+        const [profileUserRequest, setProfileUserRequest] = useState('');
+        const [profilePasswordRequest, setProfilePasswordRequest] = useState('');
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
@@ -3905,6 +3962,33 @@
           setClientOperationId('');
         }
 
+        function openProfileView() {
+          setSelectedForm('perfil');
+          setMobileTab('perfil');
+          closeSidebar();
+        }
+
+        function handleProfilePasswordChange(e) {
+          e.preventDefault();
+          if (!profilePassword.trim()) {
+            setNotificacion({ mensaje: 'Completá la nueva contraseña para continuar', tipo: 'error' });
+            return;
+          }
+          setNotificacion({ mensaje: '✔ Solicitud de cambio de contraseña enviada', tipo: 'ok' });
+          setProfilePassword('');
+        }
+
+        function handleProfileCredentialsRequest(e) {
+          e.preventDefault();
+          if (!profileUserRequest.trim() || !profilePasswordRequest.trim()) {
+            setNotificacion({ mensaje: 'Ingresá usuario y contraseña para solicitar el cambio', tipo: 'error' });
+            return;
+          }
+          setNotificacion({ mensaje: '✔ Solicitud de cambio de usuario y contraseña registrada', tipo: 'ok' });
+          setProfileUserRequest('');
+          setProfilePasswordRequest('');
+        }
+
         if (isTrackingRoute) {
           return <TrackingView />;
         }
@@ -3998,10 +4082,50 @@
                     </div>
                   </div>
                 )}
+                <button className="topbar-profile-btn" type="button" onClick={openProfileView}>
+                  <i data-lucide="user-round" />
+                  <span>Perfil chico</span>
+                </button>
               </header>
 
               <main className="main">
-                {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : isMobile && mobileTab === 'mapa' ? (<section className="panel"><h2>Mapa</h2><div className="hint">Vista de mapa próxima versión.</div></section>) : isMobile && mobileTab === 'perfil' ? (<section className="panel"><h2>Mi Perfil</h2><div className="hint">{currentUserName} · {topbarSubtitle}</div></section>) : effectiveSelectedForm === 'dashboard-gerencia' ? (
+                {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : isMobile && mobileTab === 'mapa' ? (<section className="panel"><h2>Mapa</h2><div className="hint">Vista de mapa próxima versión.</div></section>) : effectiveSelectedForm === 'perfil' ? (
+                  <section className="panel profile-view">
+                    <h2>Perfil chico</h2>
+                    <div className="hint">{currentUserName} · {topbarSubtitle}</div>
+                    <article className="profile-option">
+                      <h3>Cambiar contraseña</h3>
+                      <form className="profile-form" onSubmit={handleProfilePasswordChange}>
+                        <input
+                          type="password"
+                          placeholder="Nueva contraseña"
+                          value={profilePassword}
+                          onChange={(e) => setProfilePassword(e.target.value)}
+                        />
+                        <button className="save-btn profile-save-btn" type="submit">Solicitar cambio de contraseña</button>
+                      </form>
+                    </article>
+                    <article className="profile-option">
+                      <h3>Solicitar cambio de usuario y contraseña</h3>
+                      <form className="profile-form" onSubmit={handleProfileCredentialsRequest}>
+                        <input
+                          type="text"
+                          placeholder="Nuevo usuario"
+                          value={profileUserRequest}
+                          onChange={(e) => setProfileUserRequest(e.target.value)}
+                        />
+                        <input
+                          type="password"
+                          placeholder="Nueva contraseña"
+                          value={profilePasswordRequest}
+                          onChange={(e) => setProfilePasswordRequest(e.target.value)}
+                        />
+                        <button className="save-btn profile-save-btn" type="submit">Enviar solicitud</button>
+                      </form>
+                    </article>
+                    <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar sesión</button>
+                  </section>
+                ) : effectiveSelectedForm === 'dashboard-gerencia' ? (
                   <DashboardGerencia rows={visibleRows} isMobileNative={isMobile && isGerencia} />
                 ) : effectiveSelectedForm === 'home' ? (
                   <>
@@ -4645,6 +4769,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                     <button className={mobileTab === 'servicios' ? 'active' : ''} type="button" onClick={() => { setMobileTab('servicios'); setSelectedForm('home'); }}><i data-lucide="layers" />Servicios</button>
                     <button className={selectedForm === 'historial' ? 'active' : ''} type="button" onClick={() => { setMobileTab('historial'); setSelectedForm('historial'); setSelectedService(null); }}><i data-lucide="history" />Historial</button>
                     <button className={fabOpen ? 'active' : ''} type="button" onClick={() => setFabOpen((v) => !v)}><i data-lucide="plus-circle" />Formularios</button>
+                    <button className={selectedForm === 'perfil' ? 'active' : ''} type="button" onClick={openProfileView}><i data-lucide="user-round" />Perfil</button>
                   </nav>
                 </>
               )}
