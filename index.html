@@ -2292,11 +2292,23 @@
         cursor: pointer;
         font-weight: 700;
       }
-      .topbar-profile-btn i,
-      .topbar-profile-btn svg {
+      .topbar-profile-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 999px;
+        background: #ffffff;
+        border: 1px solid rgba(230,255,253,.6);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .topbar-profile-icon i,
+      .topbar-profile-icon svg {
         width: 18px;
         height: 18px;
         stroke-width: 2.2;
+        color: #006465;
+        stroke: #006465;
       }
       .topbar-profile-btn span {
         font-size: 12px;
@@ -2328,6 +2340,14 @@
       }
       .profile-save-btn {
         max-width: 280px;
+      }
+      .profile-logout-btn {
+        background: rgba(78, 22, 22, .25) !important;
+        border-color: rgba(170, 35, 35, .45) !important;
+        color: #ffd2d2 !important;
+      }
+      .profile-logout-btn:hover {
+        background: rgba(78, 22, 22, .38) !important;
       }
 
       /* Sidebar overlay improvement */
@@ -3183,7 +3203,6 @@
         const [deletingService, setDeletingService] = useState(false);
         const [showClientViewModal, setShowClientViewModal] = useState(false);
         const [clientOperationId, setClientOperationId] = useState('');
-        const [profilePassword, setProfilePassword] = useState('');
         const [profileUserRequest, setProfileUserRequest] = useState('');
         const [profilePasswordRequest, setProfilePasswordRequest] = useState('');
 
@@ -3968,16 +3987,6 @@
           closeSidebar();
         }
 
-        function handleProfilePasswordChange(e) {
-          e.preventDefault();
-          if (!profilePassword.trim()) {
-            setNotificacion({ mensaje: 'Completá la nueva contraseña para continuar', tipo: 'error' });
-            return;
-          }
-          setNotificacion({ mensaje: '✔ Solicitud de cambio de contraseña enviada', tipo: 'ok' });
-          setProfilePassword('');
-        }
-
         function handleProfileCredentialsRequest(e) {
           e.preventDefault();
           if (!profileUserRequest.trim() || !profilePasswordRequest.trim()) {
@@ -4083,7 +4092,7 @@
                   </div>
                 )}
                 <button className="topbar-profile-btn" type="button" onClick={openProfileView}>
-                  <i data-lucide="user-round" />
+                  <span className="topbar-profile-icon"><i data-lucide="user-round" /></span>
                   <span>Perfil chico</span>
                 </button>
               </header>
@@ -4091,20 +4100,8 @@
               <main className="main">
                 {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : isMobile && mobileTab === 'mapa' ? (<section className="panel"><h2>Mapa</h2><div className="hint">Vista de mapa próxima versión.</div></section>) : effectiveSelectedForm === 'perfil' ? (
                   <section className="panel profile-view">
-                    <h2>Perfil chico</h2>
+                    <h2>Mi perfil</h2>
                     <div className="hint">{currentUserName} · {topbarSubtitle}</div>
-                    <article className="profile-option">
-                      <h3>Cambiar contraseña</h3>
-                      <form className="profile-form" onSubmit={handleProfilePasswordChange}>
-                        <input
-                          type="password"
-                          placeholder="Nueva contraseña"
-                          value={profilePassword}
-                          onChange={(e) => setProfilePassword(e.target.value)}
-                        />
-                        <button className="save-btn profile-save-btn" type="submit">Solicitar cambio de contraseña</button>
-                      </form>
-                    </article>
                     <article className="profile-option">
                       <h3>Solicitar cambio de usuario y contraseña</h3>
                       <form className="profile-form" onSubmit={handleProfileCredentialsRequest}>
@@ -4123,7 +4120,7 @@
                         <button className="save-btn profile-save-btn" type="submit">Enviar solicitud</button>
                       </form>
                     </article>
-                    <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar sesión</button>
+                    <button className="logout-btn profile-logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar sesión</button>
                   </section>
                 ) : effectiveSelectedForm === 'dashboard-gerencia' ? (
                   <DashboardGerencia rows={visibleRows} isMobileNative={isMobile && isGerencia} />
