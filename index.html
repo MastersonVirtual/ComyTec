@@ -2282,6 +2282,179 @@
         backdrop-filter: blur(4px) !important;
       }
 
+      /* Ajustes solicitados: mobile nativo + sidebar desktop más redondeada */
+      @media (min-width: 769px) {
+        .sidebar {
+          border-radius: 0 32px 32px 0 !important;
+          overflow: hidden;
+        }
+        .sidebar::after {
+          right: 0 !important;
+          width: 4px;
+          border-radius: 0 32px 32px 0;
+          opacity: .92;
+        }
+      }
+
+      @media (max-width: 768px) {
+        :root {
+          --mobile-nav-height: calc(78px + env(safe-area-inset-bottom));
+        }
+
+        body {
+          background: radial-gradient(circle at 20% 0%, #0c4b49 0%, #072f2e 45%, #041e1d 100%) !important;
+        }
+
+        .topbar {
+          position: sticky;
+          top: 0;
+          z-index: 1400;
+          padding: 12px 14px;
+          border-radius: 0 0 20px 20px;
+          background: rgba(3, 23, 23, .92) !important;
+          border: 0 !important;
+          box-shadow: 0 10px 22px rgba(0,0,0,.28);
+        }
+
+        .top-titles h1,
+        .top-titles p {
+          color: #e9ffff !important;
+        }
+
+        .main {
+          margin: 12px auto;
+          padding: 0 12px calc(var(--mobile-nav-height) + 18px);
+        }
+
+        .panel,
+        .service-card,
+        .widget,
+        .ranking-section,
+        .kpi-card,
+        .history-list-shell {
+          border-radius: 18px !important;
+          background: linear-gradient(170deg, rgba(12, 46, 45, .9), rgba(6, 29, 29, .92)) !important;
+          border: 1px solid rgba(120, 226, 213, .22) !important;
+          box-shadow: 0 8px 18px rgba(0,0,0,.26) !important;
+        }
+
+        .field > label,
+        .hint,
+        .muted,
+        .kv,
+        .top-titles p,
+        p,
+        td,
+        th {
+          color: #bfe9e4 !important;
+        }
+
+        h1, h2, h3, h4,
+        .service-card h3,
+        .panel h2,
+        .widget h4,
+        .kpi-value,
+        .kpi-label,
+        .ranking-section h3 {
+          color: #efffff !important;
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+          min-height: 46px;
+          border-radius: 14px !important;
+        }
+
+        .mobile-bottom-nav {
+          height: var(--mobile-nav-height);
+          padding-bottom: env(safe-area-inset-bottom);
+          border-top: 1px solid rgba(126, 233, 220, .24);
+          background: rgba(2, 17, 17, .96) !important;
+          backdrop-filter: blur(18px) saturate(130%);
+          box-shadow: 0 -8px 24px rgba(0,0,0,.3);
+        }
+
+        .mobile-bottom-nav button {
+          color: #bde5e0 !important;
+          font-size: 11px;
+          font-weight: 650;
+          padding: 8px 2px 6px;
+        }
+
+        .mobile-bottom-nav button.active {
+          color: #68f7dc !important;
+        }
+
+        .mobile-fab {
+          right: 14px;
+          bottom: calc(var(--mobile-nav-height) + 12px) !important;
+          width: 56px !important;
+          height: 56px !important;
+          border-radius: 18px !important;
+        }
+
+        .mobile-fab-menu {
+          left: 10px;
+          right: 10px;
+          bottom: calc(var(--mobile-nav-height) + 80px) !important;
+          max-height: min(62vh, 540px);
+          overflow: auto;
+          border-radius: 18px;
+          background: rgba(2, 18, 18, .98) !important;
+          border: 1px solid rgba(120, 226, 213, .24) !important;
+          padding: 12px;
+          display: grid;
+          gap: 12px;
+        }
+
+        .mobile-fab-section {
+          display: grid;
+          gap: 8px;
+        }
+
+        .mobile-fab-section h4 {
+          margin: 0;
+          font-size: 12px;
+          letter-spacing: .06em;
+          text-transform: uppercase;
+          color: #8cdad2 !important;
+        }
+
+        .mobile-fab-actions {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 8px;
+        }
+
+        .mobile-fab-action,
+        .mobile-fab-link {
+          border: 1px solid rgba(120, 226, 213, .25) !important;
+          background: rgba(12, 55, 53, .72) !important;
+          color: #efffff !important;
+          border-radius: 12px !important;
+          min-height: 44px;
+          font-size: 12px;
+          font-weight: 640;
+          padding: 8px 10px;
+          text-align: left;
+        }
+
+        .mobile-fab-links {
+          border-top: 1px solid rgba(120, 226, 213, .22);
+          padding-top: 10px;
+        }
+
+        .toast {
+          bottom: calc(var(--mobile-nav-height) + 8px) !important;
+        }
+
+        .app-footer {
+          bottom: calc(var(--mobile-nav-height) + 48px) !important;
+        }
+      }
+
     </style>
 
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -3403,6 +3576,42 @@
         const isTechnicalUser = /tecnic/.test(userRole) || /tecnic/.test(userArea);
         const isCommercialUser = userArea === 'comercial' || userRole.includes('vendedor');
 
+        const ACTION_LABELS = {
+          'Nuevo Servicio': 'Nuevo servicio',
+          'Obra': 'Nueva obra',
+          'Novación': 'Novaciones',
+          'Agregado': 'Equipos agregados',
+          'Movimiento de Obra': 'Movimiento de obra',
+          'Baja': 'Baja de servicio',
+          'Charla': 'Charlas informativas',
+        };
+
+        const mobileAllowedActions = useMemo(() => {
+          if (isAdminUser) return [...ACCIONES];
+          if (isTechnicalUser && !isCommercialUser) return ['Obra', 'Movimiento de Obra', 'Agregado', 'Baja'];
+          if (isCommercialUser && !isTechnicalUser) return ['Nuevo Servicio', 'Novación', 'Agregado', 'Charla', 'Obra'];
+          return [...ACCIONES];
+        }, [isAdminUser, isTechnicalUser, isCommercialUser]);
+
+        const mobileFabSections = useMemo(() => {
+          const actionInRole = (action) => mobileAllowedActions.includes(action);
+          const toItem = (action) => ({ action, label: ACTION_LABELS[action] || action });
+          return [
+            {
+              title: 'Nuevo',
+              items: ['Nuevo Servicio', 'Obra', 'Novación', 'Agregado', 'Movimiento de Obra', 'Baja'].filter(actionInRole).map(toItem),
+            },
+            {
+              title: 'Facturación',
+              items: ['Agregado', 'Nuevo Servicio', 'Novación', 'Obra', 'Movimiento de Obra'].filter(actionInRole).map(toItem),
+            },
+            {
+              title: 'Informativos',
+              items: ['Charla'].filter(actionInRole).map(toItem),
+            },
+          ].filter((section) => section.items.length > 0);
+        }, [mobileAllowedActions]);
+
         function canEditService(service) {
           if (!service) return false;
           if (isAdminUser) return true;
@@ -4401,15 +4610,41 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                   {fabOpen && <div className="mobile-fab-overlay" onClick={() => setFabOpen(false)} />}
                   {fabOpen && (
                     <div className="mobile-fab-menu">
-                      <button className="edit-btn" type="button" onClick={() => { setFabOpen(false); selectAction('Nuevo Servicio'); }}>Nuevo Servicio</button>
+                      {mobileFabSections.map((section) => (
+                        <div key={section.title} className="mobile-fab-section">
+                          <h4>{section.title}</h4>
+                          <div className="mobile-fab-actions">
+                            {section.items.map((item) => (
+                              <button key={`${section.title}-${item.action}`} className="mobile-fab-action" type="button" onClick={() => { setFabOpen(false); selectAction(item.action); }}>
+                                {item.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                      <div className="mobile-fab-section mobile-fab-links">
+                        <button className="mobile-fab-link" type="button" onClick={() => { setFabOpen(false); setSelectedForm('historial'); setMobileTab('historial'); }}>
+                          Historial de servicios
+                        </button>
+                        {ENABLE_CLIENT_TRACKING_VIEW && isAdminUser && (
+                          <button className="mobile-fab-link" type="button" onClick={() => { setFabOpen(false); setShowClientViewModal(true); }}>
+                            Vista clientes
+                          </button>
+                        )}
+                        {isAdminUser && (
+                          <button className="mobile-fab-link" type="button" onClick={() => { setFabOpen(false); setSelectedForm('dashboard-gerencia'); }}>
+                            Vista gerencia
+                          </button>
+                        )}
+                      </div>
                     </div>
                   )}
-                  <button className="mobile-fab" type="button" onClick={() => setFabOpen((v) => !v)} aria-label="Nuevo Servicio">+</button>
+                  <button className="mobile-fab" type="button" onClick={() => setFabOpen((v) => !v)} aria-label="Abrir formularios">+</button>
                   <nav className="mobile-bottom-nav">
-                    <button className={mobileTab === 'home' ? 'active' : ''} type="button" onClick={() => { setMobileTab('home'); setSelectedForm('home'); }}><i data-lucide="house" />Inicio</button>
+                    <button className={mobileTab === 'home' && selectedForm === 'home' ? 'active' : ''} type="button" onClick={() => { setMobileTab('home'); setSelectedForm('home'); }}><i data-lucide="house" />Inicio</button>
                     <button className={mobileTab === 'servicios' ? 'active' : ''} type="button" onClick={() => { setMobileTab('servicios'); setSelectedForm('home'); }}><i data-lucide="layers" />Servicios</button>
-                    <button className={mobileTab === 'mapa' ? 'active' : ''} type="button" onClick={() => { setMobileTab('mapa'); setSelectedForm('home'); }}><i data-lucide="map" />Mapa</button>
-                    <button className={mobileTab === 'perfil' ? 'active' : ''} type="button" onClick={() => { setMobileTab('perfil'); setSelectedForm('home'); }}><i data-lucide="user-circle" />Mi Perfil</button>
+                    <button className={selectedForm === 'historial' ? 'active' : ''} type="button" onClick={() => { setMobileTab('historial'); setSelectedForm('historial'); setSelectedService(null); }}><i data-lucide="history" />Historial</button>
+                    <button className={fabOpen ? 'active' : ''} type="button" onClick={() => setFabOpen((v) => !v)}><i data-lucide="plus-circle" />Formularios</button>
                   </nav>
                 </>
               )}
