@@ -2387,6 +2387,11 @@
         border: 1px solid rgba(248, 113, 113, .45) !important;
         color: #fee2e2 !important;
       }
+      .status-action-btn.accept {
+        background: rgba(59, 130, 246, .24) !important;
+        border: 1px solid rgba(96, 165, 250, .48) !important;
+        color: #dbeafe !important;
+      }
       .status-chip-inline {
         display: inline-flex;
         align-items: center;
@@ -3266,6 +3271,7 @@
         const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
         const [userCredentialRequests, setUserCredentialRequests] = useState([]);
         const [updatingRequestId, setUpdatingRequestId] = useState('');
+        const [acceptingRequestId, setAcceptingRequestId] = useState('');
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
@@ -4120,7 +4126,8 @@
         }
 
         function requestStatusLabel(status) {
-          if (status === 'resuelta') return 'Resuelta';
+          if (status === 'aprobada') return 'Aprobada (esperando aceptación del usuario)';
+          if (status === 'aplicada') return 'Aplicada';
           if (status === 'rechazada') return 'Rechazada';
           return 'Pendiente';
         }
@@ -4136,19 +4143,40 @@
               resueltaPorUid: user?.uid || '',
               resueltaPorEmail: user?.email || '',
             };
-            if (nextStatus === 'resuelta') {
+            if (nextStatus === 'aprobada') {
               patch.credencialesInformadas = {
                 usuario: req?.nuevoUsuarioSolicitado || '',
                 password: req?.nuevaPasswordSolicitada || '',
               };
+              patch.aceptadoPorUsuario = false;
             }
             await db.collection('solicitudes_credenciales').doc(req.id).set(patch, { merge: true });
-            setNotificacion({ mensaje: `✔ Solicitud marcada como ${requestStatusLabel(nextStatus).toLowerCase()}`, tipo: 'ok' });
+            setNotificacion({ mensaje: `✔ Solicitud marcada como ${nextStatus === 'aprobada' ? 'aprobada' : 'rechazada'}`, tipo: 'ok' });
           } catch (error) {
             console.error('Error actualizando estado de solicitud:', error);
             setNotificacion({ mensaje: '✖ No se pudo actualizar la solicitud', tipo: 'error' });
           } finally {
             setUpdatingRequestId('');
+          }
+        }
+
+        async function handleUserAcceptCredentialChanges(req) {
+          if (!req?.id || !user?.uid) return;
+          setAcceptingRequestId(req.id);
+          try {
+            await db.collection('solicitudes_credenciales').doc(req.id).set({
+              estado: 'aplicada',
+              aceptadoPorUsuario: true,
+              aceptadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+              actualizadaEn: firebase.firestore.FieldValue.serverTimestamp(),
+            }, { merge: true });
+            setNotificacion({ mensaje: '✔ Cambios aceptados. Se cerrará tu sesión para ingresar con las nuevas credenciales.', tipo: 'ok' });
+            setTimeout(() => auth.signOut(), 900);
+          } catch (error) {
+            console.error('Error aceptando cambios de credenciales:', error);
+            setNotificacion({ mensaje: '✖ No se pudieron aceptar los cambios', tipo: 'error' });
+          } finally {
+            setAcceptingRequestId('');
           }
         }
 
@@ -4305,7 +4333,7 @@
                         <article className="profile-option" key={req.id}>
                           <h3>
                             {req.solicitanteNombre || req.solicitanteEmail || 'Usuario'}
-                            <span className={`status-chip-inline ${req.estado === 'resuelta' ? 'resolved' : req.estado === 'rechazada' ? 'rejected' : 'pending'}`} style={{ marginLeft: 8 }}>
+                            <span className={`status-chip-inline ${req.estado === 'aprobada' || req.estado === 'aplicada' ? 'resolved' : req.estado === 'rechazada' ? 'rejected' : 'pending'}`} style={{ marginLeft: 8 }}>
                               {requestStatusLabel(req.estado)}
                             </span>
                           </h3>
@@ -4316,8 +4344,8 @@
                           <div className="kv"><b>Última actualización:</b> {formatRequestDateTime(req.actualizadaEn)}</div>
                           {req.estado === 'pendiente' && (
                             <div className="request-status-row">
-                              <button type="button" className="status-action-btn resolve" disabled={updatingRequestId === req.id} onClick={() => updateCredentialRequestStatus(req, 'resuelta')}>
-                                {updatingRequestId === req.id ? 'Actualizando...' : 'Marcar resuelta'}
+                              <button type="button" className="status-action-btn resolve" disabled={updatingRequestId === req.id} onClick={() => updateCredentialRequestStatus(req, 'aprobada')}>
+                                {updatingRequestId === req.id ? 'Actualizando...' : 'Marcar aprobada'}
                               </button>
                               <button type="button" className="status-action-btn reject" disabled={updatingRequestId === req.id} onClick={() => updateCredentialRequestStatus(req, 'rechazada')}>
                                 {updatingRequestId === req.id ? 'Actualizando...' : 'Marcar rechazada'}
@@ -4359,8 +4387,20 @@
                           <div key={req.id} style={{ marginBottom: 8 }}>
                             <div className="kv"><b>Estado:</b> {requestStatusLabel(req.estado)}</div>
                             <div className="kv"><b>Fecha:</b> {formatRequestDateTime(req.creadoEn)}</div>
-                            {req.estado === 'resuelta' && req?.credencialesInformadas && (
+                            {(req.estado === 'aprobada' || req.estado === 'aplicada') && req?.credencialesInformadas && (
                               <div className="kv"><b>Credenciales informadas:</b> {req.credencialesInformadas.usuario || '-'} / {req.credencialesInformadas.password || '-'}</div>
+                            )}
+                            {req.estado === 'aprobada' && !req.aceptadoPorUsuario && (
+                              <div className="request-status-row">
+                                <button
+                                  type="button"
+                                  className="status-action-btn accept"
+                                  onClick={() => handleUserAcceptCredentialChanges(req)}
+                                  disabled={acceptingRequestId === req.id}
+                                >
+                                  {acceptingRequestId === req.id ? 'Aplicando...' : 'Aceptar cambios y cerrar sesión'}
+                                </button>
+                              </div>
                             )}
                           </div>
                         ))
