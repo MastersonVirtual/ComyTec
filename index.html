@@ -2069,6 +2069,13 @@
         border-radius: 999px !important;
       }
 
+      .dashboard-gerencia-panel .gerencia-widget-toggle {
+        background: #006465 !important;
+        color: #ff8c00 !important;
+        border-color: #006465 !important;
+        font-weight: 800;
+      }
+
       /* ═══════ Sidebar v2 Redesign ═══════ */
       @keyframes sidebar-slide-in {
         from { transform: translateX(-105%) scale(.97); opacity: .5; }
@@ -3317,6 +3324,19 @@
 
         const topProyecto = rentabilidadPorProyecto[0] || { name: 'Sin datos', rentabilidad: 0 };
 
+        const topVendedoresServicios = Object.entries(rows.reduce((acc, r) => {
+          const seller = (r.representanteComercial || 'Sin asignar').trim();
+          acc[seller] = (acc[seller] || 0) + 1;
+          return acc;
+        }, {})).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 8);
+
+        const topVendedoresIngresos = Object.entries(rows.reduce((acc, r) => {
+          const seller = (r.representanteComercial || 'Sin asignar').trim();
+          const income = (Number(r.importeMensualServicioSinIva) || 0) + (Number(r.importeMensualArrendamiento) || 0) + (Number(r.importeCompraEquipamiento) || 0);
+          acc[seller] = (acc[seller] || 0) + income;
+          return acc;
+        }, {})).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 8);
+
         return (
           <section className="panel dashboard-gerencia-panel">
             <h2>Dashboard Gerencia</h2>
@@ -3367,6 +3387,14 @@
                 <div className="gerencia-item"><span>Arrendamiento</span><b>US$ {totalArrendamiento.toLocaleString('es-UY')}</b></div>
                 <div className="gerencia-item"><span>Venta equipamiento</span><b>US$ {totalVentasEquipos.toLocaleString('es-UY')}</b></div>
                 <div className="gerencia-item"><span>Total ingresos</span><b>US$ {totalIngresos.toLocaleString('es-UY')}</b></div>
+              </article>
+
+
+              <article className={`gerencia-widget ${activeWidget === 'top-vendedores' ? 'active' : ''}`}>
+                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('top-vendedores')}>Top Vendedores</button>
+                <h3>Top vendedores</h3>
+                <PieChartWidget chartId="top-vendedores-servicios" title="Servicios vendidos por vendedor" items={topVendedoresServicios} />
+                <PieChartWidget chartId="top-vendedores-ingresos" title="Ingresos por vendedor" items={topVendedoresIngresos} />
               </article>
             </div>
           </section>
