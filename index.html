@@ -1400,6 +1400,23 @@
         width: 100% !important;
         height: auto !important;
       }
+      .gerencia-widget-half {
+        min-height: 250px;
+      }
+      .gerencia-top-charts {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        align-items: start;
+      }
+      .gerencia-scroll-list {
+        max-height: 180px;
+        overflow-y: auto;
+        display: grid;
+        gap: 8px;
+        margin-top: 8px;
+        padding-right: 4px;
+      }
       .legend-item {
         display: flex;
         align-items: center;
@@ -2067,6 +2084,13 @@
       .dashboard-gerencia-panel .legend-dot,
       .dashboard-gerencia-panel .kpi-dot {
         border-radius: 999px !important;
+      }
+
+      .dashboard-gerencia-panel .gerencia-widget-toggle {
+        background: #006465 !important;
+        color: #ff8c00 !important;
+        border-color: #006465 !important;
+        font-weight: 800;
       }
 
       /* ═══════ Sidebar v2 Redesign ═══════ */
@@ -3041,6 +3065,7 @@
         costoInstalacionUsdSinIva: '',
         porQueNoSeCobraServicio: '',
         presupuestoProveedor: '',
+        presupuestoPdfUrl: '',
 
         condicionControlAcceso: 'Control de acceso nuestro',
         tagsPorAptos: 'Sí (3 por unidad)',
@@ -3048,6 +3073,7 @@
         llavesServicio: 'Pendientes',
 
         referenteInstalacion: '',
+        tecnicoAsignado: '',
         telefonoReferenteInstalacion: '',
         bottiSeContactaCon: '',
         fechaEspecificaInicioActiva: false,
@@ -3261,126 +3287,129 @@
       }
 
       function DashboardGerencia({ rows, isMobileNative = false }) {
-        const [activeWidget, setActiveWidget] = useState('facturacion');
-        const [mobileVisibleCount, setMobileVisibleCount] = useState(8);
-        const mobileSentinelRef = useRef(null);
+        const [activeWidget, setActiveWidget] = useState('rentabilidad');
+        const [showCostosDetalle, setShowCostosDetalle] = useState(false);
 
-        const totalAbonos = rows.reduce((acc, r) => acc + (Number(r.importeMensualServicioSinIva) || 0), 0);
-        const totalVentasEquipos = rows.reduce((acc, r) => acc + (Number(r.costoInstalacionUsdSinIva) || 0), 0);
+        function toDate(value) {
+          if (!value) return null;
+          if (typeof value?.toDate === 'function') return value.toDate();
+          if (typeof value?.seconds === 'number') return new Date(value.seconds * 1000);
+          const parsed = new Date(value);
+          return Number.isNaN(parsed.getTime()) ? null : parsed;
+        }
 
-        const actionCounts = ACCIONES.map((name) => ({ name, value: rows.filter((r) => (r.tipoAccion || '') === name).length }));
-        const statusCounts = STATUS_OPTIONS.map((name) => ({ name, value: rows.filter((r) => (r.status || '') === name).length }));
+        const totalInstalacion = rows.reduce((acc, r) => acc + (Number(r.costoInstalacionUsdSinIva) || 0), 0);
+        const totalProveedores = rows.reduce((acc, r) => acc + (Number(r.presupuestoProveedor) || 0), 0);
+        const totalArrendamiento = rows.reduce((acc, r) => acc + (Number(r.importeMensualArrendamiento) || 0), 0);
+        const totalVentasEquipos = rows.reduce((acc, r) => acc + (Number(r.importeCompraEquipamiento) || 0), 0);
+        const totalIngresos = totalArrendamiento + totalVentasEquipos;
 
-        const comercialRanking = rows.reduce((acc, row) => {
-          const rep = (row.representanteComercial || 'Sin asignar').trim();
-          acc[rep] = (acc[rep] || 0) + 1;
-          return acc;
-        }, {});
-        const rankingList = Object.entries(comercialRanking)
-          .map(([name, value]) => ({ name, value }))
-          .sort((a, b) => b.value - a.value);
-        const topSeller = rankingList[0] || { name: 'Sin datos', value: 0 };
-        const lowSeller = rankingList[rankingList.length - 1] || { name: 'Sin datos', value: 0 };
-
-        useEffect(() => {
-          setMobileVisibleCount(8);
-        }, [rows.length]);
-
-        const serviceCards = useMemo(() => rows
+        const costosDetalleRows = rows
           .slice()
-          .sort((a, b) => {
-            const aTs = a.actualizadoEn?.seconds || a.creadoEn?.seconds || 0;
-            const bTs = b.actualizadoEn?.seconds || b.creadoEn?.seconds || 0;
-            return bTs - aTs;
-          }), [rows]);
+          .sort((a, b) => (b.actualizadoEn?.seconds || b.creadoEn?.seconds || 0) - (a.actualizadoEn?.seconds || a.creadoEn?.seconds || 0));
 
-        const mobileCards = useMemo(() => {
-          const widgets = [
-            { id: 'm-total-abono', type: 'metric', title: 'Facturación Mensual', tag: 'Widget', value: `US$ ${totalAbonos.toLocaleString('es-UY')}` },
-            { id: 'm-total-equipos', type: 'metric', title: 'Ventas Equipos', tag: 'Widget', value: `US$ ${totalVentasEquipos.toLocaleString('es-UY')}` },
-            { id: 'm-status', type: 'status' },
-            { id: 'm-ranking', type: 'ranking' },
-            { id: 'm-acciones', type: 'actions' },
-          ];
-          const services = serviceCards.map((service) => ({ id: `svc-${service.id}`, type: 'service', service }));
-          return [...widgets, ...services];
-        }, [totalAbonos, totalVentasEquipos, serviceCards]);
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const fechasAltaNuevas = rows
+          .map((r) => ({
+            nombre: r.nombreServicio || r.razonSocial || r.clienteId || 'Servicio sin nombre',
+            fecha: r.fechaAltaServicio || r.fechaAlta || r.fechaEspecificaInicio,
+            dateObj: toDate(r.fechaAltaServicio || r.fechaAlta || r.fechaEspecificaInicio),
+          }))
+          .filter((r) => r.dateObj && r.dateObj >= now)
+          .sort((a, b) => a.dateObj - b.dateObj);
 
-        const hasMoreCards = mobileVisibleCount < mobileCards.length;
-        const visibleMobileCards = mobileCards.slice(0, mobileVisibleCount);
+        const statusBuckets = { Completado: 0, Pendiente: 0, Atrasado: 0 };
+        rows.forEach((r) => {
+          const label = String(r.status || r.estado || '').toLowerCase();
+          if (label.includes('complet') || label.includes('finaliz')) {
+            statusBuckets.Completado += 1;
+          } else if (label.includes('atras')) {
+            statusBuckets.Atrasado += 1;
+          } else {
+            statusBuckets.Pendiente += 1;
+          }
+        });
+        const statusCounts = Object.entries(statusBuckets).map(([name, value]) => ({ name, value }));
 
-        useEffect(() => {
-          if (!isMobileNative || !hasMoreCards || !mobileSentinelRef.current) return () => {};
-          const observer = new IntersectionObserver((entries) => {
-            const first = entries[0];
-            if (first && first.isIntersecting) {
-              setMobileVisibleCount((prev) => Math.min(prev + 6, mobileCards.length));
-            }
-          }, { threshold: 0.1, rootMargin: '180px' });
+        const activos = rows
+          .filter((r) => {
+            const label = String(r.status || r.estado || '').toLowerCase();
+            return !(label.includes('cancel') || label.includes('complet') || label.includes('finaliz') || label.includes('baja'));
+          })
+          .slice()
+          .sort((a, b) => (b.actualizadoEn?.seconds || b.creadoEn?.seconds || 0) - (a.actualizadoEn?.seconds || a.creadoEn?.seconds || 0));
 
-          observer.observe(mobileSentinelRef.current);
-          return () => observer.disconnect();
-        }, [isMobileNative, hasMoreCards, mobileCards.length]);
+        const rentabilidadPorProyecto = Object.entries(rows.reduce((acc, r) => {
+          const key = (r.proyectoServicio || r.nombreServicio || 'Sin proyecto').trim();
+          const ingresos = (Number(r.importeMensualServicioSinIva) || 0) + (Number(r.importeMensualArrendamiento) || 0) + (Number(r.importeCompraEquipamiento) || 0);
+          const costos = (Number(r.costoInstalacionUsdSinIva) || 0) + (Number(r.presupuestoProveedor) || 0);
+          if (!acc[key]) acc[key] = { ingresos: 0, costos: 0 };
+          acc[key].ingresos += ingresos;
+          acc[key].costos += costos;
+          return acc;
+        }, {})).map(([name, values]) => ({
+          name,
+          rentabilidad: values.ingresos - values.costos,
+        })).sort((a, b) => b.rentabilidad - a.rentabilidad);
 
-        if (isMobileNative) {
+        const rentabilidadPorCliente = Object.entries(rows.reduce((acc, r) => {
+          const key = (r.razonSocial || r.nombreServicio || r.clienteId || 'Sin cliente').trim();
+          const ingresos = (Number(r.importeMensualServicioSinIva) || 0) + (Number(r.importeMensualArrendamiento) || 0) + (Number(r.importeCompraEquipamiento) || 0);
+          const costos = (Number(r.costoInstalacionUsdSinIva) || 0) + (Number(r.presupuestoProveedor) || 0);
+          if (!acc[key]) acc[key] = { ingresos: 0, costos: 0 };
+          acc[key].ingresos += ingresos;
+          acc[key].costos += costos;
+          return acc;
+        }, {})).map(([name, values]) => ({
+          name,
+          rentabilidad: values.ingresos - values.costos,
+        })).sort((a, b) => b.rentabilidad - a.rentabilidad).slice(0, 8);
+
+        const topProyecto = rentabilidadPorProyecto[0] || { name: 'Sin datos', rentabilidad: 0 };
+
+        const topVendedoresServicios = Object.entries(rows.reduce((acc, r) => {
+          const seller = (r.representanteComercial || 'Sin asignar').trim();
+          acc[seller] = (acc[seller] || 0) + 1;
+          return acc;
+        }, {})).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 8);
+
+        const topVendedoresIngresos = Object.entries(rows.reduce((acc, r) => {
+          const seller = (r.representanteComercial || 'Sin asignar').trim();
+          const income = (Number(r.importeMensualServicioSinIva) || 0) + (Number(r.importeMensualArrendamiento) || 0) + (Number(r.importeCompraEquipamiento) || 0);
+          acc[seller] = (acc[seller] || 0) + income;
+          return acc;
+        }, {})).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 8);
+
+        if (showCostosDetalle) {
           return (
             <section className="panel dashboard-gerencia-panel">
-              <h2>Dashboard Gerencia</h2>
-              <div className="hint">Vista móvil estilo app nativa, tarjetas unificadas y scroll continuo.</div>
-              <div className="gerencia-mobile-app">
-                {visibleMobileCards.map((card) => {
-                  if (card.type === 'metric') {
-                    return (
-                      <article key={card.id} className="gerencia-mobile-card">
-                        <div className="gerencia-mobile-header"><h3>{card.title}</h3><span className="gerencia-mobile-tag">{card.tag}</span></div>
-                        <div className="gerencia-mobile-value">{card.value}</div>
-                      </article>
-                    );
-                  }
-
-                  if (card.type === 'status') {
-                    return (
-                      <article key={card.id} className="gerencia-mobile-card">
-                        <div className="gerencia-mobile-header"><h3>Status de Servicios</h3><span className="gerencia-mobile-tag">Widget</span></div>
-                        <div className="gerencia-mobile-list">
-                          {statusCounts.map((item) => (<div key={`m-status-${item.name}`} className="gerencia-mobile-row"><span>{item.name}</span><b>{item.value}</b></div>))}
-                        </div>
-                      </article>
-                    );
-                  }
-
-                  if (card.type === 'ranking') {
-                    return (
-                      <article key={card.id} className="gerencia-mobile-card">
-                        <div className="gerencia-mobile-header"><h3>Ranking Comercial</h3><span className="gerencia-mobile-tag">Widget</span></div>
-                        <div className="gerencia-mobile-list">
-                          <div className="gerencia-mobile-row"><span>Mayor vendedor</span><b>{topSeller.name} · {topSeller.value}</b></div>
-                          <div className="gerencia-mobile-row"><span>Menor vendedor</span><b>{lowSeller.name} · {lowSeller.value}</b></div>
-                        </div>
-                      </article>
-                    );
-                  }
-
-                  if (card.type === 'actions') {
-                    return (
-                      <article key={card.id} className="gerencia-mobile-card">
-                        <div className="gerencia-mobile-header"><h3>Acciones</h3><span className="gerencia-mobile-tag">Widget</span></div>
-                        <div className="gerencia-mobile-list">
-                          {actionCounts.map((item) => (<div key={`m-action-${item.name}`} className="gerencia-mobile-row"><span>{item.name}</span><b>{item.value}</b></div>))}
-                        </div>
-                      </article>
-                    );
-                  }
-
-                  return (
-                    <article key={card.id} className="gerencia-mobile-card gerencia-mobile-service">
-                      <div className="gerencia-mobile-header"><h3>{card.service.nombreServicio || 'Servicio sin nombre'}</h3><span className={statusClass(card.service.status || card.service.estado)}>{card.service.status || card.service.estado || 'Pendiente'}</span></div>
-                      <strong>{card.service.razonSocial || 'Sin razón social'}</strong>
-                      <div className="gerencia-mobile-meta">ID {card.service.clienteId || '-'} · {card.service.representanteComercial || 'Sin comercial'}</div>
-                    </article>
-                  );
-                })}
-                <div ref={mobileSentinelRef} className="gerencia-mobile-loader">{hasMoreCards ? 'Cargando más tarjetas...' : 'Fin del tablero móvil.'}</div>
+              <h2>Costos por servicio</h2>
+              <div className="hint">Detalle de instalación y proveedores terceros por cada servicio.</div>
+              <button type="button" className="link-btn" onClick={() => setShowCostosDetalle(false)} style={{ marginBottom: 12 }}>← Volver al Dashboard Gerencia</button>
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Servicio</th>
+                      <th>Cliente ID</th>
+                      <th>Costo instalación</th>
+                      <th>Proveedores terceros</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {costosDetalleRows.length === 0 ? (
+                      <tr><td colSpan={4} className="muted">Sin servicios cargados.</td></tr>
+                    ) : costosDetalleRows.map((r) => (
+                      <tr key={`costo-${r.id}`}>
+                        <td>{r.nombreServicio || r.razonSocial || 'Servicio sin nombre'}</td>
+                        <td>{r.clienteId || '-'}</td>
+                        <td>US$ {(Number(r.costoInstalacionUsdSinIva) || 0).toLocaleString('es-UY')}</td>
+                        <td>US$ {(Number(r.presupuestoProveedor) || 0).toLocaleString('es-UY')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </section>
           );
@@ -3389,56 +3418,120 @@
         return (
           <section className="panel dashboard-gerencia-panel">
             <h2>Dashboard Gerencia</h2>
-            <div className="hint">Vista ejecutiva con widgets de facturación, status, acciones y ranking comercial.</div>
-
+            <div className="hint">Vista de solo lectura para seguimiento ejecutivo.</div>
             <div className="gerencia-widgets">
-              <article className={`gerencia-widget ${activeWidget === 'facturacion' ? 'active' : ''}`}>
-                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('facturacion')}>Widget de Facturación</button>
-                <h3>Facturación</h3>
-                <div className="gerencia-billing">
-                  <div>
-                    <div className="hint" style={{ marginBottom: 4, color: '#ffffff' }}>Total Abonos Mensuales</div>
-                    <div className="gerencia-value">US$ {totalAbonos.toLocaleString('es-UY')}</div>
-                  </div>
-                  <div>
-                    <div className="hint" style={{ marginBottom: 4, color: '#ffffff' }}>Total Ventas Equipos</div>
-                    <div className="gerencia-value">US$ {totalVentasEquipos.toLocaleString('es-UY')}</div>
-                  </div>
-                </div>
+              <article className={`gerencia-widget ${activeWidget === 'costos' ? 'active' : ''}`}>
+                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('costos')}>Costos</button>
+                <h3>Costos Operativos</h3>
+                <div className="gerencia-item"><span>Instalación total</span><b>US$ {totalInstalacion.toLocaleString('es-UY')}</b></div>
+                <div className="gerencia-item"><span>Proveedores terceros</span><b>US$ {totalProveedores.toLocaleString('es-UY')}</b></div>
+                <button type="button" className="link-btn" onClick={() => setShowCostosDetalle(true)} style={{ marginTop: 10 }}>Ver detalle por servicio</button>
               </article>
 
-              <article className={`gerencia-widget ${activeWidget === 'status' ? 'active' : ''}`}>
-                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('status')}>Widget de Status</button>
-                <h3>Servicios por Estado</h3>
+              <article className={`gerencia-widget ${activeWidget === 'fechas' ? 'active' : ''}`}>
+                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('fechas')}>Fechas de Alta</button>
+                <h3>Fechas de nuevas altas</h3>
                 <div className="gerencia-status-list">
-                  {statusCounts.map((item) => (
-                    <div className="gerencia-item" key={`status-${item.name}`}>
-                      <span>{item.name}</span>
-                      <b>{item.value}</b>
-                    </div>
-                  ))}
+                  {fechasAltaNuevas.length === 0 ? <div className="gerencia-item"><span>Sin nuevas altas</span><b>-</b></div> : fechasAltaNuevas.slice(0, 8).map((r, idx) => (<div key={`alta-${idx}`} className="gerencia-item"><span>{r.nombre}</span><b>{r.fecha}</b></div>))}
                 </div>
               </article>
 
-              <article className={`gerencia-widget ${activeWidget === 'acciones' ? 'active' : ''}`}>
-                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('acciones')}>Widget de Acciones</button>
-                <PieChartWidget chartId="acciones" title="Tipos de Servicio" items={actionCounts} />
+              <article className={`gerencia-widget ${activeWidget === 'pendientes' ? 'active' : ''}`}>
+                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('pendientes')}>Atrasados/Pendientes</button>
+                <h3>Completado · Pendiente · Atrasado</h3>
+                <div className="gerencia-status-list">
+                  {statusCounts.map((item) => (<div className="gerencia-item" key={`g-status-${item.name}`}><span>{item.name}</span><b>{item.value}</b></div>))}
+                </div>
               </article>
 
-              <article className={`gerencia-widget ${activeWidget === 'ranking' ? 'active' : ''}`}>
-                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('ranking')}>Widget Ranking Comercial</button>
-                <h3>Ranking Comercial</h3>
-                <div className="gerencia-ranking-list" style={{ marginBottom: 10 }}>
-                  <div className="gerencia-item"><span>Mayor vendedor</span><b>{topSeller.name} · {topSeller.value}</b></div>
-                  <div className="gerencia-item"><span>Menor vendedor</span><b>{lowSeller.name} · {lowSeller.value}</b></div>
+              <article className={`gerencia-widget ${activeWidget === 'rentabilidad' ? 'active' : ''}`}>
+                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('rentabilidad')}>Rentabilidad</button>
+                <h3>Rentabilidad por proyecto/cliente</h3>
+                <div className="gerencia-item"><span>Proyecto más rentable</span><b>{topProyecto.name} · US$ {topProyecto.rentabilidad.toLocaleString('es-UY')}</b></div>
+                <div className="gerencia-ranking-list">
+                  {rentabilidadPorCliente.length === 0 ? <div className="gerencia-item"><span>Sin datos</span><b>-</b></div> : rentabilidadPorCliente.map((item) => (<div key={`rent-${item.name}`} className="gerencia-item"><span>{item.name}</span><b>US$ {item.rentabilidad.toLocaleString('es-UY')}</b></div>))}
                 </div>
-                <PieChartWidget chartId="status" title="Distribución por STATUS" items={statusCounts} />
+              </article>
+
+              <article className={`gerencia-widget gerencia-widget-half ${activeWidget === 'top-vendedores' ? 'active' : ''}`}>
+                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('top-vendedores')}>Top Vendedores</button>
+                <h3>Top vendedores</h3>
+                <div className="gerencia-top-charts">
+                  <PieChartWidget chartId="top-vendedores-servicios" title="Servicios vendidos" items={topVendedoresServicios} />
+                  <PieChartWidget chartId="top-vendedores-ingresos" title="Ingresos por vendedor" items={topVendedoresIngresos} />
+                </div>
+              </article>
+
+              <article className={`gerencia-widget gerencia-widget-half ${activeWidget === 'activos' ? 'active' : ''}`}>
+                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('activos')}>Servicios Activos</button>
+                <h3>Cantidad y listado de servicios activos</h3>
+                <div className="gerencia-value">{activos.length}</div>
+                <div className="gerencia-scroll-list">
+                  {activos.length === 0 ? <div className="gerencia-item"><span>Sin activos</span><b>-</b></div> : activos.map((r) => (<div key={`activo-${r.id}`} className="gerencia-item"><span>{r.nombreServicio || r.razonSocial || 'Servicio sin nombre'}</span><b>{r.fechaIngresoDatos || r.fechaAltaServicio || '-'}</b></div>))}
+                </div>
+              </article>
+
+              <article className={`gerencia-widget gerencia-widget-half ${activeWidget === 'ingresos' ? 'active' : ''}`}>
+                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('ingresos')}>Ingresos</button>
+                <h3>Ingresos por ventas y arrendamientos</h3>
+                <div className="gerencia-item"><span>Arrendamiento</span><b>US$ {totalArrendamiento.toLocaleString('es-UY')}</b></div>
+                <div className="gerencia-item"><span>Venta equipamiento</span><b>US$ {totalVentasEquipos.toLocaleString('es-UY')}</b></div>
+                <div className="gerencia-item"><span>Total ingresos</span><b>US$ {totalIngresos.toLocaleString('es-UY')}</b></div>
               </article>
             </div>
           </section>
         );
       }
 
+
+
+
+      function DashboardTecnica({ rows, onGoToDetalle }) {
+        const now = new Date();
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - 7);
+        const monthStart = new Date(now);
+        monthStart.setMonth(now.getMonth() - 1);
+
+        const estadoCounts = STATUS_OPTIONS.map((status) => ({
+          status,
+          total: rows.filter((r) => String(r.status || r.estado || '').trim() === status).length,
+        }));
+
+        const thisWeek = rows.filter((r) => {
+          const ts = r.creadoEn?.seconds ? new Date(r.creadoEn.seconds * 1000) : null;
+          return ts && ts >= weekStart;
+        }).length;
+
+        const thisMonth = rows.filter((r) => {
+          const ts = r.creadoEn?.seconds ? new Date(r.creadoEn.seconds * 1000) : null;
+          return ts && ts >= monthStart;
+        }).length;
+
+        return (
+          <section className="panel">
+            <h2>Dashboard Área Técnica</h2>
+            <div className="hint">Resumen de estado de trabajos con visibilidad total de datos comerciales.</div>
+            <div className="compact-grid" style={{ marginBottom: 12 }}>
+              <article className="widget"><h4>Trabajos nuevos (7 días)</h4><div className="gerencia-value">{thisWeek}</div></article>
+              <article className="widget"><h4>Trabajos nuevos (30 días)</h4><div className="gerencia-value">{thisMonth}</div></article>
+              <article className="widget"><h4>Trabajos cargados</h4><div className="gerencia-value">{rows.length}</div></article>
+            </div>
+            <h3 style={{ marginTop: 0 }}>Estado de trabajos</h3>
+            <div className="gerencia-status-list">
+              {estadoCounts.map((item) => (
+                <div className="gerencia-item" key={`tec-${item.status}`}>
+                  <span>{item.status}</span>
+                  <b>{item.total}</b>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: 14 }}>
+              <button type="button" className="save-btn" onClick={onGoToDetalle}>Ver detalle de trabajos</button>
+            </div>
+          </section>
+        );
+      }
 
       function TrackingView() {
         const [trackingData, setTrackingData] = useState(null);
@@ -3660,6 +3753,7 @@
         const [userCredentialRequests, setUserCredentialRequests] = useState([]);
         const [updatingRequestId, setUpdatingRequestId] = useState('');
         const [acceptingRequestId, setAcceptingRequestId] = useState('');
+        const seenRowIdsRef = useRef(new Set());
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
@@ -4014,6 +4108,21 @@
         }, [user]);
 
         useEffect(() => {
+          const technicalScope = ((/tecnic/.test(userRole) || userArea === 'tecnica') && !String(userRole || '').includes('vendedor') && userRole !== 'admin');
+          if (!technicalScope) {
+            seenRowIdsRef.current = new Set(rows.map((r) => r.id));
+            return;
+          }
+          const previous = seenRowIdsRef.current;
+          const currentIds = new Set(rows.map((r) => r.id));
+          if (previous.size > 0) {
+            const hasNew = rows.some((r) => !previous.has(r.id));
+            if (hasNew) setNotificacion({ mensaje: '📌 Nuevo trabajo cargado en ESTADO DE TRABAJOS', tipo: 'ok' });
+          }
+          seenRowIdsRef.current = currentIds;
+        }, [rows, userRole, userArea]);
+
+        useEffect(() => {
           const unsub = auth.onAuthStateChanged(async (currentUser) => {
             setUser(currentUser);
             setAuthLoading(false);
@@ -4134,11 +4243,13 @@
 
         const isGerencia = userRole === 'gerentes';
         const isVendedor = userRole.includes('vendedor');
+        const isTechnicalOnly = (/tecnic/.test(userRole) || userArea === 'tecnica') && !isVendedor && userRole !== 'admin';
 
         const topbarSubtitle = useMemo(() => {
           if (userRole === 'gerentes') return 'Dashboard Gerencia';
           if (userRole === 'admin') return 'Administrador';
           if (userArea === 'comercial' || isVendedor) return 'Área Comercial';
+          if (isTechnicalOnly) return 'Área Técnica';
           if (userArea === 'tecnica') return 'Área Técnica';
           return 'Área Técnica y Comercial';
         }, [userRole, userArea, isVendedor]);
@@ -4148,8 +4259,14 @@
             setSelectedForm('dashboard-gerencia');
             setSelectedService(null);
             setTipoAccion('');
+            return;
           }
-        }, [isGerencia, selectedForm]);
+          if (isTechnicalOnly && !['dashboard-tecnica', 'historial', 'perfil'].includes(selectedForm)) {
+            setSelectedForm('dashboard-tecnica');
+            setSelectedService(null);
+            setTipoAccion('');
+          }
+        }, [isGerencia, isTechnicalOnly, selectedForm]);
 
         useEffect(() => {
           if (skipHistoryPushRef.current) {
@@ -4162,7 +4279,7 @@
           });
         }, [selectedForm]);
 
-        const effectiveSelectedForm = isGerencia ? 'dashboard-gerencia' : selectedForm;
+        const effectiveSelectedForm = isGerencia ? 'dashboard-gerencia' : (isTechnicalOnly && selectedForm === 'home' ? 'dashboard-tecnica' : selectedForm);
 
         const [formOpenAudit, setFormOpenAudit] = useState(null);
         const currentUserName = useMemo(() => (userData.nombre || (user?.email || '').split('@')[0] || 'Usuario').trim(), [userData, user]);
@@ -4185,11 +4302,12 @@
         };
 
         const mobileAllowedActions = useMemo(() => {
+          if (isTechnicalOnly) return [];
           if (isAdminUser) return [...ACCIONES];
           if (isTechnicalUser && !isCommercialUser) return ['Obra', 'Movimiento de Obra', 'Agregado', 'Baja'];
           if (isCommercialUser && !isTechnicalUser) return ['Nuevo Servicio', 'Novación', 'Agregado', 'Charla', 'Obra'];
           return [...ACCIONES];
-        }, [isAdminUser, isTechnicalUser, isCommercialUser]);
+        }, [isAdminUser, isTechnicalUser, isCommercialUser, isTechnicalOnly]);
 
         const mobileFabSections = useMemo(() => {
           const actionInRole = (action) => mobileAllowedActions.includes(action);
@@ -4212,6 +4330,7 @@
 
         function canEditService(service) {
           if (!service) return false;
+          if (isTechnicalOnly) return false;
           if (isAdminUser) return true;
           const current = String(currentUserName || '').trim();
           const creator = String(service.creadoPor || '').trim();
@@ -4285,6 +4404,21 @@
 
         function setServicioField(key, value) {
           setServicioForm((prev) => ({ ...prev, [key]: value }));
+        }
+
+        function handlePresupuestoPdfUpload(file) {
+          if (!file) return;
+          if (!String(file.type || '').includes('pdf')) {
+            setNotificacion({ mensaje: 'Solo se permiten archivos PDF', tipo: 'error' });
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = () => {
+            setServicioForm((prev) => ({ ...prev, presupuestoPdfUrl: String(reader.result || ''), presupuestoPdfNombre: file.name || 'presupuesto.pdf' }));
+            setNotificacion({ mensaje: '✔ PDF de presupuesto cargado', tipo: 'ok' });
+          };
+          reader.onerror = () => setNotificacion({ mensaje: '✖ No se pudo leer el PDF', tipo: 'error' });
+          reader.readAsDataURL(file);
         }
 
         function setObraField(key, value) {
@@ -4762,8 +4896,8 @@
             <aside className={`sidebar ${menuOpen ? 'open' : ''}`}>
               <div className="sidebar-header">MENÚ OPERATIVO</div>
               <div className="menu">
-                <button className="menu-button" onClick={() => { setSelectedForm(isGerencia ? 'dashboard-gerencia' : 'home'); setSelectedService(null); setTipoAccion(''); closeSidebar(); }}>Inicio</button>
-                {!isGerencia && !isMobile && (
+                <button className="menu-button" onClick={() => { setSelectedForm(isGerencia ? 'dashboard-gerencia' : (isTechnicalOnly ? 'dashboard-tecnica' : 'home')); setSelectedService(null); setTipoAccion(''); closeSidebar(); }}>Inicio</button>
+                {!isGerencia && !isMobile && !isTechnicalOnly && (
                   <>
                     <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}>Nuevo {openMenus.nuevo ? '▾' : '▸'}</button>
                     <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
@@ -4792,6 +4926,12 @@
                     {isAdminUser && <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}>Vista Gerencia</button>}
                   </>
                 )}
+                {isTechnicalOnly && (
+                  <>
+                    <button className="menu-button" onClick={() => { setSelectedForm('dashboard-tecnica'); closeSidebar(); }}>Dashboard Técnica</button>
+                    <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Detalle de Trabajos</button>
+                  </>
+                )}
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
                 <div className="sidebar-signature" aria-label="signature"><strong>v1.0 | Powered by Alfonso Carballo</strong></div>
               </div>
@@ -4810,7 +4950,7 @@
                   <h1>Masterson Seguridad</h1>
                   <p className="subtitle-voga">{topbarSubtitle}</p>
                 </div>
-                {!isGerencia && (
+                {!isGerencia && !isTechnicalOnly && (
                   <div className="top-search">
                     <div className="search-wrap">
                       <span className="search-icon">🔍</span>
@@ -4954,6 +5094,8 @@
                   </section>
                 ) : effectiveSelectedForm === 'dashboard-gerencia' ? (
                   <DashboardGerencia rows={visibleRows} isMobileNative={isMobile && isGerencia} />
+                ) : effectiveSelectedForm === 'dashboard-tecnica' ? (
+                  <DashboardTecnica rows={visibleRows} onGoToDetalle={() => setSelectedForm('historial')} />
                 ) : effectiveSelectedForm === 'home' ? (
                   <>
                     <section className="hero">
@@ -5188,9 +5330,9 @@
                         <div className="history-grid">
                         <div className="widget"><h4>Identificación</h4><div className="kv"><b>ID:</b> {selectedService.clienteId || '-'}</div><div className="kv"><b>Nombre:</b> {selectedService.nombreServicio || '-'}</div><div className="kv"><b>Tipo:</b> {selectedService.tipoServicioBrindar || '-'}</div><div className="kv"><b>Dirección:</b> {selectedService.direccionServicio || '-'}</div><div className="kv"><b>Unidades:</b> {selectedService.cantidadUnidades || '-'}</div></div>
                         <div className="widget"><h4>Comercial / Facturación</h4><div className="kv"><b>Representante:</b> {selectedService.representanteComercial || '-'}</div><div className="kv"><b>Razón Social:</b> {selectedService.razonSocial || '-'}</div><div className="kv"><b>RUT:</b> {selectedService.rut || '-'}</div><div className="kv"><b>Mail:</b> {selectedService.mailFacturacion || '-'}</div><div className="kv"><b>Duración:</b> {selectedService.duracionContratoMeses || '-'}</div></div>
-                        <div className="widget"><h4>Costos</h4><div className="kv"><b>Importe mensual:</b> {selectedService.importeMensualServicioSinIva || '-'}</div><div className="kv"><b>Costo instalación US$:</b> {selectedService.costoInstalacionUsdSinIva || '-'}</div><div className="kv"><b>Presupuesto proveedor:</b> {selectedService.presupuestoProveedor || '-'}</div><div className="kv"><b>Condición equipamiento:</b> {selectedService.condicionEquipamiento || '-'}</div></div>
+                        <div className="widget"><h4>Costos</h4><div className="kv"><b>Importe mensual:</b> {selectedService.importeMensualServicioSinIva || '-'}</div><div className="kv"><b>Costo instalación US$:</b> {selectedService.costoInstalacionUsdSinIva || '-'}</div><div className="kv"><b>Presupuesto proveedor:</b> {selectedService.presupuestoProveedor || '-'}</div><div className="kv"><b>Condición equipamiento:</b> {selectedService.condicionEquipamiento || '-'}</div>{selectedService.presupuestoPdfUrl && <div className="kv"><a className="link-btn" href={selectedService.presupuestoPdfUrl} target="_blank" rel="noreferrer">Ver PDF presupuesto</a></div>}</div>
                         <div className="widget"><h4>Técnica</h4><div className="kv"><b>Control acceso:</b> {selectedService.condicionControlAcceso || '-'}</div><div className="kv"><b>Tags:</b> {selectedService.tagsPorAptos || '-'}</div><div className="kv"><b>Akuvox:</b> {selectedService.appAkuvox || '-'}</div><div className="kv"><b>Llaves:</b> {selectedService.llavesServicio || '-'}</div></div>
-                        <div className="widget"><h4>Instalación</h4><div className="kv"><b>Referente:</b> {selectedService.referenteInstalacion || '-'}</div><div className="kv"><b>Teléfono:</b> {selectedService.telefonoReferenteInstalacion || '-'}</div><div className="kv"><b>Botti contacto:</b> {selectedService.bottiSeContactaCon || '-'}</div><div className="kv"><b>Jornales:</b> {selectedService.cantidadJornalesEstimados || '-'}</div><div className="kv"><b>Fecha inicio:</b> {selectedService.fechaEspecificaInicio || '-'}</div></div>
+                        <div className="widget"><h4>Instalación</h4><div className="kv"><b>Referente:</b> {selectedService.referenteInstalacion || '-'}</div><div className="kv"><b>Técnico asignado:</b> {selectedService.tecnicoAsignado || '-'}</div><div className="kv"><b>Teléfono:</b> {selectedService.telefonoReferenteInstalacion || '-'}</div><div className="kv"><b>Botti contacto:</b> {selectedService.bottiSeContactaCon || '-'}</div><div className="kv"><b>Jornales:</b> {selectedService.cantidadJornalesEstimados || '-'}</div><div className="kv"><b>Fecha inicio:</b> {selectedService.fechaEspecificaInicio || '-'}</div></div>
                         <div className="widget"><h4>Seguimiento</h4><div className="kv"><b>Tipo acción:</b> {selectedService.tipoAccion || '-'}</div><div className="kv"><b>Status:</b> {selectedService.status || selectedService.estado || '-'}</div><div className="kv"><b>Fecha ingreso:</b> {selectedService.fechaIngresoDatos || selectedService.fechaCarga || selectedService.fechaCharla || '-'}</div><div className="kv"><b>Proyecto:</b> {selectedService.proyectoServicio || '-'}</div></div>
                         <div className="widget full"><h4>Observaciones y Excepciones</h4><div className="detail-box">Observaciones: {selectedService.observacionesComentarios || '-'}
 
@@ -5260,6 +5402,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                             <div className="field span-2"><label>Dirección de servicio</label><input value={servicioForm.direccionServicio} onChange={(e) => setServicioField('direccionServicio', e.target.value)} type="text" /></div>
                             <div className="field"><label>Cantidad de unidades</label><input value={servicioForm.cantidadUnidades} onChange={(e) => setServicioField('cantidadUnidades', e.target.value)} type="number" min="0" /></div>
                             <div className="field"><label>Jornales estimados</label><input value={servicioForm.cantidadJornalesEstimados} onChange={(e) => setServicioField('cantidadJornalesEstimados', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Técnico asignado</label><input value={servicioForm.tecnicoAsignado} onChange={(e) => setServicioField('tecnicoAsignado', e.target.value)} type="text" /></div>
                           </div>
                         </div>
 
@@ -5282,6 +5425,9 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                             <div className="field"><label>Importe mensual por arrendamiento</label><input value={servicioForm.importeMensualArrendamiento} onChange={(e) => setServicioField('importeMensualArrendamiento', e.target.value)} type="number" min="0" /></div>
                             <div className="field"><label>Importe por compra de equipamiento</label><input value={servicioForm.importeCompraEquipamiento} onChange={(e) => setServicioField('importeCompraEquipamiento', e.target.value)} type="number" min="0" /></div>
                             <div className="field"><label>Costo instalación (USD sin IVA)</label><input value={servicioForm.costoInstalacionUsdSinIva} onChange={(e) => setServicioField('costoInstalacionUsdSinIva', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Presupuesto proveedor tercero (USD)</label><input value={servicioForm.presupuestoProveedor} onChange={(e) => setServicioField('presupuestoProveedor', e.target.value)} type="number" min="0" /></div>
+                            <div className="field span-2"><label>Presupuesto PDF</label><input type="file" accept="application/pdf" onChange={(e) => handlePresupuestoPdfUpload(e.target.files?.[0])} /></div>
+                            {servicioForm.presupuestoPdfNombre && <div className="field span-2"><label>PDF cargado</label><input value={servicioForm.presupuestoPdfNombre} readOnly type="text" /></div>}
                             <div className="field span-2"><label>Motivo de no cobro</label><input value={servicioForm.porQueNoSeCobraServicio} onChange={(e) => setServicioField('porQueNoSeCobraServicio', e.target.value)} type="text" /></div>
                             <div className="field span-3"><label>Descuentos negociados</label><textarea value={servicioForm.descuentosNegociados} onChange={(e) => setServicioField('descuentosNegociados', e.target.value)} /></div>
                           </div>
@@ -5593,21 +5739,31 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
               {isMobile && !isGerencia && (
                 <>
                   <nav className="mobile-bottom-nav">
-                    <button className={mobileTab === 'home' && selectedForm === 'home' ? 'active' : ''} type="button" onClick={() => { setMobileTab('home'); setSelectedForm('home'); }}>
-                      <i data-lucide="house" />
-                      <span className="mobile-nav-label">Inicio</span>
-                    </button>
-                    <button className={mobileTab === 'acciones' && selectedForm === 'home' ? 'active' : ''} type="button" onClick={() => { setMobileTab('acciones'); setSelectedForm('home'); }}>
-                      <i data-lucide="sparkles" />
-                      <span className="mobile-nav-label">Acciones</span>
-                    </button>
-                    <button className={mobileTab === 'servicios' ? 'active' : ''} type="button" onClick={() => { setMobileTab('servicios'); setSelectedForm('home'); }}>
-                      <i data-lucide="layers" />
-                      <span className="mobile-nav-label">Servicios</span>
-                    </button>
+                    {!isTechnicalOnly && (
+                      <>
+                        <button className={mobileTab === 'home' && selectedForm === 'home' ? 'active' : ''} type="button" onClick={() => { setMobileTab('home'); setSelectedForm('home'); }}>
+                          <i data-lucide="house" />
+                          <span className="mobile-nav-label">Inicio</span>
+                        </button>
+                        <button className={mobileTab === 'acciones' && selectedForm === 'home' ? 'active' : ''} type="button" onClick={() => { setMobileTab('acciones'); setSelectedForm('home'); }}>
+                          <i data-lucide="sparkles" />
+                          <span className="mobile-nav-label">Acciones</span>
+                        </button>
+                        <button className={mobileTab === 'servicios' ? 'active' : ''} type="button" onClick={() => { setMobileTab('servicios'); setSelectedForm('home'); }}>
+                          <i data-lucide="layers" />
+                          <span className="mobile-nav-label">Servicios</span>
+                        </button>
+                      </>
+                    )}
+                    {isTechnicalOnly && (
+                      <button className={selectedForm === 'dashboard-tecnica' ? 'active' : ''} type="button" onClick={() => { setMobileTab('home'); setSelectedForm('dashboard-tecnica'); setSelectedService(null); }}>
+                        <i data-lucide="layout-dashboard" />
+                        <span className="mobile-nav-label">Dashboard</span>
+                      </button>
+                    )}
                     <button className={selectedForm === 'historial' ? 'active' : ''} type="button" onClick={() => { setMobileTab('historial'); setSelectedForm('historial'); setSelectedService(null); }}>
                       <i data-lucide="history" />
-                      <span className="mobile-nav-label">Historial</span>
+                      <span className="mobile-nav-label">Detalle</span>
                     </button>
                     <button className={selectedForm === 'perfil' ? 'active' : ''} type="button" onClick={openProfileView}>
                       <i data-lucide="user-round" />
