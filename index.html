@@ -1806,14 +1806,18 @@
         .service-card { padding: 12px; border-radius: 14px; }
         .hero { padding: 34px 14px; border-radius: 16px; }
         .topbar {
-          flex-wrap: wrap;
-          align-items: flex-start;
-          gap: 10px;
+          flex-wrap: nowrap;
+          align-items: center;
+          gap: 8px;
           padding: 10px 12px;
+          background: #000000 !important;
+          border-color: #000000 !important;
         }
         .top-titles { min-width: 0; flex: 1; }
-        .top-titles h1 { font-size: 1.1rem; }
-        .top-titles p { font-size: .78rem; }
+        .top-titles h1 { font-size: 1rem; color: #006465 !important; }
+        .top-titles p { font-size: .72rem; color: #006465 !important; }
+        .topbar-mini-logo { display: block; }
+        .topbar-mini-bell { display: inline-flex; }
         .top-search {
           order: 3;
           width: 100%;
@@ -2446,6 +2450,71 @@
         cursor: pointer;
       }
       .topbar-back-btn:hover { background: rgba(51,65,85,.96) !important; }
+      .topbar-mini-bell {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        border: 1px solid rgba(0,100,101,.45);
+        background: #ffffff;
+        color: #006465;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        margin-left: auto;
+      }
+      .topbar-mini-bell svg { width: 16px; height: 16px; display: block; }
+      .topbar-mini-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        min-width: 16px;
+        height: 16px;
+        border-radius: 999px;
+        background: #ef4444;
+        color: #fff;
+        font-size: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #fff;
+      }
+      .topbar-mini-logo {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        margin-left: 8px;
+        background: rgba(230,255,253,.12) url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png') center/cover no-repeat;
+        border: 1px solid rgba(0,100,101,.35);
+        box-shadow: 0 4px 10px rgba(0,0,0,.2);
+      }
+      .mobile-alert-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 1804;
+        background: rgba(0,0,0,.12);
+      }
+      .mobile-alert-panel {
+        position: fixed;
+        top: 54px;
+        right: 10px;
+        left: 10px;
+        z-index: 1805;
+        border-radius: 12px;
+        border: 1px solid rgba(0,100,101,.35);
+        background: rgba(255,255,255,.98);
+        color: #0b2f2c;
+        max-height: 42vh;
+        overflow: auto;
+        box-shadow: 0 10px 24px rgba(0,0,0,.2);
+        padding: 8px;
+      }
+      .mobile-alert-item {
+        border-bottom: 1px solid rgba(0,0,0,.08);
+        padding: 8px 4px;
+        font-size: 12px;
+      }
+      .mobile-alert-item:last-child { border-bottom: 0; }
 
       .topbar {
         position: fixed !important;
@@ -2915,6 +2984,7 @@
           stroke: #006465 !important;
           color: #006465 !important;
           stroke-width: 2;
+          display: block;
         }
 
         .mobile-nav-label {
@@ -2931,6 +3001,35 @@
         .mobile-bottom-nav button.active i,
         .mobile-bottom-nav button.active svg {
           stroke: #006465 !important;
+        }
+
+        .mobile-bottom-nav-simple {
+          grid-template-columns: 1fr 1fr !important;
+          grid-auto-flow: unset !important;
+          grid-auto-columns: unset !important;
+          overflow-x: hidden !important;
+        }
+
+        .mobile-bottom-nav-simple button {
+          border-right: 0;
+        }
+
+        .main,
+        .panel,
+        .service-card,
+        .widget,
+        .gerencia-widget,
+        .gerencia-chart-shell,
+        .history-grid,
+        .card-grid,
+        .compact-grid,
+        .gerencia-widgets {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+
+        .gerencia-widget {
+          min-height: auto;
         }
 
         .mobile-fab {
@@ -3753,7 +3852,12 @@
         const [userCredentialRequests, setUserCredentialRequests] = useState([]);
         const [updatingRequestId, setUpdatingRequestId] = useState('');
         const [acceptingRequestId, setAcceptingRequestId] = useState('');
+        const [mobileBellOpen, setMobileBellOpen] = useState(false);
+        const [mobileAlerts, setMobileAlerts] = useState([]);
         const seenRowIdsRef = useRef(new Set());
+        const seenOperationalAlertsRef = useRef(new Set());
+        const topServicesLeaderRef = useRef('');
+        const topSalesLeaderRef = useRef('');
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
@@ -4123,6 +4227,57 @@
         }, [rows, userRole, userArea]);
 
         useEffect(() => {
+          const prevIds = seenOperationalAlertsRef.current;
+          const currentIds = new Set(rows.map((r) => r.id));
+          if (prevIds.size > 0) {
+            const news = rows.filter((r) => !prevIds.has(r.id));
+            if (news.length > 0) {
+              const relevant = news.filter((r) => ['Nuevo Servicio', 'Obra', 'Baja'].includes(String(r.tipoAccion || '').trim()));
+              if (relevant.length > 0) {
+                const alerts = relevant.map((r) => ({
+                  id: `alert-${r.id}`,
+                  read: false,
+                  message: r.tipoAccion === 'Baja'
+                    ? `⚠️ Nueva baja registrada: ${r.nombreServicio || r.razonSocial || r.clienteId || 'Servicio'}`
+                    : `🆕 Nuevo ${String(r.tipoAccion || '').toLowerCase()} registrado: ${r.nombreServicio || r.razonSocial || r.clienteId || 'Servicio'}`,
+                }));
+                setMobileAlerts((prev) => [...alerts, ...prev].slice(0, 50));
+                setNotificacion({ mensaje: alerts[0].message, tipo: 'ok' });
+              }
+            }
+          }
+          seenOperationalAlertsRef.current = currentIds;
+        }, [rows]);
+
+        useEffect(() => {
+          if (!(isGerencia || isAdminUser)) return;
+          const byServices = Object.entries(rows.reduce((acc, r) => {
+            const seller = (r.representanteComercial || 'Sin asignar').trim();
+            acc[seller] = (acc[seller] || 0) + 1;
+            return acc;
+          }, {})).sort((a, b) => b[1] - a[1]);
+          const bySales = Object.entries(rows.reduce((acc, r) => {
+            const seller = (r.representanteComercial || 'Sin asignar').trim();
+            const amount = (Number(r.importeMensualServicioSinIva) || 0) + (Number(r.importeMensualArrendamiento) || 0) + (Number(r.importeCompraEquipamiento) || 0);
+            acc[seller] = (acc[seller] || 0) + amount;
+            return acc;
+          }, {})).sort((a, b) => b[1] - a[1]);
+
+          const serviceLeader = byServices[0]?.[0] || '';
+          const salesLeader = bySales[0]?.[0] || '';
+
+          if (topServicesLeaderRef.current && serviceLeader && topServicesLeaderRef.current !== serviceLeader) {
+            setMobileAlerts((prev) => ([{ id: `leader-serv-${Date.now()}`, read: false, message: `📈 ${serviceLeader} superó en servicios a ${topServicesLeaderRef.current}` }, ...prev].slice(0, 50)));
+          }
+          if (topSalesLeaderRef.current && salesLeader && topSalesLeaderRef.current !== salesLeader) {
+            setMobileAlerts((prev) => ([{ id: `leader-sale-${Date.now()}`, read: false, message: `💰 ${salesLeader} superó en ventas a ${topSalesLeaderRef.current}` }, ...prev].slice(0, 50)));
+          }
+
+          topServicesLeaderRef.current = serviceLeader;
+          topSalesLeaderRef.current = salesLeader;
+        }, [rows, isGerencia, isAdminUser]);
+
+        useEffect(() => {
           const unsub = auth.onAuthStateChanged(async (currentUser) => {
             setUser(currentUser);
             setAuthLoading(false);
@@ -4255,7 +4410,7 @@
         }, [userRole, userArea, isVendedor]);
 
         useEffect(() => {
-          if (isGerencia && selectedForm !== 'dashboard-gerencia') {
+          if (isGerencia && !['dashboard-gerencia', 'perfil', 'notificaciones'].includes(selectedForm)) {
             setSelectedForm('dashboard-gerencia');
             setSelectedService(null);
             setTipoAccion('');
@@ -4279,11 +4434,12 @@
           });
         }, [selectedForm]);
 
-        const effectiveSelectedForm = isGerencia ? 'dashboard-gerencia' : (isTechnicalOnly && selectedForm === 'home' ? 'dashboard-tecnica' : selectedForm);
+        const effectiveSelectedForm = isGerencia ? (['perfil', 'notificaciones'].includes(selectedForm) ? selectedForm : 'dashboard-gerencia') : (isTechnicalOnly && selectedForm === 'home' ? 'dashboard-tecnica' : selectedForm);
 
         const [formOpenAudit, setFormOpenAudit] = useState(null);
         const currentUserName = useMemo(() => (userData.nombre || (user?.email || '').split('@')[0] || 'Usuario').trim(), [userData, user]);
         const isAdminUser = userRole === 'admin';
+        const mobileUnreadAlerts = useMemo(() => mobileAlerts.filter((a) => !a.read).length, [mobileAlerts]);
         const adminPendingRequests = useMemo(() => adminCredentialRequests.filter((r) => r?.estado === 'pendiente'), [adminCredentialRequests]);
         const adminUnreadCount = useMemo(() => adminPendingRequests.filter((r) => !r?.leidaPorAdmin).length, [adminPendingRequests]);
         const isSalesOrTechUser = /vendedor|tecnic/.test(userRole) || /tecnic/.test(userArea);
@@ -4945,7 +5101,7 @@
             <div className={`content ${menuOpen ? 'shift' : ''}`}>
               <header className="topbar">
                 {!isMobile && <button className="burger" aria-label="Abrir menú" onClick={toggleSidebar}><span className="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>}
-                {(selectedForm !== 'home' || !!selectedService) && <button className="topbar-back-btn" type="button" onClick={goBackOneStep}>← Atrás</button>}
+                {!isMobile && (selectedForm !== 'home' || !!selectedService) && <button className="topbar-back-btn" type="button" onClick={goBackOneStep}>← Atrás</button>}
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
                   <p className="subtitle-voga">{topbarSubtitle}</p>
@@ -4984,6 +5140,23 @@
                     </div>
                   </div>
                 )}
+                {isMobile && (
+                  <>
+                    <button
+                      type="button"
+                      className="topbar-mini-bell"
+                      aria-label="Notificaciones"
+                      onClick={() => {
+                        setMobileBellOpen((prev) => !prev);
+                        setMobileAlerts((prev) => prev.map((a) => ({ ...a, read: true })));
+                      }}
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 10a6 6 0 1 1 12 0v4l1.5 2h-15L6 14v-4Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/><path d="M10 18a2 2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
+                      {mobileUnreadAlerts > 0 && <span className="topbar-mini-badge">{mobileUnreadAlerts > 9 ? '9+' : mobileUnreadAlerts}</span>}
+                    </button>
+                    <div className="topbar-mini-logo" aria-hidden="true" />
+                  </>
+                )}
                 {!isMobile && (
                   <div className="topbar-actions">
                     {isAdminUser && (
@@ -5002,6 +5175,15 @@
                   </div>
                 )}
               </header>
+
+              {isMobile && mobileBellOpen && (
+                <>
+                  <div className="mobile-alert-backdrop" onClick={() => setMobileBellOpen(false)} />
+                  <div className="mobile-alert-panel" onClick={(e) => e.stopPropagation()}>
+                    {mobileAlerts.length === 0 ? <div className="mobile-alert-item">Sin notificaciones nuevas.</div> : mobileAlerts.map((a) => (<div key={a.id} className="mobile-alert-item">{a.message}</div>))}
+                  </div>
+                </>
+              )}
 
               <main className={`main ${grupo === 'charla-detalle' ? 'charla-main-wide' : ''}`}>
                 {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'acciones' && effectiveSelectedForm === 'home' ? renderMobileActions() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : effectiveSelectedForm === 'notificaciones' ? (
@@ -5090,7 +5272,10 @@
                         ))
                       )}
                     </article>
-                    <button className="logout-btn profile-logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar sesión</button>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <button className="edit-btn" type="button" onClick={() => { setSelectedForm(isGerencia ? 'dashboard-gerencia' : 'home'); setSelectedService(null); setTipoAccion(''); }}>Volver a inicio</button>
+                      <button className="logout-btn profile-logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar sesión</button>
+                    </div>
                   </section>
                 ) : effectiveSelectedForm === 'dashboard-gerencia' ? (
                   <DashboardGerencia rows={visibleRows} isMobileNative={isMobile && isGerencia} />
@@ -5736,42 +5921,31 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                 </div>
               )}
 
-              {isMobile && !isGerencia && (
+              {isMobile && (
                 <>
-                  <nav className="mobile-bottom-nav">
-                    {!isTechnicalOnly && (
-                      <>
-                        <button className={mobileTab === 'home' && selectedForm === 'home' ? 'active' : ''} type="button" onClick={() => { setMobileTab('home'); setSelectedForm('home'); }}>
-                          <i data-lucide="house" />
-                          <span className="mobile-nav-label">Inicio</span>
-                        </button>
-                        <button className={mobileTab === 'acciones' && selectedForm === 'home' ? 'active' : ''} type="button" onClick={() => { setMobileTab('acciones'); setSelectedForm('home'); }}>
-                          <i data-lucide="sparkles" />
-                          <span className="mobile-nav-label">Acciones</span>
-                        </button>
-                        <button className={mobileTab === 'servicios' ? 'active' : ''} type="button" onClick={() => { setMobileTab('servicios'); setSelectedForm('home'); }}>
-                          <i data-lucide="layers" />
-                          <span className="mobile-nav-label">Servicios</span>
-                        </button>
-                      </>
-                    )}
-                    {isTechnicalOnly && (
-                      <button className={selectedForm === 'dashboard-tecnica' ? 'active' : ''} type="button" onClick={() => { setMobileTab('home'); setSelectedForm('dashboard-tecnica'); setSelectedService(null); }}>
-                        <i data-lucide="layout-dashboard" />
-                        <span className="mobile-nav-label">Dashboard</span>
-                      </button>
-                    )}
-                    <button className={selectedForm === 'historial' ? 'active' : ''} type="button" onClick={() => { setMobileTab('historial'); setSelectedForm('historial'); setSelectedService(null); }}>
-                      <i data-lucide="history" />
-                      <span className="mobile-nav-label">Detalle</span>
+                  <nav className="mobile-bottom-nav mobile-bottom-nav-simple">
+                    <button
+                      className={((isGerencia && effectiveSelectedForm === 'dashboard-gerencia') || (!isGerencia && selectedForm === 'home')) ? 'active' : ''}
+                      type="button"
+                      onClick={() => {
+                        setMobileTab('home');
+                        setSelectedForm(isGerencia ? 'dashboard-gerencia' : 'home');
+                        setSelectedService(null);
+                        setTipoAccion('');
+                        setMobileBellOpen(false);
+                      }}
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><path d="M5.5 9.5V20h13V9.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><path d="M10 20v-5h4v5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <span className="mobile-nav-label">Inicio</span>
                     </button>
-                    <button className={selectedForm === 'perfil' ? 'active' : ''} type="button" onClick={openProfileView}>
-                      <i data-lucide="user-round" />
+                    <button className={effectiveSelectedForm === 'perfil' ? 'active' : ''} type="button" onClick={() => { setMobileBellOpen(false); openProfileView(); }}>
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8"/><path d="M4 20c1.8-3.4 5-5 8-5s6.2 1.6 8 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
                       <span className="mobile-nav-label">Perfil</span>
                     </button>
                   </nav>
                 </>
               )}
+
 
             </div>
           </div>
