@@ -3004,7 +3004,7 @@
         }
 
         .mobile-bottom-nav-simple {
-          grid-template-columns: 1fr 1fr !important;
+          grid-template-columns: 1fr 1fr 1fr !important;
           grid-auto-flow: unset !important;
           grid-auto-columns: unset !important;
           overflow-x: hidden !important;
@@ -3854,6 +3854,10 @@
         const [acceptingRequestId, setAcceptingRequestId] = useState('');
         const [mobileBellOpen, setMobileBellOpen] = useState(false);
         const [mobileAlerts, setMobileAlerts] = useState([]);
+        const [ticketComentario, setTicketComentario] = useState('');
+        const [ticketPrioridad, setTicketPrioridad] = useState('Media');
+        const [ticketSaving, setTicketSaving] = useState(false);
+        const [ticketsHistorial, setTicketsHistorial] = useState([]);
         const seenRowIdsRef = useRef(new Set());
         const seenOperationalAlertsRef = useRef(new Set());
         const topServicesLeaderRef = useRef('');
@@ -4396,6 +4400,24 @@
           return () => unsub();
         }, [user?.uid]);
 
+        useEffect(() => {
+          if (!user?.uid) {
+            setTicketsHistorial([]);
+            return () => {};
+          }
+          const ticketManager = String(user?.email || '').trim().toLowerCase() === 'alfonso332estigarribia@gmail.com';
+          const ref = ticketManager
+            ? db.collection('tickets_app').orderBy('creadoEn', 'desc').limit(200)
+            : db.collection('tickets_app').where('creadoPorUid', '==', user.uid).orderBy('creadoEn', 'desc').limit(40);
+          const unsub = ref.onSnapshot((snapshot) => {
+            const next = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            setTicketsHistorial(next);
+          }, (error) => {
+            console.error('Error leyendo tickets_app:', error);
+          });
+          return () => unsub();
+        }, [user?.uid, user?.email]);
+
         const isGerencia = userRole === 'gerentes';
         const isVendedor = userRole.includes('vendedor');
         const isTechnicalOnly = (/tecnic/.test(userRole) || userArea === 'tecnica') && !isVendedor && userRole !== 'admin';
@@ -4438,6 +4460,7 @@
 
         const [formOpenAudit, setFormOpenAudit] = useState(null);
         const currentUserName = useMemo(() => (userData.nombre || (user?.email || '').split('@')[0] || 'Usuario').trim(), [userData, user]);
+        const isTicketManager = String(user?.email || '').trim().toLowerCase() === 'alfonso332estigarribia@gmail.com';
         const isAdminUser = userRole === 'admin';
         const mobileUnreadAlerts = useMemo(() => mobileAlerts.filter((a) => !a.read).length, [mobileAlerts]);
         const adminPendingRequests = useMemo(() => adminCredentialRequests.filter((r) => r?.estado === 'pendiente'), [adminCredentialRequests]);
@@ -4941,6 +4964,60 @@
           closeSidebar();
         }
 
+        function openTicketsView() {
+          setSelectedForm('tickets');
+          setMobileTab('tickets');
+          setSelectedService(null);
+          setMobileBellOpen(false);
+          closeSidebar();
+        }
+
+        async function handleCreateTicket(e) {
+          e.preventDefault();
+          const comentario = String(ticketComentario || '').trim();
+          if (!comentario) {
+            setNotificacion({ mensaje: 'Completa el comentario del ticket', tipo: 'error' });
+            return;
+          }
+          setTicketSaving(true);
+          try {
+            await db.collection('tickets_app').add({
+              creadoPorUid: user?.uid || '',
+              creadoPorEmail: user?.email || '',
+              creadoPorNombre: currentUserName,
+              fechaHoraLocal: formatUruguayDateTime(),
+              comentario,
+              prioridad: ticketPrioridad,
+              estado: 'pendiente',
+              creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+            setTicketComentario('');
+            setTicketPrioridad('Media');
+            setNotificacion({ mensaje: '✔ Ticket enviado', tipo: 'ok' });
+          } catch (error) {
+            console.error('Error creando ticket:', error);
+            setNotificacion({ mensaje: '✖ No se pudo crear el ticket', tipo: 'error' });
+          } finally {
+            setTicketSaving(false);
+          }
+        }
+
+        async function handleResolveTicket(ticket) {
+          if (!isTicketManager || !ticket?.id) return;
+          try {
+            await db.collection('tickets_app').doc(ticket.id).set({
+              estado: 'resuelto',
+              resueltoPor: currentUserName,
+              resueltoPorEmail: user?.email || '',
+              resueltoEn: firebase.firestore.FieldValue.serverTimestamp(),
+            }, { merge: true });
+            setNotificacion({ mensaje: '✔ Ticket marcado como resuelto', tipo: 'ok' });
+          } catch (error) {
+            console.error('Error resolviendo ticket:', error);
+            setNotificacion({ mensaje: '✖ No se pudo resolver el ticket', tipo: 'error' });
+          }
+        }
+
         function formatRequestDateTime(value) {
           if (!value) return '-';
           const date = typeof value?.toDate === 'function'
@@ -5108,6 +5185,7 @@
                     <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Detalle de Trabajos</button>
                   </>
                 )}
+                <button className="menu-button" onClick={openTicketsView}>Tickets</button>
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
                 <div className="sidebar-signature" aria-label="signature"><strong>v1.0 | Powered by Alfonso Carballo</strong></div>
               </div>
@@ -5242,7 +5320,46 @@
                       ))
                     )}
                   </section>
-                ) : effectiveSelectedForm === 'perfil' ? (
+
+                ) : effectiveSelectedForm === 'tickets' ? (
+                  <section className="panel profile-view">
+                    <h2>Tickets</h2>
+                    <div className="hint">Registro rápido de incidencias con prioridad y seguimiento.</div>
+                    <article className="profile-option">
+                      <h3>Nuevo ticket</h3>
+                      <form className="profile-form" onSubmit={handleCreateTicket}>
+                        <input type="text" value={currentUserName} readOnly />
+                        <input type="text" value={formatUruguayDateTime()} readOnly />
+                        <select value={ticketPrioridad} onChange={(e) => setTicketPrioridad(e.target.value)}>
+                          <option>Alta</option>
+                          <option>Media</option>
+                          <option>Baja</option>
+                        </select>
+                        <textarea value={ticketComentario} onChange={(e) => setTicketComentario(e.target.value)} placeholder="Comentario del ticket" />
+                        <button className="save-btn profile-save-btn" type="submit" disabled={ticketSaving}>{ticketSaving ? 'Enviando...' : 'Crear ticket'}</button>
+                      </form>
+                    </article>
+                    {isTicketManager && (
+                      <article className="profile-option">
+                        <h3>Historial de tickets</h3>
+                        {ticketsHistorial.length === 0 ? (
+                          <div className="kv">No hay tickets registrados.</div>
+                        ) : (
+                          ticketsHistorial.map((ticket) => (
+                            <div key={ticket.id} style={{ marginBottom: 10 }}>
+                              <div className="kv"><b>Usuario:</b> {ticket.creadoPorNombre || ticket.creadoPorEmail || '-'}</div>
+                              <div className="kv"><b>Fecha:</b> {ticket.fechaHoraLocal || '-'}</div>
+                              <div className="kv"><b>Prioridad:</b> {ticket.prioridad || '-'}</div>
+                              <div className="kv"><b>Comentario:</b> {ticket.comentario || '-'}</div>
+                              <div className="kv"><b>Estado:</b> {ticket.estado || 'pendiente'}</div>
+                              {ticket.estado !== 'resuelto' && <button type="button" className="status-action-btn accept" onClick={() => handleResolveTicket(ticket)}>Marcar resuelto</button>}
+                            </div>
+                          ))
+                        )}
+                      </article>
+                    )}
+                  </section>
+) : effectiveSelectedForm === 'perfil' ? (
                   <section className="panel profile-view">
                     <h2>Mi perfil</h2>
                     <div className="hint">{currentUserName} · {topbarSubtitle}</div>
@@ -5957,6 +6074,10 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                     >
                       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><path d="M5.5 9.5V20h13V9.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><path d="M10 20v-5h4v5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       <span className="mobile-nav-label">Inicio</span>
+                    </button>
+                    <button className={effectiveSelectedForm === 'tickets' ? 'active' : ''} type="button" onClick={openTicketsView}>
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16v12H4z" stroke="currentColor" strokeWidth="1.8"/><path d="M8 10h8M8 14h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
+                      <span className="mobile-nav-label">Tickets</span>
                     </button>
                     <button className={effectiveSelectedForm === 'perfil' ? 'active' : ''} type="button" onClick={() => { setMobileBellOpen(false); openProfileView(); }}>
                       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8"/><path d="M4 20c1.8-3.4 5-5 8-5s6.2 1.6 8 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
