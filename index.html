@@ -1400,6 +1400,23 @@
         width: 100% !important;
         height: auto !important;
       }
+      .gerencia-widget-half {
+        min-height: 250px;
+      }
+      .gerencia-top-charts {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        align-items: start;
+      }
+      .gerencia-scroll-list {
+        max-height: 180px;
+        overflow-y: auto;
+        display: grid;
+        gap: 8px;
+        margin-top: 8px;
+        padding-right: 4px;
+      }
       .legend-item {
         display: flex;
         align-items: center;
@@ -3271,6 +3288,15 @@
 
       function DashboardGerencia({ rows, isMobileNative = false }) {
         const [activeWidget, setActiveWidget] = useState('rentabilidad');
+        const [showCostosDetalle, setShowCostosDetalle] = useState(false);
+
+        function toDate(value) {
+          if (!value) return null;
+          if (typeof value?.toDate === 'function') return value.toDate();
+          if (typeof value?.seconds === 'number') return new Date(value.seconds * 1000);
+          const parsed = new Date(value);
+          return Number.isNaN(parsed.getTime()) ? null : parsed;
+        }
 
         const totalInstalacion = rows.reduce((acc, r) => acc + (Number(r.costoInstalacionUsdSinIva) || 0), 0);
         const totalProveedores = rows.reduce((acc, r) => acc + (Number(r.presupuestoProveedor) || 0), 0);
@@ -3278,21 +3304,41 @@
         const totalVentasEquipos = rows.reduce((acc, r) => acc + (Number(r.importeCompraEquipamiento) || 0), 0);
         const totalIngresos = totalArrendamiento + totalVentasEquipos;
 
-        const statusCounts = STATUS_OPTIONS.map((name) => ({ name, value: rows.filter((r) => (r.status || r.estado || '') === name).length }));
-        const pendings = rows.filter((r) => {
-          const label = String(r.status || r.estado || '').toLowerCase();
-          return label.includes('pend') || label.includes('espera') || label.includes('paus') || label.includes('atras');
-        });
+        const costosDetalleRows = rows
+          .slice()
+          .sort((a, b) => (b.actualizadoEn?.seconds || b.creadoEn?.seconds || 0) - (a.actualizadoEn?.seconds || a.creadoEn?.seconds || 0));
 
-        const activos = rows.filter((r) => {
-          const label = String(r.status || r.estado || '').toLowerCase();
-          return !(label.includes('cancel') || label.includes('complet') || label.includes('finaliz') || label.includes('baja'));
-        });
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        const fechasAltaNuevas = rows
+          .map((r) => ({
+            nombre: r.nombreServicio || r.razonSocial || r.clienteId || 'Servicio sin nombre',
+            fecha: r.fechaAltaServicio || r.fechaAlta || r.fechaEspecificaInicio,
+            dateObj: toDate(r.fechaAltaServicio || r.fechaAlta || r.fechaEspecificaInicio),
+          }))
+          .filter((r) => r.dateObj && r.dateObj >= now)
+          .sort((a, b) => a.dateObj - b.dateObj);
 
-        const fechasAlta = rows
-          .map((r) => r.fechaAltaServicio || r.fechaAlta || r.fechaEspecificaInicio)
-          .filter(Boolean)
-          .sort((a, b) => String(b).localeCompare(String(a)));
+        const statusBuckets = { Completado: 0, Pendiente: 0, Atrasado: 0 };
+        rows.forEach((r) => {
+          const label = String(r.status || r.estado || '').toLowerCase();
+          if (label.includes('complet') || label.includes('finaliz')) {
+            statusBuckets.Completado += 1;
+          } else if (label.includes('atras')) {
+            statusBuckets.Atrasado += 1;
+          } else {
+            statusBuckets.Pendiente += 1;
+          }
+        });
+        const statusCounts = Object.entries(statusBuckets).map(([name, value]) => ({ name, value }));
+
+        const activos = rows
+          .filter((r) => {
+            const label = String(r.status || r.estado || '').toLowerCase();
+            return !(label.includes('cancel') || label.includes('complet') || label.includes('finaliz') || label.includes('baja'));
+          })
+          .slice()
+          .sort((a, b) => (b.actualizadoEn?.seconds || b.creadoEn?.seconds || 0) - (a.actualizadoEn?.seconds || a.creadoEn?.seconds || 0));
 
         const rentabilidadPorProyecto = Object.entries(rows.reduce((acc, r) => {
           const key = (r.proyectoServicio || r.nombreServicio || 'Sin proyecto').trim();
@@ -3304,8 +3350,6 @@
           return acc;
         }, {})).map(([name, values]) => ({
           name,
-          ingresos: values.ingresos,
-          costos: values.costos,
           rentabilidad: values.ingresos - values.costos,
         })).sort((a, b) => b.rentabilidad - a.rentabilidad);
 
@@ -3337,6 +3381,40 @@
           return acc;
         }, {})).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 8);
 
+        if (showCostosDetalle) {
+          return (
+            <section className="panel dashboard-gerencia-panel">
+              <h2>Costos por servicio</h2>
+              <div className="hint">Detalle de instalación y proveedores terceros por cada servicio.</div>
+              <button type="button" className="link-btn" onClick={() => setShowCostosDetalle(false)} style={{ marginBottom: 12 }}>← Volver al Dashboard Gerencia</button>
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Servicio</th>
+                      <th>Cliente ID</th>
+                      <th>Costo instalación</th>
+                      <th>Proveedores terceros</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {costosDetalleRows.length === 0 ? (
+                      <tr><td colSpan={4} className="muted">Sin servicios cargados.</td></tr>
+                    ) : costosDetalleRows.map((r) => (
+                      <tr key={`costo-${r.id}`}>
+                        <td>{r.nombreServicio || r.razonSocial || 'Servicio sin nombre'}</td>
+                        <td>{r.clienteId || '-'}</td>
+                        <td>US$ {(Number(r.costoInstalacionUsdSinIva) || 0).toLocaleString('es-UY')}</td>
+                        <td>US$ {(Number(r.presupuestoProveedor) || 0).toLocaleString('es-UY')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          );
+        }
+
         return (
           <section className="panel dashboard-gerencia-panel">
             <h2>Dashboard Gerencia</h2>
@@ -3347,20 +3425,20 @@
                 <h3>Costos Operativos</h3>
                 <div className="gerencia-item"><span>Instalación total</span><b>US$ {totalInstalacion.toLocaleString('es-UY')}</b></div>
                 <div className="gerencia-item"><span>Proveedores terceros</span><b>US$ {totalProveedores.toLocaleString('es-UY')}</b></div>
+                <button type="button" className="link-btn" onClick={() => setShowCostosDetalle(true)} style={{ marginTop: 10 }}>Ver detalle por servicio</button>
               </article>
 
               <article className={`gerencia-widget ${activeWidget === 'fechas' ? 'active' : ''}`}>
                 <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('fechas')}>Fechas de Alta</button>
-                <h3>Servicios dados de alta</h3>
+                <h3>Fechas de nuevas altas</h3>
                 <div className="gerencia-status-list">
-                  {fechasAlta.length === 0 ? <div className="gerencia-item"><span>Sin fechas registradas</span><b>-</b></div> : fechasAlta.slice(0, 6).map((f, idx) => (<div key={`alta-${idx}`} className="gerencia-item"><span>Alta #{idx + 1}</span><b>{f}</b></div>))}
+                  {fechasAltaNuevas.length === 0 ? <div className="gerencia-item"><span>Sin nuevas altas</span><b>-</b></div> : fechasAltaNuevas.slice(0, 8).map((r, idx) => (<div key={`alta-${idx}`} className="gerencia-item"><span>{r.nombre}</span><b>{r.fecha}</b></div>))}
                 </div>
               </article>
 
               <article className={`gerencia-widget ${activeWidget === 'pendientes' ? 'active' : ''}`}>
                 <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('pendientes')}>Atrasados/Pendientes</button>
-                <h3>Servicios pendientes o atrasados</h3>
-                <div className="gerencia-item"><span>Total</span><b>{pendings.length}</b></div>
+                <h3>Completado · Pendiente · Atrasado</h3>
                 <div className="gerencia-status-list">
                   {statusCounts.map((item) => (<div className="gerencia-item" key={`g-status-${item.name}`}><span>{item.name}</span><b>{item.value}</b></div>))}
                 </div>
@@ -3375,26 +3453,30 @@
                 </div>
               </article>
 
-              <article className={`gerencia-widget ${activeWidget === 'activos' ? 'active' : ''}`}>
-                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('activos')}>Servicios Activos</button>
-                <h3>Cantidad de servicios activos</h3>
-                <div className="gerencia-value">{activos.length}</div>
+              <article className={`gerencia-widget gerencia-widget-half ${activeWidget === 'top-vendedores' ? 'active' : ''}`}>
+                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('top-vendedores')}>Top Vendedores</button>
+                <h3>Top vendedores</h3>
+                <div className="gerencia-top-charts">
+                  <PieChartWidget chartId="top-vendedores-servicios" title="Servicios vendidos" items={topVendedoresServicios} />
+                  <PieChartWidget chartId="top-vendedores-ingresos" title="Ingresos por vendedor" items={topVendedoresIngresos} />
+                </div>
               </article>
 
-              <article className={`gerencia-widget ${activeWidget === 'ingresos' ? 'active' : ''}`}>
+              <article className={`gerencia-widget gerencia-widget-half ${activeWidget === 'activos' ? 'active' : ''}`}>
+                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('activos')}>Servicios Activos</button>
+                <h3>Cantidad y listado de servicios activos</h3>
+                <div className="gerencia-value">{activos.length}</div>
+                <div className="gerencia-scroll-list">
+                  {activos.length === 0 ? <div className="gerencia-item"><span>Sin activos</span><b>-</b></div> : activos.map((r) => (<div key={`activo-${r.id}`} className="gerencia-item"><span>{r.nombreServicio || r.razonSocial || 'Servicio sin nombre'}</span><b>{r.fechaIngresoDatos || r.fechaAltaServicio || '-'}</b></div>))}
+                </div>
+              </article>
+
+              <article className={`gerencia-widget gerencia-widget-half ${activeWidget === 'ingresos' ? 'active' : ''}`}>
                 <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('ingresos')}>Ingresos</button>
                 <h3>Ingresos por ventas y arrendamientos</h3>
                 <div className="gerencia-item"><span>Arrendamiento</span><b>US$ {totalArrendamiento.toLocaleString('es-UY')}</b></div>
                 <div className="gerencia-item"><span>Venta equipamiento</span><b>US$ {totalVentasEquipos.toLocaleString('es-UY')}</b></div>
                 <div className="gerencia-item"><span>Total ingresos</span><b>US$ {totalIngresos.toLocaleString('es-UY')}</b></div>
-              </article>
-
-
-              <article className={`gerencia-widget ${activeWidget === 'top-vendedores' ? 'active' : ''}`}>
-                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('top-vendedores')}>Top Vendedores</button>
-                <h3>Top vendedores</h3>
-                <PieChartWidget chartId="top-vendedores-servicios" title="Servicios vendidos por vendedor" items={topVendedoresServicios} />
-                <PieChartWidget chartId="top-vendedores-ingresos" title="Ingresos por vendedor" items={topVendedoresIngresos} />
               </article>
             </div>
           </section>
