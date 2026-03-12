@@ -2658,6 +2658,26 @@
         object-fit: cover;
         border-radius: 8px;
         border: 1px solid rgba(230,255,253,.35);
+        cursor: zoom-in;
+      }
+      .image-viewer-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 2400;
+        background: rgba(0,0,0,.78);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+      }
+      .image-viewer-modal img {
+        max-width: min(92vw, 1200px);
+        max-height: 88vh;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,.32);
+        box-shadow: 0 18px 48px rgba(0,0,0,.45);
+        object-fit: contain;
+        background: #0f172a;
       }
 
       .main.charla-main-wide {
@@ -3906,6 +3926,7 @@
         const [ticketImagenes, setTicketImagenes] = useState([]);
         const [ticketDragOver, setTicketDragOver] = useState(false);
         const [ticketSaving, setTicketSaving] = useState(false);
+        const [imageViewerSrc, setImageViewerSrc] = useState('');
         const [ticketsHistorial, setTicketsHistorial] = useState([]);
         const seenRowIdsRef = useRef(new Set());
         const seenOperationalAlertsRef = useRef(new Set());
@@ -5047,6 +5068,12 @@
           await handleTicketFilesInput(e.dataTransfer?.files || []);
         }
 
+        function openImageViewer(src) {
+          const next = String(src || '').trim();
+          if (!next) return;
+          setImageViewerSrc(next);
+        }
+
         async function handleCreateTicket(e) {
           e.preventDefault();
           const comentario = String(ticketComentario || '').trim();
@@ -5456,7 +5483,7 @@
                         </div>
                         {ticketImagenes.length > 0 && (
                           <div className="ticket-image-grid">
-                            {ticketImagenes.map((img, idx) => (<img key={`ticket-img-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `img-${idx + 1}`} />))}
+                            {ticketImagenes.map((img, idx) => (<img key={`ticket-img-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `img-${idx + 1}`} onClick={() => openImageViewer(img.dataUrl)} />))}
                           </div>
                         )}
                         <button className="save-btn profile-save-btn" type="submit" disabled={ticketSaving}>{ticketSaving ? 'Enviando...' : 'Crear ticket'}</button>
@@ -5479,7 +5506,7 @@
                                   <div className="kv"><b>Comentario:</b> {ticket.comentario || '-'}</div>
                                   {Array.isArray(ticket.imagenesAdjuntas) && ticket.imagenesAdjuntas.length > 0 && (
                                     <div className="ticket-image-grid">
-                                      {ticket.imagenesAdjuntas.map((img, idx) => (<img key={`hist-img-${ticket.id}-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `adj-${idx + 1}`} />))}
+                                      {ticket.imagenesAdjuntas.map((img, idx) => (<img key={`hist-img-${ticket.id}-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `adj-${idx + 1}`} onClick={() => openImageViewer(img.dataUrl)} />))}
                                     </div>
                                   )}
                                   <div className="kv"><b>Estado:</b> {ticket.estado || 'pendiente'}</div>
@@ -6161,6 +6188,12 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                 )}
               </main>
 
+
+              {imageViewerSrc && (
+                <div className="image-viewer-modal" onClick={() => setImageViewerSrc('')}>
+                  <img src={imageViewerSrc} alt="Vista ampliada" onClick={(e) => e.stopPropagation()} />
+                </div>
+              )}
 
               {ENABLE_CLIENT_TRACKING_VIEW && showClientViewModal && isAdminUser && (
                 <div className="confirm-modal" onClick={() => setShowClientViewModal(false)}>
