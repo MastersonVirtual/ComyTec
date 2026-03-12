@@ -1806,14 +1806,17 @@
         .service-card { padding: 12px; border-radius: 14px; }
         .hero { padding: 34px 14px; border-radius: 16px; }
         .topbar {
-          flex-wrap: wrap;
-          align-items: flex-start;
-          gap: 10px;
+          flex-wrap: nowrap;
+          align-items: center;
+          gap: 8px;
           padding: 10px 12px;
+          background: #000000 !important;
+          border-color: #000000 !important;
         }
         .top-titles { min-width: 0; flex: 1; }
-        .top-titles h1 { font-size: 1.1rem; }
-        .top-titles p { font-size: .78rem; }
+        .top-titles h1 { font-size: 1rem; color: #006465 !important; }
+        .top-titles p { font-size: .72rem; color: #006465 !important; }
+        .topbar-mini-logo { display: block; }
         .top-search {
           order: 3;
           width: 100%;
@@ -2446,6 +2449,15 @@
         cursor: pointer;
       }
       .topbar-back-btn:hover { background: rgba(51,65,85,.96) !important; }
+      .topbar-mini-logo {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        margin-left: auto;
+        background: rgba(230,255,253,.12) url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png') center/cover no-repeat;
+        border: 1px solid rgba(0,100,101,.35);
+        box-shadow: 0 4px 10px rgba(0,0,0,.2);
+      }
 
       .topbar {
         position: fixed !important;
@@ -2931,6 +2943,35 @@
         .mobile-bottom-nav button.active i,
         .mobile-bottom-nav button.active svg {
           stroke: #006465 !important;
+        }
+
+        .mobile-bottom-nav-simple {
+          grid-template-columns: 1fr 1fr !important;
+          grid-auto-flow: unset !important;
+          grid-auto-columns: unset !important;
+          overflow-x: hidden !important;
+        }
+
+        .mobile-bottom-nav-simple button {
+          border-right: 0;
+        }
+
+        .main,
+        .panel,
+        .service-card,
+        .widget,
+        .gerencia-widget,
+        .gerencia-chart-shell,
+        .history-grid,
+        .card-grid,
+        .compact-grid,
+        .gerencia-widgets {
+          width: 100% !important;
+          max-width: 100% !important;
+        }
+
+        .gerencia-widget {
+          min-height: auto;
         }
 
         .mobile-fab {
@@ -4945,7 +4986,7 @@
             <div className={`content ${menuOpen ? 'shift' : ''}`}>
               <header className="topbar">
                 {!isMobile && <button className="burger" aria-label="Abrir menú" onClick={toggleSidebar}><span className="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>}
-                {(selectedForm !== 'home' || !!selectedService) && <button className="topbar-back-btn" type="button" onClick={goBackOneStep}>← Atrás</button>}
+                {!isMobile && (selectedForm !== 'home' || !!selectedService) && <button className="topbar-back-btn" type="button" onClick={goBackOneStep}>← Atrás</button>}
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
                   <p className="subtitle-voga">{topbarSubtitle}</p>
@@ -4984,6 +5025,7 @@
                     </div>
                   </div>
                 )}
+                {isMobile && <div className="topbar-mini-logo" aria-hidden="true" />}
                 {!isMobile && (
                   <div className="topbar-actions">
                     {isAdminUser && (
@@ -5738,32 +5780,10 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
 
               {isMobile && !isGerencia && (
                 <>
-                  <nav className="mobile-bottom-nav">
-                    {!isTechnicalOnly && (
-                      <>
-                        <button className={mobileTab === 'home' && selectedForm === 'home' ? 'active' : ''} type="button" onClick={() => { setMobileTab('home'); setSelectedForm('home'); }}>
-                          <i data-lucide="house" />
-                          <span className="mobile-nav-label">Inicio</span>
-                        </button>
-                        <button className={mobileTab === 'acciones' && selectedForm === 'home' ? 'active' : ''} type="button" onClick={() => { setMobileTab('acciones'); setSelectedForm('home'); }}>
-                          <i data-lucide="sparkles" />
-                          <span className="mobile-nav-label">Acciones</span>
-                        </button>
-                        <button className={mobileTab === 'servicios' ? 'active' : ''} type="button" onClick={() => { setMobileTab('servicios'); setSelectedForm('home'); }}>
-                          <i data-lucide="layers" />
-                          <span className="mobile-nav-label">Servicios</span>
-                        </button>
-                      </>
-                    )}
-                    {isTechnicalOnly && (
-                      <button className={selectedForm === 'dashboard-tecnica' ? 'active' : ''} type="button" onClick={() => { setMobileTab('home'); setSelectedForm('dashboard-tecnica'); setSelectedService(null); }}>
-                        <i data-lucide="layout-dashboard" />
-                        <span className="mobile-nav-label">Dashboard</span>
-                      </button>
-                    )}
-                    <button className={selectedForm === 'historial' ? 'active' : ''} type="button" onClick={() => { setMobileTab('historial'); setSelectedForm('historial'); setSelectedService(null); }}>
-                      <i data-lucide="history" />
-                      <span className="mobile-nav-label">Detalle</span>
+                  <nav className="mobile-bottom-nav mobile-bottom-nav-simple">
+                    <button className={selectedForm === 'home' ? 'active' : ''} type="button" onClick={() => { setMobileTab('home'); setSelectedForm('home'); setSelectedService(null); setTipoAccion(''); }}>
+                      <i data-lucide="house" />
+                      <span className="mobile-nav-label">Inicio</span>
                     </button>
                     <button className={selectedForm === 'perfil' ? 'active' : ''} type="button" onClick={openProfileView}>
                       <i data-lucide="user-round" />
@@ -5772,6 +5792,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                   </nav>
                 </>
               )}
+
 
             </div>
           </div>
