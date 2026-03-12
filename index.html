@@ -2488,6 +2488,12 @@
         border: 1px solid rgba(0,100,101,.35);
         box-shadow: 0 4px 10px rgba(0,0,0,.2);
       }
+      .mobile-alert-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 1804;
+        background: rgba(0,0,0,.12);
+      }
       .mobile-alert-panel {
         position: fixed;
         top: 54px;
@@ -4404,7 +4410,7 @@
         }, [userRole, userArea, isVendedor]);
 
         useEffect(() => {
-          if (isGerencia && selectedForm !== 'dashboard-gerencia') {
+          if (isGerencia && !['dashboard-gerencia', 'perfil', 'notificaciones'].includes(selectedForm)) {
             setSelectedForm('dashboard-gerencia');
             setSelectedService(null);
             setTipoAccion('');
@@ -4428,7 +4434,7 @@
           });
         }, [selectedForm]);
 
-        const effectiveSelectedForm = isGerencia ? 'dashboard-gerencia' : (isTechnicalOnly && selectedForm === 'home' ? 'dashboard-tecnica' : selectedForm);
+        const effectiveSelectedForm = isGerencia ? (['perfil', 'notificaciones'].includes(selectedForm) ? selectedForm : 'dashboard-gerencia') : (isTechnicalOnly && selectedForm === 'home' ? 'dashboard-tecnica' : selectedForm);
 
         const [formOpenAudit, setFormOpenAudit] = useState(null);
         const currentUserName = useMemo(() => (userData.nombre || (user?.email || '').split('@')[0] || 'Usuario').trim(), [userData, user]);
@@ -5171,9 +5177,12 @@
               </header>
 
               {isMobile && mobileBellOpen && (
-                <div className="mobile-alert-panel">
-                  {mobileAlerts.length === 0 ? <div className="mobile-alert-item">Sin notificaciones nuevas.</div> : mobileAlerts.map((a) => (<div key={a.id} className="mobile-alert-item">{a.message}</div>))}
-                </div>
+                <>
+                  <div className="mobile-alert-backdrop" onClick={() => setMobileBellOpen(false)} />
+                  <div className="mobile-alert-panel" onClick={(e) => e.stopPropagation()}>
+                    {mobileAlerts.length === 0 ? <div className="mobile-alert-item">Sin notificaciones nuevas.</div> : mobileAlerts.map((a) => (<div key={a.id} className="mobile-alert-item">{a.message}</div>))}
+                  </div>
+                </>
               )}
 
               <main className={`main ${grupo === 'charla-detalle' ? 'charla-main-wide' : ''}`}>
@@ -5263,7 +5272,10 @@
                         ))
                       )}
                     </article>
-                    <button className="logout-btn profile-logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar sesión</button>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <button className="edit-btn" type="button" onClick={() => { setSelectedForm(isGerencia ? 'dashboard-gerencia' : 'home'); setSelectedService(null); setTipoAccion(''); }}>Volver a inicio</button>
+                      <button className="logout-btn profile-logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar sesión</button>
+                    </div>
                   </section>
                 ) : effectiveSelectedForm === 'dashboard-gerencia' ? (
                   <DashboardGerencia rows={visibleRows} isMobileNative={isMobile && isGerencia} />
