@@ -2927,6 +2927,7 @@
           stroke: #006465 !important;
           color: #006465 !important;
           stroke-width: 2;
+          display: block;
         }
 
         .mobile-nav-label {
@@ -5778,15 +5779,24 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                 </div>
               )}
 
-              {isMobile && !isGerencia && (
+              {isMobile && (
                 <>
                   <nav className="mobile-bottom-nav mobile-bottom-nav-simple">
-                    <button className={selectedForm === 'home' ? 'active' : ''} type="button" onClick={() => { setMobileTab('home'); setSelectedForm('home'); setSelectedService(null); setTipoAccion(''); }}>
-                      <i data-lucide="house" />
+                    <button
+                      className={((isGerencia && effectiveSelectedForm === 'dashboard-gerencia') || (!isGerencia && selectedForm === 'home')) ? 'active' : ''}
+                      type="button"
+                      onClick={() => {
+                        setMobileTab('home');
+                        setSelectedForm(isGerencia ? 'dashboard-gerencia' : 'home');
+                        setSelectedService(null);
+                        setTipoAccion('');
+                      }}
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><path d="M5.5 9.5V20h13V9.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><path d="M10 20v-5h4v5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       <span className="mobile-nav-label">Inicio</span>
                     </button>
-                    <button className={selectedForm === 'perfil' ? 'active' : ''} type="button" onClick={openProfileView}>
-                      <i data-lucide="user-round" />
+                    <button className={effectiveSelectedForm === 'perfil' ? 'active' : ''} type="button" onClick={openProfileView}>
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8"/><path d="M4 20c1.8-3.4 5-5 8-5s6.2 1.6 8 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
                       <span className="mobile-nav-label">Perfil</span>
                     </button>
                   </nav>
