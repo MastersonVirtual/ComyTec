@@ -4601,16 +4601,36 @@
           setCharlaForm((prev) => ({ ...prev, [key]: value }));
         }
 
+        function syncCharlaServiceFromId(rawId) {
+          const clean = String(rawId || '').trim().toLowerCase();
+          if (!clean) {
+            setCharlaForm((prev) => ({ ...prev, nombreServicio: '', direccion: '' }));
+            return;
+          }
+          const match = visibleRows.find((r) => String(r?.clienteId || '').trim().toLowerCase() === clean);
+          if (!match) {
+            setCharlaForm((prev) => ({ ...prev, nombreServicio: '', direccion: '' }));
+            return;
+          }
+          const nextName = String(match?.nombreServicio || match?.cliente || '').trim();
+          const nextAddress = String(match?.direccionServicio || match?.direccion || '').trim();
+          setCharlaForm((prev) => ({
+            ...prev,
+            nombreServicio: nextName || prev.nombreServicio,
+            direccion: nextAddress,
+          }));
+        }
+
         function handleCharlaClienteIdChange(value) {
           const nextId = value;
           setClienteIdAsociado(nextId);
-          const clean = String(nextId || '').trim().toLowerCase();
-          if (!clean) return;
-          const match = visibleRows.find((r) => String(r?.clienteId || '').trim().toLowerCase() === clean);
-          if (!match) return;
-          const nextName = String(match?.nombreServicio || match?.cliente || '').trim();
-          if (nextName) setCharlaField('nombreServicio', nextName);
+          syncCharlaServiceFromId(nextId);
         }
+
+        useEffect(() => {
+          if (grupo !== 'charla-detalle') return;
+          syncCharlaServiceFromId(clienteIdAsociado);
+        }, [grupo, clienteIdAsociado, visibleRows]);
 
         const charlaMapUrl = useMemo(() => {
           const q = encodeURIComponent(String(charlaForm.direccion || '').trim());
@@ -5850,7 +5870,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
 
                         <section className="charla-card map">
                           <h4>Ubicación y mapa</h4>
-                          <div className="field" style={{ marginBottom: 10 }}><label>Dirección completa</label><input value={charlaForm.direccion} onChange={(e) => setCharlaField('direccion', e.target.value)} type="text" placeholder="Calle, altura, ciudad" /></div>
+                          <div className="field" style={{ marginBottom: 10 }}><label>Dirección completa</label><input value={charlaForm.direccion} type="text" placeholder="Se completa automáticamente según Cliente ID" readOnly /></div>
                           <div className="charla-map-wrap">
                             {charlaMapUrl ? (
                               <iframe title="Mapa charla" src={charlaMapUrl} loading="lazy" referrerPolicy="no-referrer-when-downgrade" />
