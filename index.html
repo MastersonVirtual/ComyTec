@@ -2634,6 +2634,31 @@
         margin-bottom: 8px;
         background: rgba(255,255,255,.06);
       }
+      .ticket-upload-dropzone {
+        border: 1px dashed rgba(230,255,253,.45);
+        border-radius: 10px;
+        padding: 10px;
+        text-align: center;
+        color: #d7f4ef;
+        background: rgba(0,0,0,.12);
+      }
+      .ticket-upload-dropzone.dragover {
+        border-color: #97f3e7;
+        background: rgba(151,243,231,.15);
+      }
+      .ticket-image-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .ticket-thumb {
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid rgba(230,255,253,.35);
+      }
 
       .main.charla-main-wide {
         max-width: min(96vw, 1780px);
@@ -3878,6 +3903,8 @@
         const [mobileAlerts, setMobileAlerts] = useState([]);
         const [ticketComentario, setTicketComentario] = useState('');
         const [ticketPrioridad, setTicketPrioridad] = useState('Media');
+        const [ticketImagenes, setTicketImagenes] = useState([]);
+        const [ticketDragOver, setTicketDragOver] = useState(false);
         const [ticketSaving, setTicketSaving] = useState(false);
         const [ticketsHistorial, setTicketsHistorial] = useState([]);
         const seenRowIdsRef = useRef(new Set());
@@ -4994,6 +5021,32 @@
           closeSidebar();
         }
 
+        async function readImageFiles(files) {
+          const valid = Array.from(files || []).filter((f) => String(f.type || '').startsWith('image/'));
+          const mapped = await Promise.all(valid.map((file) => new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve({ nombre: file.name || 'imagen', tipo: file.type || 'image/*', dataUrl: String(reader.result || '') });
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(file);
+          })));
+          return mapped.filter(Boolean);
+        }
+
+        async function handleTicketFilesInput(fileList) {
+          const parsed = await readImageFiles(fileList);
+          if (parsed.length === 0) {
+            setNotificacion({ mensaje: 'Solo se permiten imágenes para tickets', tipo: 'error' });
+            return;
+          }
+          setTicketImagenes((prev) => [...prev, ...parsed].slice(0, 12));
+        }
+
+        async function handleTicketDrop(e) {
+          e.preventDefault();
+          setTicketDragOver(false);
+          await handleTicketFilesInput(e.dataTransfer?.files || []);
+        }
+
         async function handleCreateTicket(e) {
           e.preventDefault();
           const comentario = String(ticketComentario || '').trim();
@@ -5011,10 +5064,12 @@
               comentario,
               prioridad: ticketPrioridad,
               estado: 'pendiente',
+              imagenesAdjuntas: ticketImagenes,
               creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
             });
             setTicketComentario('');
             setTicketPrioridad('Media');
+            setTicketImagenes([]);
             setNotificacion({ mensaje: '✔ Ticket enviado', tipo: 'ok' });
           } catch (error) {
             console.error('Error creando ticket:', error);
@@ -5390,6 +5445,20 @@
                           <option>Baja</option>
                         </select>
                         <textarea value={ticketComentario} onChange={(e) => setTicketComentario(e.target.value)} placeholder="Comentá qué mejorarías de la web o del sistema" />
+                        <input type="file" accept="image/*" multiple onChange={(e) => handleTicketFilesInput(e.target.files)} />
+                        <div
+                          className={`ticket-upload-dropzone ${ticketDragOver ? 'dragover' : ''}`}
+                          onDragOver={(e) => { e.preventDefault(); setTicketDragOver(true); }}
+                          onDragLeave={() => setTicketDragOver(false)}
+                          onDrop={handleTicketDrop}
+                        >
+                          Arrastrá imágenes aquí o seleccioná archivos.
+                        </div>
+                        {ticketImagenes.length > 0 && (
+                          <div className="ticket-image-grid">
+                            {ticketImagenes.map((img, idx) => (<img key={`ticket-img-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `img-${idx + 1}`} />))}
+                          </div>
+                        )}
                         <button className="save-btn profile-save-btn" type="submit" disabled={ticketSaving}>{ticketSaving ? 'Enviando...' : 'Crear ticket'}</button>
                       </form>
                     </article>
@@ -5408,6 +5477,11 @@
                                   <div className="kv"><b>Fecha:</b> {ticket.fechaHoraLocal || formatRequestDateTime(ticket.creadoEn)}</div>
                                   <div className="kv"><b>Prioridad:</b> {ticket.prioridad || '-'}</div>
                                   <div className="kv"><b>Comentario:</b> {ticket.comentario || '-'}</div>
+                                  {Array.isArray(ticket.imagenesAdjuntas) && ticket.imagenesAdjuntas.length > 0 && (
+                                    <div className="ticket-image-grid">
+                                      {ticket.imagenesAdjuntas.map((img, idx) => (<img key={`hist-img-${ticket.id}-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `adj-${idx + 1}`} />))}
+                                    </div>
+                                  )}
                                   <div className="kv"><b>Estado:</b> {ticket.estado || 'pendiente'}</div>
                                   <div className="request-status-row" style={{ marginTop: 8 }}>
                                     {ticket.estado !== 'resuelto' && <button type="button" className="status-action-btn accept" onClick={() => handleResolveTicket(ticket)}>Marcar resuelto</button>}
