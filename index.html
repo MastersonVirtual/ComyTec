@@ -1429,23 +1429,28 @@
         background: rgba(34,211,238,.08);
       }
       .gerencia-chart-shell.large {
-        max-width: 520px;
+        max-width: min(360px, 100%);
       }
       .gerencia-chart-modal {
-        width: min(980px, calc(100vw - 40px));
-        max-height: min(88vh, 860px);
+        width: min(760px, calc(100vw - 56px));
+        max-height: min(78vh, 700px);
         overflow: auto;
         background: #071415;
         border: 1px solid var(--line);
         border-radius: 18px;
-        padding: 18px;
+        padding: 14px;
         box-shadow: 0 24px 70px rgba(0,0,0,.45);
       }
       .gerencia-chart-modal-grid {
         display: grid;
-        grid-template-columns: minmax(340px, 1.1fr) minmax(260px, .9fr);
+        grid-template-columns: minmax(250px, .95fr) minmax(220px, 1fr);
         gap: 14px;
         align-items: start;
+      }
+      .gerencia-chart-modal .gerencia-ranking-list {
+        max-height: calc(78vh - 170px);
+        overflow-y: auto;
+        padding-right: 4px;
       }
       .gerencia-scroll-list {
         max-height: 180px;
