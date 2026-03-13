@@ -4242,19 +4242,56 @@
           return digits.padStart(4, '0');
         }
 
-        function getServiceCatalogById(rawId) {
-          const target = normalizeServiceId(rawId);
-          if (!target) return null;
-          const fromRows = rows.find((r) => normalizeServiceId(r?.clienteId) === target);
-          if (fromRows) return {
-            numero: target,
-            nombreServicio: fromRows.nombreServicio || '',
-            direccionServicio: fromRows.direccionServicio || '',
-            tipoServicioBrindar: fromRows.tipoServicioBrindar || '',
-            representanteComercial: fromRows.representanteComercial || '',
-            atencionCliente: fromRows.atencionCliente || fromRows.bottiSeContactaCon || '',
+        function normalizeSearchText(value) {
+          return String(value || '')
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[̀-ͯ]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+        }
+
+        function toCatalogShape(item) {
+          if (!item) return null;
+          return {
+            numero: normalizeServiceId(item.numero || item.clienteId),
+            nombreServicio: item.nombreServicio || item.cliente || '',
+            direccionServicio: item.direccionServicio || item.direccion || '',
+            tipoServicioBrindar: item.tipoServicioBrindar || '',
+            representanteComercial: item.representanteComercial || '',
+            atencionCliente: item.atencionCliente || item.bottiSeContactaCon || '',
           };
-          return PRELOADED_SERVICES.find((s) => normalizeServiceId(s.numero) === target) || null;
+        }
+
+        function findCatalogByName(collection, queryName) {
+          const pool = collection.map(toCatalogShape).filter(Boolean);
+          const exact = pool.find((item) => normalizeSearchText(item.nombreServicio) === queryName);
+          if (exact) return exact;
+          const starts = pool.find((item) => normalizeSearchText(item.nombreServicio).startsWith(queryName));
+          if (starts) return starts;
+          return pool.find((item) => normalizeSearchText(item.nombreServicio).includes(queryName)) || null;
+        }
+
+        function getServiceCatalogById(rawId) {
+          const raw = String(rawId || '').trim();
+          if (!raw) return null;
+          const looksLikeId = /^[\d\s-]+$/.test(raw);
+          const queryName = normalizeSearchText(raw);
+
+          if (looksLikeId) {
+            const target = normalizeServiceId(raw);
+            if (target) {
+              const fromRows = rows.find((r) => normalizeServiceId(r?.clienteId) === target);
+              if (fromRows) return toCatalogShape(fromRows);
+              const fromPreloaded = PRELOADED_SERVICES.find((item) => normalizeServiceId(item.numero) === target);
+              if (fromPreloaded) return toCatalogShape(fromPreloaded);
+            }
+          }
+
+          if (!queryName) return null;
+          const fromRowsByName = findCatalogByName(rows, queryName);
+          if (fromRowsByName) return fromRowsByName;
+          return findCatalogByName(PRELOADED_SERVICES, queryName);
         }
 
         const deferredSearchTerm = useDeferredValue(searchTerm);
@@ -4278,6 +4315,7 @@
         const [historyCommercialFilter, setHistoryCommercialFilter] = useState('todos');
         const [historyPage, setHistoryPage] = useState(1);
         const [catalogSyncing, setCatalogSyncing] = useState(false);
+        const [servicesFilterTerm, setServicesFilterTerm] = useState('');
         const [showManualCatalogForm, setShowManualCatalogForm] = useState(false);
         const [savingManualCatalogService, setSavingManualCatalogService] = useState(false);
         const [manualCatalogForm, setManualCatalogForm] = useState({ numero: '', nombreServicio: '', direccionServicio: '', tipoServicioBrindar: '', representanteComercial: '', atencionCliente: '' });
@@ -4412,6 +4450,19 @@
           const start = (safeHistoryPage - 1) * HISTORY_PAGE_SIZE;
           return historyFilteredRows.slice(start, start + HISTORY_PAGE_SIZE);
         }, [historyFilteredRows, safeHistoryPage]);
+
+        const mobileServicesRows = useMemo(() => {
+          const q = normalizeSearchText(servicesFilterTerm);
+          if (!q) return visibleRows.slice(0, 60);
+          return visibleRows
+            .filter((r) => {
+              const fields = [r.nombreServicio, r.cliente, r.clienteId, r.razonSocial, r.direccionServicio]
+                .filter(Boolean)
+                .map((f) => normalizeSearchText(f));
+              return fields.some((f) => f.startsWith(q) || f.includes(q));
+            })
+            .slice(0, 60);
+        }, [visibleRows, servicesFilterTerm]);
 
         async function handleSyncPreloadedServicesToFirebase() {
           if (!isAdminUser) {
@@ -5194,19 +5245,36 @@
           setCharlaForm((prev) => ({ ...prev, [key]: value }));
         }
 
+        const charlaLookupTimeoutRef = useRef(null);
+
+        function clearCharlaLookupTimeout() {
+          if (charlaLookupTimeoutRef.current) {
+            clearTimeout(charlaLookupTimeoutRef.current);
+            charlaLookupTimeoutRef.current = null;
+          }
+        }
+
         function syncCharlaServiceFromId(rawId) {
-          const catalog = getServiceCatalogById(rawId);
-          if (!catalog) {
+          clearCharlaLookupTimeout();
+          const query = String(rawId || '').trim();
+          if (!query) {
             setCharlaForm((prev) => ({ ...prev, nombreServicio: '', direccion: '' }));
             return;
           }
-          const nextName = String(catalog?.nombreServicio || '').trim();
-          const nextAddress = String(catalog?.direccionServicio || '').trim();
-          setCharlaForm((prev) => ({
-            ...prev,
-            nombreServicio: nextName || prev.nombreServicio,
-            direccion: nextAddress,
-          }));
+          charlaLookupTimeoutRef.current = setTimeout(() => {
+            const catalog = getServiceCatalogById(query);
+            if (!catalog) {
+              setCharlaForm((prev) => ({ ...prev, nombreServicio: '', direccion: '' }));
+              return;
+            }
+            const nextName = String(catalog?.nombreServicio || '').trim();
+            const nextAddress = String(catalog?.direccionServicio || '').trim();
+            setCharlaForm((prev) => ({
+              ...prev,
+              nombreServicio: nextName || prev.nombreServicio,
+              direccion: nextAddress,
+            }));
+          }, 1500);
         }
 
         function handleCharlaClienteIdChange(value) {
@@ -5219,6 +5287,8 @@
           if (grupo !== 'charla-detalle') return;
           syncCharlaServiceFromId(clienteIdAsociado);
         }, [grupo, clienteIdAsociado, visibleRows]);
+
+        useEffect(() => () => clearCharlaLookupTimeout(), []);
 
         useEffect(() => {
           if (autoIdMode || !clienteIdAsociado) return;
@@ -5490,9 +5560,13 @@
             <section className="mobile-section-stack">
               <div className="mobile-section-card">
                 <h3 className="mobile-section-title">Servicios activos</h3>
+                <div className="field" style={{ marginBottom: 10 }}>
+                  <label>Buscar en servicios</label>
+                  <input value={servicesFilterTerm} onChange={(e) => setServicesFilterTerm(e.target.value)} placeholder="Escribí ID, nombre o dirección (filtra por letra al instante)" />
+                </div>
                 <div className="hint" style={{ marginBottom: 10 }}>Toque un servicio para abrir su detalle.</div>
               <div className="mobile-service-stack">
-                {visibleRows.slice(0, 30).map((r) => (
+                {mobileServicesRows.map((r) => (
                   <article key={r.id} className="mobile-service-card" onClick={() => { setSelectedService(r); setSelectedForm('historial'); }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
                       <strong>{r.nombreServicio || r.cliente || 'Servicio sin nombre'}</strong>
@@ -5505,6 +5579,7 @@
                     </div>
                   </article>
                 ))}
+                {mobileServicesRows.length === 0 && <div className="hint" style={{ margin: 0 }}>No hay servicios que coincidan con la búsqueda.</div>}
               </div>
               </div>
             </section>
@@ -6524,7 +6599,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>Facturación · Novaciones</h3>
                           <div className="card-grid">
-                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID o nombre del servicio" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                             <div className="field"><label>Representante Comercial</label><input value={novacionForm.representanteComercial} onChange={(e) => setNovacionField('representanteComercial', e.target.value)} type="text" readOnly={lockCommercialField} /></div>
                           </div>
@@ -6569,7 +6644,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>Equipos Agregados</h3>
                           <div className="card-grid">
-                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID o nombre del servicio" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
@@ -6605,7 +6680,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>Movimiento de Obra</h3>
                           <div className="card-grid">
-                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID o nombre del servicio" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
@@ -6634,7 +6709,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>Baja de Servicio</h3>
                           <div className="card-grid">
-                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID o nombre del servicio" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
@@ -6679,7 +6754,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <section className="charla-card context">
                           <h4>Charla · Planificación</h4>
                           <div className="charla-core-grid">
-                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => handleCharlaClienteIdChange(e.target.value)} type="text" placeholder="ID del servicio/proyecto" /></div>
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => handleCharlaClienteIdChange(e.target.value)} type="text" placeholder="ID o nombre del servicio/proyecto" /></div>
                             <div className="field"><label>Nombre del servicio</label><input value={charlaForm.nombreServicio} onChange={(e) => setCharlaField('nombreServicio', e.target.value)} type="text" placeholder="Servicio a presentar" /></div>
                             <div className="field"><label>Estado automático</label><div className="charla-status-chip">{charlaAutoStatus}</div></div>
                           </div>
@@ -6724,7 +6799,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
 ) : (
                       <div className="compact-grid">
                         <div className="field"><label>Tipo de Acción</label><select value={tipoAccion} onChange={(e) => { setTipoAccion(e.target.value); resetFields(); }}>{ACCIONES.map((a) => <option key={a} value={a}>{a}</option>)}</select></div>
-                        <div className="field"><label>{autoIdMode ? "Cliente ID" : "Cliente ID asociado"}</label>{autoIdMode ? <input value={clienteId} readOnly type="text" /> : <input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" />}</div>
+                        <div className="field"><label>{autoIdMode ? "Cliente ID" : "Cliente ID asociado"}</label>{autoIdMode ? <input value={clienteId} readOnly type="text" /> : <input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID o nombre del servicio" />}</div>
                         <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
 
                         {grupo === 'base' && <><div className="field"><label>Cliente</label><input value={cliente} onChange={(e) => setCliente(e.target.value)} /></div><div className="field"><label>Fecha Carga</label><input value={fechaCarga} onChange={(e) => setFechaCarga(e.target.value)} type="date" /></div><div className="field"><label>Tiempo Instalación</label><input value={tiempoInstalacion} onChange={(e) => setTiempoInstalacion(e.target.value)} /></div><div className="field"><label>Fecha Alta</label><input value={fechaAlta} onChange={(e) => setFechaAlta(e.target.value)} type="date" /></div><div className="field"><label>Cobro</label><input value={cobro} onChange={(e) => setCobro(e.target.value)} /></div></>}
