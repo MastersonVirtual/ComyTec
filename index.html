@@ -4030,6 +4030,9 @@
         const [historyCommercialFilter, setHistoryCommercialFilter] = useState('todos');
         const [historyPage, setHistoryPage] = useState(1);
         const [catalogSyncing, setCatalogSyncing] = useState(false);
+        const [showManualCatalogForm, setShowManualCatalogForm] = useState(false);
+        const [savingManualCatalogService, setSavingManualCatalogService] = useState(false);
+        const [manualCatalogForm, setManualCatalogForm] = useState({ numero: '', nombreServicio: '', direccionServicio: '', tipoServicioBrindar: '', representanteComercial: '', atencionCliente: '' });
 
         function getStatusLabel(row) {
           return String(row?.status || row?.estado || '').trim().toLowerCase();
@@ -4204,6 +4207,61 @@
             setNotificacion({ mensaje: 'No se pudo sincronizar el catálogo en Firebase.', tipo: 'error' });
           } finally {
             setCatalogSyncing(false);
+          }
+        }
+
+        function setManualCatalogField(field, value) {
+          setManualCatalogForm((prev) => ({ ...prev, [field]: value }));
+        }
+
+        function resetManualCatalogForm() {
+          setManualCatalogForm({ numero: '', nombreServicio: '', direccionServicio: '', tipoServicioBrindar: '', representanteComercial: '', atencionCliente: '' });
+        }
+
+        async function handleCreateManualCatalogService() {
+          if (!isAdminUser) {
+            setNotificacion({ mensaje: 'Solo administradores pueden agregar servicios al catálogo.', tipo: 'warn' });
+            return;
+          }
+          const normalizedId = normalizeServiceId(manualCatalogForm.numero);
+          const payload = {
+            clienteId: normalizedId,
+            nombreServicio: String(manualCatalogForm.nombreServicio || '').trim(),
+            direccionServicio: String(manualCatalogForm.direccionServicio || '').trim(),
+            tipoServicioBrindar: String(manualCatalogForm.tipoServicioBrindar || '').trim(),
+            representanteComercial: String(manualCatalogForm.representanteComercial || '').trim(),
+            atencionCliente: String(manualCatalogForm.atencionCliente || '').trim(),
+          };
+          if (!payload.clienteId || !payload.nombreServicio || !payload.direccionServicio || !payload.tipoServicioBrindar || !payload.representanteComercial || !payload.atencionCliente) {
+            setNotificacion({ mensaje: 'Completá los 6 campos para agregar el servicio.', tipo: 'warn' });
+            return;
+          }
+          try {
+            setSavingManualCatalogService(true);
+            const docRef = db.collection('operaciones').doc(`catalogo_manual_${payload.clienteId}`);
+            await docRef.set({
+              tipoAccion: 'Nuevo Servicio',
+              status: 'Precargado',
+              estado: 'Precargado',
+              origenCatalogo: true,
+              origenCatalogoManual: true,
+              creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+              creadoPor: currentUserName,
+              logs_cambios: [{
+                fecha: formatNow(),
+                usuario: currentUserName,
+                accion: 'Alta manual desde historial de servicios',
+              }],
+              ...payload,
+            }, { merge: true });
+            setNotificacion({ mensaje: `Servicio ${payload.clienteId} guardado en operaciones (Firebase).`, tipo: 'ok' });
+            resetManualCatalogForm();
+            setShowManualCatalogForm(false);
+          } catch (error) {
+            console.error('Error agregando servicio manual al catálogo:', error);
+            setNotificacion({ mensaje: 'No se pudo guardar el servicio en Firebase.', tipo: 'error' });
+          } finally {
+            setSavingManualCatalogService(false);
           }
         }
 
@@ -5884,9 +5942,31 @@
                       <div className="hint" style={{ marginBottom: 10 }}>Catálogo local visible en historial: {preloadedHistoryRows.length} servicio(s) aún no guardado(s) en Firebase.</div>
                       {isAdminUser && (
                         <div style={{ marginBottom: 12 }}>
-                          <button type="button" className="link-btn" disabled={catalogSyncing} onClick={handleSyncPreloadedServicesToFirebase}>
-                            {catalogSyncing ? 'Sincronizando catálogo…' : 'Sincronizar catálogo precargado en Firebase'}
-                          </button>
+                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                            <button type="button" className="link-btn" disabled={catalogSyncing} onClick={handleSyncPreloadedServicesToFirebase}>
+                              {catalogSyncing ? 'Sincronizando catálogo…' : 'Sincronizar catálogo precargado en Firebase'}
+                            </button>
+                            <button type="button" className="link-btn" onClick={() => setShowManualCatalogForm((prev) => !prev)}>
+                              {showManualCatalogForm ? 'Cerrar agregar servicio' : 'Agregar servicio'}
+                            </button>
+                          </div>
+                          {showManualCatalogForm && (
+                            <div className="panel" style={{ marginTop: 10, background: 'rgba(255,255,255,.03)' }}>
+                              <h4 style={{ marginTop: 0 }}>Agregar servicio al catálogo/Firebase</h4>
+                              <div className="grid cols-3">
+                                <div className="field"><label>Número</label><input value={manualCatalogForm.numero} onChange={(e) => setManualCatalogField('numero', e.target.value)} placeholder="Ej: 0001" /></div>
+                                <div className="field"><label>Servicio</label><input value={manualCatalogForm.nombreServicio} onChange={(e) => setManualCatalogField('nombreServicio', e.target.value)} placeholder="Nombre del servicio" /></div>
+                                <div className="field"><label>Dirección</label><input value={manualCatalogForm.direccionServicio} onChange={(e) => setManualCatalogField('direccionServicio', e.target.value)} placeholder="Dirección" /></div>
+                                <div className="field"><label>Tipo de Servicio</label><input value={manualCatalogForm.tipoServicioBrindar} onChange={(e) => setManualCatalogField('tipoServicioBrindar', e.target.value)} placeholder="MONITOREO / PORTERIA..." /></div>
+                                <div className="field"><label>Comercial</label><input value={manualCatalogForm.representanteComercial} onChange={(e) => setManualCatalogField('representanteComercial', e.target.value)} placeholder="Nombre comercial" /></div>
+                                <div className="field"><label>Atención al cliente</label><input value={manualCatalogForm.atencionCliente} onChange={(e) => setManualCatalogField('atencionCliente', e.target.value)} placeholder="Nombre atención cliente" /></div>
+                              </div>
+                              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                <button type="button" className="save-btn" disabled={savingManualCatalogService} onClick={handleCreateManualCatalogService}>{savingManualCatalogService ? 'Guardando...' : 'Guardar servicio en operaciones'}</button>
+                                <button type="button" className="link-btn" disabled={savingManualCatalogService} onClick={resetManualCatalogForm}>Limpiar</button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
 
