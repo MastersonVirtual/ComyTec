@@ -131,7 +131,7 @@
         letter-spacing: .4px;
         text-shadow: 0 4px 16px rgba(0,0,0,.4);
       }
-      .top-titles p { margin: 4px 0 0; color: #caeeee; font-size: .9rem; }
+      .top-titles p { margin: 4px 0 0; color: #ff8a00; font-size: .9rem; font-weight: 700; }
       .subtitle-voga { font-family: 'Voga', 'VOGA', 'Didot', 'Bodoni MT', 'Times New Roman', serif; letter-spacing: .9px; }
 
       .top-search { margin-left: auto; min-width: 220px; max-width: 430px; width: 38%; }
@@ -1410,6 +1410,19 @@
       .gerencia-widget-rentabilidad {
         grid-column: 1 / -1;
       }
+      .gerencia-top-vendedores-detail {
+        background: #fff;
+        border-radius: 16px;
+        padding: 16px;
+        display: grid;
+        gap: 16px;
+      }
+      .gerencia-top-vendedores-chart {
+        background: #fff;
+        border: 1px solid #e7e7e7;
+        border-radius: 12px;
+        padding: 12px;
+      }
       .gerencia-top-charts {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -2437,15 +2450,11 @@
         height: 44px;
         min-width: 44px;
         min-height: 44px;
-        border: 1px solid rgba(230,255,253,.45) !important;
+        border: 1px solid rgba(255,138,0,.45) !important;
         border-radius: 14px !important;
         padding: 0;
         background-color: rgba(255,255,255,.08) !important;
-        background-image: url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png');
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: cover;
-        color: #e6fffd !important;
+        color: #ff8a00 !important;
         display: inline-flex !important;
         align-items: center;
         justify-content: center;
@@ -2470,8 +2479,8 @@
         width: 20px;
         height: 20px;
         stroke-width: 2.4;
-        color: #e6fffd;
-        stroke: #e6fffd;
+        color: #ff8a00;
+        stroke: #ff8a00;
       }
       .notify-badge {
         position: absolute;
@@ -2494,13 +2503,9 @@
         width: 40px;
         height: 40px;
         border-radius: 12px;
-        border: 1px solid rgba(230,255,253,.45);
+        border: 1px solid rgba(255,138,0,.65);
         background-color: rgba(255,255,255,.08);
-        background-image: url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png');
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: cover;
-        color: #e6fffd;
+        color: #ff8a00;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -2561,6 +2566,7 @@
       .mobile-alert-item:last-child { border-bottom: 0; }
 
       .topbar {
+        background: #000 !important;
         position: fixed !important;
         top: 8px;
         left: 50%;
@@ -3210,6 +3216,14 @@
         .app-footer {
           bottom: calc(var(--mobile-nav-height) + 48px) !important;
         }
+      }
+
+      .service-card:hover,
+      .kpi-card:hover,
+      .gerencia-widget:hover,
+      .mobile-service-card:hover,
+      .mobile-service-card:active {
+        transform: none !important;
       }
 
     </style>
@@ -4102,8 +4116,9 @@
         );
       }
 
-      function PieChartWidget({ chartId, title, items, size = 'normal' }) {
+      function PieChartWidget({ chartId, title, items, size = 'normal', animateOnMount = true }) {
         const canvasRef = useRef(null);
+        const hasAnimatedRef = useRef(false);
 
         useEffect(() => {
           if (!canvasRef.current || !window.Chart) return () => {};
@@ -4125,6 +4140,9 @@
               responsive: true,
               maintainAspectRatio: true,
               aspectRatio: 1,
+              animation: {
+                duration: (!hasAnimatedRef.current && animateOnMount) ? 1100 : 0,
+              },
               plugins: {
                 legend: {
                   position: 'bottom',
@@ -4140,6 +4158,7 @@
               },
             },
           });
+          hasAnimatedRef.current = true;
           return () => chart.destroy();
         }, [items]);
 
@@ -4155,8 +4174,9 @@
       }
 
       function DashboardGerencia({ rows, isMobileNative = false }) {
-        const [activeWidget, setActiveWidget] = useState('rentabilidad');
+        const [activeWidget, setActiveWidget] = useState('top-vendedores');
         const [showCostosDetalle, setShowCostosDetalle] = useState(false);
+        const [detailView, setDetailView] = useState('');
         const [sellerChartModal, setSellerChartModal] = useState(null);
 
         function toDate(value) {
@@ -4256,6 +4276,24 @@
           setSellerChartModal({ type, title, items });
         }
 
+        if (detailView === 'top-vendedores') {
+          return (
+            <section className="panel dashboard-gerencia-panel">
+              <h2>Top Vendedores · Vista detallada</h2>
+              <div className="hint">Comparativa ejecutiva de ventas e ingresos.</div>
+              <button type="button" className="link-btn" onClick={() => setDetailView('')} style={{ marginBottom: 12 }}>← Volver al Dashboard Gerencia</button>
+              <div className="gerencia-top-vendedores-detail">
+                <div className="gerencia-top-vendedores-chart">
+                  <PieChartWidget chartId="top-vendedores-servicios-detalle" title="Servicios vendidos" items={topVendedoresServicios} animateOnMount />
+                </div>
+                <div className="gerencia-top-vendedores-chart">
+                  <PieChartWidget chartId="top-vendedores-ingresos-detalle" title="Ingresos por vendedor" items={topVendedoresIngresos} animateOnMount />
+                </div>
+              </div>
+            </section>
+          );
+        }
+
         if (showCostosDetalle) {
           return (
             <section className="panel dashboard-gerencia-panel">
@@ -4295,6 +4333,12 @@
             <h2>Dashboard Gerencia</h2>
             <div className="hint">Vista de solo lectura para seguimiento ejecutivo.</div>
             <div className="gerencia-widgets">
+              <article className={`gerencia-widget gerencia-widget-half gerencia-widget-top-vendedores gerencia-widget-wide ${activeWidget === 'top-vendedores' ? 'active' : ''}`} onClick={() => { setActiveWidget('top-vendedores'); setDetailView('top-vendedores'); }}>
+                <button type="button" className="gerencia-widget-toggle" onClick={(e) => { e.stopPropagation(); setActiveWidget('top-vendedores'); setDetailView('top-vendedores'); }}>Top Vendedores</button>
+                <h3>Top vendedores</h3>
+                <div className="hint" style={{ marginBottom: 0 }}>Abrir vista detallada</div>
+              </article>
+
               <article className={`gerencia-widget ${activeWidget === 'costos' ? 'active' : ''}`}>
                 <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('costos')}>Costos</button>
                 <h3>Costos Operativos</h3>
@@ -4325,19 +4369,6 @@
                 <div className="gerencia-item"><span>Proyecto más rentable</span><b>{topProyecto.name} · US$ {topProyecto.rentabilidad.toLocaleString('es-UY')}</b></div>
                 <div className="gerencia-ranking-list">
                   {rentabilidadPorCliente.length === 0 ? <div className="gerencia-item"><span>Sin datos</span><b>-</b></div> : rentabilidadPorCliente.map((item) => (<div key={`rent-${item.name}`} className="gerencia-item"><span>{item.name}</span><b>US$ {item.rentabilidad.toLocaleString('es-UY')}</b></div>))}
-                </div>
-              </article>
-
-              <article className={`gerencia-widget gerencia-widget-half gerencia-widget-top-vendedores gerencia-widget-wide ${activeWidget === 'top-vendedores' ? 'active' : ''}`}>
-                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('top-vendedores')}>Top Vendedores</button>
-                <h3>Top vendedores (click para abrir modal ampliado)</h3>
-                <div className="gerencia-top-charts">
-                  <div className="gerencia-chart-clickable" onClick={() => { setActiveWidget('top-vendedores'); openSellerChartModal('servicios'); }}>
-                    <PieChartWidget chartId="top-vendedores-servicios" title="Servicios vendidos" items={topVendedoresServicios} />
-                  </div>
-                  <div className="gerencia-chart-clickable" onClick={() => { setActiveWidget('top-vendedores'); openSellerChartModal('ingresos'); }}>
-                    <PieChartWidget chartId="top-vendedores-ingresos" title="Ingresos por vendedor" items={topVendedoresIngresos} />
-                  </div>
                 </div>
               </article>
 
@@ -5978,6 +6009,29 @@
           setClientOperationId('');
         }
 
+        useEffect(() => {
+          let touchStartX = 0;
+          let touchStartY = 0;
+          function onTouchStart(e) {
+            if (!e.touches || e.touches.length === 0) return;
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+          }
+          function onTouchEnd(e) {
+            if (!e.changedTouches || e.changedTouches.length === 0) return;
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
+            if (touchStartX < 28) return;
+            if (dx > 90 && dy < 80) goBackOneStep();
+          }
+          window.addEventListener('touchstart', onTouchStart, { passive: true });
+          window.addEventListener('touchend', onTouchEnd, { passive: true });
+          return () => {
+            window.removeEventListener('touchstart', onTouchStart);
+            window.removeEventListener('touchend', onTouchEnd);
+          };
+        }, [selectedForm, selectedService, formHistory]);
+
         function goBackOneStep() {
           if (selectedService) {
             setSelectedService(null);
@@ -6308,7 +6362,7 @@
                 {!isMobile && (selectedForm !== 'home' || !!selectedService) && <button className="topbar-back-btn" type="button" aria-label="Volver" onClick={goBackOneStep}><i data-lucide="arrow-left" /></button>}
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
-                  <p className="subtitle-voga">{topbarSubtitle}</p>
+                  <p className="subtitle-voga">Ingresó: {currentUserName}</p>
                 </div>
                 {!isGerencia && !isTechnicalOnly && (
                   <div className="top-search">
@@ -6358,7 +6412,6 @@
                       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 10a6 6 0 1 1 12 0v4l1.5 2h-15L6 14v-4Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/><path d="M10 18a2 2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
                       {mobileUnreadAlerts > 0 && <span className="topbar-mini-badge">{mobileUnreadAlerts > 9 ? '9+' : mobileUnreadAlerts}</span>}
                     </button>
-                    <div className="topbar-mini-logo" aria-hidden="true" />
                   </>
                 )}
                 {!isMobile && (
@@ -6565,8 +6618,7 @@
                         <div
                           className="kpi-card-wrap"
                           key={card.key}
-                          onMouseEnter={() => setActiveKpi(card.key)}
-                          onMouseLeave={() => setActiveKpi((prev) => (prev === card.key ? null : prev))}
+                          onClick={() => { setActiveKpi(card.key); setSelectedForm('ranking-comercial'); }}
                         >
                           <article
                             className={`kpi-card ${activeKpi === card.key ? 'active' : ''}`}
@@ -7250,10 +7302,12 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><path d="M5.5 9.5V20h13V9.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><path d="M10 20v-5h4v5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       <span className="mobile-nav-label">Inicio</span>
                     </button>
-                    <button className={effectiveSelectedForm === 'tickets' ? 'active' : ''} type="button" onClick={openTicketsView}>
-                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16v12H4z" stroke="currentColor" strokeWidth="1.8"/><path d="M8 10h8M8 14h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
-                      <span className="mobile-nav-label">Tickets</span>
-                    </button>
+                    {!isGerencia && (
+                      <button className={effectiveSelectedForm === 'tickets' ? 'active' : ''} type="button" onClick={openTicketsView}>
+                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16v12H4z" stroke="currentColor" strokeWidth="1.8"/><path d="M8 10h8M8 14h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
+                        <span className="mobile-nav-label">Tickets</span>
+                      </button>
+                    )}
                     <button className={effectiveSelectedForm === 'perfil' ? 'active' : ''} type="button" onClick={() => { setMobileBellOpen(false); openProfileView(); }}>
                       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8"/><path d="M4 20c1.8-3.4 5-5 8-5s6.2 1.6 8 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
                       <span className="mobile-nav-label">Perfil</span>
