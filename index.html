@@ -406,7 +406,7 @@
         text-shadow: none;
       }
       .top-titles p {
-        color: #d8fbf8;
+        color: #ff8a00;
         letter-spacing: .07em;
       }
       .subtitle-voga {
@@ -1873,8 +1873,8 @@
           border-color: #000000 !important;
         }
         .top-titles { min-width: 0; flex: 1; }
-        .top-titles h1 { font-size: 1rem; color: #006465 !important; }
-        .top-titles p { font-size: .72rem; color: #006465 !important; }
+        .top-titles h1 { font-size: 1rem; color: #ff8a00 !important; }
+        .top-titles p { font-size: .72rem; color: #ff8a00 !important; }
         .topbar-mini-logo { display: block; }
         .topbar-mini-bell { display: inline-flex; }
         .top-search {
@@ -2443,6 +2443,32 @@
         gap: 10px;
         margin-left: 12px;
         position: relative;
+      }
+      .topbar-search-wrap {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+      }
+      .topbar-search-panel {
+        position: absolute;
+        right: calc(100% + 10px);
+        top: 50%;
+        transform: translateY(-50%);
+        width: min(460px, 62vw);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--motion-fast) ease;
+      }
+      .topbar-search-panel.open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .topbar-search-panel .top-search {
+        display: block !important;
+        margin-left: 0;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
       }
       .topbar-action-btn,
       .topbar-back-btn {
@@ -4677,6 +4703,7 @@
         const [rows, setRows] = useState([]);
         const [saving, setSaving] = useState(false);
         const [searchTerm, setSearchTerm] = useState('');
+        const [searchOpen, setSearchOpen] = useState(false);
         const [expandedId, setExpandedId] = useState(null);
         const [selectedService, setSelectedService] = useState(null);
         const [editingServiceId, setEditingServiceId] = useState(null);
@@ -4702,6 +4729,7 @@
         const [ticketSaving, setTicketSaving] = useState(false);
         const [imageViewerSrc, setImageViewerSrc] = useState('');
         const [ticketsHistorial, setTicketsHistorial] = useState([]);
+        const searchPanelRef = useRef(null);
         const seenRowIdsRef = useRef(new Set());
         const seenOperationalAlertsRef = useRef(new Set());
         const topServicesLeaderRef = useRef('');
@@ -6190,11 +6218,37 @@
           });
         }
 
+
+        useEffect(() => {
+          if (!searchOpen) return () => {};
+          function handlePointerDown(event) {
+            if (!searchPanelRef.current) return;
+            if (!searchPanelRef.current.contains(event.target)) {
+              setSearchOpen(false);
+              setExpandedId(null);
+            }
+          }
+          function handleEsc(event) {
+            if (event.key === 'Escape') {
+              setSearchOpen(false);
+              setExpandedId(null);
+            }
+          }
+          document.addEventListener('mousedown', handlePointerDown);
+          document.addEventListener('touchstart', handlePointerDown, { passive: true });
+          document.addEventListener('keydown', handleEsc);
+          return () => {
+            document.removeEventListener('mousedown', handlePointerDown);
+            document.removeEventListener('touchstart', handlePointerDown);
+            document.removeEventListener('keydown', handleEsc);
+          };
+        }, [searchOpen]);
+
         async function openNotificationsView() {
-          if (!isAdminUser) return;
           setSelectedForm('notificaciones');
           setMobileTab('perfil');
           closeSidebar();
+          if (!isAdminUser) return;
           const unread = adminPendingRequests.filter((item) => !item?.leidaPorAdmin);
           if (unread.length === 0) return;
           const batch = db.batch();
@@ -6364,81 +6418,57 @@
                   <h1>Masterson Seguridad</h1>
                   <p className="subtitle-voga">Ingresó: {currentUserName}</p>
                 </div>
-                {!isGerencia && !isTechnicalOnly && (
-                  <div className="top-search">
-                    <div className="search-wrap">
-                      <span className="search-icon">🔍</span>
-                      <input
-                        type="text"
-                        placeholder="Buscar cliente, ID, razón social o dirección..."
-                        value={searchTerm}
-                        onChange={(e) => { setSearchTerm(e.target.value); setExpandedId(null); }}
-                      />
-                      {searchTerm.trim() !== '' && (
-                        <div className="search-preview">
-                          {filteredRows.length === 0 ? (
-                            <div className="search-item"><small>Sin resultados.</small></div>
-                          ) : (
-                            filteredRows.slice(0, 8).map((r) => (
-                              <div key={r.id}>
-                                <div className="search-item" onClick={() => { setSelectedService(r); setSelectedForm('historial'); setExpandedId(null); setSearchTerm(''); }}>
-                                  <strong>{r.clienteId || '-'} · {r.nombreServicio || 'Servicio sin nombre'}</strong>
-                                  <small>Fecha de alta: {r.fechaAlta || '-'}</small>
-                                </div>
-                                {expandedId === r.id && (
-                                  <div className="search-detail">
-                                    <div className="detail-box">{buildServiceDetailText(r)}</div>
+                <div className="topbar-actions" ref={searchPanelRef}>
+                  <div className="topbar-search-wrap">
+                    <div className={`topbar-search-panel ${searchOpen ? 'open' : ''}`}>
+                      <div className="top-search">
+                        <div className="search-wrap">
+                          <span className="search-icon">🔍</span>
+                          <input
+                            type="text"
+                            placeholder="Buscar cliente, ID, razón social o dirección..."
+                            value={searchTerm}
+                            onChange={(e) => { setSearchTerm(e.target.value); setExpandedId(null); }}
+                          />
+                          {searchTerm.trim() !== '' && (
+                            <div className="search-preview">
+                              {filteredRows.length === 0 ? (
+                                <div className="search-item"><small>Sin resultados.</small></div>
+                              ) : (
+                                filteredRows.slice(0, 8).map((r) => (
+                                  <div key={r.id}>
+                                    <div className="search-item" onClick={() => { setSelectedService(r); setSelectedForm('historial'); setExpandedId(null); setSearchTerm(''); setSearchOpen(false); }}>
+                                      <strong>{r.clienteId || '-'} · {r.nombreServicio || 'Servicio sin nombre'}</strong>
+                                      <small>Fecha de alta: {r.fechaAlta || '-'}</small>
+                                    </div>
+                                    {expandedId === r.id && (
+                                      <div className="search-detail">
+                                        <div className="detail-box">{buildServiceDetailText(r)}</div>
+                                      </div>
+                                    )}
                                   </div>
-                                )}
-                              </div>
-                            ))
+                                ))
+                              )}
+                            </div>
                           )}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-                {isMobile && (
-                  <>
-                    <button
-                      type="button"
-                      className="topbar-mini-bell"
-                      aria-label="Notificaciones"
-                      onClick={() => {
-                        setMobileBellOpen((prev) => !prev);
-                        setMobileAlerts((prev) => prev.map((a) => ({ ...a, read: true })));
-                      }}
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 10a6 6 0 1 1 12 0v4l1.5 2h-15L6 14v-4Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/><path d="M10 18a2 2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
-                      {mobileUnreadAlerts > 0 && <span className="topbar-mini-badge">{mobileUnreadAlerts > 9 ? '9+' : mobileUnreadAlerts}</span>}
-                    </button>
-                  </>
-                )}
-                {!isMobile && (
-                  <div className="topbar-actions">
-                    {isAdminUser && (
-                      <div style={{ position: 'relative' }}>
-                        <button className="topbar-action-btn" type="button" aria-label="Notificaciones" onClick={openNotificationsView}>
-                          <span className="topbar-action-icon"><i data-lucide="bell" /></span>
-                        </button>
-                        {adminUnreadCount > 0 && <span className="notify-badge">{adminUnreadCount > 99 ? '99+' : adminUnreadCount}</span>}
                       </div>
-                    )}
-                    <button className="topbar-action-btn" type="button" aria-label="Perfil" onClick={openProfileView}>
-                      <span className="topbar-action-icon"><i data-lucide="user-round" /></span>
+                    </div>
+                    <button className="topbar-action-btn" type="button" aria-label="Buscar" onClick={() => setSearchOpen((prev) => !prev)}>
+                      <span className="topbar-action-icon"><i data-lucide="search" /></span>
                     </button>
                   </div>
-                )}
-              </header>
-
-              {isMobile && mobileBellOpen && (
-                <>
-                  <div className="mobile-alert-backdrop" onClick={() => setMobileBellOpen(false)} />
-                  <div className="mobile-alert-panel" onClick={(e) => e.stopPropagation()}>
-                    {mobileAlerts.length === 0 ? <div className="mobile-alert-item">Sin notificaciones nuevas.</div> : mobileAlerts.map((a) => (<div key={a.id} className="mobile-alert-item">{a.message}</div>))}
+                  <div style={{ position: 'relative' }}>
+                    <button className="topbar-action-btn" type="button" aria-label="Notificaciones" onClick={() => { setMobileAlerts((prev) => prev.map((a) => ({ ...a, read: true }))); openNotificationsView(); }}>
+                      <span className="topbar-action-icon"><i data-lucide="bell" /></span>
+                    </button>
+                    {(isAdminUser ? adminUnreadCount : mobileUnreadAlerts) > 0 && <span className="notify-badge">{(isAdminUser ? adminUnreadCount : mobileUnreadAlerts) > 99 ? '99+' : (isAdminUser ? adminUnreadCount : mobileUnreadAlerts)}</span>}
                   </div>
-                </>
-              )}
+                  <button className="topbar-action-btn" type="button" aria-label="Perfil" onClick={openProfileView}>
+                    <span className="topbar-action-icon"><i data-lucide="user-round" /></span>
+                  </button>
+                </div>
+              </header>
 
               <main className={`main ${grupo === 'charla-detalle' ? 'charla-main-wide' : ''}`}>
                 {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'acciones' && effectiveSelectedForm === 'home' ? renderMobileActions() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : effectiveSelectedForm === 'notificaciones' ? (
