@@ -3201,6 +3201,183 @@
 
       const ACCIONES = ['Nuevo Servicio', 'Novación', 'Obra', 'Agregado', 'Movimiento de Obra', 'Baja', 'Charla'];
       const STATUS_OPTIONS = ['Pendiente', 'En curso', 'En espera', 'Completado', 'Cancelado', 'Pausado'];
+      const PRELOADED_SERVICES_BASE = [
+        { numero: '0001', nombreServicio: 'Tropicana', direccionServicio: 'Roque Graseras 936', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
+        { numero: '0002', nombreServicio: 'Oficentro Lugano', direccionServicio: 'Plaza Independencia 822, esq. Florida', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
+        { numero: '0004', nombreServicio: 'Administración Ciriacos', direccionServicio: 'Libertador 1807 y Nueva York', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
+        { numero: '0005', nombreServicio: 'El Libertador', direccionServicio: 'Asunción 1282 Esq. Libertador', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
+        { numero: '0006', nombreServicio: 'Gala Trend', direccionServicio: 'Ellauri 560', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
+        { numero: '0007', nombreServicio: 'UP Rivera', direccionServicio: 'Avenida Rivera 2620', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0008', nombreServicio: 'Gala Point', direccionServicio: '8 de Octubre 2775', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0009', nombreServicio: 'Alpha Place', direccionServicio: 'Almirante Harwood 6509', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0010', nombreServicio: 'Giulianova II', direccionServicio: 'Bulevar España 2575', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0012', nombreServicio: 'Maui', direccionServicio: '26 de Marzo 3213', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0019', nombreServicio: 'Berro', direccionServicio: 'Pedro Fco. Berro 1178, esq. Ramon Masini', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0020', nombreServicio: 'Rocamadour', direccionServicio: 'Echevarriarza 3496', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Gonzalo Claudio', atencionCliente: 'MARIA JOSE RIVERO' },
+        { numero: '0024', nombreServicio: 'Green Port', direccionServicio: 'Juan Pedro Beranger 2279', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0034', nombreServicio: 'Vilago', direccionServicio: 'Av. De las Américas 5027 (Canelones)', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Julio Castro', atencionCliente: 'DAVID GENTA' },
+        { numero: '0044', nombreServicio: 'First Tower', direccionServicio: '26 de Marzo 3438', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0055', nombreServicio: 'Zermatt', direccionServicio: 'Bulevar Artigas 4009', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
+        { numero: '0075', nombreServicio: 'Parking Torre Tres', direccionServicio: 'Dr. Puey 2528', tipoServicioBrindar: 'SOPORTE DE VIDEO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIANA SPOSITO' },
+        { numero: '0094', nombreServicio: 'Puerto Pirata', direccionServicio: 'Sarmiento 2332', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Mariana Sposito', atencionCliente: 'DAVID GENTA' },
+        { numero: '0109', nombreServicio: 'Newland (Rivera y Soca)', direccionServicio: 'Av. Dr. Francisco Soca 1420', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Gonzalo Claudio', atencionCliente: 'MARIANA SPOSITO' },
+        { numero: '0124', nombreServicio: 'Natumar (Masterson Cerro)', direccionServicio: 'Egipto y Rep. Argentina', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIANA SPOSITO' },
+        { numero: '0132', nombreServicio: 'Topaj SA - Berkes', direccionServicio: 'Fortet 2179 entre Colman y Lopez', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Martín Vazquez', atencionCliente: 'MARIANA SPOSITO' },
+        { numero: '0146', nombreServicio: 'MVD 21', direccionServicio: '21 de septiembre 2622', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0168', nombreServicio: 'Cenit', direccionServicio: 'Luis A de Herrera 3785', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0171', nombreServicio: 'La Llum', direccionServicio: 'San Lucar 1643 esq Rivera', tipoServicioBrindar: 'MONITOREO / PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0184', nombreServicio: 'Nobleza Naviera', direccionServicio: 'Puerto Montevideo', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'Francisco Bartellone' },
+        { numero: '0203', nombreServicio: 'Isla de las Gaviotas', direccionServicio: 'Rbla. República de Chile 4525', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Julio Castro', atencionCliente: 'DAVID GENTA' },
+        { numero: '0221', nombreServicio: 'Site Italia', direccionServicio: 'Av Italia 3034', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
+        { numero: '0247', nombreServicio: 'Chucarro', direccionServicio: 'Chucarro 1329', tipoServicioBrindar: 'RESPUESTA DE ALARMA', representanteComercial: 'Gonzalo Claudio', atencionCliente: 'MARIANA SPOSITO' },
+        { numero: '0283', nombreServicio: 'Patria Golf', direccionServicio: 'Patria 511', tipoServicioBrindar: 'CONTROL DE ACCESO', representanteComercial: 'Gonzalo Claudio', atencionCliente: 'DAVID GENTA' },
+        { numero: '0305', nombreServicio: 'MBC - Montevideo Bussines Center', direccionServicio: 'Cebollati 1474', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Gastón Silva', atencionCliente: 'MARIANA SPOSITO' },
+        { numero: '0327', nombreServicio: 'Sudeste', direccionServicio: 'Calle 24 y 21 peninsula', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Fernando Grubert', atencionCliente: 'DAVID GENTA' },
+        { numero: '0344', nombreServicio: 'Casa Masterson', direccionServicio: 'Vanguardia y Rivera', tipoServicioBrindar: 'RESPUESTA DE ALARMA', representanteComercial: '', atencionCliente: 'MARIANA SPOSITO' },
+        { numero: '0379', nombreServicio: 'Renaissance', direccionServicio: 'José L.Osorio 1185, esq. 26 de Marzo', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
+        { numero: '0400', nombreServicio: 'Fabrica Pan de Azucar (PLANTA DE CANNABIS)', direccionServicio: 'Ruta 37 KM 20 Pan de Azucar', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Fernando Grubert', atencionCliente: 'MARIANA SPOSITO' },
+        { numero: '0422', nombreServicio: 'Galería London', direccionServicio: 'Av. 18 de julio 1066', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Gastón Silva', atencionCliente: 'MARIA JOSE RIVERO' },
+        { numero: '0451', nombreServicio: 'Nostrum Bay', direccionServicio: 'La Paz 1020', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Gastón Silva', atencionCliente: 'DAVID GENTA' },
+      ];
+
+      const EXTRA_PRELOADED_SERVICES_RAW = `Numero	Servicio	Dirección	Tipo de Servicio	Comercial	Atencion al cliente
+0045	Ebro	Miguel Barreiro 3281	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0046	León	Andes 1358	PORTERIA VIRTUAL	Francisco Bartellone	DAVID GENTA
+0047	Altos de Brasil II	Av. Brasil 2723	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0048	Toulouse II	M.Barreiro 3343	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0049	Flaminio Palatino	Av. Italia 2982, esq. Juan Spikerman	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0053	Guaruja	A. Chucarro 1235	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
+0054	Sigma II	J. Manuel Errazquin 2368	PORTERIA VIRTUAL	Francisco Bartellone	MARIA JOSE RIVERO
+0055	Zermatt	Bulevar Artigas 4009	MONITOREO	Francisco Bartellone	MARIA JOSE RIVERO
+0056	Carmel	Juan A. Rodriguez 1424	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
+0057	Residencial Dino	21 de Setiembre 3065	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0059	Garibaldi Plaza	Garibaldi 2678	PORTERIA VIRTUAL	Francisco Bartellone	DAVID GENTA
+0060	Alamos de Carrasco	Alamos 2301 y Av. Bolivia	PORTERIA VIRTUAL	Julio Castro	MARIA JOSE RIVERO
+0061	Arrayan	Agracida 2774 - Alfredo García Morales 1116	PORTERIA VIRTUAL	Francisco Bartellone	DAVID GENTA
+0062	Solano Antuña I	Solano Antuña 2930	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0063	My Suites	Benito Blanco 674	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
+0065	Nariño	Antonio Bachini 7170	PORTERIA VIRTUAL	Francisco Bartellone	MARIANA SPOSITO
+0066	Omikron	Benito Blanco 620	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0067	Torre de los Pocitos	Buxareo 1166	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0070	Villa Romana	Scoseria 2854 Esq. Roque Graseras	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0071	Cascada	Berro 1013	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0072	Residencial Setiembre	Pedro Berro 653 Esq. 21 de Setiembre	PORTERIA VIRTUAL	Francisco Bartellone	MARIA JOSE RIVERO
+0073	Carrera	Av. Brasil 3092	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0074	Mont Cervin	Millan 3359 esq. Cisplatina	PORTERIA VIRTUAL	Francisco Bartellone	DAVID GENTA
+0075	Parking Torre Tres	Dr. Puey 2528	SOPORTE DE VIDEO	Francisco Bartellone	MARIANA SPOSITO
+0077	Bahia Esmeralda	Av. Brasil 2740 Torre B y Av. Brasil 2730 Torre A	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0078	Le Vieux Paris	Bulevar España 2721 Esq. Sarmiento	PORTERIA VIRTUAL	Francisco Bartellone	MARIA JOSE RIVERO
+0079	Marco Polo	Jose Martí 3419	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
+0080	Waterloo	Pedro Berro 1238	PORTERIA VIRTUAL	Francisco Bartellone	MARIA JOSE RIVERO
+0081	Aquum	José L Osorio 1201	MONITOREO	Gonzalo Claudio	DAVID GENTA
+0082	Nuevos vientos Golf	Ramón Fernández 230	PORTERIA VIRTUAL	Gastón Silva	MARIA JOSE RIVERO
+0085	Parque Esmeralda	Av. Italia 2857	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
+0086	YES	26 de marzo 3420	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
+0088	Lift EME	Ana Monterroso de la Lavalleja 2190	MONITOREO	Gonzalo Claudio	MARIA JOSE RIVERO
+0089	Lift Monterroso	Ana Monterroso de la Lavalleja 2032	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
+0091	Luna del Lago	26 de Marzo 1287	PORTERIA VIRTUAL	Francisco Bartellone	DAVID GENTA
+0092	Maria Pita	Bulevar España 2175	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
+0093	UCM	Bulevar Artigas 2003	PORTERIA VIRTUAL	Francisco Bartellone	MARIANA SPOSITO
+0094	Puerto Pirata	Sarmiento 2332	PORTERIA VIRTUAL	Mariana Sposito	DAVID GENTA
+0095	Playa Oriente	26 de Marzo 1306	PORTERIA VIRTUAL	Mariana Sposito	DAVID GENTA
+0096	Residencial Artigas	Av. Bulevar Artigas. Esq. 18 de Julio	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
+0097	Chapalco	Terú 546	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0098	Atenea	26 de Marzo 3407	PORTERIA VIRTUAL	Francisco Bartellone	MARIA JOSE RIVERO
+0099	Via 21	Obligado 860	PORTERIA VIRTUAL	Julio Castro	DAVID GENTA
+0100	Internacional II	Dr. Arturo Baliñas 1387	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
+0101	Puerta del Sol IV	Av. Brasil 2689	PORTERIA VIRTUAL	Mariana Sposito	MARIA JOSE RIVERO
+0102	Kyoto	Jaime Zudañez 2760	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0104	Austral	Hector Gutierrez Ruiz 1296. Esq. San Jose	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0105	Lancaster	Dr. Enrique Tarigo 1332/34 /Plaza Cagancha)	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0106	Golino	Francisco Vidal 785	PORTERIA VIRTUAL	Francisco Bartellone	DAVID GENTA
+0108	Canaro	Francisco Canaro 2282	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0109	Newland (Rivera y Soca)	Av. Dr. Francisco Soca 1420	MONITOREO	Gonzalo Claudio	MARIANA SPOSITO
+0111	Aloa	Magallanes 1418	MONITOREO	Gonzalo Claudio	DAVID GENTA
+0112	Palmas de Carrasco	Alberdi 6337	MONITOREO	Gonzalo Claudio	MARIA JOSE RIVERO
+0113	La Strada	Sarmiento 2686	PORTERIA VIRTUAL	Francisco Bartellone	DAVID GENTA
+0114	Regulus	Benito Blanco 861	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0115	Puerto Vallarta	Rambla Rep. Del Peru 981 esq. Jose Marti	PORTERIA VIRTUAL		MARIA JOSE RIVERO
+0116	Parque Miramar	Av. Gabriela Mistral 2218	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0117	Soleil Playa	Juan Maria Perez 2857	PORTERIA VIRTUAL	Francisco Bartellone	DAVID GENTA
+0118	Avita Libertador	Av. Libertador 1760, esq. Valparaiso	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0119	Uniq	Scoseria 2672	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0120	Torre Modelo	Jose Batlle Ordoñez 3090 esq Centenario	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0122	Marejada	Juan Maria Perez 2924	PORTERIA VIRTUAL	Mariana Sposito	MARIA JOSE RIVERO
+0123	Cap Camarat	Samuel Blixen 4480	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
+0124	Natumar (Masterson Cerro)	Egipto y Rep. Argentina	MONITOREO	Francisco Bartellone	MARIANA SPOSITO
+0125	La Selva	Rafael Eguren 3344	MONITOREO		MARIANA SPOSITO
+0126	Swing 23	Julio Maria Sosa 2325	MONITOREO	Francisco Bartellone	DAVID GENTA
+0127	Mon Reve	AMERICO RICALDONI 2527	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
+0128	Diagonal	Av. Libertador 1839. esq. Nueva York	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0129	Cala Mayor	Julio Maria Sosa 2327	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
+0130	Coopefhi	Missisipi 1536	MONITOREO	Gonzalo Claudio	MARIA JOSE RIVERO
+0131	Torre Independencia	Andes 1365 entre 18 y Colonia	MONITOREO	Francisco Bartellone	MARIA JOSE RIVERO
+0132	Topaj SA - Berkes	Fortet 2179 entre Colman y Lopez	MONITOREO	Martín Vazquez	MARIANA SPOSITO
+0146	MVD 21	21 de septiembre 2622	PORTERIA VIRTUAL	Francisco Bartellone	DAVID GENTA
+0168	Cenit	Luis A de Herrera 3785	MONITOREO	Francisco Bartellone	DAVID GENTA
+0171	La Llum	San Lucar 1643 esq Rivera	MONITOREO / PORTERIA VIRTUAL	Francisco Bartellone	DAVID GENTA
+0184	Nobleza Naviera	Puerto Montevideo	MONITOREO	Francisco Bartellone	Francisco Bartellone
+0203	Isla de las Gaviotas	Rbla. República de Chile 4525	MONITOREO	Julio Castro	DAVID GENTA
+0221	Site Italia	Av Italia 3034	MONITOREO	Francisco Bartellone	MARIA JOSE RIVERO
+0247	Chucarro	Chucarro 1329	RESPUESTA DE ALARMA	Gonzalo Claudio	MARIANA SPOSITO
+0283	Patria Golf	Patria 511	CONTROL DE ACCESO	Gonzalo Claudio	DAVID GENTA
+0305	MBC - Montevideo Bussines Center	Cebollati 1474	PORTERIA VIRTUAL	Gastón Silva	MARIANA SPOSITO
+0327	Sudeste	Calle 24 y 21 peninsula	PORTERIA VIRTUAL	Fernando Grubert	DAVID GENTA
+0344	Casa Masterson	Vanguardia y Rivera	RESPUESTA DE ALARMA		MARIANA SPOSITO
+0379	Renaissance	José L.Osorio 1185, esq. 26 de Marzo	PORTERIA VIRTUAL	Francisco Bartellone	MARIA JOSE RIVERO
+0400	Fabrica Pan de Azucar (PLANTA DE CANNABIS)	Ruta 37 KM 20 Pan de Azucar	MONITOREO	Fernando Grubert	MARIANA SPOSITO
+0422	Galería London	Av. 18 de julio 1066	MONITOREO	Gastón Silva	MARIA JOSE RIVERO
+0451	Nostrum Bay	La Paz 1020	MONITOREO	Gastón Silva	DAVID GENTA
+0452	San Felipe y Santiago	Lima 1288 // LIBERTADOR 1937	PORTERIA VIRTUAL	Gonzalo Cluadio	`;
+
+      function normalizeCatalogNumero(value) {
+        const digits = String(value || '').replace(/\D/g, '');
+        if (!digits) return '';
+        return digits.padStart(4, '0');
+      }
+
+      function parseExtraPreloadedServices(raw) {
+        return String(raw || '')
+          .split('\n')
+          .map((line) => line.trim())
+          .filter(Boolean)
+          .filter((line, idx) => idx > 0)
+          .map((line) => {
+            const parts = line.split('\t');
+            if (parts.length < 6) return null;
+            return {
+              numero: normalizeCatalogNumero(parts[0]),
+              nombreServicio: String(parts[1] || '').trim(),
+              direccionServicio: String(parts[2] || '').trim(),
+              tipoServicioBrindar: String(parts[3] || '').trim(),
+              representanteComercial: String(parts[4] || '').trim(),
+              atencionCliente: String(parts[5] || '').trim(),
+            };
+          })
+          .filter((item) => item && item.numero && item.nombreServicio);
+      }
+
+      function mergePreloadedServices(primary, secondary) {
+        const merged = [];
+        const seen = new Set();
+        [...primary, ...secondary].forEach((item) => {
+          const numero = normalizeCatalogNumero(item?.numero);
+          if (!numero || seen.has(numero)) return;
+          seen.add(numero);
+          merged.push({
+            numero,
+            nombreServicio: String(item?.nombreServicio || '').trim(),
+            direccionServicio: String(item?.direccionServicio || '').trim(),
+            tipoServicioBrindar: String(item?.tipoServicioBrindar || '').trim(),
+            representanteComercial: String(item?.representanteComercial || '').trim(),
+            atencionCliente: String(item?.atencionCliente || '').trim(),
+          });
+        });
+        return merged;
+      }
+
+      const PRELOADED_SERVICES = mergePreloadedServices(PRELOADED_SERVICES_BASE, parseExtraPreloadedServices(EXTRA_PRELOADED_SERVICES_RAW));
+
       // Toggle rápido para reactivar Vista Cliente/Tracking público cuando se solicite.
       const ENABLE_CLIENT_TRACKING_VIEW = false;
 
@@ -3225,6 +3402,7 @@
         representanteComercial: '',
         creadoPor: '',
         personaReferenteComision: '',
+        atencionCliente: '',
         condicionEquipamiento: 'Compra',
         condicionEquipamientoOtro: '',
         importeMensualServicioSinIva: '',
@@ -3949,6 +4127,27 @@
         const autoIdMode = AUTO_ID_ACTIONS.includes(tipoAccion);
         const effectiveClienteId = autoIdMode ? clienteId : clienteIdAsociado.trim();
 
+        function normalizeServiceId(value) {
+          const digits = String(value || '').replace(/\D/g, '');
+          if (!digits) return '';
+          return digits.padStart(4, '0');
+        }
+
+        function getServiceCatalogById(rawId) {
+          const target = normalizeServiceId(rawId);
+          if (!target) return null;
+          const fromRows = rows.find((r) => normalizeServiceId(r?.clienteId) === target);
+          if (fromRows) return {
+            numero: target,
+            nombreServicio: fromRows.nombreServicio || '',
+            direccionServicio: fromRows.direccionServicio || '',
+            tipoServicioBrindar: fromRows.tipoServicioBrindar || '',
+            representanteComercial: fromRows.representanteComercial || '',
+            atencionCliente: fromRows.atencionCliente || fromRows.bottiSeContactaCon || '',
+          };
+          return PRELOADED_SERVICES.find((s) => normalizeServiceId(s.numero) === target) || null;
+        }
+
         const deferredSearchTerm = useDeferredValue(searchTerm);
 
         const visibleRows = useMemo(() => rows.filter((r) => !r.estado_borrado), [rows]);
@@ -3969,6 +4168,12 @@
         const [historyStatusFilter, setHistoryStatusFilter] = useState('todos');
         const [historyCommercialFilter, setHistoryCommercialFilter] = useState('todos');
         const [historyPage, setHistoryPage] = useState(1);
+        const [catalogSyncing, setCatalogSyncing] = useState(false);
+        const [showManualCatalogForm, setShowManualCatalogForm] = useState(false);
+        const [savingManualCatalogService, setSavingManualCatalogService] = useState(false);
+        const [manualCatalogForm, setManualCatalogForm] = useState({ numero: '', nombreServicio: '', direccionServicio: '', tipoServicioBrindar: '', representanteComercial: '', atencionCliente: '' });
+        const [bulkCatalogRawInput, setBulkCatalogRawInput] = useState(EXTRA_PRELOADED_SERVICES_RAW);
+        const [bulkCatalogSyncing, setBulkCatalogSyncing] = useState(false);
 
         function getStatusLabel(row) {
           return String(row?.status || row?.estado || '').trim().toLowerCase();
@@ -4027,27 +4232,48 @@
           completed: visibleRows.filter((r) => isCompletedStatus(getStatusLabel(r))).length,
         }), [visibleRows]);
 
+        const preloadedHistoryRows = useMemo(() => {
+          const existingIds = new Set(visibleRows.map((r) => normalizeServiceId(r?.clienteId)).filter(Boolean));
+          return PRELOADED_SERVICES
+            .filter((s) => !existingIds.has(normalizeServiceId(s.numero)))
+            .map((s) => ({
+              id: `preloaded-${normalizeServiceId(s.numero)}`,
+              clienteId: normalizeServiceId(s.numero),
+              nombreServicio: s.nombreServicio || '',
+              direccionServicio: s.direccionServicio || '',
+              tipoServicioBrindar: s.tipoServicioBrindar || '',
+              representanteComercial: s.representanteComercial || '',
+              atencionCliente: s.atencionCliente || '',
+              status: 'Precargado',
+              estado: 'Precargado',
+              tipoAccion: 'Nuevo Servicio',
+              origenCatalogo: true,
+            }));
+        }, [visibleRows]);
+
+        const historySourceRows = useMemo(() => ([...visibleRows, ...preloadedHistoryRows]), [visibleRows, preloadedHistoryRows]);
+
         const historyStatusOptions = useMemo(() => {
           const set = new Set();
-          visibleRows.forEach((r) => {
+          historySourceRows.forEach((r) => {
             const value = String(r.status || r.estado || '').trim();
             if (value) set.add(value);
           });
           return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
-        }, [visibleRows]);
+        }, [historySourceRows]);
 
         const historyCommercialOptions = useMemo(() => {
           const set = new Set();
-          visibleRows.forEach((r) => {
+          historySourceRows.forEach((r) => {
             const value = String(r.representanteComercial || '').trim();
             if (value) set.add(value);
           });
           return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
-        }, [visibleRows]);
+        }, [historySourceRows]);
 
         const historyFilteredRows = useMemo(() => {
           const query = historySearchTerm.trim().toLowerCase();
-          const filtered = visibleRows.filter((r) => {
+          const filtered = historySourceRows.filter((r) => {
             const statusValue = String(r.status || r.estado || '').trim();
             const commercialValue = String(r.representanteComercial || '').trim();
             const matchStatus = historyStatusFilter === 'todos' || statusValue === historyStatusFilter;
@@ -4068,7 +4294,7 @@
             const bTs = b.actualizadoEn?.seconds || b.creadoEn?.seconds || 0;
             return bTs - aTs;
           });
-        }, [visibleRows, historySearchTerm, historyStatusFilter, historyCommercialFilter]);
+        }, [historySourceRows, historySearchTerm, historyStatusFilter, historyCommercialFilter]);
 
         const HISTORY_PAGE_SIZE = 18;
         const totalHistoryPages = Math.max(1, Math.ceil(historyFilteredRows.length / HISTORY_PAGE_SIZE));
@@ -4077,6 +4303,171 @@
           const start = (safeHistoryPage - 1) * HISTORY_PAGE_SIZE;
           return historyFilteredRows.slice(start, start + HISTORY_PAGE_SIZE);
         }, [historyFilteredRows, safeHistoryPage]);
+
+        async function handleSyncPreloadedServicesToFirebase() {
+          if (!isAdminUser) {
+            setNotificacion({ mensaje: 'Solo administradores pueden sincronizar catálogo a Firebase.', tipo: 'warn' });
+            return;
+          }
+          try {
+            setCatalogSyncing(true);
+            const existingIds = new Set(visibleRows.map((r) => normalizeServiceId(r?.clienteId)).filter(Boolean));
+            const pending = PRELOADED_SERVICES.filter((s) => !existingIds.has(normalizeServiceId(s.numero)));
+            if (pending.length === 0) {
+              setNotificacion({ mensaje: 'El catálogo precargado ya está sincronizado en Firebase.', tipo: 'ok' });
+              return;
+            }
+            const batch = db.batch();
+            pending.forEach((service) => {
+              const normalizedId = normalizeServiceId(service.numero);
+              const docRef = db.collection('operaciones').doc(`catalogo_${normalizedId}`);
+              batch.set(docRef, {
+                tipoAccion: 'Nuevo Servicio',
+                clienteId: normalizedId,
+                nombreServicio: service.nombreServicio || '',
+                direccionServicio: service.direccionServicio || '',
+                tipoServicioBrindar: service.tipoServicioBrindar || '',
+                representanteComercial: service.representanteComercial || '',
+                atencionCliente: service.atencionCliente || '',
+                status: 'Precargado',
+                estado: 'Precargado',
+                origenCatalogo: true,
+                creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+                creadoPor: currentUserName,
+                logs_cambios: [{
+                  fecha: formatNow(),
+                  usuario: currentUserName,
+                  accion: 'Sincronización de catálogo precargado',
+                }],
+              }, { merge: true });
+            });
+            await batch.commit();
+            setNotificacion({ mensaje: `Se sincronizaron ${pending.length} servicios precargados en Firebase.`, tipo: 'ok' });
+          } catch (error) {
+            console.error('Error sincronizando catálogo precargado:', error);
+            setNotificacion({ mensaje: 'No se pudo sincronizar el catálogo en Firebase.', tipo: 'error' });
+          } finally {
+            setCatalogSyncing(false);
+          }
+        }
+
+        function setManualCatalogField(field, value) {
+          setManualCatalogForm((prev) => ({ ...prev, [field]: value }));
+        }
+
+        function resetManualCatalogForm() {
+          setManualCatalogForm({ numero: '', nombreServicio: '', direccionServicio: '', tipoServicioBrindar: '', representanteComercial: '', atencionCliente: '' });
+        }
+
+        async function handleCreateManualCatalogService() {
+          if (!isAdminUser) {
+            setNotificacion({ mensaje: 'Solo administradores pueden agregar servicios al catálogo.', tipo: 'warn' });
+            return;
+          }
+          const normalizedId = normalizeServiceId(manualCatalogForm.numero);
+          const payload = {
+            clienteId: normalizedId,
+            nombreServicio: String(manualCatalogForm.nombreServicio || '').trim(),
+            direccionServicio: String(manualCatalogForm.direccionServicio || '').trim(),
+            tipoServicioBrindar: String(manualCatalogForm.tipoServicioBrindar || '').trim(),
+            representanteComercial: String(manualCatalogForm.representanteComercial || '').trim(),
+            atencionCliente: String(manualCatalogForm.atencionCliente || '').trim(),
+          };
+          if (!payload.clienteId || !payload.nombreServicio || !payload.direccionServicio || !payload.tipoServicioBrindar || !payload.representanteComercial || !payload.atencionCliente) {
+            setNotificacion({ mensaje: 'Completá los 6 campos para agregar el servicio.', tipo: 'warn' });
+            return;
+          }
+          try {
+            setSavingManualCatalogService(true);
+            const docRef = db.collection('operaciones').doc(`catalogo_manual_${payload.clienteId}`);
+            await docRef.set({
+              tipoAccion: 'Nuevo Servicio',
+              status: 'Precargado',
+              estado: 'Precargado',
+              origenCatalogo: true,
+              origenCatalogoManual: true,
+              creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+              creadoPor: currentUserName,
+              logs_cambios: [{
+                fecha: formatNow(),
+                usuario: currentUserName,
+                accion: 'Alta manual desde historial de servicios',
+              }],
+              ...payload,
+            }, { merge: true });
+            setNotificacion({ mensaje: `Servicio ${payload.clienteId} guardado en operaciones (Firebase).`, tipo: 'ok' });
+            resetManualCatalogForm();
+            setShowManualCatalogForm(false);
+          } catch (error) {
+            console.error('Error agregando servicio manual al catálogo:', error);
+            setNotificacion({ mensaje: 'No se pudo guardar el servicio en Firebase.', tipo: 'error' });
+          } finally {
+            setSavingManualCatalogService(false);
+          }
+        }
+
+        async function handleSyncBulkCatalogRawToFirebase() {
+          if (!isAdminUser) {
+            setNotificacion({ mensaje: 'Solo administradores pueden sincronizar listados masivos.', tipo: 'warn' });
+            return;
+          }
+          const parsed = parseExtraPreloadedServices(bulkCatalogRawInput);
+          if (parsed.length === 0) {
+            setNotificacion({ mensaje: 'No se encontraron filas válidas en el listado pegado.', tipo: 'warn' });
+            return;
+          }
+          try {
+            setBulkCatalogSyncing(true);
+            const existingIds = new Set(visibleRows.map((r) => normalizeServiceId(r?.clienteId)).filter(Boolean));
+            const uniqueMap = new Map();
+            parsed.forEach((item) => {
+              const id = normalizeServiceId(item.numero);
+              if (!id || uniqueMap.has(id) || existingIds.has(id)) return;
+              uniqueMap.set(id, item);
+            });
+            const pending = Array.from(uniqueMap.values());
+            if (pending.length === 0) {
+              setNotificacion({ mensaje: 'Todas las filas del listado ya existen en operaciones.', tipo: 'ok' });
+              return;
+            }
+            const chunkSize = 450;
+            for (let i = 0; i < pending.length; i += chunkSize) {
+              const chunk = pending.slice(i, i + chunkSize);
+              const batch = db.batch();
+              chunk.forEach((service) => {
+                const normalizedId = normalizeServiceId(service.numero);
+                const docRef = db.collection('operaciones').doc(`catalogo_massivo_${normalizedId}`);
+                batch.set(docRef, {
+                  tipoAccion: 'Nuevo Servicio',
+                  clienteId: normalizedId,
+                  nombreServicio: service.nombreServicio || '',
+                  direccionServicio: service.direccionServicio || '',
+                  tipoServicioBrindar: service.tipoServicioBrindar || '',
+                  representanteComercial: service.representanteComercial || '',
+                  atencionCliente: service.atencionCliente || '',
+                  status: 'Precargado',
+                  estado: 'Precargado',
+                  origenCatalogo: true,
+                  origenCatalogoMasivo: true,
+                  creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+                  creadoPor: currentUserName,
+                  logs_cambios: [{
+                    fecha: formatNow(),
+                    usuario: currentUserName,
+                    accion: 'Sincronización masiva desde listado pegado',
+                  }],
+                }, { merge: true });
+              });
+              await batch.commit();
+            }
+            setNotificacion({ mensaje: `Se sincronizaron ${pending.length} servicios del listado masivo a operaciones.`, tipo: 'ok' });
+          } catch (error) {
+            console.error('Error en sincronización masiva de catálogo:', error);
+            setNotificacion({ mensaje: 'Falló la sincronización masiva del listado.', tipo: 'error' });
+          } finally {
+            setBulkCatalogSyncing(false);
+          }
+        }
 
         function parseCharlaDateTime(row) {
           const d = String(row?.fecha || '').trim();
@@ -4695,18 +5086,13 @@
         }
 
         function syncCharlaServiceFromId(rawId) {
-          const clean = String(rawId || '').trim().toLowerCase();
-          if (!clean) {
+          const catalog = getServiceCatalogById(rawId);
+          if (!catalog) {
             setCharlaForm((prev) => ({ ...prev, nombreServicio: '', direccion: '' }));
             return;
           }
-          const match = visibleRows.find((r) => String(r?.clienteId || '').trim().toLowerCase() === clean);
-          if (!match) {
-            setCharlaForm((prev) => ({ ...prev, nombreServicio: '', direccion: '' }));
-            return;
-          }
-          const nextName = String(match?.nombreServicio || match?.cliente || '').trim();
-          const nextAddress = String(match?.direccionServicio || match?.direccion || '').trim();
+          const nextName = String(catalog?.nombreServicio || '').trim();
+          const nextAddress = String(catalog?.direccionServicio || '').trim();
           setCharlaForm((prev) => ({
             ...prev,
             nombreServicio: nextName || prev.nombreServicio,
@@ -4724,6 +5110,24 @@
           if (grupo !== 'charla-detalle') return;
           syncCharlaServiceFromId(clienteIdAsociado);
         }, [grupo, clienteIdAsociado, visibleRows]);
+
+        useEffect(() => {
+          if (autoIdMode || !clienteIdAsociado) return;
+          const catalog = getServiceCatalogById(clienteIdAsociado);
+          if (!catalog) return;
+          if (grupo === 'novacion') {
+            setNovacionForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio, representanteComercial: catalog.representanteComercial || prev.representanteComercial, atencionCliente: catalog.atencionCliente || prev.atencionCliente }));
+          }
+          if (grupo === 'agregado') {
+            setAgregadoForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio }));
+          }
+          if (grupo === 'baja-detalle') {
+            setBajaForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio, direccionServicio: catalog.direccionServicio || prev.direccionServicio }));
+          }
+          if (grupo === 'movimiento-detalle') {
+            setMovimientoForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio }));
+          }
+        }, [clienteIdAsociado, grupo, autoIdMode, rows]);
 
         const charlaMapUrl = useMemo(() => {
           const q = encodeURIComponent(String(charlaForm.direccion || '').trim());
@@ -5733,12 +6137,50 @@
                     <h2>Historial de Servicios · Vista Ejecutiva</h2>
                     <div className="hint">Rediseño escalable con filtros, paginación y vista rápida para manejar alto volumen de servicios.</div>
                     <section className="panel" style={{ background: 'rgba(255,255,255,.04)', marginBottom: 12 }}>
-                      <h3 style={{ marginTop: 0 }}>Servicios ({historyFilteredRows.length} filtrados de {visibleRows.length})</h3>
+                      <h3 style={{ marginTop: 0 }}>Servicios ({historyFilteredRows.length} filtrados de {historySourceRows.length})</h3>
                       <div className="history-toolbar">
                         <div className="field span-2"><label>Buscar</label><input value={historySearchTerm} onChange={(e) => setHistorySearchTerm(e.target.value)} placeholder="ID, servicio, razón social, RUT, dirección..." /></div>
                         <div className="field"><label>Status</label><select value={historyStatusFilter} onChange={(e) => setHistoryStatusFilter(e.target.value)}><option value="todos">Todos</option>{historyStatusOptions.map((st) => <option key={`hs-${st}`} value={st}>{st}</option>)}</select></div>
                         <div className="field"><label>Comercial</label><select value={historyCommercialFilter} onChange={(e) => setHistoryCommercialFilter(e.target.value)}><option value="todos">Todos</option>{historyCommercialOptions.map((cm) => <option key={`hc-${cm}`} value={cm}>{cm}</option>)}</select></div>
                       </div>
+                      <div className="hint" style={{ marginBottom: 10 }}>Catálogo local visible en historial: {preloadedHistoryRows.length} servicio(s) aún no guardado(s) en Firebase.</div>
+                      {isAdminUser && (
+                        <div style={{ marginBottom: 12 }}>
+                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                            <button type="button" className="link-btn" disabled={catalogSyncing} onClick={handleSyncPreloadedServicesToFirebase}>
+                              {catalogSyncing ? 'Sincronizando catálogo…' : 'Sincronizar catálogo precargado en Firebase'}
+                            </button>
+                            <button type="button" className="link-btn" onClick={() => setShowManualCatalogForm((prev) => !prev)}>
+                              {showManualCatalogForm ? 'Cerrar agregar servicio' : 'Agregar servicio'}
+                            </button>
+                          </div>
+                          {showManualCatalogForm && (
+                            <div className="panel" style={{ marginTop: 10, background: 'rgba(255,255,255,.03)' }}>
+                              <h4 style={{ marginTop: 0 }}>Agregar servicio al catálogo/Firebase</h4>
+                              <div className="grid cols-3">
+                                <div className="field"><label>Número</label><input value={manualCatalogForm.numero} onChange={(e) => setManualCatalogField('numero', e.target.value)} placeholder="Ej: 0001" /></div>
+                                <div className="field"><label>Servicio</label><input value={manualCatalogForm.nombreServicio} onChange={(e) => setManualCatalogField('nombreServicio', e.target.value)} placeholder="Nombre del servicio" /></div>
+                                <div className="field"><label>Dirección</label><input value={manualCatalogForm.direccionServicio} onChange={(e) => setManualCatalogField('direccionServicio', e.target.value)} placeholder="Dirección" /></div>
+                                <div className="field"><label>Tipo de Servicio</label><input value={manualCatalogForm.tipoServicioBrindar} onChange={(e) => setManualCatalogField('tipoServicioBrindar', e.target.value)} placeholder="MONITOREO / PORTERIA..." /></div>
+                                <div className="field"><label>Comercial</label><input value={manualCatalogForm.representanteComercial} onChange={(e) => setManualCatalogField('representanteComercial', e.target.value)} placeholder="Nombre comercial" /></div>
+                                <div className="field"><label>Atención al cliente</label><input value={manualCatalogForm.atencionCliente} onChange={(e) => setManualCatalogField('atencionCliente', e.target.value)} placeholder="Nombre atención cliente" /></div>
+                              </div>
+                              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                <button type="button" className="save-btn" disabled={savingManualCatalogService} onClick={handleCreateManualCatalogService}>{savingManualCatalogService ? 'Guardando...' : 'Guardar servicio en operaciones'}</button>
+                                <button type="button" className="link-btn" disabled={savingManualCatalogService} onClick={resetManualCatalogForm}>Limpiar</button>
+                              </div>
+                              <div className="field" style={{ marginTop: 10 }}>
+                                <label>Pegar listado masivo (TSV: Numero, Servicio, Dirección, Tipo de Servicio, Comercial, Atencion al cliente)</label>
+                                <textarea rows={8} value={bulkCatalogRawInput} onChange={(e) => setBulkCatalogRawInput(e.target.value)} placeholder="Pegá aquí el listado completo..." />
+                              </div>
+                              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                <button type="button" className="save-btn" disabled={bulkCatalogSyncing} onClick={handleSyncBulkCatalogRawToFirebase}>{bulkCatalogSyncing ? 'Sincronizando listado...' : 'Sincronizar listado completo en operaciones'}</button>
+                                <span className="hint" style={{ margin: 0 }}>Filas válidas detectadas: {parseExtraPreloadedServices(bulkCatalogRawInput).length}</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
 
                       <div className="history-list-shell">
                         <div className="history-list-head">
@@ -5814,7 +6256,7 @@
                         </div>
                         <div className="history-grid">
                         <div className="widget"><h4>Identificación</h4><div className="kv"><b>ID:</b> {selectedService.clienteId || '-'}</div><div className="kv"><b>Nombre:</b> {selectedService.nombreServicio || '-'}</div><div className="kv"><b>Tipo:</b> {selectedService.tipoServicioBrindar || '-'}</div><div className="kv"><b>Dirección:</b> {selectedService.direccionServicio || '-'}</div><div className="kv"><b>Unidades:</b> {selectedService.cantidadUnidades || '-'}</div></div>
-                        <div className="widget"><h4>Comercial / Facturación</h4><div className="kv"><b>Representante:</b> {selectedService.representanteComercial || '-'}</div><div className="kv"><b>Razón Social:</b> {selectedService.razonSocial || '-'}</div><div className="kv"><b>RUT:</b> {selectedService.rut || '-'}</div><div className="kv"><b>Mail:</b> {selectedService.mailFacturacion || '-'}</div><div className="kv"><b>Duración:</b> {selectedService.duracionContratoMeses || '-'}</div></div>
+                        <div className="widget"><h4>Comercial / Facturación</h4><div className="kv"><b>Representante:</b> {selectedService.representanteComercial || '-'}</div><div className="kv"><b>Atención cliente:</b> {selectedService.atencionCliente || '-'}</div><div className="kv"><b>Razón Social:</b> {selectedService.razonSocial || '-'}</div><div className="kv"><b>RUT:</b> {selectedService.rut || '-'}</div><div className="kv"><b>Mail:</b> {selectedService.mailFacturacion || '-'}</div><div className="kv"><b>Duración:</b> {selectedService.duracionContratoMeses || '-'}</div></div>
                         <div className="widget"><h4>Costos</h4><div className="kv"><b>Importe mensual:</b> {selectedService.importeMensualServicioSinIva || '-'}</div><div className="kv"><b>Costo instalación US$:</b> {selectedService.costoInstalacionUsdSinIva || '-'}</div><div className="kv"><b>Presupuesto proveedor:</b> {selectedService.presupuestoProveedor || '-'}</div><div className="kv"><b>Condición equipamiento:</b> {selectedService.condicionEquipamiento || '-'}</div>{selectedService.presupuestoPdfUrl && <div className="kv"><a className="link-btn" href={selectedService.presupuestoPdfUrl} target="_blank" rel="noreferrer">Ver PDF presupuesto</a></div>}</div>
                         <div className="widget"><h4>Técnica</h4><div className="kv"><b>Control acceso:</b> {selectedService.condicionControlAcceso || '-'}</div><div className="kv"><b>Tags:</b> {selectedService.tagsPorAptos || '-'}</div><div className="kv"><b>Akuvox:</b> {selectedService.appAkuvox || '-'}</div><div className="kv"><b>Llaves:</b> {selectedService.llavesServicio || '-'}</div></div>
                         <div className="widget"><h4>Instalación</h4><div className="kv"><b>Referente:</b> {selectedService.referenteInstalacion || '-'}</div><div className="kv"><b>Técnico asignado:</b> {selectedService.tecnicoAsignado || '-'}</div><div className="kv"><b>Teléfono:</b> {selectedService.telefonoReferenteInstalacion || '-'}</div><div className="kv"><b>Botti contacto:</b> {selectedService.bottiSeContactaCon || '-'}</div><div className="kv"><b>Jornales:</b> {selectedService.cantidadJornalesEstimados || '-'}</div><div className="kv"><b>Fecha inicio:</b> {selectedService.fechaEspecificaInicio || '-'}</div></div>
