@@ -3201,6 +3201,44 @@
 
       const ACCIONES = ['Nuevo Servicio', 'Novación', 'Obra', 'Agregado', 'Movimiento de Obra', 'Baja', 'Charla'];
       const STATUS_OPTIONS = ['Pendiente', 'En curso', 'En espera', 'Completado', 'Cancelado', 'Pausado'];
+      const PRELOADED_SERVICES = [
+        { numero: '0001', nombreServicio: 'Tropicana', direccionServicio: 'Roque Graseras 936', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
+        { numero: '0002', nombreServicio: 'Oficentro Lugano', direccionServicio: 'Plaza Independencia 822, esq. Florida', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
+        { numero: '0004', nombreServicio: 'Administración Ciriacos', direccionServicio: 'Libertador 1807 y Nueva York', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
+        { numero: '0005', nombreServicio: 'El Libertador', direccionServicio: 'Asunción 1282 Esq. Libertador', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
+        { numero: '0006', nombreServicio: 'Gala Trend', direccionServicio: 'Ellauri 560', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
+        { numero: '0007', nombreServicio: 'UP Rivera', direccionServicio: 'Avenida Rivera 2620', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0008', nombreServicio: 'Gala Point', direccionServicio: '8 de Octubre 2775', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0009', nombreServicio: 'Alpha Place', direccionServicio: 'Almirante Harwood 6509', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0010', nombreServicio: 'Giulianova II', direccionServicio: 'Bulevar España 2575', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0012', nombreServicio: 'Maui', direccionServicio: '26 de Marzo 3213', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0019', nombreServicio: 'Berro', direccionServicio: 'Pedro Fco. Berro 1178, esq. Ramon Masini', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0020', nombreServicio: 'Rocamadour', direccionServicio: 'Echevarriarza 3496', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Gonzalo Claudio', atencionCliente: 'MARIA JOSE RIVERO' },
+        { numero: '0024', nombreServicio: 'Green Port', direccionServicio: 'Juan Pedro Beranger 2279', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0034', nombreServicio: 'Vilago', direccionServicio: 'Av. De las Américas 5027 (Canelones)', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Julio Castro', atencionCliente: 'DAVID GENTA' },
+        { numero: '0044', nombreServicio: 'First Tower', direccionServicio: '26 de Marzo 3438', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0055', nombreServicio: 'Zermatt', direccionServicio: 'Bulevar Artigas 4009', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
+        { numero: '0075', nombreServicio: 'Parking Torre Tres', direccionServicio: 'Dr. Puey 2528', tipoServicioBrindar: 'SOPORTE DE VIDEO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIANA SPOSITO' },
+        { numero: '0094', nombreServicio: 'Puerto Pirata', direccionServicio: 'Sarmiento 2332', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Mariana Sposito', atencionCliente: 'DAVID GENTA' },
+        { numero: '0109', nombreServicio: 'Newland (Rivera y Soca)', direccionServicio: 'Av. Dr. Francisco Soca 1420', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Gonzalo Claudio', atencionCliente: 'MARIANA SPOSITO' },
+        { numero: '0124', nombreServicio: 'Natumar (Masterson Cerro)', direccionServicio: 'Egipto y Rep. Argentina', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIANA SPOSITO' },
+        { numero: '0132', nombreServicio: 'Topaj SA - Berkes', direccionServicio: 'Fortet 2179 entre Colman y Lopez', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Martín Vazquez', atencionCliente: 'MARIANA SPOSITO' },
+        { numero: '0146', nombreServicio: 'MVD 21', direccionServicio: '21 de septiembre 2622', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0168', nombreServicio: 'Cenit', direccionServicio: 'Luis A de Herrera 3785', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0171', nombreServicio: 'La Llum', direccionServicio: 'San Lucar 1643 esq Rivera', tipoServicioBrindar: 'MONITOREO / PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
+        { numero: '0184', nombreServicio: 'Nobleza Naviera', direccionServicio: 'Puerto Montevideo', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'Francisco Bartellone' },
+        { numero: '0203', nombreServicio: 'Isla de las Gaviotas', direccionServicio: 'Rbla. República de Chile 4525', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Julio Castro', atencionCliente: 'DAVID GENTA' },
+        { numero: '0221', nombreServicio: 'Site Italia', direccionServicio: 'Av Italia 3034', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
+        { numero: '0247', nombreServicio: 'Chucarro', direccionServicio: 'Chucarro 1329', tipoServicioBrindar: 'RESPUESTA DE ALARMA', representanteComercial: 'Gonzalo Claudio', atencionCliente: 'MARIANA SPOSITO' },
+        { numero: '0283', nombreServicio: 'Patria Golf', direccionServicio: 'Patria 511', tipoServicioBrindar: 'CONTROL DE ACCESO', representanteComercial: 'Gonzalo Claudio', atencionCliente: 'DAVID GENTA' },
+        { numero: '0305', nombreServicio: 'MBC - Montevideo Bussines Center', direccionServicio: 'Cebollati 1474', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Gastón Silva', atencionCliente: 'MARIANA SPOSITO' },
+        { numero: '0327', nombreServicio: 'Sudeste', direccionServicio: 'Calle 24 y 21 peninsula', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Fernando Grubert', atencionCliente: 'DAVID GENTA' },
+        { numero: '0344', nombreServicio: 'Casa Masterson', direccionServicio: 'Vanguardia y Rivera', tipoServicioBrindar: 'RESPUESTA DE ALARMA', representanteComercial: '', atencionCliente: 'MARIANA SPOSITO' },
+        { numero: '0379', nombreServicio: 'Renaissance', direccionServicio: 'José L.Osorio 1185, esq. 26 de Marzo', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
+        { numero: '0400', nombreServicio: 'Fabrica Pan de Azucar (PLANTA DE CANNABIS)', direccionServicio: 'Ruta 37 KM 20 Pan de Azucar', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Fernando Grubert', atencionCliente: 'MARIANA SPOSITO' },
+        { numero: '0422', nombreServicio: 'Galería London', direccionServicio: 'Av. 18 de julio 1066', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Gastón Silva', atencionCliente: 'MARIA JOSE RIVERO' },
+        { numero: '0451', nombreServicio: 'Nostrum Bay', direccionServicio: 'La Paz 1020', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Gastón Silva', atencionCliente: 'DAVID GENTA' },
+      ];
       // Toggle rápido para reactivar Vista Cliente/Tracking público cuando se solicite.
       const ENABLE_CLIENT_TRACKING_VIEW = false;
 
@@ -3225,6 +3263,7 @@
         representanteComercial: '',
         creadoPor: '',
         personaReferenteComision: '',
+        atencionCliente: '',
         condicionEquipamiento: 'Compra',
         condicionEquipamientoOtro: '',
         importeMensualServicioSinIva: '',
@@ -3948,6 +3987,27 @@
         const AUTO_ID_ACTIONS = ['Nuevo Servicio', 'Obra'];
         const autoIdMode = AUTO_ID_ACTIONS.includes(tipoAccion);
         const effectiveClienteId = autoIdMode ? clienteId : clienteIdAsociado.trim();
+
+        function normalizeServiceId(value) {
+          const digits = String(value || '').replace(/\D/g, '');
+          if (!digits) return '';
+          return digits.padStart(4, '0');
+        }
+
+        function getServiceCatalogById(rawId) {
+          const target = normalizeServiceId(rawId);
+          if (!target) return null;
+          const fromRows = rows.find((r) => normalizeServiceId(r?.clienteId) === target);
+          if (fromRows) return {
+            numero: target,
+            nombreServicio: fromRows.nombreServicio || '',
+            direccionServicio: fromRows.direccionServicio || '',
+            tipoServicioBrindar: fromRows.tipoServicioBrindar || '',
+            representanteComercial: fromRows.representanteComercial || '',
+            atencionCliente: fromRows.atencionCliente || fromRows.bottiSeContactaCon || '',
+          };
+          return PRELOADED_SERVICES.find((s) => normalizeServiceId(s.numero) === target) || null;
+        }
 
         const deferredSearchTerm = useDeferredValue(searchTerm);
 
@@ -4695,18 +4755,13 @@
         }
 
         function syncCharlaServiceFromId(rawId) {
-          const clean = String(rawId || '').trim().toLowerCase();
-          if (!clean) {
+          const catalog = getServiceCatalogById(rawId);
+          if (!catalog) {
             setCharlaForm((prev) => ({ ...prev, nombreServicio: '', direccion: '' }));
             return;
           }
-          const match = visibleRows.find((r) => String(r?.clienteId || '').trim().toLowerCase() === clean);
-          if (!match) {
-            setCharlaForm((prev) => ({ ...prev, nombreServicio: '', direccion: '' }));
-            return;
-          }
-          const nextName = String(match?.nombreServicio || match?.cliente || '').trim();
-          const nextAddress = String(match?.direccionServicio || match?.direccion || '').trim();
+          const nextName = String(catalog?.nombreServicio || '').trim();
+          const nextAddress = String(catalog?.direccionServicio || '').trim();
           setCharlaForm((prev) => ({
             ...prev,
             nombreServicio: nextName || prev.nombreServicio,
@@ -4724,6 +4779,24 @@
           if (grupo !== 'charla-detalle') return;
           syncCharlaServiceFromId(clienteIdAsociado);
         }, [grupo, clienteIdAsociado, visibleRows]);
+
+        useEffect(() => {
+          if (autoIdMode || !clienteIdAsociado) return;
+          const catalog = getServiceCatalogById(clienteIdAsociado);
+          if (!catalog) return;
+          if (grupo === 'novacion') {
+            setNovacionForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio, representanteComercial: catalog.representanteComercial || prev.representanteComercial, atencionCliente: catalog.atencionCliente || prev.atencionCliente }));
+          }
+          if (grupo === 'agregado') {
+            setAgregadoForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio }));
+          }
+          if (grupo === 'baja-detalle') {
+            setBajaForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio, direccionServicio: catalog.direccionServicio || prev.direccionServicio }));
+          }
+          if (grupo === 'movimiento-detalle') {
+            setMovimientoForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio }));
+          }
+        }, [clienteIdAsociado, grupo, autoIdMode, rows]);
 
         const charlaMapUrl = useMemo(() => {
           const q = encodeURIComponent(String(charlaForm.direccion || '').trim());
@@ -5814,7 +5887,7 @@
                         </div>
                         <div className="history-grid">
                         <div className="widget"><h4>Identificación</h4><div className="kv"><b>ID:</b> {selectedService.clienteId || '-'}</div><div className="kv"><b>Nombre:</b> {selectedService.nombreServicio || '-'}</div><div className="kv"><b>Tipo:</b> {selectedService.tipoServicioBrindar || '-'}</div><div className="kv"><b>Dirección:</b> {selectedService.direccionServicio || '-'}</div><div className="kv"><b>Unidades:</b> {selectedService.cantidadUnidades || '-'}</div></div>
-                        <div className="widget"><h4>Comercial / Facturación</h4><div className="kv"><b>Representante:</b> {selectedService.representanteComercial || '-'}</div><div className="kv"><b>Razón Social:</b> {selectedService.razonSocial || '-'}</div><div className="kv"><b>RUT:</b> {selectedService.rut || '-'}</div><div className="kv"><b>Mail:</b> {selectedService.mailFacturacion || '-'}</div><div className="kv"><b>Duración:</b> {selectedService.duracionContratoMeses || '-'}</div></div>
+                        <div className="widget"><h4>Comercial / Facturación</h4><div className="kv"><b>Representante:</b> {selectedService.representanteComercial || '-'}</div><div className="kv"><b>Atención cliente:</b> {selectedService.atencionCliente || '-'}</div><div className="kv"><b>Razón Social:</b> {selectedService.razonSocial || '-'}</div><div className="kv"><b>RUT:</b> {selectedService.rut || '-'}</div><div className="kv"><b>Mail:</b> {selectedService.mailFacturacion || '-'}</div><div className="kv"><b>Duración:</b> {selectedService.duracionContratoMeses || '-'}</div></div>
                         <div className="widget"><h4>Costos</h4><div className="kv"><b>Importe mensual:</b> {selectedService.importeMensualServicioSinIva || '-'}</div><div className="kv"><b>Costo instalación US$:</b> {selectedService.costoInstalacionUsdSinIva || '-'}</div><div className="kv"><b>Presupuesto proveedor:</b> {selectedService.presupuestoProveedor || '-'}</div><div className="kv"><b>Condición equipamiento:</b> {selectedService.condicionEquipamiento || '-'}</div>{selectedService.presupuestoPdfUrl && <div className="kv"><a className="link-btn" href={selectedService.presupuestoPdfUrl} target="_blank" rel="noreferrer">Ver PDF presupuesto</a></div>}</div>
                         <div className="widget"><h4>Técnica</h4><div className="kv"><b>Control acceso:</b> {selectedService.condicionControlAcceso || '-'}</div><div className="kv"><b>Tags:</b> {selectedService.tagsPorAptos || '-'}</div><div className="kv"><b>Akuvox:</b> {selectedService.appAkuvox || '-'}</div><div className="kv"><b>Llaves:</b> {selectedService.llavesServicio || '-'}</div></div>
                         <div className="widget"><h4>Instalación</h4><div className="kv"><b>Referente:</b> {selectedService.referenteInstalacion || '-'}</div><div className="kv"><b>Técnico asignado:</b> {selectedService.tecnicoAsignado || '-'}</div><div className="kv"><b>Teléfono:</b> {selectedService.telefonoReferenteInstalacion || '-'}</div><div className="kv"><b>Botti contacto:</b> {selectedService.bottiSeContactaCon || '-'}</div><div className="kv"><b>Jornales:</b> {selectedService.cantidadJornalesEstimados || '-'}</div><div className="kv"><b>Fecha inicio:</b> {selectedService.fechaEspecificaInicio || '-'}</div></div>
