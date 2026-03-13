@@ -216,7 +216,7 @@
         gap: 8px;
       }
       .service-card h3::before { content: '◆'; color: var(--accent); font-size: 12px; }
-      .card-grid { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 10px; }
+      .card-grid { display: grid; grid-template-columns: repeat(4, minmax(170px, 1fr)); gap: 10px; }
 
       .field { display: flex; flex-direction: column; gap: 6px; }
       .span-2 { grid-column: span 2; }
@@ -264,7 +264,7 @@
       }
       .save-btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
 
-      .compact-grid { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 12px; }
+      .compact-grid { display: grid; grid-template-columns: repeat(4, minmax(170px, 1fr)); gap: 12px; }
 
       .table-wrap { overflow-x: auto; }
       table { width: 100%; min-width: 950px; border-collapse: separate; border-spacing: 0; overflow: hidden; border-radius: 14px; }
@@ -279,7 +279,7 @@
       .status-default { background: var(--chip); }
       .muted { color: var(--muted); }
 
-      .history-grid { display: grid; grid-template-columns: repeat(3, minmax(220px, 1fr)); gap: 12px; }
+      .history-grid { display: grid; grid-template-columns: repeat(4, minmax(200px, 1fr)); gap: 12px; }
       .widget {
         background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
         border: 1px solid rgba(255,255,255,.28);
@@ -747,7 +747,7 @@
       .confirm-modal {
         position: fixed;
         inset: 0;
-        z-index: 1305;
+        z-index: 5005;
         display: grid;
         place-items: center;
         background: rgba(2,8,10,.64);
@@ -1329,7 +1329,7 @@
       }
       .gerencia-widgets {
         display: grid;
-        grid-template-columns: repeat(2, minmax(340px, 1fr));
+        grid-template-columns: repeat(3, minmax(280px, 1fr));
         gap: 16px;
       }
       .gerencia-widget {
@@ -1429,27 +1429,35 @@
         background: rgba(34,211,238,.08);
       }
       .gerencia-chart-shell.large {
-        max-width: 100%;
+        max-width: min(62vw, 760px);
+        margin: 0 auto;
       }
       .gerencia-chart-modal {
-        width: calc(100vw - 28px);
-        height: calc(100vh - 28px);
+        width: min(1500px, calc(100vw - 20px));
+        height: min(940px, calc(100vh - 20px));
         overflow: hidden;
         background: #071415;
         border: 1px solid var(--line);
         border-radius: 18px;
-        padding: 16px;
+        padding: 14px;
         box-shadow: 0 24px 70px rgba(0,0,0,.45);
         display: grid;
-        grid-template-rows: auto 1fr;
+        grid-template-rows: auto minmax(0, 1fr);
         gap: 10px;
       }
       .gerencia-chart-modal-grid {
         display: grid;
-        grid-template-columns: minmax(420px, 1.2fr) minmax(300px, .8fr);
+        grid-template-columns: minmax(0, 1.35fr) minmax(320px, .65fr);
         gap: 14px;
-        align-items: start;
-        height: 100%;
+        align-items: stretch;
+        min-height: 0;
+      }
+      .gerencia-chart-modal-grid > div {
+        min-height: 0;
+      }
+      .gerencia-chart-modal-grid .gerencia-ranking-list {
+        overflow: hidden;
+        align-content: start;
       }
       .gerencia-modal-close {
         width: 38px;
@@ -1792,7 +1800,7 @@
       @media (max-width: 1080px) {
         .card-grid, .compact-grid, .history-grid { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
         .ranking-grid { grid-template-columns: 1fr; }
-        .gerencia-widgets { grid-template-columns: repeat(2, minmax(280px, 1fr)); }
+        .gerencia-widgets { grid-template-columns: repeat(2, minmax(260px, 1fr)); }
         .gerencia-widget-top-vendedores,
         .gerencia-widget-rentabilidad,
         .gerencia-widget-wide { grid-column: 1 / -1; }
