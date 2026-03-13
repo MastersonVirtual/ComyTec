@@ -3338,7 +3338,7 @@
 
       function parseExtraPreloadedServices(raw) {
         return String(raw || '')
-          .split('\\n')
+          .split('\n')
           .map((line) => line.trim())
           .filter(Boolean)
           .filter((line, idx) => idx > 0)
@@ -4172,6 +4172,8 @@
         const [showManualCatalogForm, setShowManualCatalogForm] = useState(false);
         const [savingManualCatalogService, setSavingManualCatalogService] = useState(false);
         const [manualCatalogForm, setManualCatalogForm] = useState({ numero: '', nombreServicio: '', direccionServicio: '', tipoServicioBrindar: '', representanteComercial: '', atencionCliente: '' });
+        const [bulkCatalogRawInput, setBulkCatalogRawInput] = useState(EXTRA_PRELOADED_SERVICES_RAW);
+        const [bulkCatalogSyncing, setBulkCatalogSyncing] = useState(false);
 
         function getStatusLabel(row) {
           return String(row?.status || row?.estado || '').trim().toLowerCase();
@@ -4401,6 +4403,69 @@
             setNotificacion({ mensaje: 'No se pudo guardar el servicio en Firebase.', tipo: 'error' });
           } finally {
             setSavingManualCatalogService(false);
+          }
+        }
+
+        async function handleSyncBulkCatalogRawToFirebase() {
+          if (!isAdminUser) {
+            setNotificacion({ mensaje: 'Solo administradores pueden sincronizar listados masivos.', tipo: 'warn' });
+            return;
+          }
+          const parsed = parseExtraPreloadedServices(bulkCatalogRawInput);
+          if (parsed.length === 0) {
+            setNotificacion({ mensaje: 'No se encontraron filas válidas en el listado pegado.', tipo: 'warn' });
+            return;
+          }
+          try {
+            setBulkCatalogSyncing(true);
+            const existingIds = new Set(visibleRows.map((r) => normalizeServiceId(r?.clienteId)).filter(Boolean));
+            const uniqueMap = new Map();
+            parsed.forEach((item) => {
+              const id = normalizeServiceId(item.numero);
+              if (!id || uniqueMap.has(id) || existingIds.has(id)) return;
+              uniqueMap.set(id, item);
+            });
+            const pending = Array.from(uniqueMap.values());
+            if (pending.length === 0) {
+              setNotificacion({ mensaje: 'Todas las filas del listado ya existen en operaciones.', tipo: 'ok' });
+              return;
+            }
+            const chunkSize = 450;
+            for (let i = 0; i < pending.length; i += chunkSize) {
+              const chunk = pending.slice(i, i + chunkSize);
+              const batch = db.batch();
+              chunk.forEach((service) => {
+                const normalizedId = normalizeServiceId(service.numero);
+                const docRef = db.collection('operaciones').doc(`catalogo_massivo_${normalizedId}`);
+                batch.set(docRef, {
+                  tipoAccion: 'Nuevo Servicio',
+                  clienteId: normalizedId,
+                  nombreServicio: service.nombreServicio || '',
+                  direccionServicio: service.direccionServicio || '',
+                  tipoServicioBrindar: service.tipoServicioBrindar || '',
+                  representanteComercial: service.representanteComercial || '',
+                  atencionCliente: service.atencionCliente || '',
+                  status: 'Precargado',
+                  estado: 'Precargado',
+                  origenCatalogo: true,
+                  origenCatalogoMasivo: true,
+                  creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+                  creadoPor: currentUserName,
+                  logs_cambios: [{
+                    fecha: formatNow(),
+                    usuario: currentUserName,
+                    accion: 'Sincronización masiva desde listado pegado',
+                  }],
+                }, { merge: true });
+              });
+              await batch.commit();
+            }
+            setNotificacion({ mensaje: `Se sincronizaron ${pending.length} servicios del listado masivo a operaciones.`, tipo: 'ok' });
+          } catch (error) {
+            console.error('Error en sincronización masiva de catálogo:', error);
+            setNotificacion({ mensaje: 'Falló la sincronización masiva del listado.', tipo: 'error' });
+          } finally {
+            setBulkCatalogSyncing(false);
           }
         }
 
@@ -6103,6 +6168,14 @@
                               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                                 <button type="button" className="save-btn" disabled={savingManualCatalogService} onClick={handleCreateManualCatalogService}>{savingManualCatalogService ? 'Guardando...' : 'Guardar servicio en operaciones'}</button>
                                 <button type="button" className="link-btn" disabled={savingManualCatalogService} onClick={resetManualCatalogForm}>Limpiar</button>
+                              </div>
+                              <div className="field" style={{ marginTop: 10 }}>
+                                <label>Pegar listado masivo (TSV: Numero, Servicio, Dirección, Tipo de Servicio, Comercial, Atencion al cliente)</label>
+                                <textarea rows={8} value={bulkCatalogRawInput} onChange={(e) => setBulkCatalogRawInput(e.target.value)} placeholder="Pegá aquí el listado completo..." />
+                              </div>
+                              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                <button type="button" className="save-btn" disabled={bulkCatalogSyncing} onClick={handleSyncBulkCatalogRawToFirebase}>{bulkCatalogSyncing ? 'Sincronizando listado...' : 'Sincronizar listado completo en operaciones'}</button>
+                                <span className="hint" style={{ margin: 0 }}>Filas válidas detectadas: {parseExtraPreloadedServices(bulkCatalogRawInput).length}</span>
                               </div>
                             </div>
                           )}
