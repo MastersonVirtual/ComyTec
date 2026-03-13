@@ -1329,17 +1329,17 @@
       }
       .gerencia-widgets {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 14px;
+        grid-template-columns: repeat(2, minmax(340px, 1fr));
+        gap: 16px;
       }
       .gerencia-widget {
         background: #0a1515;
         border: 1px solid var(--line);
         border-radius: 16px;
-        padding: 16px;
+        padding: 20px;
         box-shadow: var(--shadow-soft);
         color: #ffffff;
-        min-height: 280px;
+        min-height: 320px;
         transition: transform var(--motion-fast) ease, border-color var(--motion-fast) ease;
       }
       .gerencia-widget.active {
@@ -1403,10 +1403,48 @@
       .gerencia-widget-half {
         min-height: 250px;
       }
+      .gerencia-widget-wide {
+        grid-column: 1 / -1;
+      }
+      .gerencia-widget-top-vendedores,
+      .gerencia-widget-rentabilidad {
+        grid-column: 1 / -1;
+      }
       .gerencia-top-charts {
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 10px;
+        align-items: start;
+      }
+      .gerencia-chart-clickable {
+        border: 1px solid rgba(255,255,255,.12);
+        border-radius: 12px;
+        padding: 10px;
+        background: rgba(255,255,255,.02);
+        cursor: pointer;
+      }
+      .gerencia-chart-clickable.active,
+      .gerencia-chart-clickable:hover {
+        border-color: color-mix(in srgb, var(--accent) 55%, #ffffff 45%);
+        background: rgba(34,211,238,.08);
+      }
+      .gerencia-chart-shell.large {
+        max-width: 520px;
+      }
+      .gerencia-chart-modal {
+        width: min(980px, calc(100vw - 40px));
+        max-height: min(88vh, 860px);
+        overflow: auto;
+        background: #071415;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 18px;
+        box-shadow: 0 24px 70px rgba(0,0,0,.45);
+      }
+      .gerencia-chart-modal-grid {
+        display: grid;
+        grid-template-columns: minmax(340px, 1.1fr) minmax(260px, .9fr);
+        gap: 14px;
         align-items: start;
       }
       .gerencia-scroll-list {
@@ -1739,7 +1777,10 @@
       @media (max-width: 1080px) {
         .card-grid, .compact-grid, .history-grid { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
         .ranking-grid { grid-template-columns: 1fr; }
-        .gerencia-widgets { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+        .gerencia-widgets { grid-template-columns: repeat(2, minmax(280px, 1fr)); }
+        .gerencia-widget-top-vendedores,
+        .gerencia-widget-rentabilidad,
+        .gerencia-widget-wide { grid-column: 1 / -1; }
       }
       @media (max-width: 980px) {
         .sidebar { width: 285px; }
@@ -1844,6 +1885,10 @@
           font-size: 10px;
         }
         .gerencia-widgets { grid-template-columns: 1fr; }
+        .gerencia-widget-top-vendedores,
+        .gerencia-widget-rentabilidad,
+        .gerencia-widget-wide { grid-column: auto; }
+        .gerencia-chart-modal-grid { grid-template-columns: 1fr; }
         .card-grid,
         .compact-grid,
         .history-grid {
@@ -3578,7 +3623,7 @@
         );
       }
 
-      function PieChartWidget({ chartId, title, items }) {
+      function PieChartWidget({ chartId, title, items, size = 'normal' }) {
         const canvasRef = useRef(null);
 
         useEffect(() => {
@@ -3622,7 +3667,7 @@
         return (
           <div>
             <h3>{title}</h3>
-            <div className="gerencia-chart-shell">
+            <div className={`gerencia-chart-shell ${size === 'large' ? 'large' : ''}`}>
               <canvas ref={canvasRef} className="gerencia-chart-canvas" aria-label={`${title}-${chartId}`} />
 
             </div>
@@ -3633,6 +3678,7 @@
       function DashboardGerencia({ rows, isMobileNative = false }) {
         const [activeWidget, setActiveWidget] = useState('rentabilidad');
         const [showCostosDetalle, setShowCostosDetalle] = useState(false);
+        const [sellerChartModal, setSellerChartModal] = useState(null);
 
         function toDate(value) {
           if (!value) return null;
@@ -3725,6 +3771,12 @@
           return acc;
         }, {})).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 8);
 
+        function openSellerChartModal(type) {
+          const items = type === 'ingresos' ? topVendedoresIngresos : topVendedoresServicios;
+          const title = type === 'ingresos' ? 'Ingresos por vendedor' : 'Servicios vendidos';
+          setSellerChartModal({ type, title, items });
+        }
+
         if (showCostosDetalle) {
           return (
             <section className="panel dashboard-gerencia-panel">
@@ -3788,7 +3840,7 @@
                 </div>
               </article>
 
-              <article className={`gerencia-widget ${activeWidget === 'rentabilidad' ? 'active' : ''}`}>
+              <article className={`gerencia-widget gerencia-widget-rentabilidad gerencia-widget-wide ${activeWidget === 'rentabilidad' ? 'active' : ''}`}>
                 <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('rentabilidad')}>Rentabilidad</button>
                 <h3>Rentabilidad por proyecto/cliente</h3>
                 <div className="gerencia-item"><span>Proyecto más rentable</span><b>{topProyecto.name} · US$ {topProyecto.rentabilidad.toLocaleString('es-UY')}</b></div>
@@ -3797,21 +3849,16 @@
                 </div>
               </article>
 
-              <article className={`gerencia-widget gerencia-widget-half ${activeWidget === 'top-vendedores' ? 'active' : ''}`}>
+              <article className={`gerencia-widget gerencia-widget-half gerencia-widget-top-vendedores gerencia-widget-wide ${activeWidget === 'top-vendedores' ? 'active' : ''}`}>
                 <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('top-vendedores')}>Top Vendedores</button>
-                <h3>Top vendedores</h3>
+                <h3>Top vendedores (click para abrir modal ampliado)</h3>
                 <div className="gerencia-top-charts">
-                  <PieChartWidget chartId="top-vendedores-servicios" title="Servicios vendidos" items={topVendedoresServicios} />
-                  <PieChartWidget chartId="top-vendedores-ingresos" title="Ingresos por vendedor" items={topVendedoresIngresos} />
-                </div>
-              </article>
-
-              <article className={`gerencia-widget gerencia-widget-half ${activeWidget === 'activos' ? 'active' : ''}`}>
-                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('activos')}>Servicios Activos</button>
-                <h3>Cantidad y listado de servicios activos</h3>
-                <div className="gerencia-value">{activos.length}</div>
-                <div className="gerencia-scroll-list">
-                  {activos.length === 0 ? <div className="gerencia-item"><span>Sin activos</span><b>-</b></div> : activos.map((r) => (<div key={`activo-${r.id}`} className="gerencia-item"><span>{r.nombreServicio || r.razonSocial || 'Servicio sin nombre'}</span><b>{r.fechaIngresoDatos || r.fechaAltaServicio || '-'}</b></div>))}
+                  <div className="gerencia-chart-clickable" onClick={() => { setActiveWidget('top-vendedores'); openSellerChartModal('servicios'); }}>
+                    <PieChartWidget chartId="top-vendedores-servicios" title="Servicios vendidos" items={topVendedoresServicios} />
+                  </div>
+                  <div className="gerencia-chart-clickable" onClick={() => { setActiveWidget('top-vendedores'); openSellerChartModal('ingresos'); }}>
+                    <PieChartWidget chartId="top-vendedores-ingresos" title="Ingresos por vendedor" items={topVendedoresIngresos} />
+                  </div>
                 </div>
               </article>
 
@@ -3822,7 +3869,46 @@
                 <div className="gerencia-item"><span>Venta equipamiento</span><b>US$ {totalVentasEquipos.toLocaleString('es-UY')}</b></div>
                 <div className="gerencia-item"><span>Total ingresos</span><b>US$ {totalIngresos.toLocaleString('es-UY')}</b></div>
               </article>
+
+              <article className={`gerencia-widget gerencia-widget-half ${activeWidget === 'activos' ? 'active' : ''}`}>
+                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('activos')}>Servicios Activos</button>
+                <h3>Cantidad y listado de servicios activos</h3>
+                <div className="gerencia-value">{activos.length}</div>
+                <div className="gerencia-scroll-list">
+                  {activos.length === 0 ? <div className="gerencia-item"><span>Sin activos</span><b>-</b></div> : activos.map((r) => (<div key={`activo-${r.id}`} className="gerencia-item"><span>{r.nombreServicio || r.razonSocial || 'Servicio sin nombre'}</span><b>{r.fechaIngresoDatos || r.fechaAltaServicio || '-'}</b></div>))}
+                </div>
+              </article>
             </div>
+
+            {sellerChartModal && (
+              <div className="confirm-modal" onClick={() => setSellerChartModal(null)}>
+                <div className="gerencia-chart-modal" onClick={(e) => e.stopPropagation()}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                    <h3 style={{ margin: 0 }}>{sellerChartModal.title} · vista ampliada</h3>
+                    <button type="button" className="link-btn" onClick={() => setSellerChartModal(null)}>Cerrar</button>
+                  </div>
+                  <div className="gerencia-chart-modal-grid">
+                    <div>
+                      <PieChartWidget chartId={`gerencia-modal-${sellerChartModal.type}`} title={sellerChartModal.title} items={sellerChartModal.items} size="large" />
+                    </div>
+                    <div className="gerencia-ranking-list">
+                      {(() => {
+                        const total = sellerChartModal.items.reduce((acc, item) => acc + (Number(item.value) || 0), 0);
+                        return sellerChartModal.items.map((item, idx) => {
+                          const pct = total > 0 ? ((Number(item.value) || 0) * 100 / total) : 0;
+                          return (
+                            <div key={`seller-modal-item-${idx}-${item.name}`} className="gerencia-item">
+                              <span>{idx + 1}. {item.name}</span>
+                              <b>{sellerChartModal.type === 'ingresos' ? `US$ ${Number(item.value || 0).toLocaleString('es-UY')}` : `${item.value} servicios`} · {pct.toFixed(1)}%</b>
+                            </div>
+                          );
+                        });
+                      })()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </section>
         );
       }
