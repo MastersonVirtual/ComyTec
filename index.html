@@ -2431,46 +2431,47 @@
         margin-left: 12px;
         position: relative;
       }
-      .topbar-action-btn {
-        border: 1px solid rgba(255,255,255,.22) !important;
-        background: rgba(31,41,55,.92) !important;
-        color: #e6fffd !important;
+      .topbar-action-btn,
+      .topbar-back-btn {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        min-height: 44px;
+        border: 1px solid rgba(230,255,253,.45) !important;
         border-radius: 14px !important;
-        min-width: 112px;
-        min-height: 68px;
-        display: flex !important;
-        flex-direction: column;
+        padding: 0;
+        background-color: rgba(255,255,255,.08) !important;
+        background-image: url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png');
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        color: #e6fffd !important;
+        display: inline-flex !important;
         align-items: center;
         justify-content: center;
-        gap: 5px;
         cursor: pointer;
-        font-weight: 700;
+        box-shadow: 0 8px 16px rgba(0,0,0,.18);
       }
-      .topbar-action-btn:hover {
+      .topbar-action-btn:hover,
+      .topbar-back-btn:hover {
         transform: translateY(-1px);
-        background: rgba(51,65,85,.96) !important;
+        box-shadow: 0 10px 18px rgba(0,0,0,.22);
       }
       .topbar-action-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 999px;
-        background: #ffffff;
-        border: 1px solid rgba(230,255,253,.6);
+        width: 20px;
+        height: 20px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
       }
       .topbar-action-icon i,
-      .topbar-action-icon svg {
+      .topbar-action-icon svg,
+      .topbar-back-btn svg {
         width: 20px;
         height: 20px;
-        stroke-width: 2.2;
-        color: #006465;
-        stroke: #006465;
-      }
-      .topbar-action-btn span {
-        font-size: 12px;
-        letter-spacing: .01em;
+        stroke-width: 2.4;
+        color: #e6fffd;
+        stroke: #e6fffd;
       }
       .notify-badge {
         position: absolute;
@@ -2489,31 +2490,24 @@
         border: 2px solid rgba(15,23,42,.9);
       }
 
-      .topbar-back-btn {
-        border: 1px solid rgba(230,255,253,.3) !important;
-        background: rgba(31,41,55,.92) !important;
-        color: #e6fffd !important;
-        border-radius: 12px !important;
-        min-width: 86px;
-        min-height: 46px;
-        font-weight: 700;
-        cursor: pointer;
-      }
-      .topbar-back-btn:hover { background: rgba(51,65,85,.96) !important; }
       .topbar-mini-bell {
-        width: 30px;
-        height: 30px;
-        border-radius: 8px;
-        border: 1px solid rgba(0,100,101,.45);
-        background: #ffffff;
-        color: #006465;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        border: 1px solid rgba(230,255,253,.45);
+        background-color: rgba(255,255,255,.08);
+        background-image: url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png');
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        color: #e6fffd;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         position: relative;
         margin-left: auto;
       }
-      .topbar-mini-bell svg { width: 16px; height: 16px; display: block; }
+      .topbar-mini-bell svg { width: 18px; height: 18px; display: block; }
       .topbar-mini-badge {
         position: absolute;
         top: -5px;
@@ -5830,7 +5824,7 @@
             <div className={`content ${menuOpen ? 'shift' : ''}`}>
               <header className="topbar">
                 {!isMobile && <button className="burger" aria-label="Abrir menú" onClick={toggleSidebar}><span className="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>}
-                {!isMobile && (selectedForm !== 'home' || !!selectedService) && <button className="topbar-back-btn" type="button" onClick={goBackOneStep}>← Atrás</button>}
+                {!isMobile && (selectedForm !== 'home' || !!selectedService) && <button className="topbar-back-btn" type="button" aria-label="Volver" onClick={goBackOneStep}><i data-lucide="arrow-left" /></button>}
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
                   <p className="subtitle-voga">{topbarSubtitle}</p>
@@ -5890,16 +5884,14 @@
                   <div className="topbar-actions">
                     {isAdminUser && (
                       <div style={{ position: 'relative' }}>
-                        <button className="topbar-action-btn" type="button" onClick={openNotificationsView}>
+                        <button className="topbar-action-btn" type="button" aria-label="Notificaciones" onClick={openNotificationsView}>
                           <span className="topbar-action-icon"><i data-lucide="bell" /></span>
-                          <span>Notificaciones</span>
                         </button>
                         {adminUnreadCount > 0 && <span className="notify-badge">{adminUnreadCount > 99 ? '99+' : adminUnreadCount}</span>}
                       </div>
                     )}
-                    <button className="topbar-action-btn" type="button" onClick={openProfileView}>
+                    <button className="topbar-action-btn" type="button" aria-label="Perfil" onClick={openProfileView}>
                       <span className="topbar-action-icon"><i data-lucide="user-round" /></span>
-                      <span>Perfil</span>
                     </button>
                   </div>
                 )}
