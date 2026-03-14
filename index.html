@@ -130,6 +130,7 @@
         font-weight: 800;
         letter-spacing: .4px;
         text-shadow: 0 4px 16px rgba(0,0,0,.4);
+        color: #ff8a2a !important;
       }
       .top-titles p { margin: 4px 0 0; color: #caeeee; font-size: .9rem; }
       .subtitle-voga { font-family: 'Voga', 'VOGA', 'Didot', 'Bodoni MT', 'Times New Roman', serif; letter-spacing: .9px; }
@@ -405,7 +406,7 @@
         box-shadow: 0 8px 16px rgba(0,0,0,.18);
       }
       .top-titles h1 {
-        color: #e6fffd;
+        color: #ff8a2a !important;
         letter-spacing: .2px;
         text-shadow: none;
       }
@@ -413,6 +414,11 @@
         color: #d8fbf8;
         letter-spacing: .07em;
       }
+
+      .topbar .top-titles h1 {
+        color: #ff8a2a !important;
+      }
+
       .subtitle-voga {
         font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
         font-weight: 700;
@@ -506,15 +512,25 @@
       }
       .card-grid, .compact-grid, .history-grid { gap: 16px; }
 
+      .hero {
+        width: min(100%, 1180px);
+        margin: 14px auto 16px;
+      }
+
       .kpi-grid {
         margin-top: 24px;
+        width: min(100%, 1180px);
+        margin-left: auto;
+        margin-right: auto;
         display: grid;
-        grid-template-columns: repeat(4, minmax(160px, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 18px;
         align-items: start;
+        justify-items: stretch;
       }
       .kpi-card-wrap {
         position: relative;
+        width: 100%;
       }
       .kpi-card {
         border-radius: 14px;
@@ -678,7 +694,7 @@
         grid-column: auto;
       }
       .history-toolbar .field label {
-        color: #114243;
+        color: #ffffff !important;
       }
       .history-toolbar .field input,
       .history-toolbar .field select,
@@ -2011,7 +2027,7 @@
           border-color: #000000 !important;
         }
         .top-titles { min-width: 0; flex: 1; }
-        .top-titles h1 { font-size: 1rem; color: #006465 !important; }
+        .top-titles h1 { font-size: 1rem; color: #ff8a2a !important; }
         .top-titles p { font-size: .72rem; color: #006465 !important; }
         .topbar-mini-logo { display: block; }
         .topbar-mini-bell { display: inline-flex; }
