@@ -1190,30 +1190,34 @@
       }
 
       .toast {
-        position: fixed;
-        top: 18px;
-        right: 18px;
-        z-index: 1200;
-        min-width: 260px;
-        max-width: 360px;
+        position: absolute;
+        left: 50%;
+        top: 8px;
+        transform: translateX(-50%);
+        z-index: 90;
+        min-width: 320px;
+        max-width: min(70vw, 760px);
         border-radius: 12px;
-        padding: 10px 12px;
+        padding: 9px 14px;
         border: 1px solid var(--accent);
-        background: rgba(0, 100, 101, .92);
+        background: rgba(0, 0, 0, .92);
         color: #e6fffd;
         backdrop-filter: blur(10px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.20);
         animation: toast-in-out 3s ease forwards;
+        text-align: center;
+        font-weight: 700;
+        pointer-events: none;
       }
       .toast.error {
         border-color: var(--pause);
         color: #ffd4d4;
       }
       @keyframes toast-in-out {
-        0% { opacity: 0; transform: translateY(-10px); }
-        12% { opacity: 1; transform: translateY(0); }
-        82% { opacity: 1; transform: translateY(0); }
-        100% { opacity: 0; transform: translateY(-10px); }
+        0% { opacity: 0; transform: translate(-50%, -10px); }
+        12% { opacity: 1; transform: translate(-50%, 0); }
+        82% { opacity: 1; transform: translate(-50%, 0); }
+        100% { opacity: 0; transform: translate(-50%, -10px); }
       }
 
       .login-shell {
@@ -1887,12 +1891,9 @@
         }
         .burger { width: 40px; height: 40px; border-radius: 12px; }
         .toast {
-          top: auto;
-          right: 10px;
-          left: 10px;
-          bottom: 82px;
-          min-width: 0;
-          max-width: none;
+          top: 6px;
+          min-width: min(92vw, 320px);
+          max-width: 92vw;
         }
         .app-footer {
           right: 10px;
@@ -3296,9 +3297,6 @@
           padding-top: 10px;
         }
 
-        .toast {
-          bottom: calc(var(--mobile-nav-height) + 8px) !important;
-        }
 
         .app-footer {
           bottom: calc(var(--mobile-nav-height) + 48px) !important;
@@ -6440,12 +6438,12 @@
             </aside>
 
             <div className={`overlay ${(menuOpen || fabOpen) ? 'show' : ''}`} onClick={() => { closeSidebar(); setFabOpen(false); }} />
-            {notificacion.mensaje && (
-              <div className={`toast ${notificacion.tipo === 'error' ? 'error' : ''}`}>{notificacion.mensaje}</div>
-            )}
 
             <div className={`content ${menuOpen ? 'shift' : ''}`}>
               <header className="topbar">
+                {notificacion.mensaje && (
+                  <div className={`toast ${notificacion.tipo === 'error' ? 'error' : ''}`}>{`${currentUserName || 'Usuario'}: ${notificacion.mensaje}`}</div>
+                )}
                 {!isMobile && <button className="burger" aria-label="Abrir menú" onClick={toggleSidebar}><span className="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>}
                 {!isMobile && (selectedForm !== 'home' || !!selectedService) && <button className="topbar-back-btn" type="button" aria-label="Volver" onClick={goBackOneStep}><i data-lucide="arrow-left" /></button>}
                 <div className="top-titles">
