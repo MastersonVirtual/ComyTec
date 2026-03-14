@@ -2986,25 +2986,105 @@
 
       .profile-view {
         display: grid;
-        gap: 14px;
+        gap: 16px;
+      }
+      .profile-main-card {
+        border: 1px solid rgba(11, 78, 73, .18);
+        border-radius: 20px;
+        padding: 18px;
+        background: linear-gradient(180deg, #f6f9f9 0%, #eef3f3 100%);
+        box-shadow: 0 12px 24px rgba(12, 45, 44, .12);
+      }
+      .profile-main-row {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+      .profile-avatar-wrap {
+        position: relative;
+        width: 108px;
+        height: 108px;
+        border-radius: 999px;
+        overflow: hidden;
+        flex: 0 0 auto;
+        border: 3px solid rgba(0, 100, 101, .24);
+        box-shadow: 0 8px 16px rgba(11, 78, 73, .18);
+      }
+      .profile-avatar-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        background: #dfe8e8;
+      }
+      .profile-avatar-edit {
+        position: absolute;
+        inset: 0;
+        border: 0;
+        background: rgba(11, 78, 73, .08);
+        color: #fff;
+        opacity: 0;
+        transition: opacity .2s ease;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+      }
+      .profile-avatar-wrap:hover .profile-avatar-edit,
+      .profile-avatar-wrap:focus-within .profile-avatar-edit {
+        opacity: 1;
+      }
+      .profile-avatar-edit i,
+      .profile-avatar-edit svg {
+        width: 22px;
+        height: 22px;
+        padding: 6px;
+        border-radius: 999px;
+        background: rgba(0, 100, 101, .86);
+      }
+      .profile-identity-title {
+        margin: 0;
+        color: #0b4e49;
+        font-size: clamp(1.25rem, 2.2vw, 1.7rem);
+      }
+      .profile-identity-title b { color: #ff8c00; }
+      .profile-identity-sub {
+        margin-top: 6px;
+        color: #4a6568;
+        font-size: .95rem;
+      }
+      .profile-view > h2 {
+        color: #ff8c00 !important;
       }
       .profile-option {
-        border: 1px solid rgba(230,255,253,.25);
-        border-radius: 14px;
-        padding: 16px;
-        background: rgba(0, 82, 85, .55);
+        border: 1px solid rgba(11, 78, 73, .16);
+        border-radius: 16px;
+        padding: 18px;
+        background: #f9fcfc;
+        box-shadow: 0 10px 20px rgba(12, 45, 44, .08);
       }
       .profile-option h3 {
         margin: 0 0 12px;
-        color: #e6fffd;
-        font-size: 1rem;
+        color: #0b4e49;
+        font-size: 1.05rem;
       }
       .profile-form {
         display: grid;
-        gap: 10px;
+        gap: 12px;
+      }
+      .profile-form input {
+        min-height: 48px;
+        border-radius: 12px;
+        border: 1px solid rgba(0,100,101,.28);
+        background: #ffffff;
+        color: #17363a;
       }
       .profile-save-btn {
         max-width: 280px;
+        min-height: 44px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #0b4e49, #006465) !important;
+        border-color: rgba(0,100,101,.85) !important;
+        color: #ffffff !important;
       }
       .request-status-row {
         margin-top: 10px;
@@ -3047,12 +3127,20 @@
       .status-chip-inline.rejected { background: rgba(239, 68, 68, .22); color: #fecaca; }
 
       .profile-logout-btn {
-        background: rgba(78, 22, 22, .25) !important;
-        border-color: rgba(170, 35, 35, .45) !important;
-        color: #ffd2d2 !important;
+        background: #ff8c00 !important;
+        border-color: rgba(255, 140, 0, .65) !important;
+        color: #ffffff !important;
       }
       .profile-logout-btn:hover {
-        background: rgba(78, 22, 22, .38) !important;
+        background: #e07900 !important;
+      }
+      .profile-back-btn {
+        background: #ffffff !important;
+        border: 1px solid rgba(0,100,101,.45) !important;
+        color: #0b4e49 !important;
+      }
+      @media (max-width: 768px) {
+        .profile-main-row { flex-direction: column; align-items: flex-start; }
       }
 
       .ticket-date-group {
@@ -5080,6 +5168,7 @@
         const topSalesLeaderRef = useRef('');
         const desktopBellRef = useRef(null);
         const sellerFilterRef = useRef(null);
+        const profileAvatarInputRef = useRef(null);
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
@@ -5151,6 +5240,7 @@
           dateFrom: '',
           dateTo: '',
         });
+        const [profileAvatarSrc, setProfileAvatarSrc] = useState('');
         const [catalogSyncing, setCatalogSyncing] = useState(false);
         const [showManualCatalogForm, setShowManualCatalogForm] = useState(false);
         const [savingManualCatalogService, setSavingManualCatalogService] = useState(false);
@@ -5726,6 +5816,35 @@
           const safeId = String(service.clienteId || 'servicio').replace(/[^a-z0-9_-]/gi, '_');
           const safeName = String(service.nombreServicio || 'detalle').replace(/[^a-z0-9_-]/gi, '_');
           doc.save(`Masterson_${safeId}_${safeName}.pdf`);
+        }
+
+        useEffect(() => {
+          const key = `masterson.profile.avatar.${String(user?.uid || user?.email || 'guest')}`;
+          const saved = localStorage.getItem(key);
+          if (saved) setProfileAvatarSrc(saved);
+          else setProfileAvatarSrc('');
+        }, [user?.uid, user?.email]);
+
+        useEffect(() => {
+          if (!user) return;
+          const key = `masterson.profile.avatar.${String(user?.uid || user?.email || 'guest')}`;
+          if (profileAvatarSrc) localStorage.setItem(key, profileAvatarSrc);
+          else localStorage.removeItem(key);
+        }, [profileAvatarSrc, user]);
+
+        function handleProfileAvatarFile(file) {
+          if (!file) return;
+          const valid = ['image/jpeg', 'image/jpg', 'image/png'];
+          if (!valid.includes(file.type)) {
+            setNotificacion({ mensaje: 'Formato no válido. Usá JPG o PNG.', tipo: 'error' });
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = () => {
+            setProfileAvatarSrc(String(reader.result || ''));
+            setNotificacion({ mensaje: 'Foto de perfil actualizada.', tipo: 'ok' });
+          };
+          reader.readAsDataURL(file);
         }
 
         useEffect(() => {
@@ -7069,10 +7188,39 @@
                       </article>
                     )}
                   </section>
-) : effectiveSelectedForm === 'perfil' ? (
+ ) : effectiveSelectedForm === 'perfil' ? (
                   <section className="panel profile-view">
                     <h2>Mi perfil</h2>
-                    <div className="hint">{currentUserName} · {topbarSubtitle}</div>
+                    <article className="profile-main-card">
+                      <div className="profile-main-row">
+                        <div className="profile-avatar-wrap">
+                          <img
+                            className="profile-avatar-image"
+                            src={profileAvatarSrc || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUserName || 'Usuario')}&background=006465&color=ffffff&size=256`}
+                            alt="Foto de perfil"
+                          />
+                          <button
+                            type="button"
+                            className="profile-avatar-edit"
+                            onClick={() => profileAvatarInputRef.current?.click()}
+                            aria-label="Editar foto de perfil"
+                          >
+                            <i data-lucide="pencil"></i>
+                          </button>
+                          <input
+                            ref={profileAvatarInputRef}
+                            type="file"
+                            accept="image/png,image/jpeg,image/jpg"
+                            style={{ display: 'none' }}
+                            onChange={(e) => handleProfileAvatarFile(e.target.files?.[0])}
+                          />
+                        </div>
+                        <div>
+                          <h3 className="profile-identity-title"><b>{currentUserName}</b> · {topbarSubtitle}</h3>
+                          <div className="profile-identity-sub">{currentUserName} · {topbarSubtitle}</div>
+                        </div>
+                      </div>
+                    </article>
                     <article className="profile-option">
                       <h3>Solicitar cambio de usuario y contraseña</h3>
                       <form className="profile-form" onSubmit={handleProfileCredentialsRequest}>
@@ -7120,7 +7268,7 @@
                       )}
                     </article>
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                      <button className="edit-btn" type="button" onClick={() => { setSelectedForm(isGerencia ? 'dashboard-gerencia' : 'home'); setSelectedService(null); setTipoAccion(''); }}>Volver a inicio</button>
+                      <button className="edit-btn profile-back-btn" type="button" onClick={() => { setSelectedForm(isGerencia ? 'dashboard-gerencia' : 'home'); setSelectedService(null); setTipoAccion(''); }}>Volver a inicio</button>
                       <button className="logout-btn profile-logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar sesión</button>
                     </div>
                   </section>
