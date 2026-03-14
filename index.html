@@ -559,98 +559,6 @@
         margin-top: 5px;
         color: #587478;
       }
-      .notes-widget {
-        border: 1px solid rgba(11, 78, 73, .14);
-        border-radius: 14px;
-        background: #ffffff;
-        padding: 12px;
-      }
-      .notes-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 10px;
-      }
-      .notes-head h4 {
-        margin: 0;
-        color: #0b4e49;
-        font-size: 1rem;
-      }
-      .notes-list {
-        display: grid;
-        gap: 8px;
-        max-height: 230px;
-        overflow: auto;
-        padding-right: 2px;
-      }
-      .note-item {
-        border: 1px solid rgba(11, 78, 73, .12);
-        border-left: 6px solid var(--note-color, #f4b400);
-        border-radius: 12px;
-        padding: 9px 10px;
-        background: #fbfdfd;
-        box-shadow: 0 6px 14px rgba(11,78,73,.08);
-      }
-      .note-time {
-        font-size: .8rem;
-        color: #5f7a7d;
-        margin-bottom: 4px;
-      }
-      .note-text {
-        color: #213f45;
-        font-weight: 600;
-        line-height: 1.35;
-      }
-      .note-empty {
-        font-size: .9rem;
-        color: #678084;
-        padding: 8px 4px;
-      }
-      .note-create-btn {
-        margin-top: 10px;
-        width: 100%;
-        min-height: 40px;
-        border-radius: 12px;
-        border: 1px solid rgba(0,100,101,.45);
-        background: #f2f8f8;
-        color: #0b4e49;
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 7px;
-      }
-      .note-create-btn i,
-      .note-create-btn svg { width: 16px; height: 16px; }
-      .note-form {
-        margin-top: 10px;
-        display: grid;
-        gap: 8px;
-        padding-top: 10px;
-        border-top: 1px solid #e3eded;
-      }
-      .note-form input,
-      .note-form select {
-        min-height: 40px;
-        border-radius: 10px;
-        border: 1px solid rgba(0,100,101,.25);
-        background: #fff;
-        color: #1e3b40;
-      }
-      .note-form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-      }
-      .note-save-btn {
-        min-height: 40px;
-        border-radius: 10px;
-        border: 1px solid rgba(0,100,101,.65);
-        background: #006465;
-        color: #fff;
-        font-weight: 700;
-      }
       @media (max-width: 980px) {
         .welcome-card { grid-template-columns: 1fr; }
         .dashboard-info-grid { grid-template-columns: 1fr; }
@@ -702,6 +610,23 @@
       .dashboard-info-empty {
         color: #6b8588;
         font-size: .92rem;
+      }
+      .activity-timeline {
+        border-left: 2px solid rgba(0,100,101,.22);
+        padding-left: 12px;
+      }
+      .activity-item {
+        position: relative;
+      }
+      .activity-item::before {
+        content: '';
+        position: absolute;
+        left: -18px;
+        top: 14px;
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #006465;
       }
 
       .kpi-grid {
@@ -5358,6 +5283,8 @@
         const desktopBellRef = useRef(null);
         const sellerFilterRef = useRef(null);
         const profileAvatarInputRef = useRef(null);
+        const recentActivitySourcesRef = useRef({});
+        const upcomingInstallationsSourcesRef = useRef({});
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
@@ -5517,6 +5444,69 @@
 
         function resolveWelcomeTasksCount(installations) {
           return Array.isArray(installations) ? installations.length : 0;
+        }
+
+        function parseEventTimestamp(raw = {}) {
+          const direct = Number(raw.timestamp || raw.fechaTimestamp || raw.createdAt || raw.updatedAt || 0);
+          if (Number.isFinite(direct) && direct > 0) return direct;
+          const str = raw.fechaHoraUy || raw.fechaHora || raw.fecha || raw.momento || raw.createdAtIso || raw.iso || '';
+          const ts = str ? new Date(str).getTime() : NaN;
+          return Number.isNaN(ts) ? Date.now() : ts;
+        }
+
+        function normalizeTimelineEvent(raw = {}, id = '') {
+          const timestamp = parseEventTimestamp(raw);
+          const usuario = String(raw.usuario || raw.user || raw.creadoPor || raw.editadoPor || raw.solicitanteNombre || raw.tecnico || 'Sistema').trim() || 'Sistema';
+          const clienteIdRaw = raw.clienteId || raw.servicioId || raw.idServicio || raw.referenciaServicio || raw.referencia || '';
+          const clienteId = normalizeServiceId(clienteIdRaw) || String(clienteIdRaw || '').trim();
+          const accion = String(raw.accion || raw.action || raw.evento || raw.tipo || raw.detalle || raw.descripcion || 'realizó una acción').trim();
+          const mensaje = raw.mensaje || `${usuario} ${accion}${clienteId ? ` ID ${clienteId}` : ''}`;
+          return {
+            id: String(raw.id || id || `event_${timestamp}_${Math.random().toString(36).slice(2, 7)}`),
+            timestamp,
+            dateLabel: new Date(timestamp).toLocaleString('es-UY', { dateStyle: 'short', timeStyle: 'short' }),
+            message: mensaje,
+            usuario,
+            accion,
+            clienteId,
+          };
+        }
+
+        function normalizeInstallationItem(raw = {}, id = '') {
+          const statusRaw = String(raw.status || raw.estado || raw.estadoInstalacion || raw.estadoServicio || '').toLowerCase();
+          const isPendingOrProgrammed = statusRaw.includes('pend') || statusRaw.includes('program') || statusRaw.includes('agenda') || statusRaw.includes('instal');
+          const isClosed = statusRaw.includes('final') || statusRaw.includes('complet') || statusRaw.includes('realiz') || statusRaw.includes('cancel') || statusRaw.includes('baja');
+          if (!isPendingOrProgrammed || isClosed) return null;
+
+          const fecha = String(raw.fechaProgramada || raw.fechaInstalacion || raw.fecha || '').trim();
+          const hora = String(raw.horaProgramada || raw.hora || '').trim();
+          if (!fecha) return null;
+
+          return {
+            id: String(raw.id || id || `inst_${fecha}_${hora}`),
+            edificio: raw.edificio || raw.nombreServicio || raw.nombreCliente || raw.cliente || raw.razonSocial || 'Servicio sin nombre',
+            tecnico: raw.tecnicoAsignado || raw.tecnico || raw.asignadoA || raw.responsable || 'Sin asignar',
+            fecha,
+            hora,
+            timestamp: parseEventTimestamp({ fecha: `${fecha}${hora ? ` ${hora}` : ''}` }),
+          };
+        }
+
+        async function logRealtimeActivityEvent(payload = {}) {
+          if (!rtdb) return;
+          try {
+            const event = {
+              usuario: payload.usuario || currentUserName || 'Usuario',
+              accion: payload.accion || 'actualizó servicio',
+              clienteId: payload.clienteId || '',
+              detalle: payload.detalle || '',
+              timestamp: Date.now(),
+              fechaHoraUy: formatUruguayDateTime(),
+            };
+            await rtdb.ref('dashboard/actividadReciente').push(event);
+          } catch (err) {
+            console.warn('No se pudo registrar actividad en RTDB:', err);
+          }
         }
 
         function resolveSellerStatusKey(service) {
@@ -6206,22 +6196,36 @@
             setRecentActivity([]);
             return () => {};
           }
-          const refs = [
-            rtdb.ref('dashboard/actividadReciente').limitToLast(25),
-            rtdb.ref('actividadReciente').limitToLast(25),
+          const sources = [
+            { key: 'dashboard_actividad', ref: rtdb.ref('dashboard/actividadReciente').limitToLast(300) },
+            { key: 'actividad', ref: rtdb.ref('actividadReciente').limitToLast(300) },
+            { key: 'timeline', ref: rtdb.ref('timelineAcciones').limitToLast(300) },
+            { key: 'auditoria', ref: rtdb.ref('auditoria/acciones').limitToLast(300) },
           ];
-          const handlers = refs.map((refNode) => {
+          const handlers = sources.map(({ key, ref }) => {
             const handler = (snap) => {
-              const val = snap.val();
-              if (!val) return;
-              const rowsList = Object.entries(val).map(([id, row]) => ({ id, ...(row || {}) }));
-              rowsList.sort((a, b) => (Number(b.timestamp || b.fechaTimestamp || 0) - Number(a.timestamp || a.fechaTimestamp || 0)));
-              setRecentActivity(rowsList.slice(0, 12));
+              const val = snap.val() || {};
+              const normalized = Object.entries(val)
+                .map(([id, row]) => normalizeTimelineEvent({ ...(row || {}) }, id))
+                .filter((row) => String(row?.message || '').trim() !== '');
+              recentActivitySourcesRef.current[key] = normalized;
+              const merged = Object.values(recentActivitySourcesRef.current)
+                .flat()
+                .sort((a, b) => b.timestamp - a.timestamp);
+              const dedup = [];
+              const seen = new Set();
+              merged.forEach((item) => {
+                const sig = `${item.usuario}|${item.accion}|${item.clienteId}|${item.timestamp}`;
+                if (seen.has(sig)) return;
+                seen.add(sig);
+                dedup.push(item);
+              });
+              setRecentActivity(dedup);
             };
-            refNode.on('value', handler);
-            return { refNode, handler };
+            ref.on('value', handler);
+            return { ref, handler };
           });
-          return () => handlers.forEach(({ refNode, handler }) => refNode.off('value', handler));
+          return () => handlers.forEach(({ ref, handler }) => ref.off('value', handler));
         }, []);
 
         useEffect(() => {
@@ -6229,26 +6233,35 @@
             setUpcomingInstallations([]);
             return () => {};
           }
-          const refs = [
-            rtdb.ref('dashboard/instalacionesProximas').limitToLast(25),
-            rtdb.ref('instalacionesProximas').limitToLast(25),
+          const sources = [
+            { key: 'dashboard_inst', ref: rtdb.ref('dashboard/instalacionesProximas').limitToLast(300) },
+            { key: 'inst', ref: rtdb.ref('instalacionesProximas').limitToLast(300) },
+            { key: 'operaciones_inst', ref: rtdb.ref('operaciones').limitToLast(300) },
           ];
-          const handlers = refs.map((refNode) => {
+          const handlers = sources.map(({ key, ref }) => {
             const handler = (snap) => {
-              const val = snap.val();
-              if (!val) return;
-              const rowsList = Object.entries(val).map(([id, row]) => ({ id, ...(row || {}) }));
-              rowsList.sort((a, b) => {
-                const ad = new Date(`${a.fecha || ''}T${a.hora || '00:00'}`).getTime() || Number.MAX_SAFE_INTEGER;
-                const bd = new Date(`${b.fecha || ''}T${b.hora || '00:00'}`).getTime() || Number.MAX_SAFE_INTEGER;
-                return ad - bd;
+              const val = snap.val() || {};
+              const normalized = Object.entries(val)
+                .map(([id, row]) => normalizeInstallationItem({ ...(row || {}) }, id))
+                .filter(Boolean);
+              upcomingInstallationsSourcesRef.current[key] = normalized;
+              const merged = Object.values(upcomingInstallationsSourcesRef.current)
+                .flat()
+                .sort((a, b) => a.timestamp - b.timestamp);
+              const dedup = [];
+              const seen = new Set();
+              merged.forEach((item) => {
+                const sig = `${item.edificio}|${item.tecnico}|${item.fecha}|${item.hora}`;
+                if (seen.has(sig)) return;
+                seen.add(sig);
+                dedup.push(item);
               });
-              setUpcomingInstallations(rowsList.slice(0, 12));
+              setUpcomingInstallations(dedup);
             };
-            refNode.on('value', handler);
-            return { refNode, handler };
+            ref.on('value', handler);
+            return { ref, handler };
           });
-          return () => handlers.forEach(({ refNode, handler }) => refNode.off('value', handler));
+          return () => handlers.forEach(({ ref, handler }) => ref.off('value', handler));
         }, []);
 
         useEffect(() => {
@@ -6652,6 +6665,11 @@
             }, { merge: true });
 
             setNotificacion({ mensaje: '✔ Servicio ocultado y marcado para eliminación diferida', tipo: 'ok' });
+            void logRealtimeActivityEvent({
+              usuario: currentUserName,
+              accion: 'registró baja del servicio',
+              clienteId: deleteTargetService?.clienteId || '',
+            });
             if (selectedService?.id === deleteTargetService.id) setSelectedService(null);
             if (editingServiceId === deleteTargetService.id) resetFields();
           } catch (error) {
@@ -6761,6 +6779,11 @@
               } else {
                 setNotificacion({ mensaje: '✔ Servicio actualizado correctamente', tipo: 'ok' });
               }
+              void logRealtimeActivityEvent({
+                usuario: currentUserName,
+                accion: tipoAccion === 'Baja' ? 'registró baja del servicio' : tipoAccion === 'Novación' ? 'registró novación del servicio' : tipoAccion === 'Agregado' ? 'registró agregado del servicio' : tipoAccion === 'Movimiento de Obra' ? 'registró movimiento de obra' : 'modificó servicio',
+                clienteId: normalizedClientId,
+              });
               return;
             }
 
@@ -6773,6 +6796,11 @@
             await db.collection('operaciones').add(createPayload);
             resetFields();
             setNotificacion({ mensaje: '✔ Datos guardados correctamente', tipo: 'ok' });
+            void logRealtimeActivityEvent({
+              usuario: currentUserName,
+              accion: tipoAccion === 'Obra' ? 'registró obra' : 'creó servicio',
+              clienteId: normalizedClientId,
+            });
           } catch (error) {
             console.error('Error guardando:', error);
             setNotificacion({ mensaje: '✖ Error al guardar datos', tipo: 'error' });
@@ -7575,13 +7603,13 @@
                     <section className="dashboard-info-grid">
                       <article className="dashboard-info-card">
                         <h3>Actividad reciente</h3>
-                        <div className="dashboard-info-list">
+                        <div className="dashboard-info-list activity-timeline">
                           {recentActivity.length === 0 ? (
                             <div className="dashboard-info-empty">Sin actividad reciente disponible.</div>
                           ) : recentActivity.map((item) => (
-                            <div key={`activity-${item.id}`} className="dashboard-info-item">
-                              <small>{item.momento || item.fecha || item.timestampLabel || 'Evento reciente'}</small>
-                              <b>{item.descripcion || item.evento || item.detalle || item.tipo || 'Actividad registrada'}</b>
+                            <div key={`activity-${item.id}`} className="dashboard-info-item activity-item">
+                              <small>{item.dateLabel}</small>
+                              <b>{item.message}</b>
                             </div>
                           ))}
                         </div>
