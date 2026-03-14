@@ -729,7 +729,6 @@
         cursor: pointer;
         list-style: none;
       }
-      .seller-filter-wrap > summary::-webkit-details-marker { display: none; }
       .seller-filter-toggle i,
       .seller-filter-toggle svg { width: 16px; height: 16px; }
       .seller-filter-popover {
@@ -872,7 +871,7 @@
       .seller-service-card .edit-btn {
         background: linear-gradient(135deg, #006465, #0b4e49);
         border-color: rgba(0,100,101,.85);
-        color: #fff;
+        color: #ffffff !important;
         border-radius: 12px;
         min-height: 38px;
         padding: 0 14px;
@@ -5080,6 +5079,7 @@
         const topServicesLeaderRef = useRef('');
         const topSalesLeaderRef = useRef('');
         const desktopBellRef = useRef(null);
+        const sellerFilterRef = useRef(null);
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
@@ -5138,6 +5138,19 @@
         const [historyStatusFilter, setHistoryStatusFilter] = useState('todos');
         const [historyCommercialFilter, setHistoryCommercialFilter] = useState('todos');
         const [historyPage, setHistoryPage] = useState(1);
+        const [sellerFilterOpen, setSellerFilterOpen] = useState(false);
+        const [sellerFiltersDraft, setSellerFiltersDraft] = useState({
+          sortBy: 'date_desc',
+          statuses: { active: true, installation: true, suspended: true },
+          dateFrom: '',
+          dateTo: '',
+        });
+        const [sellerFiltersApplied, setSellerFiltersApplied] = useState({
+          sortBy: 'date_desc',
+          statuses: { active: true, installation: true, suspended: true },
+          dateFrom: '',
+          dateTo: '',
+        });
         const [catalogSyncing, setCatalogSyncing] = useState(false);
         const [showManualCatalogForm, setShowManualCatalogForm] = useState(false);
         const [savingManualCatalogService, setSavingManualCatalogService] = useState(false);
@@ -5199,6 +5212,78 @@
           return getKpiRows(type)
             .filter((r) => ((r.representanteComercial || 'Sin asignar').trim() === commercial))
             .sort((a, b) => String(a.nombreServicio || '').localeCompare(String(b.nombreServicio || '')));
+        }
+
+        function parseServiceDate(value) {
+          if (!value) return null;
+          if (typeof value?.toDate === 'function') return value.toDate();
+          if (typeof value?.seconds === 'number') return new Date(value.seconds * 1000);
+          if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+          const str = String(value).trim();
+          if (!str) return null;
+          const iso = new Date(str);
+          if (!Number.isNaN(iso.getTime())) return iso;
+          const m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+          if (m) {
+            const d = Number(m[1]);
+            const mm = Number(m[2]);
+            const y = Number(m[3]);
+            const dt = new Date(y, mm - 1, d);
+            return Number.isNaN(dt.getTime()) ? null : dt;
+          }
+          return null;
+        }
+
+        function resolveSellerStatusKey(service) {
+          const raw = String(service?.status || service?.estado || '').toLowerCase();
+          if (raw.includes('instal')) return 'installation';
+          if (raw.includes('suspend') || raw.includes('cancel') || raw.includes('baja')) return 'suspended';
+          return 'active';
+        }
+
+        function applySellerFilters(list, filters) {
+          const activeKeys = Object.entries(filters.statuses || {}).filter(([,v]) => !!v).map(([k]) => k);
+          let out = list.filter((service) => activeKeys.length === 0 ? true : activeKeys.includes(resolveSellerStatusKey(service)));
+
+          const fromDate = parseServiceDate(filters.dateFrom);
+          if (fromDate) {
+            fromDate.setHours(0,0,0,0);
+            out = out.filter((service) => {
+              const d = parseServiceDate(service.fechaAltaServicio || service.fechaAlta || service.fechaEspecificaInicio);
+              if (!d) return false;
+              d.setHours(0,0,0,0);
+              return d >= fromDate;
+            });
+          }
+
+          const toDate = parseServiceDate(filters.dateTo);
+          if (toDate) {
+            toDate.setHours(23,59,59,999);
+            out = out.filter((service) => {
+              const d = parseServiceDate(service.fechaAltaServicio || service.fechaAlta || service.fechaEspecificaInicio);
+              if (!d) return false;
+              return d <= toDate;
+            });
+          }
+
+          const gainOf = (service) => Number(String(service.importeMensualServicioSinIva || service.costoInstalacionUsdSinIva || service.costo || 0).replace(/[^\d.-]/g, '')) || 0;
+
+          out = out.slice().sort((a, b) => {
+            const ad = parseServiceDate(a.fechaAltaServicio || a.fechaAlta || a.fechaEspecificaInicio)?.getTime() || 0;
+            const bd = parseServiceDate(b.fechaAltaServicio || b.fechaAlta || b.fechaEspecificaInicio)?.getTime() || 0;
+            const ag = gainOf(a);
+            const bg = gainOf(b);
+            switch (filters.sortBy) {
+              case 'date_asc': return ad - bd;
+              case 'gain_desc': return bg - ag;
+              case 'gain_asc': return ag - bg;
+              case 'date_desc':
+              default:
+                return bd - ad;
+            }
+          });
+
+          return out;
         }
 
         const kpiStats = useMemo(() => ({
@@ -5653,6 +5738,17 @@
           document.addEventListener('mousedown', handleDocClick);
           return () => document.removeEventListener('mousedown', handleDocClick);
         }, [desktopBellOpen]);
+
+        useEffect(() => {
+          if (!sellerFilterOpen) return () => {};
+          function handleSellerFilterOutside(event) {
+            if (sellerFilterRef.current && !sellerFilterRef.current.contains(event.target)) {
+              setSellerFilterOpen(false);
+            }
+          }
+          document.addEventListener('mousedown', handleSellerFilterOutside);
+          return () => document.removeEventListener('mousedown', handleSellerFilterOutside);
+        }, [sellerFilterOpen]);
 
         useEffect(() => {
           if (!user) {
@@ -7096,44 +7192,64 @@
                   <section className="panel">
                     {(() => {
                       const sellerName = selectedCommercial || 'Sin asignar';
-                      const list = getServicesByCommercial('active', sellerName);
+                      const baseList = getServicesByCommercial('active', sellerName);
+                      const list = applySellerFilters(baseList, sellerFiltersApplied);
+                      const setDraftStatus = (key, checked) => {
+                        setSellerFiltersDraft((prev) => ({ ...prev, statuses: { ...prev.statuses, [key]: checked } }));
+                      };
                       return (
                         <div className="seller-services-shell">
                           <div className="seller-services-header">
                             <div>
                               <h2 className="seller-services-title">Servicios activos por <span className="seller-name">{sellerName}</span></h2>
-                              <p className="seller-services-subtitle">Vendedor seleccionado: <b>{sellerName}</b></p>
                             </div>
-                            <details className="seller-filter-wrap">
-                              <summary className="seller-filter-toggle"><i data-lucide="sliders-horizontal"></i> Filtrar servicios</summary>
-                              <div className="seller-filter-popover">
-                                <div className="seller-filter-group">
-                                  <h4>Ordenar por</h4>
-                                  <label className="seller-filter-option"><input type="radio" name="seller-order" defaultChecked /> Fecha de alta (más reciente)</label>
-                                  <label className="seller-filter-option"><input type="radio" name="seller-order" /> Fecha de alta (más antiguo)</label>
-                                  <label className="seller-filter-option"><input type="radio" name="seller-order" /> Mayor ganancia estimada</label>
-                                  <label className="seller-filter-option"><input type="radio" name="seller-order" /> Menor ganancia estimada</label>
-                                </div>
-                                <div className="seller-filter-group">
-                                  <h4>Estado del servicio</h4>
-                                  <label className="seller-filter-option"><input type="checkbox" defaultChecked /> Activo</label>
-                                  <label className="seller-filter-option"><input type="checkbox" defaultChecked /> En instalación</label>
-                                  <label className="seller-filter-option"><input type="checkbox" defaultChecked /> Suspendido</label>
-                                </div>
-                                <div className="seller-filter-group">
-                                  <h4>Periodo</h4>
-                                  <div className="seller-filter-dates">
-                                    <div className="field"><label>Fecha desde</label><input type="date" /></div>
-                                    <div className="field"><label>Fecha hasta</label><input type="date" /></div>
+                            <div className="seller-filter-wrap" ref={sellerFilterRef}>
+                              <button
+                                type="button"
+                                className="seller-filter-toggle"
+                                onClick={() => setSellerFilterOpen((prev) => !prev)}
+                              >
+                                <i data-lucide="sliders-horizontal"></i> Filtrar servicios
+                              </button>
+                              {sellerFilterOpen && (
+                                <div className="seller-filter-popover">
+                                  <div className="seller-filter-group">
+                                    <h4>Ordenar por</h4>
+                                    <label className="seller-filter-option"><input type="radio" name="seller-order" checked={sellerFiltersDraft.sortBy === 'date_desc'} onChange={() => setSellerFiltersDraft((prev) => ({ ...prev, sortBy: 'date_desc' }))} /> Fecha de alta (más reciente)</label>
+                                    <label className="seller-filter-option"><input type="radio" name="seller-order" checked={sellerFiltersDraft.sortBy === 'date_asc'} onChange={() => setSellerFiltersDraft((prev) => ({ ...prev, sortBy: 'date_asc' }))} /> Fecha de alta (más antiguo)</label>
+                                    <label className="seller-filter-option"><input type="radio" name="seller-order" checked={sellerFiltersDraft.sortBy === 'gain_desc'} onChange={() => setSellerFiltersDraft((prev) => ({ ...prev, sortBy: 'gain_desc' }))} /> Mayor ganancia estimada</label>
+                                    <label className="seller-filter-option"><input type="radio" name="seller-order" checked={sellerFiltersDraft.sortBy === 'gain_asc'} onChange={() => setSellerFiltersDraft((prev) => ({ ...prev, sortBy: 'gain_asc' }))} /> Menor ganancia estimada</label>
                                   </div>
+                                  <div className="seller-filter-group">
+                                    <h4>Estado del servicio</h4>
+                                    <label className="seller-filter-option"><input type="checkbox" checked={sellerFiltersDraft.statuses.active} onChange={(e) => setDraftStatus('active', e.target.checked)} /> Activo</label>
+                                    <label className="seller-filter-option"><input type="checkbox" checked={sellerFiltersDraft.statuses.installation} onChange={(e) => setDraftStatus('installation', e.target.checked)} /> En instalación</label>
+                                    <label className="seller-filter-option"><input type="checkbox" checked={sellerFiltersDraft.statuses.suspended} onChange={(e) => setDraftStatus('suspended', e.target.checked)} /> Suspendido</label>
+                                  </div>
+                                  <div className="seller-filter-group">
+                                    <h4>Periodo</h4>
+                                    <div className="seller-filter-dates">
+                                      <div className="field"><label>Fecha desde</label><input type="date" value={sellerFiltersDraft.dateFrom} onChange={(e) => setSellerFiltersDraft((prev) => ({ ...prev, dateFrom: e.target.value }))} /></div>
+                                      <div className="field"><label>Fecha hasta</label><input type="date" value={sellerFiltersDraft.dateTo} onChange={(e) => setSellerFiltersDraft((prev) => ({ ...prev, dateTo: e.target.value }))} /></div>
+                                    </div>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    className="seller-filter-apply"
+                                    onClick={() => {
+                                      setSellerFiltersApplied(sellerFiltersDraft);
+                                      setSellerFilterOpen(false);
+                                    }}
+                                  >
+                                    Aplicar filtro
+                                  </button>
                                 </div>
-                                <button type="button" className="seller-filter-apply">Aplicar filtros</button>
-                              </div>
-                            </details>
+                              )}
+                            </div>
                           </div>
                           <div className="seller-services-summary"><span className="seller-status-icon">✓</span> Servicios Activos · {list.length}</div>
                           {list.length === 0 ? (
-                            <div className="hint" style={{ marginBottom: 0, color: '#2d5558' }}>No hay servicios activos para este vendedor.</div>
+                            <div className="hint" style={{ marginBottom: 0, color: '#2d5558' }}>No hay servicios activos para este vendedor con los filtros aplicados.</div>
                           ) : (
                             <div className="seller-services-grid">
                               {list.map((service) => {
