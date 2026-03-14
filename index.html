@@ -131,7 +131,7 @@
         letter-spacing: .4px;
         text-shadow: 0 4px 16px rgba(0,0,0,.4);
       }
-      .top-titles p { margin: 4px 0 0; color: #ff8a00; font-size: .9rem; font-weight: 700; }
+      .top-titles p { margin: 4px 0 0; color: #caeeee; font-size: .9rem; }
       .subtitle-voga { font-family: 'Voga', 'VOGA', 'Didot', 'Bodoni MT', 'Times New Roman', serif; letter-spacing: .9px; }
 
       .top-search { margin-left: auto; min-width: 220px; max-width: 430px; width: 38%; }
@@ -406,7 +406,7 @@
         text-shadow: none;
       }
       .top-titles p {
-        color: #ff8a00;
+        color: #d8fbf8;
         letter-spacing: .07em;
       }
       .subtitle-voga {
@@ -1410,19 +1410,6 @@
       .gerencia-widget-rentabilidad {
         grid-column: 1 / -1;
       }
-      .gerencia-top-vendedores-detail {
-        background: #fff;
-        border-radius: 16px;
-        padding: 16px;
-        display: grid;
-        gap: 16px;
-      }
-      .gerencia-top-vendedores-chart {
-        background: #fff;
-        border: 1px solid #e7e7e7;
-        border-radius: 12px;
-        padding: 12px;
-      }
       .gerencia-top-charts {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -1873,8 +1860,8 @@
           border-color: #000000 !important;
         }
         .top-titles { min-width: 0; flex: 1; }
-        .top-titles h1 { font-size: 1rem; color: #ff8a00 !important; }
-        .top-titles p { font-size: .72rem; color: #ff8a00 !important; }
+        .top-titles h1 { font-size: 1rem; color: #006465 !important; }
+        .top-titles p { font-size: .72rem; color: #006465 !important; }
         .topbar-mini-logo { display: block; }
         .topbar-mini-bell { display: inline-flex; }
         .top-search {
@@ -2441,34 +2428,8 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        margin-left: auto;
+        margin-left: 12px;
         position: relative;
-      }
-      .topbar-search-wrap {
-        position: relative;
-        display: inline-flex;
-        align-items: center;
-      }
-      .topbar-search-panel {
-        position: absolute;
-        right: calc(100% + 10px);
-        top: 50%;
-        transform: translateY(-50%);
-        width: min(460px, 62vw);
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity var(--motion-fast) ease;
-      }
-      .topbar-search-panel.open {
-        opacity: 1;
-        pointer-events: auto;
-      }
-      .topbar-search-panel .top-search {
-        display: block !important;
-        margin-left: 0;
-        width: 100%;
-        min-width: 0;
-        max-width: none;
       }
       .topbar-action-btn,
       .topbar-back-btn {
@@ -2476,11 +2437,15 @@
         height: 44px;
         min-width: 44px;
         min-height: 44px;
-        border: 1px solid rgba(255,138,0,.45) !important;
+        border: 1px solid rgba(230,255,253,.45) !important;
         border-radius: 14px !important;
         padding: 0;
         background-color: rgba(255,255,255,.08) !important;
-        color: #ff8a00 !important;
+        background-image: url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png');
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        color: #e6fffd !important;
         display: inline-flex !important;
         align-items: center;
         justify-content: center;
@@ -2505,8 +2470,8 @@
         width: 20px;
         height: 20px;
         stroke-width: 2.4;
-        color: #ff8a00;
-        stroke: #ff8a00;
+        color: #e6fffd;
+        stroke: #e6fffd;
       }
       .notify-badge {
         position: absolute;
@@ -2525,13 +2490,102 @@
         border: 2px solid rgba(15,23,42,.9);
       }
 
+      .topbar-notify-wrap {
+        position: relative;
+      }
+      .topbar-notify-popover {
+        position: absolute;
+        top: calc(100% + 14px);
+        right: 0;
+        width: min(360px, 88vw);
+        max-height: 62vh;
+        overflow: auto;
+        background: rgba(5, 22, 23, .98);
+        border: 1px solid rgba(230,255,253,.25);
+        border-radius: 14px;
+        box-shadow: 0 16px 34px rgba(0,0,0,.35);
+        z-index: 140;
+        padding: 12px;
+      }
+      .topbar-notify-arrow {
+        position: absolute;
+        top: -7px;
+        right: 16px;
+        width: 14px;
+        height: 14px;
+        background: rgba(5, 22, 23, .98);
+        border-left: 1px solid rgba(230,255,253,.25);
+        border-top: 1px solid rgba(230,255,253,.25);
+        transform: rotate(45deg);
+      }
+      .topbar-notify-head {
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .04em;
+        color: #e6fffd;
+        margin-bottom: 8px;
+      }
+      .topbar-notify-list {
+        display: grid;
+        gap: 8px;
+      }
+      .topbar-notify-item {
+        position: relative;
+        border: 1px solid rgba(230,255,253,.18);
+        border-radius: 10px;
+        background: rgba(230,255,253,.06);
+        padding: 8px 8px 36px;
+        display: grid;
+        gap: 4px;
+      }
+      .topbar-notify-item strong { font-size: 12px; color: #f0fffd; }
+      .topbar-notify-item small { font-size: 11px; color: #cbecea; }
+      .topbar-notify-empty {
+        border: 1px dashed rgba(230,255,253,.22);
+        border-radius: 10px;
+        padding: 10px;
+        font-size: 12px;
+        color: #cbecea;
+      }
+      .topbar-notify-actions {
+        position: absolute;
+        right: 8px;
+        bottom: 8px;
+        display: inline-flex;
+        gap: 6px;
+      }
+      .topbar-notify-action {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        border: 1px solid rgba(251, 146, 60, .55);
+        background: rgba(251, 146, 60, .22);
+        color: #fb923c;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+      .topbar-notify-action i,
+      .topbar-notify-action svg {
+        width: 16px;
+        height: 16px;
+        stroke: currentColor;
+      }
+      .topbar-notify-action:hover {
+        background: rgba(251, 146, 60, .34);
+      }
       .topbar-mini-bell {
         width: 40px;
         height: 40px;
         border-radius: 12px;
-        border: 1px solid rgba(255,138,0,.65);
+        border: 1px solid rgba(230,255,253,.45);
         background-color: rgba(255,255,255,.08);
-        color: #ff8a00;
+        background-image: url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png');
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+        color: #e6fffd;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -2592,7 +2646,6 @@
       .mobile-alert-item:last-child { border-bottom: 0; }
 
       .topbar {
-        background: #000 !important;
         position: fixed !important;
         top: 8px;
         left: 50%;
@@ -3242,14 +3295,6 @@
         .app-footer {
           bottom: calc(var(--mobile-nav-height) + 48px) !important;
         }
-      }
-
-      .service-card:hover,
-      .kpi-card:hover,
-      .gerencia-widget:hover,
-      .mobile-service-card:hover,
-      .mobile-service-card:active {
-        transform: none !important;
       }
 
     </style>
@@ -4142,9 +4187,8 @@
         );
       }
 
-      function PieChartWidget({ chartId, title, items, size = 'normal', animateOnMount = true }) {
+      function PieChartWidget({ chartId, title, items, size = 'normal' }) {
         const canvasRef = useRef(null);
-        const hasAnimatedRef = useRef(false);
 
         useEffect(() => {
           if (!canvasRef.current || !window.Chart) return () => {};
@@ -4166,9 +4210,6 @@
               responsive: true,
               maintainAspectRatio: true,
               aspectRatio: 1,
-              animation: {
-                duration: (!hasAnimatedRef.current && animateOnMount) ? 1100 : 0,
-              },
               plugins: {
                 legend: {
                   position: 'bottom',
@@ -4184,7 +4225,6 @@
               },
             },
           });
-          hasAnimatedRef.current = true;
           return () => chart.destroy();
         }, [items]);
 
@@ -4200,9 +4240,8 @@
       }
 
       function DashboardGerencia({ rows, isMobileNative = false }) {
-        const [activeWidget, setActiveWidget] = useState('top-vendedores');
+        const [activeWidget, setActiveWidget] = useState('rentabilidad');
         const [showCostosDetalle, setShowCostosDetalle] = useState(false);
-        const [detailView, setDetailView] = useState('');
         const [sellerChartModal, setSellerChartModal] = useState(null);
 
         function toDate(value) {
@@ -4302,24 +4341,6 @@
           setSellerChartModal({ type, title, items });
         }
 
-        if (detailView === 'top-vendedores') {
-          return (
-            <section className="panel dashboard-gerencia-panel">
-              <h2>Top Vendedores · Vista detallada</h2>
-              <div className="hint">Comparativa ejecutiva de ventas e ingresos.</div>
-              <button type="button" className="link-btn" onClick={() => setDetailView('')} style={{ marginBottom: 12 }}>← Volver al Dashboard Gerencia</button>
-              <div className="gerencia-top-vendedores-detail">
-                <div className="gerencia-top-vendedores-chart">
-                  <PieChartWidget chartId="top-vendedores-servicios-detalle" title="Servicios vendidos" items={topVendedoresServicios} animateOnMount />
-                </div>
-                <div className="gerencia-top-vendedores-chart">
-                  <PieChartWidget chartId="top-vendedores-ingresos-detalle" title="Ingresos por vendedor" items={topVendedoresIngresos} animateOnMount />
-                </div>
-              </div>
-            </section>
-          );
-        }
-
         if (showCostosDetalle) {
           return (
             <section className="panel dashboard-gerencia-panel">
@@ -4359,12 +4380,6 @@
             <h2>Dashboard Gerencia</h2>
             <div className="hint">Vista de solo lectura para seguimiento ejecutivo.</div>
             <div className="gerencia-widgets">
-              <article className={`gerencia-widget gerencia-widget-half gerencia-widget-top-vendedores gerencia-widget-wide ${activeWidget === 'top-vendedores' ? 'active' : ''}`} onClick={() => { setActiveWidget('top-vendedores'); setDetailView('top-vendedores'); }}>
-                <button type="button" className="gerencia-widget-toggle" onClick={(e) => { e.stopPropagation(); setActiveWidget('top-vendedores'); setDetailView('top-vendedores'); }}>Top Vendedores</button>
-                <h3>Top vendedores</h3>
-                <div className="hint" style={{ marginBottom: 0 }}>Abrir vista detallada</div>
-              </article>
-
               <article className={`gerencia-widget ${activeWidget === 'costos' ? 'active' : ''}`}>
                 <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('costos')}>Costos</button>
                 <h3>Costos Operativos</h3>
@@ -4395,6 +4410,19 @@
                 <div className="gerencia-item"><span>Proyecto más rentable</span><b>{topProyecto.name} · US$ {topProyecto.rentabilidad.toLocaleString('es-UY')}</b></div>
                 <div className="gerencia-ranking-list">
                   {rentabilidadPorCliente.length === 0 ? <div className="gerencia-item"><span>Sin datos</span><b>-</b></div> : rentabilidadPorCliente.map((item) => (<div key={`rent-${item.name}`} className="gerencia-item"><span>{item.name}</span><b>US$ {item.rentabilidad.toLocaleString('es-UY')}</b></div>))}
+                </div>
+              </article>
+
+              <article className={`gerencia-widget gerencia-widget-half gerencia-widget-top-vendedores gerencia-widget-wide ${activeWidget === 'top-vendedores' ? 'active' : ''}`}>
+                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('top-vendedores')}>Top Vendedores</button>
+                <h3>Top vendedores (click para abrir modal ampliado)</h3>
+                <div className="gerencia-top-charts">
+                  <div className="gerencia-chart-clickable" onClick={() => { setActiveWidget('top-vendedores'); openSellerChartModal('servicios'); }}>
+                    <PieChartWidget chartId="top-vendedores-servicios" title="Servicios vendidos" items={topVendedoresServicios} />
+                  </div>
+                  <div className="gerencia-chart-clickable" onClick={() => { setActiveWidget('top-vendedores'); openSellerChartModal('ingresos'); }}>
+                    <PieChartWidget chartId="top-vendedores-ingresos" title="Ingresos por vendedor" items={topVendedoresIngresos} />
+                  </div>
                 </div>
               </article>
 
@@ -4703,7 +4731,6 @@
         const [rows, setRows] = useState([]);
         const [saving, setSaving] = useState(false);
         const [searchTerm, setSearchTerm] = useState('');
-        const [searchOpen, setSearchOpen] = useState(false);
         const [expandedId, setExpandedId] = useState(null);
         const [selectedService, setSelectedService] = useState(null);
         const [editingServiceId, setEditingServiceId] = useState(null);
@@ -4722,6 +4749,7 @@
         const [acceptingRequestId, setAcceptingRequestId] = useState('');
         const [mobileBellOpen, setMobileBellOpen] = useState(false);
         const [mobileAlerts, setMobileAlerts] = useState([]);
+        const [desktopBellOpen, setDesktopBellOpen] = useState(false);
         const [ticketComentario, setTicketComentario] = useState('');
         const [ticketPrioridad, setTicketPrioridad] = useState('Media');
         const [ticketImagenes, setTicketImagenes] = useState([]);
@@ -4729,11 +4757,11 @@
         const [ticketSaving, setTicketSaving] = useState(false);
         const [imageViewerSrc, setImageViewerSrc] = useState('');
         const [ticketsHistorial, setTicketsHistorial] = useState([]);
-        const searchPanelRef = useRef(null);
         const seenRowIdsRef = useRef(new Set());
         const seenOperationalAlertsRef = useRef(new Set());
         const topServicesLeaderRef = useRef('');
         const topSalesLeaderRef = useRef('');
+        const desktopBellRef = useRef(null);
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
@@ -4815,8 +4843,14 @@
           return label.includes('complet') || label.includes('finaliz') || label.includes('alta');
         }
 
+        function isBajaRow(row) {
+          return String(row?.tipoAccion || '').toLowerCase().includes('baja');
+        }
+
         function getKpiRows(type) {
-          if (type === 'total') return visibleRows;
+          if (type === 'active') return visibleRows;
+          if (type === 'installation') return visibleRows.filter((r) => isInProgressStatus(getStatusLabel(r)));
+          if (type === 'baja') return visibleRows.filter((r) => isBajaRow(r));
           if (type === 'pending') return visibleRows.filter((r) => isPendingStatus(getStatusLabel(r)));
           if (type === 'inprogress') return visibleRows.filter((r) => isInProgressStatus(getStatusLabel(r)));
           if (type === 'completed') return visibleRows.filter((r) => isCompletedStatus(getStatusLabel(r)));
@@ -4850,7 +4884,9 @@
         }
 
         const kpiStats = useMemo(() => ({
-          total: visibleRows.length,
+          active: visibleRows.length,
+          installation: visibleRows.filter((r) => isInProgressStatus(getStatusLabel(r))).length,
+          baja: visibleRows.filter((r) => isBajaRow(r)).length,
           pending: visibleRows.filter((r) => isPendingStatus(getStatusLabel(r))).length,
           inprogress: visibleRows.filter((r) => isInProgressStatus(getStatusLabel(r))).length,
           completed: visibleRows.filter((r) => isCompletedStatus(getStatusLabel(r))).length,
@@ -5290,6 +5326,17 @@
         }
 
         useEffect(() => {
+          if (!desktopBellOpen) return () => {};
+          function handleDocClick(event) {
+            if (desktopBellRef.current && !desktopBellRef.current.contains(event.target)) {
+              setDesktopBellOpen(false);
+            }
+          }
+          document.addEventListener('mousedown', handleDocClick);
+          return () => document.removeEventListener('mousedown', handleDocClick);
+        }, [desktopBellOpen]);
+
+        useEffect(() => {
           if (!user) {
             setRows([]);
             return () => {};
@@ -5445,7 +5492,7 @@
 
         useEffect(() => {
           if (window.lucide?.createIcons) window.lucide.createIcons();
-        }, [mobileTab, selectedForm, fabOpen, rows.length, adminCredentialRequests.length]);
+        }, [mobileTab, selectedForm, fabOpen, rows.length, adminCredentialRequests.length, desktopBellOpen]);
 
         useEffect(() => {
           if (!user || userRole !== 'admin') {
@@ -6037,29 +6084,6 @@
           setClientOperationId('');
         }
 
-        useEffect(() => {
-          let touchStartX = 0;
-          let touchStartY = 0;
-          function onTouchStart(e) {
-            if (!e.touches || e.touches.length === 0) return;
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-          }
-          function onTouchEnd(e) {
-            if (!e.changedTouches || e.changedTouches.length === 0) return;
-            const dx = e.changedTouches[0].clientX - touchStartX;
-            const dy = Math.abs(e.changedTouches[0].clientY - touchStartY);
-            if (touchStartX < 28) return;
-            if (dx > 90 && dy < 80) goBackOneStep();
-          }
-          window.addEventListener('touchstart', onTouchStart, { passive: true });
-          window.addEventListener('touchend', onTouchEnd, { passive: true });
-          return () => {
-            window.removeEventListener('touchstart', onTouchStart);
-            window.removeEventListener('touchend', onTouchEnd);
-          };
-        }, [selectedForm, selectedService, formHistory]);
-
         function goBackOneStep() {
           if (selectedService) {
             setSelectedService(null);
@@ -6218,37 +6242,7 @@
           });
         }
 
-
-        useEffect(() => {
-          if (!searchOpen) return () => {};
-          function handlePointerDown(event) {
-            if (!searchPanelRef.current) return;
-            if (!searchPanelRef.current.contains(event.target)) {
-              setSearchOpen(false);
-              setExpandedId(null);
-            }
-          }
-          function handleEsc(event) {
-            if (event.key === 'Escape') {
-              setSearchOpen(false);
-              setExpandedId(null);
-            }
-          }
-          document.addEventListener('mousedown', handlePointerDown);
-          document.addEventListener('touchstart', handlePointerDown, { passive: true });
-          document.addEventListener('keydown', handleEsc);
-          return () => {
-            document.removeEventListener('mousedown', handlePointerDown);
-            document.removeEventListener('touchstart', handlePointerDown);
-            document.removeEventListener('keydown', handleEsc);
-          };
-        }, [searchOpen]);
-
-        async function openNotificationsView() {
-          setSelectedForm('notificaciones');
-          setMobileTab('perfil');
-          closeSidebar();
-          if (!isAdminUser) return;
+        async function markAdminNotificationsAsRead() {
           const unread = adminPendingRequests.filter((item) => !item?.leidaPorAdmin);
           if (unread.length === 0) return;
           const batch = db.batch();
@@ -6259,6 +6253,30 @@
             await batch.commit();
           } catch (error) {
             console.error('Error marcando notificaciones como leídas:', error);
+          }
+        }
+
+        async function toggleDesktopNotifications() {
+          if (!isAdminUser) return;
+          setDesktopBellOpen((prev) => !prev);
+          await markAdminNotificationsAsRead();
+        }
+
+        async function openNotificationsView() {
+          if (!isAdminUser) return;
+          setSelectedForm('notificaciones');
+          setMobileTab('perfil');
+          setDesktopBellOpen(false);
+          closeSidebar();
+          await markAdminNotificationsAsRead();
+        }
+
+        async function deleteNotificationRequest(req) {
+          if (!isAdminUser || !req?.id) return;
+          try {
+            await db.collection('solicitudes_credenciales').doc(req.id).delete();
+          } catch (error) {
+            console.error('Error eliminando notificación:', error);
           }
         }
 
@@ -6416,59 +6434,103 @@
                 {!isMobile && (selectedForm !== 'home' || !!selectedService) && <button className="topbar-back-btn" type="button" aria-label="Volver" onClick={goBackOneStep}><i data-lucide="arrow-left" /></button>}
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
-                  <p className="subtitle-voga">Ingresó: {currentUserName}</p>
+                  <p className="subtitle-voga">{topbarSubtitle}</p>
                 </div>
-                <div className="topbar-actions" ref={searchPanelRef}>
-                  <div className="topbar-search-wrap">
-                    <div className={`topbar-search-panel ${searchOpen ? 'open' : ''}`}>
-                      <div className="top-search">
-                        <div className="search-wrap">
-                          <span className="search-icon">🔍</span>
-                          <input
-                            type="text"
-                            placeholder="Buscar cliente, ID, razón social o dirección..."
-                            value={searchTerm}
-                            onChange={(e) => { setSearchTerm(e.target.value); setExpandedId(null); }}
-                          />
-                          {searchTerm.trim() !== '' && (
-                            <div className="search-preview">
-                              {filteredRows.length === 0 ? (
-                                <div className="search-item"><small>Sin resultados.</small></div>
-                              ) : (
-                                filteredRows.slice(0, 8).map((r) => (
-                                  <div key={r.id}>
-                                    <div className="search-item" onClick={() => { setSelectedService(r); setSelectedForm('historial'); setExpandedId(null); setSearchTerm(''); setSearchOpen(false); }}>
-                                      <strong>{r.clienteId || '-'} · {r.nombreServicio || 'Servicio sin nombre'}</strong>
-                                      <small>Fecha de alta: {r.fechaAlta || '-'}</small>
-                                    </div>
-                                    {expandedId === r.id && (
-                                      <div className="search-detail">
-                                        <div className="detail-box">{buildServiceDetailText(r)}</div>
-                                      </div>
-                                    )}
+                {!isGerencia && !isTechnicalOnly && (
+                  <div className="top-search">
+                    <div className="search-wrap">
+                      <span className="search-icon">🔍</span>
+                      <input
+                        type="text"
+                        placeholder="Buscar cliente, ID, razón social o dirección..."
+                        value={searchTerm}
+                        onChange={(e) => { setSearchTerm(e.target.value); setExpandedId(null); }}
+                      />
+                      {searchTerm.trim() !== '' && (
+                        <div className="search-preview">
+                          {filteredRows.length === 0 ? (
+                            <div className="search-item"><small>Sin resultados.</small></div>
+                          ) : (
+                            filteredRows.slice(0, 8).map((r) => (
+                              <div key={r.id}>
+                                <div className="search-item" onClick={() => { setSelectedService(r); setSelectedForm('historial'); setExpandedId(null); setSearchTerm(''); }}>
+                                  <strong>{r.clienteId || '-'} · {r.nombreServicio || 'Servicio sin nombre'}</strong>
+                                  <small>Fecha de alta: {r.fechaAlta || '-'}</small>
+                                </div>
+                                {expandedId === r.id && (
+                                  <div className="search-detail">
+                                    <div className="detail-box">{buildServiceDetailText(r)}</div>
                                   </div>
-                                ))
-                              )}
-                            </div>
+                                )}
+                              </div>
+                            ))
                           )}
                         </div>
-                      </div>
+                      )}
                     </div>
-                    <button className="topbar-action-btn" type="button" aria-label="Buscar" onClick={() => setSearchOpen((prev) => !prev)}>
-                      <span className="topbar-action-icon"><i data-lucide="search" /></span>
+                  </div>
+                )}
+                {isMobile && (
+                  <>
+                    <button
+                      type="button"
+                      className="topbar-mini-bell"
+                      aria-label="Notificaciones"
+                      onClick={() => {
+                        setMobileBellOpen((prev) => !prev);
+                        setMobileAlerts((prev) => prev.map((a) => ({ ...a, read: true })));
+                      }}
+                    >
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 10a6 6 0 1 1 12 0v4l1.5 2h-15L6 14v-4Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/><path d="M10 18a2 2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
+                      {mobileUnreadAlerts > 0 && <span className="topbar-mini-badge">{mobileUnreadAlerts > 9 ? '9+' : mobileUnreadAlerts}</span>}
+                    </button>
+                    <div className="topbar-mini-logo" aria-hidden="true" />
+                  </>
+                )}
+                {!isMobile && (
+                  <div className="topbar-actions">
+                    {isAdminUser && (
+                      <div className="topbar-notify-wrap" ref={desktopBellRef}>
+                        <button className="topbar-action-btn" type="button" aria-label="Notificaciones" onClick={toggleDesktopNotifications}>
+                          <span className="topbar-action-icon"><i data-lucide="bell" /></span>
+                        </button>
+                        {adminUnreadCount > 0 && <span className="notify-badge">{adminUnreadCount > 99 ? '99+' : adminUnreadCount}</span>}
+                        {desktopBellOpen && (
+                          <div className="topbar-notify-popover" role="dialog" aria-label="Panel de notificaciones">
+                            <div className="topbar-notify-arrow" aria-hidden="true" />
+                            <div className="topbar-notify-head">Notificaciones</div>
+                            <div className="topbar-notify-list">
+                              {adminCredentialRequests.length === 0 ? <div className="topbar-notify-empty">Sin notificaciones nuevas.</div> : adminCredentialRequests.slice(0, 8).map((req) => (
+                                <article className="topbar-notify-item" key={`popover-${req.id}`}>
+                                  <strong>{req.solicitanteNombre || req.solicitanteEmail || 'Usuario'}</strong>
+                                  <small>{requestStatusLabel(req.estado)}</small>
+                                  <small>{formatRequestDateTime(req.creadoEn)}</small>
+                                  <div className="topbar-notify-actions">
+                                    <button type="button" className="topbar-notify-action" aria-label="Ver notificación" onClick={openNotificationsView}><i data-lucide="eye" /></button>
+                                    <button type="button" className="topbar-notify-action" aria-label="Eliminar notificación" onClick={() => deleteNotificationRequest(req)}><i data-lucide="trash-2" /></button>
+                                  </div>
+                                </article>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <button className="topbar-action-btn" type="button" aria-label="Perfil" onClick={openProfileView}>
+                      <span className="topbar-action-icon"><i data-lucide="user-round" /></span>
                     </button>
                   </div>
-                  <div style={{ position: 'relative' }}>
-                    <button className="topbar-action-btn" type="button" aria-label="Notificaciones" onClick={() => { setMobileAlerts((prev) => prev.map((a) => ({ ...a, read: true }))); openNotificationsView(); }}>
-                      <span className="topbar-action-icon"><i data-lucide="bell" /></span>
-                    </button>
-                    {(isAdminUser ? adminUnreadCount : mobileUnreadAlerts) > 0 && <span className="notify-badge">{(isAdminUser ? adminUnreadCount : mobileUnreadAlerts) > 99 ? '99+' : (isAdminUser ? adminUnreadCount : mobileUnreadAlerts)}</span>}
-                  </div>
-                  <button className="topbar-action-btn" type="button" aria-label="Perfil" onClick={openProfileView}>
-                    <span className="topbar-action-icon"><i data-lucide="user-round" /></span>
-                  </button>
-                </div>
+                )}
               </header>
+
+              {isMobile && mobileBellOpen && (
+                <>
+                  <div className="mobile-alert-backdrop" onClick={() => setMobileBellOpen(false)} />
+                  <div className="mobile-alert-panel" onClick={(e) => e.stopPropagation()}>
+                    {mobileAlerts.length === 0 ? <div className="mobile-alert-item">Sin notificaciones nuevas.</div> : mobileAlerts.map((a) => (<div key={a.id} className="mobile-alert-item">{a.message}</div>))}
+                  </div>
+                </>
+              )}
 
               <main className={`main ${grupo === 'charla-detalle' ? 'charla-main-wide' : ''}`}>
                 {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'acciones' && effectiveSelectedForm === 'home' ? renderMobileActions() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : effectiveSelectedForm === 'notificaciones' ? (
@@ -6640,15 +6702,15 @@
                     </section>
                     <section className="kpi-grid">
                       {[
-                        { key: 'total', label: 'Servicios totales', value: kpiStats.total },
-                        { key: 'pending', label: 'Pendientes', value: kpiStats.pending },
-                        { key: 'inprogress', label: 'En curso', value: kpiStats.inprogress },
-                        { key: 'completed', label: 'Completados', value: kpiStats.completed },
+                        { key: 'active', label: 'Servicios Activos', value: kpiStats.active },
+                        { key: 'installation', label: 'En instalación', value: kpiStats.installation },
+                        { key: 'baja', label: 'Baja', value: kpiStats.baja },
                       ].map((card) => (
                         <div
                           className="kpi-card-wrap"
                           key={card.key}
-                          onClick={() => { setActiveKpi(card.key); setSelectedForm('ranking-comercial'); }}
+                          onMouseEnter={() => setActiveKpi(card.key)}
+                          onMouseLeave={() => setActiveKpi((prev) => (prev === card.key ? null : prev))}
                         >
                           <article
                             className={`kpi-card ${activeKpi === card.key ? 'active' : ''}`}
@@ -6658,7 +6720,7 @@
                           </article>
                           {activeKpi === card.key && (
                             <section className="kpi-breakdown">
-                              <h3>{card.key === 'total' ? 'Ranking Comercial · Servicios Totales' : card.key === 'pending' ? 'Ranking Comercial · Pendientes' : card.key === 'inprogress' ? 'Ranking Comercial · En curso' : 'Ranking Comercial · Completados'}</h3>
+                              <h3>{card.key === 'active' ? 'Ranking Comercial · Servicios Activos' : card.key === 'installation' ? 'Ranking Comercial · En instalación' : 'Ranking Comercial · Baja'}</h3>
                               {getCommercialBreakdown(card.key).length === 0 ? (
                                 <div className="hint" style={{ color: '#d1faf5', marginBottom: 0 }}>Sin datos para este indicador.</div>
                               ) : (
@@ -6703,10 +6765,9 @@
                     </div>
                     <div className="ranking-grid">
                       {[
-                        { key: 'total', label: 'Servicios totales' },
-                        { key: 'pending', label: 'Pendientes' },
-                        { key: 'inprogress', label: 'En curso' },
-                        { key: 'completed', label: 'Completados' },
+                        { key: 'active', label: 'Servicios Activos' },
+                        { key: 'installation', label: 'En instalación' },
+                        { key: 'baja', label: 'Baja' },
                       ].map((section) => {
                         const list = getServicesByCommercial(section.key, selectedCommercial || 'Sin asignar');
                         return (
@@ -7332,12 +7393,10 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><path d="M5.5 9.5V20h13V9.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><path d="M10 20v-5h4v5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       <span className="mobile-nav-label">Inicio</span>
                     </button>
-                    {!isGerencia && (
-                      <button className={effectiveSelectedForm === 'tickets' ? 'active' : ''} type="button" onClick={openTicketsView}>
-                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16v12H4z" stroke="currentColor" strokeWidth="1.8"/><path d="M8 10h8M8 14h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
-                        <span className="mobile-nav-label">Tickets</span>
-                      </button>
-                    )}
+                    <button className={effectiveSelectedForm === 'tickets' ? 'active' : ''} type="button" onClick={openTicketsView}>
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16v12H4z" stroke="currentColor" strokeWidth="1.8"/><path d="M8 10h8M8 14h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
+                      <span className="mobile-nav-label">Tickets</span>
+                    </button>
                     <button className={effectiveSelectedForm === 'perfil' ? 'active' : ''} type="button" onClick={() => { setMobileBellOpen(false); openProfileView(); }}>
                       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8"/><path d="M4 20c1.8-3.4 5-5 8-5s6.2 1.6 8 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
                       <span className="mobile-nav-label">Perfil</span>
