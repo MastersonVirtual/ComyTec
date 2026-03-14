@@ -134,10 +134,14 @@
       .top-titles p { margin: 4px 0 0; color: #caeeee; font-size: .9rem; }
       .subtitle-voga { font-family: 'Voga', 'VOGA', 'Didot', 'Bodoni MT', 'Times New Roman', serif; letter-spacing: .9px; }
 
-      .top-search { margin-left: auto; min-width: 220px; max-width: 430px; width: 38%; }
+      .top-search { margin-left: auto; position: relative; display: flex; justify-content: flex-end; }
       .top-search input { width: 100%; padding-left: 38px; }
+      .top-search-toggle { margin-left: auto; }
+      .top-search-panel { position: absolute; top: calc(100% + 10px); right: 0; width: min(430px, 52vw); z-index: 130; }
       .search-wrap { position: relative; }
-      .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: .85; font-size: 14px; }
+      .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); opacity: .95; font-size: 14px; color: #fb923c; display: inline-flex; align-items: center; }
+      .search-icon i,
+      .search-icon svg { width: 18px; height: 18px; stroke: currentColor; }
       .search-preview {
         position: absolute;
         top: calc(100% + 8px);
@@ -417,12 +421,18 @@
       .top-search {
         max-width: 460px;
       }
-      .search-icon { color: #64748b; opacity: 1; }
+      .top-search-panel .search-wrap {
+        border-radius: 12px;
+        border: 1px solid rgba(251,146,60,.65);
+        background: rgba(3, 8, 8, .96);
+        padding: 0;
+        box-shadow: 0 10px 26px rgba(0,0,0,.35);
+      }
       .top-search input {
         border-radius: 12px;
-        border: 1px solid #d6dee8;
-        background: #ffffff;
-        box-shadow: 0 4px 10px rgba(15, 23, 42, .05);
+        border: 1px solid transparent;
+        background: transparent;
+        color: #fff3e8;
       }
       .search-preview {
         background: var(--base);
@@ -1871,6 +1881,7 @@
           max-width: none;
           margin-left: 0;
         }
+        .top-search-panel { position: static; width: 100%; margin-top: 8px; }
         .search-preview {
           max-height: 44vh;
         }
@@ -2433,24 +2444,20 @@
       }
       .topbar-action-btn,
       .topbar-back-btn {
-        width: 44px;
-        height: 44px;
-        min-width: 44px;
-        min-height: 44px;
-        border: 1px solid rgba(230,255,253,.45) !important;
+        width: 46px;
+        height: 46px;
+        min-width: 46px;
+        min-height: 46px;
+        border: 2px solid rgba(251,146,60,.85) !important;
         border-radius: 14px !important;
         padding: 0;
-        background-color: rgba(255,255,255,.08) !important;
-        background-image: url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png');
-        background-position: center;
-        background-repeat: no-repeat;
-        background-size: cover;
-        color: #e6fffd !important;
+        background: #050505 !important;
+        color: #fb923c !important;
         display: inline-flex !important;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        box-shadow: 0 8px 16px rgba(0,0,0,.18);
+        box-shadow: 0 8px 16px rgba(0,0,0,.24);
       }
       .topbar-action-btn:hover,
       .topbar-back-btn:hover {
@@ -2467,11 +2474,11 @@
       .topbar-action-icon i,
       .topbar-action-icon svg,
       .topbar-back-btn svg {
-        width: 20px;
-        height: 20px;
-        stroke-width: 2.4;
-        color: #e6fffd;
-        stroke: #e6fffd;
+        width: 24px;
+        height: 24px;
+        stroke-width: 2.3;
+        color: #fb923c;
+        stroke: #fb923c;
       }
       .notify-badge {
         position: absolute;
@@ -2552,14 +2559,14 @@
         right: 8px;
         bottom: 8px;
         display: inline-flex;
-        gap: 6px;
+        gap: 8px;
       }
       .topbar-notify-action {
-        width: 28px;
-        height: 28px;
-        border-radius: 8px;
-        border: 1px solid rgba(251, 146, 60, .55);
-        background: rgba(251, 146, 60, .22);
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        border: 2px solid rgba(251, 146, 60, .95);
+        background: rgba(20, 10, 2, .96);
         color: #fb923c;
         display: inline-flex;
         align-items: center;
@@ -2568,8 +2575,9 @@
       }
       .topbar-notify-action i,
       .topbar-notify-action svg {
-        width: 16px;
-        height: 16px;
+        width: 26px;
+        height: 26px;
+        stroke-width: 2.2;
         stroke: currentColor;
       }
       .topbar-notify-action:hover {
@@ -4750,6 +4758,7 @@
         const [mobileBellOpen, setMobileBellOpen] = useState(false);
         const [mobileAlerts, setMobileAlerts] = useState([]);
         const [desktopBellOpen, setDesktopBellOpen] = useState(false);
+        const [desktopSearchOpen, setDesktopSearchOpen] = useState(false);
         const [ticketComentario, setTicketComentario] = useState('');
         const [ticketPrioridad, setTicketPrioridad] = useState('Media');
         const [ticketImagenes, setTicketImagenes] = useState([]);
@@ -5492,7 +5501,7 @@
 
         useEffect(() => {
           if (window.lucide?.createIcons) window.lucide.createIcons();
-        }, [mobileTab, selectedForm, fabOpen, rows.length, adminCredentialRequests.length, desktopBellOpen]);
+        }, [mobileTab, selectedForm, fabOpen, rows.length, adminCredentialRequests.length, desktopBellOpen, desktopSearchOpen]);
 
         useEffect(() => {
           if (!user || userRole !== 'admin') {
@@ -6436,38 +6445,45 @@
                   <h1>Masterson Seguridad</h1>
                   <p className="subtitle-voga">{topbarSubtitle}</p>
                 </div>
-                {!isGerencia && !isTechnicalOnly && (
+                {!isGerencia && !isTechnicalOnly && !isMobile && (
                   <div className="top-search">
-                    <div className="search-wrap">
-                      <span className="search-icon">🔍</span>
-                      <input
-                        type="text"
-                        placeholder="Buscar cliente, ID, razón social o dirección..."
-                        value={searchTerm}
-                        onChange={(e) => { setSearchTerm(e.target.value); setExpandedId(null); }}
-                      />
-                      {searchTerm.trim() !== '' && (
-                        <div className="search-preview">
-                          {filteredRows.length === 0 ? (
-                            <div className="search-item"><small>Sin resultados.</small></div>
-                          ) : (
-                            filteredRows.slice(0, 8).map((r) => (
-                              <div key={r.id}>
-                                <div className="search-item" onClick={() => { setSelectedService(r); setSelectedForm('historial'); setExpandedId(null); setSearchTerm(''); }}>
-                                  <strong>{r.clienteId || '-'} · {r.nombreServicio || 'Servicio sin nombre'}</strong>
-                                  <small>Fecha de alta: {r.fechaAlta || '-'}</small>
-                                </div>
-                                {expandedId === r.id && (
-                                  <div className="search-detail">
-                                    <div className="detail-box">{buildServiceDetailText(r)}</div>
+                    <button className="topbar-action-btn top-search-toggle" type="button" aria-label="Buscar" onClick={() => setDesktopSearchOpen((prev) => !prev)}>
+                      <span className="topbar-action-icon"><i data-lucide="search" /></span>
+                    </button>
+                    {(desktopSearchOpen || searchTerm.trim() !== '') && (
+                      <div className="top-search-panel">
+                        <div className="search-wrap">
+                          <span className="search-icon"><i data-lucide="search" /></span>
+                          <input
+                            type="text"
+                            placeholder="Buscar cliente, ID, razón social o dirección..."
+                            value={searchTerm}
+                            onChange={(e) => { setSearchTerm(e.target.value); setExpandedId(null); }}
+                          />
+                          {searchTerm.trim() !== '' && (
+                            <div className="search-preview">
+                              {filteredRows.length === 0 ? (
+                                <div className="search-item"><small>Sin resultados.</small></div>
+                              ) : (
+                                filteredRows.slice(0, 8).map((r) => (
+                                  <div key={r.id}>
+                                    <div className="search-item" onClick={() => { setSelectedService(r); setSelectedForm('historial'); setExpandedId(null); setSearchTerm(''); setDesktopSearchOpen(false); }}>
+                                      <strong>{r.clienteId || '-'} · {r.nombreServicio || 'Servicio sin nombre'}</strong>
+                                      <small>Fecha de alta: {r.fechaAlta || '-'}</small>
+                                    </div>
+                                    {expandedId === r.id && (
+                                      <div className="search-detail">
+                                        <div className="detail-box">{buildServiceDetailText(r)}</div>
+                                      </div>
+                                    )}
                                   </div>
-                                )}
-                              </div>
-                            ))
+                                ))
+                              )}
+                            </div>
                           )}
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 )}
                 {isMobile && (
