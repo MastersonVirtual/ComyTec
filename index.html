@@ -2490,6 +2490,91 @@
         border: 2px solid rgba(15,23,42,.9);
       }
 
+      .topbar-notify-wrap {
+        position: relative;
+      }
+      .topbar-notify-popover {
+        position: absolute;
+        top: calc(100% + 14px);
+        right: 0;
+        width: min(360px, 88vw);
+        max-height: 62vh;
+        overflow: auto;
+        background: rgba(5, 22, 23, .98);
+        border: 1px solid rgba(230,255,253,.25);
+        border-radius: 14px;
+        box-shadow: 0 16px 34px rgba(0,0,0,.35);
+        z-index: 140;
+        padding: 12px;
+      }
+      .topbar-notify-arrow {
+        position: absolute;
+        top: -7px;
+        right: 16px;
+        width: 14px;
+        height: 14px;
+        background: rgba(5, 22, 23, .98);
+        border-left: 1px solid rgba(230,255,253,.25);
+        border-top: 1px solid rgba(230,255,253,.25);
+        transform: rotate(45deg);
+      }
+      .topbar-notify-head {
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .04em;
+        color: #e6fffd;
+        margin-bottom: 8px;
+      }
+      .topbar-notify-list {
+        display: grid;
+        gap: 8px;
+      }
+      .topbar-notify-item {
+        position: relative;
+        border: 1px solid rgba(230,255,253,.18);
+        border-radius: 10px;
+        background: rgba(230,255,253,.06);
+        padding: 8px 8px 36px;
+        display: grid;
+        gap: 4px;
+      }
+      .topbar-notify-item strong { font-size: 12px; color: #f0fffd; }
+      .topbar-notify-item small { font-size: 11px; color: #cbecea; }
+      .topbar-notify-empty {
+        border: 1px dashed rgba(230,255,253,.22);
+        border-radius: 10px;
+        padding: 10px;
+        font-size: 12px;
+        color: #cbecea;
+      }
+      .topbar-notify-actions {
+        position: absolute;
+        right: 8px;
+        bottom: 8px;
+        display: inline-flex;
+        gap: 6px;
+      }
+      .topbar-notify-action {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        border: 1px solid rgba(251, 146, 60, .55);
+        background: rgba(251, 146, 60, .22);
+        color: #fb923c;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+      .topbar-notify-action i,
+      .topbar-notify-action svg {
+        width: 16px;
+        height: 16px;
+        stroke: currentColor;
+      }
+      .topbar-notify-action:hover {
+        background: rgba(251, 146, 60, .34);
+      }
       .topbar-mini-bell {
         width: 40px;
         height: 40px;
@@ -4664,6 +4749,7 @@
         const [acceptingRequestId, setAcceptingRequestId] = useState('');
         const [mobileBellOpen, setMobileBellOpen] = useState(false);
         const [mobileAlerts, setMobileAlerts] = useState([]);
+        const [desktopBellOpen, setDesktopBellOpen] = useState(false);
         const [ticketComentario, setTicketComentario] = useState('');
         const [ticketPrioridad, setTicketPrioridad] = useState('Media');
         const [ticketImagenes, setTicketImagenes] = useState([]);
@@ -4675,6 +4761,7 @@
         const seenOperationalAlertsRef = useRef(new Set());
         const topServicesLeaderRef = useRef('');
         const topSalesLeaderRef = useRef('');
+        const desktopBellRef = useRef(null);
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
@@ -4756,8 +4843,14 @@
           return label.includes('complet') || label.includes('finaliz') || label.includes('alta');
         }
 
+        function isBajaRow(row) {
+          return String(row?.tipoAccion || '').toLowerCase().includes('baja');
+        }
+
         function getKpiRows(type) {
-          if (type === 'total') return visibleRows;
+          if (type === 'active') return visibleRows;
+          if (type === 'installation') return visibleRows.filter((r) => isInProgressStatus(getStatusLabel(r)));
+          if (type === 'baja') return visibleRows.filter((r) => isBajaRow(r));
           if (type === 'pending') return visibleRows.filter((r) => isPendingStatus(getStatusLabel(r)));
           if (type === 'inprogress') return visibleRows.filter((r) => isInProgressStatus(getStatusLabel(r)));
           if (type === 'completed') return visibleRows.filter((r) => isCompletedStatus(getStatusLabel(r)));
@@ -4791,7 +4884,9 @@
         }
 
         const kpiStats = useMemo(() => ({
-          total: visibleRows.length,
+          active: visibleRows.length,
+          installation: visibleRows.filter((r) => isInProgressStatus(getStatusLabel(r))).length,
+          baja: visibleRows.filter((r) => isBajaRow(r)).length,
           pending: visibleRows.filter((r) => isPendingStatus(getStatusLabel(r))).length,
           inprogress: visibleRows.filter((r) => isInProgressStatus(getStatusLabel(r))).length,
           completed: visibleRows.filter((r) => isCompletedStatus(getStatusLabel(r))).length,
@@ -5231,6 +5326,17 @@
         }
 
         useEffect(() => {
+          if (!desktopBellOpen) return () => {};
+          function handleDocClick(event) {
+            if (desktopBellRef.current && !desktopBellRef.current.contains(event.target)) {
+              setDesktopBellOpen(false);
+            }
+          }
+          document.addEventListener('mousedown', handleDocClick);
+          return () => document.removeEventListener('mousedown', handleDocClick);
+        }, [desktopBellOpen]);
+
+        useEffect(() => {
           if (!user) {
             setRows([]);
             return () => {};
@@ -5386,7 +5492,7 @@
 
         useEffect(() => {
           if (window.lucide?.createIcons) window.lucide.createIcons();
-        }, [mobileTab, selectedForm, fabOpen, rows.length, adminCredentialRequests.length]);
+        }, [mobileTab, selectedForm, fabOpen, rows.length, adminCredentialRequests.length, desktopBellOpen]);
 
         useEffect(() => {
           if (!user || userRole !== 'admin') {
@@ -6136,11 +6242,7 @@
           });
         }
 
-        async function openNotificationsView() {
-          if (!isAdminUser) return;
-          setSelectedForm('notificaciones');
-          setMobileTab('perfil');
-          closeSidebar();
+        async function markAdminNotificationsAsRead() {
           const unread = adminPendingRequests.filter((item) => !item?.leidaPorAdmin);
           if (unread.length === 0) return;
           const batch = db.batch();
@@ -6151,6 +6253,30 @@
             await batch.commit();
           } catch (error) {
             console.error('Error marcando notificaciones como leídas:', error);
+          }
+        }
+
+        async function toggleDesktopNotifications() {
+          if (!isAdminUser) return;
+          setDesktopBellOpen((prev) => !prev);
+          await markAdminNotificationsAsRead();
+        }
+
+        async function openNotificationsView() {
+          if (!isAdminUser) return;
+          setSelectedForm('notificaciones');
+          setMobileTab('perfil');
+          setDesktopBellOpen(false);
+          closeSidebar();
+          await markAdminNotificationsAsRead();
+        }
+
+        async function deleteNotificationRequest(req) {
+          if (!isAdminUser || !req?.id) return;
+          try {
+            await db.collection('solicitudes_credenciales').doc(req.id).delete();
+          } catch (error) {
+            console.error('Error eliminando notificación:', error);
           }
         }
 
@@ -6364,11 +6490,30 @@
                 {!isMobile && (
                   <div className="topbar-actions">
                     {isAdminUser && (
-                      <div style={{ position: 'relative' }}>
-                        <button className="topbar-action-btn" type="button" aria-label="Notificaciones" onClick={openNotificationsView}>
+                      <div className="topbar-notify-wrap" ref={desktopBellRef}>
+                        <button className="topbar-action-btn" type="button" aria-label="Notificaciones" onClick={toggleDesktopNotifications}>
                           <span className="topbar-action-icon"><i data-lucide="bell" /></span>
                         </button>
                         {adminUnreadCount > 0 && <span className="notify-badge">{adminUnreadCount > 99 ? '99+' : adminUnreadCount}</span>}
+                        {desktopBellOpen && (
+                          <div className="topbar-notify-popover" role="dialog" aria-label="Panel de notificaciones">
+                            <div className="topbar-notify-arrow" aria-hidden="true" />
+                            <div className="topbar-notify-head">Notificaciones</div>
+                            <div className="topbar-notify-list">
+                              {adminCredentialRequests.length === 0 ? <div className="topbar-notify-empty">Sin notificaciones nuevas.</div> : adminCredentialRequests.slice(0, 8).map((req) => (
+                                <article className="topbar-notify-item" key={`popover-${req.id}`}>
+                                  <strong>{req.solicitanteNombre || req.solicitanteEmail || 'Usuario'}</strong>
+                                  <small>{requestStatusLabel(req.estado)}</small>
+                                  <small>{formatRequestDateTime(req.creadoEn)}</small>
+                                  <div className="topbar-notify-actions">
+                                    <button type="button" className="topbar-notify-action" aria-label="Ver notificación" onClick={openNotificationsView}><i data-lucide="eye" /></button>
+                                    <button type="button" className="topbar-notify-action" aria-label="Eliminar notificación" onClick={() => deleteNotificationRequest(req)}><i data-lucide="trash-2" /></button>
+                                  </div>
+                                </article>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                     <button className="topbar-action-btn" type="button" aria-label="Perfil" onClick={openProfileView}>
@@ -6557,10 +6702,9 @@
                     </section>
                     <section className="kpi-grid">
                       {[
-                        { key: 'total', label: 'Servicios totales', value: kpiStats.total },
-                        { key: 'pending', label: 'Pendientes', value: kpiStats.pending },
-                        { key: 'inprogress', label: 'En curso', value: kpiStats.inprogress },
-                        { key: 'completed', label: 'Completados', value: kpiStats.completed },
+                        { key: 'active', label: 'Servicios Activos', value: kpiStats.active },
+                        { key: 'installation', label: 'En instalación', value: kpiStats.installation },
+                        { key: 'baja', label: 'Baja', value: kpiStats.baja },
                       ].map((card) => (
                         <div
                           className="kpi-card-wrap"
@@ -6576,7 +6720,7 @@
                           </article>
                           {activeKpi === card.key && (
                             <section className="kpi-breakdown">
-                              <h3>{card.key === 'total' ? 'Ranking Comercial · Servicios Totales' : card.key === 'pending' ? 'Ranking Comercial · Pendientes' : card.key === 'inprogress' ? 'Ranking Comercial · En curso' : 'Ranking Comercial · Completados'}</h3>
+                              <h3>{card.key === 'active' ? 'Ranking Comercial · Servicios Activos' : card.key === 'installation' ? 'Ranking Comercial · En instalación' : 'Ranking Comercial · Baja'}</h3>
                               {getCommercialBreakdown(card.key).length === 0 ? (
                                 <div className="hint" style={{ color: '#d1faf5', marginBottom: 0 }}>Sin datos para este indicador.</div>
                               ) : (
@@ -6621,10 +6765,9 @@
                     </div>
                     <div className="ranking-grid">
                       {[
-                        { key: 'total', label: 'Servicios totales' },
-                        { key: 'pending', label: 'Pendientes' },
-                        { key: 'inprogress', label: 'En curso' },
-                        { key: 'completed', label: 'Completados' },
+                        { key: 'active', label: 'Servicios Activos' },
+                        { key: 'installation', label: 'En instalación' },
+                        { key: 'baja', label: 'Baja' },
                       ].map((section) => {
                         const list = getServicesByCommercial(section.key, selectedCommercial || 'Sin asignar');
                         return (
