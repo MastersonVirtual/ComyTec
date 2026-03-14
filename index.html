@@ -1813,96 +1813,113 @@
         padding: 10px;
       }
 
-      /* Glassmorphism refresh */
-      body {
-        background: linear-gradient(145deg, #f0f4f4 0%, #d9e2e2 100%) !important;
-        color: #1a1a1a !important;
+      /* Glassmorphism tecnológico SOLO en formularios */
+      .panel:has(form),
+      .service-card:has(.field),
+      .login-panel,
+      .profile-form {
+        background: linear-gradient(145deg, rgba(232, 247, 247, 0.18), rgba(230, 248, 248, 0.08)) !important;
+        border: 1px solid rgba(110, 243, 255, 0.62) !important;
+        border-radius: 18px !important;
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,.28),
+          0 14px 38px rgba(3, 35, 37, .34),
+          0 0 0 1px rgba(0, 255, 255, .10);
+        backdrop-filter: blur(16px) saturate(128%);
+        -webkit-backdrop-filter: blur(16px) saturate(128%);
       }
-      .panel,
-      .service-card,
-      .widget,
-      .kpi-card,
-      .gerencia-widget,
-      .gerencia-card,
-      .gerencia-chart-card,
-      .ranking-section,
-      .mobile-service-card,
-      .mobile-capsule {
-        background: rgba(255, 255, 255, 0.7) !important;
-        border: 1px solid rgba(255,255,255,.55) !important;
-        border-radius: 16px !important;
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        box-shadow: 0 10px 30px rgba(0,0,0,.12) !important;
+
+      .panel:has(form) h2,
+      .service-card:has(.field) h3,
+      .login-panel h2,
+      .profile-form h3 {
+        color: #ff8a2a !important;
+        text-shadow: 0 4px 16px rgba(255, 138, 42, .28);
       }
-      .topbar,
-      .hero {
-        background: rgba(255, 255, 255, 0.65) !important;
-        border: 1px solid rgba(255,255,255,.55) !important;
-        backdrop-filter: blur(15px);
+
+      .panel:has(form) .field,
+      .service-card:has(.field) .field,
+      .login-panel .field,
+      .profile-form .field {
+        background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+        border: 1px solid rgba(130, 236, 246, .20);
+        border-radius: 14px;
+        padding: 10px;
       }
-      .top-titles h1,
-      .panel h2,
-      .service-card h3,
-      .widget h4,
-      .kpi-label,
-      .tracking-title,
-      .tracking-card h3,
-      .hero h2,
-      .hero p {
-        color: #006465 !important;
+
+      .panel:has(form) label,
+      .service-card:has(.field) label,
+      .login-panel label,
+      .profile-form label {
+        color: #ffe0c5 !important;
+        font-weight: 600;
+        letter-spacing: .15px;
       }
-      .hint,
-      .muted,
-      .kv,
-      .detail-box,
-      .tracking-data,
-      .mobile-rep,
-      .search-item,
-      .search-item small,
-      .search-detail,
-      .legend-left,
-      .kpi-value,
-      td,
-      th,
-      label {
-        color: #1a1a1a !important;
+
+      .panel:has(form) input,
+      .panel:has(form) select,
+      .panel:has(form) textarea,
+      .service-card:has(.field) input,
+      .service-card:has(.field) select,
+      .service-card:has(.field) textarea,
+      .login-panel input,
+      .login-panel select,
+      .login-panel textarea,
+      .profile-form input,
+      .profile-form select,
+      .profile-form textarea {
+        background: linear-gradient(180deg, rgba(245, 251, 251, .9), rgba(226, 238, 238, .8)) !important;
+        border: 1px solid rgba(118, 227, 239, .45) !important;
+        color: #0d3638 !important;
+        border-radius: 12px;
+        box-shadow: inset 0 1px 4px rgba(255,255,255,.7), inset 0 -1px 5px rgba(0,0,0,.06);
       }
-      input,
-      select,
-      textarea {
-        background: rgba(255,255,255,.75) !important;
-        border: 1px solid rgba(0,100,101,.35) !important;
-        color: #1a1a1a !important;
-        text-align: center;
+
+      .panel:has(form) input::placeholder,
+      .panel:has(form) textarea::placeholder,
+      .service-card:has(.field) input::placeholder,
+      .service-card:has(.field) textarea::placeholder,
+      .login-panel input::placeholder,
+      .login-panel textarea::placeholder,
+      .profile-form input::placeholder,
+      .profile-form textarea::placeholder {
+        color: #5f8d8f;
       }
-      .field > label {
-        background: rgba(255,255,255,.78) !important;
-        color: #1a1a1a !important;
+
+      .panel:has(form) input:focus,
+      .panel:has(form) select:focus,
+      .panel:has(form) textarea:focus,
+      .service-card:has(.field) input:focus,
+      .service-card:has(.field) select:focus,
+      .service-card:has(.field) textarea:focus,
+      .login-panel input:focus,
+      .login-panel select:focus,
+      .login-panel textarea:focus,
+      .profile-form input:focus,
+      .profile-form select:focus,
+      .profile-form textarea:focus {
+        border-color: rgba(122, 245, 255, .95) !important;
+        box-shadow:
+          0 0 0 3px rgba(122, 245, 255, .22),
+          0 0 28px rgba(0, 208, 255, .24),
+          inset 0 1px 5px rgba(255,255,255,.75);
       }
-      .panel form {
-        max-width: 1220px;
-        margin: 0 auto;
+
+      .panel:has(form) .save-btn,
+      .service-card:has(.field) .save-btn,
+      .login-panel .save-btn,
+      .profile-form .save-btn {
+        background: linear-gradient(135deg, #05686a, #01474a) !important;
+        border-color: rgba(118, 227, 239, .55) !important;
+        box-shadow: 0 14px 28px rgba(0, 20, 26, .36), inset 0 1px 0 rgba(255,255,255,.2);
       }
-      .save-btn,
-      .pdf-btn,
-      .help-btn,
-      .menu-button,
-      .submenu-button,
-      .ranking-service-btn,
-      .edit-btn {
-        background: #006465 !important;
-        color: #ffffff !important;
-        border-color: rgba(0,100,101,.9) !important;
-      }
-      .mobile-fab {
-        background: #006465 !important;
-        color: #fff !important;
-        border: 1px solid rgba(0,100,101,.9) !important;
-        border-radius: 999px !important;
-      }
-      .mobile-fab-overlay {
-        background: rgba(0,0,0,.16) !important;
+
+      .panel:has(form) .save-btn:hover,
+      .service-card:has(.field) .save-btn:hover,
+      .login-panel .save-btn:hover,
+      .profile-form .save-btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.05);
       }
 
       @media (prefers-reduced-motion: reduce) {
