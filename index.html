@@ -6645,7 +6645,12 @@
           e.preventDefault();
           if (selectedForm === 'home') return;
           if (!effectiveClienteId) return alert('Debes indicar un Cliente ID asociado para esta acción.');
-          const doc = { tipoAccion, clienteId: effectiveClienteId, status, estado: status, creadoEn: firebase.firestore.FieldValue.serverTimestamp(), creadoPor: currentUserName, logs_cambios: [] };
+
+          const normalizedStatusToSave = normalizeLegacyStatusName(status);
+          const normalizedClientId = normalizeServiceId(effectiveClienteId) || String(effectiveClienteId || '').trim();
+          const actionNeedsExistingService = ['Baja', 'Novación', 'Agregado', 'Movimiento de Obra'].includes(tipoAccion);
+
+          const doc = { tipoAccion, clienteId: normalizedClientId, status: normalizedStatusToSave, estado: normalizedStatusToSave };
 
           if (grupo === 'servicio') {
             if (!servicioForm.nombreServicio || !servicioForm.razonSocial || !servicioForm.rut || !servicioForm.fechaAltaServicio) {
@@ -6685,7 +6690,7 @@
             if (!bajaForm.nombreServicio || !bajaForm.direccionServicio || !bajaForm.fechaIngreso) {
               return alert('Completá al menos: Nombre del servicio, Dirección y Fecha de ingreso.');
             }
-            Object.assign(doc, { ...bajaForm, formulario: 'baja-servicio' });
+            Object.assign(doc, { ...bajaForm, formulario: 'baja-servicio', status: 'Baja', estado: 'Baja' });
           }
           if (grupo === 'charla-detalle') {
             if (!charlaForm.responsableCharla || !charlaForm.fecha || !charlaForm.horario || !charlaForm.direccion) {
@@ -6694,38 +6699,64 @@
             Object.assign(doc, { ...charlaForm, formulario: 'charla-informativa' });
           }
 
-          const normalizedStatusToSave = normalizeLegacyStatusName(status);
-          doc.status = normalizedStatusToSave;
-          doc.estado = normalizedStatusToSave;
-
           setSaving(true);
-          const nextLog = {
-            fecha: new Date().toISOString(),
-            usuario: currentUserName,
-            accion: 'Actualización de datos',
-          };
-          const existingLogs = Array.isArray(selectedService?.logs_cambios) ? selectedService.logs_cambios : [];
 
-          const payload = editingServiceId
-            ? { ...doc, actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(), editadoPor: currentUserName, logs_cambios: [...existingLogs, nextLog] }
-            : { ...doc, logs_cambios: [] };
+          try {
+            const byRows = rows.find((r) => normalizeServiceId(r?.clienteId) === normalizeServiceId(normalizedClientId) && !r?.estado_borrado);
+            let existingDocIdByClient = byRows?.id || null;
 
-          const writeOp = editingServiceId
-            ? db.collection('operaciones').doc(editingServiceId).set(payload, { merge: true })
-            : db.collection('operaciones').add(payload);
+            if (!existingDocIdByClient && normalizedClientId) {
+              const exact = await db.collection('operaciones').where('clienteId', '==', normalizedClientId).limit(1).get();
+              if (!exact.empty) existingDocIdByClient = exact.docs[0].id;
+            }
 
-          writeOp
-            .then(() => {
+            if (!existingDocIdByClient && actionNeedsExistingService && !editingServiceId) {
+              setNotificacion({ mensaje: '✖ El servicio no existe. Primero debés crearlo para registrar esta operación.', tipo: 'error' });
+              return;
+            }
+
+            const targetDocId = editingServiceId || existingDocIdByClient || null;
+            const nextLog = {
+              fecha: new Date().toISOString(),
+              usuario: currentUserName,
+              accion: editingServiceId || existingDocIdByClient ? 'Actualización de datos' : 'Alta de servicio',
+            };
+
+            const targetSource = rows.find((r) => r.id === targetDocId) || selectedService;
+            const existingLogs = Array.isArray(targetSource?.logs_cambios) ? targetSource.logs_cambios : [];
+
+            if (targetDocId) {
+              const payload = {
+                ...doc,
+                actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+                editadoPor: currentUserName,
+                logs_cambios: [...existingLogs, nextLog],
+              };
+              await db.collection('operaciones').doc(targetDocId).set(payload, { merge: true });
               resetFields();
-              setNotificacion({ mensaje: editingServiceId ? '✔ Servicio actualizado correctamente' : '✔ Datos guardados correctamente', tipo: 'ok' });
-            })
-            .catch((error) => {
-              console.error('Error guardando:', error);
-              setNotificacion({ mensaje: '✖ Error al guardar datos', tipo: 'error' });
-            })
-            .finally(() => {
-              setSaving(false);
-            });
+              if (!editingServiceId && existingDocIdByClient && ['Nuevo Servicio', 'Obra'].includes(tipoAccion)) {
+                setNotificacion({ mensaje: '✔ Servicio existente actualizado (sin duplicar ID).', tipo: 'ok' });
+              } else {
+                setNotificacion({ mensaje: '✔ Servicio actualizado correctamente', tipo: 'ok' });
+              }
+              return;
+            }
+
+            const createPayload = {
+              ...doc,
+              creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+              creadoPor: doc.creadoPor || currentUserName,
+              logs_cambios: [],
+            };
+            await db.collection('operaciones').add(createPayload);
+            resetFields();
+            setNotificacion({ mensaje: '✔ Datos guardados correctamente', tipo: 'ok' });
+          } catch (error) {
+            console.error('Error guardando:', error);
+            setNotificacion({ mensaje: '✖ Error al guardar datos', tipo: 'error' });
+          } finally {
+            setSaving(false);
+          }
         }
 
         function renderMobileHome() {
