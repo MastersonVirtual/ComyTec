@@ -130,6 +130,7 @@
         font-weight: 800;
         letter-spacing: .4px;
         text-shadow: 0 4px 16px rgba(0,0,0,.4);
+        color: #ff8a2a !important;
       }
       .top-titles p { margin: 4px 0 0; color: #caeeee; font-size: .9rem; }
       .subtitle-voga { font-family: 'Voga', 'VOGA', 'Didot', 'Bodoni MT', 'Times New Roman', serif; letter-spacing: .9px; }
@@ -405,7 +406,7 @@
         box-shadow: 0 8px 16px rgba(0,0,0,.18);
       }
       .top-titles h1 {
-        color: #e6fffd;
+        color: #ff8a2a !important;
         letter-spacing: .2px;
         text-shadow: none;
       }
@@ -413,6 +414,11 @@
         color: #d8fbf8;
         letter-spacing: .07em;
       }
+
+      .topbar .top-titles h1 {
+        color: #ff8a2a !important;
+      }
+
       .subtitle-voga {
         font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
         font-weight: 700;
@@ -506,15 +512,25 @@
       }
       .card-grid, .compact-grid, .history-grid { gap: 16px; }
 
+      .hero {
+        width: min(100%, 1180px);
+        margin: 14px auto 16px;
+      }
+
       .kpi-grid {
         margin-top: 24px;
+        width: min(100%, 1180px);
+        margin-left: auto;
+        margin-right: auto;
         display: grid;
-        grid-template-columns: repeat(4, minmax(160px, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 18px;
         align-items: start;
+        justify-items: stretch;
       }
       .kpi-card-wrap {
         position: relative;
+        width: 100%;
       }
       .kpi-card {
         border-radius: 14px;
@@ -678,7 +694,7 @@
         grid-column: auto;
       }
       .history-toolbar .field label {
-        color: #114243;
+        color: #ffffff !important;
       }
       .history-toolbar .field input,
       .history-toolbar .field select,
@@ -1813,96 +1829,113 @@
         padding: 10px;
       }
 
-      /* Glassmorphism refresh */
-      body {
-        background: linear-gradient(145deg, #f0f4f4 0%, #d9e2e2 100%) !important;
-        color: #1a1a1a !important;
+      /* Glassmorphism tecnológico SOLO en formularios */
+      .panel:has(form),
+      .service-card:has(.field),
+      .login-panel,
+      .profile-form {
+        background: linear-gradient(145deg, rgba(232, 247, 247, 0.18), rgba(230, 248, 248, 0.08)) !important;
+        border: 1px solid rgba(110, 243, 255, 0.62) !important;
+        border-radius: 18px !important;
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,.28),
+          0 14px 38px rgba(3, 35, 37, .34),
+          0 0 0 1px rgba(0, 255, 255, .10);
+        backdrop-filter: blur(16px) saturate(128%);
+        -webkit-backdrop-filter: blur(16px) saturate(128%);
       }
-      .panel,
-      .service-card,
-      .widget,
-      .kpi-card,
-      .gerencia-widget,
-      .gerencia-card,
-      .gerencia-chart-card,
-      .ranking-section,
-      .mobile-service-card,
-      .mobile-capsule {
-        background: rgba(255, 255, 255, 0.7) !important;
-        border: 1px solid rgba(255,255,255,.55) !important;
-        border-radius: 16px !important;
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        box-shadow: 0 10px 30px rgba(0,0,0,.12) !important;
+
+      .panel:has(form) h2,
+      .service-card:has(.field) h3,
+      .login-panel h2,
+      .profile-form h3 {
+        color: #ff8a2a !important;
+        text-shadow: 0 4px 16px rgba(255, 138, 42, .28);
       }
-      .topbar,
-      .hero {
-        background: rgba(255, 255, 255, 0.65) !important;
-        border: 1px solid rgba(255,255,255,.55) !important;
-        backdrop-filter: blur(15px);
+
+      .panel:has(form) .field,
+      .service-card:has(.field) .field,
+      .login-panel .field,
+      .profile-form .field {
+        background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+        border: 1px solid rgba(130, 236, 246, .20);
+        border-radius: 14px;
+        padding: 10px;
       }
-      .top-titles h1,
-      .panel h2,
-      .service-card h3,
-      .widget h4,
-      .kpi-label,
-      .tracking-title,
-      .tracking-card h3,
-      .hero h2,
-      .hero p {
-        color: #006465 !important;
+
+      .panel:has(form) label,
+      .service-card:has(.field) label,
+      .login-panel label,
+      .profile-form label {
+        color: #ffe0c5 !important;
+        font-weight: 600;
+        letter-spacing: .15px;
       }
-      .hint,
-      .muted,
-      .kv,
-      .detail-box,
-      .tracking-data,
-      .mobile-rep,
-      .search-item,
-      .search-item small,
-      .search-detail,
-      .legend-left,
-      .kpi-value,
-      td,
-      th,
-      label {
-        color: #1a1a1a !important;
+
+      .panel:has(form) input,
+      .panel:has(form) select,
+      .panel:has(form) textarea,
+      .service-card:has(.field) input,
+      .service-card:has(.field) select,
+      .service-card:has(.field) textarea,
+      .login-panel input,
+      .login-panel select,
+      .login-panel textarea,
+      .profile-form input,
+      .profile-form select,
+      .profile-form textarea {
+        background: linear-gradient(180deg, rgba(245, 251, 251, .9), rgba(226, 238, 238, .8)) !important;
+        border: 1px solid rgba(118, 227, 239, .45) !important;
+        color: #0d3638 !important;
+        border-radius: 12px;
+        box-shadow: inset 0 1px 4px rgba(255,255,255,.7), inset 0 -1px 5px rgba(0,0,0,.06);
       }
-      input,
-      select,
-      textarea {
-        background: rgba(255,255,255,.75) !important;
-        border: 1px solid rgba(0,100,101,.35) !important;
-        color: #1a1a1a !important;
-        text-align: center;
+
+      .panel:has(form) input::placeholder,
+      .panel:has(form) textarea::placeholder,
+      .service-card:has(.field) input::placeholder,
+      .service-card:has(.field) textarea::placeholder,
+      .login-panel input::placeholder,
+      .login-panel textarea::placeholder,
+      .profile-form input::placeholder,
+      .profile-form textarea::placeholder {
+        color: #5f8d8f;
       }
-      .field > label {
-        background: rgba(255,255,255,.78) !important;
-        color: #1a1a1a !important;
+
+      .panel:has(form) input:focus,
+      .panel:has(form) select:focus,
+      .panel:has(form) textarea:focus,
+      .service-card:has(.field) input:focus,
+      .service-card:has(.field) select:focus,
+      .service-card:has(.field) textarea:focus,
+      .login-panel input:focus,
+      .login-panel select:focus,
+      .login-panel textarea:focus,
+      .profile-form input:focus,
+      .profile-form select:focus,
+      .profile-form textarea:focus {
+        border-color: rgba(122, 245, 255, .95) !important;
+        box-shadow:
+          0 0 0 3px rgba(122, 245, 255, .22),
+          0 0 28px rgba(0, 208, 255, .24),
+          inset 0 1px 5px rgba(255,255,255,.75);
       }
-      .panel form {
-        max-width: 1220px;
-        margin: 0 auto;
+
+      .panel:has(form) .save-btn,
+      .service-card:has(.field) .save-btn,
+      .login-panel .save-btn,
+      .profile-form .save-btn {
+        background: linear-gradient(135deg, #05686a, #01474a) !important;
+        border-color: rgba(118, 227, 239, .55) !important;
+        box-shadow: 0 14px 28px rgba(0, 20, 26, .36), inset 0 1px 0 rgba(255,255,255,.2);
       }
-      .save-btn,
-      .pdf-btn,
-      .help-btn,
-      .menu-button,
-      .submenu-button,
-      .ranking-service-btn,
-      .edit-btn {
-        background: #006465 !important;
-        color: #ffffff !important;
-        border-color: rgba(0,100,101,.9) !important;
-      }
-      .mobile-fab {
-        background: #006465 !important;
-        color: #fff !important;
-        border: 1px solid rgba(0,100,101,.9) !important;
-        border-radius: 999px !important;
-      }
-      .mobile-fab-overlay {
-        background: rgba(0,0,0,.16) !important;
+
+      .panel:has(form) .save-btn:hover,
+      .service-card:has(.field) .save-btn:hover,
+      .login-panel .save-btn:hover,
+      .profile-form .save-btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.05);
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -1994,7 +2027,7 @@
           border-color: #000000 !important;
         }
         .top-titles { min-width: 0; flex: 1; }
-        .top-titles h1 { font-size: 1rem; color: #006465 !important; }
+        .top-titles h1 { font-size: 1rem; color: #ff8a2a !important; }
         .top-titles p { font-size: .72rem; color: #006465 !important; }
         .topbar-mini-logo { display: block; }
         .topbar-mini-bell { display: inline-flex; }
@@ -2298,63 +2331,46 @@
       }
 
       .sidebar {
-        width: 310px !important;
-        background: linear-gradient(175deg, rgba(0, 80, 82, .94) 0%, rgba(0, 56, 58, .97) 50%, rgba(2, 32, 33, .98) 100%) !important;
-        border-right: 1px solid rgba(0, 180, 170, .18) !important;
-        backdrop-filter: blur(22px) saturate(140%) !important;
-        -webkit-backdrop-filter: blur(22px) saturate(140%) !important;
-        box-shadow: 6px 0 40px rgba(0, 0, 0, .4), inset -1px 0 0 rgba(255,255,255,.06) !important;
-        border-radius: 0 24px 24px 0 !important;
+        width: 312px !important;
+        background: linear-gradient(180deg, #0d7274 0%, #085b5d 42%, #06494a 100%) !important;
+        border-right: 1px solid rgba(255,255,255,.16) !important;
+        backdrop-filter: blur(10px) saturate(110%) !important;
+        -webkit-backdrop-filter: blur(10px) saturate(110%) !important;
+        box-shadow: 14px 0 32px rgba(10, 39, 40, .22) !important;
+        border-radius: 0 18px 18px 0 !important;
         display: flex !important;
         flex-direction: column !important;
       }
       .sidebar.open {
-        animation: sidebar-slide-in .38s cubic-bezier(.16,1,.3,1) both;
+        animation: sidebar-slide-in .34s cubic-bezier(.2,.9,.2,1) both;
       }
-
-      /* Accent bar running along the right edge */
       .sidebar::after {
         content: '';
         position: absolute;
         top: 0;
-        right: -1px;
-        width: 3px;
+        right: 0;
+        width: 1px;
         height: 100%;
-        background: linear-gradient(180deg, #00d4aa, #006465, #00d4aa, #006465);
-        background-size: 100% 200%;
-        animation: sidebar-accent-drift 6s linear infinite;
-        border-radius: 0 999px 999px 0;
+        background: rgba(255,255,255,.22);
         opacity: .7;
       }
 
       .sidebar-header {
         position: relative;
-        padding: 22px 20px 18px !important;
-        background: linear-gradient(135deg, rgba(0, 140, 130, .22), rgba(0, 100, 101, .08)) !important;
-        border-bottom: 1px solid rgba(0, 200, 190, .18) !important;
+        padding: 18px 16px 14px !important;
+        background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.04)) !important;
+        border-bottom: 1px solid rgba(255,255,255,.15) !important;
         display: flex !important;
         align-items: center !important;
-        gap: 14px !important;
-        overflow: hidden;
-        color: #ff9f1a !important;
-      }
-      .sidebar-header::before {
-        content: '';
-        position: absolute;
-        width: 120px;
-        height: 120px;
-        top: -60px;
-        right: -30px;
-        background: radial-gradient(circle, rgba(0, 212, 170, .2), transparent 70%);
-        pointer-events: none;
+        gap: 12px !important;
+        color: #ffffff !important;
       }
       .sidebar-header-logo {
-        width: 42px;
-        height: 42px;
-        border-radius: 14px;
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
         background: url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png') center/cover no-repeat;
-        border: 1.5px solid rgba(0, 200, 190, .35);
-        box-shadow: 0 4px 14px rgba(0, 0, 0, .3);
+        border: 1px solid rgba(255,255,255,.32);
         flex-shrink: 0;
       }
       .sidebar-header-text {
@@ -2364,53 +2380,33 @@
       }
       .sidebar-header-title {
         font-size: 15px;
-        font-weight: 800;
-        letter-spacing: .3px;
-        color: #e6fffd !important;
+        font-weight: 700;
+        letter-spacing: .01em;
+        color: #ffffff !important;
         line-height: 1.2;
       }
       .sidebar-header-sub {
         font-size: 11px;
-        color: rgba(230, 255, 253, .55);
+        color: rgba(232,250,250,.86);
         letter-spacing: .06em;
         text-transform: uppercase;
       }
-      .sidebar-close {
-        position: absolute;
-        top: 14px;
-        right: 14px;
-        width: 32px;
-        height: 32px;
-        border-radius: 10px;
-        border: 1px solid rgba(230, 255, 253, .15) !important;
-        background: rgba(230, 255, 253, .06) !important;
-        color: #e6fffd !important;
-        font-size: 18px;
-        cursor: pointer;
-        display: grid;
-        place-items: center;
-        transition: all .2s ease;
-      }
-      .sidebar-close:hover {
-        background: rgba(230, 255, 253, .14) !important;
-        transform: rotate(90deg);
-      }
 
       .menu {
-        padding: 16px 14px !important;
+        padding: 14px 12px !important;
         flex: 1;
         overflow-y: auto;
         display: flex !important;
         flex-direction: column !important;
-        gap: 4px !important;
+        gap: 2px !important;
       }
       .sidebar-section-label {
         font-size: 10px;
         font-weight: 700;
-        letter-spacing: .1em;
+        letter-spacing: .08em;
         text-transform: uppercase;
-        color: rgba(230, 255, 253, .35) !important;
-        padding: 12px 14px 6px;
+        color: rgba(235,255,255,.72) !important;
+        padding: 12px 10px 6px;
         margin: 0;
       }
 
@@ -2421,84 +2417,72 @@
         cursor: pointer;
         display: flex !important;
         align-items: center !important;
-        gap: 12px !important;
-        color: rgba(230, 255, 253, .88) !important;
-        padding: 11px 14px !important;
+        gap: 10px !important;
+        color: #ecfdfc !important;
+        padding: 10px 12px !important;
         margin-bottom: 2px !important;
-        border-radius: 14px !important;
+        border-radius: 12px !important;
         border: 1px solid transparent !important;
-        background: transparent !important;
+        background: rgba(255,255,255,.04) !important;
         box-shadow: none !important;
         font-size: 13.5px !important;
-        font-weight: 600 !important;
-        letter-spacing: .01em;
-        transition: all .22s cubic-bezier(.4, 0, .2, 1) !important;
-        overflow: hidden;
+        font-weight: 500 !important;
+        transition: all .2s ease !important;
       }
       .menu-button::before {
         content: '';
         position: absolute;
-        left: 0;
+        left: -2px;
         top: 50%;
         transform: translateY(-50%) scaleY(0);
         width: 3px;
-        height: 60%;
-        border-radius: 0 999px 999px 0;
-        background: #00d4aa;
-        transition: transform .22s cubic-bezier(.4, 0, .2, 1);
+        height: 62%;
+        border-radius: 0 4px 4px 0;
+        background: #f4f7f7;
+        transition: transform .2s ease;
       }
-
       .menu-button:hover, .submenu-button:hover {
-        transform: translateX(0) !important;
-        background: rgba(0, 200, 190, .1) !important;
-        border-color: rgba(0, 200, 190, .18) !important;
-        color: #e6fffd !important;
-        box-shadow: 0 4px 16px rgba(0, 100, 101, .15) !important;
+        background: rgba(255,255,255,.14) !important;
+        border-color: rgba(255,255,255,.26) !important;
+        color: #ffffff !important;
       }
-      .menu-button:hover::before {
+      .menu-button:hover::before,
+      .menu-button:focus-visible::before {
         transform: translateY(-50%) scaleY(1);
       }
-
-      .menu-button:active, .submenu-button:active {
-        transform: scale(.98) !important;
-        background: rgba(0, 200, 190, .16) !important;
+      .menu-button:focus-visible, .submenu-button:focus-visible {
+        outline: 0;
+        box-shadow: 0 0 0 2px rgba(255,255,255,.25) !important;
       }
-
       .menu-icon {
-        width: 22px;
-        height: 22px;
-        display: grid;
-        place-items: center;
-        border-radius: 8px;
-        background: rgba(0, 200, 190, .12);
-        color: #00d4aa;
-        font-size: 13px;
+        width: 20px;
+        height: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        background: rgba(255,255,255,.14);
+        color: #ffffff;
+        font-size: 12px;
         flex-shrink: 0;
-        transition: all .22s ease;
       }
       .menu-button:hover .menu-icon {
-        background: rgba(0, 200, 190, .22);
-        box-shadow: 0 0 10px rgba(0, 212, 170, .25);
+        background: rgba(255,255,255,.24);
       }
-
       .menu-arrow {
         margin-left: auto;
         font-size: 11px;
-        opacity: .5;
-        transition: transform .28s cubic-bezier(.4, 0, .2, 1);
-      }
-      .menu-arrow.rotated {
-        transform: rotate(180deg);
+        opacity: .8;
       }
 
       .submenu {
         max-height: 0 !important;
         overflow: hidden !important;
-        padding-left: 18px !important;
+        padding-left: 14px !important;
         opacity: 0 !important;
-        margin-left: 12px !important;
-        border-left: 2px solid rgba(0, 200, 190, .15) !important;
-        transition: max-height .32s cubic-bezier(.4, 0, .2, 1), opacity .24s ease, padding .24s ease !important;
+        margin-left: 10px !important;
+        border-left: 1px solid rgba(255,255,255,.22) !important;
+        transition: max-height .28s ease, opacity .2s ease, padding .2s ease !important;
       }
       .submenu.open {
         max-height: 480px !important;
@@ -2506,57 +2490,46 @@
         padding-top: 4px !important;
         padding-bottom: 4px !important;
       }
-
       .submenu-button {
         font-size: 12.5px !important;
-        padding: 9px 12px !important;
+        padding: 8px 10px !important;
         border-radius: 10px !important;
-        color: rgba(230, 255, 253, .72) !important;
+        color: rgba(236,253,252,.9) !important;
+        background: transparent !important;
       }
       .submenu-button::before {
-        content: '';
-        width: 5px;
-        height: 5px;
-        border-radius: 999px;
-        background: rgba(0, 200, 190, .4);
-        flex-shrink: 0;
-        transition: all .22s ease;
-      }
-      .submenu-button:hover::before {
-        background: #00d4aa;
-        box-shadow: 0 0 8px rgba(0, 212, 170, .6);
-      }
-      .submenu-button:hover {
-        color: #e6fffd !important;
+        content: '•';
+        font-size: 10px;
+        color: rgba(255,255,255,.82);
       }
 
       .sidebar-divider {
         height: 1px;
-        margin: 8px 14px;
-        background: linear-gradient(90deg, transparent, rgba(0, 200, 190, .2), transparent);
+        margin: 10px 10px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,.28), transparent);
       }
 
       .logout-btn {
-        margin: auto 14px 16px !important;
-        width: calc(100% - 28px) !important;
-        border: 1px solid rgba(239, 68, 68, .3) !important;
-        background: rgba(127, 29, 29, .12) !important;
-        color: #fecaca !important;
-        font-weight: 700 !important;
+        margin: auto 12px 14px !important;
+        width: calc(100% - 24px) !important;
+        border: 1px solid rgba(255,255,255,.34) !important;
+        background: rgba(255,255,255,.1) !important;
+        color: #ffffff !important;
+        font-weight: 600 !important;
         cursor: pointer !important;
-        border-radius: 14px !important;
+        border-radius: 12px !important;
         padding: 12px 14px !important;
         font-size: 13px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         gap: 8px !important;
-        transition: all .22s ease !important;
+        transition: all .2s ease !important;
       }
       .logout-btn:hover {
-        background: rgba(127, 29, 29, .24) !important;
-        border-color: rgba(239, 68, 68, .5) !important;
-        box-shadow: 0 4px 18px rgba(239, 68, 68, .12) !important;
+        background: rgba(255,255,255,.2) !important;
+        border-color: rgba(255,255,255,.45) !important;
+        box-shadow: 0 6px 14px rgba(0,0,0,.15) !important;
         transform: translateY(-1px) !important;
       }
 
@@ -6517,12 +6490,20 @@
         return (
           <div className="app-shell">
             <aside className={`sidebar ${menuOpen ? 'open' : ''}`}>
-              <div className="sidebar-header">MENÚ OPERATIVO</div>
+              <div className="sidebar-header">
+                <div className="sidebar-header-logo" aria-hidden="true" />
+                <div className="sidebar-header-text">
+                  <div className="sidebar-header-title">Masterson Seguridad</div>
+                  <div className="sidebar-header-sub">Administrador</div>
+                </div>
+              </div>
               <div className="menu">
-                <button className="menu-button" onClick={() => { setSelectedForm(isGerencia ? 'dashboard-gerencia' : (isTechnicalOnly ? 'dashboard-tecnica' : 'home')); setSelectedService(null); setTipoAccion(''); closeSidebar(); }}>Inicio</button>
+                <div className="sidebar-section-label">Inicio</div>
+                <button className="menu-button" onClick={() => { setSelectedForm(isGerencia ? 'dashboard-gerencia' : (isTechnicalOnly ? 'dashboard-tecnica' : 'home')); setSelectedService(null); setTipoAccion(''); closeSidebar(); }}><span className="menu-icon">🏠</span><span>Inicio</span></button>
                 {!isGerencia && !isMobile && !isTechnicalOnly && (
                   <>
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}>Nuevo {openMenus.nuevo ? '▾' : '▸'}</button>
+                    <div className="sidebar-section-label">Operaciones</div>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}><span className="menu-icon">➕</span><span>Nuevo</span><span className="menu-arrow">{openMenus.nuevo ? '▾' : '▸'}</span></button>
                     <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
                       <button className="submenu-button" onClick={() => selectAction('Nuevo Servicio')}>Servicio</button>
                       <button className="submenu-button" onClick={() => selectAction('Obra')}>Obra</button>
@@ -6531,7 +6512,7 @@
                       <button className="submenu-button" onClick={() => selectAction('Movimiento de Obra')}>Movimiento de obra</button>
                       <button className="submenu-button" onClick={() => selectAction('Baja')}>Baja de Servicio</button>
                     </div>
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, fact: !p.fact }))}>Facturación {openMenus.fact ? '▾' : '▸'}</button>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, fact: !p.fact }))}><span className="menu-icon">🧾</span><span>Facturación</span><span className="menu-arrow">{openMenus.fact ? '▾' : '▸'}</span></button>
                     <div className={`submenu ${openMenus.fact ? 'open' : ''}`}>
                       <button className="submenu-button" onClick={() => selectAction('Agregado')}>Equipos agregados</button>
                       <button className="submenu-button" onClick={() => selectAction('Nuevo Servicio')}>Nuevo servicio</button>
@@ -6539,23 +6520,27 @@
                       <button className="submenu-button" onClick={() => selectAction('Obra')}>Nueva Obra</button>
                       <button className="submenu-button" onClick={() => selectAction('Movimiento de Obra')}>Movimiento de Obra</button>
                     </div>
-                    <button className="menu-button" onClick={() => selectAction('Charla')}>Charlas informativas</button>
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, historial: !p.historial }))}>Historial {openMenus.historial ? '▾' : '▸'}</button>
+                    <button className="menu-button" onClick={() => selectAction('Charla')}><span className="menu-icon">💬</span><span>Charlas informativas</span></button>
+                    <div className="sidebar-divider" />
+                    <div className="sidebar-section-label">Gestión</div>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, historial: !p.historial }))}><span className="menu-icon">📚</span><span>Historial</span><span className="menu-arrow">{openMenus.historial ? '▾' : '▸'}</span></button>
                     <div className={`submenu ${openMenus.historial ? 'open' : ''}`}>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial-charlas'); closeSidebar(); }}>Historial de Charlas</button>
                     </div>
-                    {ENABLE_CLIENT_TRACKING_VIEW && isAdminUser && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}>Vista Clientes</button>}
-                    {isAdminUser && <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}>Vista Gerencia</button>}
+                    {ENABLE_CLIENT_TRACKING_VIEW && isAdminUser && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}><span className="menu-icon">👥</span><span>Vista Clientes</span></button>}
+                    {isAdminUser && <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}><span className="menu-icon">📊</span><span>Vista Gerencia</span></button>}
                   </>
                 )}
                 {isTechnicalOnly && (
                   <>
-                    <button className="menu-button" onClick={() => { setSelectedForm('dashboard-tecnica'); closeSidebar(); }}>Dashboard Técnica</button>
-                    <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Detalle de Trabajos</button>
+                    <div className="sidebar-section-label">Gestión</div>
+                    <button className="menu-button" onClick={() => { setSelectedForm('dashboard-tecnica'); closeSidebar(); }}><span className="menu-icon">🛠️</span><span>Dashboard Técnica</span></button>
+                    <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">🗂️</span><span>Detalle de Trabajos</span></button>
                   </>
                 )}
-                <button className="menu-button" onClick={openTicketsView}>Tickets</button>
+                <div className="sidebar-divider" />
+                <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
                 <div className="sidebar-signature" aria-label="signature"><strong>v1.0 | Powered by Alfonso Carballo</strong></div>
               </div>
