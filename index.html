@@ -679,6 +679,214 @@
         gap: 8px;
         flex-wrap: wrap;
       }
+      .seller-services-shell {
+        position: relative;
+        border: 1px solid rgba(11, 78, 73, .16);
+        border-radius: 20px;
+        padding: 20px;
+        background: linear-gradient(180deg, #f7fbfb 0%, #eef4f4 100%);
+        box-shadow: 0 12px 24px rgba(8, 43, 42, .10);
+      }
+      .seller-services-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 14px;
+        margin-bottom: 14px;
+      }
+      .seller-services-title {
+        margin: 0;
+        font-size: clamp(1.4rem, 2.4vw, 2rem);
+        font-weight: 800;
+        color: #0b4e49;
+      }
+      .seller-services-title .seller-name {
+        color: #ff8c00;
+      }
+      .seller-services-subtitle {
+        margin: 8px 0 0;
+        color: #1f3c42;
+        font-size: 1.08rem;
+      }
+      .seller-services-subtitle b {
+        color: #0f8084;
+      }
+      .seller-filter-wrap {
+        position: relative;
+      }
+      .seller-filter-toggle {
+        min-height: 46px;
+        border: 1px solid rgba(0,100,101,.85);
+        border-radius: 14px;
+        background: #006465;
+        color: #ffffff;
+        font-weight: 700;
+        padding: 10px 16px;
+        box-shadow: 0 10px 20px rgba(0,100,101,.22);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        list-style: none;
+      }
+      .seller-filter-wrap > summary::-webkit-details-marker { display: none; }
+      .seller-filter-toggle i,
+      .seller-filter-toggle svg { width: 16px; height: 16px; }
+      .seller-filter-popover {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        width: min(420px, 88vw);
+        z-index: 40;
+        border: 1px solid rgba(11, 78, 73, .18);
+        border-radius: 20px;
+        background: #ffffff;
+        box-shadow: 0 18px 36px rgba(9, 48, 50, .2);
+        padding: 16px;
+      }
+      .seller-filter-popover::before {
+        content: '';
+        position: absolute;
+        top: -8px;
+        right: 32px;
+        width: 14px;
+        height: 14px;
+        background: #ffffff;
+        border-left: 1px solid rgba(11, 78, 73, .18);
+        border-top: 1px solid rgba(11, 78, 73, .18);
+        transform: rotate(45deg);
+      }
+      .seller-filter-group { margin-bottom: 14px; }
+      .seller-filter-group:last-child { margin-bottom: 0; }
+      .seller-filter-group h4 {
+        margin: 0 0 10px;
+        color: #0b4e49;
+        font-size: 1.05rem;
+      }
+      .seller-filter-option {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        font-size: 1rem;
+        color: #21353c;
+        margin-bottom: 8px;
+      }
+      .seller-filter-option input { width: 18px; height: 18px; accent-color: #006465; }
+      .seller-filter-dates {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .seller-filter-dates .field { gap: 4px; }
+      .seller-filter-dates label { color: #2a4448; font-size: .9rem; }
+      .seller-filter-apply {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid rgba(255,140,0,.55);
+        background: #ff8c00;
+        color: #ffffff;
+        font-weight: 800;
+        min-height: 44px;
+      }
+      .seller-services-summary {
+        margin-bottom: 12px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: rgba(0, 100, 101, .08);
+        border: 1px solid rgba(0, 100, 101, .15);
+        color: #0b4e49;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .seller-services-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+      .seller-service-card {
+        background: #ffffff;
+        border: 1px solid rgba(11, 78, 73, .14);
+        border-radius: 16px;
+        box-shadow: 0 8px 18px rgba(10, 58, 58, .10);
+        padding: 14px;
+        display: grid;
+        gap: 10px;
+      }
+      .seller-service-head h3 {
+        margin: 0;
+        color: #0b4e49;
+        font-size: 1.45rem;
+        line-height: 1.15;
+      }
+      .seller-service-id {
+        margin-top: 6px;
+        color: #5b7478;
+        font-weight: 600;
+      }
+      .seller-service-meta {
+        border-top: 1px solid #e7efef;
+        border-bottom: 1px solid #e7efef;
+        padding: 10px 0;
+        display: grid;
+        gap: 8px;
+      }
+      .seller-meta-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        color: #36555b;
+      }
+      .seller-meta-label { color: #49656a; }
+      .seller-meta-value { color: #1f3d42; font-weight: 600; }
+      .seller-meta-value.gain {
+        color: #006465;
+        font-size: 1.9rem;
+        font-weight: 800;
+        line-height: 1;
+      }
+      .seller-service-foot {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+      }
+      .seller-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: #0b4e49;
+        font-weight: 700;
+      }
+      .seller-status-icon {
+        width: 22px;
+        height: 22px;
+        border-radius: 7px;
+        background: #006465;
+        color: #fff;
+        display: inline-grid;
+        place-items: center;
+        font-size: 13px;
+      }
+      .seller-service-card .edit-btn {
+        background: linear-gradient(135deg, #006465, #0b4e49);
+        border-color: rgba(0,100,101,.85);
+        color: #fff;
+        border-radius: 12px;
+        min-height: 38px;
+        padding: 0 14px;
+      }
+      @media (max-width: 1180px) {
+        .seller-services-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      @media (max-width: 768px) {
+        .seller-services-shell { padding: 14px; }
+        .seller-services-header { flex-direction: column; align-items: stretch; }
+        .seller-filter-popover { position: static; width: 100%; margin-top: 8px; }
+        .seller-filter-popover::before { display: none; }
+        .seller-services-grid { grid-template-columns: 1fr; }
+      }
       .history-toolbar {
         display: grid;
         grid-template-columns: minmax(260px, 2fr) repeat(2, minmax(170px, 1fr)) auto;
@@ -6886,62 +7094,84 @@
 
                 ) : effectiveSelectedForm === 'ranking-comercial' ? (
                   <section className="panel">
-                    <h2>Listado de servicios por vendedor</h2>
-                    <div className="ranking-toolbar">
-                      <div className="hint" style={{ marginBottom: 0 }}>
-                        Vendedor seleccionado: <b style={{ color: '#e6fffd' }}>{selectedCommercial || 'Sin asignar'}</b>
-                      </div>
-                      <button className="pdf-btn" type="button" onClick={() => setSelectedForm('home')}>← Volver a Inicio</button>
-                    </div>
-                    <div className="ranking-grid">
-                      {[
-                        { key: 'active', label: 'Servicios Activos' },
-                        { key: 'installation', label: 'En instalación' },
-                        { key: 'baja', label: 'Baja' },
-                      ].map((section) => {
-                        const list = getServicesByCommercial(section.key, selectedCommercial || 'Sin asignar');
-                        return (
-                          <div className="ranking-section" key={section.key}>
-                            <h3>{section.label} · {list.length}</h3>
-                            {list.length === 0 ? (
-                              <div className="hint" style={{ color: '#d1faf5', marginBottom: 0 }}>Sin servicios en esta sección.</div>
-                            ) : (
-                              <div className="ranking-services">
-                                {list.map((service) => {
-                                  const allowedEdit = canEditService(service);
-                                  const showRestriction = !isAdminUser && !allowedEdit;
-                                  return (
-                                    <div className="ranking-service-row" key={service.id}>
+                    {(() => {
+                      const sellerName = selectedCommercial || 'Sin asignar';
+                      const list = getServicesByCommercial('active', sellerName);
+                      return (
+                        <div className="seller-services-shell">
+                          <div className="seller-services-header">
+                            <div>
+                              <h2 className="seller-services-title">Servicios activos por <span className="seller-name">{sellerName}</span></h2>
+                              <p className="seller-services-subtitle">Vendedor seleccionado: <b>{sellerName}</b></p>
+                            </div>
+                            <details className="seller-filter-wrap">
+                              <summary className="seller-filter-toggle"><i data-lucide="sliders-horizontal"></i> Filtrar servicios</summary>
+                              <div className="seller-filter-popover">
+                                <div className="seller-filter-group">
+                                  <h4>Ordenar por</h4>
+                                  <label className="seller-filter-option"><input type="radio" name="seller-order" defaultChecked /> Fecha de alta (más reciente)</label>
+                                  <label className="seller-filter-option"><input type="radio" name="seller-order" /> Fecha de alta (más antiguo)</label>
+                                  <label className="seller-filter-option"><input type="radio" name="seller-order" /> Mayor ganancia estimada</label>
+                                  <label className="seller-filter-option"><input type="radio" name="seller-order" /> Menor ganancia estimada</label>
+                                </div>
+                                <div className="seller-filter-group">
+                                  <h4>Estado del servicio</h4>
+                                  <label className="seller-filter-option"><input type="checkbox" defaultChecked /> Activo</label>
+                                  <label className="seller-filter-option"><input type="checkbox" defaultChecked /> En instalación</label>
+                                  <label className="seller-filter-option"><input type="checkbox" defaultChecked /> Suspendido</label>
+                                </div>
+                                <div className="seller-filter-group">
+                                  <h4>Periodo</h4>
+                                  <div className="seller-filter-dates">
+                                    <div className="field"><label>Fecha desde</label><input type="date" /></div>
+                                    <div className="field"><label>Fecha hasta</label><input type="date" /></div>
+                                  </div>
+                                </div>
+                                <button type="button" className="seller-filter-apply">Aplicar filtros</button>
+                              </div>
+                            </details>
+                          </div>
+                          <div className="seller-services-summary"><span className="seller-status-icon">✓</span> Servicios Activos · {list.length}</div>
+                          {list.length === 0 ? (
+                            <div className="hint" style={{ marginBottom: 0, color: '#2d5558' }}>No hay servicios activos para este vendedor.</div>
+                          ) : (
+                            <div className="seller-services-grid">
+                              {list.map((service) => {
+                                const allowedEdit = canEditService(service);
+                                const showRestriction = !isAdminUser && !allowedEdit;
+                                const serviceStatus = service.status || service.estado || 'Activo';
+                                const gainRaw = service.importeMensualServicioSinIva || service.costoInstalacionUsdSinIva || service.costo || 0;
+                                const gainValue = Number(String(gainRaw).replace(/[^\d.-]/g, '')) || 0;
+                                return (
+                                  <article className="seller-service-card" key={service.id}>
+                                    <div className="seller-service-head">
+                                      <h3>{service.nombreServicio || 'Servicio sin nombre'}</h3>
+                                      <div className="seller-service-id">ID {service.clienteId || '-'}</div>
+                                    </div>
+                                    <div className="seller-service-meta">
+                                      <div className="seller-meta-row"><span className="seller-meta-label">Fecha de alta</span><span className="seller-meta-value">{service.fechaAltaServicio || service.fechaAlta || service.fechaEspecificaInicio || '-'}</span></div>
+                                      <div className="seller-meta-row"><span className="seller-meta-label">Ganancia estimada</span><span className="seller-meta-value gain">${gainValue.toLocaleString('es-UY')}</span></div>
+                                    </div>
+                                    <div className="seller-service-foot">
+                                      <span className="seller-status"><span className="seller-status-icon">✓</span> Estado {serviceStatus}</span>
                                       <button
                                         type="button"
-                                        className="ranking-service-btn"
-                                        onClick={() => {
-                                          setSelectedService(service);
-                                          setSelectedForm('historial');
-                                        }}
+                                        className="edit-btn"
+                                        disabled={!allowedEdit}
+                                        onClick={() => startEditService(service)}
                                       >
-                                        {service.nombreServicio || 'Servicio sin nombre'} · ID {service.clienteId || '-'}
+                                        {allowedEdit ? '✎ Editar servicio' : '🔒 Editar'}
                                       </button>
-                                      <div className="ranking-service-actions">
-                                        <button
-                                          type="button"
-                                          className="edit-btn"
-                                          disabled={!allowedEdit}
-                                          onClick={() => startEditService(service)}
-                                        >
-                                          {allowedEdit ? '✎ Editar servicio' : '🔒 Editar'}
-                                        </button>
-                                        {showRestriction && <span className="lock-hint">🔒 Solo lectura</span>}
-                                      </div>
                                     </div>
-                                  );
-                                })}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
+                                    {showRestriction && <span className="lock-hint">🔒 Solo lectura</span>}
+                                  </article>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </section>
 ) : effectiveSelectedForm === 'historial-charlas' ? (
                   <section className="panel">
