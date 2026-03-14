@@ -6171,9 +6171,6 @@
               setUserRole(rol);
               setUserArea(area);
               setUserData({ nombre, rol, area });
-              if ((profile?.rol || '').toLowerCase() === 'gerentes') {
-                setSelectedForm('dashboard-gerencia');
-              }
             } catch (err) {
               console.error('Error leyendo config_usuarios:', err);
               setUserRole('admin');
@@ -6365,18 +6362,12 @@
         }, [userRole, userArea, isVendedor]);
 
         useEffect(() => {
-          if (isGerencia && !['dashboard-gerencia', 'perfil', 'notificaciones'].includes(selectedForm)) {
-            setSelectedForm('dashboard-gerencia');
-            setSelectedService(null);
-            setTipoAccion('');
-            return;
-          }
-          if (isTechnicalOnly && !['dashboard-tecnica', 'historial', 'perfil'].includes(selectedForm)) {
-            setSelectedForm('dashboard-tecnica');
+          if (!selectedForm) {
+            setSelectedForm('home');
             setSelectedService(null);
             setTipoAccion('');
           }
-        }, [isGerencia, isTechnicalOnly, selectedForm]);
+        }, [selectedForm]);
 
         useEffect(() => {
           if (skipHistoryPushRef.current) {
@@ -6389,7 +6380,7 @@
           });
         }, [selectedForm]);
 
-        const effectiveSelectedForm = isGerencia ? (['perfil', 'notificaciones'].includes(selectedForm) ? selectedForm : 'dashboard-gerencia') : (isTechnicalOnly && selectedForm === 'home' ? 'dashboard-tecnica' : selectedForm);
+        const effectiveSelectedForm = selectedForm;
 
         const [formOpenAudit, setFormOpenAudit] = useState(null);
         const currentUserName = useMemo(() => (userData.nombre || (user?.email || '').split('@')[0] || 'Usuario').trim(), [userData, user]);
@@ -6925,12 +6916,6 @@
                 <button type="button" className="mobile-list-button" onClick={() => { setMobileTab('historial'); setSelectedForm('historial-charlas'); setSelectedService(null); }}>Ver historial de charlas</button>
                 <div style={{ height: 8 }} />
                 <button type="button" className="mobile-list-button" onClick={() => setSelectedForm('ranking-comercial')}>Ranking comercial</button>
-                {isAdminUser && (
-                  <>
-                    <div style={{ height: 8 }} />
-                    <button type="button" className="mobile-list-button" onClick={() => setSelectedForm('dashboard-gerencia')}>Dashboard gerencia</button>
-                  </>
-                )}
               </div>
             </section>
           );
@@ -7276,8 +7261,8 @@
               </div>
               <div className="menu">
                 <div className="sidebar-section-label">Inicio</div>
-                {!isTechnicalOnly && <button className="menu-button" onClick={() => { setSelectedForm(isGerencia ? 'dashboard-gerencia' : 'home'); setSelectedService(null); setTipoAccion(''); closeSidebar(); }}><span className="menu-icon">🏠</span><span>Inicio</span></button>}
-                {!isGerencia && !isMobile && !isTechnicalOnly && (
+                <button className="menu-button" onClick={() => { setSelectedForm('home'); setSelectedService(null); setTipoAccion(''); closeSidebar(); }}><span className="menu-icon">🏠</span><span>Inicio</span></button>
+                {!isMobile && (
                   <>
                     <div className="sidebar-section-label">Operaciones</div>
                     <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}><span className="menu-icon">➕</span><span>Nuevo</span><span className="menu-arrow">{openMenus.nuevo ? '▾' : '▸'}</span></button>
@@ -7305,18 +7290,12 @@
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial-charlas'); closeSidebar(); }}>Historial de Charlas</button>
                     </div>
-                    {ENABLE_CLIENT_TRACKING_VIEW && isAdminUser && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}><span className="menu-icon">👥</span><span>Vista Clientes</span></button>}
-                    {isAdminUser && <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}><span className="menu-icon">📊</span><span>Vista Gerencia</span></button>}
-                  </>
-                )}
-                {isTechnicalOnly && (
-                  <>
-                    <div className="sidebar-section-label">Gestión</div>
-                    <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">🗂️</span><span>Detalle de Trabajos</span></button>
+                    {ENABLE_CLIENT_TRACKING_VIEW && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}><span className="menu-icon">👥</span><span>Vista Clientes</span></button>}
+                    <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}><span className="menu-icon">📊</span><span>Vista Gerencia</span></button>
                   </>
                 )}
                 <div className="sidebar-divider" />
-                {!isTechnicalOnly && <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>}
+                <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
                 <div className="sidebar-signature" aria-label="signature"><strong>v1.0 | Powered by Alfonso Carballo</strong></div>
               </div>
@@ -7330,12 +7309,12 @@
                   <div className={`toast ${notificacion.tipo === 'error' ? 'error' : ''}`}>{`${currentUserName || 'Usuario'}: ${notificacion.mensaje}`}</div>
                 )}
                 {!isMobile && <button className="burger" aria-label="Abrir menú" onClick={toggleSidebar}><span className="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>}
-                {!isMobile && (selectedForm !== 'home' || !!selectedService) && <button className="topbar-back-btn" type="button" aria-label="Volver" onClick={goBackOneStep}><i data-lucide="arrow-left" /></button>}
+                {!isMobile && (effectiveSelectedForm !== 'home' || !!selectedService) && <button className="topbar-back-btn" type="button" aria-label="Volver" onClick={goBackOneStep}><i data-lucide="arrow-left" /></button>}
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
                   <p className="subtitle-voga">{topbarSubtitle}</p>
                 </div>
-                {!isGerencia && !isTechnicalOnly && !isMobile && (
+                {!isMobile && (
                   <div className="top-search">
                     <button className="topbar-action-btn top-search-toggle" type="button" aria-label="Buscar" onClick={() => setDesktopSearchOpen((prev) => !prev)}>
                       <span className="topbar-action-icon"><i data-lucide="search" /></span>
@@ -7395,8 +7374,7 @@
                 )}
                 {!isMobile && (
                   <div className="topbar-actions">
-                    {isAdminUser && (
-                      <div className="topbar-notify-wrap" ref={desktopBellRef}>
+                    <div className="topbar-notify-wrap" ref={desktopBellRef}>
                         <button className="topbar-action-btn" type="button" aria-label="Notificaciones" onClick={toggleDesktopNotifications}>
                           <span className="topbar-action-icon"><i data-lucide="bell" /></span>
                         </button>
@@ -7421,7 +7399,6 @@
                           </div>
                         )}
                       </div>
-                    )}
                     <button className="topbar-action-btn" type="button" aria-label="Perfil" onClick={openProfileView}>
                       <span className="topbar-action-icon"><i data-lucide="user-round" /></span>
                     </button>
@@ -7621,7 +7598,7 @@
                       )}
                     </article>
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                      <button className="edit-btn profile-back-btn" type="button" onClick={() => { setSelectedForm(isGerencia ? 'dashboard-gerencia' : 'home'); setSelectedService(null); setTipoAccion(''); }}>Volver a inicio</button>
+                      <button className="edit-btn profile-back-btn" type="button" onClick={() => { setSelectedForm('home'); setSelectedService(null); setTipoAccion(''); }}>Volver a inicio</button>
                       <button className="logout-btn profile-logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar sesión</button>
                     </div>
                   </section>
@@ -8455,11 +8432,11 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                 <>
                   <nav className="mobile-bottom-nav mobile-bottom-nav-simple">
                     <button
-                      className={((isGerencia && effectiveSelectedForm === 'dashboard-gerencia') || (!isGerencia && selectedForm === 'home')) ? 'active' : ''}
+                      className={effectiveSelectedForm === 'home' ? 'active' : ''}
                       type="button"
                       onClick={() => {
                         setMobileTab('home');
-                        setSelectedForm(isGerencia ? 'dashboard-gerencia' : 'home');
+                        setSelectedForm('home');
                         setSelectedService(null);
                         setTipoAccion('');
                         setMobileBellOpen(false);
