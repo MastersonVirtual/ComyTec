@@ -5005,10 +5005,19 @@
         const monthStart = new Date(now);
         monthStart.setMonth(now.getMonth() - 1);
 
-        const estadoCounts = STATUS_OPTIONS.map((status) => ({
-          status,
-          total: rows.filter((r) => String(r.status || r.estado || '').trim() === status).length,
-        }));
+        const normalizeStatus = (row) => normalizeLegacyStatusName(row?.status || row?.estado || 'pendiente').toLowerCase();
+        const isTrabajoNuevo = (row) => {
+          const statusRaw = normalizeStatus(row);
+          return statusRaw === 'pendiente' || statusRaw.includes('nuevo') || statusRaw.includes('ingres');
+        };
+        const isTrabajoFinalizado = (row) => {
+          const statusRaw = normalizeStatus(row);
+          return statusRaw.includes('final') || statusRaw.includes('complet') || statusRaw.includes('realiz') || statusRaw.includes('dado de alta');
+        };
+
+        const nuevos = rows.filter((r) => isTrabajoNuevo(r)).length;
+        const finalizados = rows.filter((r) => isTrabajoFinalizado(r)).length;
+        const enProceso = rows.length - nuevos - finalizados;
 
         const thisWeek = rows.filter((r) => {
           const ts = r.creadoEn?.seconds ? new Date(r.creadoEn.seconds * 1000) : null;
@@ -5023,20 +5032,17 @@
         return (
           <section className="panel">
             <h2>Dashboard Área Técnica</h2>
-            <div className="hint">Resumen de estado de trabajos con visibilidad total de datos comerciales.</div>
+            <div className="hint">Vista solo lectura con resumen de ESTADO DE TRABAJOS y seguimiento operativo semanal/mensual.</div>
             <div className="compact-grid" style={{ marginBottom: 12 }}>
-              <article className="widget"><h4>Trabajos nuevos (7 días)</h4><div className="gerencia-value">{thisWeek}</div></article>
-              <article className="widget"><h4>Trabajos nuevos (30 días)</h4><div className="gerencia-value">{thisMonth}</div></article>
-              <article className="widget"><h4>Trabajos cargados</h4><div className="gerencia-value">{rows.length}</div></article>
+              <article className="widget"><h4>Trabajos nuevos cargados</h4><div className="gerencia-value">{nuevos}</div></article>
+              <article className="widget"><h4>Trabajos en proceso</h4><div className="gerencia-value">{Math.max(0, enProceso)}</div></article>
+              <article className="widget"><h4>Trabajos finalizados</h4><div className="gerencia-value">{finalizados}</div></article>
             </div>
-            <h3 style={{ marginTop: 0 }}>Estado de trabajos</h3>
+            <h3 style={{ marginTop: 0 }}>Indicadores del Área Técnica</h3>
             <div className="gerencia-status-list">
-              {estadoCounts.map((item) => (
-                <div className="gerencia-item" key={`tec-${item.status}`}>
-                  <span>{item.status}</span>
-                  <b>{item.total}</b>
-                </div>
-              ))}
+              <div className="gerencia-item"><span>Trabajos nuevos (últimos 7 días)</span><b>{thisWeek}</b></div>
+              <div className="gerencia-item"><span>Trabajos nuevos (últimos 30 días)</span><b>{thisMonth}</b></div>
+              <div className="gerencia-item"><span>Total de trabajos registrados</span><b>{rows.length}</b></div>
             </div>
             <div style={{ marginTop: 14 }}>
               <button type="button" className="save-btn" onClick={onGoToDetalle}>Ver detalle de trabajos</button>
@@ -5044,6 +5050,7 @@
           </section>
         );
       }
+
 
       function TrackingView() {
         const [trackingData, setTrackingData] = useState(null);
@@ -5273,6 +5280,8 @@
         const [ticketPrioridad, setTicketPrioridad] = useState('Media');
         const [ticketImagenes, setTicketImagenes] = useState([]);
         const [ticketDragOver, setTicketDragOver] = useState(false);
+        const [technicalDocDragOver, setTechnicalDocDragOver] = useState(false);
+        const [uploadingTechnicalDoc, setUploadingTechnicalDoc] = useState(false);
         const [ticketSaving, setTicketSaving] = useState(false);
         const [imageViewerSrc, setImageViewerSrc] = useState('');
         const [ticketsHistorial, setTicketsHistorial] = useState([]);
@@ -6524,6 +6533,47 @@
           reader.readAsDataURL(file);
         }
 
+        async function handleTechnicalDocumentUpload(file, service) {
+          if (!file || !service?.id || !isTechnicalOnly) return;
+          if (!String(file.type || '').includes('pdf')) {
+            setNotificacion({ mensaje: 'Solo se permiten archivos PDF para documentos técnicos.', tipo: 'error' });
+            return;
+          }
+          if (file.size > 10 * 1024 * 1024) {
+            setNotificacion({ mensaje: 'El PDF supera el límite de 10MB.', tipo: 'error' });
+            return;
+          }
+          setUploadingTechnicalDoc(true);
+          try {
+            const dataUrl = await new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(String(reader.result || ''));
+              reader.onerror = () => reject(new Error('No se pudo leer el archivo PDF.'));
+              reader.readAsDataURL(file);
+            });
+            const nuevoAdjunto = {
+              id: `doc-${Date.now()}`,
+              name: file.name || 'documento.pdf',
+              mimeType: file.type || 'application/pdf',
+              url: dataUrl,
+              uploadedAt: new Date().toISOString(),
+              uploadedBy: currentUserName || 'Área Técnica',
+            };
+            const prevAdjuntos = Array.isArray(service.documentosAdjuntos) ? service.documentosAdjuntos : [];
+            const nextAdjuntos = [...prevAdjuntos, nuevoAdjunto].slice(-20);
+            await db.collection('operaciones').doc(service.id).set({ documentosAdjuntos: nextAdjuntos }, { merge: true });
+            setSelectedService((prev) => (prev?.id === service.id ? { ...prev, documentosAdjuntos: nextAdjuntos } : prev));
+            setRows((prev) => prev.map((row) => (row.id === service.id ? { ...row, documentosAdjuntos: nextAdjuntos } : row)));
+            setNotificacion({ mensaje: 'Documento PDF adjuntado correctamente.', tipo: 'ok' });
+          } catch (error) {
+            console.error('Error cargando documento técnico:', error);
+            setNotificacion({ mensaje: 'No se pudo adjuntar el documento PDF.', tipo: 'error' });
+          } finally {
+            setUploadingTechnicalDoc(false);
+            setTechnicalDocDragOver(false);
+          }
+        }
+
         function setObraField(key, value) {
           setObraForm((prev) => ({ ...prev, [key]: value }));
         }
@@ -7226,7 +7276,7 @@
               </div>
               <div className="menu">
                 <div className="sidebar-section-label">Inicio</div>
-                <button className="menu-button" onClick={() => { setSelectedForm(isGerencia ? 'dashboard-gerencia' : (isTechnicalOnly ? 'dashboard-tecnica' : 'home')); setSelectedService(null); setTipoAccion(''); closeSidebar(); }}><span className="menu-icon">🏠</span><span>Inicio</span></button>
+                {!isTechnicalOnly && <button className="menu-button" onClick={() => { setSelectedForm(isGerencia ? 'dashboard-gerencia' : 'home'); setSelectedService(null); setTipoAccion(''); closeSidebar(); }}><span className="menu-icon">🏠</span><span>Inicio</span></button>}
                 {!isGerencia && !isMobile && !isTechnicalOnly && (
                   <>
                     <div className="sidebar-section-label">Operaciones</div>
@@ -7262,12 +7312,11 @@
                 {isTechnicalOnly && (
                   <>
                     <div className="sidebar-section-label">Gestión</div>
-                    <button className="menu-button" onClick={() => { setSelectedForm('dashboard-tecnica'); closeSidebar(); }}><span className="menu-icon">🛠️</span><span>Dashboard Técnica</span></button>
                     <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">🗂️</span><span>Detalle de Trabajos</span></button>
                   </>
                 )}
                 <div className="sidebar-divider" />
-                <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>
+                {!isTechnicalOnly && <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>}
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
                 <div className="sidebar-signature" aria-label="signature"><strong>v1.0 | Powered by Alfonso Carballo</strong></div>
               </div>
@@ -7926,10 +7975,10 @@
                           <button
                             className="edit-btn"
                             type="button"
-                            disabled={!canEditService(selectedService)}
+                            disabled={isTechnicalOnly || !canEditService(selectedService)}
                             onClick={() => startEditService(selectedService)}
                           >
-                            {canEditService(selectedService) ? '✎ Editar servicio' : '🔒 Editar'}
+                            {isTechnicalOnly ? '🔒 Solo lectura técnica' : (canEditService(selectedService) ? '✎ Editar servicio' : '🔒 Editar')}
                           </button>
                           {isAdminUser && (
                             <button
@@ -7952,6 +8001,51 @@
                         <div className="widget full"><h4>Observaciones y Excepciones</h4><div className="detail-box">Observaciones: {selectedService.observacionesComentarios || '-'}
 
 Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
+                        {isTechnicalOnly && (
+                          <div className="widget full">
+                            <h4>Documentos adjuntos del trabajo (PDF)</h4>
+                            <div className="hint">Vista técnica de consulta: podés adjuntar presupuestos/documentos PDF sin editar datos del trabajo.</div>
+                            <div
+                              className={`ticket-upload-dropzone ${technicalDocDragOver ? 'dragover' : ''}`}
+                              onDragOver={(e) => { e.preventDefault(); setTechnicalDocDragOver(true); }}
+                              onDragLeave={(e) => { e.preventDefault(); setTechnicalDocDragOver(false); }}
+                              onDrop={(e) => {
+                                e.preventDefault();
+                                setTechnicalDocDragOver(false);
+                                const file = e.dataTransfer?.files?.[0];
+                                if (file) handleTechnicalDocumentUpload(file, selectedService);
+                              }}
+                            >
+                              Arrastrá y soltá un PDF aquí o usá el selector de archivo.
+                            </div>
+                            <div className="field" style={{ marginTop: 8 }}>
+                              <label>Seleccionar documento PDF</label>
+                              <input
+                                type="file"
+                                accept="application/pdf"
+                                disabled={uploadingTechnicalDoc}
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) handleTechnicalDocumentUpload(file, selectedService);
+                                  e.target.value = '';
+                                }}
+                              />
+                            </div>
+                            {uploadingTechnicalDoc && <div className="hint" style={{ marginBottom: 0 }}>Subiendo documento...</div>}
+                            {!Array.isArray(selectedService.documentosAdjuntos) || selectedService.documentosAdjuntos.length === 0 ? (
+                              <div className="hint" style={{ marginBottom: 0 }}>Aún no hay documentos adjuntos para este trabajo.</div>
+                            ) : (
+                              <div className="gerencia-status-list" style={{ marginTop: 8 }}>
+                                {selectedService.documentosAdjuntos.map((doc, idx) => (
+                                  <div className="gerencia-item" key={`doc-tecnico-${doc.id || idx}`}>
+                                    <span>{doc.name || `Documento ${idx + 1}`}</span>
+                                    {doc.url ? <a className="link-btn" href={doc.url} target="_blank" rel="noreferrer">Abrir PDF</a> : <b>Sin enlace</b>}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
                         <div className="widget full">
                           <h4>Micro-Historial de Cambios</h4>
                           {!Array.isArray(selectedService.logs_cambios) || selectedService.logs_cambios.length === 0 ? (
