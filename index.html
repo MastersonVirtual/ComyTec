@@ -3337,7 +3337,7 @@
       const auth = firebase.auth();
 
       const ACCIONES = ['Nuevo Servicio', 'Novación', 'Obra', 'Agregado', 'Movimiento de Obra', 'Baja', 'Charla'];
-      const STATUS_OPTIONS = ['Pendiente', 'En curso', 'En espera', 'Completado', 'Cancelado', 'Pausado'];
+      const STATUS_OPTIONS = ['Pendiente', 'Presupuesto enviado', 'Aprobado', 'En agenda', 'En instalación', 'En progreso', 'Finalizado', 'Cancelado', 'En mantenimiento'];
       const PRELOADED_SERVICES_BASE = [
         { numero: '0001', nombreServicio: 'Tropicana', direccionServicio: 'Roque Graseras 936', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
         { numero: '0002', nombreServicio: 'Oficentro Lugano', direccionServicio: 'Plaza Independencia 822, esq. Florida', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
@@ -3982,16 +3982,22 @@
 
       const SERVICE_DATE_OVERRIDES = parseServiceDates(SERVICE_DATES_RAW);
 
+      function normalizeLegacyStatusName(value) {
+        const raw = String(value || '').trim();
+        return /^completado$/i.test(raw) ? 'Finalizado' : raw;
+      }
+
       function applyServiceCatalogOverrides(row) {
         const normalizedId = normalizeCatalogNumero(row?.clienteId);
         if (!normalizedId) return row;
         const mappedDate = SERVICE_DATE_OVERRIDES.get(normalizedId) || '';
+        const normalizedStatus = normalizeLegacyStatusName(row?.status || row?.estado);
         return {
           ...row,
           clienteId: normalizedId,
           fechaAltaServicio: mappedDate || row?.fechaAltaServicio || row?.fechaAlta || row?.fechaEspecificaInicio || '',
-          status: 'Completado',
-          estado: 'Completado',
+          status: normalizedStatus || 'Finalizado',
+          estado: normalizedStatus || 'Finalizado',
         };
       }
 
@@ -4281,11 +4287,11 @@
           .filter((r) => r.dateObj && r.dateObj >= now)
           .sort((a, b) => a.dateObj - b.dateObj);
 
-        const statusBuckets = { Completado: 0, Pendiente: 0, Atrasado: 0 };
+        const statusBuckets = { Finalizado: 0, Pendiente: 0, Atrasado: 0 };
         rows.forEach((r) => {
           const label = String(r.status || r.estado || '').toLowerCase();
           if (label.includes('complet') || label.includes('finaliz')) {
-            statusBuckets.Completado += 1;
+            statusBuckets.Finalizado += 1;
           } else if (label.includes('atras')) {
             statusBuckets.Atrasado += 1;
           } else {
@@ -4913,8 +4919,8 @@
               tipoServicioBrindar: s.tipoServicioBrindar || '',
               representanteComercial: s.representanteComercial || '',
               atencionCliente: s.atencionCliente || '',
-              status: 'Completado',
-              estado: 'Completado',
+              status: 'Finalizado',
+              estado: 'Finalizado',
               tipoAccion: 'Nuevo Servicio',
               origenCatalogo: true,
               fechaAltaServicio: SERVICE_DATE_OVERRIDES.get(normalizeServiceId(s.numero)) || '',
@@ -5052,8 +5058,8 @@
             const docRef = db.collection('operaciones').doc(`catalogo_manual_${payload.clienteId}`);
             await docRef.set({
               tipoAccion: 'Nuevo Servicio',
-              status: 'Completado',
-              estado: 'Completado',
+              status: 'Finalizado',
+              estado: 'Finalizado',
               origenCatalogo: true,
               origenCatalogoManual: true,
               creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
@@ -5664,7 +5670,7 @@
           const action = service.tipoAccion || 'Nuevo Servicio';
           setEditingServiceId(service.id || null);
           setSelectedService(service);
-          setStatus(service.status || service.estado || 'Pendiente');
+          setStatus(normalizeLegacyStatusName(service.status || service.estado || 'Pendiente'));
           setTipoAccion(action);
 
           const stamp = formatUruguayDateTime();
@@ -5947,8 +5953,9 @@
             Object.assign(doc, { ...charlaForm, formulario: 'charla-informativa' });
           }
 
-          doc.status = status;
-          doc.estado = status;
+          const normalizedStatusToSave = normalizeLegacyStatusName(status);
+          doc.status = normalizedStatusToSave;
+          doc.estado = normalizedStatusToSave;
 
           setSaving(true);
           const nextLog = {
@@ -5992,7 +5999,7 @@
                   <article className="mobile-capsule"><div className="title">Servicios</div><div className="value">{visibleRows.length}</div></article>
                   <article className="mobile-capsule"><div className="title">Pendientes</div><div className="value">{kpiStats.pending}</div></article>
                   <article className="mobile-capsule"><div className="title">En curso</div><div className="value">{kpiStats.inprogress}</div></article>
-                  <article className="mobile-capsule"><div className="title">Completados</div><div className="value">{kpiStats.completed}</div></article>
+                  <article className="mobile-capsule"><div className="title">Finalizados</div><div className="value">{kpiStats.completed}</div></article>
                 </div>
               </div>
 
