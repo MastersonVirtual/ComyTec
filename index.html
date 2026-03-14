@@ -524,10 +524,11 @@
         border-radius: 18px;
         background: linear-gradient(180deg, #f8fbfb 0%, #edf3f3 100%);
         box-shadow: 0 12px 24px rgba(9, 47, 46, .10);
-        padding: 18px;
+        padding: 20px;
         display: grid;
-        grid-template-columns: minmax(280px, 1.2fr) minmax(320px, 1fr);
+        grid-template-columns: 1fr;
         gap: 16px;
+        justify-items: center;
       }
       .welcome-profile {
         display: flex;
@@ -652,17 +653,66 @@
       }
       @media (max-width: 980px) {
         .welcome-card { grid-template-columns: 1fr; }
+        .dashboard-info-grid { grid-template-columns: 1fr; }
+      }
+
+
+      .dashboard-info-grid {
+        width: min(100%, 1180px);
+        margin: 0 auto 16px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .dashboard-info-card {
+        border: 1px solid rgba(11, 78, 73, .16);
+        border-radius: 16px;
+        background: linear-gradient(180deg, #f9fcfc 0%, #eef4f4 100%);
+        box-shadow: 0 10px 20px rgba(9, 47, 46, .09);
+        padding: 14px;
+      }
+      .dashboard-info-card h3 {
+        margin: 0 0 10px;
+        color: #0b4e49;
+        font-size: 1.08rem;
+      }
+      .dashboard-info-list {
+        display: grid;
+        gap: 8px;
+        max-height: 220px;
+        overflow: auto;
+      }
+      .dashboard-info-item {
+        border: 1px solid rgba(11, 78, 73, .12);
+        border-left: 4px solid #006465;
+        border-radius: 10px;
+        padding: 8px 10px;
+        background: #ffffff;
+      }
+      .dashboard-info-item small {
+        color: #5c767a;
+        display: block;
+        margin-bottom: 4px;
+        font-size: .78rem;
+      }
+      .dashboard-info-item b {
+        color: #1f3f44;
+        font-weight: 700;
+      }
+      .dashboard-info-empty {
+        color: #6b8588;
+        font-size: .92rem;
       }
 
       .kpi-grid {
-        margin-top: 24px;
+        margin-top: 8px;
         width: min(100%, 1180px);
         margin-left: auto;
         margin-right: auto;
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 18px;
-        align-items: start;
+        align-items: stretch;
         justify-items: stretch;
       }
       .kpi-card-wrap {
@@ -670,8 +720,8 @@
         width: 100%;
       }
       .kpi-card {
-        border-radius: 14px;
-        padding: 20px;
+        border-radius: 16px;
+        padding: 28px 20px;
         text-align: center;
         cursor: pointer;
         background: #0a1515;
@@ -3840,6 +3890,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -3862,6 +3913,7 @@
       if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
       const auth = firebase.auth();
+      const rtdb = typeof firebase.database === 'function' ? firebase.database() : null;
 
       const ACCIONES = ['Nuevo Servicio', 'Novación', 'Obra', 'Agregado', 'Movimiento de Obra', 'Baja', 'Charla'];
       const STATUS_OPTIONS = ['Pendiente', 'Presupuesto enviado', 'Aprobado', 'En agenda', 'En instalación', 'En progreso', 'Finalizado', 'Cancelado', 'En mantenimiento'];
@@ -5378,10 +5430,8 @@
           dateTo: '',
         });
         const [profileAvatarSrc, setProfileAvatarSrc] = useState('');
-        const [dashboardNotes, setDashboardNotes] = useState([]);
-        const [noteComposerOpen, setNoteComposerOpen] = useState(false);
-        const [noteDraft, setNoteDraft] = useState({ text: '', color: '#f4b400', date: '', time: '' });
-        const noteNotifiedRef = useRef(new Set());
+        const [recentActivity, setRecentActivity] = useState([]);
+        const [upcomingInstallations, setUpcomingInstallations] = useState([]);
         const [catalogSyncing, setCatalogSyncing] = useState(false);
         const [showManualCatalogForm, setShowManualCatalogForm] = useState(false);
         const [savingManualCatalogService, setSavingManualCatalogService] = useState(false);
@@ -5465,36 +5515,8 @@
           return null;
         }
 
-        function noteDueTimestamp(note) {
-          if (!note?.date || !note?.time) return null;
-          const parsed = new Date(`${note.date}T${note.time}`);
-          const ts = parsed.getTime();
-          return Number.isNaN(ts) ? null : ts;
-        }
-
-        function formatNoteMoment(note) {
-          if (!note?.date) return 'Sin fecha';
-          const dateObj = new Date(`${note.date}T${note.time || '00:00'}`);
-          if (Number.isNaN(dateObj.getTime())) return `${note.date}${note.time ? ` ${note.time}` : ''}`;
-          const now = new Date();
-          const startToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-          const startTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-          const startTarget = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate());
-          const dayLabel = startTarget.getTime() === startToday.getTime()
-            ? 'Hoy'
-            : startTarget.getTime() === startTomorrow.getTime()
-              ? 'Mañana'
-              : dateObj.toLocaleDateString('es-UY', { weekday: 'long', day: '2-digit', month: 'long' });
-          const timeLabel = note.time || dateObj.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' });
-          return `${dayLabel} ${timeLabel}`;
-        }
-
-        function resolveWelcomeTasksCount(notes) {
-          const now = Date.now();
-          return notes.filter((note) => {
-            const due = noteDueTimestamp(note);
-            return due === null || due >= now;
-          }).length;
+        function resolveWelcomeTasksCount(installations) {
+          return Array.isArray(installations) ? installations.length : 0;
         }
 
         function resolveSellerStatusKey(service) {
@@ -6180,54 +6202,54 @@
         }, [rows, selectedService?.id]);
 
         useEffect(() => {
-          const key = `masterson.dashboard.notes.${String(user?.uid || user?.email || 'guest')}`;
-          const saved = localStorage.getItem(key);
-          if (!saved) {
-            setDashboardNotes([]);
-            noteNotifiedRef.current = new Set();
-            return;
+          if (!rtdb) {
+            setRecentActivity([]);
+            return () => {};
           }
-          try {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed)) {
-              setDashboardNotes(parsed);
-              noteNotifiedRef.current = new Set();
-            } else {
-              setDashboardNotes([]);
-            }
-          } catch {
-            setDashboardNotes([]);
-          }
-        }, [user?.uid, user?.email]);
+          const refs = [
+            rtdb.ref('dashboard/actividadReciente').limitToLast(25),
+            rtdb.ref('actividadReciente').limitToLast(25),
+          ];
+          const handlers = refs.map((refNode) => {
+            const handler = (snap) => {
+              const val = snap.val();
+              if (!val) return;
+              const rowsList = Object.entries(val).map(([id, row]) => ({ id, ...(row || {}) }));
+              rowsList.sort((a, b) => (Number(b.timestamp || b.fechaTimestamp || 0) - Number(a.timestamp || a.fechaTimestamp || 0)));
+              setRecentActivity(rowsList.slice(0, 12));
+            };
+            refNode.on('value', handler);
+            return { refNode, handler };
+          });
+          return () => handlers.forEach(({ refNode, handler }) => refNode.off('value', handler));
+        }, []);
 
         useEffect(() => {
-          if (!user) return;
-          const key = `masterson.dashboard.notes.${String(user?.uid || user?.email || 'guest')}`;
-          localStorage.setItem(key, JSON.stringify(dashboardNotes));
-        }, [dashboardNotes, user]);
-
-        useEffect(() => {
-          if (!dashboardNotes.length) return () => {};
-          const tick = () => {
-            const now = Date.now();
-            dashboardNotes.forEach((note) => {
-              const due = noteDueTimestamp(note);
-              if (due === null || due > now) return;
-              if (noteNotifiedRef.current.has(note.id)) return;
-              noteNotifiedRef.current.add(note.id);
-              const message = `Anotación pendiente: ${note.text || 'Sin detalle'}`;
-              if (typeof window !== 'undefined' && 'Notification' in window) {
-                if (window.Notification.permission === 'granted') {
-                  try { new window.Notification('Masterson Seguridad', { body: message }); } catch {}
-                }
-              }
-              setNotificacion({ mensaje: message, tipo: 'warn' });
-            });
-          };
-          tick();
-          const intervalId = setInterval(tick, 30000);
-          return () => clearInterval(intervalId);
-        }, [dashboardNotes]);
+          if (!rtdb) {
+            setUpcomingInstallations([]);
+            return () => {};
+          }
+          const refs = [
+            rtdb.ref('dashboard/instalacionesProximas').limitToLast(25),
+            rtdb.ref('instalacionesProximas').limitToLast(25),
+          ];
+          const handlers = refs.map((refNode) => {
+            const handler = (snap) => {
+              const val = snap.val();
+              if (!val) return;
+              const rowsList = Object.entries(val).map(([id, row]) => ({ id, ...(row || {}) }));
+              rowsList.sort((a, b) => {
+                const ad = new Date(`${a.fecha || ''}T${a.hora || '00:00'}`).getTime() || Number.MAX_SAFE_INTEGER;
+                const bd = new Date(`${b.fecha || ''}T${b.hora || '00:00'}`).getTime() || Number.MAX_SAFE_INTEGER;
+                return ad - bd;
+              });
+              setUpcomingInstallations(rowsList.slice(0, 12));
+            };
+            refNode.on('value', handler);
+            return { refNode, handler };
+          });
+          return () => handlers.forEach(({ refNode, handler }) => refNode.off('value', handler));
+        }, []);
 
         useEffect(() => {
           if (!notificacion.mensaje) return;
@@ -6248,7 +6270,7 @@
 
         useEffect(() => {
           if (window.lucide?.createIcons) window.lucide.createIcons();
-        }, [mobileTab, selectedForm, fabOpen, rows.length, adminCredentialRequests.length, desktopBellOpen, desktopSearchOpen, noteComposerOpen, dashboardNotes.length]);
+        }, [mobileTab, selectedForm, fabOpen, rows.length, adminCredentialRequests.length, desktopBellOpen, desktopSearchOpen]);
 
         useEffect(() => {
           if (!user || userRole !== 'admin') {
@@ -7537,108 +7559,52 @@
                       <p className="subtitle-voga">ÁREA TÉCNICA Y COMERCIAL</p>
                     </section>
                     <section className="welcome-card">
-                      <div>
-                        <div className="welcome-profile">
-                          <img
-                            className="welcome-avatar"
-                            src={profileAvatarSrc || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUserName || 'Usuario')}&background=006465&color=ffffff&size=256`}
-                            alt="Avatar de usuario"
-                          />
-                          <div>
-                            <h3 className="welcome-title">Bienvenido, <b>{currentUserName || 'Usuario'}</b></h3>
-                            <div className="welcome-meta">Hoy tienes {resolveWelcomeTasksCount(dashboardNotes)} tareas pendientes.</div>
-                            <div className="welcome-meta secondary">¡Que tengas una excelente jornada!</div>
-                          </div>
+                      <div className="welcome-profile">
+                        <img
+                          className="welcome-avatar"
+                          src={profileAvatarSrc || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUserName || 'Usuario')}&background=006465&color=ffffff&size=256`}
+                          alt="Avatar de usuario"
+                        />
+                        <div>
+                          <h3 className="welcome-title">Bienvenido, <b>{currentUserName || 'Usuario'}</b></h3>
+                          <div className="welcome-meta">Hoy tienes {resolveWelcomeTasksCount(upcomingInstallations)} tareas pendientes.</div>
+                          <div className="welcome-meta secondary">¡Que tengas una excelente jornada!</div>
                         </div>
                       </div>
-                      <aside className="notes-widget">
-                        <div className="notes-head">
-                          <h4>Anotaciones</h4>
-                        </div>
-                        <div className="notes-list">
-                          {dashboardNotes.length === 0 ? (
-                            <div className="note-empty">No hay anotaciones cargadas.</div>
-                          ) : (
-                            dashboardNotes
-                              .slice()
-                              .sort((a, b) => (noteDueTimestamp(a) || Number.MAX_SAFE_INTEGER) - (noteDueTimestamp(b) || Number.MAX_SAFE_INTEGER))
-                              .map((note) => (
-                                <article key={note.id} className="note-item" style={{ '--note-color': note.color || '#f4b400' }}>
-                                  <div className="note-time">{formatNoteMoment(note)}</div>
-                                  <div className="note-text">{note.text || 'Sin descripción'}</div>
-                                </article>
-                              ))
-                          )}
-                        </div>
-                        <button type="button" className="note-create-btn" onClick={() => setNoteComposerOpen((prev) => !prev)}>
-                          <i data-lucide="plus"></i> Crear anotación
-                        </button>
-                        {noteComposerOpen && (
-                          <div className="note-form">
-                            <input
-                              type="text"
-                              placeholder="Descripción de la tarea"
-                              value={noteDraft.text}
-                              onChange={(e) => setNoteDraft((prev) => ({ ...prev, text: e.target.value }))}
-                            />
-                            <div className="note-form-row">
-                              <input
-                                type="date"
-                                value={noteDraft.date}
-                                onChange={(e) => setNoteDraft((prev) => ({ ...prev, date: e.target.value }))}
-                              />
-                              <input
-                                type="time"
-                                value={noteDraft.time}
-                                onChange={(e) => setNoteDraft((prev) => ({ ...prev, time: e.target.value }))}
-                              />
+                    </section>
+                    <section className="dashboard-info-grid">
+                      <article className="dashboard-info-card">
+                        <h3>Actividad reciente</h3>
+                        <div className="dashboard-info-list">
+                          {recentActivity.length === 0 ? (
+                            <div className="dashboard-info-empty">Sin actividad reciente disponible.</div>
+                          ) : recentActivity.map((item) => (
+                            <div key={`activity-${item.id}`} className="dashboard-info-item">
+                              <small>{item.momento || item.fecha || item.timestampLabel || 'Evento reciente'}</small>
+                              <b>{item.descripcion || item.evento || item.detalle || item.tipo || 'Actividad registrada'}</b>
                             </div>
-                            <select
-                              value={noteDraft.color}
-                              onChange={(e) => setNoteDraft((prev) => ({ ...prev, color: e.target.value }))}
-                            >
-                              <option value="#f4b400">Amarillo</option>
-                              <option value="#3b82f6">Azul</option>
-                              <option value="#ef4444">Rojo</option>
-                              <option value="#10b981">Verde</option>
-                              <option value="#8b5cf6">Violeta</option>
-                            </select>
-                            <button
-                              type="button"
-                              className="note-save-btn"
-                              onClick={async () => {
-                                if (!noteDraft.text.trim()) {
-                                  setNotificacion({ mensaje: 'Escribí una tarea para crear la anotación.', tipo: 'warn' });
-                                  return;
-                                }
-                                if (typeof window !== 'undefined' && 'Notification' in window && window.Notification.permission === 'default') {
-                                  try { await window.Notification.requestPermission(); } catch {}
-                                }
-                                const nextNote = {
-                                  id: `note_${Date.now()}`,
-                                  text: noteDraft.text.trim(),
-                                  color: noteDraft.color || '#f4b400',
-                                  date: noteDraft.date,
-                                  time: noteDraft.time,
-                                  createdAt: Date.now(),
-                                };
-                                setDashboardNotes((prev) => [nextNote, ...prev]);
-                                setNoteDraft({ text: '', color: '#f4b400', date: '', time: '' });
-                                setNoteComposerOpen(false);
-                                setNotificacion({ mensaje: 'Anotación creada correctamente.', tipo: 'ok' });
-                              }}
-                            >
-                              Guardar anotación
-                            </button>
-                          </div>
-                        )}
-                      </aside>
+                          ))}
+                        </div>
+                      </article>
+                      <article className="dashboard-info-card">
+                        <h3>Instalaciones próximas</h3>
+                        <div className="dashboard-info-list">
+                          {upcomingInstallations.length === 0 ? (
+                            <div className="dashboard-info-empty">Sin instalaciones próximas programadas.</div>
+                          ) : upcomingInstallations.map((item) => (
+                            <div key={`install-${item.id}`} className="dashboard-info-item">
+                              <small>{item.fecha || 'Sin fecha'} {item.hora || ''}</small>
+                              <b>{item.edificio || item.nombreServicio || item.nombre || 'Edificio sin nombre'}</b>
+                              <small>Técnico: {item.tecnico || item.tecnicoAsignado || item.asignadoA || 'Sin asignar'}</small>
+                            </div>
+                          ))}
+                        </div>
+                      </article>
                     </section>
                     <section className="kpi-grid">
                       {[
-                        { key: 'active', label: 'Servicios Activos', value: kpiStats.active },
-                        { key: 'installation', label: 'En instalación', value: kpiStats.installation },
-                        { key: 'baja', label: 'Baja', value: kpiStats.baja },
+                        { key: 'active', label: 'Servicios activos', value: kpiStats.active },
+                        { key: 'baja', label: 'Servicios dados de baja', value: kpiStats.baja },
                       ].map((card) => (
                         <div
                           className="kpi-card-wrap"
@@ -7654,7 +7620,7 @@
                           </article>
                           {activeKpi === card.key && (
                             <section className="kpi-breakdown">
-                              <h3>{card.key === 'active' ? 'Ranking Comercial · Servicios Activos' : card.key === 'installation' ? 'Ranking Comercial · En instalación' : 'Ranking Comercial · Baja'}</h3>
+                              <h3>{card.key === 'active' ? 'Ranking Comercial · Servicios Activos' : 'Ranking Comercial · Baja'}</h3>
                               {getCommercialBreakdown(card.key).length === 0 ? (
                                 <div className="hint" style={{ color: '#d1faf5', marginBottom: 0 }}>Sin datos para este indicador.</div>
                               ) : (
