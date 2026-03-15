@@ -2223,6 +2223,32 @@
         font-weight: 700;
       }
       .mobile-quick-btn .mobile-kpi-icon { width: 36px; height: 36px; border-radius: 12px; background: rgba(255,132,37,.15); color: #ff8425; }
+      .mobile-progress {
+        width: 100%;
+        height: 8px;
+        border-radius: 999px;
+        background: #d3e5e5;
+        overflow: hidden;
+        margin: 8px 0;
+      }
+      .mobile-progress span {
+        display: block;
+        height: 100%;
+        background: linear-gradient(90deg, #42b86f, #3ec2c0);
+      }
+      .mobile-kpi-note { font-size: .78rem; color: #608183 !important; }
+      .mobile-kpi-foot { font-size: .8rem; color: #23494b !important; font-weight: 700; }
+      .mobile-split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .mobile-kpi-grid-v2 { grid-template-columns: 1.25fr 1fr; }
+      .mobile-kpi-card-main { grid-row: span 2; }
+      .mobile-kpi-card-soft { background: #fffdf7; }
+      .mobile-kpi-icon.warn { background: rgba(255, 197, 81, 0.2); color: #d48600; }
+      .mobile-alert-card { background: #fff; }
+      .mobile-quick-actions-v2 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .mobile-quick-btn { min-height: 70px; padding: 8px 4px; font-size: .76rem; line-height: 1.1; }
+      .mobile-quick-btn.primary { background: linear-gradient(145deg, #0b6f70, #0e5f60); color: #fff !important; }
+      .mobile-quick-btn.primary .mobile-kpi-icon { background: rgba(255,255,255,.2); color: #fff; }
+      .mobile-quick-btn.accent { background: #fff7df; }
       .mobile-fab-menu {
         position: fixed;
         right: 18px;
@@ -2431,6 +2457,19 @@
           background: #000000 !important;
           border-color: #000000 !important;
         }
+        .mobile-brand-icon {
+          width: 40px;
+          height: 40px;
+          border-radius: 12px;
+          border: 1px solid #bdd8d8;
+          background: linear-gradient(160deg, #0d7779, #0f6566);
+          display: grid;
+          place-items: center;
+          color: #ecffff;
+          flex: 0 0 auto;
+        }
+        .mobile-brand-icon i,
+        .mobile-brand-icon svg { width: 20px; height: 20px; }
         .top-titles { min-width: 0; flex: 1; }
         .top-titles h1 { font-size: 1rem; color: #ff8a2a !important; }
         .top-titles p { font-size: .72rem; color: #006465 !important; }
@@ -3816,7 +3855,7 @@
         }
 
         .mobile-bottom-nav-simple {
-          grid-template-columns: 1fr 1fr 1fr !important;
+          grid-template-columns: 1fr 1fr 1fr 1fr !important;
           grid-auto-flow: unset !important;
           grid-auto-columns: unset !important;
           overflow-x: hidden !important;
@@ -3824,6 +3863,19 @@
 
         .mobile-bottom-nav-simple button {
           border-right: 0;
+        }
+
+        .mobile-dashboard-v2 {
+          gap: 12px;
+        }
+
+        @media (max-width: 390px) {
+          .mobile-split-grid {
+            grid-template-columns: 1fr;
+          }
+          .mobile-quick-actions-v2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
         }
 
         .main,
@@ -6954,11 +7006,13 @@
         }
 
         function renderMobileHome() {
-          const now = new Date();
-          const today = now.toLocaleDateString('es-AR', { weekday: 'long', day: '2-digit', month: 'long' });
+          const today = new Date().toLocaleDateString('es-AR', { weekday: 'long', day: '2-digit', month: 'long' });
           const recentEvents = recentActivity.slice(0, 3);
-          const nextInstallations = upcomingInstallations.slice(0, 3);
+          const nextInstallations = upcomingInstallations.slice(0, 2);
           const latestAlert = recentActivity[0] || null;
+          const weeklyGoal = 8;
+          const weeklyDone = Math.min(weeklyGoal, Number(kpiStats.completed || 0));
+          const progressPct = Math.max(8, Math.min(100, Math.round((weeklyDone / weeklyGoal) * 100)));
           const formatRelativeMinutes = (timestamp) => {
             const diffMs = Date.now() - Number(timestamp || Date.now());
             const minutes = Math.max(1, Math.round(diffMs / 60000));
@@ -6968,31 +7022,40 @@
           };
           const formatEventTime = (timestamp) => new Date(timestamp || Date.now()).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
           return (
-            <section className="mobile-dashboard">
+            <section className="mobile-dashboard mobile-dashboard-v2">
               <div className="mobile-welcome-card">
                 <div className="mobile-welcome-head">
-                  <div className="mobile-avatar">{(currentUserName || 'U').slice(0, 1).toUpperCase()}</div>
+                  <div className="mobile-avatar">{(currentUserName || 'A').slice(0, 1).toUpperCase()}</div>
                   <div>
                     <h3>Bienvenido, {String(currentUserName || 'Alfonso').split(' ')[0]}</h3>
-                    <p>Resumen de tu jornada</p>
+                    <p>Hoy tienes {kpiStats.pending} pendiente{kpiStats.pending === 1 ? '' : 's'}</p>
                   </div>
                 </div>
                 <div className="mobile-welcome-date">{today.charAt(0).toUpperCase() + today.slice(1)}</div>
               </div>
 
-              <div className="mobile-kpi-grid">
-                {[{ label: 'Servicios', value: visibleRows.length, icon: 'briefcase-business' }, { label: 'Pendiente', value: kpiStats.pending, icon: 'clock-3' }, { label: 'En curso', value: kpiStats.inprogress, icon: 'activity' }, { label: 'Finalizados', value: kpiStats.completed, icon: 'check-check' }].map((kpi) => (
-                  <article key={kpi.label} className="mobile-kpi-card">
-                    <div className="mobile-kpi-row"><span className="mobile-kpi-icon"><i data-lucide={kpi.icon} /></span><span className="mobile-kpi-label">{kpi.label}</span></div>
-                    <div className="mobile-kpi-value">{kpi.value}</div>
-                  </article>
-                ))}
+              <div className="mobile-kpi-grid mobile-kpi-grid-v2">
+                <article className="mobile-kpi-card mobile-kpi-card-main">
+                  <div className="mobile-kpi-row"><span className="mobile-kpi-icon"><i data-lucide="briefcase-business" /></span><span className="mobile-kpi-label">Servicios activos</span></div>
+                  <div className="mobile-kpi-value">{visibleRows.length}</div>
+                  <div className="mobile-kpi-note">Instalaciones esta semana</div>
+                  <div className="mobile-progress"><span style={{ width: `${progressPct}%` }} /></div>
+                  <div className="mobile-kpi-foot">{weeklyDone} / {weeklyGoal} completadas</div>
+                </article>
+                <article className="mobile-kpi-card mobile-kpi-card-soft">
+                  <div className="mobile-kpi-row"><span className="mobile-kpi-icon warn"><i data-lucide="triangle-alert" /></span><span className="mobile-kpi-label">Pendiente</span></div>
+                  <div className="mobile-kpi-value">{kpiStats.pending}</div>
+                </article>
+                <article className="mobile-kpi-card mobile-kpi-card-soft">
+                  <div className="mobile-kpi-row"><span className="mobile-kpi-icon"><i data-lucide="search-check" /></span><span className="mobile-kpi-label">En curso</span></div>
+                  <div className="mobile-kpi-value">{kpiStats.inprogress}</div>
+                </article>
               </div>
 
-              <div className="mobile-flat-card">
+              <div className="mobile-flat-card mobile-alert-card">
                 <div className="mobile-alert-row">
                   <div className="mobile-alert-main">
-                    <span className="mobile-kpi-icon"><i data-lucide="bell-ring" /></span>
+                    <span className="mobile-kpi-icon warn"><i data-lucide="bell-ring" /></span>
                     <div>
                       <strong>{latestAlert ? 'Nuevo servicio registrado' : 'Sin alertas recientes'}</strong>
                       <div>{latestAlert ? latestAlert.message : 'Aún no hay novedades del sistema.'}</div>
@@ -7002,39 +7065,42 @@
                 </div>
               </div>
 
-              <div className="mobile-flat-card">
-                <h3 className="mobile-section-title">Actividad reciente</h3>
-                {recentEvents.length === 0 ? <div className="hint">Sin actividad reciente disponible.</div> : recentEvents.map((item) => (
-                  <div key={item.id} className="mobile-timeline-item">
-                    <div className="mobile-timeline-time">{formatEventTime(item.timestamp)}</div>
-                    <div>{item.message}</div>
-                  </div>
-                ))}
-                <button type="button" className="mobile-link-btn" onClick={() => { setMobileTab('servicios'); setSelectedForm('historial'); }}>Ver toda la actividad</button>
-              </div>
-
-              <div className="mobile-flat-card">
-                <h3 className="mobile-section-title">Instalaciones próximas</h3>
-                {nextInstallations.length === 0 ? <div className="hint">Sin instalaciones próximas programadas.</div> : nextInstallations.map((item) => (
-                  <div key={item.id} className="mobile-install-item">
-                    <div className="mobile-install-main">
-                      <span className="mobile-kpi-icon"><i data-lucide="wrench" /></span>
-                      <div>
-                        <strong>{item.edificio || 'Servicio sin nombre'}</strong>
-                        <div>{item.tecnico || 'Sin técnico'} — {item.hora || '-'}</div>
-                      </div>
+              <div className="mobile-split-grid">
+                <div className="mobile-flat-card">
+                  <h3 className="mobile-section-title">Actividad reciente</h3>
+                  {recentEvents.length === 0 ? <div className="hint">Sin actividad reciente disponible.</div> : recentEvents.map((item) => (
+                    <div key={item.id} className="mobile-timeline-item">
+                      <div className="mobile-timeline-time">{formatEventTime(item.timestamp)}</div>
+                      <div>{item.message}</div>
                     </div>
-                    <small>{item.fecha || '-'}</small>
-                  </div>
-                ))}
-                <button type="button" className="mobile-link-btn" onClick={() => { setMobileTab('servicios'); setSelectedForm('historial'); }}>Ver todas</button>
+                  ))}
+                  <button type="button" className="mobile-link-btn" onClick={() => { setMobileTab('actividad'); setSelectedForm('historial'); }}>Ver toda la actividad</button>
+                </div>
+
+                <div className="mobile-flat-card">
+                  <h3 className="mobile-section-title">Instalaciones próximas</h3>
+                  <div className="mobile-kpi-note">Hoy</div>
+                  {nextInstallations.length === 0 ? <div className="hint">Sin instalaciones próximas programadas.</div> : nextInstallations.map((item) => (
+                    <div key={item.id} className="mobile-install-item">
+                      <div className="mobile-install-main">
+                        <span className="mobile-kpi-icon"><i data-lucide="wrench" /></span>
+                        <div>
+                          <strong>{item.edificio || 'Servicio sin nombre'}</strong>
+                          <div>{item.tecnico || 'Sin técnico'}</div>
+                        </div>
+                      </div>
+                      <small>{item.hora || item.fecha || '-'}</small>
+                    </div>
+                  ))}
+                  <button type="button" className="mobile-link-btn" onClick={() => { setMobileTab('servicios'); setSelectedForm('historial'); }}>Ver agenda</button>
+                </div>
               </div>
 
-              <div className="mobile-quick-actions">
-                <button type="button" className="mobile-quick-btn" onClick={() => selectAction('Nuevo Servicio')}><span className="mobile-kpi-icon"><i data-lucide="plus" /></span><span>Nuevo servicio</span></button>
-                <button type="button" className="mobile-quick-btn" onClick={() => selectAction('Baja')}><span className="mobile-kpi-icon"><i data-lucide="file-minus" /></span><span>Registrar baja</span></button>
-                <button type="button" className="mobile-quick-btn" onClick={() => selectAction('Obra')}><span className="mobile-kpi-icon"><i data-lucide="building-2" /></span><span>Nueva obra</span></button>
-                <button type="button" className="mobile-quick-btn" onClick={() => { setMobileTab('servicios'); setSelectedForm('ranking-comercial'); }}><span className="mobile-kpi-icon"><i data-lucide="bar-chart-3" /></span><span>Ver reportes</span></button>
+              <div className="mobile-quick-actions mobile-quick-actions-v2">
+                <button type="button" className="mobile-quick-btn primary" onClick={() => selectAction('Nuevo Servicio')}><span className="mobile-kpi-icon"><i data-lucide="plus" /></span><span>Nuevo servicio</span></button>
+                <button type="button" className="mobile-quick-btn" onClick={() => selectAction('Obra')}><span className="mobile-kpi-icon"><i data-lucide="wrench" /></span><span>Nueva obra</span></button>
+                <button type="button" className="mobile-quick-btn accent" onClick={() => selectAction('Baja')}><span className="mobile-kpi-icon"><i data-lucide="arrow-down" /></span><span>Registrar baja</span></button>
+                <button type="button" className="mobile-quick-btn accent" onClick={() => { setMobileTab('servicios'); setSelectedForm('ranking-comercial'); }}><span className="mobile-kpi-icon"><i data-lucide="bar-chart-3" /></span><span>Reportes</span></button>
               </div>
             </section>
           );
@@ -7445,9 +7511,10 @@
                 )}
                 {!isMobile && <button className="burger" aria-label="Abrir menú" onClick={toggleSidebar}><span className="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>}
                 {!isMobile && (effectiveSelectedForm !== 'home' || !!selectedService) && <button className="topbar-back-btn" type="button" aria-label="Volver" onClick={goBackOneStep}><i data-lucide="arrow-left" /></button>}
+                {isMobile && <div className="mobile-brand-icon" aria-hidden="true"><i data-lucide="house" /></div>}
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
-                  <p className="subtitle-voga">{isMobile ? `${topbarSubtitle} · ${currentUserName || 'log user'} ▾` : topbarSubtitle}</p>
+                  <p className="subtitle-voga">{isMobile ? `${topbarSubtitle || 'Área Técnica'} ▾` : topbarSubtitle}</p>
                 </div>
                 {!isMobile && (
                   <div className="top-search">
@@ -7563,7 +7630,14 @@
               )}
 
               <main className={`main ${grupo === 'charla-detalle' ? 'charla-main-wide' : ''}`}>
-                {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'acciones' && effectiveSelectedForm === 'home' ? renderMobileActions() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : effectiveSelectedForm === 'notificaciones' ? (
+                {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'acciones' && effectiveSelectedForm === 'home' ? renderMobileActions() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : isMobile && mobileTab === 'actividad' ? (
+                  <section className="mobile-section-stack">
+                    <div className="mobile-section-card">
+                      <h3 className="mobile-section-title">Actividad</h3>
+                      <button type="button" className="mobile-list-button" onClick={() => { setSelectedForm('historial'); setSelectedService(null); }}>Ver historial de servicios</button>
+                    </div>
+                  </section>
+                ) : effectiveSelectedForm === 'notificaciones' ? (
                   <section className="panel profile-view">
                     <h2>Notificaciones</h2>
                     <div className="hint">Solicitudes recibidas para cambio de usuario y contraseña.</div>
@@ -8579,7 +8653,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                 <>
                   <nav className="mobile-bottom-nav mobile-bottom-nav-simple">
                     <button
-                      className={effectiveSelectedForm === 'home' ? 'active' : ''}
+                      className={mobileTab === 'home' && effectiveSelectedForm === 'home' ? 'active' : ''}
                       type="button"
                       onClick={() => {
                         setMobileTab('home');
@@ -8595,6 +8669,10 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                     <button className={mobileTab === 'servicios' ? 'active' : ''} type="button" onClick={() => { setMobileTab('servicios'); setSelectedForm('home'); setSelectedService(null); setMobileBellOpen(false); }}>
                       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 7.5h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><path d="M6 12h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><path d="M9 16.5h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
                       <span className="mobile-nav-label">Servicios</span>
+                    </button>
+                    <button className={mobileTab === 'actividad' ? 'active' : ''} type="button" onClick={() => { setMobileTab('actividad'); setSelectedForm('home'); setSelectedService(null); setMobileBellOpen(false); }}>
+                      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.8"/><path d="M12 8v4l3 2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <span className="mobile-nav-label">Actividad</span>
                     </button>
                     <button className={effectiveSelectedForm === 'perfil' ? 'active' : ''} type="button" onClick={() => { setMobileBellOpen(false); openProfileView(); }}>
                       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8"/><path d="M4 20c1.8-3.4 5-5 8-5s6.2 1.6 8 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
