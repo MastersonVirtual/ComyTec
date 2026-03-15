@@ -2244,11 +2244,63 @@
       .mobile-kpi-card-soft { background: #fffdf7; }
       .mobile-kpi-icon.warn { background: rgba(255, 197, 81, 0.2); color: #d48600; }
       .mobile-alert-card { background: #fff; }
-      .mobile-quick-actions-v2 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-      .mobile-quick-btn { min-height: 70px; padding: 8px 4px; font-size: .76rem; line-height: 1.1; }
+      .mobile-quick-actions-v2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .mobile-quick-btn { min-height: 76px; padding: 8px 6px; font-size: .86rem; line-height: 1.1; }
       .mobile-quick-btn.primary { background: linear-gradient(145deg, #0b6f70, #0e5f60); color: #fff !important; }
       .mobile-quick-btn.primary .mobile-kpi-icon { background: rgba(255,255,255,.2); color: #fff; }
       .mobile-quick-btn.accent { background: #fff7df; }
+      .mobile-quick-menu {
+        grid-column: 1 / -1;
+        border-radius: 16px;
+        border: 1px solid rgba(0,100,101,.16);
+        background: #ffffff;
+        box-shadow: 0 14px 26px rgba(0, 58, 60, 0.16);
+        padding: 8px;
+        display: grid;
+        gap: 8px;
+      }
+      .mobile-quick-menu button {
+        width: 100%;
+        min-height: 42px;
+        border-radius: 10px;
+        border: 1px solid rgba(0,100,101,.14);
+        background: #f7fbfb;
+        color: #0f5051;
+        font-weight: 700;
+        text-align: left;
+        padding: 10px 12px;
+      }
+      .mobile-search-panel {
+        position: fixed;
+        top: 74px;
+        left: 10px;
+        right: 10px;
+        z-index: 1805;
+        border-radius: 14px;
+        border: 1px solid rgba(0,100,101,.18);
+        background: rgba(255,255,255,.98);
+        box-shadow: 0 14px 26px rgba(0,50,52,.18);
+        padding: 10px;
+      }
+      .mobile-search-input {
+        width: 100%;
+        border-radius: 12px;
+        border: 1px solid rgba(0,100,101,.2);
+        background: #f7fbfb;
+        color: #0d4040;
+        min-height: 42px;
+        padding: 8px 12px;
+      }
+      .mobile-search-results {
+        margin-top: 8px;
+        max-height: 42vh;
+        overflow: auto;
+        border-top: 1px solid rgba(0,100,101,.12);
+      }
+      .mobile-search-item {
+        padding: 9px 4px;
+        border-bottom: 1px solid rgba(0,100,101,.1);
+      }
       .mobile-fab-menu {
         position: fixed;
         right: 18px;
@@ -2462,14 +2514,14 @@
           height: 40px;
           border-radius: 12px;
           border: 1px solid #bdd8d8;
-          background: linear-gradient(160deg, #0d7779, #0f6566);
+          background: #0f6566 url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png') center/cover no-repeat;
           display: grid;
           place-items: center;
           color: #ecffff;
           flex: 0 0 auto;
         }
         .mobile-brand-icon i,
-        .mobile-brand-icon svg { width: 20px; height: 20px; }
+        .mobile-brand-icon svg { display: none; }
         .top-titles { min-width: 0; flex: 1; }
         .top-titles h1 { font-size: 1rem; color: #ff8a2a !important; }
         .top-titles p { font-size: .72rem; color: #006465 !important; }
@@ -3873,9 +3925,7 @@
           .mobile-split-grid {
             grid-template-columns: 1fr;
           }
-          .mobile-quick-actions-v2 {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
+          .mobile-quick-actions-v2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
 
         .main,
@@ -5416,6 +5466,8 @@
         const [editingServiceId, setEditingServiceId] = useState(null);
         const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
         const [mobileTab, setMobileTab] = useState('home');
+        const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+        const [mobileQuickMenuOpen, setMobileQuickMenuOpen] = useState(false);
         const [fabOpen, setFabOpen] = useState(false);
         const [deleteTargetService, setDeleteTargetService] = useState(null);
         const [deletingService, setDeletingService] = useState(false);
@@ -7097,10 +7149,16 @@
               </div>
 
               <div className="mobile-quick-actions mobile-quick-actions-v2">
-                <button type="button" className="mobile-quick-btn primary" onClick={() => selectAction('Nuevo Servicio')}><span className="mobile-kpi-icon"><i data-lucide="plus" /></span><span>Nuevo servicio</span></button>
-                <button type="button" className="mobile-quick-btn" onClick={() => selectAction('Obra')}><span className="mobile-kpi-icon"><i data-lucide="wrench" /></span><span>Nueva obra</span></button>
-                <button type="button" className="mobile-quick-btn accent" onClick={() => selectAction('Baja')}><span className="mobile-kpi-icon"><i data-lucide="arrow-down" /></span><span>Registrar baja</span></button>
-                <button type="button" className="mobile-quick-btn accent" onClick={() => { setMobileTab('servicios'); setSelectedForm('ranking-comercial'); }}><span className="mobile-kpi-icon"><i data-lucide="bar-chart-3" /></span><span>Reportes</span></button>
+                <button type="button" className="mobile-quick-btn primary" onClick={() => setMobileQuickMenuOpen((prev) => !prev)}><span className="mobile-kpi-icon"><i data-lucide="plus" /></span><span>Nuevo</span></button>
+                <button type="button" className="mobile-quick-btn" onClick={() => { setSelectedForm('dashboard-gerencia'); setMobileQuickMenuOpen(false); }}><span className="mobile-kpi-icon"><i data-lucide="bar-chart-3" /></span><span>KPI´s</span></button>
+                {mobileQuickMenuOpen && (
+                  <div className="mobile-quick-menu">
+                    <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Obra'); }}>Nueva obra</button>
+                    <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Baja'); }}>Nueva baja</button>
+                    <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Nuevo Servicio'); }}>Nuevo servicio</button>
+                    <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Charla'); }}>Nueva presentación</button>
+                  </div>
+                )}
               </div>
             </section>
           );
@@ -7511,7 +7569,7 @@
                 )}
                 {!isMobile && <button className="burger" aria-label="Abrir menú" onClick={toggleSidebar}><span className="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>}
                 {!isMobile && (effectiveSelectedForm !== 'home' || !!selectedService) && <button className="topbar-back-btn" type="button" aria-label="Volver" onClick={goBackOneStep}><i data-lucide="arrow-left" /></button>}
-                {isMobile && <div className="mobile-brand-icon" aria-hidden="true"><i data-lucide="house" /></div>}
+                {isMobile && <div className="mobile-brand-icon" aria-hidden="true" />}
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
                   <p className="subtitle-voga">{isMobile ? `${topbarSubtitle || 'Área Técnica'} ▾` : topbarSubtitle}</p>
@@ -7565,8 +7623,8 @@
                         className="mobile-icon-btn"
                         aria-label="Buscar servicios"
                         onClick={() => {
-                          setMobileTab('servicios');
-                          setSelectedForm('home');
+                          setMobileSearchOpen((prev) => !prev);
+                          setMobileBellOpen(false);
                         }}
                       >
                         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.8"/><path d="M16 16l4.2 4.2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
@@ -7619,6 +7677,34 @@
                   </div>
                 )}
               </header>
+
+              {isMobile && mobileSearchOpen && (
+                <>
+                  <div className="mobile-alert-backdrop" onClick={() => setMobileSearchOpen(false)} />
+                  <div className="mobile-search-panel" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      autoFocus
+                      className="mobile-search-input"
+                      type="text"
+                      placeholder="Buscar por nombre o ID del servicio..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <div className="mobile-search-results">
+                      {searchTerm.trim() === '' ? (
+                        <div className="mobile-search-item"><small>Escribí un nombre o ID para buscar.</small></div>
+                      ) : filteredRows.length === 0 ? (
+                        <div className="mobile-search-item"><small>Sin resultados.</small></div>
+                      ) : filteredRows.slice(0, 10).map((r) => (
+                        <div key={`mobile-search-${r.id}`} className="mobile-search-item" onClick={() => { setSelectedService(r); setSelectedForm('historial'); setMobileTab('servicios'); setSearchTerm(''); setMobileSearchOpen(false); }}>
+                          <strong>{r.clienteId || '-'} · {r.nombreServicio || 'Servicio sin nombre'}</strong>
+                          <small>{r.direccionServicio || r.cliente || 'Sin dirección'}</small>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
 
               {isMobile && mobileBellOpen && (
                 <>
@@ -8661,20 +8747,22 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         setSelectedService(null);
                         setTipoAccion('');
                         setMobileBellOpen(false);
+                        setMobileSearchOpen(false);
+                        setMobileQuickMenuOpen(false);
                       }}
                     >
                       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.5L12 3l9 7.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><path d="M5.5 9.5V20h13V9.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><path d="M10 20v-5h4v5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       <span className="mobile-nav-label">Inicio</span>
                     </button>
-                    <button className={mobileTab === 'servicios' ? 'active' : ''} type="button" onClick={() => { setMobileTab('servicios'); setSelectedForm('home'); setSelectedService(null); setMobileBellOpen(false); }}>
+                    <button className={mobileTab === 'servicios' ? 'active' : ''} type="button" onClick={() => { setMobileTab('servicios'); setSelectedForm('home'); setSelectedService(null); setMobileBellOpen(false); setMobileSearchOpen(false); setMobileQuickMenuOpen(false); }}>
                       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 7.5h18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><path d="M6 12h12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><path d="M9 16.5h6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
                       <span className="mobile-nav-label">Servicios</span>
                     </button>
-                    <button className={mobileTab === 'actividad' ? 'active' : ''} type="button" onClick={() => { setMobileTab('actividad'); setSelectedForm('home'); setSelectedService(null); setMobileBellOpen(false); }}>
+                    <button className={mobileTab === 'actividad' ? 'active' : ''} type="button" onClick={() => { setMobileTab('actividad'); setSelectedForm('home'); setSelectedService(null); setMobileBellOpen(false); setMobileSearchOpen(false); setMobileQuickMenuOpen(false); }}>
                       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.8"/><path d="M12 8v4l3 2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       <span className="mobile-nav-label">Actividad</span>
                     </button>
-                    <button className={effectiveSelectedForm === 'perfil' ? 'active' : ''} type="button" onClick={() => { setMobileBellOpen(false); openProfileView(); }}>
+                    <button className={effectiveSelectedForm === 'perfil' ? 'active' : ''} type="button" onClick={() => { setMobileBellOpen(false); setMobileSearchOpen(false); setMobileQuickMenuOpen(false); openProfileView(); }}>
                       <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8"/><path d="M4 20c1.8-3.4 5-5 8-5s6.2 1.6 8 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
                       <span className="mobile-nav-label">Perfil</span>
                     </button>
