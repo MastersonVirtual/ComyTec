@@ -2177,6 +2177,8 @@
         border: 1px solid rgba(0,100,101,.18);
         box-shadow: 0 24px 60px rgba(0,0,0,.32);
         padding: 16px;
+        overflow: hidden;
+        max-height: none;
       }
       .executive-modal-header {
         display: flex;
@@ -5323,6 +5325,65 @@
           });
         }
 
+        function exportExecutivePdf(kind) {
+          if (!window.jspdf?.jsPDF) {
+            alert('No se pudo cargar el generador de PDF.');
+            return;
+          }
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+          const fecha = new Date().toLocaleString('es-UY');
+          const title = kind === 'ingresos' ? 'Reporte ejecutivo - Ingresos estimados' : 'Reporte ejecutivo - Costos operativos';
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(16);
+          doc.text('Masterson Seguridad', 14, 18);
+          doc.setFontSize(13);
+          doc.text(title, 14, 28);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(10);
+          doc.text(`Generado: ${fecha}`, 14, 34);
+
+          let y = 44;
+          const writeLine = (label, value) => {
+            doc.setFont('helvetica', 'bold');
+            doc.text(`${label}:`, 14, y);
+            doc.setFont('helvetica', 'normal');
+            doc.text(String(value), 72, y);
+            y += 7;
+          };
+
+          if (kind === 'ingresos') {
+            writeLine('Ingresos estimados', `US$ ${ingresosEstimados.toLocaleString('es-UY')}`);
+            writeLine('Rentabilidad actual', `${rentabilidad}%`);
+            writeLine('Servicios activos', activeServices.length);
+            writeLine('Servicios finalizados', completedServices.length);
+            y += 3;
+            doc.setFont('helvetica', 'bold');
+            doc.text('Tendencia mensual de ingresos (referencial):', 14, y);
+            y += 7;
+            monthLabels.forEach((month, idx) => {
+              writeLine(month, `US$ ${(ingresosTrend[idx] || 0).toLocaleString('es-UY')}`);
+            });
+          } else {
+            const totalInstalaciones = rows.reduce((acc, r) => acc + (Number(r.costoInstalacionUsdSinIva) || 0), 0);
+            const totalProveedores = rows.reduce((acc, r) => acc + (Number(r.presupuestoProveedor) || 0), 0);
+            writeLine('Costos operativos', `US$ ${costosOperativos.toLocaleString('es-UY')}`);
+            writeLine('Instalaciones', `US$ ${totalInstalaciones.toLocaleString('es-UY')}`);
+            writeLine('Proveedores', `US$ ${totalProveedores.toLocaleString('es-UY')}`);
+            writeLine('Presupuestos pendientes', presupuestosPendientes.length);
+            y += 3;
+            doc.setFont('helvetica', 'bold');
+            doc.text('Tendencia mensual de costos (referencial):', 14, y);
+            y += 7;
+            monthLabels.forEach((month, idx) => {
+              writeLine(month, `US$ ${(costosTrend[idx] || 0).toLocaleString('es-UY')}`);
+            });
+          }
+
+          const fileName = kind === 'ingresos' ? 'reporte_ingresos_dashboard.pdf' : 'reporte_costos_dashboard.pdf';
+          doc.save(fileName);
+        }
+
         const latestRowsFallback = rows
           .map((r) => ({
             id: r.id,
@@ -5371,14 +5432,14 @@
                 <h3>Ingresos estimados</h3>
                 <div className="executive-value">US$ {ingresosEstimados.toLocaleString('es-UY')}</div>
                 <MiniBarChart chartId="ingresos-estimados" labels={monthLabels} values={ingresosTrend} color="#168f90" />
-                <button type="button" className="executive-btn">Ver reportes</button>
+                <button type="button" className="executive-btn" onClick={() => exportExecutivePdf('ingresos')}>Ver reportes</button>
               </article>
 
               <article className="executive-card">
                 <h3>Costos operativos</h3>
                 <div className="executive-value">US$ {costosOperativos.toLocaleString('es-UY')}</div>
                 <MiniBarChart chartId="costos-operativos" labels={monthLabels} values={costosTrend} color="#f39a3d" />
-                <button type="button" className="executive-btn accent">Exportar datos</button>
+                <button type="button" className="executive-btn accent" onClick={() => exportExecutivePdf('costos')}>Exportar datos</button>
               </article>
 
               <article className="executive-card">
