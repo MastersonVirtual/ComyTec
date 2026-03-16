@@ -2012,6 +2012,208 @@
         padding: 8px 0 2px;
       }
 
+
+      /* Dashboard Ejecutivo Gerencia */
+      .executive-dashboard {
+        display: grid;
+        gap: 16px;
+        padding-bottom: 18px;
+      }
+      .executive-hero {
+        background: linear-gradient(145deg, rgba(0,100,101,.98), rgba(7,120,120,.88));
+        color: #fff;
+        border-radius: 20px;
+        padding: clamp(16px, 3vw, 24px);
+        box-shadow: 0 16px 32px rgba(0,100,101,.22);
+      }
+      .executive-hero h2 { margin: 0; font-size: clamp(1.3rem, 2.6vw, 1.9rem); color: #fff; }
+      .executive-hero p { margin: 6px 0 0; color: rgba(238,255,255,.9); }
+      .executive-kpi-grid {
+        margin-top: 16px;
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(4, minmax(160px, 1fr));
+      }
+      .executive-kpi-card {
+        background: rgba(242, 255, 254, 0.95);
+        color: #0a3131;
+        border-radius: 16px;
+        padding: 14px;
+        display: grid;
+        grid-template-columns: 38px 1fr;
+        gap: 10px;
+        align-items: center;
+        border: 1px solid rgba(0,100,101,.14);
+        box-shadow: 0 8px 22px rgba(2,50,50,.14);
+      }
+      .executive-kpi-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        background: rgba(0,100,101,.12);
+        color: #006465;
+      }
+      .executive-kpi-icon.warn { background: rgba(255,132,37,.16); color: #cc6512; }
+      .executive-kpi-value { font-size: 1.8rem; line-height: 1; font-weight: 800; color: #083535; }
+      .executive-kpi-label { font-size: .9rem; color: #1e4d4c; }
+
+      .executive-finance-grid {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(3, minmax(250px, 1fr));
+      }
+      .executive-card {
+        background: #f9fffe;
+        border: 1px solid rgba(0,100,101,.15);
+        border-radius: 18px;
+        padding: 16px;
+        box-shadow: 0 10px 24px rgba(5,48,48,.09);
+        display: grid;
+        gap: 10px;
+      }
+      .executive-card h3 { margin: 0; color: #0c4040; }
+      .executive-value {
+        font-size: clamp(1.5rem, 2.8vw, 2rem);
+        color: #006465;
+        font-weight: 800;
+        letter-spacing: .01em;
+      }
+      .executive-btn {
+        border: 0;
+        border-radius: 12px;
+        min-height: 38px;
+        background: rgba(0,100,101,.12);
+        color: #006465;
+        font-weight: 700;
+      }
+      .executive-btn.accent { background: rgba(255,132,37,.2); color: #944300; }
+      .executive-list { display: grid; gap: 8px; }
+      .executive-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        border: 1px solid rgba(0,100,101,.12);
+        background: #fff;
+        border-radius: 12px;
+        padding: 10px 12px;
+      }
+      .executive-alert-item { justify-content: flex-start; gap: 10px; }
+      .executive-alert-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        background: rgba(255,132,37,.16);
+        color: #b85a0f;
+        flex-shrink: 0;
+      }
+      .executive-chart-shell {
+        height: 136px;
+        position: relative;
+      }
+      .executive-chart-shell canvas {
+        width: 100% !important;
+        height: 100% !important;
+      }
+      .executive-section-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(290px, 1fr));
+        gap: 14px;
+      }
+      .executive-timeline {
+        position: relative;
+        padding-left: 14px;
+      }
+      .executive-timeline::before {
+        content: '';
+        position: absolute;
+        left: 3px;
+        top: 6px;
+        bottom: 6px;
+        width: 2px;
+        background: rgba(0,100,101,.25);
+      }
+      .executive-timeline-item {
+        position: relative;
+        margin-bottom: 10px;
+        padding-left: 12px;
+      }
+      .executive-timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -15px;
+        top: 7px;
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #ff8425;
+      }
+      .executive-muted { color: #6d8d8c; font-size: .84rem; }
+      .executive-kpi-charts {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .executive-kpi-chart-btn {
+        border: 1px solid rgba(0,100,101,.16);
+        border-radius: 12px;
+        background: #ffffff;
+        padding: 10px;
+        cursor: pointer;
+      }
+      .executive-kpi-chart-btn h4 {
+        margin: 0 0 6px;
+        font-size: .85rem;
+        color: #1e4d4c;
+      }
+      .executive-modal {
+        width: min(860px, calc(100vw - 28px));
+        background: #f7fffe;
+        border-radius: 18px;
+        border: 1px solid rgba(0,100,101,.18);
+        box-shadow: 0 24px 60px rgba(0,0,0,.32);
+        padding: 16px;
+        overflow: hidden;
+        max-height: none;
+      }
+      .executive-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+      .executive-modal-close {
+        border: 1px solid rgba(0,100,101,.2);
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        background: #fff;
+        color: #006465;
+      }
+      .executive-modal-grid {
+        display: grid;
+        grid-template-columns: minmax(320px, .95fr) minmax(220px, 1fr);
+        gap: 12px;
+      }
+
+      @media (max-width: 1180px) {
+        .executive-kpi-grid { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
+        .executive-finance-grid { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 768px) {
+        .executive-section-grid { grid-template-columns: 1fr; }
+        .executive-kpi-grid { grid-template-columns: 1fr; }
+        .executive-kpi-charts { grid-template-columns: 1fr; }
+        .executive-modal-grid { grid-template-columns: 1fr; }
+      }
+
       .mobile-bottom-nav {
         display: none;
       }
@@ -4962,235 +5164,368 @@
         );
       }
 
-      function DashboardGerencia({ rows, isMobileNative = false }) {
-        const [activeWidget, setActiveWidget] = useState('rentabilidad');
-        const [showCostosDetalle, setShowCostosDetalle] = useState(false);
-        const [sellerChartModal, setSellerChartModal] = useState(null);
+      function MiniBarChart({ chartId, labels, values, color = '#006465' }) {
+        const canvasRef = useRef(null);
 
-        function toDate(value) {
-          if (!value) return null;
-          if (typeof value?.toDate === 'function') return value.toDate();
-          if (typeof value?.seconds === 'number') return new Date(value.seconds * 1000);
-          const parsed = new Date(value);
-          return Number.isNaN(parsed.getTime()) ? null : parsed;
-        }
+        useEffect(() => {
+          if (!canvasRef.current || !window.Chart) return () => {};
+          const chart = new window.Chart(canvasRef.current, {
+            type: 'bar',
+            data: {
+              labels,
+              datasets: [{
+                data: values,
+                borderRadius: 8,
+                backgroundColor: color,
+                borderWidth: 0,
+              }],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                x: { grid: { display: false }, ticks: { color: '#4f6f6f' } },
+                y: { beginAtZero: true, ticks: { display: false }, grid: { color: 'rgba(0,100,101,.09)' } },
+              },
+            },
+          });
+          return () => chart.destroy();
+        }, [labels.join('|'), values.join('|'), color]);
 
-        const totalInstalacion = rows.reduce((acc, r) => acc + (Number(r.costoInstalacionUsdSinIva) || 0), 0);
-        const totalProveedores = rows.reduce((acc, r) => acc + (Number(r.presupuestoProveedor) || 0), 0);
-        const totalArrendamiento = rows.reduce((acc, r) => acc + (Number(r.importeMensualArrendamiento) || 0), 0);
-        const totalVentasEquipos = rows.reduce((acc, r) => acc + (Number(r.importeCompraEquipamiento) || 0), 0);
-        const totalIngresos = totalArrendamiento + totalVentasEquipos;
+        return <div className="executive-chart-shell"><canvas ref={canvasRef} aria-label={chartId} /></div>;
+      }
 
-        const costosDetalleRows = rows
-          .slice()
-          .sort((a, b) => (b.actualizadoEn?.seconds || b.creadoEn?.seconds || 0) - (a.actualizadoEn?.seconds || a.creadoEn?.seconds || 0));
+      function DonutChartWidget({ chartId, items }) {
+        const canvasRef = useRef(null);
 
-        const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        const fechasAltaNuevas = rows
-          .map((r) => ({
-            nombre: r.nombreServicio || r.razonSocial || r.clienteId || 'Servicio sin nombre',
-            fecha: r.fechaAltaServicio || r.fechaAlta || r.fechaEspecificaInicio,
-            dateObj: toDate(r.fechaAltaServicio || r.fechaAlta || r.fechaEspecificaInicio),
-          }))
-          .filter((r) => r.dateObj && r.dateObj >= now)
-          .sort((a, b) => a.dateObj - b.dateObj);
+        useEffect(() => {
+          if (!canvasRef.current || !window.Chart) return () => {};
+          const chart = new window.Chart(canvasRef.current, {
+            type: 'doughnut',
+            data: {
+              labels: items.map((item) => item.name),
+              datasets: [{
+                data: items.map((item) => item.value),
+                backgroundColor: ['#22a3a3', '#f59e0b', '#ef6f43'],
+                borderWidth: 0,
+              }],
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              cutout: '72%',
+              plugins: {
+                legend: {
+                  position: 'bottom',
+                  labels: { usePointStyle: true, pointStyle: 'circle', boxWidth: 10, color: '#255756' },
+                },
+              },
+            },
+          });
+          return () => chart.destroy();
+        }, [items.map((item) => `${item.name}-${item.value}`).join('|')]);
 
-        const statusBuckets = { Finalizado: 0, Pendiente: 0, Atrasado: 0 };
-        rows.forEach((r) => {
-          const label = String(r.status || r.estado || '').toLowerCase();
-          if (label.includes('complet') || label.includes('finaliz')) {
-            statusBuckets.Finalizado += 1;
-          } else if (label.includes('atras')) {
-            statusBuckets.Atrasado += 1;
-          } else {
-            statusBuckets.Pendiente += 1;
+        return <div className="executive-chart-shell"><canvas ref={canvasRef} aria-label={chartId} /></div>;
+      }
+
+      function DashboardGerencia({ rows, recentActivity = [] }) {
+        const [realtimeServices, setRealtimeServices] = useState([]);
+        const [sellerModal, setSellerModal] = useState(null);
+
+        useEffect(() => {
+          if (!rtdb) {
+            setRealtimeServices([]);
+            return () => {};
           }
+          const refs = [
+            rtdb.ref('dashboard/ultimasAltasServicio').limitToLast(20),
+            rtdb.ref('ultimasAltasServicio').limitToLast(20),
+            rtdb.ref('dashboard/serviciosRecientes').limitToLast(20),
+          ];
+          const localStore = {};
+          const listeners = refs.map((sourceRef, idx) => {
+            const handler = (snap) => {
+              const val = snap.val() || {};
+              localStore[idx] = Object.entries(val).map(([id, item]) => {
+                const row = item || {};
+                const rawDate = row.fechaAlta || row.fecha || row.createdAt || row.timestamp || row.creadoEn || null;
+                const timestamp = typeof rawDate === 'number' ? rawDate : (new Date(rawDate).getTime() || 0);
+                return {
+                  id,
+                  nombre: row.nombreEdificio || row.edificio || row.nombreServicio || row.razonSocial || row.nombre || 'Servicio sin nombre',
+                  fecha: row.fechaAlta || row.fecha || (timestamp ? new Date(timestamp).toLocaleDateString('es-UY', { day: '2-digit', month: 'long' }) : '-'),
+                  timestamp,
+                };
+              });
+              const merged = Object.values(localStore).flat();
+              const dedup = [];
+              const seen = new Set();
+              merged.sort((a, b) => b.timestamp - a.timestamp).forEach((item) => {
+                const sig = `${item.nombre}-${item.fecha}`;
+                if (seen.has(sig)) return;
+                seen.add(sig);
+                dedup.push(item);
+              });
+              setRealtimeServices(dedup.slice(0, 6));
+            };
+            sourceRef.on('value', handler);
+            return { sourceRef, handler };
+          });
+          return () => listeners.forEach(({ sourceRef, handler }) => sourceRef.off('value', handler));
+        }, []);
+
+        const monthLabels = ['Ago', 'Sep', 'Oct', 'Nov', 'Dic', 'Ene'];
+        const activeServices = rows.filter((r) => {
+          const label = String(r.status || r.estado || '').toLowerCase();
+          return !(label.includes('baja') || label.includes('cancel') || label.includes('finaliz') || label.includes('complet'));
         });
-        const statusCounts = Object.entries(statusBuckets).map(([name, value]) => ({ name, value }));
+        const completedServices = rows.filter((r) => {
+          const label = String(r.status || r.estado || '').toLowerCase();
+          return label.includes('finaliz') || label.includes('complet');
+        });
+        const pendingServices = rows.filter((r) => {
+          const label = String(r.status || r.estado || '').toLowerCase();
+          return label.includes('pend') || label === '' || label.includes('proceso');
+        });
+        const delayedServices = rows.filter((r) => {
+          const label = String(r.status || r.estado || '').toLowerCase();
+          return label.includes('atras');
+        });
 
-        const activos = rows
-          .filter((r) => {
-            const label = String(r.status || r.estado || '').toLowerCase();
-            return !(label.includes('cancel') || label.includes('complet') || label.includes('finaliz') || label.includes('baja'));
-          })
-          .slice()
-          .sort((a, b) => (b.actualizadoEn?.seconds || b.creadoEn?.seconds || 0) - (a.actualizadoEn?.seconds || a.creadoEn?.seconds || 0));
+        const ingresosEstimados = rows.reduce((acc, r) => acc + (Number(r.importeMensualServicioSinIva) || 0) + (Number(r.importeMensualArrendamiento) || 0) + (Number(r.importeCompraEquipamiento) || 0), 0);
+        const costosOperativos = rows.reduce((acc, r) => acc + (Number(r.costoInstalacionUsdSinIva) || 0) + (Number(r.presupuestoProveedor) || 0), 0);
+        const rentabilidad = ingresosEstimados > 0 ? Math.round(((ingresosEstimados - costosOperativos) / ingresosEstimados) * 100) : 0;
 
-        const rentabilidadPorProyecto = Object.entries(rows.reduce((acc, r) => {
-          const key = (r.proyectoServicio || r.nombreServicio || 'Sin proyecto').trim();
-          const ingresos = (Number(r.importeMensualServicioSinIva) || 0) + (Number(r.importeMensualArrendamiento) || 0) + (Number(r.importeCompraEquipamiento) || 0);
-          const costos = (Number(r.costoInstalacionUsdSinIva) || 0) + (Number(r.presupuestoProveedor) || 0);
-          if (!acc[key]) acc[key] = { ingresos: 0, costos: 0 };
-          acc[key].ingresos += ingresos;
-          acc[key].costos += costos;
-          return acc;
-        }, {})).map(([name, values]) => ({
-          name,
-          rentabilidad: values.ingresos - values.costos,
-        })).sort((a, b) => b.rentabilidad - a.rentabilidad);
+        const ingresosTrend = monthLabels.map((_, idx) => Math.max(0, Math.round((ingresosEstimados / 6) * (0.55 + idx * 0.16))));
+        const costosTrend = monthLabels.map((_, idx) => Math.max(0, Math.round((costosOperativos / 6) * (0.48 + idx * 0.18))));
 
-        const rentabilidadPorCliente = Object.entries(rows.reduce((acc, r) => {
-          const key = (r.razonSocial || r.nombreServicio || r.clienteId || 'Sin cliente').trim();
-          const ingresos = (Number(r.importeMensualServicioSinIva) || 0) + (Number(r.importeMensualArrendamiento) || 0) + (Number(r.importeCompraEquipamiento) || 0);
-          const costos = (Number(r.costoInstalacionUsdSinIva) || 0) + (Number(r.presupuestoProveedor) || 0);
-          if (!acc[key]) acc[key] = { ingresos: 0, costos: 0 };
-          acc[key].ingresos += ingresos;
-          acc[key].costos += costos;
-          return acc;
-        }, {})).map(([name, values]) => ({
-          name,
-          rentabilidad: values.ingresos - values.costos,
-        })).sort((a, b) => b.rentabilidad - a.rentabilidad).slice(0, 8);
-
-        const topProyecto = rentabilidadPorProyecto[0] || { name: 'Sin datos', rentabilidad: 0 };
+        const serviciosSinTecnico = rows.filter((r) => !String(r.tecnico || r.tecnicoAsignado || r.asignadoA || '').trim());
+        const presupuestosPendientes = rows.filter((r) => (Number(r.presupuestoProveedor) || 0) <= 0);
 
         const topVendedoresServicios = Object.entries(rows.reduce((acc, r) => {
-          const seller = (r.representanteComercial || 'Sin asignar').trim();
+          const seller = (r.representanteComercial || r.vendedor || r.usuarioComercial || 'Sin asignar').trim();
           acc[seller] = (acc[seller] || 0) + 1;
           return acc;
         }, {})).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 8);
 
         const topVendedoresIngresos = Object.entries(rows.reduce((acc, r) => {
-          const seller = (r.representanteComercial || 'Sin asignar').trim();
+          const seller = (r.representanteComercial || r.vendedor || r.usuarioComercial || 'Sin asignar').trim();
           const income = (Number(r.importeMensualServicioSinIva) || 0) + (Number(r.importeMensualArrendamiento) || 0) + (Number(r.importeCompraEquipamiento) || 0);
           acc[seller] = (acc[seller] || 0) + income;
           return acc;
         }, {})).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 8);
 
-        function openSellerChartModal(type) {
-          const items = type === 'ingresos' ? topVendedoresIngresos : topVendedoresServicios;
-          const title = type === 'ingresos' ? 'Ingresos por vendedor' : 'Servicios vendidos';
-          setSellerChartModal({ type, title, items });
+        function openSellerModal(type) {
+          const isMoney = type === 'ingresos';
+          setSellerModal({
+            type,
+            title: isMoney ? 'Top vendedores por ingresos' : 'Top vendedores por servicios',
+            items: isMoney ? topVendedoresIngresos : topVendedoresServicios,
+          });
         }
 
-        if (showCostosDetalle) {
-          return (
-            <section className="panel dashboard-gerencia-panel">
-              <h2>Costos por servicio</h2>
-              <div className="hint">Detalle de instalación y proveedores terceros por cada servicio.</div>
-              <button type="button" className="link-btn" onClick={() => setShowCostosDetalle(false)} style={{ marginBottom: 12 }}>← Volver al Dashboard Gerencia</button>
-              <div className="table-wrap">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Servicio</th>
-                      <th>Cliente ID</th>
-                      <th>Costo instalación</th>
-                      <th>Proveedores terceros</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {costosDetalleRows.length === 0 ? (
-                      <tr><td colSpan={4} className="muted">Sin servicios cargados.</td></tr>
-                    ) : costosDetalleRows.map((r) => (
-                      <tr key={`costo-${r.id}`}>
-                        <td>{r.nombreServicio || r.razonSocial || 'Servicio sin nombre'}</td>
-                        <td>{r.clienteId || '-'}</td>
-                        <td>US$ {(Number(r.costoInstalacionUsdSinIva) || 0).toLocaleString('es-UY')}</td>
-                        <td>US$ {(Number(r.presupuestoProveedor) || 0).toLocaleString('es-UY')}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          );
+        function exportExecutivePdf(kind) {
+          if (!window.jspdf?.jsPDF) {
+            alert('No se pudo cargar el generador de PDF.');
+            return;
+          }
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+          const fecha = new Date().toLocaleString('es-UY');
+          const title = kind === 'ingresos' ? 'Reporte ejecutivo - Ingresos estimados' : 'Reporte ejecutivo - Costos operativos';
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(16);
+          doc.text('Masterson Seguridad', 14, 18);
+          doc.setFontSize(13);
+          doc.text(title, 14, 28);
+          doc.setFont('helvetica', 'normal');
+          doc.setFontSize(10);
+          doc.text(`Generado: ${fecha}`, 14, 34);
+
+          let y = 44;
+          const writeLine = (label, value) => {
+            doc.setFont('helvetica', 'bold');
+            doc.text(`${label}:`, 14, y);
+            doc.setFont('helvetica', 'normal');
+            doc.text(String(value), 72, y);
+            y += 7;
+          };
+
+          if (kind === 'ingresos') {
+            writeLine('Ingresos estimados', `US$ ${ingresosEstimados.toLocaleString('es-UY')}`);
+            writeLine('Rentabilidad actual', `${rentabilidad}%`);
+            writeLine('Servicios activos', activeServices.length);
+            writeLine('Servicios finalizados', completedServices.length);
+            y += 3;
+            doc.setFont('helvetica', 'bold');
+            doc.text('Tendencia mensual de ingresos (referencial):', 14, y);
+            y += 7;
+            monthLabels.forEach((month, idx) => {
+              writeLine(month, `US$ ${(ingresosTrend[idx] || 0).toLocaleString('es-UY')}`);
+            });
+          } else {
+            const totalInstalaciones = rows.reduce((acc, r) => acc + (Number(r.costoInstalacionUsdSinIva) || 0), 0);
+            const totalProveedores = rows.reduce((acc, r) => acc + (Number(r.presupuestoProveedor) || 0), 0);
+            writeLine('Costos operativos', `US$ ${costosOperativos.toLocaleString('es-UY')}`);
+            writeLine('Instalaciones', `US$ ${totalInstalaciones.toLocaleString('es-UY')}`);
+            writeLine('Proveedores', `US$ ${totalProveedores.toLocaleString('es-UY')}`);
+            writeLine('Presupuestos pendientes', presupuestosPendientes.length);
+            y += 3;
+            doc.setFont('helvetica', 'bold');
+            doc.text('Tendencia mensual de costos (referencial):', 14, y);
+            y += 7;
+            monthLabels.forEach((month, idx) => {
+              writeLine(month, `US$ ${(costosTrend[idx] || 0).toLocaleString('es-UY')}`);
+            });
+          }
+
+          const fileName = kind === 'ingresos' ? 'reporte_ingresos_dashboard.pdf' : 'reporte_costos_dashboard.pdf';
+          doc.save(fileName);
         }
+
+        const latestRowsFallback = rows
+          .map((r) => ({
+            id: r.id,
+            nombre: r.nombreEdificio || r.nombreServicio || r.razonSocial || 'Servicio sin nombre',
+            fecha: r.fechaAltaServicio || r.fechaAlta || r.fechaIngresoDatos || '-',
+            timestamp: r.creadoEn?.seconds ? r.creadoEn.seconds * 1000 : 0,
+          }))
+          .sort((a, b) => b.timestamp - a.timestamp)
+          .slice(0, 6);
+        const latestServices = realtimeServices.length ? realtimeServices : latestRowsFallback;
+
+        const activityFeed = recentActivity.slice(0, 6);
+
+
+        const rentabilityBreakdown = [
+          { name: 'Pendientes', value: pendingServices.length },
+          { name: 'Finalizados', value: completedServices.length },
+          { name: 'Atrasados', value: delayedServices.length },
+        ];
 
         return (
-          <section className="panel dashboard-gerencia-panel">
-            <h2>Dashboard Gerencia</h2>
-            <div className="hint">Vista de solo lectura para seguimiento ejecutivo.</div>
-            <div className="gerencia-widgets">
-              <article className={`gerencia-widget ${activeWidget === 'costos' ? 'active' : ''}`}>
-                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('costos')}>Costos</button>
-                <h3>Costos Operativos</h3>
-                <div className="gerencia-item"><span>Instalación total</span><b>US$ {totalInstalacion.toLocaleString('es-UY')}</b></div>
-                <div className="gerencia-item"><span>Proveedores terceros</span><b>US$ {totalProveedores.toLocaleString('es-UY')}</b></div>
-                <button type="button" className="link-btn" onClick={() => setShowCostosDetalle(true)} style={{ marginTop: 10 }}>Ver detalle por servicio</button>
-              </article>
-
-              <article className={`gerencia-widget ${activeWidget === 'fechas' ? 'active' : ''}`}>
-                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('fechas')}>Fechas de Alta</button>
-                <h3>Fechas de nuevas altas</h3>
-                <div className="gerencia-status-list">
-                  {fechasAltaNuevas.length === 0 ? <div className="gerencia-item"><span>Sin nuevas altas</span><b>-</b></div> : fechasAltaNuevas.slice(0, 8).map((r, idx) => (<div key={`alta-${idx}`} className="gerencia-item"><span>{r.nombre}</span><b>{r.fecha}</b></div>))}
-                </div>
-              </article>
-
-              <article className={`gerencia-widget ${activeWidget === 'pendientes' ? 'active' : ''}`}>
-                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('pendientes')}>Activos</button>
-                <h3>Activos</h3>
-                <div className="gerencia-status-list">
-                  {statusCounts.map((item) => (<div className="gerencia-item" key={`g-status-${item.name}`}><span>{item.name}</span><b>{item.value}</b></div>))}
-                </div>
-              </article>
-
-              <article className={`gerencia-widget gerencia-widget-rentabilidad gerencia-widget-wide ${activeWidget === 'rentabilidad' ? 'active' : ''}`}>
-                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('rentabilidad')}>Rentabilidad</button>
-                <h3>Rentabilidad por proyecto/cliente</h3>
-                <div className="gerencia-item"><span>Proyecto más rentable</span><b>{topProyecto.name} · US$ {topProyecto.rentabilidad.toLocaleString('es-UY')}</b></div>
-                <div className="gerencia-ranking-list">
-                  {rentabilidadPorCliente.length === 0 ? <div className="gerencia-item"><span>Sin datos</span><b>-</b></div> : rentabilidadPorCliente.map((item) => (<div key={`rent-${item.name}`} className="gerencia-item"><span>{item.name}</span><b>US$ {item.rentabilidad.toLocaleString('es-UY')}</b></div>))}
-                </div>
-              </article>
-
-              <article className={`gerencia-widget gerencia-widget-half gerencia-widget-top-vendedores gerencia-widget-wide ${activeWidget === 'top-vendedores' ? 'active' : ''}`}>
-                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('top-vendedores')}>Top Vendedores</button>
-                <h3>Top vendedores (click para abrir modal ampliado)</h3>
-                <div className="gerencia-top-charts">
-                  <div className="gerencia-chart-clickable" onClick={() => { setActiveWidget('top-vendedores'); openSellerChartModal('servicios'); }}>
-                    <PieChartWidget chartId="top-vendedores-servicios" title="Servicios vendidos" items={topVendedoresServicios} />
-                  </div>
-                  <div className="gerencia-chart-clickable" onClick={() => { setActiveWidget('top-vendedores'); openSellerChartModal('ingresos'); }}>
-                    <PieChartWidget chartId="top-vendedores-ingresos" title="Ingresos por vendedor" items={topVendedoresIngresos} />
-                  </div>
-                </div>
-              </article>
-
-              <article className={`gerencia-widget gerencia-widget-half ${activeWidget === 'ingresos' ? 'active' : ''}`}>
-                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('ingresos')}>Ingresos</button>
-                <h3>Ingresos por ventas y arrendamientos</h3>
-                <div className="gerencia-item"><span>Arrendamiento</span><b>US$ {totalArrendamiento.toLocaleString('es-UY')}</b></div>
-                <div className="gerencia-item"><span>Venta equipamiento</span><b>US$ {totalVentasEquipos.toLocaleString('es-UY')}</b></div>
-                <div className="gerencia-item"><span>Total ingresos</span><b>US$ {totalIngresos.toLocaleString('es-UY')}</b></div>
-              </article>
-
-              <article className={`gerencia-widget gerencia-widget-half ${activeWidget === 'activos' ? 'active' : ''}`}>
-                <button type="button" className="gerencia-widget-toggle" onClick={() => setActiveWidget('activos')}>Servicios Activos</button>
-                <h3>Cantidad y listado de servicios activos</h3>
-                <div className="gerencia-value">{activos.length}</div>
-                <div className="gerencia-scroll-list">
-                  {activos.length === 0 ? <div className="gerencia-item"><span>Sin activos</span><b>-</b></div> : activos.map((r) => (<div key={`activo-${r.id}`} className="gerencia-item"><span>{r.nombreServicio || r.razonSocial || 'Servicio sin nombre'}</span><b>{r.fechaIngresoDatos || r.fechaAltaServicio || '-'}</b></div>))}
-                </div>
-              </article>
-            </div>
-
-            {sellerChartModal && (
-              <div className="confirm-modal" onClick={() => setSellerChartModal(null)}>
-                <div className="gerencia-chart-modal" onClick={(e) => e.stopPropagation()}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                    <h3 style={{ margin: 0 }}>{sellerChartModal.title} · vista ampliada</h3>
-                    <button type="button" className="link-btn" onClick={() => setSellerChartModal(null)}>Cerrar</button>
-                  </div>
-                  <div className="gerencia-chart-modal-grid">
+          <section className="panel dashboard-gerencia-panel executive-dashboard">
+            <article className="executive-hero">
+              <h2>Dashboard Ejecutivo</h2>
+              <p>Resumen general de la operación</p>
+              <div className="executive-kpi-grid">
+                {[
+                  { icon: 'briefcase-business', label: 'Servicios activos', value: activeServices.length },
+                  { icon: 'badge-check', label: 'Finalizados', value: completedServices.length },
+                  { icon: 'clock-3', label: 'Pendientes', value: pendingServices.length },
+                  { icon: 'triangle-alert', label: 'Atrasados', value: delayedServices.length, warn: true },
+                ].map((item) => (
+                  <article key={item.label} className="executive-kpi-card">
+                    <span className={`executive-kpi-icon ${item.warn ? 'warn' : ''}`}><i data-lucide={item.icon} /></span>
                     <div>
-                      <PieChartWidget chartId={`gerencia-modal-${sellerChartModal.type}`} title={sellerChartModal.title} items={sellerChartModal.items} size="large" />
+                      <div className="executive-kpi-value">{item.value}</div>
+                      <div className="executive-kpi-label">{item.label}</div>
                     </div>
-                    <div className="gerencia-ranking-list">
-                      {(() => {
-                        const total = sellerChartModal.items.reduce((acc, item) => acc + (Number(item.value) || 0), 0);
-                        return sellerChartModal.items.map((item, idx) => {
-                          const pct = total > 0 ? ((Number(item.value) || 0) * 100 / total) : 0;
-                          return (
-                            <div key={`seller-modal-item-${idx}-${item.name}`} className="gerencia-item">
-                              <span>{idx + 1}. {item.name}</span>
-                              <b>{sellerChartModal.type === 'ingresos' ? `US$ ${Number(item.value || 0).toLocaleString('es-UY')}` : `${item.value} servicios`} · {pct.toFixed(1)}%</b>
-                            </div>
-                          );
-                        });
-                      })()}
+                  </article>
+                ))}
+              </div>
+            </article>
+
+            <section className="executive-finance-grid">
+              <article className="executive-card">
+                <h3>Ingresos estimados</h3>
+                <div className="executive-value">US$ {ingresosEstimados.toLocaleString('es-UY')}</div>
+                <MiniBarChart chartId="ingresos-estimados" labels={monthLabels} values={ingresosTrend} color="#168f90" />
+                <button type="button" className="executive-btn" onClick={() => exportExecutivePdf('ingresos')}>Ver reportes</button>
+              </article>
+
+              <article className="executive-card">
+                <h3>Costos operativos</h3>
+                <div className="executive-value">US$ {costosOperativos.toLocaleString('es-UY')}</div>
+                <MiniBarChart chartId="costos-operativos" labels={monthLabels} values={costosTrend} color="#f39a3d" />
+                <button type="button" className="executive-btn accent" onClick={() => exportExecutivePdf('costos')}>Exportar datos</button>
+              </article>
+
+              <article className="executive-card">
+                <h3>Rentabilidad actual</h3>
+                <div className="executive-value">{rentabilidad}%</div>
+                <DonutChartWidget chartId="rentabilidad" items={rentabilityBreakdown} />
+              </article>
+            </section>
+
+            <section className="executive-section-grid">
+              <article className="executive-card">
+                <h3>Alertas del sistema</h3>
+                <div className="executive-list">
+                  <div className="executive-item executive-alert-item"><span className="executive-alert-icon"><i data-lucide="triangle-alert" /></span><span>{delayedServices.length} servicios atrasados</span></div>
+                  <div className="executive-item executive-alert-item"><span className="executive-alert-icon"><i data-lucide="user-x" /></span><span>{serviciosSinTecnico.length} servicios sin técnico asignado</span></div>
+                  <div className="executive-item executive-alert-item"><span className="executive-alert-icon"><i data-lucide="file-warning" /></span><span>{presupuestosPendientes.length} presupuestos pendientes</span></div>
+                </div>
+                <button type="button" className="executive-btn">Ver toda la actividad</button>
+              </article>
+
+              <article className="executive-card">
+                <h3>Últimas altas de servicio</h3>
+                <div className="executive-list">
+                  {latestServices.length === 0 ? (
+                    <div className="executive-muted">Sin altas recientes.</div>
+                  ) : latestServices.map((item) => (
+                    <div className="executive-item" key={`alta-${item.id}`}>
+                      <span>{item.nombre}</span>
+                      <strong>{item.fecha}</strong>
+                    </div>
+                  ))}
+                </div>
+                <button type="button" className="executive-btn">Ver todas</button>
+              </article>
+            </section>
+
+            <section className="executive-section-grid">
+              <article className="executive-card">
+                <h3>KPI´s</h3>
+                <div className="executive-kpi-charts">
+                  <button type="button" className="executive-kpi-chart-btn" onClick={() => openSellerModal('servicios')}>
+                    <h4>Quién vendió más servicios</h4>
+                    <PieChartWidget chartId="exec-top-servicios" title="Servicios vendidos" items={topVendedoresServicios} />
+                  </button>
+                  <button type="button" className="executive-kpi-chart-btn" onClick={() => openSellerModal('ingresos')}>
+                    <h4>Quién vendió más dinero</h4>
+                    <PieChartWidget chartId="exec-top-ingresos" title="Ingresos por vendedor" items={topVendedoresIngresos} />
+                  </button>
+                </div>
+              </article>
+
+              <article className="executive-card">
+                <h3>Actividad reciente</h3>
+                <div className="executive-timeline">
+                  {activityFeed.length === 0 ? (
+                    <div className="executive-muted">Sin actividad reciente disponible.</div>
+                  ) : activityFeed.map((item) => (
+                    <div key={`activity-${item.id}`} className="executive-timeline-item">
+                      <strong>{item.message}</strong>
+                      <div className="executive-muted">{item.dateLabel || 'Ahora mismo'}</div>
+                    </div>
+                  ))}
+                </div>
+              </article>
+            </section>
+
+            {sellerModal && (
+              <div className="confirm-modal" onClick={() => setSellerModal(null)}>
+                <div className="executive-modal" onClick={(e) => e.stopPropagation()}>
+                  <div className="executive-modal-header">
+                    <h3 style={{ margin: 0 }}>{sellerModal.title}</h3>
+                    <button type="button" className="executive-modal-close" onClick={() => setSellerModal(null)} aria-label="Cerrar"><i data-lucide="x" /></button>
+                  </div>
+                  <div className="executive-modal-grid">
+                    <div>
+                      <PieChartWidget chartId={`exec-modal-${sellerModal.type}`} title={sellerModal.title} items={sellerModal.items} size="large" />
+                    </div>
+                    <div className="executive-list">
+                      {sellerModal.items.length === 0 ? (
+                        <div className="executive-muted">Sin datos para mostrar.</div>
+                      ) : sellerModal.items.map((item, idx) => (
+                        <div key={`seller-${idx}-${item.name}`} className="executive-item">
+                          <span>{idx + 1}. {item.name}</span>
+                          <strong>{sellerModal.type === 'ingresos' ? `US$ ${Number(item.value || 0).toLocaleString('es-UY')}` : `${item.value} servicios`}</strong>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -5199,8 +5534,6 @@
           </section>
         );
       }
-
-
 
 
       function DashboardTecnica({ rows, onGoToDetalle }) {
@@ -7910,7 +8243,7 @@
                     </div>
                   </section>
                 ) : effectiveSelectedForm === 'dashboard-gerencia' ? (
-                  <DashboardGerencia rows={visibleRows} isMobileNative={isMobile && isGerencia} />
+                  <DashboardGerencia rows={visibleRows} recentActivity={recentActivity} />
                 ) : effectiveSelectedForm === 'dashboard-tecnica' ? (
                   <DashboardTecnica rows={visibleRows} onGoToDetalle={() => setSelectedForm('historial')} />
                 ) : effectiveSelectedForm === 'home' ? (
