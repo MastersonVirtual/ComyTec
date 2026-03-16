@@ -2153,6 +2153,53 @@
         background: #ff8425;
       }
       .executive-muted { color: #6d8d8c; font-size: .84rem; }
+      .executive-kpi-charts {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+      .executive-kpi-chart-btn {
+        border: 1px solid rgba(0,100,101,.16);
+        border-radius: 12px;
+        background: #ffffff;
+        padding: 10px;
+        cursor: pointer;
+      }
+      .executive-kpi-chart-btn h4 {
+        margin: 0 0 6px;
+        font-size: .85rem;
+        color: #1e4d4c;
+      }
+      .executive-modal {
+        width: min(860px, calc(100vw - 28px));
+        background: #f7fffe;
+        border-radius: 18px;
+        border: 1px solid rgba(0,100,101,.18);
+        box-shadow: 0 24px 60px rgba(0,0,0,.32);
+        padding: 16px;
+      }
+      .executive-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+      .executive-modal-close {
+        border: 1px solid rgba(0,100,101,.2);
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        background: #fff;
+        color: #006465;
+      }
+      .executive-modal-grid {
+        display: grid;
+        grid-template-columns: minmax(320px, .95fr) minmax(220px, 1fr);
+        gap: 12px;
+      }
 
       @media (max-width: 1180px) {
         .executive-kpi-grid { grid-template-columns: repeat(2, minmax(180px, 1fr)); }
@@ -2161,6 +2208,8 @@
       @media (max-width: 768px) {
         .executive-section-grid { grid-template-columns: 1fr; }
         .executive-kpi-grid { grid-template-columns: 1fr; }
+        .executive-kpi-charts { grid-template-columns: 1fr; }
+        .executive-modal-grid { grid-template-columns: 1fr; }
       }
 
       .mobile-bottom-nav {
@@ -5180,6 +5229,7 @@
 
       function DashboardGerencia({ rows, recentActivity = [] }) {
         const [realtimeServices, setRealtimeServices] = useState([]);
+        const [sellerModal, setSellerModal] = useState(null);
 
         useEffect(() => {
           if (!rtdb) {
@@ -5251,6 +5301,28 @@
         const serviciosSinTecnico = rows.filter((r) => !String(r.tecnico || r.tecnicoAsignado || r.asignadoA || '').trim());
         const presupuestosPendientes = rows.filter((r) => (Number(r.presupuestoProveedor) || 0) <= 0);
 
+        const topVendedoresServicios = Object.entries(rows.reduce((acc, r) => {
+          const seller = (r.representanteComercial || r.vendedor || r.usuarioComercial || 'Sin asignar').trim();
+          acc[seller] = (acc[seller] || 0) + 1;
+          return acc;
+        }, {})).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 8);
+
+        const topVendedoresIngresos = Object.entries(rows.reduce((acc, r) => {
+          const seller = (r.representanteComercial || r.vendedor || r.usuarioComercial || 'Sin asignar').trim();
+          const income = (Number(r.importeMensualServicioSinIva) || 0) + (Number(r.importeMensualArrendamiento) || 0) + (Number(r.importeCompraEquipamiento) || 0);
+          acc[seller] = (acc[seller] || 0) + income;
+          return acc;
+        }, {})).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 8);
+
+        function openSellerModal(type) {
+          const isMoney = type === 'ingresos';
+          setSellerModal({
+            type,
+            title: isMoney ? 'Top vendedores por ingresos' : 'Top vendedores por servicios',
+            items: isMoney ? topVendedoresIngresos : topVendedoresServicios,
+          });
+        }
+
         const latestRowsFallback = rows
           .map((r) => ({
             id: r.id,
@@ -5264,10 +5336,6 @@
 
         const activityFeed = recentActivity.slice(0, 6);
 
-        const operationalCosts = {
-          instalaciones: rows.reduce((acc, r) => acc + (Number(r.costoInstalacionUsdSinIva) || 0), 0),
-          proveedores: rows.reduce((acc, r) => acc + (Number(r.presupuestoProveedor) || 0), 0),
-        };
 
         const rentabilityBreakdown = [
           { name: 'Pendientes', value: pendingServices.length },
@@ -5349,12 +5417,17 @@
 
             <section className="executive-section-grid">
               <article className="executive-card">
-                <h3>Costos Operativos</h3>
-                <div className="executive-list">
-                  <div className="executive-item"><span>Instalaciones</span><strong>US$ {operationalCosts.instalaciones.toLocaleString('es-UY')}</strong></div>
-                  <div className="executive-item"><span>Proveedores</span><strong>US$ {operationalCosts.proveedores.toLocaleString('es-UY')}</strong></div>
+                <h3>KPI´s</h3>
+                <div className="executive-kpi-charts">
+                  <button type="button" className="executive-kpi-chart-btn" onClick={() => openSellerModal('servicios')}>
+                    <h4>Quién vendió más servicios</h4>
+                    <PieChartWidget chartId="exec-top-servicios" title="Servicios vendidos" items={topVendedoresServicios} />
+                  </button>
+                  <button type="button" className="executive-kpi-chart-btn" onClick={() => openSellerModal('ingresos')}>
+                    <h4>Quién vendió más dinero</h4>
+                    <PieChartWidget chartId="exec-top-ingresos" title="Ingresos por vendedor" items={topVendedoresIngresos} />
+                  </button>
                 </div>
-                <button type="button" className="executive-btn">Ver detalle</button>
               </article>
 
               <article className="executive-card">
@@ -5371,6 +5444,32 @@
                 </div>
               </article>
             </section>
+
+            {sellerModal && (
+              <div className="confirm-modal" onClick={() => setSellerModal(null)}>
+                <div className="executive-modal" onClick={(e) => e.stopPropagation()}>
+                  <div className="executive-modal-header">
+                    <h3 style={{ margin: 0 }}>{sellerModal.title}</h3>
+                    <button type="button" className="executive-modal-close" onClick={() => setSellerModal(null)} aria-label="Cerrar"><i data-lucide="x" /></button>
+                  </div>
+                  <div className="executive-modal-grid">
+                    <div>
+                      <PieChartWidget chartId={`exec-modal-${sellerModal.type}`} title={sellerModal.title} items={sellerModal.items} size="large" />
+                    </div>
+                    <div className="executive-list">
+                      {sellerModal.items.length === 0 ? (
+                        <div className="executive-muted">Sin datos para mostrar.</div>
+                      ) : sellerModal.items.map((item, idx) => (
+                        <div key={`seller-${idx}-${item.name}`} className="executive-item">
+                          <span>{idx + 1}. {item.name}</span>
+                          <strong>{sellerModal.type === 'ingresos' ? `US$ ${Number(item.value || 0).toLocaleString('es-UY')}` : `${item.value} servicios`}</strong>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </section>
         );
       }
