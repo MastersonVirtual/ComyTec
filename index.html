@@ -3038,6 +3038,9 @@
         border-radius: 0 18px 18px 0 !important;
         display: flex !important;
         flex-direction: column !important;
+        height: 100vh !important;
+        overflow-y: auto !important;
+        overscroll-behavior: contain;
       }
       .sidebar.open {
         animation: sidebar-slide-in .34s cubic-bezier(.2,.9,.2,1) both;
@@ -3093,6 +3096,7 @@
       .menu {
         padding: 14px 12px !important;
         flex: 1;
+        min-height: 0;
         overflow-y: auto;
         display: flex !important;
         flex-direction: column !important;
@@ -6973,11 +6977,11 @@
             },
             {
               title: 'Facturación',
-              items: ['Nuevo Servicio', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa', 'Solicitud de presupuesto'].filter(actionInRole).map(toItem),
+              items: ['Novación', 'Solicitud de presupuesto'].filter(actionInRole).map(toItem),
             },
             {
               title: 'Informativos',
-              items: ['Charla informativa', 'Solicitud de presupuesto'].filter(actionInRole).map(toItem),
+              items: ['Charla informativa'].filter(actionInRole).map(toItem),
             },
           ].filter((section) => section.items.length > 0);
         }, [mobileAllowedActions]);
@@ -7872,7 +7876,7 @@
                 {!isMobile && (
                   <>
                     <div className="sidebar-section-label">Operaciones</div>
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}><span className="menu-icon">➕</span><span>Nuevo</span><span className="menu-arrow">{openMenus.nuevo ? '▾' : '▸'}</span></button>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ nuevo: !p.nuevo, fact: false, historial: false }))}><span className="menu-icon">➕</span><span>Nuevo</span><span className="menu-arrow">{openMenus.nuevo ? '▾' : '▸'}</span></button>
                     <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
                       <button className="submenu-button" onClick={() => selectAction('Nuevo Servicio')}>Servicio</button>
                       <button className="submenu-button" onClick={() => selectAction('Novación')}>Novación</button>
@@ -7881,18 +7885,15 @@
                       <button className="submenu-button" onClick={() => selectAction('Charla informativa')}>Charla informativa</button>
                       <button className="submenu-button" onClick={() => selectAction('Solicitud de presupuesto')}>Solicitud de presupuesto</button>
                     </div>
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, fact: !p.fact }))}><span className="menu-icon">🧾</span><span>Facturación</span><span className="menu-arrow">{openMenus.fact ? '▾' : '▸'}</span></button>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ nuevo: false, fact: !p.fact, historial: false }))}><span className="menu-icon">🧾</span><span>Facturación</span><span className="menu-arrow">{openMenus.fact ? '▾' : '▸'}</span></button>
                     <div className={`submenu ${openMenus.fact ? 'open' : ''}`}>
-                      <button className="submenu-button" onClick={() => selectAction('Solicitud de presupuesto')}>Solicitud de presupuesto</button>
-                      <button className="submenu-button" onClick={() => selectAction('Nuevo Servicio')}>Nuevo servicio</button>
                       <button className="submenu-button" onClick={() => selectAction('Novación')}>Novación</button>
-                      <button className="submenu-button" onClick={() => selectAction('Movimiento de obra')}>Movimiento de obra</button>
-                      <button className="submenu-button" onClick={() => selectAction('Baja')}>Baja de servicio</button>
+                      <button className="submenu-button" onClick={() => selectAction('Solicitud de presupuesto')}>Solicitud de presupuesto</button>
                     </div>
                     <button className="menu-button" onClick={() => selectAction('Charla informativa')}><span className="menu-icon">💬</span><span>Charla informativa</span></button>
                     <div className="sidebar-divider" />
                     <div className="sidebar-section-label">Gestión</div>
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, historial: !p.historial }))}><span className="menu-icon">📚</span><span>Historial</span><span className="menu-arrow">{openMenus.historial ? '▾' : '▸'}</span></button>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ nuevo: false, fact: false, historial: !p.historial }))}><span className="menu-icon">📚</span><span>Historial</span><span className="menu-arrow">{openMenus.historial ? '▾' : '▸'}</span></button>
                     <div className={`submenu ${openMenus.historial ? 'open' : ''}`}>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial-charlas'); closeSidebar(); }}>Historial de Charlas</button>
