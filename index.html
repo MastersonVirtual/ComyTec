@@ -4247,8 +4247,25 @@
       const auth = firebase.auth();
       const rtdb = typeof firebase.database === 'function' ? firebase.database() : null;
 
-      const ACCIONES = ['Nuevo Servicio', 'Novación', 'Obra', 'Agregado', 'Movimiento de Obra', 'Baja', 'Charla'];
+      const ACCIONES = ['Nuevo Servicio', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa', 'Solicitud de presupuesto'];
       const STATUS_OPTIONS = ['Pendiente', 'Presupuesto enviado', 'Aprobado', 'En agenda', 'En instalación', 'En progreso', 'Finalizado', 'Cancelado', 'En mantenimiento'];
+      const SERVICE_TYPE_OPTIONS = ['Monitoreo', 'Portería virtual', 'Respuesta de alarma', 'Servicio Técnico', 'Control de acceso'];
+
+      function normalizeServiceType(value) {
+        const raw = String(value || '').trim();
+        if (!raw) return '';
+        const normalized = raw
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase();
+
+        if (normalized.includes('monitoreo') || normalized.includes('alarma')) return 'Monitoreo';
+        if (normalized.includes('porteria') || normalized.includes('porteria virtual')) return 'Portería virtual';
+        if (normalized.includes('respuesta')) return 'Respuesta de alarma';
+        if (normalized.includes('control de acceso')) return 'Control de acceso';
+        if (normalized.includes('mantenimiento') || normalized.includes('servicio tecnico') || normalized.includes('soporte de video') || normalized.includes('soporte')) return 'Servicio Técnico';
+        return 'Monitoreo';
+      }
       const PRELOADED_SERVICES_BASE = [
         { numero: '0001', nombreServicio: 'Tropicana', direccionServicio: 'Roque Graseras 936', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
         { numero: '0002', nombreServicio: 'Oficentro Lugano', direccionServicio: 'Plaza Independencia 822, esq. Florida', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
@@ -5837,17 +5854,17 @@
 
         const grupo = useMemo(() => {
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
-          if (tipoAccion === 'Obra' && selectedForm === 'servicio') return 'obra';
+          if (tipoAccion === 'Obra') return 'obra';
           if (tipoAccion === 'Novación') return 'novacion';
-          if (tipoAccion === 'Agregado') return 'agregado';
+          if (tipoAccion === 'Solicitud de presupuesto') return 'agregado';
           if (tipoAccion === 'Baja') return 'baja-detalle';
-          if (tipoAccion === 'Charla') return 'charla-detalle';
-          if (tipoAccion === 'Movimiento de Obra') return 'movimiento-detalle';
+          if (tipoAccion === 'Charla informativa') return 'charla-detalle';
+          if (tipoAccion === 'Movimiento de obra') return 'movimiento-detalle';
           return 'base';
         }, [tipoAccion, selectedForm]);
 
 
-        const AUTO_ID_ACTIONS = ['Nuevo Servicio', 'Obra'];
+        const AUTO_ID_ACTIONS = ['Nuevo Servicio'];
         const autoIdMode = AUTO_ID_ACTIONS.includes(tipoAccion);
         const effectiveClienteId = autoIdMode ? clienteId : clienteIdAsociado.trim();
 
@@ -5865,7 +5882,7 @@
             numero: target,
             nombreServicio: fromRows.nombreServicio || '',
             direccionServicio: fromRows.direccionServicio || '',
-            tipoServicioBrindar: fromRows.tipoServicioBrindar || '',
+            tipoServicioBrindar: normalizeServiceType(fromRows.tipoServicioBrindar) || '',
             representanteComercial: fromRows.representanteComercial || '',
             atencionCliente: fromRows.atencionCliente || fromRows.bottiSeContactaCon || '',
           };
@@ -5911,7 +5928,7 @@
         const [catalogSyncing, setCatalogSyncing] = useState(false);
         const [showManualCatalogForm, setShowManualCatalogForm] = useState(false);
         const [savingManualCatalogService, setSavingManualCatalogService] = useState(false);
-        const [manualCatalogForm, setManualCatalogForm] = useState({ numero: '', nombreServicio: '', direccionServicio: '', tipoServicioBrindar: '', representanteComercial: '', atencionCliente: '' });
+        const [manualCatalogForm, setManualCatalogForm] = useState({ numero: '', nombreServicio: '', direccionServicio: '', tipoServicioBrindar: 'Monitoreo', representanteComercial: '', atencionCliente: '' });
         const [bulkCatalogRawInput, setBulkCatalogRawInput] = useState(EXTRA_PRELOADED_SERVICES_RAW);
         const [bulkCatalogSyncing, setBulkCatalogSyncing] = useState(false);
 
@@ -6128,7 +6145,7 @@
               clienteId: normalizeServiceId(s.numero),
               nombreServicio: s.nombreServicio || '',
               direccionServicio: s.direccionServicio || '',
-              tipoServicioBrindar: s.tipoServicioBrindar || '',
+              tipoServicioBrindar: normalizeServiceType(s.tipoServicioBrindar) || '',
               representanteComercial: s.representanteComercial || '',
               atencionCliente: s.atencionCliente || '',
               status: 'Finalizado',
@@ -6214,7 +6231,7 @@
                 clienteId: normalizedId,
                 nombreServicio: service.nombreServicio || '',
                 direccionServicio: service.direccionServicio || '',
-                tipoServicioBrindar: service.tipoServicioBrindar || '',
+                tipoServicioBrindar: normalizeServiceType(service.tipoServicioBrindar) || '',
                 representanteComercial: service.representanteComercial || '',
                 atencionCliente: service.atencionCliente || '',
                 status: 'Precargado',
@@ -6244,7 +6261,7 @@
         }
 
         function resetManualCatalogForm() {
-          setManualCatalogForm({ numero: '', nombreServicio: '', direccionServicio: '', tipoServicioBrindar: '', representanteComercial: '', atencionCliente: '' });
+          setManualCatalogForm({ numero: '', nombreServicio: '', direccionServicio: '', tipoServicioBrindar: 'Monitoreo', representanteComercial: '', atencionCliente: '' });
         }
 
         async function handleCreateManualCatalogService() {
@@ -6257,7 +6274,7 @@
             clienteId: normalizedId,
             nombreServicio: String(manualCatalogForm.nombreServicio || '').trim(),
             direccionServicio: String(manualCatalogForm.direccionServicio || '').trim(),
-            tipoServicioBrindar: String(manualCatalogForm.tipoServicioBrindar || '').trim(),
+            tipoServicioBrindar: normalizeServiceType(manualCatalogForm.tipoServicioBrindar),
             representanteComercial: String(manualCatalogForm.representanteComercial || '').trim(),
             atencionCliente: String(manualCatalogForm.atencionCliente || '').trim(),
           };
@@ -6330,7 +6347,7 @@
                   clienteId: normalizedId,
                   nombreServicio: service.nombreServicio || '',
                   direccionServicio: service.direccionServicio || '',
-                  tipoServicioBrindar: service.tipoServicioBrindar || '',
+                  tipoServicioBrindar: normalizeServiceType(service.tipoServicioBrindar) || '',
                   representanteComercial: service.representanteComercial || '',
                   atencionCliente: service.atencionCliente || '',
                   status: 'Precargado',
@@ -6367,7 +6384,7 @@
 
         const charlaHistoryRows = useMemo(() => (
           visibleRows
-            .filter((r) => (r?.tipoAccion || '') === 'Charla' || (r?.formulario || '') === 'charla-informativa')
+            .filter((r) => (r?.tipoAccion || '') === 'Charla informativa' || (r?.formulario || '') === 'charla-informativa')
             .slice()
             .sort((a, b) => (parseCharlaDateTime(b)?.getTime() || 0) - (parseCharlaDateTime(a)?.getTime() || 0))
         ), [visibleRows]);
@@ -6636,7 +6653,7 @@
           if (prevIds.size > 0) {
             const news = rows.filter((r) => !prevIds.has(r.id));
             if (news.length > 0) {
-              const relevant = news.filter((r) => ['Nuevo Servicio', 'Obra', 'Baja'].includes(String(r.tipoAccion || '').trim()));
+              const relevant = news.filter((r) => ['Nuevo Servicio', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa', 'Solicitud de presupuesto', 'Obra'].includes(String(r.tipoAccion || '').trim()));
               if (relevant.length > 0) {
                 const alerts = relevant.map((r) => ({
                   id: `alert-${r.id}`,
@@ -6935,22 +6952,16 @@
         const isCommercialUser = userArea === 'comercial' || userRole.includes('vendedor');
 
         const ACTION_LABELS = {
-          'Nuevo Servicio': 'Nuevo servicio',
-          'Obra': 'Nueva obra',
-          'Novación': 'Novaciones',
-          'Agregado': 'Equipos agregados',
-          'Movimiento de Obra': 'Movimiento de obra',
+          'Nuevo Servicio': 'Servicio',
+          'Novación': 'Novación',
+          'Movimiento de obra': 'Movimiento de obra',
           'Baja': 'Baja de servicio',
-          'Charla': 'Charlas informativas',
+          'Charla informativa': 'Charla informativa',
+          'Solicitud de presupuesto': 'Solicitud de presupuesto',
+          'Obra': 'Obra',
         };
 
-        const mobileAllowedActions = useMemo(() => {
-          if (isTechnicalOnly) return [];
-          if (isAdminUser) return [...ACCIONES];
-          if (isTechnicalUser && !isCommercialUser) return ['Obra', 'Movimiento de Obra', 'Agregado', 'Baja'];
-          if (isCommercialUser && !isTechnicalUser) return ['Nuevo Servicio', 'Novación', 'Agregado', 'Charla', 'Obra'];
-          return [...ACCIONES];
-        }, [isAdminUser, isTechnicalUser, isCommercialUser, isTechnicalOnly]);
+        const mobileAllowedActions = useMemo(() => [...ACCIONES], [isAdminUser, isTechnicalUser, isCommercialUser, isTechnicalOnly]);
 
         const mobileFabSections = useMemo(() => {
           const actionInRole = (action) => mobileAllowedActions.includes(action);
@@ -6958,15 +6969,15 @@
           return [
             {
               title: 'Nuevo',
-              items: ['Nuevo Servicio', 'Obra', 'Novación', 'Agregado', 'Movimiento de Obra', 'Baja'].filter(actionInRole).map(toItem),
+              items: ['Nuevo Servicio', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa', 'Solicitud de presupuesto'].filter(actionInRole).map(toItem),
             },
             {
               title: 'Facturación',
-              items: ['Agregado', 'Nuevo Servicio', 'Novación', 'Obra', 'Movimiento de Obra'].filter(actionInRole).map(toItem),
+              items: ['Nuevo Servicio', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa', 'Solicitud de presupuesto'].filter(actionInRole).map(toItem),
             },
             {
               title: 'Informativos',
-              items: ['Charla'].filter(actionInRole).map(toItem),
+              items: ['Charla informativa', 'Solicitud de presupuesto'].filter(actionInRole).map(toItem),
             },
           ].filter((section) => section.items.length > 0);
         }, [mobileAllowedActions]);
@@ -6994,7 +7005,7 @@
           setObraForm({ ...obraInicial, ...service, representanteComercial: service.representanteComercial || currentUserName, creadoPor: service.creadoPor || currentUserName });
           setNovacionForm({ ...novacionInicial, ...service, representanteComercial: service.representanteComercial || currentUserName, creadoPor: service.creadoPor || currentUserName });
 
-          if (['Nuevo Servicio', 'Obra'].includes(action)) {
+          if (['Nuevo Servicio'].includes(action)) {
             setClienteId(service.clienteId || generarClienteId());
             setClienteIdAsociado('');
             setSelectedForm('servicio');
@@ -7162,13 +7173,13 @@
           if (grupo === 'novacion') {
             setNovacionForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio, representanteComercial: catalog.representanteComercial || prev.representanteComercial, atencionCliente: catalog.atencionCliente || prev.atencionCliente }));
           }
-          if (grupo === 'agregado') {
+          if (grupo === 'agregado' || grupo === 'movimiento-detalle') {
             setAgregadoForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio }));
           }
           if (grupo === 'baja-detalle') {
             setBajaForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio, direccionServicio: catalog.direccionServicio || prev.direccionServicio }));
           }
-          if (grupo === 'movimiento-detalle') {
+          if (grupo === 'movimiento-detalle' || grupo === 'agregado') {
             setMovimientoForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio }));
           }
         }, [clienteIdAsociado, grupo, autoIdMode, rows]);
@@ -7208,14 +7219,14 @@
         function selectAction(action) {
           setTipoAccion(action);
           resetFields();
-          if (['Nuevo Servicio', 'Obra'].includes(action)) {
+          if (['Nuevo Servicio'].includes(action)) {
             setClienteId(generarClienteId());
             setClienteIdAsociado('');
           } else {
             setClienteId('');
           }
-          setSelectedForm(['Nuevo Servicio', 'Obra'].includes(action) ? 'servicio' : 'other');
-          if (['Nuevo Servicio', 'Obra', 'Novación'].includes(action)) {
+          setSelectedForm(['Nuevo Servicio'].includes(action) ? 'servicio' : 'other');
+          if (['Nuevo Servicio', 'Novación'].includes(action)) {
             captureFormOpen(action);
             applyUserDefaultsToForms();
           }
@@ -7269,7 +7280,7 @@
 
           const normalizedStatusToSave = normalizeLegacyStatusName(status);
           const normalizedClientId = normalizeServiceId(effectiveClienteId) || String(effectiveClienteId || '').trim();
-          const actionNeedsExistingService = ['Baja', 'Novación', 'Agregado', 'Movimiento de Obra'].includes(tipoAccion);
+          const actionNeedsExistingService = ['Baja', 'Novación', 'Obra', 'Movimiento de obra', 'Charla informativa', 'Solicitud de presupuesto'].includes(tipoAccion);
 
           const doc = { tipoAccion, clienteId: normalizedClientId, status: normalizedStatusToSave, estado: normalizedStatusToSave };
 
@@ -7291,7 +7302,7 @@
             }
             Object.assign(doc, { ...novacionForm, formulario: 'novacion', creadoPor: novacionForm.creadoPor || currentUserName, auditoriaApertura: formOpenAudit });
           }
-          if (grupo === 'agregado') {
+          if (grupo === 'agregado' || grupo === 'movimiento-detalle') {
             if (!agregadoForm.nombreServicio || !agregadoForm.fechaAltaAdicional) {
               return alert('Completá al menos: Nombre del servicio y Fecha de alta del adicional.');
             }
@@ -7301,7 +7312,7 @@
             if (!cliente || !fechaCarga) return alert('Completá Cliente y Fecha Carga.');
             Object.assign(doc, { cliente, fechaCarga, tiempoInstalacion, fechaAlta, cobro });
           }
-          if (grupo === 'movimiento-detalle') {
+          if (grupo === 'movimiento-detalle' || grupo === 'agregado') {
             if (!movimientoForm.nombreServicio || !movimientoForm.nombreSolicitante || !movimientoForm.fechaMovimiento) {
               return alert('Completá al menos: Nombre del servicio, Solicitante y Fecha del movimiento.');
             }
@@ -7355,14 +7366,14 @@
               };
               await db.collection('operaciones').doc(targetDocId).set(payload, { merge: true });
               resetFields();
-              if (!editingServiceId && existingDocIdByClient && ['Nuevo Servicio', 'Obra'].includes(tipoAccion)) {
+              if (!editingServiceId && existingDocIdByClient && ['Nuevo Servicio'].includes(tipoAccion)) {
                 setNotificacion({ mensaje: '✔ Servicio existente actualizado (sin duplicar ID).', tipo: 'ok' });
               } else {
                 setNotificacion({ mensaje: '✔ Servicio actualizado correctamente', tipo: 'ok' });
               }
               void logRealtimeActivityEvent({
                 usuario: currentUserName,
-                accion: tipoAccion === 'Baja' ? 'registró baja del servicio' : tipoAccion === 'Novación' ? 'registró novación del servicio' : tipoAccion === 'Agregado' ? 'registró agregado del servicio' : tipoAccion === 'Movimiento de Obra' ? 'registró movimiento de obra' : 'modificó servicio',
+                accion: tipoAccion === 'Baja' ? 'registró baja del servicio' : tipoAccion === 'Novación' ? 'registró novación del servicio' : tipoAccion === 'Obra' ? 'registró obra' : tipoAccion === 'Movimiento de obra' ? 'registró movimiento de obra' : tipoAccion === 'Charla informativa' ? 'registró charla informativa' : tipoAccion === 'Solicitud de presupuesto' ? 'registró solicitud de presupuesto' : 'modificó servicio',
                 clienteId: normalizedClientId,
               });
               return;
@@ -7379,7 +7390,7 @@
             setNotificacion({ mensaje: '✔ Datos guardados correctamente', tipo: 'ok' });
             void logRealtimeActivityEvent({
               usuario: currentUserName,
-              accion: tipoAccion === 'Obra' ? 'registró obra' : 'creó servicio',
+              accion: 'creó servicio',
               clienteId: normalizedClientId,
             });
           } catch (error) {
@@ -7486,10 +7497,12 @@
                 <button type="button" className="mobile-quick-btn" onClick={() => { setSelectedForm('dashboard-gerencia'); setMobileQuickMenuOpen(false); }}><span className="mobile-kpi-icon"><i data-lucide="bar-chart-3" /></span><span>KPI´s</span></button>
                 {mobileQuickMenuOpen && (
                   <div className="mobile-quick-menu">
-                    <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Obra'); }}>Nueva obra</button>
-                    <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Baja'); }}>Nueva baja</button>
-                    <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Nuevo Servicio'); }}>Nuevo servicio</button>
-                    <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Charla'); }}>Nueva presentación</button>
+                    <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Nuevo Servicio'); }}>Servicio</button>
+                    <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Novación'); }}>Novación</button>
+                    <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Movimiento de obra'); }}>Movimiento de obra</button>
+                    <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Baja'); }}>Baja de servicio</button>
+                    <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Charla informativa'); }}>Charla informativa</button>
+                    <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Solicitud de presupuesto'); }}>Solicitud de presupuesto</button>
                   </div>
                 )}
               </div>
@@ -7504,9 +7517,11 @@
                 <h3 className="mobile-section-title">Carga operativa</h3>
                 <div className="mobile-actions-grid">
                   <button type="button" className="mobile-action-btn" onClick={() => selectAction('Nuevo Servicio')}>Servicio</button>
-                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Obra')}>Obra</button>
-                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Movimiento de Obra')}>Movimiento</button>
-                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Baja')}>Baja</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Novación')}>Novación</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Movimiento de obra')}>Movimiento de obra</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Baja')}>Baja de servicio</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Charla informativa')}>Charla informativa</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Solicitud de presupuesto')}>Solicitud de presupuesto</button>
                 </div>
               </div>
             </section>
@@ -7860,21 +7875,21 @@
                     <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}><span className="menu-icon">➕</span><span>Nuevo</span><span className="menu-arrow">{openMenus.nuevo ? '▾' : '▸'}</span></button>
                     <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
                       <button className="submenu-button" onClick={() => selectAction('Nuevo Servicio')}>Servicio</button>
-                      <button className="submenu-button" onClick={() => selectAction('Obra')}>Obra</button>
-                      <button className="submenu-button" onClick={() => selectAction('Novación')}>Novaciones</button>
-                      <button className="submenu-button" onClick={() => selectAction('Agregado')}>Agregados</button>
-                      <button className="submenu-button" onClick={() => selectAction('Movimiento de Obra')}>Movimiento de obra</button>
-                      <button className="submenu-button" onClick={() => selectAction('Baja')}>Baja de Servicio</button>
+                      <button className="submenu-button" onClick={() => selectAction('Novación')}>Novación</button>
+                      <button className="submenu-button" onClick={() => selectAction('Movimiento de obra')}>Movimiento de obra</button>
+                      <button className="submenu-button" onClick={() => selectAction('Baja')}>Baja de servicio</button>
+                      <button className="submenu-button" onClick={() => selectAction('Charla informativa')}>Charla informativa</button>
+                      <button className="submenu-button" onClick={() => selectAction('Solicitud de presupuesto')}>Solicitud de presupuesto</button>
                     </div>
                     <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, fact: !p.fact }))}><span className="menu-icon">🧾</span><span>Facturación</span><span className="menu-arrow">{openMenus.fact ? '▾' : '▸'}</span></button>
                     <div className={`submenu ${openMenus.fact ? 'open' : ''}`}>
-                      <button className="submenu-button" onClick={() => selectAction('Agregado')}>Equipos agregados</button>
+                      <button className="submenu-button" onClick={() => selectAction('Solicitud de presupuesto')}>Solicitud de presupuesto</button>
                       <button className="submenu-button" onClick={() => selectAction('Nuevo Servicio')}>Nuevo servicio</button>
-                      <button className="submenu-button" onClick={() => selectAction('Novación')}>Novaciones</button>
-                      <button className="submenu-button" onClick={() => selectAction('Obra')}>Nueva Obra</button>
-                      <button className="submenu-button" onClick={() => selectAction('Movimiento de Obra')}>Movimiento de Obra</button>
+                      <button className="submenu-button" onClick={() => selectAction('Novación')}>Novación</button>
+                      <button className="submenu-button" onClick={() => selectAction('Movimiento de obra')}>Movimiento de obra</button>
+                      <button className="submenu-button" onClick={() => selectAction('Baja')}>Baja de servicio</button>
                     </div>
-                    <button className="menu-button" onClick={() => selectAction('Charla')}><span className="menu-icon">💬</span><span>Charlas informativas</span></button>
+                    <button className="menu-button" onClick={() => selectAction('Charla informativa')}><span className="menu-icon">💬</span><span>Charla informativa</span></button>
                     <div className="sidebar-divider" />
                     <div className="sidebar-section-label">Gestión</div>
                     <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, historial: !p.historial }))}><span className="menu-icon">📚</span><span>Historial</span><span className="menu-arrow">{openMenus.historial ? '▾' : '▸'}</span></button>
@@ -8693,7 +8708,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                 ) : (
                 <section className="panel">
                   <h2>Formulario Operativo · Gestión de Acciones</h2>
-                  <div className="hint">Nuevo Servicio conserva su formulario actual y Obra usa el formulario nuevo solicitado.</div>
+                  <div className="hint">Nuevo incluye: Servicio, Novación, Movimiento de obra, Baja de servicio, Charla informativa y Solicitud de presupuesto.</div>
 
                   <form onSubmit={handleSubmit}>
                     {grupo === 'servicio' ? (
@@ -8721,7 +8736,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>2. Clasificación y Vigencia</h3>
                           <div className="card-grid">
-                            <div className="field"><label>Tipo de servicio</label><select value={servicioForm.tipoServicioBrindar} onChange={(e) => setServicioField('tipoServicioBrindar', e.target.value)}><option>Monitoreo</option><option>Portería</option><option>Mantenimiento</option><option>Control de Acceso</option><option>Portería Virtual</option></select></div>
+                            <div className="field"><label>Tipo de servicio</label><select value={servicioForm.tipoServicioBrindar} onChange={(e) => setServicioField('tipoServicioBrindar', e.target.value)}>{SERVICE_TYPE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></div>
                             <div className="field"><label>Fecha de alta</label><input value={servicioForm.fechaAltaServicio} onChange={(e) => setServicioField('fechaAltaServicio', e.target.value)} type="date" /></div>
                             <div className="field"><label>Fecha específica de inicio</label><input value={servicioForm.fechaEspecificaInicio} onChange={(e) => setServicioField('fechaEspecificaInicio', e.target.value)} type="date" /></div>
                             <div className="field"><label>Duración del contrato (meses)</label><input value={servicioForm.duracionContratoMeses} onChange={(e) => setServicioField('duracionContratoMeses', e.target.value)} type="number" min="0" /></div>
@@ -8793,7 +8808,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>2. Configuración del Abono</h3>
                           <div className="card-grid">
-                            <div className="field"><label>Tipo de servicio</label><select value={obraForm.tipoServicioBrindar} onChange={(e) => setObraField('tipoServicioBrindar', e.target.value)}><option>Monitoreo</option><option>Portería</option><option>Mantenimiento</option><option>Control de Acceso</option><option>Portería Virtual</option></select></div>
+                            <div className="field"><label>Tipo de servicio</label><select value={obraForm.tipoServicioBrindar} onChange={(e) => setObraField('tipoServicioBrindar', e.target.value)}>{SERVICE_TYPE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></div>
                             <div className="field"><label>Importe mensual por servicio</label><input value={obraForm.importeMensualServicio} onChange={(e) => setObraField('importeMensualServicio', e.target.value)} type="number" min="0" /></div>
                             <div className="field span-2"><label>Descuentos negociados</label><textarea value={obraForm.descuentosNegociados} onChange={(e) => setObraField('descuentosNegociados', e.target.value)} /></div>
                           </div>
@@ -8857,7 +8872,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                     ) : grupo === 'agregado' ? (
                       <div className="service-layout">
                         <div className="service-card">
-                          <h3>Equipos Agregados</h3>
+                          <h3>Obra</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
@@ -8893,7 +8908,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                     ) : grupo === 'movimiento-detalle' ? (
                       <div className="service-layout">
                         <div className="service-card">
-                          <h3>Movimiento de Obra</h3>
+                          <h3>Movimiento de obra</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
@@ -8967,7 +8982,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                     ) : grupo === 'charla-detalle' ? (
                       <div className="charla-studio">
                         <section className="charla-card context">
-                          <h4>Charla · Planificación</h4>
+                          <h4>Charla informativa · Planificación</h4>
                           <div className="charla-core-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => handleCharlaClienteIdChange(e.target.value)} type="text" placeholder="ID del servicio/proyecto" /></div>
                             <div className="field"><label>Nombre del servicio</label><input value={charlaForm.nombreServicio} onChange={(e) => setCharlaField('nombreServicio', e.target.value)} type="text" placeholder="Servicio a presentar" /></div>
