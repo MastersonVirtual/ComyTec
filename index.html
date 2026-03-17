@@ -5777,7 +5777,7 @@
 
       function App() {
         const [menuOpen, setMenuOpen] = useState(false);
-        const [openMenus, setOpenMenus] = useState({ nuevo: false, fact: false, historial: false });
+        const [openMenus, setOpenMenus] = useState({ nuevo: false, historial: false });
         const [user, setUser] = useState(null);
         const [authLoading, setAuthLoading] = useState(true);
         const [userRole, setUserRole] = useState('');
@@ -6975,14 +6975,6 @@
               title: 'Nuevo',
               items: ['Nuevo Servicio', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa', 'Solicitud de presupuesto'].filter(actionInRole).map(toItem),
             },
-            {
-              title: 'Facturación',
-              items: ['Novación', 'Solicitud de presupuesto'].filter(actionInRole).map(toItem),
-            },
-            {
-              title: 'Informativos',
-              items: ['Charla informativa'].filter(actionInRole).map(toItem),
-            },
           ].filter((section) => section.items.length > 0);
         }, [mobileAllowedActions]);
 
@@ -7209,7 +7201,7 @@
 
         function closeSidebar() {
           setMenuOpen(false);
-          setOpenMenus({ nuevo: false, fact: false, historial: false });
+          setOpenMenus({ nuevo: false, historial: false });
         }
 
         function toggleSidebar() {
@@ -7876,7 +7868,7 @@
                 {!isMobile && (
                   <>
                     <div className="sidebar-section-label">Operaciones</div>
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ nuevo: !p.nuevo, fact: false, historial: false }))}><span className="menu-icon">➕</span><span>Nuevo</span><span className="menu-arrow">{openMenus.nuevo ? '▾' : '▸'}</span></button>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ nuevo: !p.nuevo, historial: false }))}><span className="menu-icon">➕</span><span>Nuevo</span><span className="menu-arrow">{openMenus.nuevo ? '▾' : '▸'}</span></button>
                     <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
                       <button className="submenu-button" onClick={() => selectAction('Nuevo Servicio')}>Servicio</button>
                       <button className="submenu-button" onClick={() => selectAction('Novación')}>Novación</button>
@@ -7885,15 +7877,9 @@
                       <button className="submenu-button" onClick={() => selectAction('Charla informativa')}>Charla informativa</button>
                       <button className="submenu-button" onClick={() => selectAction('Solicitud de presupuesto')}>Solicitud de presupuesto</button>
                     </div>
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ nuevo: false, fact: !p.fact, historial: false }))}><span className="menu-icon">🧾</span><span>Facturación</span><span className="menu-arrow">{openMenus.fact ? '▾' : '▸'}</span></button>
-                    <div className={`submenu ${openMenus.fact ? 'open' : ''}`}>
-                      <button className="submenu-button" onClick={() => selectAction('Novación')}>Novación</button>
-                      <button className="submenu-button" onClick={() => selectAction('Solicitud de presupuesto')}>Solicitud de presupuesto</button>
-                    </div>
-                    <button className="menu-button" onClick={() => selectAction('Charla informativa')}><span className="menu-icon">💬</span><span>Charla informativa</span></button>
                     <div className="sidebar-divider" />
                     <div className="sidebar-section-label">Gestión</div>
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ nuevo: false, fact: false, historial: !p.historial }))}><span className="menu-icon">📚</span><span>Historial</span><span className="menu-arrow">{openMenus.historial ? '▾' : '▸'}</span></button>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ nuevo: false, historial: !p.historial }))}><span className="menu-icon">📚</span><span>Historial</span><span className="menu-arrow">{openMenus.historial ? '▾' : '▸'}</span></button>
                     <div className={`submenu ${openMenus.historial ? 'open' : ''}`}>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial-charlas'); closeSidebar(); }}>Historial de Charlas</button>
