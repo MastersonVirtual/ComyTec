@@ -4214,6 +4214,79 @@
         }
       }
 
+
+      /* Ajustes finales responsive + modal KPI */
+      .confirm-modal {
+        padding: clamp(12px, 2.2vw, 22px);
+        overflow: hidden;
+        overscroll-behavior: contain;
+        background: rgba(4, 16, 18, 0.48);
+      }
+      .executive-modal,
+      .gerencia-chart-modal {
+        width: min(900px, calc(100vw - 24px));
+        max-height: min(88dvh, 760px);
+        display: flex;
+        flex-direction: column;
+      }
+      .executive-modal-grid,
+      .gerencia-chart-modal-grid {
+        min-height: 0;
+      }
+      .executive-modal .executive-list,
+      .gerencia-chart-modal .gerencia-ranking-list {
+        max-height: min(52dvh, 430px);
+        overflow-y: auto;
+      }
+
+      @media (max-width: 768px) {
+        html {
+          -webkit-text-size-adjust: 100%;
+        }
+        body {
+          width: 100%;
+          overflow-x: hidden;
+        }
+        .main {
+          padding-left: 10px !important;
+          padding-right: 10px !important;
+        }
+        .welcome-card,
+        .dashboard-info-grid,
+        .kpi-grid,
+        .seller-services-shell,
+        .service-layout {
+          width: 100%;
+          max-width: 100%;
+        }
+        table {
+          min-width: 640px;
+        }
+        th,
+        td {
+          padding: 8px;
+          font-size: 12px;
+        }
+        .confirm-modal {
+          align-items: center;
+          padding: 10px;
+        }
+        .executive-modal,
+        .gerencia-chart-modal {
+          width: min(100%, 620px);
+          max-height: min(86dvh, 700px);
+          border-radius: 14px;
+          padding: 12px;
+        }
+        .executive-modal-grid,
+        .gerencia-chart-modal-grid {
+          grid-template-columns: 1fr !important;
+          overflow-y: auto;
+          max-height: calc(86dvh - 108px);
+          padding-right: 2px;
+        }
+      }
+
     </style>
 
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
