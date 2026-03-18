@@ -3520,20 +3520,17 @@
         background: #dfe8e8;
       }
       .profile-avatar-picker {
-        margin-top: 18px;
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
         gap: 12px;
       }
       .profile-avatar-option {
         border: 1px solid rgba(0,100,101,.18);
         border-radius: 18px;
-        padding: 10px 8px;
+        padding: 10px;
         background: #ffffff;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 8px;
+        display: grid;
+        place-items: center;
         cursor: pointer;
         transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
       }
@@ -3553,16 +3550,20 @@
         object-fit: cover;
         box-shadow: 0 6px 14px rgba(15,23,42,.12);
       }
-      .profile-avatar-option span {
-        font-size: 12px;
-        font-weight: 700;
-        color: #0b4e49;
-        text-align: center;
+      .profile-avatar-modal {
+        width: min(720px, calc(100vw - 24px));
+        max-height: min(80vh, 760px);
+        overflow: auto;
       }
-      .profile-avatar-help {
-        margin-top: 12px;
-        color: #476968;
-        font-size: 13px;
+      .profile-avatar-modal h3 {
+        margin: 0 0 14px;
+        color: #0b4e49;
+      }
+      .profile-avatar-modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 18px;
       }
       .profile-avatar-edit {
         position: absolute;
@@ -4500,26 +4501,51 @@
       const PRELOADED_SERVICES = mergePreloadedServices(PRELOADED_SERVICES_BASE, parseExtraPreloadedServices(EXTRA_PRELOADED_SERVICES_RAW));
 
       const PROFILE_AVATAR_PRESETS = [
-        { id: 'woman-coral', label: 'Mujer coral', palette: { bg: '#ffe4e6', body: '#fb7185', hair: '#7f1d1d', accent: '#f59e0b' }, silhouette: 'woman' },
-        { id: 'woman-violet', label: 'Mujer violeta', palette: { bg: '#ede9fe', body: '#8b5cf6', hair: '#4c1d95', accent: '#ec4899' }, silhouette: 'woman' },
-        { id: 'man-sky', label: 'Hombre cielo', palette: { bg: '#e0f2fe', body: '#0ea5e9', hair: '#0f172a', accent: '#22c55e' }, silhouette: 'man' },
-        { id: 'man-emerald', label: 'Hombre verde', palette: { bg: '#dcfce7', body: '#10b981', hair: '#14532d', accent: '#f97316' }, silhouette: 'man' },
-        { id: 'neutral-amber', label: 'Neutral ámbar', palette: { bg: '#fef3c7', body: '#f59e0b', hair: '#78350f', accent: '#14b8a6' }, silhouette: 'neutral' },
-        { id: 'neutral-teal', label: 'Neutral teal', palette: { bg: '#ccfbf1', body: '#0f766e', hair: '#134e4a', accent: '#6366f1' }, silhouette: 'neutral' },
+        { id: 'woman-coral', label: 'Avatar 1', palette: { bg: '#ffe4e6', body: '#fb7185', hair: '#7f1d1d', accent: '#f59e0b' }, silhouette: 'woman' },
+        { id: 'woman-violet', label: 'Avatar 2', palette: { bg: '#ede9fe', body: '#8b5cf6', hair: '#4c1d95', accent: '#ec4899' }, silhouette: 'woman' },
+        { id: 'woman-rose', label: 'Avatar 3', palette: { bg: '#ffe4f1', body: '#f472b6', hair: '#831843', accent: '#fb7185' }, silhouette: 'woman' },
+        { id: 'woman-gold', label: 'Avatar 4', palette: { bg: '#fef3c7', body: '#f59e0b', hair: '#92400e', accent: '#f43f5e' }, silhouette: 'woman' },
+        { id: 'man-sky', label: 'Avatar 5', palette: { bg: '#e0f2fe', body: '#0ea5e9', hair: '#0f172a', accent: '#22c55e' }, silhouette: 'man' },
+        { id: 'man-emerald', label: 'Avatar 6', palette: { bg: '#dcfce7', body: '#10b981', hair: '#14532d', accent: '#f97316' }, silhouette: 'man' },
+        { id: 'man-indigo', label: 'Avatar 7', palette: { bg: '#e0e7ff', body: '#6366f1', hair: '#312e81', accent: '#06b6d4' }, silhouette: 'man' },
+        { id: 'man-slate', label: 'Avatar 8', palette: { bg: '#e2e8f0', body: '#475569', hair: '#111827', accent: '#f59e0b' }, silhouette: 'man' },
+        { id: 'neutral-amber', label: 'Avatar 9', palette: { bg: '#fef3c7', body: '#f59e0b', hair: '#78350f', accent: '#14b8a6' }, silhouette: 'neutral' },
+        { id: 'neutral-teal', label: 'Avatar 10', palette: { bg: '#ccfbf1', body: '#0f766e', hair: '#134e4a', accent: '#6366f1' }, silhouette: 'neutral' },
+        { id: 'neutral-lime', label: 'Avatar 11', palette: { bg: '#ecfccb', body: '#65a30d', hair: '#3f6212', accent: '#f97316' }, silhouette: 'neutral' },
+        { id: 'neutral-cyan', label: 'Avatar 12', palette: { bg: '#cffafe', body: '#0891b2', hair: '#164e63', accent: '#a855f7' }, silhouette: 'neutral' },
+        { id: 'cat-mint', label: 'Avatar 13', palette: { bg: '#d1fae5', body: '#10b981', hair: '#064e3b', accent: '#f59e0b' }, silhouette: 'cat' },
+        { id: 'cat-lilac', label: 'Avatar 14', palette: { bg: '#ede9fe', body: '#8b5cf6', hair: '#5b21b6', accent: '#f472b6' }, silhouette: 'cat' },
+        { id: 'dog-sand', label: 'Avatar 15', palette: { bg: '#ffedd5', body: '#f97316', hair: '#9a3412', accent: '#22c55e' }, silhouette: 'dog' },
+        { id: 'dog-blue', label: 'Avatar 16', palette: { bg: '#dbeafe', body: '#3b82f6', hair: '#1d4ed8', accent: '#f59e0b' }, silhouette: 'dog' },
+        { id: 'fox-sunset', label: 'Avatar 17', palette: { bg: '#ffedd5', body: '#ea580c', hair: '#7c2d12', accent: '#fb7185' }, silhouette: 'fox' },
+        { id: 'panda-night', label: 'Avatar 18', palette: { bg: '#e5e7eb', body: '#111827', hair: '#000000', accent: '#14b8a6' }, silhouette: 'panda' },
       ];
 
       function buildAvatarSvgDataUri({ palette = {}, silhouette = 'neutral', label = 'Avatar' } = {}) {
         const { bg = '#dbeafe', body = '#2563eb', hair = '#1e293b', accent = '#f59e0b' } = palette;
+        const animalFace = silhouette === 'cat'
+          ? `<path d="M42 48 54 28l12 16h12l12-16 12 20v22H42V48Z" fill="${hair}"/><circle cx="58" cy="74" r="18" fill="${body}"/><circle cx="86" cy="74" r="18" fill="${body}"/><ellipse cx="72" cy="88" rx="34" ry="28" fill="${body}"/><path d="M72 88l-8 8h16l-8-8Z" fill="#1f2937"/><path d="M55 95h-16M55 101H37M89 95h16M89 101h18" stroke="${hair}" stroke-width="3" stroke-linecap="round"/>`
+          : silhouette === 'dog'
+            ? `<ellipse cx="48" cy="52" rx="14" ry="22" fill="${hair}"/><ellipse cx="96" cy="52" rx="14" ry="22" fill="${hair}"/><circle cx="72" cy="74" r="34" fill="${body}"/><ellipse cx="72" cy="92" rx="20" ry="14" fill="#f8d6bf"/><circle cx="72" cy="88" r="5" fill="#1f2937"/><path d="M72 93c4 5 10 8 16 9" stroke="#7c2d12" stroke-width="3" stroke-linecap="round"/><path d="M72 93c-4 5-10 8-16 9" stroke="#7c2d12" stroke-width="3" stroke-linecap="round"/>`
+            : silhouette === 'fox'
+              ? `<path d="M40 54 56 26l16 18 16-18 16 28-8 44H48l-8-44Z" fill="${body}"/><path d="M56 26l16 18 16-18" stroke="${hair}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="72" cy="84" rx="24" ry="18" fill="#fff7ed"/><circle cx="72" cy="90" r="5" fill="#1f2937"/>`
+              : silhouette === 'panda'
+                ? `<circle cx="50" cy="48" r="16" fill="${hair}"/><circle cx="94" cy="48" r="16" fill="${hair}"/><circle cx="72" cy="76" r="34" fill="#ffffff"/><ellipse cx="58" cy="72" rx="10" ry="13" fill="${hair}"/><ellipse cx="86" cy="72" rx="10" ry="13" fill="${hair}"/><ellipse cx="72" cy="90" rx="12" ry="10" fill="${hair}"/>`
+                : '';
         const hairPath = silhouette === 'woman'
           ? '<path d="M42 46c2-15 13-24 30-24s28 9 30 24v14H42V46Z" fill="' + hair + '"/><path d="M44 76c0-13 10-22 20-22h16c10 0 20 9 20 22v10H44V76Z" fill="' + hair + '" opacity=".95"/>'
           : silhouette === 'man'
             ? '<path d="M44 50c3-17 16-28 28-28 17 0 28 9 30 28v10H44V50Z" fill="' + hair + '"/>'
-            : '<path d="M43 49c2-16 14-26 29-26s27 10 29 26v11H43V49Z" fill="' + hair + '" opacity=".98"/>';
+            : silhouette === 'neutral'
+              ? '<path d="M43 49c2-16 14-26 29-26s27 10 29 26v11H43V49Z" fill="' + hair + '" opacity=".98"/>'
+              : '';
         const accessory = silhouette === 'woman'
           ? '<circle cx="91" cy="43" r="5" fill="' + accent + '"/><circle cx="53" cy="43" r="5" fill="' + accent + '"/>'
           : silhouette === 'man'
             ? '<rect x="57" y="25" width="30" height="6" rx="3" fill="' + accent + '" opacity=".9"/>'
-            : '<circle cx="72" cy="25" r="6" fill="' + accent + '" opacity=".9"/>';
+            : silhouette === 'neutral'
+              ? '<circle cx="72" cy="25" r="6" fill="' + accent + '" opacity=".9"/>'
+              : '<circle cx="72" cy="24" r="7" fill="' + accent + '" opacity=".9"/>';
         const svg = `
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 144" role="img" aria-label="${label}">
             <defs>
@@ -4530,12 +4556,12 @@
             </defs>
             <rect width="144" height="144" rx="72" fill="url(#bg)"/>
             <circle cx="72" cy="146" r="58" fill="${body}" opacity=".18"/>
-            ${hairPath}
+            ${animalFace || `${hairPath}
             <circle cx="72" cy="56" r="22" fill="#f8d6bf"/>
             <path d="M46 124c2-20 16-34 34-34h0c18 0 32 14 34 34" fill="${body}"/>
             <path d="M62 67c4 4 16 4 20 0" stroke="#9a3412" stroke-width="3" stroke-linecap="round" fill="none"/>
             <circle cx="63" cy="57" r="2.8" fill="#1f2937"/>
-            <circle cx="81" cy="57" r="2.8" fill="#1f2937"/>
+            <circle cx="81" cy="57" r="2.8" fill="#1f2937"/>`}
             ${accessory}
           </svg>
         `.replace(/\s+/g, ' ').trim();
@@ -6029,6 +6055,8 @@
         });
         const [profileAvatarId, setProfileAvatarId] = useState(DEFAULT_PROFILE_AVATAR_ID);
         const [savingProfileAvatar, setSavingProfileAvatar] = useState(false);
+        const [profileAvatarModalOpen, setProfileAvatarModalOpen] = useState(false);
+        const [pendingProfileAvatarId, setPendingProfileAvatarId] = useState(DEFAULT_PROFILE_AVATAR_ID);
         const [recentActivity, setRecentActivity] = useState([]);
         const [upcomingInstallations, setUpcomingInstallations] = useState([]);
         const [catalogSyncing, setCatalogSyncing] = useState(false);
@@ -6678,11 +6706,11 @@
         async function handleSelectProfileAvatar(nextAvatarId) {
           if (!user) {
             setNotificacion({ mensaje: 'Necesitás iniciar sesión para cambiar tu ícono.', tipo: 'error' });
-            return;
+            return false;
           }
           if (!PROFILE_AVATAR_OPTIONS.some((avatar) => avatar.id === nextAvatarId)) {
             setNotificacion({ mensaje: 'El ícono elegido no es válido.', tipo: 'error' });
-            return;
+            return false;
           }
           try {
             setSavingProfileAvatar(true);
@@ -6697,12 +6725,30 @@
             setProfileAvatarId(nextAvatarId);
             setUserData((prev) => ({ ...prev, avatarId: nextAvatarId }));
             setNotificacion({ mensaje: 'Ícono de perfil actualizado para todos los usuarios.', tipo: 'ok' });
+            return true;
           } catch (error) {
             console.error('Error actualizando icono de perfil:', error);
             setNotificacion({ mensaje: 'No se pudo guardar el ícono de perfil.', tipo: 'error' });
+            return false;
           } finally {
             setSavingProfileAvatar(false);
           }
+        }
+
+        function openProfileAvatarModal() {
+          setPendingProfileAvatarId(profileAvatarId);
+          setProfileAvatarModalOpen(true);
+        }
+
+        function closeProfileAvatarModal() {
+          if (savingProfileAvatar) return;
+          setPendingProfileAvatarId(profileAvatarId);
+          setProfileAvatarModalOpen(false);
+        }
+
+        async function applyProfileAvatarSelection() {
+          const saved = await handleSelectProfileAvatar(pendingProfileAvatarId);
+          if (saved) setProfileAvatarModalOpen(false);
         }
 
         useEffect(() => {
@@ -7055,11 +7101,18 @@
         const selectedProfileAvatar = useMemo(() => (
           PROFILE_AVATAR_OPTIONS.find((avatar) => avatar.id === profileAvatarId) || PROFILE_AVATAR_OPTIONS[0]
         ), [profileAvatarId]);
+        const pendingProfileAvatar = useMemo(() => (
+          PROFILE_AVATAR_OPTIONS.find((avatar) => avatar.id === pendingProfileAvatarId) || selectedProfileAvatar
+        ), [pendingProfileAvatarId, selectedProfileAvatar]);
         const isTicketManager = String(user?.email || '').trim().toLowerCase() === 'alfonso332estigarribia@gmail.com';
         const isAdminUser = userRole === 'admin';
         const mobileUnreadAlerts = useMemo(() => mobileAlerts.filter((a) => !a.read).length, [mobileAlerts]);
         const adminPendingRequests = useMemo(() => adminCredentialRequests.filter((r) => r?.estado === 'pendiente'), [adminCredentialRequests]);
         const adminUnreadCount = useMemo(() => adminPendingRequests.filter((r) => !r?.leidaPorAdmin).length, [adminPendingRequests]);
+
+        useEffect(() => {
+          if (!profileAvatarModalOpen) setPendingProfileAvatarId(profileAvatarId);
+        }, [profileAvatarModalOpen, profileAvatarId]);
         const isSalesOrTechUser = /vendedor|tecnic/.test(userRole) || /tecnic/.test(userArea);
         const lockCommercialField = isSalesOrTechUser && !isAdminUser;
         const isTechnicalUser = /tecnic/.test(userRole) || /tecnic/.test(userArea);
@@ -8293,35 +8346,19 @@
                             src={selectedProfileAvatar.src}
                             alt={`Ícono de perfil ${selectedProfileAvatar.label}`}
                           />
-                          <div
+                          <button
+                            type="button"
                             className="profile-avatar-edit"
-                            aria-hidden="true"
+                            onClick={openProfileAvatarModal}
+                            aria-label="Cambiar ícono de perfil"
                           >
                             <i data-lucide="pencil"></i>
-                          </div>
+                          </button>
                         </div>
                         <div>
                           <h3 className="profile-identity-title"><b>{currentUserName}</b> · {topbarSubtitle}</h3>
                           <div className="profile-identity-sub">{currentUserName} · {topbarSubtitle}</div>
                         </div>
-                      </div>
-                      <div className="profile-avatar-picker">
-                        {PROFILE_AVATAR_OPTIONS.map((avatar) => (
-                          <button
-                            key={avatar.id}
-                            type="button"
-                            className={`profile-avatar-option ${profileAvatarId === avatar.id ? 'active' : ''}`}
-                            onClick={() => handleSelectProfileAvatar(avatar.id)}
-                            disabled={savingProfileAvatar}
-                            aria-label={`Elegir ${avatar.label}`}
-                          >
-                            <img src={avatar.src} alt={avatar.label} />
-                            <span>{avatar.label}</span>
-                          </button>
-                        ))}
-                      </div>
-                      <div className="profile-avatar-help">
-                        Elegí uno de los íconos precargados. El cambio se guarda en `config_usuarios` y lo ven todos los usuarios desde cualquier sesión.
                       </div>
                     </article>
                     <article className="profile-option">
@@ -9162,6 +9199,32 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                 )}
               </main>
 
+              {profileAvatarModalOpen && (
+                <div className="confirm-modal" onClick={closeProfileAvatarModal}>
+                  <div className="confirm-modal-card profile-avatar-modal" onClick={(e) => e.stopPropagation()}>
+                    <h3>Elegir ícono</h3>
+                    <div className="profile-avatar-picker">
+                      {PROFILE_AVATAR_OPTIONS.map((avatar) => (
+                        <button
+                          key={avatar.id}
+                          type="button"
+                          className={`profile-avatar-option ${pendingProfileAvatar.id === avatar.id ? 'active' : ''}`}
+                          onClick={() => setPendingProfileAvatarId(avatar.id)}
+                          aria-label={`Seleccionar ${avatar.label}`}
+                        >
+                          <img src={avatar.src} alt={avatar.label} />
+                        </button>
+                      ))}
+                    </div>
+                    <div className="profile-avatar-modal-actions">
+                      <button type="button" className="edit-btn" onClick={closeProfileAvatarModal} disabled={savingProfileAvatar}>Cancelar</button>
+                      <button type="button" className="save-btn" onClick={applyProfileAvatarSelection} disabled={savingProfileAvatar}>
+                        {savingProfileAvatar ? 'Guardando...' : 'Aceptar'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {imageViewerSrc && (
                 <div className="image-viewer-modal" onClick={() => setImageViewerSrc('')}>
