@@ -4501,68 +4501,97 @@
       const PRELOADED_SERVICES = mergePreloadedServices(PRELOADED_SERVICES_BASE, parseExtraPreloadedServices(EXTRA_PRELOADED_SERVICES_RAW));
 
       const PROFILE_AVATAR_PRESETS = [
-        { id: 'woman-coral', label: 'Avatar 1', palette: { bg: '#ffe4e6', body: '#fb7185', hair: '#7f1d1d', accent: '#f59e0b' }, silhouette: 'woman' },
-        { id: 'woman-violet', label: 'Avatar 2', palette: { bg: '#ede9fe', body: '#8b5cf6', hair: '#4c1d95', accent: '#ec4899' }, silhouette: 'woman' },
-        { id: 'woman-rose', label: 'Avatar 3', palette: { bg: '#ffe4f1', body: '#f472b6', hair: '#831843', accent: '#fb7185' }, silhouette: 'woman' },
-        { id: 'woman-gold', label: 'Avatar 4', palette: { bg: '#fef3c7', body: '#f59e0b', hair: '#92400e', accent: '#f43f5e' }, silhouette: 'woman' },
-        { id: 'man-sky', label: 'Avatar 5', palette: { bg: '#e0f2fe', body: '#0ea5e9', hair: '#0f172a', accent: '#22c55e' }, silhouette: 'man' },
-        { id: 'man-emerald', label: 'Avatar 6', palette: { bg: '#dcfce7', body: '#10b981', hair: '#14532d', accent: '#f97316' }, silhouette: 'man' },
-        { id: 'man-indigo', label: 'Avatar 7', palette: { bg: '#e0e7ff', body: '#6366f1', hair: '#312e81', accent: '#06b6d4' }, silhouette: 'man' },
-        { id: 'man-slate', label: 'Avatar 8', palette: { bg: '#e2e8f0', body: '#475569', hair: '#111827', accent: '#f59e0b' }, silhouette: 'man' },
-        { id: 'neutral-amber', label: 'Avatar 9', palette: { bg: '#fef3c7', body: '#f59e0b', hair: '#78350f', accent: '#14b8a6' }, silhouette: 'neutral' },
-        { id: 'neutral-teal', label: 'Avatar 10', palette: { bg: '#ccfbf1', body: '#0f766e', hair: '#134e4a', accent: '#6366f1' }, silhouette: 'neutral' },
-        { id: 'neutral-lime', label: 'Avatar 11', palette: { bg: '#ecfccb', body: '#65a30d', hair: '#3f6212', accent: '#f97316' }, silhouette: 'neutral' },
-        { id: 'neutral-cyan', label: 'Avatar 12', palette: { bg: '#cffafe', body: '#0891b2', hair: '#164e63', accent: '#a855f7' }, silhouette: 'neutral' },
-        { id: 'cat-mint', label: 'Avatar 13', palette: { bg: '#d1fae5', body: '#10b981', hair: '#064e3b', accent: '#f59e0b' }, silhouette: 'cat' },
-        { id: 'cat-lilac', label: 'Avatar 14', palette: { bg: '#ede9fe', body: '#8b5cf6', hair: '#5b21b6', accent: '#f472b6' }, silhouette: 'cat' },
-        { id: 'dog-sand', label: 'Avatar 15', palette: { bg: '#ffedd5', body: '#f97316', hair: '#9a3412', accent: '#22c55e' }, silhouette: 'dog' },
-        { id: 'dog-blue', label: 'Avatar 16', palette: { bg: '#dbeafe', body: '#3b82f6', hair: '#1d4ed8', accent: '#f59e0b' }, silhouette: 'dog' },
-        { id: 'fox-sunset', label: 'Avatar 17', palette: { bg: '#ffedd5', body: '#ea580c', hair: '#7c2d12', accent: '#fb7185' }, silhouette: 'fox' },
-        { id: 'panda-night', label: 'Avatar 18', palette: { bg: '#e5e7eb', body: '#111827', hair: '#000000', accent: '#14b8a6' }, silhouette: 'panda' },
+        { id: 'portrait-01', label: 'Avatar 1', silhouette: 'feminine', skin: '#f1c7a5', palette: { bg: '#fff1eb', body: '#d97706', hair: '#4a2c2a', accent: '#f59e0b', shirt: '#c2410c', shadow: '#7c2d12' }, hairStyle: 'waves', accessory: 'earrings' },
+        { id: 'portrait-02', label: 'Avatar 2', silhouette: 'feminine', skin: '#f5d0b5', palette: { bg: '#fdf2f8', body: '#be185d', hair: '#6b213f', accent: '#fb7185', shirt: '#9d174d', shadow: '#831843' }, hairStyle: 'bun', accessory: 'glasses' },
+        { id: 'portrait-03', label: 'Avatar 3', silhouette: 'feminine', skin: '#d9a07b', palette: { bg: '#eef2ff', body: '#4f46e5', hair: '#2f2547', accent: '#818cf8', shirt: '#3730a3', shadow: '#312e81' }, hairStyle: 'bob', accessory: 'scarf' },
+        { id: 'portrait-04', label: 'Avatar 4', silhouette: 'feminine', skin: '#f2c6a1', palette: { bg: '#ecfeff', body: '#0891b2', hair: '#3b2f2f', accent: '#22d3ee', shirt: '#0f766e', shadow: '#164e63' }, hairStyle: 'pony', accessory: 'earrings' },
+        { id: 'portrait-05', label: 'Avatar 5', silhouette: 'feminine', skin: '#8e5b3b', palette: { bg: '#fff7ed', body: '#ea580c', hair: '#201a19', accent: '#fb923c', shirt: '#c2410c', shadow: '#7c2d12' }, hairStyle: 'curls', accessory: 'necklace' },
+        { id: 'portrait-06', label: 'Avatar 6', silhouette: 'feminine', skin: '#c98d67', palette: { bg: '#f0fdf4', body: '#16a34a', hair: '#523629', accent: '#4ade80', shirt: '#166534', shadow: '#14532d' }, hairStyle: 'waves', accessory: 'glasses' },
+        { id: 'portrait-07', label: 'Avatar 7', silhouette: 'feminine', skin: '#f0c9ac', palette: { bg: '#faf5ff', body: '#9333ea', hair: '#2a1f3a', accent: '#c084fc', shirt: '#7e22ce', shadow: '#581c87' }, hairStyle: 'pixie', accessory: 'scarf' },
+        { id: 'portrait-08', label: 'Avatar 8', silhouette: 'feminine', skin: '#b8774f', palette: { bg: '#eff6ff', body: '#2563eb', hair: '#1f2937', accent: '#60a5fa', shirt: '#1d4ed8', shadow: '#1e3a8a' }, hairStyle: 'braids', accessory: 'earrings' },
+        { id: 'portrait-09', label: 'Avatar 9', silhouette: 'feminine', skin: '#e3b592', palette: { bg: '#fefce8', body: '#ca8a04', hair: '#5b4636', accent: '#facc15', shirt: '#a16207', shadow: '#713f12' }, hairStyle: 'bun', accessory: 'necklace' },
+        { id: 'portrait-10', label: 'Avatar 10', silhouette: 'feminine', skin: '#6f4630', palette: { bg: '#f5f3ff', body: '#7c3aed', hair: '#120f1d', accent: '#a78bfa', shirt: '#5b21b6', shadow: '#4c1d95' }, hairStyle: 'curls', accessory: 'glasses' },
+        { id: 'portrait-11', label: 'Avatar 11', silhouette: 'masculine', skin: '#f0c7a6', palette: { bg: '#eff6ff', body: '#0284c7', hair: '#2b2a33', accent: '#38bdf8', shirt: '#0369a1', shadow: '#0c4a6e' }, hairStyle: 'fade', accessory: 'tie' },
+        { id: 'portrait-12', label: 'Avatar 12', silhouette: 'masculine', skin: '#c98d67', palette: { bg: '#f0fdf4', body: '#15803d', hair: '#3f2b20', accent: '#4ade80', shirt: '#166534', shadow: '#14532d' }, hairStyle: 'short', accessory: 'beard' },
+        { id: 'portrait-13', label: 'Avatar 13', silhouette: 'masculine', skin: '#a46a47', palette: { bg: '#fff7ed', body: '#ea580c', hair: '#241d1a', accent: '#fb923c', shirt: '#9a3412', shadow: '#7c2d12' }, hairStyle: 'curly-short', accessory: 'beard' },
+        { id: 'portrait-14', label: 'Avatar 14', silhouette: 'masculine', skin: '#f4d1b7', palette: { bg: '#faf5ff', body: '#7e22ce', hair: '#312e81', accent: '#c4b5fd', shirt: '#6b21a8', shadow: '#581c87' }, hairStyle: 'quiff', accessory: 'glasses' },
+        { id: 'portrait-15', label: 'Avatar 15', silhouette: 'masculine', skin: '#7c5037', palette: { bg: '#ecfeff', body: '#0f766e', hair: '#171717', accent: '#2dd4bf', shirt: '#115e59', shadow: '#134e4a' }, hairStyle: 'buzz', accessory: 'tie' },
+        { id: 'portrait-16', label: 'Avatar 16', silhouette: 'masculine', skin: '#d9a07b', palette: { bg: '#eef2ff', body: '#4338ca', hair: '#433422', accent: '#818cf8', shirt: '#3730a3', shadow: '#312e81' }, hairStyle: 'sidepart', accessory: 'mustache' },
+        { id: 'portrait-17', label: 'Avatar 17', silhouette: 'masculine', skin: '#e6b48a', palette: { bg: '#fef2f2', body: '#dc2626', hair: '#3b1d18', accent: '#f87171', shirt: '#b91c1c', shadow: '#7f1d1d' }, hairStyle: 'short', accessory: 'none' },
+        { id: 'portrait-18', label: 'Avatar 18', silhouette: 'masculine', skin: '#5f3c2a', palette: { bg: '#f8fafc', body: '#475569', hair: '#111827', accent: '#94a3b8', shirt: '#334155', shadow: '#0f172a' }, hairStyle: 'locs', accessory: 'beard' },
+        { id: 'portrait-19', label: 'Avatar 19', silhouette: 'masculine', skin: '#f3cfba', palette: { bg: '#fffbeb', body: '#d97706', hair: '#4b3621', accent: '#fbbf24', shirt: '#b45309', shadow: '#78350f' }, hairStyle: 'quiff', accessory: 'glasses' },
+        { id: 'portrait-20', label: 'Avatar 20', silhouette: 'masculine', skin: '#b57957', palette: { bg: '#f0fdfa', body: '#0f766e', hair: '#2c221f', accent: '#5eead4', shirt: '#0f766e', shadow: '#134e4a' }, hairStyle: 'fade', accessory: 'mustache' },
+        { id: 'portrait-21', label: 'Avatar 21', silhouette: 'neutral', skin: '#f0c8ae', palette: { bg: '#f8fafc', body: '#6366f1', hair: '#334155', accent: '#a5b4fc', shirt: '#4f46e5', shadow: '#312e81' }, hairStyle: 'layered', accessory: 'glasses' },
+        { id: 'portrait-22', label: 'Avatar 22', silhouette: 'neutral', skin: '#dbab87', palette: { bg: '#f0fdf4', body: '#16a34a', hair: '#433422', accent: '#86efac', shirt: '#15803d', shadow: '#14532d' }, hairStyle: 'curtain', accessory: 'none' },
+        { id: 'portrait-23', label: 'Avatar 23', silhouette: 'neutral', skin: '#8d5d41', palette: { bg: '#fff7ed', body: '#ea580c', hair: '#241c18', accent: '#fdba74', shirt: '#c2410c', shadow: '#7c2d12' }, hairStyle: 'afro', accessory: 'earbuds' },
+        { id: 'portrait-24', label: 'Avatar 24', silhouette: 'neutral', skin: '#f5d5bd', palette: { bg: '#eef2ff', body: '#4f46e5', hair: '#2f2547', accent: '#a5b4fc', shirt: '#4338ca', shadow: '#312e81' }, hairStyle: 'layered', accessory: 'scarf' },
+        { id: 'portrait-25', label: 'Avatar 25', silhouette: 'neutral', skin: '#c78b66', palette: { bg: '#fdf2f8', body: '#db2777', hair: '#3f1d2e', accent: '#f9a8d4', shirt: '#be185d', shadow: '#831843' }, hairStyle: 'curtain', accessory: 'earrings' },
+        { id: 'portrait-26', label: 'Avatar 26', silhouette: 'neutral', skin: '#e4b89a', palette: { bg: '#ecfeff', body: '#0891b2', hair: '#2c323d', accent: '#67e8f9', shirt: '#0e7490', shadow: '#164e63' }, hairStyle: 'topknot', accessory: 'glasses' },
+        { id: 'portrait-27', label: 'Avatar 27', silhouette: 'neutral', skin: '#6c4330', palette: { bg: '#faf5ff', body: '#9333ea', hair: '#140f1f', accent: '#d8b4fe', shirt: '#7e22ce', shadow: '#581c87' }, hairStyle: 'afro', accessory: 'none' },
+        { id: 'portrait-28', label: 'Avatar 28', silhouette: 'neutral', skin: '#f1cbaa', palette: { bg: '#fefce8', body: '#ca8a04', hair: '#5a4735', accent: '#fde047', shirt: '#a16207', shadow: '#713f12' }, hairStyle: 'short-soft', accessory: 'earbuds' },
+        { id: 'portrait-29', label: 'Avatar 29', silhouette: 'neutral', skin: '#a56b4a', palette: { bg: '#eff6ff', body: '#2563eb', hair: '#1f2937', accent: '#93c5fd', shirt: '#1d4ed8', shadow: '#1e3a8a' }, hairStyle: 'locs', accessory: 'scarf' },
+        { id: 'portrait-30', label: 'Avatar 30', silhouette: 'neutral', skin: '#e2b496', palette: { bg: '#f0fdfa', body: '#0f766e', hair: '#433422', accent: '#99f6e4', shirt: '#115e59', shadow: '#134e4a' }, hairStyle: 'topknot', accessory: 'necklace' },
       ];
 
-      function buildAvatarSvgDataUri({ palette = {}, silhouette = 'neutral', label = 'Avatar' } = {}) {
-        const { bg = '#dbeafe', body = '#2563eb', hair = '#1e293b', accent = '#f59e0b' } = palette;
-        const animalFace = silhouette === 'cat'
-          ? `<path d="M42 48 54 28l12 16h12l12-16 12 20v22H42V48Z" fill="${hair}"/><circle cx="58" cy="74" r="18" fill="${body}"/><circle cx="86" cy="74" r="18" fill="${body}"/><ellipse cx="72" cy="88" rx="34" ry="28" fill="${body}"/><path d="M72 88l-8 8h16l-8-8Z" fill="#1f2937"/><path d="M55 95h-16M55 101H37M89 95h16M89 101h18" stroke="${hair}" stroke-width="3" stroke-linecap="round"/>`
-          : silhouette === 'dog'
-            ? `<ellipse cx="48" cy="52" rx="14" ry="22" fill="${hair}"/><ellipse cx="96" cy="52" rx="14" ry="22" fill="${hair}"/><circle cx="72" cy="74" r="34" fill="${body}"/><ellipse cx="72" cy="92" rx="20" ry="14" fill="#f8d6bf"/><circle cx="72" cy="88" r="5" fill="#1f2937"/><path d="M72 93c4 5 10 8 16 9" stroke="#7c2d12" stroke-width="3" stroke-linecap="round"/><path d="M72 93c-4 5-10 8-16 9" stroke="#7c2d12" stroke-width="3" stroke-linecap="round"/>`
-            : silhouette === 'fox'
-              ? `<path d="M40 54 56 26l16 18 16-18 16 28-8 44H48l-8-44Z" fill="${body}"/><path d="M56 26l16 18 16-18" stroke="${hair}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><ellipse cx="72" cy="84" rx="24" ry="18" fill="#fff7ed"/><circle cx="72" cy="90" r="5" fill="#1f2937"/>`
-              : silhouette === 'panda'
-                ? `<circle cx="50" cy="48" r="16" fill="${hair}"/><circle cx="94" cy="48" r="16" fill="${hair}"/><circle cx="72" cy="76" r="34" fill="#ffffff"/><ellipse cx="58" cy="72" rx="10" ry="13" fill="${hair}"/><ellipse cx="86" cy="72" rx="10" ry="13" fill="${hair}"/><ellipse cx="72" cy="90" rx="12" ry="10" fill="${hair}"/>`
-                : '';
-        const hairPath = silhouette === 'woman'
-          ? '<path d="M42 46c2-15 13-24 30-24s28 9 30 24v14H42V46Z" fill="' + hair + '"/><path d="M44 76c0-13 10-22 20-22h16c10 0 20 9 20 22v10H44V76Z" fill="' + hair + '" opacity=".95"/>'
-          : silhouette === 'man'
-            ? '<path d="M44 50c3-17 16-28 28-28 17 0 28 9 30 28v10H44V50Z" fill="' + hair + '"/>'
-            : silhouette === 'neutral'
-              ? '<path d="M43 49c2-16 14-26 29-26s27 10 29 26v11H43V49Z" fill="' + hair + '" opacity=".98"/>'
-              : '';
-        const accessory = silhouette === 'woman'
-          ? '<circle cx="91" cy="43" r="5" fill="' + accent + '"/><circle cx="53" cy="43" r="5" fill="' + accent + '"/>'
-          : silhouette === 'man'
-            ? '<rect x="57" y="25" width="30" height="6" rx="3" fill="' + accent + '" opacity=".9"/>'
-            : silhouette === 'neutral'
-              ? '<circle cx="72" cy="25" r="6" fill="' + accent + '" opacity=".9"/>'
-              : '<circle cx="72" cy="24" r="7" fill="' + accent + '" opacity=".9"/>';
+      function buildAvatarSvgDataUri({ palette = {}, silhouette = 'neutral', label = 'Avatar', skin = '#f3c7a5', hairStyle = 'layered', accessory = 'none' } = {}) {
+        const { bg = '#dbeafe', body = '#2563eb', hair = '#1e293b', accent = '#f59e0b', shirt = body } = palette;
+        const facePath = silhouette === 'masculine'
+          ? 'M72 38c-14 0-25 10-25 23v15c0 8 4 15 10 21l8 7h14l8-7c6-6 10-13 10-21V61c0-13-11-23-25-23Z'
+          : silhouette === 'feminine'
+            ? 'M72 38c-15 0-26 11-26 24v12c0 10 4 18 11 24l8 6h14l8-6c7-6 11-14 11-24V62c0-13-11-24-26-24Z'
+            : 'M72 38c-15 0-26 11-26 24v13c0 9 4 17 10 23l9 6h14l9-6c6-6 10-14 10-23V62c0-13-11-24-26-24Z';
+        const hairMap = {
+          waves: `<path d="M46 60c0-18 12-32 26-32 14 0 26 8 30 22v19h-8v-8l-8-6-10 5-10-5-10 6v8h-10V60Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
+          bun: `<circle cx="72" cy="25" r="10" fill="${hair}" stroke="#111827" stroke-width="4.5"/><path d="M46 59c2-18 13-29 26-29 14 0 25 9 28 25v14H92v-8l-7-6-13 4-12-4-6 6v8h-8V59Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
+          bob: `<path d="M44 60c0-19 12-31 28-31 16 0 28 12 28 31v16l-9-7-19-6-19 6-9 7V60Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
+          pony: `<path d="M99 49c9 4 15 13 15 24-8-3-13-7-17-14" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/><path d="M46 60c0-19 11-31 26-31 17 0 28 11 28 30v10H92v-8l-10-7-10 4-12-4-6 7v8h-8V60Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
+          curls: `<circle cx="50" cy="45" r="10" fill="${hair}" stroke="#111827" stroke-width="4"/><circle cx="66" cy="36" r="12" fill="${hair}" stroke="#111827" stroke-width="4"/><circle cx="82" cy="36" r="12" fill="${hair}" stroke="#111827" stroke-width="4"/><circle cx="96" cy="45" r="10" fill="${hair}" stroke="#111827" stroke-width="4"/><path d="M46 58c4-14 14-21 26-21 15 0 24 7 28 21v12H92v-8l-8-5-12 5-12-5-6 5v8h-8V58Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
+          pixie: `<path d="M46 57c5-17 17-28 32-28 9 0 18 4 25 12-15 1-27 3-38 10l-11 7-8 2Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/><path d="M47 57c8-7 17-11 28-11 10 0 18 3 25 8v15H91v-8l-8-3-11 3-12-3-6 3v8h-7V57Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
+          braids: `<path d="M46 59c2-18 13-30 26-30s24 9 28 25v15H92v-8l-8-5-12 4-12-4-6 5v8h-8V59Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/><path d="M48 66c0 13 1 23 5 31M96 66c0 13-1 23-5 31" stroke="#111827" stroke-width="8" stroke-linecap="round"/>`,
+          fade: `<path d="M47 57c3-16 13-27 25-27 14 0 24 8 28 23v16h-8v-8l-8-4-12 3-12-3-5 4v8h-8V57Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
+          short: `<path d="M47 58c3-18 14-28 26-28 15 0 26 10 28 25v14h-9v-8l-8-4-12 3-12-3-6 4v8h-7V58Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
+          'curly-short': `<circle cx="54" cy="43" r="9" fill="${hair}" stroke="#111827" stroke-width="4"/><circle cx="72" cy="34" r="12" fill="${hair}" stroke="#111827" stroke-width="4"/><circle cx="90" cy="43" r="9" fill="${hair}" stroke="#111827" stroke-width="4"/><path d="M47 56c4-13 13-20 25-20 14 0 23 7 27 20v13h-8v-8l-7-3-12 3-12-3-5 3v8h-8V56Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
+          quiff: `<path d="M47 56c4-18 16-28 29-28 10 0 20 4 27 14-15-2-26 1-39 10l-10 7-7 1Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/><path d="M48 57c7-8 16-11 27-11 9 0 17 2 25 7v16h-8v-8l-8-4-12 3-12-3-6 4v8h-6V57Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
+          buzz: `<path d="M49 58c4-14 13-22 23-22 13 0 22 7 24 21l2 12H46l3-11Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
+          sidepart: `<path d="M47 58c3-17 14-28 27-28 15 0 25 9 28 25-16-4-30-2-43 7l-5 3-7 2V58Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/><path d="M79 31c6 5 10 12 11 20" stroke="#111827" stroke-width="4" stroke-linecap="round"/>`,
+          locs: `<path d="M46 57c4-18 15-28 26-28 15 0 26 9 28 26v14H46V57Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/><path d="M52 61v28M64 58v31M76 58v31M88 58v31" stroke="#111827" stroke-width="7" stroke-linecap="round"/>`,
+          layered: `<path d="M45 58c2-19 14-30 27-30 15 0 27 11 27 30v16l-9-7-18-5-18 5-9 7V58Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
+          curtain: `<path d="M46 58c3-18 15-29 26-29 13 0 25 10 27 28v14H46V58Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/><path d="M72 31v24" stroke="#111827" stroke-width="4" stroke-linecap="round"/>`,
+          afro: `<circle cx="72" cy="45" r="29" fill="${hair}" stroke="#111827" stroke-width="4.5"/><path d="M46 56c6-9 15-13 26-13 12 0 21 4 27 13v15H46V56Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
+          topknot: `<path d="M62 20c4-6 16-6 20 0-1 8-4 13-10 13s-9-5-10-13Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/><path d="M46 58c3-18 14-29 26-29 15 0 25 10 28 27v15H92v-9l-8-5-12 4-12-4-6 5v9h-8V58Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
+          'short-soft': `<path d="M47 58c3-17 15-28 26-28 14 0 26 10 28 25v14h-8v-8l-9-4-12 3-11-3-6 4v8h-8V58Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
+        };
+        const accessoryMap = {
+          earrings: `<circle cx="46" cy="77" r="3.8" fill="${accent}" stroke="#111827" stroke-width="2.5"/><circle cx="98" cy="77" r="3.8" fill="${accent}" stroke="#111827" stroke-width="2.5"/>`,
+          glasses: `<rect x="48" y="62" width="18" height="12" rx="4" fill="#ffffff" stroke="#111827" stroke-width="3"/><rect x="78" y="62" width="18" height="12" rx="4" fill="#ffffff" stroke="#111827" stroke-width="3"/><path d="M66 68h12" stroke="#111827" stroke-width="3"/>`,
+          scarf: `<path d="M51 115c8 7 34 7 42 0l-3 12H54l-3-12Z" fill="${accent}" stroke="#111827" stroke-width="4" stroke-linejoin="round"/>`,
+          necklace: `<path d="M57 109c4 5 8 8 15 8s11-3 15-8" fill="none" stroke="#111827" stroke-width="3" stroke-linecap="round"/><circle cx="72" cy="118" r="4" fill="${accent}" stroke="#111827" stroke-width="2.5"/>`,
+          tie: `<path d="M66 98h12l-2 11 5 18H63l5-18-2-11Z" fill="${accent}" stroke="#111827" stroke-width="4" stroke-linejoin="round"/>`,
+          beard: `<path d="M56 80c2 11 8 17 16 17s14-6 16-17c-6 6-26 6-32 0Z" fill="${hair}" stroke="#111827" stroke-width="3.5" stroke-linejoin="round"/>`,
+          mustache: `<path d="M59 82c3 4 7 6 13 6 5 0 9-2 13-6" fill="none" stroke="#111827" stroke-width="4" stroke-linecap="round"/>`,
+          earbuds: `<circle cx="46" cy="78" r="3" fill="#ffffff" stroke="#111827" stroke-width="2.2"/><circle cx="98" cy="78" r="3" fill="#ffffff" stroke="#111827" stroke-width="2.2"/><path d="M46 81c0 7 3 14 6 19M98 81c0 7-3 14-6 19" stroke="#111827" stroke-width="2.2" stroke-linecap="round"/>`,
+          none: '',
+        };
+        const hairSvg = hairMap[hairStyle] || hairMap.layered;
+        const accessorySvg = accessoryMap[accessory] || '';
+        const suitShade = silhouette === 'feminine' ? body : shirt;
         const svg = `
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 144" role="img" aria-label="${label}">
-            <defs>
-              <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
-                <stop offset="0%" stop-color="${bg}"/>
-                <stop offset="100%" stop-color="#ffffff"/>
-              </linearGradient>
-            </defs>
-            <rect width="144" height="144" rx="72" fill="url(#bg)"/>
-            <circle cx="72" cy="146" r="58" fill="${body}" opacity=".18"/>
-            ${animalFace || `${hairPath}
-            <circle cx="72" cy="56" r="22" fill="#f8d6bf"/>
-            <path d="M46 124c2-20 16-34 34-34h0c18 0 32 14 34 34" fill="${body}"/>
-            <path d="M62 67c4 4 16 4 20 0" stroke="#9a3412" stroke-width="3" stroke-linecap="round" fill="none"/>
-            <circle cx="63" cy="57" r="2.8" fill="#1f2937"/>
-            <circle cx="81" cy="57" r="2.8" fill="#1f2937"/>`}
-            ${accessory}
+            <circle cx="72" cy="72" r="67" fill="${bg}" stroke="#111827" stroke-width="5"/>
+            <path d="M22 131c7-22 23-34 50-34s43 12 50 34" fill="${suitShade}" stroke="#111827" stroke-width="5" stroke-linejoin="round"/>
+            <path d="M44 128c6-14 13-23 28-23s22 9 28 23" fill="${body}" opacity=".18"/>
+            <path d="M49 127 61 95h22l12 32" fill="${suitShade}" stroke="#111827" stroke-width="5" stroke-linejoin="round"/>
+            <path d="M61 95l11 14 11-14" fill="#ffffff" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>
+            <path d="M72 90v18" stroke="#111827" stroke-width="4" stroke-linecap="round"/>
+            <path d="${facePath}" fill="${skin}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>
+            <path d="M61 73c3-2 7-3 11-2M72 71c4-1 8 0 11 2" fill="none" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="61" cy="77" r="2.8" fill="#111827"/>
+            <circle cx="83" cy="77" r="2.8" fill="#111827"/>
+            <path d="M72 77v8" stroke="#111827" stroke-width="2.8" stroke-linecap="round"/>
+            <path d="M64 91c3 3 13 3 16 0" fill="none" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
+            ${hairSvg}
+            ${accessorySvg}
+            ${accessory === 'tie' ? '' : `<path d="M66 99h12l-2 8 3 11H65l3-11-2-8Z" fill="${accent}" stroke="#111827" stroke-width="4" stroke-linejoin="round"/>`}
           </svg>
         `.replace(/\s+/g, ' ').trim();
         return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
