@@ -3235,6 +3235,11 @@
         transform: translateY(-1px) !important;
       }
 
+      .topbar-nav-controls {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
       .topbar-actions {
         display: flex;
         align-items: center;
@@ -3243,7 +3248,8 @@
         position: relative;
       }
       .topbar-action-btn,
-      .topbar-back-btn {
+      .topbar-back-btn,
+      .topbar-home-btn {
         width: 46px;
         height: 46px;
         min-width: 46px;
@@ -3260,7 +3266,8 @@
         box-shadow: 0 8px 16px rgba(0,0,0,.24);
       }
       .topbar-action-btn:hover,
-      .topbar-back-btn:hover {
+      .topbar-back-btn:hover,
+      .topbar-home-btn:hover {
         transform: translateY(-1px);
         box-shadow: 0 10px 18px rgba(0,0,0,.22);
       }
@@ -3273,7 +3280,8 @@
       }
       .topbar-action-icon i,
       .topbar-action-icon svg,
-      .topbar-back-btn svg {
+      .topbar-back-btn svg,
+      .topbar-home-btn svg {
         width: 24px;
         height: 24px;
         stroke-width: 2.3;
@@ -7903,7 +7911,19 @@
                   <div className={`toast ${notificacion.tipo === 'error' ? 'error' : ''}`}>{`${currentUserName || 'Usuario'}: ${notificacion.mensaje}`}</div>
                 )}
                 {!isMobile && <button className="burger" aria-label="Abrir menú" onClick={toggleSidebar}><span className="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>}
-                {!isMobile && (effectiveSelectedForm !== 'home' || !!selectedService) && <button className="topbar-back-btn" type="button" aria-label="Volver" onClick={goBackOneStep}><i data-lucide="arrow-left" /></button>}
+                {!isMobile && (effectiveSelectedForm !== 'home' || !!selectedService) && (
+                  <div className="topbar-nav-controls">
+                    <button
+                      className="topbar-home-btn"
+                      type="button"
+                      aria-label="Inicio"
+                      onClick={() => { setSelectedForm('home'); setSelectedService(null); setTipoAccion(''); setMobileTab('home'); closeSidebar(); }}
+                    >
+                      <i data-lucide="house" />
+                    </button>
+                    <button className="topbar-back-btn" type="button" aria-label="Volver" onClick={goBackOneStep}><i data-lucide="arrow-left" /></button>
+                  </div>
+                )}
                 {isMobile && <div className="mobile-brand-icon" aria-hidden="true" />}
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
