@@ -281,6 +281,7 @@
       .chip { display: inline-block; padding: 4px 8px; border-radius: 999px; color: #fff; font-size: 12px; font-weight: 700; }
       .status-ongoing { background: var(--ok); }
       .status-pausa { background: var(--pause); }
+      .status-completed { background: #3b82f6; }
       .status-default { background: var(--chip); }
       .muted { color: var(--muted); }
 
@@ -5216,7 +5217,8 @@
       function statusClass(value) {
         if (!value) return 'chip status-default';
         const v = value.toLowerCase();
-        if (v.includes('curso') || v.includes('proceso') || v.includes('ongoing') || v.includes('complet') || v.includes('finaliz')) return 'chip status-ongoing';
+        if (v.includes('curso') || v.includes('proceso') || v.includes('ongoing')) return 'chip status-ongoing';
+        if (v.includes('culmin') || v.includes('complet') || v.includes('finaliz')) return 'chip status-completed';
         if (v.includes('pausa') || v.includes('cancel') || v.includes('espera') || v.includes('pend')) return 'chip status-pausa';
         return 'chip status-default';
       }
@@ -6065,7 +6067,8 @@
           if (byId) return byId;
           const normalizedNeedle = normalizeText(raw);
           if (!normalizedNeedle) return null;
-          const fromRows = rows.find((r) => normalizeText(r?.nombreServicio) === normalizedNeedle);
+          const fromRows = rows.find((r) => normalizeText(r?.nombreServicio) === normalizedNeedle)
+            || rows.find((r) => normalizeText(r?.nombreServicio).includes(normalizedNeedle));
           if (fromRows) {
             return {
               numero: normalizeServiceId(fromRows.clienteId),
@@ -6076,7 +6079,8 @@
               atencionCliente: fromRows.atencionCliente || fromRows.bottiSeContactaCon || '',
             };
           }
-          const fromPreloaded = PRELOADED_SERVICES.find((s) => normalizeText(s?.nombreServicio) === normalizedNeedle);
+          const fromPreloaded = PRELOADED_SERVICES.find((s) => normalizeText(s?.nombreServicio) === normalizedNeedle)
+            || PRELOADED_SERVICES.find((s) => normalizeText(s?.nombreServicio).includes(normalizedNeedle));
           return fromPreloaded || null;
         }
 
@@ -6125,6 +6129,7 @@
         const [manualCatalogForm, setManualCatalogForm] = useState({ numero: '', nombreServicio: '', direccionServicio: '', tipoServicioBrindar: 'Monitoreo', representanteComercial: '', atencionCliente: '' });
         const [bulkCatalogRawInput, setBulkCatalogRawInput] = useState(EXTRA_PRELOADED_SERVICES_RAW);
         const [bulkCatalogSyncing, setBulkCatalogSyncing] = useState(false);
+        const [charlaStatusNow, setCharlaStatusNow] = useState(Date.now());
 
         function getStatusLabel(row) {
           return String(row?.status || row?.estado || '').trim().toLowerCase();
@@ -6580,7 +6585,7 @@
           visibleRows
             .filter((r) => (r?.tipoAccion || '') === 'Charla informativa' || (r?.formulario || '') === 'charla-informativa')
             .map((r) => {
-              const dynamicStatus = resolveCharlaStatus(r?.fecha, r?.horario);
+              const dynamicStatus = resolveCharlaStatus(r?.fecha, r?.horario, charlaStatusNow);
               return {
                 ...r,
                 status: dynamicStatus,
@@ -6589,7 +6594,7 @@
             })
             .slice()
             .sort((a, b) => (parseCharlaDateTime(b)?.getTime() || 0) - (parseCharlaDateTime(a)?.getTime() || 0))
-        ), [visibleRows]);
+        ), [visibleRows, charlaStatusNow]);
 
         function buildServiceDetailText(r) {
           const lines = [
@@ -7398,6 +7403,11 @@
         }
 
         useEffect(() => {
+          const interval = window.setInterval(() => setCharlaStatusNow(Date.now()), 30000);
+          return () => window.clearInterval(interval);
+        }, []);
+
+        useEffect(() => {
           if (grupo !== 'charla-detalle') return;
           const timer = window.setTimeout(() => {
             const lookup = charlaForm.servicioBusqueda || clienteIdAsociado || charlaForm.nombreServicio;
@@ -7431,19 +7441,18 @@
           return `https://www.google.com/maps?q=${q}&output=embed`;
         }, [charlaForm.direccion]);
 
-        function resolveCharlaStatus(fecha, horario) {
+        function resolveCharlaStatus(fecha, horario, nowTs = Date.now()) {
           if (!fecha) return 'Pendiente';
           const start = new Date(`${fecha}T${horario || '00:00'}`);
           if (Number.isNaN(start.getTime())) return 'Pendiente';
-          const now = Date.now();
           const startMs = start.getTime();
           const endMs = startMs + (90 * 60 * 1000);
-          if (now < startMs) return 'Pendiente';
-          if (now <= endMs) return 'En curso';
+          if (nowTs < startMs) return 'Pendiente';
+          if (nowTs <= endMs) return 'En curso';
           return 'Culminado';
         }
 
-        const charlaAutoStatus = useMemo(() => resolveCharlaStatus(charlaForm.fecha, charlaForm.horario), [charlaForm.fecha, charlaForm.horario]);
+        const charlaAutoStatus = useMemo(() => resolveCharlaStatus(charlaForm.fecha, charlaForm.horario, charlaStatusNow), [charlaForm.fecha, charlaForm.horario, charlaStatusNow]);
 
         useEffect(() => {
           if (grupo !== 'charla-detalle') return;
@@ -8728,7 +8737,16 @@
                       <div className="history-list">
                         {charlaHistoryRows.map((row) => (
                           <div className="history-row" key={`charla-${row.id}`}>
-                            <button type="button" className="ranking-service-btn" onClick={() => { setSelectedService(row); setSelectedForm('historial'); }}>
+                            <button
+                              type="button"
+                              className="ranking-service-btn"
+                              onClick={() => {
+                                setSelectedService(row);
+                                if (canEditService(row)) {
+                                  startEditService(row);
+                                }
+                              }}
+                            >
                               <div className="history-row-main">
                                 <strong>{row.nombreServicio || 'Charla sin nombre'}</strong>
                                 <div className="history-row-meta">
@@ -9279,7 +9297,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <div className="charla-summary-item"><small>Dirección</small><strong>{charlaForm.direccion || '-'}</strong></div>
                         </section>
 
-                        <section className="charla-card save"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></section>
+                        <section className="charla-card save"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Aceptar'}</button></section>
                       </div>
 ) : (
                       <div className="compact-grid">
