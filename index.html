@@ -226,7 +226,18 @@
       .field { display: flex; flex-direction: column; gap: 6px; }
       .span-2 { grid-column: span 2; }
       .span-3, .full { grid-column: 1 / -1; }
-      label { font-size: 12.8px; font-weight: 650; color: #d8f1f1; line-height: 1.25; word-break: break-word; }
+      label {
+        font-size: 12.8px;
+        font-weight: 700;
+        color: #ff8a2a;
+        line-height: 1.25;
+        word-break: break-word;
+        background: #1b2a2b;
+        border: 1px solid rgba(255, 138, 42, .45);
+        border-radius: 999px;
+        padding: 2px 9px;
+        width: fit-content;
+      }
 
       input, select, button, textarea {
         border-radius: 12px;
@@ -338,6 +349,17 @@
         line-height: 1.45;
       }
       .charla-history-actions { display: flex; justify-content: flex-end; }
+      .charla-history-form-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(180px, 1fr));
+        gap: 8px;
+      }
+      .charla-history-form-grid .field.span-3 { grid-column: 1 / -1; }
+      .charla-edit-log {
+        margin-top: 4px;
+        font-size: 11px;
+        color: #ffd8b5;
+      }
       .widget {
         background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
         border: 1px solid rgba(255,255,255,.28);
@@ -6178,6 +6200,8 @@
         const [historyCommercialFilter, setHistoryCommercialFilter] = useState('todos');
         const [charlaHistorySearch, setCharlaHistorySearch] = useState('');
         const [charlaHistoryStatusFilter, setCharlaHistoryStatusFilter] = useState('todos');
+        const [charlaHistoryDrafts, setCharlaHistoryDrafts] = useState({});
+        const [savingCharlaHistoryId, setSavingCharlaHistoryId] = useState('');
         const [historyPage, setHistoryPage] = useState(1);
         const [sellerFilterOpen, setSellerFilterOpen] = useState(false);
         const [sellerFiltersDraft, setSellerFiltersDraft] = useState({
@@ -6698,6 +6722,78 @@
           enCurso: charlaHistoryRows.filter((r) => (r.status || r.estado) === 'En curso').length,
           culminado: charlaHistoryRows.filter((r) => (r.status || r.estado) === 'Culminado').length,
         }), [charlaHistoryRows]);
+
+        useEffect(() => {
+          setCharlaHistoryDrafts((prev) => {
+            const next = { ...prev };
+            charlaHistoryRows.forEach((row) => {
+              if (next[row.id]) return;
+              next[row.id] = {
+                nombreServicio: row.nombreServicio || '',
+                responsableCharla: row.responsableCharla || '',
+                fecha: row.fecha || '',
+                horario: row.horario || '',
+                direccion: row.direccion || '',
+                observaciones: row.observaciones || '',
+              };
+            });
+            return next;
+          });
+        }, [charlaHistoryRows]);
+
+        function setCharlaHistoryDraftField(rowId, key, value) {
+          setCharlaHistoryDrafts((prev) => ({
+            ...prev,
+            [rowId]: { ...(prev[rowId] || {}), [key]: value },
+          }));
+        }
+
+        function getCharlaEditLog(row) {
+          const editor = row?.editorUltimaCharla || row?.editadoPor || row?.creadoPor || 'Sistema';
+          const fecha = row?.fechaUltimaEdicionCharla || row?.actualizadoEn || row?.creadoEn || '';
+          let label = '';
+          if (typeof fecha?.toDate === 'function') label = fecha.toDate().toLocaleString('es-UY');
+          else if (typeof fecha?.seconds === 'number') label = new Date(fecha.seconds * 1000).toLocaleString('es-UY');
+          else if (fecha) label = new Date(fecha).toString() !== 'Invalid Date' ? new Date(fecha).toLocaleString('es-UY') : String(fecha);
+          return `Última edición: ${editor}${label ? ` · ${label}` : ''}`;
+        }
+
+        async function saveCharlaHistoryEdit(row) {
+          if (!row?.id || !canEditService(row)) return;
+          const draft = charlaHistoryDrafts[row.id] || {};
+          if (!draft.responsableCharla || !draft.fecha || !draft.horario || !draft.direccion) {
+            setNotificacion({ mensaje: 'Completá Responsable, Fecha, Hora y Dirección para guardar la charla.', tipo: 'warn' });
+            return;
+          }
+          setSavingCharlaHistoryId(row.id);
+          try {
+            const dynamicStatus = resolveCharlaStatus(draft.fecha, draft.horario, Date.now());
+            const payload = {
+              nombreServicio: draft.nombreServicio || '',
+              responsableCharla: draft.responsableCharla || '',
+              fecha: draft.fecha || '',
+              horario: draft.horario || '',
+              direccion: draft.direccion || '',
+              observaciones: draft.observaciones || '',
+              status: dynamicStatus,
+              estado: dynamicStatus,
+              formulario: 'charla-informativa',
+              tipoAccion: 'Charla informativa',
+              editadoPor: currentUserName,
+              editorUltimaCharla: currentUserName,
+              fechaUltimaEdicionCharla: new Date().toISOString(),
+              actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+            };
+            await db.collection('operaciones').doc(row.id).set(payload, { merge: true });
+            setRows((prev) => prev.map((item) => (item.id === row.id ? { ...item, ...payload } : item)));
+            setNotificacion({ mensaje: '✔ Charla actualizada en historial', tipo: 'ok' });
+          } catch (error) {
+            console.error('Error actualizando charla desde historial:', error);
+            setNotificacion({ mensaje: '✖ No se pudo actualizar la charla.', tipo: 'error' });
+          } finally {
+            setSavingCharlaHistoryId('');
+          }
+        }
 
         function buildServiceDetailText(r) {
           const lines = [
@@ -8853,29 +8949,38 @@
                         <div className="charla-history-list">
                           {charlaHistoryFilteredRows.map((row) => {
                             const canEdit = canEditService(row);
+                            const draft = charlaHistoryDrafts[row.id] || {};
                             return (
                               <article className="charla-history-card" key={`charla-${row.id}`}>
                                 <div className="charla-history-top">
                                   <div>
-                                    <strong>{row.nombreServicio || 'Charla sin nombre'}</strong>
+                                    <strong>{draft.nombreServicio || row.nombreServicio || 'Charla sin nombre'}</strong>
                                     <div className="charla-history-meta">
                                       <span>ID {row.clienteId || '-'}</span>
-                                      <span>{row.responsableCharla || 'Sin responsable'}</span>
-                                      <span>{row.fecha || '-'} {row.horario || '--:--'}</span>
-                                      <span>{row.direccion || 'Sin dirección'}</span>
+                                      <span>{draft.responsableCharla || row.responsableCharla || 'Sin responsable'}</span>
+                                      <span>{draft.fecha || row.fecha || '-'} {draft.horario || row.horario || '--:--'}</span>
+                                      <span>{draft.direccion || row.direccion || 'Sin dirección'}</span>
                                     </div>
                                   </div>
                                   <span className={statusClass(row.status || row.estado)}>{row.status || row.estado || 'Pendiente'}</span>
                                 </div>
-                                <div className="charla-history-obs"><b>Observaciones:</b> {row.observaciones || 'Sin observaciones'}</div>
+                                <div className="charla-history-form-grid">
+                                  <div className="field"><label>Servicio</label><input value={draft.nombreServicio || ''} onChange={(e) => setCharlaHistoryDraftField(row.id, 'nombreServicio', e.target.value)} disabled={!canEdit} /></div>
+                                  <div className="field"><label>Responsable</label><input value={draft.responsableCharla || ''} onChange={(e) => setCharlaHistoryDraftField(row.id, 'responsableCharla', e.target.value)} disabled={!canEdit} /></div>
+                                  <div className="field"><label>Dirección</label><input value={draft.direccion || ''} onChange={(e) => setCharlaHistoryDraftField(row.id, 'direccion', e.target.value)} disabled={!canEdit} /></div>
+                                  <div className="field"><label>Fecha</label><input type="date" value={draft.fecha || ''} onChange={(e) => setCharlaHistoryDraftField(row.id, 'fecha', e.target.value)} disabled={!canEdit} /></div>
+                                  <div className="field"><label>Hora</label><input type="time" value={draft.horario || ''} onChange={(e) => setCharlaHistoryDraftField(row.id, 'horario', e.target.value)} disabled={!canEdit} /></div>
+                                  <div className="field span-3"><label>Observaciones</label><textarea value={draft.observaciones || ''} onChange={(e) => setCharlaHistoryDraftField(row.id, 'observaciones', e.target.value)} disabled={!canEdit} rows={3} /></div>
+                                </div>
+                                <div className="charla-history-obs"><b>Registro:</b> {getCharlaEditLog(row)}</div>
                                 <div className="charla-history-actions">
                                   <button
                                     type="button"
                                     className="edit-btn"
-                                    disabled={!canEdit}
-                                    onClick={() => startEditService(row)}
+                                    disabled={!canEdit || savingCharlaHistoryId === row.id}
+                                    onClick={() => saveCharlaHistoryEdit(row)}
                                   >
-                                    {canEdit ? '✏ Editar charla' : '🔒 Solo lectura'}
+                                    {canEdit ? (savingCharlaHistoryId === row.id ? 'Guardando...' : 'Guardar cambios') : '🔒 Solo lectura'}
                                   </button>
                                 </div>
                               </article>
