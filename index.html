@@ -226,7 +226,18 @@
       .field { display: flex; flex-direction: column; gap: 6px; }
       .span-2 { grid-column: span 2; }
       .span-3, .full { grid-column: 1 / -1; }
-      label { font-size: 12.8px; font-weight: 650; color: #d8f1f1; line-height: 1.25; word-break: break-word; }
+      label {
+        font-size: 12.8px;
+        font-weight: 700;
+        color: #ff8a2a;
+        line-height: 1.25;
+        word-break: break-word;
+        background: #1b2a2b;
+        border: 1px solid rgba(255, 138, 42, .45);
+        border-radius: 999px;
+        padding: 2px 9px;
+        width: fit-content;
+      }
 
       input, select, button, textarea {
         border-radius: 12px;
@@ -281,10 +292,74 @@
       .chip { display: inline-block; padding: 4px 8px; border-radius: 999px; color: #fff; font-size: 12px; font-weight: 700; }
       .status-ongoing { background: var(--ok); }
       .status-pausa { background: var(--pause); }
+      .status-completed { background: #3b82f6; }
       .status-default { background: var(--chip); }
       .muted { color: var(--muted); }
 
       .history-grid { display: grid; grid-template-columns: repeat(3, minmax(220px, 1fr)); gap: 12px; }
+      .charla-history-shell { display: grid; gap: 14px; }
+      .charla-history-kpis {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(140px, 1fr));
+        gap: 10px;
+      }
+      .charla-history-kpi {
+        border: 1px solid rgba(6, 101, 103, .4);
+        border-radius: 12px;
+        padding: 10px 12px;
+        background: rgba(4, 84, 86, .24);
+      }
+      .charla-history-kpi small { display: block; color: #d6f7f2; font-size: 12px; font-weight: 700; }
+      .charla-history-kpi strong { font-size: 1.2rem; color: #ffffff; text-shadow: 0 1px 0 rgba(0,0,0,.2); }
+      .charla-history-toolbar {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 10px;
+      }
+      .charla-history-list {
+        display: grid;
+        gap: 10px;
+      }
+      .charla-history-card {
+        border: 1px solid rgba(6, 101, 103, .38);
+        border-radius: 14px;
+        padding: 12px;
+        background: rgba(4, 84, 86, .2);
+        display: grid;
+        gap: 10px;
+      }
+      .charla-history-card strong { color: #ffffff; }
+      .charla-history-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        align-items: flex-start;
+      }
+      .charla-history-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        color: #e8fffb;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .charla-history-obs {
+        font-size: 12px;
+        color: #f2fffd;
+        line-height: 1.45;
+      }
+      .charla-history-actions { display: flex; justify-content: flex-end; }
+      .charla-history-form-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(180px, 1fr));
+        gap: 8px;
+      }
+      .charla-history-form-grid .field.span-3 { grid-column: 1 / -1; }
+      .charla-edit-log {
+        margin-top: 4px;
+        font-size: 11px;
+        color: #ffd8b5;
+      }
       .widget {
         background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
         border: 1px solid rgba(255,255,255,.28);
@@ -562,6 +637,26 @@
       @media (max-width: 980px) {
         .welcome-card { grid-template-columns: 1fr; }
         .dashboard-info-grid { grid-template-columns: 1fr; }
+      }
+
+      @media (min-width: 769px) and (max-width: 1180px) {
+        .sidebar { width: 244px; }
+        .menu { padding: 10px; }
+        .menu-button, .submenu-button {
+          padding: 10px 11px;
+          font-size: 13px;
+          line-height: 1.15;
+          white-space: normal;
+        }
+        .submenu.open { max-height: 540px; }
+        .topbar { padding: 7px 10px; }
+        .top-titles h1 { font-size: 1.2rem; }
+        .top-titles p { font-size: .82rem; }
+        .main { max-width: 1180px; padding: 0 10px 20px; }
+        .panel { padding: 16px; border-radius: 12px; }
+        .service-card { padding: 15px; }
+        .charla-history-kpis { grid-template-columns: repeat(2, minmax(140px, 1fr)); }
+        .charla-history-toolbar { grid-template-columns: 1fr; }
       }
 
 
@@ -5205,6 +5300,7 @@
 
       const charlaInicial = {
         nombreServicio: '',
+        servicioBusqueda: '',
         responsableCharla: '',
         fecha: '',
         horario: '',
@@ -5215,7 +5311,8 @@
       function statusClass(value) {
         if (!value) return 'chip status-default';
         const v = value.toLowerCase();
-        if (v.includes('curso') || v.includes('proceso') || v.includes('ongoing') || v.includes('complet') || v.includes('finaliz')) return 'chip status-ongoing';
+        if (v.includes('curso') || v.includes('proceso') || v.includes('ongoing')) return 'chip status-ongoing';
+        if (v.includes('culmin') || v.includes('complet') || v.includes('finaliz')) return 'chip status-completed';
         if (v.includes('pausa') || v.includes('cancel') || v.includes('espera') || v.includes('pend')) return 'chip status-pausa';
         return 'chip status-default';
       }
@@ -6013,13 +6110,14 @@
         const upcomingInstallationsSourcesRef = useRef({});
 
         const grupo = useMemo(() => {
-          if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
-          if (tipoAccion === 'Obra') return 'obra';
-          if (tipoAccion === 'Novación') return 'novacion';
-          if (tipoAccion === 'Solicitud de presupuesto') return 'agregado';
-          if (tipoAccion === 'Baja') return 'baja-detalle';
-          if (tipoAccion === 'Charla informativa') return 'charla-detalle';
-          if (tipoAccion === 'Movimiento de obra') return 'movimiento-detalle';
+          const actionLabel = String(tipoAccion || '').trim().toLowerCase();
+          if (actionLabel === 'nuevo servicio' && selectedForm === 'servicio') return 'servicio';
+          if (actionLabel === 'obra') return 'obra';
+          if (actionLabel === 'novación' || actionLabel === 'novacion') return 'novacion';
+          if (actionLabel === 'solicitud de presupuesto') return 'agregado';
+          if (actionLabel === 'baja') return 'baja-detalle';
+          if (actionLabel.includes('charla')) return 'charla-detalle';
+          if (actionLabel === 'movimiento de obra') return 'movimiento-detalle';
           return 'base';
         }, [tipoAccion, selectedForm]);
 
@@ -6032,6 +6130,14 @@
           const digits = String(value || '').replace(/\D/g, '');
           if (!digits) return '';
           return digits.padStart(4, '0');
+        }
+
+        function normalizeText(value) {
+          return String(value || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .trim()
+            .toLowerCase();
         }
 
         function getServiceCatalogById(rawId) {
@@ -6047,6 +6153,30 @@
             atencionCliente: fromRows.atencionCliente || fromRows.bottiSeContactaCon || '',
           };
           return PRELOADED_SERVICES.find((s) => normalizeServiceId(s.numero) === target) || null;
+        }
+
+        function getServiceCatalogByIdOrName(rawValue) {
+          const raw = String(rawValue || '').trim();
+          if (!raw) return null;
+          const byId = getServiceCatalogById(raw);
+          if (byId) return byId;
+          const normalizedNeedle = normalizeText(raw);
+          if (!normalizedNeedle) return null;
+          const fromRows = rows.find((r) => normalizeText(r?.nombreServicio) === normalizedNeedle)
+            || rows.find((r) => normalizeText(r?.nombreServicio).includes(normalizedNeedle));
+          if (fromRows) {
+            return {
+              numero: normalizeServiceId(fromRows.clienteId),
+              nombreServicio: fromRows.nombreServicio || '',
+              direccionServicio: fromRows.direccionServicio || '',
+              tipoServicioBrindar: normalizeServiceType(fromRows.tipoServicioBrindar) || '',
+              representanteComercial: fromRows.representanteComercial || '',
+              atencionCliente: fromRows.atencionCliente || fromRows.bottiSeContactaCon || '',
+            };
+          }
+          const fromPreloaded = PRELOADED_SERVICES.find((s) => normalizeText(s?.nombreServicio) === normalizedNeedle)
+            || PRELOADED_SERVICES.find((s) => normalizeText(s?.nombreServicio).includes(normalizedNeedle));
+          return fromPreloaded || null;
         }
 
         const deferredSearchTerm = useDeferredValue(searchTerm);
@@ -6068,6 +6198,10 @@
         const [historySearchTerm, setHistorySearchTerm] = useState('');
         const [historyStatusFilter, setHistoryStatusFilter] = useState('todos');
         const [historyCommercialFilter, setHistoryCommercialFilter] = useState('todos');
+        const [charlaHistorySearch, setCharlaHistorySearch] = useState('');
+        const [charlaHistoryStatusFilter, setCharlaHistoryStatusFilter] = useState('todos');
+        const [charlaHistoryDrafts, setCharlaHistoryDrafts] = useState({});
+        const [savingCharlaHistoryId, setSavingCharlaHistoryId] = useState('');
         const [historyPage, setHistoryPage] = useState(1);
         const [sellerFilterOpen, setSellerFilterOpen] = useState(false);
         const [sellerFiltersDraft, setSellerFiltersDraft] = useState({
@@ -6094,6 +6228,7 @@
         const [manualCatalogForm, setManualCatalogForm] = useState({ numero: '', nombreServicio: '', direccionServicio: '', tipoServicioBrindar: 'Monitoreo', representanteComercial: '', atencionCliente: '' });
         const [bulkCatalogRawInput, setBulkCatalogRawInput] = useState(EXTRA_PRELOADED_SERVICES_RAW);
         const [bulkCatalogSyncing, setBulkCatalogSyncing] = useState(false);
+        const [charlaStatusNow, setCharlaStatusNow] = useState(Date.now());
 
         function getStatusLabel(row) {
           return String(row?.status || row?.estado || '').trim().toLowerCase();
@@ -6548,9 +6683,117 @@
         const charlaHistoryRows = useMemo(() => (
           visibleRows
             .filter((r) => (r?.tipoAccion || '') === 'Charla informativa' || (r?.formulario || '') === 'charla-informativa')
+            .map((r) => {
+              const dynamicStatus = resolveCharlaStatus(r?.fecha, r?.horario, charlaStatusNow);
+              return {
+                ...r,
+                status: dynamicStatus,
+                estado: dynamicStatus,
+              };
+            })
             .slice()
             .sort((a, b) => (parseCharlaDateTime(b)?.getTime() || 0) - (parseCharlaDateTime(a)?.getTime() || 0))
-        ), [visibleRows]);
+        ), [visibleRows, charlaStatusNow]);
+
+        const charlaHistoryFilteredRows = useMemo(() => {
+          const q = charlaHistorySearch.trim().toLowerCase();
+          return charlaHistoryRows.filter((row) => {
+            const status = String(row.status || row.estado || 'Pendiente');
+            const passStatus = charlaHistoryStatusFilter === 'todos' || status === charlaHistoryStatusFilter;
+            if (!passStatus) return false;
+            if (!q) return true;
+            return [
+              row.clienteId,
+              row.nombreServicio,
+              row.responsableCharla,
+              row.direccion,
+              row.observaciones,
+              row.fecha,
+              row.horario,
+            ]
+              .filter(Boolean)
+              .some((v) => String(v).toLowerCase().includes(q));
+          });
+        }, [charlaHistoryRows, charlaHistorySearch, charlaHistoryStatusFilter]);
+
+        const charlaSummary = useMemo(() => ({
+          total: charlaHistoryRows.length,
+          pendiente: charlaHistoryRows.filter((r) => (r.status || r.estado) === 'Pendiente').length,
+          enCurso: charlaHistoryRows.filter((r) => (r.status || r.estado) === 'En curso').length,
+          culminado: charlaHistoryRows.filter((r) => (r.status || r.estado) === 'Culminado').length,
+        }), [charlaHistoryRows]);
+
+        useEffect(() => {
+          setCharlaHistoryDrafts((prev) => {
+            const next = { ...prev };
+            charlaHistoryRows.forEach((row) => {
+              if (next[row.id]) return;
+              next[row.id] = {
+                nombreServicio: row.nombreServicio || '',
+                responsableCharla: row.responsableCharla || '',
+                fecha: row.fecha || '',
+                horario: row.horario || '',
+                direccion: row.direccion || '',
+                observaciones: row.observaciones || '',
+              };
+            });
+            return next;
+          });
+        }, [charlaHistoryRows]);
+
+        function setCharlaHistoryDraftField(rowId, key, value) {
+          setCharlaHistoryDrafts((prev) => ({
+            ...prev,
+            [rowId]: { ...(prev[rowId] || {}), [key]: value },
+          }));
+        }
+
+        function getCharlaEditLog(row) {
+          const editor = row?.editorUltimaCharla || row?.editadoPor || row?.creadoPor || 'Sistema';
+          const fecha = row?.fechaUltimaEdicionCharla || row?.actualizadoEn || row?.creadoEn || '';
+          let label = '';
+          if (typeof fecha?.toDate === 'function') label = fecha.toDate().toLocaleString('es-UY');
+          else if (typeof fecha?.seconds === 'number') label = new Date(fecha.seconds * 1000).toLocaleString('es-UY');
+          else if (fecha) label = new Date(fecha).toString() !== 'Invalid Date' ? new Date(fecha).toLocaleString('es-UY') : String(fecha);
+          return `Última edición: ${editor}${label ? ` · ${label}` : ''}`;
+        }
+
+        async function saveCharlaHistoryEdit(row) {
+          if (!row?.id || !canEditService(row)) return;
+          const draft = charlaHistoryDrafts[row.id] || {};
+          if (!draft.responsableCharla || !draft.fecha || !draft.horario || !draft.direccion) {
+            setNotificacion({ mensaje: 'Completá Responsable, Fecha, Hora y Dirección para guardar la charla.', tipo: 'warn' });
+            return;
+          }
+          setSavingCharlaHistoryId(row.id);
+          try {
+            const dynamicStatus = resolveCharlaStatus(draft.fecha, draft.horario, Date.now());
+            const payload = {
+              nombreServicio: draft.nombreServicio || '',
+              responsableCharla: draft.responsableCharla || '',
+              fecha: draft.fecha || '',
+              horario: draft.horario || '',
+              direccion: draft.direccion || '',
+              observaciones: draft.observaciones || '',
+              status: dynamicStatus,
+              estado: dynamicStatus,
+              formulario: 'charla-informativa',
+              tipoAccion: 'Charla informativa',
+              editadoPor: currentUserName,
+              editorUltimaCharla: currentUserName,
+              fechaUltimaEdicionCharla: new Date().toISOString(),
+              actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+            };
+            await db.collection('operaciones').doc(row.id).set(payload, { merge: true });
+            setRows((prev) => prev.map((item) => (item.id === row.id ? { ...item, ...payload } : item)));
+            setNotificacion({ mensaje: '✔ Charla actualizada en historial', tipo: 'ok' });
+          } catch (error) {
+            console.error('Error actualizando charla desde historial:', error);
+            setNotificacion({ mensaje: '✖ No se pudo actualizar la charla.', tipo: 'error' });
+          } finally {
+            setSavingCharlaHistoryId('');
+          }
+        }
 
         function buildServiceDetailText(r) {
           const lines = [
@@ -7182,7 +7425,7 @@
 
         function startEditService(service) {
           if (!canEditService(service)) return;
-          const action = service.tipoAccion || 'Nuevo Servicio';
+          const action = service.tipoAccion || (service.formulario === 'charla-informativa' ? 'Charla informativa' : 'Nuevo Servicio');
           setEditingServiceId(service.id || null);
           setSelectedService(service);
           setStatus(normalizeLegacyStatusName(service.status || service.estado || 'Pendiente'));
@@ -7192,6 +7435,12 @@
           setServicioForm({ ...servicioInicial, ...service, representanteComercial: service.representanteComercial || currentUserName, creadoPor: service.creadoPor || currentUserName, fechaIngresoDatos: service.fechaIngresoDatos || stamp });
           setObraForm({ ...obraInicial, ...service, representanteComercial: service.representanteComercial || currentUserName, creadoPor: service.creadoPor || currentUserName });
           setNovacionForm({ ...novacionInicial, ...service, representanteComercial: service.representanteComercial || currentUserName, creadoPor: service.creadoPor || currentUserName });
+          setCharlaForm({
+            ...charlaInicial,
+            ...service,
+            nombreServicio: service.nombreServicio || '',
+            servicioBusqueda: service.nombreServicio || service.clienteId || '',
+          });
 
           if (['Nuevo Servicio'].includes(action)) {
             setClienteId(service.clienteId || generarClienteId());
@@ -7328,31 +7577,44 @@
           setCharlaForm((prev) => ({ ...prev, [key]: value }));
         }
 
-        function syncCharlaServiceFromId(rawId) {
-          const catalog = getServiceCatalogById(rawId);
+        function syncCharlaService(rawLookup) {
+          const catalog = getServiceCatalogByIdOrName(rawLookup);
           if (!catalog) {
-            setCharlaForm((prev) => ({ ...prev, nombreServicio: '', direccion: '' }));
+            setCharlaForm((prev) => ({ ...prev, direccion: '' }));
             return;
           }
+          const nextId = normalizeServiceId(catalog?.numero);
           const nextName = String(catalog?.nombreServicio || '').trim();
           const nextAddress = String(catalog?.direccionServicio || '').trim();
+          if (nextId && nextId !== normalizeServiceId(clienteIdAsociado)) {
+            setClienteIdAsociado(nextId);
+          }
           setCharlaForm((prev) => ({
             ...prev,
             nombreServicio: nextName || prev.nombreServicio,
+            servicioBusqueda: prev.servicioBusqueda || nextName || nextId || '',
             direccion: nextAddress,
           }));
         }
 
-        function handleCharlaClienteIdChange(value) {
-          const nextId = value;
-          setClienteIdAsociado(nextId);
-          syncCharlaServiceFromId(nextId);
+        function handleCharlaServicioLookupChange(value) {
+          setCharlaForm((prev) => ({ ...prev, servicioBusqueda: value }));
         }
 
         useEffect(() => {
+          const interval = window.setInterval(() => setCharlaStatusNow(Date.now()), 30000);
+          return () => window.clearInterval(interval);
+        }, []);
+
+        useEffect(() => {
           if (grupo !== 'charla-detalle') return;
-          syncCharlaServiceFromId(clienteIdAsociado);
-        }, [grupo, clienteIdAsociado, visibleRows]);
+          const timer = window.setTimeout(() => {
+            const lookup = charlaForm.servicioBusqueda || clienteIdAsociado || charlaForm.nombreServicio;
+            if (!lookup) return;
+            syncCharlaService(lookup);
+          }, 1500);
+          return () => window.clearTimeout(timer);
+        }, [grupo, charlaForm.servicioBusqueda, charlaForm.nombreServicio, clienteIdAsociado, visibleRows]);
 
         useEffect(() => {
           if (autoIdMode || !clienteIdAsociado) return;
@@ -7378,13 +7640,18 @@
           return `https://www.google.com/maps?q=${q}&output=embed`;
         }, [charlaForm.direccion]);
 
-        const charlaAutoStatus = useMemo(() => {
-          if (!charlaForm.fecha) return 'Pendiente';
-          const base = `${charlaForm.fecha}T${charlaForm.horario || '00:00'}`;
-          const dt = new Date(base);
-          if (Number.isNaN(dt.getTime())) return 'Pendiente';
-          return dt.getTime() < Date.now() ? 'Realizada' : 'Pendiente';
-        }, [charlaForm.fecha, charlaForm.horario]);
+        function resolveCharlaStatus(fecha, horario, nowTs = Date.now()) {
+          if (!fecha) return 'Pendiente';
+          const start = new Date(`${fecha}T${horario || '00:00'}`);
+          if (Number.isNaN(start.getTime())) return 'Pendiente';
+          const startMs = start.getTime();
+          const endMs = startMs + (90 * 60 * 1000);
+          if (nowTs < startMs) return 'Pendiente';
+          if (nowTs <= endMs) return 'En curso';
+          return 'Culminado';
+        }
+
+        const charlaAutoStatus = useMemo(() => resolveCharlaStatus(charlaForm.fecha, charlaForm.horario, charlaStatusNow), [charlaForm.fecha, charlaForm.horario, charlaStatusNow]);
 
         useEffect(() => {
           if (grupo !== 'charla-detalle') return;
@@ -7516,7 +7783,8 @@
             if (!charlaForm.responsableCharla || !charlaForm.fecha || !charlaForm.horario || !charlaForm.direccion) {
               return alert('Completá al menos: Responsable, Fecha, Hora y Dirección.');
             }
-            Object.assign(doc, { ...charlaForm, formulario: 'charla-informativa' });
+            const dynamicStatus = resolveCharlaStatus(charlaForm.fecha, charlaForm.horario);
+            Object.assign(doc, { ...charlaForm, formulario: 'charla-informativa', status: dynamicStatus, estado: dynamicStatus });
           }
 
           setSaving(true);
@@ -8661,28 +8929,66 @@
 ) : effectiveSelectedForm === 'historial-charlas' ? (
                   <section className="panel">
                     <h2>Historial de Charlas Informativas</h2>
-                    <div className="hint">Charlas registradas por fecha y hora (más reciente primero).</div>
-                    {charlaHistoryRows.length === 0 ? (
-                      <div className="hint" style={{ marginBottom: 0 }}>No hay charlas registradas todavía.</div>
-                    ) : (
-                      <div className="history-list">
-                        {charlaHistoryRows.map((row) => (
-                          <div className="history-row" key={`charla-${row.id}`}>
-                            <button type="button" className="ranking-service-btn" onClick={() => { setSelectedService(row); setSelectedForm('historial'); }}>
-                              <div className="history-row-main">
-                                <strong>{row.nombreServicio || 'Charla sin nombre'}</strong>
-                                <div className="history-row-meta">
-                                  <span>ID {row.clienteId || '-'}</span><span>·</span>
-                                  <span>{row.responsableCharla || 'Sin responsable'}</span><span>·</span>
-                                  <span>{row.fecha || '-'} {row.horario || '--:--'}</span>
-                                </div>
-                              </div>
-                            </button>
-                            <span className={statusClass(row.status || row.estado)}>{row.status || row.estado || 'Pendiente'}</span>
-                          </div>
-                        ))}
+                    <div className="hint">Vista exclusiva de charlas: agenda, estados dinámicos y edición directa.</div>
+                    <div className="charla-history-shell">
+                      <div className="charla-history-kpis">
+                        <div className="charla-history-kpi"><small>Total</small><strong>{charlaSummary.total}</strong></div>
+                        <div className="charla-history-kpi"><small>Pendiente</small><strong>{charlaSummary.pendiente}</strong></div>
+                        <div className="charla-history-kpi"><small>En curso</small><strong>{charlaSummary.enCurso}</strong></div>
+                        <div className="charla-history-kpi"><small>Culminado</small><strong>{charlaSummary.culminado}</strong></div>
                       </div>
-                    )}
+
+                      <div className="charla-history-toolbar">
+                        <div className="field"><label>Buscar charla</label><input value={charlaHistorySearch} onChange={(e) => setCharlaHistorySearch(e.target.value)} placeholder="ID, servicio, responsable, dirección..." /></div>
+                        <div className="field"><label>Estado</label><select value={charlaHistoryStatusFilter} onChange={(e) => setCharlaHistoryStatusFilter(e.target.value)}><option value="todos">Todos</option><option value="Pendiente">Pendiente</option><option value="En curso">En curso</option><option value="Culminado">Culminado</option></select></div>
+                      </div>
+
+                      {charlaHistoryFilteredRows.length === 0 ? (
+                        <div className="hint" style={{ marginBottom: 0 }}>No hay charlas para los filtros seleccionados.</div>
+                      ) : (
+                        <div className="charla-history-list">
+                          {charlaHistoryFilteredRows.map((row) => {
+                            const canEdit = canEditService(row);
+                            const draft = charlaHistoryDrafts[row.id] || {};
+                            return (
+                              <article className="charla-history-card" key={`charla-${row.id}`}>
+                                <div className="charla-history-top">
+                                  <div>
+                                    <strong>{draft.nombreServicio || row.nombreServicio || 'Charla sin nombre'}</strong>
+                                    <div className="charla-history-meta">
+                                      <span>ID {row.clienteId || '-'}</span>
+                                      <span>{draft.responsableCharla || row.responsableCharla || 'Sin responsable'}</span>
+                                      <span>{draft.fecha || row.fecha || '-'} {draft.horario || row.horario || '--:--'}</span>
+                                      <span>{draft.direccion || row.direccion || 'Sin dirección'}</span>
+                                    </div>
+                                  </div>
+                                  <span className={statusClass(row.status || row.estado)}>{row.status || row.estado || 'Pendiente'}</span>
+                                </div>
+                                <div className="charla-history-form-grid">
+                                  <div className="field"><label>Servicio</label><input value={draft.nombreServicio || ''} onChange={(e) => setCharlaHistoryDraftField(row.id, 'nombreServicio', e.target.value)} disabled={!canEdit} /></div>
+                                  <div className="field"><label>Responsable</label><input value={draft.responsableCharla || ''} onChange={(e) => setCharlaHistoryDraftField(row.id, 'responsableCharla', e.target.value)} disabled={!canEdit} /></div>
+                                  <div className="field"><label>Dirección</label><input value={draft.direccion || ''} onChange={(e) => setCharlaHistoryDraftField(row.id, 'direccion', e.target.value)} disabled={!canEdit} /></div>
+                                  <div className="field"><label>Fecha</label><input type="date" value={draft.fecha || ''} onChange={(e) => setCharlaHistoryDraftField(row.id, 'fecha', e.target.value)} disabled={!canEdit} /></div>
+                                  <div className="field"><label>Hora</label><input type="time" value={draft.horario || ''} onChange={(e) => setCharlaHistoryDraftField(row.id, 'horario', e.target.value)} disabled={!canEdit} /></div>
+                                  <div className="field span-3"><label>Observaciones</label><textarea value={draft.observaciones || ''} onChange={(e) => setCharlaHistoryDraftField(row.id, 'observaciones', e.target.value)} disabled={!canEdit} rows={3} /></div>
+                                </div>
+                                <div className="charla-history-obs"><b>Registro:</b> {getCharlaEditLog(row)}</div>
+                                <div className="charla-history-actions">
+                                  <button
+                                    type="button"
+                                    className="edit-btn"
+                                    disabled={!canEdit || savingCharlaHistoryId === row.id}
+                                    onClick={() => saveCharlaHistoryEdit(row)}
+                                  >
+                                    {canEdit ? (savingCharlaHistoryId === row.id ? 'Guardando...' : 'Guardar cambios') : '🔒 Solo lectura'}
+                                  </button>
+                                </div>
+                              </article>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </section>
                 ) : effectiveSelectedForm === 'historial' ? (
                   <section className="panel">
@@ -9168,7 +9474,8 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <section className="charla-card context">
                           <h4>Charla informativa · Planificación</h4>
                           <div className="charla-core-grid">
-                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => handleCharlaClienteIdChange(e.target.value)} type="text" placeholder="ID del servicio/proyecto" /></div>
+                            <div className="field"><label>Servicio (ID o nombre)</label><input value={charlaForm.servicioBusqueda} onChange={(e) => handleCharlaServicioLookupChange(e.target.value)} type="text" placeholder="Ej: 0123 o Torre Golf" /></div>
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => { setClienteIdAsociado(e.target.value); handleCharlaServicioLookupChange(e.target.value); }} type="text" placeholder="Se completa al reconocer el servicio" /></div>
                             <div className="field"><label>Nombre del servicio</label><input value={charlaForm.nombreServicio} onChange={(e) => setCharlaField('nombreServicio', e.target.value)} type="text" placeholder="Servicio a presentar" /></div>
                             <div className="field"><label>Estado automático</label><div className="charla-status-chip">{charlaAutoStatus}</div></div>
                           </div>
@@ -9208,7 +9515,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <div className="charla-summary-item"><small>Dirección</small><strong>{charlaForm.direccion || '-'}</strong></div>
                         </section>
 
-                        <section className="charla-card save"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></section>
+                        <section className="charla-card save"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Aceptar'}</button></section>
                       </div>
 ) : (
                       <div className="compact-grid">
