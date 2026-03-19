@@ -293,13 +293,13 @@
         gap: 10px;
       }
       .charla-history-kpi {
-        border: 1px solid rgba(255,255,255,.22);
+        border: 1px solid rgba(6, 101, 103, .4);
         border-radius: 12px;
         padding: 10px 12px;
-        background: rgba(255,255,255,.08);
+        background: rgba(4, 84, 86, .24);
       }
-      .charla-history-kpi small { display: block; color: #cde8e4; font-size: 12px; }
-      .charla-history-kpi strong { font-size: 1.2rem; color: #fff; }
+      .charla-history-kpi small { display: block; color: #d6f7f2; font-size: 12px; font-weight: 700; }
+      .charla-history-kpi strong { font-size: 1.2rem; color: #ffffff; text-shadow: 0 1px 0 rgba(0,0,0,.2); }
       .charla-history-toolbar {
         display: grid;
         grid-template-columns: 2fr 1fr;
@@ -310,13 +310,14 @@
         gap: 10px;
       }
       .charla-history-card {
-        border: 1px solid rgba(255,255,255,.22);
+        border: 1px solid rgba(6, 101, 103, .38);
         border-radius: 14px;
         padding: 12px;
-        background: rgba(255,255,255,.07);
+        background: rgba(4, 84, 86, .2);
         display: grid;
         gap: 10px;
       }
+      .charla-history-card strong { color: #ffffff; }
       .charla-history-top {
         display: flex;
         justify-content: space-between;
@@ -327,12 +328,13 @@
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
-        color: #d8efef;
+        color: #e8fffb;
         font-size: 12px;
+        font-weight: 600;
       }
       .charla-history-obs {
         font-size: 12px;
-        color: #dcf6f2;
+        color: #f2fffd;
         line-height: 1.45;
       }
       .charla-history-actions { display: flex; justify-content: flex-end; }
@@ -6086,13 +6088,14 @@
         const upcomingInstallationsSourcesRef = useRef({});
 
         const grupo = useMemo(() => {
-          if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
-          if (tipoAccion === 'Obra') return 'obra';
-          if (tipoAccion === 'Novación') return 'novacion';
-          if (tipoAccion === 'Solicitud de presupuesto') return 'agregado';
-          if (tipoAccion === 'Baja') return 'baja-detalle';
-          if (tipoAccion === 'Charla informativa') return 'charla-detalle';
-          if (tipoAccion === 'Movimiento de obra') return 'movimiento-detalle';
+          const actionLabel = String(tipoAccion || '').trim().toLowerCase();
+          if (actionLabel === 'nuevo servicio' && selectedForm === 'servicio') return 'servicio';
+          if (actionLabel === 'obra') return 'obra';
+          if (actionLabel === 'novación' || actionLabel === 'novacion') return 'novacion';
+          if (actionLabel === 'solicitud de presupuesto') return 'agregado';
+          if (actionLabel === 'baja') return 'baja-detalle';
+          if (actionLabel.includes('charla')) return 'charla-detalle';
+          if (actionLabel === 'movimiento de obra') return 'movimiento-detalle';
           return 'base';
         }, [tipoAccion, selectedForm]);
 
@@ -7326,7 +7329,7 @@
 
         function startEditService(service) {
           if (!canEditService(service)) return;
-          const action = service.tipoAccion || 'Nuevo Servicio';
+          const action = service.tipoAccion || (service.formulario === 'charla-informativa' ? 'Charla informativa' : 'Nuevo Servicio');
           setEditingServiceId(service.id || null);
           setSelectedService(service);
           setStatus(normalizeLegacyStatusName(service.status || service.estado || 'Pendiente'));
