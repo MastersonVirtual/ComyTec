@@ -6600,7 +6600,7 @@
 
       function App() {
         const [menuOpen, setMenuOpen] = useState(false);
-        const [openMenus, setOpenMenus] = useState({ operaciones: false, baseDatos: false });
+        const [openMenus, setOpenMenus] = useState({ operaciones: false, nuevo: false, baseDatos: false });
         const [user, setUser] = useState(null);
         const [authLoading, setAuthLoading] = useState(true);
         const [userRole, setUserRole] = useState('');
@@ -9346,17 +9346,25 @@
                 </div>
               </div>
               <div className="menu">
-                                <button className="menu-button" onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
+                <button className="menu-button" onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
                 {!isMobile && (
                   <>
-                                        <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: !p.operaciones, baseDatos: false }))}><span className="menu-icon">🗂️</span><span>Operaciones</span><span className="menu-arrow">{openMenus.operaciones ? '▾' : '▸'}</span></button>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: !p.operaciones, nuevo: false, baseDatos: false }))}><span className="menu-icon">🗂️</span><span>Operaciones</span><span className="menu-arrow">{openMenus.operaciones ? '▾' : '▸'}</span></button>
                     <div className={`submenu ${openMenus.operaciones ? 'open' : ''}`}>
-                      <button className="submenu-button" onClick={() => { selectAction('Nuevo Servicio'); closeSidebar(); }}>Nuevo</button>
+                      <button className="submenu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}><span>Nuevo</span><span className="menu-arrow">{openMenus.nuevo ? '▾' : '▸'}</span></button>
+                      <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
+                        <button className="submenu-button" onClick={() => { selectAction('Nuevo Servicio'); closeSidebar(); }}>Servicio</button>
+                        <button className="submenu-button" onClick={() => { selectAction('Novación'); closeSidebar(); }}>Novación</button>
+                        <button className="submenu-button" onClick={() => { selectAction('Movimiento de obra'); closeSidebar(); }}>Movimiento de obra</button>
+                        <button className="submenu-button" onClick={() => { selectAction('Baja'); closeSidebar(); }}>Baja de servicio</button>
+                        <button className="submenu-button" onClick={() => { selectAction('Charla informativa'); closeSidebar(); }}>Charla informativa</button>
+                        <button className="submenu-button" onClick={() => { selectAction('Solicitud de presupuesto'); closeSidebar(); }}>Solicitud de presupuesto</button>
+                      </div>
                       <button className="submenu-button" onClick={() => { setSelectedForm('home'); closeSidebar(); }}>Instalaciones</button>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Gestión de servicios</button>
                     </div>
                     <div className="sidebar-divider" />
-                                        <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: false, baseDatos: !p.baseDatos }))}><span className="menu-icon">📚</span><span>Base de datos</span><span className="menu-arrow">{openMenus.baseDatos ? '▾' : '▸'}</span></button>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: false, nuevo: false, baseDatos: !p.baseDatos }))}><span className="menu-icon">📚</span><span>Base de datos</span><span className="menu-arrow">{openMenus.baseDatos ? '▾' : '▸'}</span></button>
                     <div className={`submenu ${openMenus.baseDatos ? 'open' : ''}`}>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial-charlas'); closeSidebar(); }}>Historial de Charlas</button>
