@@ -4013,6 +4013,7 @@
         border-radius: 10px;
         margin-top: 6px;
         border: 1px solid rgba(255,255,255,.2);
+        cursor: zoom-in;
       }
       .staff-chat-file-link {
         margin-top: 8px;
@@ -9682,7 +9683,7 @@
                                       <div>{message.mensaje || '-'}</div>
                                       {Array.isArray(message.adjuntos) && message.adjuntos.map((adjunto) => {
                                         const mime = String(adjunto?.mimeType || '');
-                                        if (mime.startsWith('image/')) return <img key={adjunto.id || adjunto.nombre} className="staff-chat-media" src={adjunto.dataUrl} alt={adjunto.nombre || 'Imagen adjunta'} />;
+                                        if (mime.startsWith('image/')) return <img key={adjunto.id || adjunto.nombre} className="staff-chat-media" src={adjunto.dataUrl} alt={adjunto.nombre || 'Imagen adjunta'} onClick={() => openImageViewer(adjunto.dataUrl)} />;
                                         if (mime.startsWith('video/')) return <video key={adjunto.id || adjunto.nombre} className="staff-chat-media" src={adjunto.dataUrl} controls />;
                                         return <a key={adjunto.id || adjunto.nombre} className="staff-chat-file-link" href={adjunto.dataUrl} download={adjunto.nombre || 'archivo'}>📎 {adjunto.nombre || 'archivo adjunto'}</a>;
                                       })}
@@ -10763,7 +10764,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                               <div>{message.mensaje || '-'}</div>
                               {Array.isArray(message.adjuntos) && message.adjuntos.map((adjunto) => {
                                 const mime = String(adjunto?.mimeType || '');
-                                if (mime.startsWith('image/')) return <img key={adjunto.id || adjunto.nombre} className="staff-chat-media" src={adjunto.dataUrl} alt={adjunto.nombre || 'Imagen adjunta'} />;
+                                if (mime.startsWith('image/')) return <img key={adjunto.id || adjunto.nombre} className="staff-chat-media" src={adjunto.dataUrl} alt={adjunto.nombre || 'Imagen adjunta'} onClick={() => openImageViewer(adjunto.dataUrl)} />;
                                 if (mime.startsWith('video/')) return <video key={adjunto.id || adjunto.nombre} className="staff-chat-media" src={adjunto.dataUrl} controls />;
                                 return <a key={adjunto.id || adjunto.nombre} className="staff-chat-file-link" href={adjunto.dataUrl} download={adjunto.nombre || 'archivo'}>📎 {adjunto.nombre || 'archivo adjunto'}</a>;
                               })}
