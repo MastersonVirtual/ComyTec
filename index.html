@@ -4970,7 +4970,7 @@
       const auth = firebase.auth();
       const rtdb = typeof firebase.database === 'function' ? firebase.database() : null;
 
-      const ACCIONES = ['Nuevo Servicio', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa', 'Solicitud de presupuesto'];
+      const ACCIONES = ['Nuevo Servicio', 'Adicionales', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa'];
       const STATUS_OPTIONS = ['Pendiente', 'Presupuesto enviado', 'Aprobado', 'En agenda', 'En instalación', 'En progreso', 'Finalizado', 'Cancelado', 'En mantenimiento'];
       const SERVICE_TYPE_OPTIONS = ['Monitoreo', 'Portería virtual', 'Respuesta de alarma', 'Servicio Técnico', 'Control de acceso'];
 
@@ -5842,10 +5842,21 @@
 
       const agregadoInicial = {
         nombreServicio: '',
+        idServicio: '',
+        presupuestoTrabajoNombre: '',
+        presupuestoTrabajoUrl: '',
+        descripcionTrabajo: '',
+        observaciones: '',
+        responsableAdicionales: '',
+        quienAsumeCostos: '',
+        aclaracionCostoMasterson: '',
         administracion: '',
-        detalleAdicional: '',
         fechaAltaAdicional: '',
         importeFacturarCliente: '',
+        monedaFacturacion: 'Pesos',
+        referenteInstalacion: '',
+        telefonoReferente: '',
+        plazoInstalacion: '',
         facturado: 'No',
       };
 
@@ -6704,7 +6715,7 @@
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
           if (tipoAccion === 'Obra') return 'obra';
           if (tipoAccion === 'Novación') return 'novacion';
-          if (tipoAccion === 'Solicitud de presupuesto') return 'agregado';
+          if (tipoAccion === 'Adicionales' || tipoAccion === 'Solicitud de presupuesto') return 'agregado';
           if (tipoAccion === 'Baja') return 'baja-detalle';
           if (tipoAccion === 'Charla informativa') return 'charla-detalle';
           if (tipoAccion === 'Movimiento de obra') return 'movimiento-detalle';
@@ -6798,6 +6809,7 @@
             direccionServicio: fromRows.direccionServicio || '',
             tipoServicioBrindar: normalizeServiceType(fromRows.tipoServicioBrindar) || '',
             representanteComercial: fromRows.representanteComercial || '',
+            administracion: fromRows.administracion || '',
             atencionCliente: fromRows.atencionCliente || fromRows.bottiSeContactaCon || '',
           };
           return PRELOADED_SERVICES.find((s) => normalizeServiceId(s.numero) === target) || null;
@@ -7589,7 +7601,7 @@
           if (prevIds.size > 0) {
             const news = rows.filter((r) => !prevIds.has(r.id));
             if (news.length > 0) {
-              const relevant = news.filter((r) => ['Nuevo Servicio', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa', 'Solicitud de presupuesto', 'Obra'].includes(String(r.tipoAccion || '').trim()));
+              const relevant = news.filter((r) => ['Nuevo Servicio', 'Adicionales', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa', 'Solicitud de presupuesto', 'Obra'].includes(String(r.tipoAccion || '').trim()));
               if (relevant.length > 0) {
                 const alerts = relevant.map((r) => ({
                   id: `alert-${r.id}`,
@@ -8216,6 +8228,7 @@
 
         const ACTION_LABELS = {
           'Nuevo Servicio': 'Servicio',
+          'Adicionales': 'Adicionales',
           'Novación': 'Novación',
           'Movimiento de obra': 'Movimiento de obra',
           'Baja': 'Baja de servicio',
@@ -8232,7 +8245,7 @@
           return [
             {
               title: 'Nuevo',
-              items: ['Nuevo Servicio', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa', 'Solicitud de presupuesto'].filter(actionInRole).map(toItem),
+              items: ['Nuevo Servicio', 'Adicionales', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa'].filter(actionInRole).map(toItem),
             },
           ].filter((section) => section.items.length > 0);
         }, [mobileAllowedActions]);
@@ -8294,6 +8307,20 @@
         }, [currentUserName, isAdminUser, isSalesOrTechUser]);
 
         useEffect(() => {
+          if (grupo !== 'agregado') return;
+          const fromServiceId = String(clienteIdAsociado || agregadoForm.idServicio || '').trim();
+          if (!fromServiceId) return;
+          const catalog = getServiceCatalogById(fromServiceId);
+          if (!catalog) return;
+          setAgregadoForm((prev) => ({
+            ...prev,
+            idServicio: fromServiceId,
+            nombreServicio: prev.nombreServicio || catalog.nombreServicio || '',
+            administracion: prev.administracion || catalog.administracion || '',
+          }));
+        }, [grupo, clienteIdAsociado, agregadoForm.idServicio, rows]);
+
+        useEffect(() => {
           setHistoryPage(1);
         }, [historySearchTerm, historyStatusFilter, historyCommercialFilter]);
 
@@ -8308,7 +8335,7 @@
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
           setEditingServiceId(null);
           const stamp = formatUruguayDateTime();
-          setServicioForm({ ...servicioInicial, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: stamp }); setObraForm({ ...obraInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setNovacionForm({ ...novacionInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setAgregadoForm(agregadoInicial); setMovimientoForm(movimientoInicial); setBajaForm(bajaInicial); setCharlaForm(charlaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
+          setServicioForm({ ...servicioInicial, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: stamp }); setObraForm({ ...obraInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setNovacionForm({ ...novacionInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setAgregadoForm({ ...agregadoInicial, responsableAdicionales: currentUserName || '' }); setMovimientoForm(movimientoInicial); setBajaForm(bajaInicial); setCharlaForm(charlaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
         }
 
         function setServicioField(key, value) {
@@ -8383,6 +8410,17 @@
           setAgregadoForm((prev) => ({ ...prev, [key]: value }));
         }
 
+        function handleAgregadoFileUpload(file) {
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            setAgregadoForm((prev) => ({ ...prev, presupuestoTrabajoUrl: String(reader.result || ''), presupuestoTrabajoNombre: file.name || 'archivo-adicional' }));
+            setNotificacion({ mensaje: '✔ Archivo de adicionales cargado', tipo: 'ok' });
+          };
+          reader.onerror = () => setNotificacion({ mensaje: '✖ No se pudo leer el archivo', tipo: 'error' });
+          reader.readAsDataURL(file);
+        }
+
         function setMovimientoField(key, value) {
           setMovimientoForm((prev) => ({ ...prev, [key]: value }));
         }
@@ -8428,13 +8466,13 @@
           if (grupo === 'novacion') {
             setNovacionForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio, representanteComercial: catalog.representanteComercial || prev.representanteComercial, atencionCliente: catalog.atencionCliente || prev.atencionCliente }));
           }
-          if (grupo === 'agregado' || grupo === 'movimiento-detalle') {
+          if (grupo === 'agregado') {
             setAgregadoForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio }));
           }
           if (grupo === 'baja-detalle') {
             setBajaForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio, direccionServicio: catalog.direccionServicio || prev.direccionServicio }));
           }
-          if (grupo === 'movimiento-detalle' || grupo === 'agregado') {
+          if (grupo === 'movimiento-detalle') {
             setMovimientoForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio }));
           }
         }, [clienteIdAsociado, grupo, autoIdMode, rows]);
@@ -8484,6 +8522,9 @@
           if (['Nuevo Servicio', 'Novación'].includes(action)) {
             captureFormOpen(action);
             applyUserDefaultsToForms();
+          }
+          if (action === 'Adicionales') {
+            setAgregadoForm((prev) => ({ ...prev, responsableAdicionales: prev.responsableAdicionales || currentUserName || '' }));
           }
           closeSidebar();
         }
@@ -8535,13 +8576,13 @@
 
           const normalizedStatusToSave = normalizeLegacyStatusName(status);
           const normalizedClientId = normalizeServiceId(effectiveClienteId) || String(effectiveClienteId || '').trim();
-          const actionNeedsExistingService = ['Baja', 'Novación', 'Obra', 'Movimiento de obra', 'Charla informativa', 'Solicitud de presupuesto'].includes(tipoAccion);
+          const actionNeedsExistingService = ['Baja', 'Novación', 'Obra', 'Movimiento de obra', 'Charla informativa', 'Adicionales', 'Solicitud de presupuesto'].includes(tipoAccion);
 
           const doc = { tipoAccion, clienteId: normalizedClientId, status: normalizedStatusToSave, estado: normalizedStatusToSave };
 
           if (grupo === 'servicio') {
-            if (!servicioForm.nombreServicio || !servicioForm.razonSocial || !servicioForm.rut || !servicioForm.fechaAltaServicio) {
-              return alert('Completá al menos: Nombre del servicio, Razón social, RUT y Fecha de alta.');
+            if (!servicioForm.nombreServicio || !servicioForm.direccionServicio || !servicioForm.tipoServicioBrindar) {
+              return alert('Completá al menos: Nombre del servicio, Dirección y Tipo de servicio.');
             }
             Object.assign(doc, { ...servicioForm, formulario: 'nuevo-servicio-optimizado', creadoPor: servicioForm.creadoPor || currentUserName, auditoriaApertura: formOpenAudit });
           }
@@ -8557,9 +8598,9 @@
             }
             Object.assign(doc, { ...novacionForm, formulario: 'novacion', creadoPor: novacionForm.creadoPor || currentUserName, auditoriaApertura: formOpenAudit });
           }
-          if (grupo === 'agregado' || grupo === 'movimiento-detalle') {
+          if (grupo === 'agregado') {
             if (!agregadoForm.nombreServicio || !agregadoForm.fechaAltaAdicional) {
-              return alert('Completá al menos: Nombre del servicio y Fecha de alta del adicional.');
+              return alert('Completá al menos: Nombre del servicio y Fecha de alta de los adicionales.');
             }
             Object.assign(doc, { ...agregadoForm, formulario: 'agregado' });
           }
@@ -8567,7 +8608,7 @@
             if (!cliente || !fechaCarga) return alert('Completá Cliente y Fecha Carga.');
             Object.assign(doc, { cliente, fechaCarga, tiempoInstalacion, fechaAlta, cobro });
           }
-          if (grupo === 'movimiento-detalle' || grupo === 'agregado') {
+          if (grupo === 'movimiento-detalle') {
             if (!movimientoForm.nombreServicio || !movimientoForm.nombreSolicitante || !movimientoForm.fechaMovimiento) {
               return alert('Completá al menos: Nombre del servicio, Solicitante y Fecha del movimiento.');
             }
@@ -8628,7 +8669,7 @@
               }
               void logRealtimeActivityEvent({
                 usuario: currentUserName,
-                accion: tipoAccion === 'Baja' ? 'registró baja del servicio' : tipoAccion === 'Novación' ? 'registró novación del servicio' : tipoAccion === 'Obra' ? 'registró obra' : tipoAccion === 'Movimiento de obra' ? 'registró movimiento de obra' : tipoAccion === 'Charla informativa' ? 'registró charla informativa' : tipoAccion === 'Solicitud de presupuesto' ? 'registró solicitud de presupuesto' : 'modificó servicio',
+                accion: tipoAccion === 'Baja' ? 'registró baja del servicio' : tipoAccion === 'Novación' ? 'registró novación del servicio' : tipoAccion === 'Obra' ? 'registró obra' : tipoAccion === 'Movimiento de obra' ? 'registró movimiento de obra' : tipoAccion === 'Charla informativa' ? 'registró charla informativa' : (tipoAccion === 'Adicionales' || tipoAccion === 'Solicitud de presupuesto') ? 'registró adicionales' : 'modificó servicio',
                 clienteId: normalizedClientId,
               });
               return;
@@ -8753,11 +8794,11 @@
                 {mobileQuickMenuOpen && (
                   <div className="mobile-quick-menu">
                     <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Nuevo Servicio'); }}>Servicio</button>
+                    <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Adicionales'); }}>Adicionales</button>
                     <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Novación'); }}>Novación</button>
                     <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Movimiento de obra'); }}>Movimiento de obra</button>
                     <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Baja'); }}>Baja de servicio</button>
                     <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Charla informativa'); }}>Charla informativa</button>
-                    <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Solicitud de presupuesto'); }}>Solicitud de presupuesto</button>
                   </div>
                 )}
               </div>
@@ -8772,11 +8813,11 @@
                 <h3 className="mobile-section-title">Carga operativa</h3>
                 <div className="mobile-actions-grid">
                   <button type="button" className="mobile-action-btn" onClick={() => selectAction('Nuevo Servicio')}>Servicio</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Adicionales')}>Adicionales</button>
                   <button type="button" className="mobile-action-btn" onClick={() => selectAction('Novación')}>Novación</button>
                   <button type="button" className="mobile-action-btn" onClick={() => selectAction('Movimiento de obra')}>Movimiento de obra</button>
                   <button type="button" className="mobile-action-btn" onClick={() => selectAction('Baja')}>Baja de servicio</button>
                   <button type="button" className="mobile-action-btn" onClick={() => selectAction('Charla informativa')}>Charla informativa</button>
-                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Solicitud de presupuesto')}>Solicitud de presupuesto</button>
                 </div>
               </div>
             </section>
@@ -9354,11 +9395,11 @@
                       <button className="submenu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}><span>Nuevo</span><span className="menu-arrow">{openMenus.nuevo ? '▾' : '▸'}</span></button>
                       <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
                         <button className="submenu-button" onClick={() => { selectAction('Nuevo Servicio'); closeSidebar(); }}>Servicio</button>
+                        <button className="submenu-button" onClick={() => { selectAction('Adicionales'); closeSidebar(); }}>Adicionales</button>
                         <button className="submenu-button" onClick={() => { selectAction('Novación'); closeSidebar(); }}>Novación</button>
                         <button className="submenu-button" onClick={() => { selectAction('Movimiento de obra'); closeSidebar(); }}>Movimiento de obra</button>
                         <button className="submenu-button" onClick={() => { selectAction('Baja'); closeSidebar(); }}>Baja de servicio</button>
                         <button className="submenu-button" onClick={() => { selectAction('Charla informativa'); closeSidebar(); }}>Charla informativa</button>
-                        <button className="submenu-button" onClick={() => { selectAction('Solicitud de presupuesto'); closeSidebar(); }}>Solicitud de presupuesto</button>
                       </div>
                       <button className="submenu-button" onClick={() => { setSelectedForm('home'); closeSidebar(); }}>Instalaciones</button>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Gestión de servicios</button>
@@ -10380,7 +10421,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                 ) : (
                 <section className="panel">
                   <h2>Formulario Operativo · Gestión de Acciones</h2>
-                  <div className="hint">Nuevo incluye: Servicio, Novación, Movimiento de obra, Baja de servicio, Charla informativa y Solicitud de presupuesto.</div>
+                  <div className="hint">Nuevo incluye: Servicio, Adicionales, Novación, Movimiento de obra, Baja de servicio y Charla informativa.</div>
 
                   <form onSubmit={handleSubmit}>
                     {grupo === 'servicio' ? (
@@ -10652,9 +10693,9 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                     ) : grupo === 'agregado' ? (
                       <div className="service-layout">
                         <div className="service-card">
-                          <h3>Obra</h3>
+                          <h3>Adicionales</h3>
                           <div className="card-grid">
-                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => { setClienteIdAsociado(e.target.value); setAgregadoField('idServicio', e.target.value); }} type="text" placeholder="ID del servicio existente" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
@@ -10663,22 +10704,78 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <h3>1. Identificación del Servicio</h3>
                           <div className="card-grid">
                             <div className="field span-2"><label>Nombre de servicio</label><input value={agregadoForm.nombreServicio} onChange={(e) => setAgregadoField('nombreServicio', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Administración</label><input value={agregadoForm.administracion} onChange={(e) => setAgregadoField('administracion', e.target.value)} type="text" placeholder="Consorcio/empresa responsable" /></div>
+                            <div className="field"><label>ID del servicio</label><input value={agregadoForm.idServicio || ''} onChange={(e) => { setAgregadoField('idServicio', e.target.value); setClienteIdAsociado(e.target.value); }} type="text" placeholder="ID del servicio" /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>2. Detalles del Movimiento</h3>
+                          <h3>2. Información del Trabajo</h3>
                           <div className="card-grid">
-                            <div className="field span-3"><label>Detalles del adicional agregado</label><textarea value={agregadoForm.detalleAdicional} onChange={(e) => setAgregadoField('detalleAdicional', e.target.value)} placeholder="Qué se instaló: cámaras, sensores, controles, etc." /></div>
-                            <div className="field"><label>Fecha de alta</label><input value={agregadoForm.fechaAltaAdicional} onChange={(e) => setAgregadoField('fechaAltaAdicional', e.target.value)} type="date" /></div>
+                            <div className="field span-2"><label>Presupuesto del trabajo a realizar (archivo)</label><input type="file" onChange={(e) => handleAgregadoFileUpload(e.target.files?.[0])} /></div>
+                            {agregadoForm.presupuestoTrabajoNombre && <div className="field span-2"><label>Archivo cargado</label><input value={agregadoForm.presupuestoTrabajoNombre} readOnly type="text" /></div>}
+                            <div className="field span-3"><label>Descripción del trabajo</label><textarea value={agregadoForm.descripcionTrabajo || ''} onChange={(e) => setAgregadoField('descripcionTrabajo', e.target.value)} placeholder="Detallar en qué consiste el trabajo a realizar" /></div>
+                            <div className="field span-3"><label>Observaciones</label><textarea value={agregadoForm.observaciones || ''} onChange={(e) => setAgregadoField('observaciones', e.target.value)} placeholder="Observaciones relevantes para ejecutar la instalación" /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>3. Control Administrativo y Contable</h3>
+                          <h3>3. Responsables</h3>
                           <div className="card-grid">
-                            <div className="field span-2"><label>Importe a facturar por el adicional instalado</label><input value={agregadoForm.importeFacturarCliente} onChange={(e) => setAgregadoField('importeFacturarCliente', e.target.value)} type="text" placeholder="Monto acordado" /></div>
+                            <div className="field span-2">
+                              <label>Responsable de los adicionales acordados con el cliente</label>
+                              <select value={agregadoForm.responsableAdicionales || ''} onChange={(e) => setAgregadoField('responsableAdicionales', e.target.value)}>
+                                <option value="">Seleccionar...</option>
+                                <option value="Francisco Bartellone">Francisco Bartellone</option>
+                                <option value="Mariana Sposito">Mariana Sposito</option>
+                                <option value="María José Rivero">María José Rivero</option>
+                                <option value="David Genta">David Genta</option>
+                                <option value="Gonzalo Claudio">Gonzalo Claudio</option>
+                                <option value="Gastón Silva">Gastón Silva</option>
+                                <option value="Nicolás Leguizamón">Nicolás Leguizamón</option>
+                                <option value="Macarena Otero">Macarena Otero</option>
+                                <option value="Adrián Aguiar">Adrián Aguiar</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>4. Costos</h3>
+                          <div className="card-grid">
+                            <div className="field">
+                              <label>¿Quién asume los costos?</label>
+                              <select value={agregadoForm.quienAsumeCostos || ''} onChange={(e) => setAgregadoField('quienAsumeCostos', e.target.value)}>
+                                <option value="">Seleccionar...</option>
+                                <option value="Masterson">Masterson</option>
+                                <option value="Cliente">Cliente</option>
+                              </select>
+                            </div>
+                            <div className="field span-2"><label>Aclaración (solo si Masterson asume los costos)</label><input value={agregadoForm.aclaracionCostoMasterson || ''} onChange={(e) => setAgregadoField('aclaracionCostoMasterson', e.target.value)} type="text" placeholder="Motivo por el cual no se le cobra al cliente" /></div>
+                            <div className="field"><label>Importe a facturar al cliente</label><input value={agregadoForm.importeFacturarCliente} onChange={(e) => setAgregadoField('importeFacturarCliente', e.target.value)} type="number" min="0" placeholder="Monto" /></div>
+                            <div className="field"><label>Moneda</label><select value={agregadoForm.monedaFacturacion || 'Pesos'} onChange={(e) => setAgregadoField('monedaFacturacion', e.target.value)}><option value="Pesos">Pesos</option><option value="Dólares">Dólares</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>5. Administración</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Nombre de la administración del servicio</label><input value={agregadoForm.administracion} onChange={(e) => setAgregadoField('administracion', e.target.value)} type="text" placeholder="Se autocompleta por ID si existe" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>6. Referente de Instalación</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Nombre y apellido del referente</label><input value={agregadoForm.referenteInstalacion || ''} onChange={(e) => setAgregadoField('referenteInstalacion', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Teléfono del referente</label><input value={agregadoForm.telefonoReferente || ''} onChange={(e) => setAgregadoField('telefonoReferente', e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>7. Fechas y Plazos</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Fecha de alta de los adicionales</label><input value={agregadoForm.fechaAltaAdicional} onChange={(e) => setAgregadoField('fechaAltaAdicional', e.target.value)} type="date" /></div>
+                            <div className="field"><label>Plazo de instalación</label><input value={agregadoForm.plazoInstalacion || ''} onChange={(e) => setAgregadoField('plazoInstalacion', e.target.value)} type="text" placeholder="Días o fecha estimada de finalización" /></div>
                             <div className="field"><label>FACTURADO</label><select value={agregadoForm.facturado} onChange={(e) => setAgregadoField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
                           </div>
                         </div>
