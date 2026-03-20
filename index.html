@@ -1625,6 +1625,7 @@
       }
       .logout-btn:hover { background: rgba(127,29,29,.28); }
       .sidebar-signature {
+        position: relative;
         margin-top: 10px;
         text-align: center;
         font-size: 10px;
@@ -1632,9 +1633,40 @@
         color: rgba(230,255,253,.72);
       }
       .sidebar-signature strong {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(0, 14, 14, .42);
+        border: 1px solid rgba(0,251,255,.24);
         color: #00fbff;
         text-shadow: 0 0 8px rgba(0,251,255,.45);
         font-weight: 700;
+      }
+      .sidebar-signature-tooltip {
+        position: absolute;
+        left: 50%;
+        bottom: calc(100% + 12px);
+        transform: translateX(-50%) translateY(8px);
+        width: min(280px, 92vw);
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: rgba(3, 22, 22, .96);
+        border: 1px solid rgba(251, 146, 60, .35);
+        color: #e9fbf9;
+        font-size: 11px;
+        line-height: 1.45;
+        text-align: left;
+        box-shadow: 0 16px 34px rgba(0,0,0,.32);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--motion-fast) ease, transform var(--motion-fast) ease;
+      }
+      .sidebar-signature:hover .sidebar-signature-tooltip,
+      .sidebar-signature:focus-within .sidebar-signature-tooltip {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
       }
 
       .toast {
@@ -6096,7 +6128,7 @@
               </section>
             )}
 
-            <div className="app-footer" aria-label="signature"><strong>v1.0 | Powered by Alfonso Carballo</strong></div>
+            <div className="app-footer" aria-label="signature"><strong>v1.2 | Powered by Alfonso Carballo</strong></div>
           </div>
         );
       }
@@ -8591,7 +8623,7 @@
                 <button className="menu-button" onClick={openFuncionariosView}><span className="menu-icon">🧑‍💼</span><span>Funcionarios</span></button>
                 <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
-                <div className="sidebar-signature" aria-label="signature"><strong>v1.0 | Powered by Alfonso Carballo</strong></div>
+                <div className="sidebar-signature" aria-label="signature" tabIndex={0}><strong>v1.2 | Powered by Alfonso Carballo</strong><div className="sidebar-signature-tooltip">Actualización 1.2: se agregó la gestión de Funcionarios con listado por áreas, búsqueda rápida y chats internos persistidos en Firebase para que todos vean el historial compartido.</div></div>
               </div>
             </aside>
 
