@@ -3808,6 +3808,129 @@
         align-items: flex-end;
         gap: 10px;
       }
+      .staff-chat-compose-tools {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .staff-chat-tool-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        border: 1px solid rgba(126, 247, 223, .3);
+        background: rgba(8, 43, 41, .9);
+        color: #d8f8f3;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        cursor: pointer;
+      }
+      .staff-chat-tool-btn:hover { background: rgba(16, 77, 71, .94); }
+      .staff-chat-tool-btn svg {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+      }
+      .staff-chat-attachments {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .staff-chat-attachment-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        max-width: 100%;
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 11px;
+        border: 1px solid rgba(126, 247, 223, .3);
+        background: rgba(7, 57, 53, .72);
+      }
+      .staff-chat-attachment-chip button {
+        border: 0;
+        background: transparent;
+        color: #fff;
+        cursor: pointer;
+        padding: 0;
+        font-size: 12px;
+      }
+      .staff-chat-media {
+        display: block;
+        max-width: 220px;
+        border-radius: 10px;
+        margin-top: 6px;
+        border: 1px solid rgba(255,255,255,.2);
+      }
+      .staff-chat-file-link {
+        margin-top: 8px;
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        color: #c8fffb;
+        text-decoration: underline;
+      }
+      .staff-chat-head-actions {
+        margin-left: auto;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .staff-chat-menu {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        min-width: 210px;
+        z-index: 6;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,.18);
+        background: rgba(2, 24, 23, .98);
+        box-shadow: 0 14px 26px rgba(0,0,0,.28);
+        overflow: hidden;
+      }
+      .staff-chat-menu button {
+        width: 100%;
+        border: 0;
+        border-bottom: 1px solid rgba(255,255,255,.09);
+        border-radius: 0;
+        background: transparent;
+        color: #e8f8f6;
+        padding: 10px 12px;
+        text-align: left;
+        cursor: pointer;
+        font-size: 12px;
+      }
+      .staff-chat-menu button:last-child { border-bottom: 0; }
+      .staff-chat-menu button:hover { background: rgba(255,255,255,.08); }
+      .staff-chat-emoji-picker {
+        position: absolute;
+        left: 0;
+        bottom: calc(100% + 8px);
+        width: min(270px, 70vw);
+        max-height: 160px;
+        overflow: auto;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,.18);
+        background: rgba(2, 24, 23, .98);
+        box-shadow: 0 14px 26px rgba(0,0,0,.28);
+        padding: 8px;
+        display: grid;
+        grid-template-columns: repeat(8, minmax(0, 1fr));
+        gap: 6px;
+      }
+      .staff-chat-emoji-picker button {
+        width: 100%;
+        min-height: 28px;
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,.12);
+        background: rgba(255,255,255,.05);
+        cursor: pointer;
+        padding: 0;
+        font-size: 17px;
+      }
       .staff-pending-pill {
         display: inline-flex;
         align-items: center;
@@ -3865,9 +3988,9 @@
       }
       .staff-message-box {
         width: 100%;
-        min-height: 52px;
+        min-height: 88px;
         max-height: 132px;
-        resize: vertical;
+        resize: none;
         margin: 0;
         padding: 14px 16px;
         font-size: 13px;
@@ -4898,18 +5021,6 @@
         { id: 'portrait-28', label: 'Avatar 28', silhouette: 'neutral', skin: '#f1cbaa', palette: { bg: '#fefce8', body: '#ca8a04', hair: '#5a4735', accent: '#fde047', shirt: '#a16207', shadow: '#713f12' }, hairStyle: 'short-soft', accessory: 'earbuds' },
         { id: 'portrait-29', label: 'Avatar 29', silhouette: 'neutral', skin: '#a56b4a', palette: { bg: '#eff6ff', body: '#2563eb', hair: '#1f2937', accent: '#93c5fd', shirt: '#1d4ed8', shadow: '#1e3a8a' }, hairStyle: 'locs', accessory: 'scarf' },
         { id: 'portrait-30', label: 'Avatar 30', silhouette: 'neutral', skin: '#e2b496', palette: { bg: '#f0fdfa', body: '#0f766e', hair: '#433422', accent: '#99f6e4', shirt: '#115e59', shadow: '#134e4a' }, hairStyle: 'topknot', accessory: 'necklace' },
-        { id: 'portrait-31', label: 'Avatar 31', silhouette: 'feminine', skin: '#f3caae', palette: { bg: '#fff7ed', body: '#f97316', hair: '#5a2d1e', accent: '#fdba74', shirt: '#ea580c', shadow: '#9a3412' }, hairStyle: 'long-straight', accessory: 'hoop-earrings' },
-        { id: 'portrait-32', label: 'Avatar 32', silhouette: 'feminine', skin: '#cb936d', palette: { bg: '#fdf2f8', body: '#ec4899', hair: '#28151f', accent: '#f9a8d4', shirt: '#db2777', shadow: '#9d174d' }, hairStyle: 'wolfcut', accessory: 'star-pin' },
-        { id: 'portrait-33', label: 'Avatar 33', silhouette: 'feminine', skin: '#8c5d40', palette: { bg: '#eef2ff', body: '#6366f1', hair: '#16151f', accent: '#c7d2fe', shirt: '#4f46e5', shadow: '#312e81' }, hairStyle: 'hijab', accessory: 'none' },
-        { id: 'portrait-34', label: 'Avatar 34', silhouette: 'feminine', skin: '#e8bf9f', palette: { bg: '#ecfeff', body: '#06b6d4', hair: '#3a2d2a', accent: '#67e8f9', shirt: '#0891b2', shadow: '#155e75' }, hairStyle: 'pony', accessory: 'headset' },
-        { id: 'portrait-35', label: 'Avatar 35', silhouette: 'masculine', skin: '#f0c7a5', palette: { bg: '#f0fdf4', body: '#22c55e', hair: '#251d1a', accent: '#86efac', shirt: '#15803d', shadow: '#14532d' }, hairStyle: 'mohawk', accessory: 'piercing' },
-        { id: 'portrait-36', label: 'Avatar 36', silhouette: 'masculine', skin: '#a9714c', palette: { bg: '#eff6ff', body: '#3b82f6', hair: '#111827', accent: '#93c5fd', shirt: '#2563eb', shadow: '#1d4ed8' }, hairStyle: 'shaved', accessory: 'bowtie' },
-        { id: 'portrait-37', label: 'Avatar 37', silhouette: 'masculine', skin: '#d6a37e', palette: { bg: '#fefce8', body: '#eab308', hair: '#4b3621', accent: '#fde047', shirt: '#ca8a04', shadow: '#854d0e' }, hairStyle: 'undercut', accessory: 'cap' },
-        { id: 'portrait-38', label: 'Avatar 38', silhouette: 'masculine', skin: '#6f4632', palette: { bg: '#f5f3ff', body: '#8b5cf6', hair: '#15111f', accent: '#c4b5fd', shirt: '#7c3aed', shadow: '#5b21b6' }, hairStyle: 'locs', accessory: 'headset' },
-        { id: 'portrait-39', label: 'Avatar 39', silhouette: 'neutral', skin: '#efc8a8', palette: { bg: '#fff1f2', body: '#f43f5e', hair: '#3b1f24', accent: '#fda4af', shirt: '#e11d48', shadow: '#9f1239' }, hairStyle: 'long-straight', accessory: 'glasses' },
-        { id: 'portrait-40', label: 'Avatar 40', silhouette: 'neutral', skin: '#c38460', palette: { bg: '#f0fdfa', body: '#14b8a6', hair: '#2d2622', accent: '#99f6e4', shirt: '#0f766e', shadow: '#134e4a' }, hairStyle: 'curtain', accessory: 'cap' },
-        { id: 'portrait-41', label: 'Avatar 41', silhouette: 'neutral', skin: '#f4d0b8', palette: { bg: '#faf5ff', body: '#a855f7', hair: '#2a1e38', accent: '#e9d5ff', shirt: '#9333ea', shadow: '#6b21a8' }, hairStyle: 'wolfcut', accessory: 'necklace' },
-        { id: 'portrait-42', label: 'Avatar 42', silhouette: 'neutral', skin: '#936243', palette: { bg: '#fef2f2', body: '#ef4444', hair: '#1f1815', accent: '#fca5a5', shirt: '#dc2626', shadow: '#991b1b' }, hairStyle: 'afro', accessory: 'hoop-earrings' },
       ];
 
       function buildAvatarSvgDataUri({ palette = {}, silhouette = 'neutral', label = 'Avatar', skin = '#f3c7a5', hairStyle = 'layered', accessory = 'none' } = {}) {
@@ -4939,12 +5050,6 @@
           afro: `<circle cx="72" cy="45" r="29" fill="${hair}" stroke="#111827" stroke-width="4.5"/><path d="M46 56c6-9 15-13 26-13 12 0 21 4 27 13v15H46V56Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
           topknot: `<path d="M62 20c4-6 16-6 20 0-1 8-4 13-10 13s-9-5-10-13Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/><path d="M46 58c3-18 14-29 26-29 15 0 25 10 28 27v15H92v-9l-8-5-12 4-12-4-6 5v9h-8V58Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
           'short-soft': `<path d="M47 58c3-17 15-28 26-28 14 0 26 10 28 25v14h-8v-8l-9-4-12 3-11-3-6 4v8h-8V58Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
-          'long-straight': `<path d="M45 58c2-20 13-31 27-31 16 0 28 12 28 31v23l-8-10-20-6-19 6-8 10V58Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
-          wolfcut: `<path d="M46 57c4-18 15-29 27-29 14 0 25 8 28 24l-9-2-8 6-12-5-13 5-7-6-6 6v18l8-8 19-5 18 5 9 8V57Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
-          hijab: `<path d="M35 67c0-23 16-39 37-39 22 0 37 16 37 39v14H96l-7-16-17-7-17 7-7 16H35V67Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/><path d="M48 82c7 15 17 23 24 23s17-8 24-23" fill="none" stroke="${accent}" stroke-width="4" stroke-linecap="round"/>`,
-          mohawk: `<path d="M64 22h16l7 31H57l7-31Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/><path d="M49 57c4-15 13-23 23-23 13 0 22 7 24 21l2 14H46l3-12Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
-          shaved: `<path d="M50 58c3-13 12-21 22-21 12 0 21 7 24 19l3 13H47l3-11Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round" opacity=".92"/>`,
-          undercut: `<path d="M47 57c4-18 15-29 28-29 11 0 20 4 27 12-8 0-18 3-29 10l-18 12-8 3V57Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/><path d="M51 61c8-8 17-12 28-12 9 0 16 2 22 7v13H51V61Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
         };
         const accessoryMap = {
           earrings: `<circle cx="46" cy="77" r="3.8" fill="${accent}" stroke="#111827" stroke-width="2.5"/><circle cx="98" cy="77" r="3.8" fill="${accent}" stroke="#111827" stroke-width="2.5"/>`,
@@ -4955,12 +5060,6 @@
           beard: `<path d="M56 80c2 11 8 17 16 17s14-6 16-17c-6 6-26 6-32 0Z" fill="${hair}" stroke="#111827" stroke-width="3.5" stroke-linejoin="round"/>`,
           mustache: `<path d="M59 82c3 4 7 6 13 6 5 0 9-2 13-6" fill="none" stroke="#111827" stroke-width="4" stroke-linecap="round"/>`,
           earbuds: `<circle cx="46" cy="78" r="3" fill="#ffffff" stroke="#111827" stroke-width="2.2"/><circle cx="98" cy="78" r="3" fill="#ffffff" stroke="#111827" stroke-width="2.2"/><path d="M46 81c0 7 3 14 6 19M98 81c0 7-3 14-6 19" stroke="#111827" stroke-width="2.2" stroke-linecap="round"/>`,
-          headset: `<path d="M46 76c0-16 12-28 26-28s26 12 26 28" fill="none" stroke="#111827" stroke-width="4" stroke-linecap="round"/><rect x="40" y="74" width="8" height="18" rx="4" fill="${accent}" stroke="#111827" stroke-width="2.5"/><rect x="96" y="74" width="8" height="18" rx="4" fill="${accent}" stroke="#111827" stroke-width="2.5"/><path d="M98 88c5 0 9 2 11 5" fill="none" stroke="#111827" stroke-width="2.5" stroke-linecap="round"/>`,
-          cap: `<path d="M46 56c4-15 15-24 27-24 13 0 24 8 28 22-14-2-31 0-44 7l-10 5-1-10Z" fill="${accent}" stroke="#111827" stroke-width="4" stroke-linejoin="round"/><path d="M42 61c11-5 21-8 30-8 12 0 22 3 30 8" fill="none" stroke="#111827" stroke-width="4" stroke-linecap="round"/>`,
-          'star-pin': `<polygon points="94,50 97,57 105,57 99,62 101,70 94,65 87,70 89,62 83,57 91,57" fill="${accent}" stroke="#111827" stroke-width="2.4" stroke-linejoin="round"/>`,
-          'hoop-earrings': `<circle cx="46" cy="79" r="5" fill="none" stroke="${accent}" stroke-width="2.8"/><circle cx="98" cy="79" r="5" fill="none" stroke="${accent}" stroke-width="2.8"/>`,
-          bowtie: `<path d="M59 103 70 108 59 115 50 109Z" fill="${accent}" stroke="#111827" stroke-width="3" stroke-linejoin="round"/><path d="M85 103 74 108 85 115 94 109Z" fill="${accent}" stroke="#111827" stroke-width="3" stroke-linejoin="round"/><circle cx="72" cy="109" r="4" fill="#ffffff" stroke="#111827" stroke-width="2.6"/>`,
-          piercing: `<circle cx="88" cy="90" r="2.4" fill="${accent}" stroke="#111827" stroke-width="1.8"/>`,
           none: '',
         };
         const hairSvg = hairMap[hairStyle] || hairMap.layered;
@@ -4975,15 +5074,11 @@
             <path d="M61 95l11 14 11-14" fill="#ffffff" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>
             <path d="M72 90v18" stroke="#111827" stroke-width="4" stroke-linecap="round"/>
             <path d="${facePath}" fill="${skin}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>
-            <ellipse cx="58" cy="86" rx="4.5" ry="2.2" fill="rgba(255,255,255,.16)"/>
-            <ellipse cx="86" cy="86" rx="4.5" ry="2.2" fill="rgba(255,255,255,.16)"/>
-            <path d="M55 69c3-3 8-4 13-3M76 66c5-1 10 0 13 3" fill="none" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
             <path d="M61 73c3-2 7-3 11-2M72 71c4-1 8 0 11 2" fill="none" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
             <circle cx="61" cy="77" r="2.8" fill="#111827"/>
             <circle cx="83" cy="77" r="2.8" fill="#111827"/>
             <path d="M72 77v8" stroke="#111827" stroke-width="2.8" stroke-linecap="round"/>
             <path d="M64 91c3 3 13 3 16 0" fill="none" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
-            <path d="M57 96c4 8 10 12 15 12 6 0 11-4 15-12" fill="rgba(0,0,0,.06)" opacity=".32"/>
             ${hairSvg}
             ${accessorySvg}
             ${accessory === 'tie' ? '' : `<path d="M66 99h12l-2 8 3 11H65l3-11-2-8Z" fill="${accent}" stroke="#111827" stroke-width="4" stroke-linejoin="round"/>`}
@@ -6389,6 +6484,12 @@
         const [staffMessageDraft, setStaffMessageDraft] = useState({});
         const [sendingStaffMessageId, setSendingStaffMessageId] = useState('');
         const [activeChatMemberId, setActiveChatMemberId] = useState('');
+        const [chatMenuOpen, setChatMenuOpen] = useState(false);
+        const [chatEmojiPickerOpen, setChatEmojiPickerOpen] = useState(false);
+        const [chatPendingFlags, setChatPendingFlags] = useState({});
+        const [chatPinnedFlags, setChatPinnedFlags] = useState({});
+        const [chatReminderFlags, setChatReminderFlags] = useState({});
+        const [chatAttachmentDraft, setChatAttachmentDraft] = useState({});
         const [notificationStaffFilter, setNotificationStaffFilter] = useState('');
         const [chatSearchTerm, setChatSearchTerm] = useState('');
         const [internalMessages, setInternalMessages] = useState([]);
@@ -6413,6 +6514,9 @@
         const topServicesLeaderRef = useRef('');
         const topSalesLeaderRef = useRef('');
         const desktopBellRef = useRef(null);
+        const chatFileInputsRef = useRef({});
+        const chatMenuRef = useRef(null);
+        const chatEmojiPickerRef = useRef(null);
         const sellerFilterRef = useRef(null);
         const recentActivitySourcesRef = useRef({});
         const upcomingInstallationsSourcesRef = useRef({});
@@ -6471,6 +6575,15 @@
           const hh = String(date.getHours()).padStart(2, '0');
           const min = String(date.getMinutes()).padStart(2, '0');
           return `${dd}/${mm} ${hh}:${min}`;
+        }
+
+        function getChatTimestampMs(value) {
+          if (!value) return 0;
+          const date = typeof value?.toDate === 'function'
+            ? value.toDate()
+            : (typeof value?.seconds === 'number' ? new Date(value.seconds * 1000) : new Date(value));
+          if (!(date instanceof Date) || Number.isNaN(date.getTime())) return 0;
+          return date.getTime();
         }
 
         function getChatDisplayName(message, staffList = []) {
@@ -7640,6 +7753,35 @@
           return () => unsubs.forEach((unsub) => typeof unsub === 'function' && unsub());
         }, [user?.uid, user?.email]);
 
+        const chatSettingsStorageKey = useMemo(() => {
+          const identity = String(user?.uid || user?.email || '').trim().toLowerCase();
+          return identity ? `chat_settings_${identity}` : '';
+        }, [user?.uid, user?.email]);
+
+        useEffect(() => {
+          if (!chatSettingsStorageKey) return;
+          try {
+            const raw = localStorage.getItem(chatSettingsStorageKey);
+            if (!raw) return;
+            const parsed = JSON.parse(raw) || {};
+            setChatPendingFlags(parsed.pending || {});
+            setChatPinnedFlags(parsed.pinned || {});
+            setChatReminderFlags(parsed.reminders || {});
+          } catch (error) {
+            console.error('No se pudieron cargar preferencias de chat:', error);
+          }
+        }, [chatSettingsStorageKey]);
+
+        useEffect(() => {
+          if (!chatSettingsStorageKey) return;
+          const payload = {
+            pending: chatPendingFlags,
+            pinned: chatPinnedFlags,
+            reminders: chatReminderFlags,
+          };
+          localStorage.setItem(chatSettingsStorageKey, JSON.stringify(payload));
+        }, [chatSettingsStorageKey, chatPendingFlags, chatPinnedFlags, chatReminderFlags]);
+
         const isGerencia = userRole === 'gerentes';
         const isVendedor = userRole.includes('vendedor');
         const isTechnicalOnly = (/tecnic/.test(userRole) || userArea === 'tecnica') && !isVendedor && userRole !== 'admin';
@@ -7775,11 +7917,73 @@
         }, [chatSearchTerm, internalMessages]);
         const activeChatMember = useMemo(() => staffMembers.find((member) => member.id === activeChatMemberId) || null, [staffMembers, activeChatMemberId]);
         const activeChatMessages = useMemo(() => activeChatMember ? (staffConversations[activeChatMember.id] || []) : [], [activeChatMember, staffConversations]);
+        const pinnedStaffMembers = useMemo(() => staffMembers.filter((member) => !!chatPinnedFlags[member.id]), [staffMembers, chatPinnedFlags]);
+        const groupedStaffMembersWithoutPinned = useMemo(() => Object.entries(groupedStaffMembers).reduce((acc, [area, members]) => {
+          const next = members.filter((member) => !chatPinnedFlags[member.id]);
+          if (next.length > 0) acc[area] = next;
+          return acc;
+        }, {}), [groupedStaffMembers, chatPinnedFlags]);
+        const CHAT_EMOJIS = ['😀', '😄', '😁', '😅', '😂', '😊', '😍', '🤩', '😎', '🤔', '😮', '😴', '👍', '👏', '🙌', '🙏', '🔥', '💡', '📌', '✅', '❗', '🎉', '💬', '🤝'];
         const isTicketManager = String(user?.email || '').trim().toLowerCase() === 'alfonso332estigarribia@gmail.com';
         const isAdminUser = userRole === 'admin';
         const mobileUnreadAlerts = useMemo(() => mobileAlerts.filter((a) => !a.read).length, [mobileAlerts]);
         const adminPendingRequests = useMemo(() => adminCredentialRequests.filter((r) => r?.estado === 'pendiente'), [adminCredentialRequests]);
         const adminUnreadCount = useMemo(() => adminPendingRequests.filter((r) => !r?.leidaPorAdmin).length, [adminPendingRequests]);
+
+        useEffect(() => {
+          if (!user) return () => {};
+          const timers = [];
+          Object.entries(chatReminderFlags).forEach(([memberId, reminder]) => {
+            if (!reminder || reminder.notified || !reminder.setAt) return;
+            const messages = staffConversations[memberId] || [];
+            const wasAnswered = messages.some((message) => {
+              const senderIsMember = String(message?.remitenteUid || '') === String(staffMembers.find((m) => m.id === memberId)?.uid || '')
+                || String(message?.remitenteEmail || '').trim().toLowerCase() === String(staffMembers.find((m) => m.id === memberId)?.email || '').trim().toLowerCase();
+              return senderIsMember && getChatTimestampMs(message?.creadoEn) > Number(reminder.setAt || 0);
+            });
+            if (wasAnswered) {
+              setChatReminderFlags((prev) => ({ ...prev, [memberId]: { ...prev[memberId], answered: true, notified: true } }));
+              return;
+            }
+            const elapsed = Date.now() - Number(reminder.setAt || 0);
+            const remaining = Math.max(0, (3 * 60 * 60 * 1000) - elapsed);
+            timers.push(setTimeout(() => {
+              setChatReminderFlags((prev) => {
+                const current = prev[memberId];
+                if (!current || current.notified) return prev;
+                return { ...prev, [memberId]: { ...current, notified: true } };
+              });
+              setNotificacion({ mensaje: `⏰ Recordatorio: ${staffMembers.find((m) => m.id === memberId)?.nombre || 'el chat'} sigue sin responder.`, tipo: 'warn' });
+            }, remaining));
+          });
+          return () => timers.forEach((timerId) => clearTimeout(timerId));
+        }, [chatReminderFlags, staffConversations, staffMembers, user]);
+
+        useEffect(() => {
+          staffMembers.forEach((member) => {
+            const conversation = staffConversations[member.id] || [];
+            const last = conversation[conversation.length - 1];
+            if (!last) return;
+            const isIncoming = !((user?.uid && String(last?.remitenteUid || '') === String(user.uid)) || (user?.email && String(last?.remitenteEmail || '').trim().toLowerCase() === String(user.email).trim().toLowerCase()));
+            if (isIncoming && activeChatMemberId !== member.id) {
+              setChatPendingFlags((prev) => (prev[member.id] ? prev : { ...prev, [member.id]: true }));
+            }
+          });
+        }, [staffMembers, staffConversations, activeChatMemberId, user?.uid, user?.email]);
+
+        useEffect(() => {
+          if (!chatMenuOpen && !chatEmojiPickerOpen) return () => {};
+          function handleGlobalClick(event) {
+            if (chatMenuOpen && chatMenuRef.current && !chatMenuRef.current.contains(event.target)) {
+              setChatMenuOpen(false);
+            }
+            if (chatEmojiPickerOpen && chatEmojiPickerRef.current && !chatEmojiPickerRef.current.contains(event.target)) {
+              setChatEmojiPickerOpen(false);
+            }
+          }
+          document.addEventListener('mousedown', handleGlobalClick);
+          return () => document.removeEventListener('mousedown', handleGlobalClick);
+        }, [chatMenuOpen, chatEmojiPickerOpen]);
 
         useEffect(() => {
           if (!profileAvatarModalOpen) setPendingProfileAvatarId(profileAvatarId);
@@ -8441,6 +8645,65 @@
           setStaffMessageDraft((prev) => ({ ...prev, [staffId]: value }));
         }
 
+        function addEmojiToDraft(member, emoji) {
+          if (!member?.id || !emoji) return;
+          setStaffMessageDraft((prev) => ({ ...prev, [member.id]: `${String(prev[member.id] || '')}${emoji}` }));
+        }
+
+        function updateChatPendingFlag(memberId, value) {
+          setChatPendingFlags((prev) => ({ ...prev, [memberId]: value }));
+        }
+
+        function togglePinChat(memberId) {
+          setChatPinnedFlags((prev) => ({ ...prev, [memberId]: !prev[memberId] }));
+        }
+
+        function setReminderForChat(memberId) {
+          setChatReminderFlags((prev) => ({ ...prev, [memberId]: { setAt: Date.now(), notified: false, answered: false } }));
+          setNotificacion({ mensaje: '⏰ Recordatorio configurado para 3 horas (si no hay respuesta).', tipo: 'ok' });
+        }
+
+        async function parseChatFiles(fileList) {
+          const files = Array.from(fileList || []);
+          const mapped = await Promise.all(files.map((file) => new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve({
+              id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+              nombre: file.name || 'archivo',
+              mimeType: file.type || 'application/octet-stream',
+              dataUrl: String(reader.result || ''),
+            });
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(file);
+          })));
+          return mapped.filter(Boolean);
+        }
+
+        async function appendAttachmentsToDraft(memberId, files) {
+          const attachments = await parseChatFiles(files);
+          if (attachments.length === 0) return;
+          setChatAttachmentDraft((prev) => ({ ...prev, [memberId]: [...(prev[memberId] || []), ...attachments].slice(-6) }));
+        }
+
+        async function handleChatPaste(member, event) {
+          const files = Array.from(event.clipboardData?.items || [])
+            .filter((item) => item.kind === 'file')
+            .map((item) => item.getAsFile())
+            .filter(Boolean);
+          if (files.length === 0) return;
+          event.preventDefault();
+          await appendAttachmentsToDraft(member.id, files);
+        }
+
+        async function handleChatFileInput(member, event) {
+          await appendAttachmentsToDraft(member.id, event.target.files || []);
+          event.target.value = '';
+        }
+
+        function removeChatAttachment(memberId, attachmentId) {
+          setChatAttachmentDraft((prev) => ({ ...prev, [memberId]: (prev[memberId] || []).filter((item) => item.id !== attachmentId) }));
+        }
+
 
         function getStaffMemberFromMessage(message) {
           const email = String(message?.remitenteEmail || message?.destinatarioEmail || '').trim().toLowerCase();
@@ -8470,10 +8733,15 @@
         function openStaffChat(member) {
           if (!member?.id) return;
           setActiveChatMemberId(member.id);
+          updateChatPendingFlag(member.id, false);
+          setChatMenuOpen(false);
+          setChatEmojiPickerOpen(false);
         }
 
         function closeStaffChatModal() {
           setActiveChatMemberId('');
+          setChatMenuOpen(false);
+          setChatEmojiPickerOpen(false);
         }
 
         function openStaffNotifications(member) {
@@ -8515,8 +8783,9 @@
 
         async function handleSendStaffMessage(member) {
           const text = String(staffMessageDraft[member.id] || '').trim();
-          if (!text) {
-            setNotificacion({ mensaje: 'Escribí un mensaje para enviar al funcionario.', tipo: 'error' });
+          const attachments = chatAttachmentDraft[member.id] || [];
+          if (!text && attachments.length === 0) {
+            setNotificacion({ mensaje: 'Escribí un mensaje o adjuntá un archivo para enviar.', tipo: 'error' });
             return;
           }
           setSendingStaffMessageId(member.id);
@@ -8529,10 +8798,12 @@
               remitenteNombre: currentUserName,
               titulo: 'Chat interno',
               mensaje: text,
+              adjuntos: attachments,
               leida: false,
               creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
             });
             setStaffMessageDraft((prev) => ({ ...prev, [member.id]: '' }));
+            setChatAttachmentDraft((prev) => ({ ...prev, [member.id]: [] }));
             setNotificacion({ mensaje: `Mensaje enviado a ${member.nombre || member.email}.`, tipo: 'ok' });
           } catch (error) {
             console.error('Error enviando mensaje interno:', error);
@@ -9103,14 +9374,47 @@
                         </select>
                       </div>
                     </div>
-                    {Object.keys(groupedStaffMembers).length === 0 ? (
+                    {Object.keys(groupedStaffMembersWithoutPinned).length === 0 && pinnedStaffMembers.length === 0 ? (
                       <article className="profile-option">No se encontraron funcionarios para los filtros seleccionados.</article>
                     ) : (
-                      Object.entries(groupedStaffMembers).map(([area, members]) => (
-                        <section key={area} className="staff-group-section">
-                          <div className="staff-group-title">{area}</div>
-                          <div className="staff-card-grid">
-                            {members.map((member) => {
+                      <>
+                        {pinnedStaffMembers.length > 0 && (
+                          <section className="staff-group-section">
+                            <div className="staff-group-title">📍 Chats fijados</div>
+                            <div className="staff-card-grid">
+                              {pinnedStaffMembers.map((member) => {
+                                const avatar = PROFILE_AVATAR_OPTIONS.find((option) => option.id === member.avatarId) || PROFILE_AVATAR_OPTIONS[0];
+                                return (
+                                  <article key={`pinned-${member.id}`} className="staff-card">
+                                    <div className="staff-card-top">
+                                      <img className="staff-card-avatar" src={avatar.src} alt={`Perfil de ${member.nombre}`} />
+                                      <div>
+                                        <h3>{member.nombre || 'Funcionario'}</h3>
+                                        <div className="staff-card-role">{member.cargo || 'Cargo pendiente'}</div>
+                                      </div>
+                                    </div>
+                                    <div className="kv"><b>Email:</b> {member.email || '-'}</div>
+                                    <div className="staff-card-actions">
+                                      <button type="button" className="staff-toggle-btn" onClick={() => openStaffChat(member)}>
+                                        <span>💬</span>
+                                        <span>Abrir chat</span>
+                                      </button>
+                                      <button type="button" className="staff-toggle-btn" onClick={() => togglePinChat(member.id)}>
+                                        <span>📌</span>
+                                        <span>Desfijar</span>
+                                      </button>
+                                    </div>
+                                  </article>
+                                );
+                              })}
+                            </div>
+                          </section>
+                        )}
+                        {Object.entries(groupedStaffMembersWithoutPinned).map(([area, members]) => (
+                          <section key={area} className="staff-group-section">
+                            <div className="staff-group-title">{area}</div>
+                            <div className="staff-card-grid">
+                              {members.map((member) => {
                               const avatar = PROFILE_AVATAR_OPTIONS.find((option) => option.id === member.avatarId) || PROFILE_AVATAR_OPTIONS[0];
                               return (
                                 <article key={member.id} className="staff-card">
@@ -9132,15 +9436,16 @@
                                     <button type="button" className="staff-toggle-btn" onClick={() => openStaffNotifications(member)}>
                                       <span>🔔</span>
                                       <span>Notificaciones</span>
-                                      <span className="staff-pending-pill">{pendingMessagesByStaff[member.id] || 0}</span>
+                                      <span className="staff-pending-pill">{Math.max(pendingMessagesByStaff[member.id] || 0, chatPendingFlags[member.id] ? 1 : 0)}</span>
                                     </button>
                                   </div>
                                 </article>
                               );
-                            })}
-                          </div>
-                        </section>
-                      ))
+                              })}
+                            </div>
+                          </section>
+                        ))}
+                      </>
                     )}
                   </section>
 
@@ -10132,7 +10437,19 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <strong>{activeChatMember.nombre || 'Funcionario'}</strong>
                         <small>{getStaffPresenceLabel(activeChatMember)}</small>
                       </div>
-                      <button type="button" className="staff-chat-modal-close" onClick={closeStaffChatModal} aria-label="Cerrar chat">×</button>
+                      <div className="staff-chat-head-actions" ref={chatMenuRef}>
+                        <button type="button" className="staff-chat-tool-btn" onClick={() => setChatMenuOpen((prev) => !prev)} aria-label="Opciones del chat">⋮</button>
+                        {chatMenuOpen && (
+                          <div className="staff-chat-menu">
+                            <button type="button" onClick={() => { updateChatPendingFlag(activeChatMember.id, true); setChatMenuOpen(false); }}>📌 Marcar como no leído</button>
+                            <button type="button" onClick={() => { setReminderForChat(activeChatMember.id); setChatMenuOpen(false); }}>⏰ Recordar más tarde</button>
+                            <button type="button" onClick={() => { togglePinChat(activeChatMember.id); setChatMenuOpen(false); }}>
+                              {chatPinnedFlags[activeChatMember.id] ? '📍 Desfijar chat' : '📍 Fijar chat'}
+                            </button>
+                          </div>
+                        )}
+                        <button type="button" className="staff-chat-modal-close" onClick={closeStaffChatModal} aria-label="Cerrar chat">×</button>
+                      </div>
                     </div>
                     <div className="staff-chat-modal-body">
                       {activeChatMessages.length === 0 ? (
@@ -10147,14 +10464,51 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                                 <span>{formatChatTimestamp(message.creadoEn)}</span>
                               </div>
                               <div>{message.mensaje || '-'}</div>
+                              {Array.isArray(message.adjuntos) && message.adjuntos.map((adjunto) => {
+                                const mime = String(adjunto?.mimeType || '');
+                                if (mime.startsWith('image/')) return <img key={adjunto.id || adjunto.nombre} className="staff-chat-media" src={adjunto.dataUrl} alt={adjunto.nombre || 'Imagen adjunta'} />;
+                                if (mime.startsWith('video/')) return <video key={adjunto.id || adjunto.nombre} className="staff-chat-media" src={adjunto.dataUrl} controls />;
+                                return <a key={adjunto.id || adjunto.nombre} className="staff-chat-file-link" href={adjunto.dataUrl} download={adjunto.nombre || 'archivo'}>📎 {adjunto.nombre || 'archivo adjunto'}</a>;
+                              })}
                             </div>
                           );
                         })
                       )}
                     </div>
                     <div className="staff-chat-modal-compose">
+                      {(chatAttachmentDraft[activeChatMember.id] || []).length > 0 && (
+                        <div className="staff-chat-attachments">
+                          {(chatAttachmentDraft[activeChatMember.id] || []).map((attachment) => (
+                            <div key={attachment.id} className="staff-chat-attachment-chip">
+                              <span>{attachment.mimeType.startsWith('image/') ? '🖼️' : attachment.mimeType.startsWith('video/') ? '🎬' : '📄'} {attachment.nombre}</span>
+                              <button type="button" onClick={() => removeChatAttachment(activeChatMember.id, attachment.id)} aria-label="Quitar adjunto">✕</button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                       <div className="staff-chat-compose-row">
-                        <textarea className="staff-message-box" placeholder="Escribí tu mensaje..." value={staffMessageDraft[activeChatMember.id] || ''} onChange={(e) => updateStaffMessageDraft(activeChatMember.id, e.target.value)} />
+                        <div className="staff-chat-compose-tools">
+                          <button type="button" className="staff-chat-tool-btn" onClick={() => chatFileInputsRef.current[activeChatMember.id]?.click()} aria-label="Adjuntar archivo">📎</button>
+                          <input ref={(node) => { chatFileInputsRef.current[activeChatMember.id] = node; }} type="file" style={{ display: 'none' }} multiple onChange={(e) => handleChatFileInput(activeChatMember, e)} />
+                          <div style={{ position: 'relative' }} ref={chatEmojiPickerRef}>
+                            <button type="button" className="staff-chat-tool-btn" onClick={() => setChatEmojiPickerOpen((prev) => !prev)} aria-label="Abrir selector de emojis">
+                              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <circle cx="12" cy="12" r="9" strokeWidth="2" />
+                                <circle cx="9" cy="10" r="1" fill="currentColor" stroke="none" />
+                                <circle cx="15" cy="10" r="1" fill="currentColor" stroke="none" />
+                                <path d="M8 14c1 1.2 2.2 1.8 4 1.8s3-.6 4-1.8" strokeWidth="2" strokeLinecap="round" />
+                              </svg>
+                            </button>
+                            {chatEmojiPickerOpen && (
+                              <div className="staff-chat-emoji-picker">
+                                {CHAT_EMOJIS.map((emoji) => (
+                                  <button key={`emoji-${emoji}`} type="button" onClick={() => { addEmojiToDraft(activeChatMember, emoji); setChatEmojiPickerOpen(false); }}>{emoji}</button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <textarea className="staff-message-box" placeholder="Escribí tu mensaje..." value={staffMessageDraft[activeChatMember.id] || ''} onPaste={(e) => handleChatPaste(activeChatMember, e)} onChange={(e) => updateStaffMessageDraft(activeChatMember.id, e.target.value)} />
                         <button type="button" className="staff-chat-send-btn" disabled={sendingStaffMessageId === activeChatMember.id} onClick={() => handleSendStaffMessage(activeChatMember)} aria-label={sendingStaffMessageId === activeChatMember.id ? 'Enviando mensaje' : 'Enviar mensaje'} title={sendingStaffMessageId === activeChatMember.id ? 'Enviando...' : 'Enviar mensaje'}>
                           {sendingStaffMessageId === activeChatMember.id ? (
                             <span style={{ fontSize: 11, fontWeight: 800 }}>...</span>
