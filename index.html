@@ -5880,9 +5880,21 @@
 
       const movimientoInicial = {
         nombreServicio: '',
+        servicioIdSeleccionado: '',
+        fechaIngresoAuto: '',
         nombreSolicitante: '',
-        fechaMovimiento: '',
-        montoUsd: '',
+        solicitanteNombreCliente: '',
+        solicitanteTelefono: '',
+        costoUsd: '',
+        costoIvaTipo: 'Sin IVA',
+        motivoNoCobro: '',
+        autorizaNoCobro: '',
+        motivoMovimiento: '',
+        otroMotivoMovimiento: '',
+        canalSolicitud: '',
+        otroCanalSolicitud: '',
+        tipoAlarmaInstalada: '',
+        observaciones: '',
         facturado: 'No',
       };
 
@@ -8355,7 +8367,7 @@
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
           setEditingServiceId(null);
           const stamp = formatUruguayDateTime();
-          setServicioForm({ ...servicioInicial, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: stamp }); setObraForm({ ...obraInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setNovacionForm({ ...novacionInicial, representanteComercial: 'Francisco Bartellone', creadoPor: currentUserName }); setAgregadoForm({ ...agregadoInicial, responsableAdicionales: currentUserName || '' }); setMovimientoForm(movimientoInicial); setBajaForm(bajaInicial); setCharlaForm(charlaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
+          setServicioForm({ ...servicioInicial, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: stamp }); setObraForm({ ...obraInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setNovacionForm({ ...novacionInicial, representanteComercial: 'Francisco Bartellone', creadoPor: currentUserName }); setAgregadoForm({ ...agregadoInicial, responsableAdicionales: currentUserName || '' }); setMovimientoForm({ ...movimientoInicial, fechaIngresoAuto: stamp }); setBajaForm(bajaInicial); setCharlaForm(charlaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
         }
 
         function setServicioField(key, value) {
@@ -8656,8 +8668,15 @@
             Object.assign(doc, { cliente, fechaCarga, tiempoInstalacion, fechaAlta, cobro });
           }
           if (grupo === 'movimiento-detalle') {
-            if (!movimientoForm.nombreServicio || !movimientoForm.nombreSolicitante || !movimientoForm.fechaMovimiento) {
-              return alert('Completá al menos: Nombre del servicio, Solicitante y Fecha del movimiento.');
+            if (!movimientoForm.nombreServicio || !normalizedClientId) {
+              return alert('Seleccioná un servicio existente (ID) y verificá el nombre del servicio.');
+            }
+            if (!movimientoForm.nombreSolicitante || !movimientoForm.solicitanteNombreCliente || !movimientoForm.solicitanteTelefono) {
+              return alert('Completá: Quién lo solicita, Nombre del cliente y Teléfono.');
+            }
+            const costoNum = Number(movimientoForm.costoUsd || 0);
+            if (costoNum === 0 && (!movimientoForm.motivoNoCobro || !movimientoForm.autorizaNoCobro)) {
+              return alert('Si el costo es 0, debés completar Motivo por el cual no se cobra y Quién autoriza.');
             }
             Object.assign(doc, { ...movimientoForm, formulario: 'movimiento-obra' });
           }
@@ -10865,24 +10884,86 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>Movimiento de obra</h3>
                           <div className="card-grid">
-                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => { setClienteIdAsociado(e.target.value); setMovimientoField('servicioIdSeleccionado', e.target.value); }} type="text" placeholder="ID del servicio existente" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>1. Identificación de la Gestión</h3>
+                          <h3>1. Identificación del Servicio</h3>
                           <div className="card-grid">
-                            <div className="field span-2"><label>Nombre de servicio</label><input value={movimientoForm.nombreServicio} onChange={(e) => setMovimientoField('nombreServicio', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Nombre del solicitante</label><input value={movimientoForm.nombreSolicitante} onChange={(e) => setMovimientoField('nombreSolicitante', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Fecha del movimiento</label><input value={movimientoForm.fechaMovimiento} onChange={(e) => setMovimientoField('fechaMovimiento', e.target.value)} type="date" /></div>
+                            <div className="field span-2"><label>Nombre del servicio</label><input value={movimientoForm.nombreServicio} onChange={(e) => setMovimientoField('nombreServicio', e.target.value)} type="text" /></div>
+                            <div className="field">
+                              <label>ID del servicio (selector)</label>
+                              <select value={clienteIdAsociado || movimientoForm.servicioIdSeleccionado || ''} onChange={(e) => { setClienteIdAsociado(e.target.value); setMovimientoField('servicioIdSeleccionado', e.target.value); }}>
+                                <option value="">Seleccionar servicio...</option>
+                                {visibleRows.map((row) => (
+                                  <option key={`mov-id-${row.id}`} value={row.clienteId || ''}>
+                                    {(row.clienteId || '-') + ' · ' + (row.nombreServicio || 'Servicio sin nombre')}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>2. Liquidación y Cobro</h3>
+                          <h3>2. Fecha</h3>
                           <div className="card-grid">
-                            <div className="field"><label>Monto en dólares</label><input value={movimientoForm.montoUsd} onChange={(e) => setMovimientoField('montoUsd', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Fecha de ingreso (automática)</label><input value={movimientoForm.fechaIngresoAuto || ''} readOnly type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>3. Solicitud</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Quién lo solicita</label><input value={movimientoForm.nombreSolicitante} onChange={(e) => setMovimientoField('nombreSolicitante', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Nombre del cliente</label><input value={movimientoForm.solicitanteNombreCliente || ''} onChange={(e) => setMovimientoField('solicitanteNombreCliente', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Teléfono</label><input value={movimientoForm.solicitanteTelefono || ''} onChange={(e) => setMovimientoField('solicitanteTelefono', e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>4. Costos</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Costo (USD)</label><input value={movimientoForm.costoUsd || ''} onChange={(e) => setMovimientoField('costoUsd', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Tipo de IVA</label><select value={movimientoForm.costoIvaTipo || 'Sin IVA'} onChange={(e) => setMovimientoField('costoIvaTipo', e.target.value)}><option value="Con IVA">Con IVA</option><option value="Sin IVA">Sin IVA</option></select></div>
+                            {Number(movimientoForm.costoUsd || 0) === 0 && (
+                              <>
+                                <div className="field span-2"><label>Motivo por el cual no se cobra</label><input value={movimientoForm.motivoNoCobro || ''} onChange={(e) => setMovimientoField('motivoNoCobro', e.target.value)} type="text" /></div>
+                                <div className="field"><label>Indicar quién autoriza</label><input value={movimientoForm.autorizaNoCobro || ''} onChange={(e) => setMovimientoField('autorizaNoCobro', e.target.value)} type="text" /></div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>5. Motivo del Movimiento</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Motivo</label><select value={movimientoForm.motivoMovimiento || ''} onChange={(e) => setMovimientoField('motivoMovimiento', e.target.value)}><option value="">Seleccionar...</option><option value="Demolición">Demolición</option><option value="Reubicación">Reubicación</option><option value="Recableado">Recableado</option><option value="Otros">Otros</option></select></div>
+                            {movimientoForm.motivoMovimiento === 'Otros' && <div className="field span-2"><label>Detalle</label><input value={movimientoForm.otroMotivoMovimiento || ''} onChange={(e) => setMovimientoField('otroMotivoMovimiento', e.target.value)} type="text" /></div>}
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>6. Canal de Solicitud</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Solicitud formal recibida por</label><select value={movimientoForm.canalSolicitud || ''} onChange={(e) => setMovimientoField('canalSolicitud', e.target.value)}><option value="">Seleccionar...</option><option value="Mail">Mail</option><option value="Portería Virtual">Portería Virtual</option><option value="Comercial (Francisco o Mariana)">Comercial (Francisco o Mariana)</option><option value="Otros">Otros</option></select></div>
+                            {movimientoForm.canalSolicitud === 'Otros' && <div className="field span-2"><label>Detalle</label><input value={movimientoForm.otroCanalSolicitud || ''} onChange={(e) => setMovimientoField('otroCanalSolicitud', e.target.value)} type="text" /></div>}
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>7. Tipo de Alarma Instalada</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Tipo de alarma</label><select value={movimientoForm.tipoAlarmaInstalada || ''} onChange={(e) => setMovimientoField('tipoAlarmaInstalada', e.target.value)}><option value="">Seleccionar...</option><option value="Svideo">Svideo</option><option value="Botti">Botti</option><option value="Contratada por la obra">Contratada por la obra</option><option value="No tiene">No tiene</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>8. Observaciones</h3>
+                          <div className="card-grid">
+                            <div className="field span-3"><label>Comentarios adicionales</label><textarea value={movimientoForm.observaciones || ''} onChange={(e) => setMovimientoField('observaciones', e.target.value)} /></div>
                             <div className="field"><label>FACTURADO</label><select value={movimientoForm.facturado} onChange={(e) => setMovimientoField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
                           </div>
                         </div>
