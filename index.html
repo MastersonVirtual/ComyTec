@@ -4898,6 +4898,18 @@
         { id: 'portrait-28', label: 'Avatar 28', silhouette: 'neutral', skin: '#f1cbaa', palette: { bg: '#fefce8', body: '#ca8a04', hair: '#5a4735', accent: '#fde047', shirt: '#a16207', shadow: '#713f12' }, hairStyle: 'short-soft', accessory: 'earbuds' },
         { id: 'portrait-29', label: 'Avatar 29', silhouette: 'neutral', skin: '#a56b4a', palette: { bg: '#eff6ff', body: '#2563eb', hair: '#1f2937', accent: '#93c5fd', shirt: '#1d4ed8', shadow: '#1e3a8a' }, hairStyle: 'locs', accessory: 'scarf' },
         { id: 'portrait-30', label: 'Avatar 30', silhouette: 'neutral', skin: '#e2b496', palette: { bg: '#f0fdfa', body: '#0f766e', hair: '#433422', accent: '#99f6e4', shirt: '#115e59', shadow: '#134e4a' }, hairStyle: 'topknot', accessory: 'necklace' },
+        { id: 'portrait-31', label: 'Avatar 31', silhouette: 'feminine', skin: '#f3caae', palette: { bg: '#fff7ed', body: '#f97316', hair: '#5a2d1e', accent: '#fdba74', shirt: '#ea580c', shadow: '#9a3412' }, hairStyle: 'long-straight', accessory: 'hoop-earrings' },
+        { id: 'portrait-32', label: 'Avatar 32', silhouette: 'feminine', skin: '#cb936d', palette: { bg: '#fdf2f8', body: '#ec4899', hair: '#28151f', accent: '#f9a8d4', shirt: '#db2777', shadow: '#9d174d' }, hairStyle: 'wolfcut', accessory: 'star-pin' },
+        { id: 'portrait-33', label: 'Avatar 33', silhouette: 'feminine', skin: '#8c5d40', palette: { bg: '#eef2ff', body: '#6366f1', hair: '#16151f', accent: '#c7d2fe', shirt: '#4f46e5', shadow: '#312e81' }, hairStyle: 'hijab', accessory: 'none' },
+        { id: 'portrait-34', label: 'Avatar 34', silhouette: 'feminine', skin: '#e8bf9f', palette: { bg: '#ecfeff', body: '#06b6d4', hair: '#3a2d2a', accent: '#67e8f9', shirt: '#0891b2', shadow: '#155e75' }, hairStyle: 'pony', accessory: 'headset' },
+        { id: 'portrait-35', label: 'Avatar 35', silhouette: 'masculine', skin: '#f0c7a5', palette: { bg: '#f0fdf4', body: '#22c55e', hair: '#251d1a', accent: '#86efac', shirt: '#15803d', shadow: '#14532d' }, hairStyle: 'mohawk', accessory: 'piercing' },
+        { id: 'portrait-36', label: 'Avatar 36', silhouette: 'masculine', skin: '#a9714c', palette: { bg: '#eff6ff', body: '#3b82f6', hair: '#111827', accent: '#93c5fd', shirt: '#2563eb', shadow: '#1d4ed8' }, hairStyle: 'shaved', accessory: 'bowtie' },
+        { id: 'portrait-37', label: 'Avatar 37', silhouette: 'masculine', skin: '#d6a37e', palette: { bg: '#fefce8', body: '#eab308', hair: '#4b3621', accent: '#fde047', shirt: '#ca8a04', shadow: '#854d0e' }, hairStyle: 'undercut', accessory: 'cap' },
+        { id: 'portrait-38', label: 'Avatar 38', silhouette: 'masculine', skin: '#6f4632', palette: { bg: '#f5f3ff', body: '#8b5cf6', hair: '#15111f', accent: '#c4b5fd', shirt: '#7c3aed', shadow: '#5b21b6' }, hairStyle: 'locs', accessory: 'headset' },
+        { id: 'portrait-39', label: 'Avatar 39', silhouette: 'neutral', skin: '#efc8a8', palette: { bg: '#fff1f2', body: '#f43f5e', hair: '#3b1f24', accent: '#fda4af', shirt: '#e11d48', shadow: '#9f1239' }, hairStyle: 'long-straight', accessory: 'glasses' },
+        { id: 'portrait-40', label: 'Avatar 40', silhouette: 'neutral', skin: '#c38460', palette: { bg: '#f0fdfa', body: '#14b8a6', hair: '#2d2622', accent: '#99f6e4', shirt: '#0f766e', shadow: '#134e4a' }, hairStyle: 'curtain', accessory: 'cap' },
+        { id: 'portrait-41', label: 'Avatar 41', silhouette: 'neutral', skin: '#f4d0b8', palette: { bg: '#faf5ff', body: '#a855f7', hair: '#2a1e38', accent: '#e9d5ff', shirt: '#9333ea', shadow: '#6b21a8' }, hairStyle: 'wolfcut', accessory: 'necklace' },
+        { id: 'portrait-42', label: 'Avatar 42', silhouette: 'neutral', skin: '#936243', palette: { bg: '#fef2f2', body: '#ef4444', hair: '#1f1815', accent: '#fca5a5', shirt: '#dc2626', shadow: '#991b1b' }, hairStyle: 'afro', accessory: 'hoop-earrings' },
       ];
 
       function buildAvatarSvgDataUri({ palette = {}, silhouette = 'neutral', label = 'Avatar', skin = '#f3c7a5', hairStyle = 'layered', accessory = 'none' } = {}) {
@@ -4927,6 +4939,12 @@
           afro: `<circle cx="72" cy="45" r="29" fill="${hair}" stroke="#111827" stroke-width="4.5"/><path d="M46 56c6-9 15-13 26-13 12 0 21 4 27 13v15H46V56Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
           topknot: `<path d="M62 20c4-6 16-6 20 0-1 8-4 13-10 13s-9-5-10-13Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/><path d="M46 58c3-18 14-29 26-29 15 0 25 10 28 27v15H92v-9l-8-5-12 4-12-4-6 5v9h-8V58Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
           'short-soft': `<path d="M47 58c3-17 15-28 26-28 14 0 26 10 28 25v14h-8v-8l-9-4-12 3-11-3-6 4v8h-8V58Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
+          'long-straight': `<path d="M45 58c2-20 13-31 27-31 16 0 28 12 28 31v23l-8-10-20-6-19 6-8 10V58Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
+          wolfcut: `<path d="M46 57c4-18 15-29 27-29 14 0 25 8 28 24l-9-2-8 6-12-5-13 5-7-6-6 6v18l8-8 19-5 18 5 9 8V57Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
+          hijab: `<path d="M35 67c0-23 16-39 37-39 22 0 37 16 37 39v14H96l-7-16-17-7-17 7-7 16H35V67Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/><path d="M48 82c7 15 17 23 24 23s17-8 24-23" fill="none" stroke="${accent}" stroke-width="4" stroke-linecap="round"/>`,
+          mohawk: `<path d="M64 22h16l7 31H57l7-31Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/><path d="M49 57c4-15 13-23 23-23 13 0 22 7 24 21l2 14H46l3-12Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
+          shaved: `<path d="M50 58c3-13 12-21 22-21 12 0 21 7 24 19l3 13H47l3-11Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round" opacity=".92"/>`,
+          undercut: `<path d="M47 57c4-18 15-29 28-29 11 0 20 4 27 12-8 0-18 3-29 10l-18 12-8 3V57Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/><path d="M51 61c8-8 17-12 28-12 9 0 16 2 22 7v13H51V61Z" fill="${hair}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>`,
         };
         const accessoryMap = {
           earrings: `<circle cx="46" cy="77" r="3.8" fill="${accent}" stroke="#111827" stroke-width="2.5"/><circle cx="98" cy="77" r="3.8" fill="${accent}" stroke="#111827" stroke-width="2.5"/>`,
@@ -4937,6 +4955,12 @@
           beard: `<path d="M56 80c2 11 8 17 16 17s14-6 16-17c-6 6-26 6-32 0Z" fill="${hair}" stroke="#111827" stroke-width="3.5" stroke-linejoin="round"/>`,
           mustache: `<path d="M59 82c3 4 7 6 13 6 5 0 9-2 13-6" fill="none" stroke="#111827" stroke-width="4" stroke-linecap="round"/>`,
           earbuds: `<circle cx="46" cy="78" r="3" fill="#ffffff" stroke="#111827" stroke-width="2.2"/><circle cx="98" cy="78" r="3" fill="#ffffff" stroke="#111827" stroke-width="2.2"/><path d="M46 81c0 7 3 14 6 19M98 81c0 7-3 14-6 19" stroke="#111827" stroke-width="2.2" stroke-linecap="round"/>`,
+          headset: `<path d="M46 76c0-16 12-28 26-28s26 12 26 28" fill="none" stroke="#111827" stroke-width="4" stroke-linecap="round"/><rect x="40" y="74" width="8" height="18" rx="4" fill="${accent}" stroke="#111827" stroke-width="2.5"/><rect x="96" y="74" width="8" height="18" rx="4" fill="${accent}" stroke="#111827" stroke-width="2.5"/><path d="M98 88c5 0 9 2 11 5" fill="none" stroke="#111827" stroke-width="2.5" stroke-linecap="round"/>`,
+          cap: `<path d="M46 56c4-15 15-24 27-24 13 0 24 8 28 22-14-2-31 0-44 7l-10 5-1-10Z" fill="${accent}" stroke="#111827" stroke-width="4" stroke-linejoin="round"/><path d="M42 61c11-5 21-8 30-8 12 0 22 3 30 8" fill="none" stroke="#111827" stroke-width="4" stroke-linecap="round"/>`,
+          'star-pin': `<polygon points="94,50 97,57 105,57 99,62 101,70 94,65 87,70 89,62 83,57 91,57" fill="${accent}" stroke="#111827" stroke-width="2.4" stroke-linejoin="round"/>`,
+          'hoop-earrings': `<circle cx="46" cy="79" r="5" fill="none" stroke="${accent}" stroke-width="2.8"/><circle cx="98" cy="79" r="5" fill="none" stroke="${accent}" stroke-width="2.8"/>`,
+          bowtie: `<path d="M59 103 70 108 59 115 50 109Z" fill="${accent}" stroke="#111827" stroke-width="3" stroke-linejoin="round"/><path d="M85 103 74 108 85 115 94 109Z" fill="${accent}" stroke="#111827" stroke-width="3" stroke-linejoin="round"/><circle cx="72" cy="109" r="4" fill="#ffffff" stroke="#111827" stroke-width="2.6"/>`,
+          piercing: `<circle cx="88" cy="90" r="2.4" fill="${accent}" stroke="#111827" stroke-width="1.8"/>`,
           none: '',
         };
         const hairSvg = hairMap[hairStyle] || hairMap.layered;
@@ -4951,11 +4975,15 @@
             <path d="M61 95l11 14 11-14" fill="#ffffff" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>
             <path d="M72 90v18" stroke="#111827" stroke-width="4" stroke-linecap="round"/>
             <path d="${facePath}" fill="${skin}" stroke="#111827" stroke-width="4.5" stroke-linejoin="round"/>
+            <ellipse cx="58" cy="86" rx="4.5" ry="2.2" fill="rgba(255,255,255,.16)"/>
+            <ellipse cx="86" cy="86" rx="4.5" ry="2.2" fill="rgba(255,255,255,.16)"/>
+            <path d="M55 69c3-3 8-4 13-3M76 66c5-1 10 0 13 3" fill="none" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
             <path d="M61 73c3-2 7-3 11-2M72 71c4-1 8 0 11 2" fill="none" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
             <circle cx="61" cy="77" r="2.8" fill="#111827"/>
             <circle cx="83" cy="77" r="2.8" fill="#111827"/>
             <path d="M72 77v8" stroke="#111827" stroke-width="2.8" stroke-linecap="round"/>
             <path d="M64 91c3 3 13 3 16 0" fill="none" stroke="#111827" stroke-width="3" stroke-linecap="round"/>
+            <path d="M57 96c4 8 10 12 15 12 6 0 11-4 15-12" fill="rgba(0,0,0,.06)" opacity=".32"/>
             ${hairSvg}
             ${accessorySvg}
             ${accessory === 'tie' ? '' : `<path d="M66 99h12l-2 8 3 11H65l3-11-2-8Z" fill="${accent}" stroke="#111827" stroke-width="4" stroke-linejoin="round"/>`}
