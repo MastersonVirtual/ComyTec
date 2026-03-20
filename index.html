@@ -3632,6 +3632,85 @@
         color: #4a6568;
         font-size: .95rem;
       }
+      .profile-main-card.has-background {
+        position: relative;
+        overflow: hidden;
+        background-size: cover !important;
+        background-position: center !important;
+        border: 1px solid rgba(255,255,255,.38);
+      }
+      .profile-main-card.has-background::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(3, 24, 24, .1), rgba(3, 24, 24, .34));
+        pointer-events: none;
+      }
+      .profile-main-card.has-background > * {
+        position: relative;
+        z-index: 1;
+      }
+      .profile-main-card.has-background .profile-identity-title,
+      .profile-main-card.has-background .profile-identity-sub {
+        color: #ffffff;
+        text-shadow: 0 4px 18px rgba(0,0,0,.28);
+      }
+      .profile-background-controls {
+        display: grid;
+        gap: 12px;
+      }
+      .profile-background-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .profile-background-preview-shell {
+        position: relative;
+        min-height: 210px;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid rgba(11, 78, 73, .18);
+        background: linear-gradient(180deg, #eff7f7 0%, #dbeaea 100%);
+      }
+      .profile-background-preview {
+        width: 100%;
+        height: 100%;
+        min-height: 210px;
+        object-fit: cover;
+        display: block;
+      }
+      .profile-background-empty {
+        min-height: 210px;
+        display: grid;
+        place-items: center;
+        padding: 20px;
+        text-align: center;
+        color: #406265;
+        background: linear-gradient(145deg, rgba(221,240,239,.92), rgba(240,248,247,.96));
+      }
+      .profile-background-loader {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        gap: 10px;
+        background: rgba(3, 24, 24, .44);
+        color: #ffffff;
+        font-weight: 700;
+      }
+      .profile-background-spinner {
+        width: 42px;
+        height: 42px;
+        border-radius: 999px;
+        border: 4px solid rgba(255,255,255,.22);
+        border-top-color: #ffffff;
+        border-right-color: #97f3e7;
+        animation: spin .95s linear infinite;
+      }
+      .profile-background-input {
+        display: none;
+      }
       .profile-view > h2 {
         color: #ff8c00 !important;
       }
@@ -3674,6 +3753,20 @@
         align-items: center;
         gap: 10px;
         margin-bottom: 10px;
+      }
+      .staff-card-top.with-cover {
+        align-items: flex-end;
+        min-height: 92px;
+        margin: -12px -12px 10px;
+        padding: 12px;
+        border-radius: 16px 16px 12px 12px;
+        background-size: cover;
+        background-position: center;
+      }
+      .staff-card-top.with-cover h3,
+      .staff-card-top.with-cover .staff-card-role {
+        color: #ffffff;
+        text-shadow: 0 4px 18px rgba(0,0,0,.32);
       }
       .staff-card-top h3 { margin: 0 0 2px; font-size: 15px; }
       .staff-card-avatar {
@@ -3750,7 +3843,7 @@
         padding: clamp(84px, 10vh, 108px) 18px 18px;
       }
       .staff-chat-modal {
-        width: min(100%, 470px);
+        width: min(470px, calc(100vw - 36px));
         max-height: min(calc(100vh - 120px), 760px);
         display: flex;
         flex-direction: column;
@@ -3769,6 +3862,10 @@
         padding: 14px 16px;
         background: rgba(255,255,255,.08);
         border-bottom: 1px solid rgba(255,255,255,.12);
+      }
+      .staff-chat-modal-head.with-cover {
+        background-size: cover;
+        background-position: center;
       }
       .staff-chat-modal-avatar {
         width: 48px;
@@ -3914,45 +4011,12 @@
         height: 20px;
         stroke: currentColor;
       }
-      @media (max-width: 1280px), (max-height: 860px) {
-        .staff-chat-modal-overlay {
-          padding-top: clamp(92px, 14vh, 132px);
-        }
-        .staff-chat-modal {
-          width: min(100%, 430px);
-          max-height: calc(100vh - 136px);
-          border-radius: 22px;
-        }
-        .staff-chat-modal-head {
-          padding: 12px 14px;
-          gap: 10px;
-        }
-        .staff-chat-modal-avatar {
-          width: 42px;
-          height: 42px;
-          border-radius: 14px;
-        }
-        .staff-chat-modal-close {
-          width: 34px;
-          height: 34px;
-        }
-        .staff-chat-modal-body {
-          padding: 12px;
-        }
-        .staff-chat-modal-compose {
-          padding: 12px;
-        }
-        .staff-chat-bubble {
-          max-width: 84%;
-          padding: 9px 11px;
-        }
-      }
-      @media (max-width: 720px), (max-height: 720px) {
+      @media (max-width: 560px), (max-height: 720px) {
         .staff-chat-modal-overlay {
           padding: clamp(82px, 12vh, 110px) 10px 10px;
         }
         .staff-chat-modal {
-          width: min(100%, 100vw - 20px);
+          width: min(470px, calc(100vw - 20px));
           max-height: calc(100vh - 100px);
           border-radius: 18px;
         }
@@ -4702,6 +4766,7 @@
       if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
       const db = firebase.firestore();
       const auth = firebase.auth();
+      const storage = typeof firebase.storage === 'function' ? firebase.storage() : null;
       const rtdb = typeof firebase.database === 'function' ? firebase.database() : null;
 
       const ACCIONES = ['Nuevo Servicio', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa', 'Solicitud de presupuesto'];
@@ -6339,7 +6404,7 @@
         const [authLoading, setAuthLoading] = useState(true);
         const [userRole, setUserRole] = useState('');
         const [userArea, setUserArea] = useState('');
-        const [userData, setUserData] = useState({ nombre: '', rol: '', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
+        const [userData, setUserData] = useState({ nombre: '', rol: '', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID, backgroundImage: '' });
         const [roleLoading, setRoleLoading] = useState(true);
         const [notificacion, setNotificacion] = useState({ mensaje: '', tipo: '' });
 
@@ -6419,6 +6484,7 @@
         const topSalesLeaderRef = useRef('');
         const desktopBellRef = useRef(null);
         const sellerFilterRef = useRef(null);
+        const backgroundFileInputRef = useRef(null);
         const recentActivitySourcesRef = useRef({});
         const upcomingInstallationsSourcesRef = useRef({});
 
@@ -6457,6 +6523,20 @@
 
         function formatStaffPhone(value) {
           return String(value || '').trim() || 'Sin teléfono';
+        }
+
+        function normalizeProfileLookupKey(value) {
+          return String(value || '').trim().toLowerCase();
+        }
+
+        function resolveBackgroundImageForEntity(entity, backgroundMap = userBackgrounds) {
+          const lookupKeys = [entity?.uid, entity?.email, entity?.id]
+            .map((value) => normalizeProfileLookupKey(value))
+            .filter(Boolean);
+          for (const key of lookupKeys) {
+            if (backgroundMap[key]) return backgroundMap[key];
+          }
+          return '';
         }
 
         function buildInternalNotificationMessage(item) {
@@ -6553,6 +6633,10 @@
         const [savingProfileAvatar, setSavingProfileAvatar] = useState(false);
         const [profileAvatarModalOpen, setProfileAvatarModalOpen] = useState(false);
         const [pendingProfileAvatarId, setPendingProfileAvatarId] = useState(DEFAULT_PROFILE_AVATAR_ID);
+        const [userBackgrounds, setUserBackgrounds] = useState({});
+        const [backgroundUploading, setBackgroundUploading] = useState(false);
+        const [backgroundUploadPreview, setBackgroundUploadPreview] = useState('');
+        const [backgroundInputResetKey, setBackgroundInputResetKey] = useState(0);
         const [recentActivity, setRecentActivity] = useState([]);
         const [upcomingInstallations, setUpcomingInstallations] = useState([]);
         const [catalogSyncing, setCatalogSyncing] = useState(false);
@@ -7247,6 +7331,70 @@
           if (saved) setProfileAvatarModalOpen(false);
         }
 
+        function openBackgroundFilePicker() {
+          if (backgroundUploading) return;
+          backgroundFileInputRef.current?.click();
+        }
+
+        async function handleBackgroundImageSelection(file) {
+          if (!file) return;
+          if (!user) {
+            setNotificacion({ mensaje: 'Necesitás iniciar sesión para cambiar el fondo.', tipo: 'error' });
+            return;
+          }
+          if (!storage) {
+            setNotificacion({ mensaje: 'Firebase Storage no está disponible en esta sesión.', tipo: 'error' });
+            return;
+          }
+          if (!String(file.type || '').startsWith('image/')) {
+            setNotificacion({ mensaje: 'Seleccioná una imagen válida para el fondo.', tipo: 'error' });
+            return;
+          }
+          if (file.size > 8 * 1024 * 1024) {
+            setNotificacion({ mensaje: 'La imagen supera el límite de 8MB.', tipo: 'error' });
+            return;
+          }
+          try {
+            const previewUrl = await new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(String(reader.result || ''));
+              reader.onerror = () => reject(new Error('No se pudo leer la imagen seleccionada.'));
+              reader.readAsDataURL(file);
+            });
+            setBackgroundUploadPreview(previewUrl);
+            setBackgroundUploading(true);
+            const ownerDocId = String(user.uid || user.email || '').trim();
+            const safeName = String(file.name || 'background').replace(/[^a-z0-9._-]/gi, '_');
+            const storageRef = storage.ref().child(`users/${ownerDocId}/backgrounds/${Date.now()}_${safeName}`);
+            const snapshot = await storageRef.put(file, { contentType: file.type || 'image/jpeg' });
+            const downloadURL = await snapshot.ref.getDownloadURL();
+            await db.collection('users').doc(ownerDocId).set({
+              uid: user.uid || '',
+              email: String(user.email || '').trim().toLowerCase(),
+              backgroundImage: downloadURL,
+              updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            }, { merge: true });
+            setUserData((prev) => ({ ...prev, backgroundImage: downloadURL }));
+            setUserBackgrounds((prev) => {
+              const next = { ...prev };
+              [ownerDocId, user.uid, user.email].forEach((value) => {
+                const key = normalizeProfileLookupKey(value);
+                if (key) next[key] = downloadURL;
+              });
+              return next;
+            });
+            setBackgroundUploadPreview(downloadURL);
+            setNotificacion({ mensaje: 'Fondo actualizado correctamente.', tipo: 'ok' });
+          } catch (error) {
+            console.error('Error subiendo fondo de perfil:', error);
+            setBackgroundUploadPreview('');
+            setNotificacion({ mensaje: 'No se pudo actualizar el fondo.', tipo: 'error' });
+          } finally {
+            setBackgroundUploading(false);
+            setBackgroundInputResetKey((prev) => prev + 1);
+          }
+        }
+
         useEffect(() => {
           if (!desktopBellOpen) return () => {};
           function handleDocClick(event) {
@@ -7368,12 +7516,14 @@
             if (!currentUser) {
               setUserRole('');
               setUserArea('');
-              setUserData({ nombre: '', rol: '', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
+              setUserData({ nombre: '', rol: '', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID, backgroundImage: '' });
               setProfileAvatarId(DEFAULT_PROFILE_AVATAR_ID);
+              setBackgroundUploadPreview('');
               setRoleLoading(false);
               return;
             }
 
+            setBackgroundUploadPreview('');
             setRoleLoading(true);
             try {
               let profile = null;
@@ -7391,13 +7541,13 @@
               const avatarId = PROFILE_AVATAR_OPTIONS.some((avatar) => avatar.id === profile?.avatarId) ? profile.avatarId : DEFAULT_PROFILE_AVATAR_ID;
               setUserRole(rol);
               setUserArea(area);
-              setUserData({ nombre, rol, area, avatarId });
+              setUserData({ nombre, rol, area, avatarId, backgroundImage: resolveBackgroundImageForEntity({ uid: currentUser.uid, email: currentUser.email }) });
               setProfileAvatarId(avatarId);
             } catch (err) {
               console.error('Error leyendo config_usuarios:', err);
               setUserRole('admin');
               setUserArea('');
-              setUserData({ nombre: (currentUser?.email || 'admin').split('@')[0], rol: 'admin', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
+              setUserData({ nombre: (currentUser?.email || 'admin').split('@')[0], rol: 'admin', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID, backgroundImage: resolveBackgroundImageForEntity({ uid: currentUser?.uid, email: currentUser?.email }) });
               setProfileAvatarId(DEFAULT_PROFILE_AVATAR_ID);
             } finally {
               setRoleLoading(false);
@@ -7574,6 +7724,35 @@
 
         useEffect(() => {
           if (!user) {
+            setUserBackgrounds({});
+            return () => {};
+          }
+          const unsub = db.collection('users').onSnapshot((snapshot) => {
+            const next = {};
+            snapshot.docs.forEach((doc) => {
+              const data = doc.data() || {};
+              const image = String(data.backgroundImage || '').trim();
+              if (!image) return;
+              [doc.id, data.uid, data.email].forEach((value) => {
+                const key = normalizeProfileLookupKey(value);
+                if (key) next[key] = image;
+              });
+            });
+            setUserBackgrounds(next);
+          }, (error) => {
+            console.error('Error leyendo backgrounds de users:', error);
+          });
+          return () => unsub();
+        }, [user]);
+
+        useEffect(() => {
+          if (!user) return;
+          const nextBackground = resolveBackgroundImageForEntity({ uid: user.uid, email: user.email });
+          setUserData((prev) => (prev.backgroundImage === nextBackground ? prev : { ...prev, backgroundImage: nextBackground }));
+        }, [user, userBackgrounds]);
+
+        useEffect(() => {
+          if (!user) {
             setStaffMembers([]);
             return () => {};
           }
@@ -7591,6 +7770,7 @@
                 area: String(data.area || '').trim(),
                 avatarId,
                 uid: String(data.uid || '').trim(),
+                backgroundImage: resolveBackgroundImageForEntity({ uid: String(data.uid || '').trim(), email, id: doc.id }),
               };
             }).filter((item) => item.email);
             next.sort((a, b) => normalizeAreaLabel(a.area).localeCompare(normalizeAreaLabel(b.area), 'es', { sensitivity: 'base' }) || a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
@@ -7687,6 +7867,7 @@
         const pendingProfileAvatar = useMemo(() => (
           PROFILE_AVATAR_OPTIONS.find((avatar) => avatar.id === pendingProfileAvatarId) || selectedProfileAvatar
         ), [pendingProfileAvatarId, selectedProfileAvatar]);
+        const activeProfileBackground = backgroundUploadPreview || userData.backgroundImage || '';
 
         const allNotifications = useMemo(() => {
           const credentialItems = userRole === 'admin'
@@ -9119,7 +9300,7 @@
                               const avatar = PROFILE_AVATAR_OPTIONS.find((option) => option.id === member.avatarId) || PROFILE_AVATAR_OPTIONS[0];
                               return (
                                 <article key={member.id} className="staff-card">
-                                  <div className="staff-card-top">
+                                  <div className={`staff-card-top ${member.backgroundImage ? 'with-cover' : ''}`} style={member.backgroundImage ? { backgroundImage: `linear-gradient(135deg, rgba(3, 30, 29, .24), rgba(3, 30, 29, .52)), url("${member.backgroundImage}")` } : undefined}>
                                     <img className="staff-card-avatar" src={avatar.src} alt={`Perfil de ${member.nombre}`} />
                                     <div>
                                       <h3>{member.nombre || 'Funcionario'}</h3>
@@ -9217,7 +9398,7 @@
  ) : effectiveSelectedForm === 'perfil' ? (
                   <section className="panel profile-view">
                     <h2>Mi perfil</h2>
-                    <article className="profile-main-card">
+                    <article className={`profile-main-card ${activeProfileBackground ? 'has-background' : ''}`} style={activeProfileBackground ? { backgroundImage: `linear-gradient(135deg, rgba(3, 28, 27, .28), rgba(3, 28, 27, .46)), url("${activeProfileBackground}")` } : undefined}>
                       <div className="profile-main-row">
                         <div className="profile-avatar-wrap">
                           <img
@@ -9237,6 +9418,38 @@
                         <div>
                           <h3 className="profile-identity-title"><b>{currentUserName}</b> · {topbarSubtitle}</h3>
                           <div className="profile-identity-sub">{currentUserName} · {topbarSubtitle}</div>
+                        </div>
+                      </div>
+                    </article>
+                    <article className="profile-option">
+                      <h3>Fondo de perfil</h3>
+                      <div className="profile-background-controls">
+                        <input
+                          key={backgroundInputResetKey}
+                          ref={backgroundFileInputRef}
+                          className="profile-background-input"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleBackgroundImageSelection(e.target.files?.[0] || null)}
+                        />
+                        <div className="profile-background-actions">
+                          <button type="button" className="save-btn profile-save-btn" onClick={openBackgroundFilePicker} disabled={backgroundUploading}>
+                            {backgroundUploading ? 'Subiendo fondo...' : 'Cambiar fondo'}
+                          </button>
+                          <div className="hint" style={{ marginBottom: 0 }}>Seleccioná una imagen desde tu computadora. Se sube automáticamente a Firebase Storage y se guarda su URL en Firestore.</div>
+                        </div>
+                        <div className="profile-background-preview-shell">
+                          {activeProfileBackground ? (
+                            <img className="profile-background-preview" src={activeProfileBackground} alt="Preview del fondo de perfil" />
+                          ) : (
+                            <div className="profile-background-empty">Todavía no configuraste un fondo personalizado.</div>
+                          )}
+                          {backgroundUploading && (
+                            <div className="profile-background-loader">
+                              <div className="profile-background-spinner" aria-hidden="true" />
+                              <span>Subiendo imagen...</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </article>
@@ -10131,7 +10344,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
               {activeChatMember && (
                 <div className="staff-chat-modal-overlay" onClick={closeStaffChatModal}>
                   <div className="staff-chat-modal" onClick={(e) => e.stopPropagation()}>
-                    <div className="staff-chat-modal-head">
+                    <div className={`staff-chat-modal-head ${activeChatMember.backgroundImage ? 'with-cover' : ''}`} style={activeChatMember.backgroundImage ? { backgroundImage: `linear-gradient(135deg, rgba(3, 30, 29, .26), rgba(3, 30, 29, .58)), url("${activeChatMember.backgroundImage}")` } : undefined}>
                       <img className="staff-chat-modal-avatar" src={(PROFILE_AVATAR_OPTIONS.find((option) => option.id === activeChatMember.avatarId) || PROFILE_AVATAR_OPTIONS[0]).src} alt={`Perfil de ${activeChatMember.nombre || 'Funcionario'}`} />
                       <div className="staff-chat-modal-meta">
                         <strong>{activeChatMember.nombre || 'Funcionario'}</strong>
