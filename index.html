@@ -8823,6 +8823,7 @@
             setSelectedForm('home');
             setMobileTab('home');
             setTipoAccion('');
+            setActiveChatMemberId('');
             return;
           }
           const previous = formHistory[formHistory.length - 2] || 'home';
@@ -8837,6 +8838,17 @@
         function openProfileView() {
           setSelectedForm('perfil');
           setMobileTab('perfil');
+          closeSidebar();
+        }
+
+        function goToHomeView() {
+          setSelectedForm('home');
+          setSelectedService(null);
+          setTipoAccion('');
+          setMobileTab('home');
+          setActiveChatMemberId('');
+          setChatMenuOpen(false);
+          setChatEmojiPickerOpen(false);
           closeSidebar();
         }
 
@@ -9318,7 +9330,7 @@
               </div>
               <div className="menu">
                 <div className="sidebar-section-label">Inicio</div>
-                <button className="menu-button" onClick={() => { setSelectedForm('home'); setSelectedService(null); setTipoAccion(''); closeSidebar(); }}><span className="menu-icon">🏠</span><span>Inicio</span></button>
+                <button className="menu-button" onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
                 {!isMobile && (
                   <>
                     <div className="sidebar-section-label">Operaciones</div>
@@ -9364,7 +9376,7 @@
                       className="topbar-home-btn"
                       type="button"
                       aria-label="Inicio"
-                      onClick={() => { setSelectedForm('home'); setSelectedService(null); setTipoAccion(''); setMobileTab('home'); closeSidebar(); }}
+                      onClick={goToHomeView}
                     >
                       <i data-lucide="house" />
                     </button>
@@ -9885,7 +9897,7 @@
                       )}
                     </article>
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                      <button className="edit-btn profile-back-btn" type="button" onClick={() => { setSelectedForm('home'); setSelectedService(null); setTipoAccion(''); }}>Volver a inicio</button>
+                      <button className="edit-btn profile-back-btn" type="button" onClick={goToHomeView}>Volver a inicio</button>
                       <button className="logout-btn profile-logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar sesión</button>
                     </div>
                   </section>
@@ -10845,10 +10857,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                       className={mobileTab === 'home' && effectiveSelectedForm === 'home' ? 'active' : ''}
                       type="button"
                       onClick={() => {
-                        setMobileTab('home');
-                        setSelectedForm('home');
-                        setSelectedService(null);
-                        setTipoAccion('');
+                        goToHomeView();
                         setMobileBellOpen(false);
                         setMobileSearchOpen(false);
                         setMobileQuickMenuOpen(false);
