@@ -3603,6 +3603,113 @@
       .profile-view > h2 {
         color: #ff8c00 !important;
       }
+      .funcionarios-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+      }
+      .funcionarios-filters {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+        gap: 10px;
+        width: min(100%, 620px);
+      }
+      .staff-group-section + .staff-group-section { margin-top: 22px; }
+      .staff-group-title {
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--accent-soft);
+        margin-bottom: 12px;
+        letter-spacing: .3px;
+      }
+      .staff-card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+      }
+      .staff-card {
+        border-radius: 16px;
+        padding: 12px;
+        border: 1px solid rgba(255,255,255,.18);
+        background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
+        box-shadow: var(--shadow-soft);
+      }
+      .staff-card-top {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .staff-card-top h3 { margin: 0 0 2px; font-size: 15px; }
+      .staff-card-avatar {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        object-fit: cover;
+        border: 1px solid rgba(255,255,255,.24);
+        background: rgba(255,255,255,.08);
+      }
+      .staff-card-role {
+        color: #cceeed;
+        font-size: 12px;
+      }
+      .staff-chat-thread {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 180px;
+        overflow: auto;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,.12);
+        background: rgba(3, 25, 24, .24);
+      }
+      .staff-chat-empty {
+        font-size: 12px;
+        color: #cde7e4;
+      }
+      .staff-chat-bubble {
+        max-width: 88%;
+        padding: 8px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        line-height: 1.45;
+        box-shadow: 0 6px 14px rgba(0,0,0,.16);
+      }
+      .staff-chat-bubble.outgoing {
+        align-self: flex-end;
+        background: linear-gradient(135deg, rgba(78,227,209,.32), rgba(78,227,209,.14));
+      }
+      .staff-chat-bubble.incoming {
+        align-self: flex-start;
+        background: rgba(255,255,255,.12);
+      }
+      .staff-chat-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 4px;
+        font-size: 10px;
+        color: #d7f4ef;
+        opacity: .9;
+      }
+      .staff-message-box {
+        width: 100%;
+        min-height: 68px;
+        resize: vertical;
+        margin: 8px 0 8px;
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+      @media (max-width: 720px) {
+        .funcionarios-filters {
+          grid-template-columns: 1fr;
+        }
+      }
       .profile-option {
         border: 1px solid rgba(11, 78, 73, .16);
         border-radius: 16px;
@@ -5988,6 +6095,13 @@
         const [profilePasswordRequest, setProfilePasswordRequest] = useState('');
         const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
         const [userCredentialRequests, setUserCredentialRequests] = useState([]);
+        const [staffMembers, setStaffMembers] = useState([]);
+        const [staffSearchTerm, setStaffSearchTerm] = useState('');
+        const [staffAreaFilter, setStaffAreaFilter] = useState('todas');
+        const [staffMessageDraft, setStaffMessageDraft] = useState({});
+        const [sendingStaffMessageId, setSendingStaffMessageId] = useState('');
+        const [internalMessages, setInternalMessages] = useState([]);
+        const [internalNotifications, setInternalNotifications] = useState([]);
         const [updatingRequestId, setUpdatingRequestId] = useState('');
         const [acceptingRequestId, setAcceptingRequestId] = useState('');
         const [mobileBellOpen, setMobileBellOpen] = useState(false);
@@ -6032,6 +6146,40 @@
           const digits = String(value || '').replace(/\D/g, '');
           if (!digits) return '';
           return digits.padStart(4, '0');
+        }
+
+
+        function normalizeAreaLabel(value) {
+          const raw = String(value || '').trim();
+          if (!raw) return 'Sin área';
+          const compact = raw.toLowerCase();
+          if (compact === 'tecnica' || compact === 'técnica') return 'Técnica';
+          if (compact === 'comercial') return 'Comercial';
+          if (compact === 'administracion' || compact === 'administración') return 'Administración';
+          return raw.charAt(0).toUpperCase() + raw.slice(1);
+        }
+
+        function formatStaffPhone(value) {
+          return String(value || '').trim() || 'Sin teléfono';
+        }
+
+        function buildInternalNotificationMessage(item) {
+          const sender = item?.remitenteNombre || item?.remitenteEmail || 'Usuario';
+          const subject = item?.titulo ? `${item.titulo}: ` : '';
+          return `✉️ ${sender}: ${subject}${item?.mensaje || ''}`.trim();
+        }
+
+        function formatChatTimestamp(value) {
+          if (!value) return '-';
+          const date = typeof value?.toDate === 'function'
+            ? value.toDate()
+            : (typeof value?.seconds === 'number' ? new Date(value.seconds * 1000) : new Date(value));
+          if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '-';
+          const dd = String(date.getDate()).padStart(2, '0');
+          const mm = String(date.getMonth() + 1).padStart(2, '0');
+          const hh = String(date.getHours()).padStart(2, '0');
+          const min = String(date.getMinutes()).padStart(2, '0');
+          return `${dd}/${mm} ${hh}:${min}`;
         }
 
         function getServiceCatalogById(rawId) {
@@ -6853,6 +7001,19 @@
         }, [rows]);
 
         useEffect(() => {
+          if (internalNotifications.length === 0) return;
+          const alerts = internalNotifications.slice(0, 8).map((item) => ({
+            id: `internal-alert-${item.id}`,
+            read: !!item.leida,
+            message: buildInternalNotificationMessage(item),
+          }));
+          setMobileAlerts((prev) => {
+            const filtered = prev.filter((item) => !String(item.id || '').startsWith('internal-alert-'));
+            return [...alerts, ...filtered].slice(0, 50);
+          });
+        }, [internalNotifications]);
+
+        useEffect(() => {
           if (!(isGerencia || isAdminUser)) return;
           const byServices = Object.entries(rows.reduce((acc, r) => {
             const seller = (r.representanteComercial || 'Sin asignar').trim();
@@ -7091,6 +7252,80 @@
           return () => unsub();
         }, [user?.uid, user?.email]);
 
+
+        useEffect(() => {
+          if (!user) {
+            setStaffMembers([]);
+            return () => {};
+          }
+          const unsub = db.collection('config_usuarios').onSnapshot((snapshot) => {
+            const next = snapshot.docs.map((doc) => {
+              const data = doc.data() || {};
+              const email = String(data.email || doc.id || '').trim();
+              const avatarId = PROFILE_AVATAR_OPTIONS.some((avatar) => avatar.id === data.avatarId) ? data.avatarId : DEFAULT_PROFILE_AVATAR_ID;
+              return {
+                id: doc.id,
+                email,
+                nombre: String(data.nombre || email.split('@')[0] || 'Funcionario').trim(),
+                telefono: String(data.telefono || data.telefonoMovil || data.celular || '').trim(),
+                cargo: String(data.cargo || data.rol || '').trim(),
+                area: String(data.area || '').trim(),
+                avatarId,
+                uid: String(data.uid || '').trim(),
+              };
+            }).filter((item) => item.email);
+            next.sort((a, b) => normalizeAreaLabel(a.area).localeCompare(normalizeAreaLabel(b.area), 'es', { sensitivity: 'base' }) || a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
+            setStaffMembers(next);
+          }, (error) => {
+            console.error('Error leyendo config_usuarios para funcionarios:', error);
+          });
+          return () => unsub();
+        }, [user]);
+
+        useEffect(() => {
+          if (!user?.uid && !user?.email) {
+            setInternalMessages([]);
+            setInternalNotifications([]);
+            return () => {};
+          }
+          const clauses = [];
+          if (user.uid) {
+            clauses.push(db.collection('notificaciones_internas').where('destinatarioUid', '==', user.uid).limit(120));
+            clauses.push(db.collection('notificaciones_internas').where('remitenteUid', '==', user.uid).limit(120));
+          }
+          if (user.email) {
+            const normalizedEmail = String(user.email).trim().toLowerCase();
+            clauses.push(db.collection('notificaciones_internas').where('destinatarioEmail', '==', normalizedEmail).limit(120));
+            clauses.push(db.collection('notificaciones_internas').where('remitenteEmail', '==', normalizedEmail).limit(120));
+          }
+          const buckets = {};
+          const syncMessages = () => {
+            const merged = Object.values(buckets).flat();
+            const dedup = [];
+            const seen = new Set();
+            merged.forEach((item) => {
+              if (seen.has(item.id)) return;
+              seen.add(item.id);
+              dedup.push(item);
+            });
+            dedup.sort((a, b) => (a?.creadoEn?.seconds || 0) - (b?.creadoEn?.seconds || 0));
+            setInternalMessages(dedup);
+            const normalizedEmail = String(user?.email || '').trim().toLowerCase();
+            setInternalNotifications(dedup.filter((item) => {
+              const recipientUid = String(item?.destinatarioUid || '').trim();
+              const recipientEmail = String(item?.destinatarioEmail || '').trim().toLowerCase();
+              return (user?.uid && recipientUid === user.uid) || (normalizedEmail && recipientEmail === normalizedEmail);
+            }).sort((a, b) => (b?.creadoEn?.seconds || 0) - (a?.creadoEn?.seconds || 0)));
+          };
+          const unsubs = clauses.map((ref, index) => ref.onSnapshot((snapshot) => {
+            buckets[index] = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            syncMessages();
+          }, (error) => {
+            console.error('Error leyendo notificaciones internas:', error);
+          }));
+          return () => unsubs.forEach((unsub) => typeof unsub === 'function' && unsub());
+        }, [user?.uid, user?.email]);
+
         const isGerencia = userRole === 'gerentes';
         const isVendedor = userRole.includes('vendedor');
         const isTechnicalOnly = (/tecnic/.test(userRole) || userArea === 'tecnica') && !isVendedor && userRole !== 'admin';
@@ -7133,6 +7368,72 @@
         const pendingProfileAvatar = useMemo(() => (
           PROFILE_AVATAR_OPTIONS.find((avatar) => avatar.id === pendingProfileAvatarId) || selectedProfileAvatar
         ), [pendingProfileAvatarId, selectedProfileAvatar]);
+
+        const allNotifications = useMemo(() => {
+          const credentialItems = userRole === 'admin'
+            ? adminCredentialRequests.map((req) => ({
+                id: `cred-${req.id}`,
+                source: 'credencial',
+                title: req.solicitanteNombre || req.solicitanteEmail || 'Usuario',
+                status: requestStatusLabel(req.estado),
+                createdAt: req.creadoEn,
+                raw: req,
+                read: !!req.leidaPorAdmin,
+              }))
+            : [];
+          const internalItems = internalNotifications.map((item) => ({
+            id: `internal-${item.id}`,
+            source: 'interna',
+            title: item.titulo || `Mensaje de ${item.remitenteNombre || item.remitenteEmail || 'usuario'}`,
+            status: item.mensaje || '',
+            createdAt: item.creadoEn,
+            raw: item,
+            read: !!item.leida,
+          }));
+          return [...credentialItems, ...internalItems].sort((a, b) => {
+            const av = a?.createdAt?.seconds || 0;
+            const bv = b?.createdAt?.seconds || 0;
+            return bv - av;
+          });
+        }, [adminCredentialRequests, internalNotifications, userRole]);
+        const staffAreaOptions = useMemo(() => {
+          const labels = Array.from(new Set(staffMembers.map((member) => normalizeAreaLabel(member.area || 'Sin área'))));
+          return ['todas', ...labels];
+        }, [staffMembers]);
+        const groupedStaffMembers = useMemo(() => {
+          const q = String(staffSearchTerm || '').trim().toLowerCase();
+          const filtered = staffMembers.filter((member) => {
+            const areaLabel = normalizeAreaLabel(member.area || 'Sin área');
+            const matchesArea = staffAreaFilter === 'todas' || areaLabel === staffAreaFilter;
+            const matchesQuery = !q || [member.nombre, member.email, member.telefono, member.cargo, areaLabel]
+              .filter(Boolean)
+              .some((value) => String(value).toLowerCase().includes(q));
+            return matchesArea && matchesQuery;
+          });
+          return filtered.reduce((acc, member) => {
+            const areaLabel = normalizeAreaLabel(member.area || 'Sin área');
+            if (!acc[areaLabel]) acc[areaLabel] = [];
+            acc[areaLabel].push(member);
+            return acc;
+          }, {});
+        }, [staffMembers, staffSearchTerm, staffAreaFilter]);
+
+        const staffConversations = useMemo(() => staffMembers.reduce((acc, member) => {
+          const memberEmail = String(member.email || '').trim().toLowerCase();
+          const memberUid = String(member.uid || '').trim();
+          acc[member.id] = internalMessages.filter((item) => {
+            const senderUid = String(item?.remitenteUid || '').trim();
+            const senderEmail = String(item?.remitenteEmail || '').trim().toLowerCase();
+            const recipientUid = String(item?.destinatarioUid || '').trim();
+            const recipientEmail = String(item?.destinatarioEmail || '').trim().toLowerCase();
+            const fromMember = (memberUid && senderUid === memberUid) || (memberEmail && senderEmail === memberEmail);
+            const toMember = (memberUid && recipientUid === memberUid) || (memberEmail && recipientEmail === memberEmail);
+            const fromCurrent = (user?.uid && senderUid === user.uid) || (user?.email && senderEmail === String(user.email).trim().toLowerCase());
+            const toCurrent = (user?.uid && recipientUid === user.uid) || (user?.email && recipientEmail === String(user.email).trim().toLowerCase());
+            return (fromMember && toCurrent) || (toMember && fromCurrent);
+          });
+          return acc;
+        }, {}), [staffMembers, internalMessages, user?.uid, user?.email]);
         const isTicketManager = String(user?.email || '').trim().toLowerCase() === 'alfonso332estigarribia@gmail.com';
         const isAdminUser = userRole === 'admin';
         const mobileUnreadAlerts = useMemo(() => mobileAlerts.filter((a) => !a.read).length, [mobileAlerts]);
@@ -7786,6 +8087,62 @@
           closeSidebar();
         }
 
+
+        function openFuncionariosView() {
+          setSelectedForm('funcionarios');
+          setMobileTab('perfil');
+          setSelectedService(null);
+          setMobileBellOpen(false);
+          closeSidebar();
+        }
+
+        function updateStaffMessageDraft(staffId, value) {
+          setStaffMessageDraft((prev) => ({ ...prev, [staffId]: value }));
+        }
+
+        async function markInternalNotificationsAsRead() {
+          const pending = internalNotifications.filter((item) => !item?.leida && item?.id);
+          if (pending.length === 0) return;
+          const batch = db.batch();
+          pending.forEach((item) => {
+            batch.set(db.collection('notificaciones_internas').doc(item.id), { leida: true }, { merge: true });
+          });
+          try {
+            await batch.commit();
+          } catch (error) {
+            console.error('Error marcando notificaciones internas como leídas:', error);
+          }
+        }
+
+        async function handleSendStaffMessage(member) {
+          const text = String(staffMessageDraft[member.id] || '').trim();
+          if (!text) {
+            setNotificacion({ mensaje: 'Escribí un mensaje para enviar al funcionario.', tipo: 'error' });
+            return;
+          }
+          setSendingStaffMessageId(member.id);
+          try {
+            await db.collection('notificaciones_internas').add({
+              destinatarioUid: member.uid || '',
+              destinatarioEmail: String(member.email || '').trim().toLowerCase(),
+              remitenteUid: user?.uid || '',
+              remitenteEmail: user?.email || '',
+              remitenteNombre: currentUserName,
+              titulo: 'Chat interno',
+              mensaje: text,
+              leida: false,
+              creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+            setStaffMessageDraft((prev) => ({ ...prev, [member.id]: '' }));
+            setNotificacion({ mensaje: `Mensaje enviado a ${member.nombre || member.email}.`, tipo: 'ok' });
+          } catch (error) {
+            console.error('Error enviando mensaje interno:', error);
+            setNotificacion({ mensaje: 'No se pudo enviar el mensaje al funcionario.', tipo: 'error' });
+          } finally {
+            setSendingStaffMessageId('');
+          }
+        }
+
         async function readImageFiles(files) {
           const valid = Array.from(files || []).filter((f) => String(f.type || '').startsWith('image/'));
           const mapped = await Promise.all(valid.map((file) => new Promise((resolve) => {
@@ -7925,18 +8282,18 @@
         }
 
         async function toggleDesktopNotifications() {
-          if (!isAdminUser) return;
+          if (!isAdminUser && internalNotifications.length === 0) return;
           setDesktopBellOpen((prev) => !prev);
-          await markAdminNotificationsAsRead();
+          await Promise.all([markAdminNotificationsAsRead(), markInternalNotificationsAsRead()]);
         }
 
         async function openNotificationsView() {
-          if (!isAdminUser) return;
+          if (!isAdminUser && internalNotifications.length === 0) return;
           setSelectedForm('notificaciones');
           setMobileTab('perfil');
           setDesktopBellOpen(false);
           closeSidebar();
-          await markAdminNotificationsAsRead();
+          await Promise.all([markAdminNotificationsAsRead(), markInternalNotificationsAsRead()]);
         }
 
         async function deleteNotificationRequest(req) {
@@ -8081,6 +8438,7 @@
                   </>
                 )}
                 <div className="sidebar-divider" />
+                <button className="menu-button" onClick={openFuncionariosView}><span className="menu-icon">🧑‍💼</span><span>Funcionarios</span></button>
                 <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
                 <div className="sidebar-signature" aria-label="signature"><strong>v1.0 | Powered by Alfonso Carballo</strong></div>
@@ -8175,6 +8533,7 @@
                         onClick={() => {
                           setMobileBellOpen((prev) => !prev);
                           setMobileAlerts((prev) => prev.map((a) => ({ ...a, read: true })));
+                          markInternalNotificationsAsRead();
                         }}
                       >
                         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 10a6 6 0 1 1 12 0v4l1.5 2h-15L6 14v-4Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/><path d="M10 18a2 2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
@@ -8189,20 +8548,20 @@
                         <button className="topbar-action-btn" type="button" aria-label="Notificaciones" onClick={toggleDesktopNotifications}>
                           <span className="topbar-action-icon"><i data-lucide="bell" /></span>
                         </button>
-                        {adminUnreadCount > 0 && <span className="notify-badge">{adminUnreadCount > 99 ? '99+' : adminUnreadCount}</span>}
+                        {(adminUnreadCount + internalNotifications.filter((item) => !item?.leida).length) > 0 && <span className="notify-badge">{(adminUnreadCount + internalNotifications.filter((item) => !item?.leida).length) > 99 ? '99+' : (adminUnreadCount + internalNotifications.filter((item) => !item?.leida).length)}</span>}
                         {desktopBellOpen && (
                           <div className="topbar-notify-popover" role="dialog" aria-label="Panel de notificaciones">
                             <div className="topbar-notify-arrow" aria-hidden="true" />
                             <div className="topbar-notify-head">Notificaciones</div>
                             <div className="topbar-notify-list">
-                              {adminCredentialRequests.length === 0 ? <div className="topbar-notify-empty">Sin notificaciones nuevas.</div> : adminCredentialRequests.slice(0, 8).map((req) => (
-                                <article className="topbar-notify-item" key={`popover-${req.id}`}>
-                                  <strong>{req.solicitanteNombre || req.solicitanteEmail || 'Usuario'}</strong>
-                                  <small>{requestStatusLabel(req.estado)}</small>
-                                  <small>{formatRequestDateTime(req.creadoEn)}</small>
+                              {allNotifications.length === 0 ? <div className="topbar-notify-empty">Sin notificaciones nuevas.</div> : allNotifications.slice(0, 8).map((item) => (
+                                <article className="topbar-notify-item" key={`popover-${item.id}`}>
+                                  <strong>{item.title}</strong>
+                                  <small>{item.status}</small>
+                                  <small>{formatRequestDateTime(item.createdAt)}</small>
                                   <div className="topbar-notify-actions">
                                     <button type="button" className="topbar-notify-action" aria-label="Ver notificación" onClick={openNotificationsView}><i data-lucide="eye" /></button>
-                                    <button type="button" className="topbar-notify-action" aria-label="Eliminar notificación" onClick={() => deleteNotificationRequest(req)}><i data-lucide="trash-2" /></button>
+                                    {item.source === 'credencial' && <button type="button" className="topbar-notify-action" aria-label="Eliminar notificación" onClick={() => deleteNotificationRequest(item.raw)}><i data-lucide="trash-2" /></button>}
                                   </div>
                                 </article>
                               ))}
@@ -8265,36 +8624,117 @@
                 ) : effectiveSelectedForm === 'notificaciones' ? (
                   <section className="panel profile-view">
                     <h2>Notificaciones</h2>
-                    <div className="hint">Solicitudes recibidas para cambio de usuario y contraseña.</div>
-                    {!isAdminUser ? (
-                      <div className="profile-option">Solo administradores pueden ver esta sección.</div>
-                    ) : adminCredentialRequests.length === 0 ? (
-                      <div className="profile-option">No hay solicitudes registradas.</div>
+                    <div className="hint">Mensajes internos y solicitudes recibidas dentro del sistema.</div>
+                    {allNotifications.length === 0 ? (
+                      <div className="profile-option">No hay notificaciones registradas.</div>
                     ) : (
-                      adminCredentialRequests.map((req) => (
-                        <article className="profile-option" key={req.id}>
+                      allNotifications.map((item) => item.source === 'credencial' ? (
+                        <article className="profile-option" key={item.id}>
                           <h3>
-                            {req.solicitanteNombre || req.solicitanteEmail || 'Usuario'}
-                            <span className={`status-chip-inline ${req.estado === 'aprobada' || req.estado === 'aplicada' ? 'resolved' : req.estado === 'rechazada' ? 'rejected' : 'pending'}`} style={{ marginLeft: 8 }}>
-                              {requestStatusLabel(req.estado)}
+                            {item.raw.solicitanteNombre || item.raw.solicitanteEmail || 'Usuario'}
+                            <span className={`status-chip-inline ${item.raw.estado === 'aprobada' || item.raw.estado === 'aplicada' ? 'resolved' : item.raw.estado === 'rechazada' ? 'rejected' : 'pending'}`} style={{ marginLeft: 8 }}>
+                              {requestStatusLabel(item.raw.estado)}
                             </span>
                           </h3>
-                          <div className="kv"><b>Email:</b> {req.solicitanteEmail || '-'}</div>
-                          <div className="kv"><b>Usuario solicitado:</b> {req.nuevoUsuarioSolicitado || '-'}</div>
-                          <div className="kv"><b>Contraseña solicitada:</b> {req.nuevaPasswordSolicitada || '-'}</div>
-                          <div className="kv"><b>Fecha y hora de solicitud:</b> {formatRequestDateTime(req.creadoEn)}</div>
-                          <div className="kv"><b>Última actualización:</b> {formatRequestDateTime(req.actualizadaEn)}</div>
-                          {req.estado === 'pendiente' && (
+                          <div className="kv"><b>Email:</b> {item.raw.solicitanteEmail || '-'}</div>
+                          <div className="kv"><b>Usuario solicitado:</b> {item.raw.nuevoUsuarioSolicitado || '-'}</div>
+                          <div className="kv"><b>Contraseña solicitada:</b> {item.raw.nuevaPasswordSolicitada || '-'}</div>
+                          <div className="kv"><b>Fecha y hora de solicitud:</b> {formatRequestDateTime(item.raw.creadoEn)}</div>
+                          <div className="kv"><b>Última actualización:</b> {formatRequestDateTime(item.raw.actualizadaEn)}</div>
+                          {isAdminUser && item.raw.estado === 'pendiente' && (
                             <div className="request-status-row">
-                              <button type="button" className="status-action-btn resolve" disabled={updatingRequestId === req.id} onClick={() => updateCredentialRequestStatus(req, 'aprobada')}>
-                                {updatingRequestId === req.id ? 'Actualizando...' : 'Marcar aprobada'}
+                              <button type="button" className="status-action-btn resolve" disabled={updatingRequestId === item.raw.id} onClick={() => updateCredentialRequestStatus(item.raw, 'aprobada')}>
+                                {updatingRequestId === item.raw.id ? 'Actualizando...' : 'Marcar aprobada'}
                               </button>
-                              <button type="button" className="status-action-btn reject" disabled={updatingRequestId === req.id} onClick={() => updateCredentialRequestStatus(req, 'rechazada')}>
-                                {updatingRequestId === req.id ? 'Actualizando...' : 'Marcar rechazada'}
+                              <button type="button" className="status-action-btn reject" disabled={updatingRequestId === item.raw.id} onClick={() => updateCredentialRequestStatus(item.raw, 'rechazada')}>
+                                {updatingRequestId === item.raw.id ? 'Actualizando...' : 'Marcar rechazada'}
                               </button>
                             </div>
                           )}
                         </article>
+                      ) : (
+                        <article className="profile-option" key={item.id}>
+                          <h3>{item.raw.titulo || 'Mensaje interno'}</h3>
+                          <div className="kv"><b>De:</b> {item.raw.remitenteNombre || item.raw.remitenteEmail || 'Usuario'}</div>
+                          <div className="kv"><b>Mensaje:</b> {item.raw.mensaje || '-'}</div>
+                          <div className="kv"><b>Recibido:</b> {formatRequestDateTime(item.raw.creadoEn)}</div>
+                        </article>
+                      ))
+                    )}
+                  </section>
+
+                ) : effectiveSelectedForm === 'funcionarios' ? (
+                  <section className="panel profile-view funcionarios-view">
+                    <div className="funcionarios-header">
+                      <div>
+                        <h2>Funcionarios</h2>
+                        <div className="hint">Listado agrupado por área con acceso a mensajería interna.</div>
+                      </div>
+                      <div className="funcionarios-filters">
+                        <input
+                          type="text"
+                          placeholder="Buscar por nombre, email, cargo o teléfono"
+                          value={staffSearchTerm}
+                          onChange={(e) => setStaffSearchTerm(e.target.value)}
+                        />
+                        <select value={staffAreaFilter} onChange={(e) => setStaffAreaFilter(e.target.value)}>
+                          {staffAreaOptions.map((option) => <option key={option} value={option}>{option === 'todas' ? 'Todas las áreas' : option}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                    {Object.keys(groupedStaffMembers).length === 0 ? (
+                      <article className="profile-option">No se encontraron funcionarios para los filtros seleccionados.</article>
+                    ) : (
+                      Object.entries(groupedStaffMembers).map(([area, members]) => (
+                        <section key={area} className="staff-group-section">
+                          <div className="staff-group-title">{area}</div>
+                          <div className="staff-card-grid">
+                            {members.map((member) => {
+                              const avatar = PROFILE_AVATAR_OPTIONS.find((option) => option.id === member.avatarId) || PROFILE_AVATAR_OPTIONS[0];
+                              return (
+                                <article key={member.id} className="staff-card">
+                                  <div className="staff-card-top">
+                                    <img className="staff-card-avatar" src={avatar.src} alt={`Perfil de ${member.nombre}`} />
+                                    <div>
+                                      <h3>{member.nombre || 'Funcionario'}</h3>
+                                      <div className="staff-card-role">{member.cargo || 'Cargo pendiente'}</div>
+                                    </div>
+                                  </div>
+                                  <div className="kv"><b>Email:</b> {member.email || '-'}</div>
+                                  <div className="kv"><b>Teléfono:</b> {formatStaffPhone(member.telefono)}</div>
+                                  <div className="kv"><b>Área:</b> {normalizeAreaLabel(member.area || 'Sin área')}</div>
+                                  <div className="staff-chat-thread">
+                                    {(staffConversations[member.id] || []).length === 0 ? (
+                                      <div className="staff-chat-empty">Todavía no hay mensajes en esta conversación.</div>
+                                    ) : (
+                                      (staffConversations[member.id] || []).map((message) => {
+                                        const isOutgoing = ((user?.uid && message?.remitenteUid === user.uid) || (user?.email && String(message?.remitenteEmail || '').trim().toLowerCase() === String(user.email).trim().toLowerCase()));
+                                        return (
+                                          <div key={message.id} className={`staff-chat-bubble ${isOutgoing ? 'outgoing' : 'incoming'}`}>
+                                            <div className="staff-chat-meta">
+                                              <span>{isOutgoing ? 'Vos' : (member.nombre || 'Funcionario')}</span>
+                                              <span>{formatChatTimestamp(message.creadoEn)}</span>
+                                            </div>
+                                            <div>{message.mensaje || '-'}</div>
+                                          </div>
+                                        );
+                                      })
+                                    )}
+                                  </div>
+                                  <textarea
+                                    className="staff-message-box"
+                                    placeholder="Escribí tu respuesta..."
+                                    value={staffMessageDraft[member.id] || ''}
+                                    onChange={(e) => updateStaffMessageDraft(member.id, e.target.value)}
+                                  />
+                                  <button type="button" className="save-btn profile-save-btn" disabled={sendingStaffMessageId === member.id} onClick={() => handleSendStaffMessage(member)}>
+                                    {sendingStaffMessageId === member.id ? 'Enviando...' : 'Enviar mensaje'}
+                                  </button>
+                                </article>
+                              );
+                            })}
+                          </div>
+                        </section>
                       ))
                     )}
                   </section>
