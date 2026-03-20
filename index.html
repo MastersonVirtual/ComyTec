@@ -3627,12 +3627,12 @@
       }
       .staff-card-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
       }
       .staff-card {
-        border-radius: 18px;
-        padding: 16px;
+        border-radius: 16px;
+        padding: 12px;
         border: 1px solid rgba(255,255,255,.18);
         background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
         box-shadow: var(--shadow-soft);
@@ -3640,27 +3640,70 @@
       .staff-card-top {
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin-bottom: 14px;
+        gap: 10px;
+        margin-bottom: 10px;
       }
-      .staff-card-top h3 { margin: 0 0 4px; }
+      .staff-card-top h3 { margin: 0 0 2px; font-size: 15px; }
       .staff-card-avatar {
-        width: 58px;
-        height: 58px;
-        border-radius: 16px;
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
         object-fit: cover;
         border: 1px solid rgba(255,255,255,.24);
         background: rgba(255,255,255,.08);
       }
       .staff-card-role {
         color: #cceeed;
-        font-size: 13px;
+        font-size: 12px;
+      }
+      .staff-chat-thread {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        max-height: 180px;
+        overflow: auto;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,.12);
+        background: rgba(3, 25, 24, .24);
+      }
+      .staff-chat-empty {
+        font-size: 12px;
+        color: #cde7e4;
+      }
+      .staff-chat-bubble {
+        max-width: 88%;
+        padding: 8px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        line-height: 1.45;
+        box-shadow: 0 6px 14px rgba(0,0,0,.16);
+      }
+      .staff-chat-bubble.outgoing {
+        align-self: flex-end;
+        background: linear-gradient(135deg, rgba(78,227,209,.32), rgba(78,227,209,.14));
+      }
+      .staff-chat-bubble.incoming {
+        align-self: flex-start;
+        background: rgba(255,255,255,.12);
+      }
+      .staff-chat-meta {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 4px;
+        font-size: 10px;
+        color: #d7f4ef;
+        opacity: .9;
       }
       .staff-message-box {
         width: 100%;
-        min-height: 92px;
+        min-height: 68px;
         resize: vertical;
-        margin: 12px 0 10px;
+        margin: 8px 0 8px;
+        padding: 8px 10px;
+        font-size: 12px;
       }
       @media (max-width: 720px) {
         .funcionarios-filters {
@@ -6057,6 +6100,7 @@
         const [staffAreaFilter, setStaffAreaFilter] = useState('todas');
         const [staffMessageDraft, setStaffMessageDraft] = useState({});
         const [sendingStaffMessageId, setSendingStaffMessageId] = useState('');
+        const [internalMessages, setInternalMessages] = useState([]);
         const [internalNotifications, setInternalNotifications] = useState([]);
         const [updatingRequestId, setUpdatingRequestId] = useState('');
         const [acceptingRequestId, setAcceptingRequestId] = useState('');
@@ -6123,6 +6167,19 @@
           const sender = item?.remitenteNombre || item?.remitenteEmail || 'Usuario';
           const subject = item?.titulo ? `${item.titulo}: ` : '';
           return `✉️ ${sender}: ${subject}${item?.mensaje || ''}`.trim();
+        }
+
+        function formatChatTimestamp(value) {
+          if (!value) return '-';
+          const date = typeof value?.toDate === 'function'
+            ? value.toDate()
+            : (typeof value?.seconds === 'number' ? new Date(value.seconds * 1000) : new Date(value));
+          if (!(date instanceof Date) || Number.isNaN(date.getTime())) return '-';
+          const dd = String(date.getDate()).padStart(2, '0');
+          const mm = String(date.getMonth() + 1).padStart(2, '0');
+          const hh = String(date.getHours()).padStart(2, '0');
+          const min = String(date.getMinutes()).padStart(2, '0');
+          return `${dd}/${mm} ${hh}:${min}`;
         }
 
         function getServiceCatalogById(rawId) {
@@ -7227,15 +7284,22 @@
 
         useEffect(() => {
           if (!user?.uid && !user?.email) {
+            setInternalMessages([]);
             setInternalNotifications([]);
             return () => {};
           }
           const clauses = [];
-          if (user.uid) clauses.push(db.collection('notificaciones_internas').where('destinatarioUid', '==', user.uid).limit(80));
-          if (user.email) clauses.push(db.collection('notificaciones_internas').where('destinatarioEmail', '==', String(user.email).trim().toLowerCase()).limit(80));
+          if (user.uid) {
+            clauses.push(db.collection('notificaciones_internas').where('destinatarioUid', '==', user.uid).limit(120));
+            clauses.push(db.collection('notificaciones_internas').where('remitenteUid', '==', user.uid).limit(120));
+          }
+          if (user.email) {
+            const normalizedEmail = String(user.email).trim().toLowerCase();
+            clauses.push(db.collection('notificaciones_internas').where('destinatarioEmail', '==', normalizedEmail).limit(120));
+            clauses.push(db.collection('notificaciones_internas').where('remitenteEmail', '==', normalizedEmail).limit(120));
+          }
           const buckets = {};
-          const unsubs = clauses.map((ref, index) => ref.onSnapshot((snapshot) => {
-            buckets[index] = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+          const syncMessages = () => {
             const merged = Object.values(buckets).flat();
             const dedup = [];
             const seen = new Set();
@@ -7244,8 +7308,18 @@
               seen.add(item.id);
               dedup.push(item);
             });
-            dedup.sort((a, b) => (b?.creadoEn?.seconds || 0) - (a?.creadoEn?.seconds || 0));
-            setInternalNotifications(dedup);
+            dedup.sort((a, b) => (a?.creadoEn?.seconds || 0) - (b?.creadoEn?.seconds || 0));
+            setInternalMessages(dedup);
+            const normalizedEmail = String(user?.email || '').trim().toLowerCase();
+            setInternalNotifications(dedup.filter((item) => {
+              const recipientUid = String(item?.destinatarioUid || '').trim();
+              const recipientEmail = String(item?.destinatarioEmail || '').trim().toLowerCase();
+              return (user?.uid && recipientUid === user.uid) || (normalizedEmail && recipientEmail === normalizedEmail);
+            }).sort((a, b) => (b?.creadoEn?.seconds || 0) - (a?.creadoEn?.seconds || 0)));
+          };
+          const unsubs = clauses.map((ref, index) => ref.onSnapshot((snapshot) => {
+            buckets[index] = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            syncMessages();
           }, (error) => {
             console.error('Error leyendo notificaciones internas:', error);
           }));
@@ -7343,6 +7417,23 @@
             return acc;
           }, {});
         }, [staffMembers, staffSearchTerm, staffAreaFilter]);
+
+        const staffConversations = useMemo(() => staffMembers.reduce((acc, member) => {
+          const memberEmail = String(member.email || '').trim().toLowerCase();
+          const memberUid = String(member.uid || '').trim();
+          acc[member.id] = internalMessages.filter((item) => {
+            const senderUid = String(item?.remitenteUid || '').trim();
+            const senderEmail = String(item?.remitenteEmail || '').trim().toLowerCase();
+            const recipientUid = String(item?.destinatarioUid || '').trim();
+            const recipientEmail = String(item?.destinatarioEmail || '').trim().toLowerCase();
+            const fromMember = (memberUid && senderUid === memberUid) || (memberEmail && senderEmail === memberEmail);
+            const toMember = (memberUid && recipientUid === memberUid) || (memberEmail && recipientEmail === memberEmail);
+            const fromCurrent = (user?.uid && senderUid === user.uid) || (user?.email && senderEmail === String(user.email).trim().toLowerCase());
+            const toCurrent = (user?.uid && recipientUid === user.uid) || (user?.email && recipientEmail === String(user.email).trim().toLowerCase());
+            return (fromMember && toCurrent) || (toMember && fromCurrent);
+          });
+          return acc;
+        }, {}), [staffMembers, internalMessages, user?.uid, user?.email]);
         const isTicketManager = String(user?.email || '').trim().toLowerCase() === 'alfonso332estigarribia@gmail.com';
         const isAdminUser = userRole === 'admin';
         const mobileUnreadAlerts = useMemo(() => mobileAlerts.filter((a) => !a.read).length, [mobileAlerts]);
@@ -8037,7 +8128,7 @@
               remitenteUid: user?.uid || '',
               remitenteEmail: user?.email || '',
               remitenteNombre: currentUserName,
-              titulo: 'Nuevo mensaje interno',
+              titulo: 'Chat interno',
               mensaje: text,
               leida: false,
               creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
@@ -8612,9 +8703,27 @@
                                   <div className="kv"><b>Email:</b> {member.email || '-'}</div>
                                   <div className="kv"><b>Teléfono:</b> {formatStaffPhone(member.telefono)}</div>
                                   <div className="kv"><b>Área:</b> {normalizeAreaLabel(member.area || 'Sin área')}</div>
+                                  <div className="staff-chat-thread">
+                                    {(staffConversations[member.id] || []).length === 0 ? (
+                                      <div className="staff-chat-empty">Todavía no hay mensajes en esta conversación.</div>
+                                    ) : (
+                                      (staffConversations[member.id] || []).map((message) => {
+                                        const isOutgoing = ((user?.uid && message?.remitenteUid === user.uid) || (user?.email && String(message?.remitenteEmail || '').trim().toLowerCase() === String(user.email).trim().toLowerCase()));
+                                        return (
+                                          <div key={message.id} className={`staff-chat-bubble ${isOutgoing ? 'outgoing' : 'incoming'}`}>
+                                            <div className="staff-chat-meta">
+                                              <span>{isOutgoing ? 'Vos' : (member.nombre || 'Funcionario')}</span>
+                                              <span>{formatChatTimestamp(message.creadoEn)}</span>
+                                            </div>
+                                            <div>{message.mensaje || '-'}</div>
+                                          </div>
+                                        );
+                                      })
+                                    )}
+                                  </div>
                                   <textarea
                                     className="staff-message-box"
-                                    placeholder="Escribí un mensaje para este funcionario..."
+                                    placeholder="Escribí tu respuesta..."
                                     value={staffMessageDraft[member.id] || ''}
                                     onChange={(e) => updateStaffMessageDraft(member.id, e.target.value)}
                                   />
