@@ -3750,7 +3750,7 @@
         padding: clamp(84px, 10vh, 108px) 18px 18px;
       }
       .staff-chat-modal {
-        width: min(100%, 470px);
+        width: min(470px, calc(100vw - 36px));
         max-height: min(calc(100vh - 120px), 760px);
         display: flex;
         flex-direction: column;
@@ -3914,45 +3914,12 @@
         height: 20px;
         stroke: currentColor;
       }
-      @media (max-width: 1280px), (max-height: 860px) {
-        .staff-chat-modal-overlay {
-          padding-top: clamp(92px, 14vh, 132px);
-        }
-        .staff-chat-modal {
-          width: min(100%, 430px);
-          max-height: calc(100vh - 136px);
-          border-radius: 22px;
-        }
-        .staff-chat-modal-head {
-          padding: 12px 14px;
-          gap: 10px;
-        }
-        .staff-chat-modal-avatar {
-          width: 42px;
-          height: 42px;
-          border-radius: 14px;
-        }
-        .staff-chat-modal-close {
-          width: 34px;
-          height: 34px;
-        }
-        .staff-chat-modal-body {
-          padding: 12px;
-        }
-        .staff-chat-modal-compose {
-          padding: 12px;
-        }
-        .staff-chat-bubble {
-          max-width: 84%;
-          padding: 9px 11px;
-        }
-      }
-      @media (max-width: 720px), (max-height: 720px) {
+      @media (max-width: 560px), (max-height: 720px) {
         .staff-chat-modal-overlay {
           padding: clamp(82px, 12vh, 110px) 10px 10px;
         }
         .staff-chat-modal {
-          width: min(100%, 100vw - 20px);
+          width: min(470px, calc(100vw - 20px));
           max-height: calc(100vh - 100px);
           border-radius: 18px;
         }
