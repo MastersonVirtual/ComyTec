@@ -6667,6 +6667,7 @@
         const [chatReminderFlags, setChatReminderFlags] = useState({});
         const [chatAttachmentDraft, setChatAttachmentDraft] = useState({});
         const [chatUploadingFiles, setChatUploadingFiles] = useState(false);
+        const [chatContextMenu, setChatContextMenu] = useState({ open: false, x: 0, y: 0, memberId: '' });
         const [notificationStaffFilter, setNotificationStaffFilter] = useState('');
         const [chatSearchTerm, setChatSearchTerm] = useState('');
         const [internalMessages, setInternalMessages] = useState([]);
@@ -8073,6 +8074,7 @@
           const memberEmail = String(member.email || '').trim().toLowerCase();
           const memberUid = String(member.uid || '').trim();
           acc[member.id] = internalNotifications.filter((item) => {
+            if (item?.leida) return false;
             const senderUid = String(item?.remitenteUid || '').trim();
             const senderEmail = String(item?.remitenteEmail || '').trim().toLowerCase();
             return (memberUid && senderUid === memberUid) || (memberEmail && senderEmail === memberEmail);
@@ -8176,7 +8178,7 @@
         }, [staffMembers, staffConversations, activeChatMemberId, user?.uid, user?.email]);
 
         useEffect(() => {
-          if (!chatMenuOpen && !chatEmojiPickerOpen) return () => {};
+          if (!chatMenuOpen && !chatEmojiPickerOpen && !chatContextMenu.open) return () => {};
           function handleGlobalClick(event) {
             if (chatMenuOpen && chatMenuRef.current && !chatMenuRef.current.contains(event.target)) {
               setChatMenuOpen(false);
@@ -8184,10 +8186,13 @@
             if (chatEmojiPickerOpen && chatEmojiPickerRef.current && !chatEmojiPickerRef.current.contains(event.target)) {
               setChatEmojiPickerOpen(false);
             }
+            if (chatContextMenu.open) {
+              setChatContextMenu((prev) => ({ ...prev, open: false }));
+            }
           }
           document.addEventListener('mousedown', handleGlobalClick);
           return () => document.removeEventListener('mousedown', handleGlobalClick);
-        }, [chatMenuOpen, chatEmojiPickerOpen]);
+        }, [chatMenuOpen, chatEmojiPickerOpen, chatContextMenu.open]);
 
         useEffect(() => {
           if (effectiveSelectedForm !== 'funcionarios') return;
@@ -8969,7 +8974,19 @@
           updateChatPendingFlag(member.id, false);
           setChatMenuOpen(false);
           setChatEmojiPickerOpen(false);
+          setChatContextMenu({ open: false, x: 0, y: 0, memberId: '' });
           void markConversationAsRead(member);
+        }
+
+        function openChatContextMenu(member, event) {
+          if (!member?.id) return;
+          event.preventDefault();
+          setChatContextMenu({
+            open: true,
+            x: Math.min(event.clientX, window.innerWidth - 230),
+            y: Math.min(event.clientY, window.innerHeight - 180),
+            memberId: member.id,
+          });
         }
 
         function closeStaffChatModal() {
@@ -9640,7 +9657,7 @@
                               const member = chatItem.member;
                               const avatar = PROFILE_AVATAR_OPTIONS.find((option) => option.id === member.avatarId) || PROFILE_AVATAR_OPTIONS[0];
                               return (
-                                <article key={`chat-list-${member.id}`} className={`staff-chat-list-item ${activeChatMemberId === member.id ? 'active' : ''}`} onClick={() => openStaffChat(member)}>
+                                <article key={`chat-list-${member.id}`} className={`staff-chat-list-item ${activeChatMemberId === member.id ? 'active' : ''}`} onClick={() => openStaffChat(member)} onContextMenu={(event) => openChatContextMenu(member, event)}>
                                   <img src={avatar.src} alt={`Perfil de ${member.nombre || 'Funcionario'}`} />
                                   <div className="staff-chat-list-meta">
                                     <strong>{chatItem.pinned ? '📍 ' : ''}{member.nombre || 'Funcionario'}</strong>
@@ -9655,6 +9672,15 @@
                             })
                           )}
                         </div>
+                        {chatContextMenu.open && (
+                          <div className="staff-chat-menu" style={{ position: 'fixed', top: chatContextMenu.y, left: chatContextMenu.x, right: 'auto', zIndex: 2200 }}>
+                            <button type="button" onClick={() => { updateChatPendingFlag(chatContextMenu.memberId, true); setChatContextMenu({ open: false, x: 0, y: 0, memberId: '' }); }}>📌 Marcar como no leído</button>
+                            <button type="button" onClick={() => { setReminderForChat(chatContextMenu.memberId); setChatContextMenu({ open: false, x: 0, y: 0, memberId: '' }); }}>⏰ Recordar más tarde</button>
+                            <button type="button" onClick={() => { togglePinChat(chatContextMenu.memberId); setChatContextMenu({ open: false, x: 0, y: 0, memberId: '' }); }}>
+                              {chatPinnedFlags[chatContextMenu.memberId] ? '📍 Desfijar chat' : '📍 Fijar chat'}
+                            </button>
+                          </div>
+                        )}
                       </aside>
 
                       <section className="staff-chat-conversation-pane">
