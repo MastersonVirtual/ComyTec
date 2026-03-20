@@ -3709,7 +3709,7 @@
         display: grid;
         grid-template-columns: minmax(270px, 360px) minmax(0, 1fr);
         gap: 14px;
-        min-height: min(78vh, 760px);
+        min-height: calc(100vh - 210px);
         background: #f4f7f7;
         border-radius: 22px;
         border: 1px solid rgba(0, 100, 101, .16);
@@ -3819,6 +3819,14 @@
         padding: 14px;
         border-bottom: 1px solid rgba(0,100,101,.14);
         background: #ffffff;
+      }
+      .staff-chat-conversation-head .staff-chat-modal-meta strong {
+        color: #ff8a2a;
+      }
+      .staff-chat-conversation-head .staff-chat-modal-meta small {
+        color: #101515;
+        font-size: 12px;
+        font-weight: 600;
       }
       .staff-chat-conversation-thread {
         flex: 1;
@@ -4105,6 +4113,7 @@
       .staff-chat-bubble.incoming {
         align-self: flex-start;
         background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.09));
+        color: #111111;
       }
       .staff-chat-meta {
         display: flex;
@@ -4235,6 +4244,9 @@
         padding: 18px;
         background: #f9fcfc;
         box-shadow: 0 10px 20px rgba(12, 45, 44, .08);
+      }
+      .funcionarios-view {
+        width: min(1600px, 100%);
       }
       .profile-option h3 {
         margin: 0 0 12px;
@@ -8153,7 +8165,7 @@
           if (effectiveSelectedForm !== 'funcionarios') return;
           if (activeChatMemberId) return;
           const first = staffChatList[0]?.member;
-          if (first?.id) setActiveChatMemberId(first.id);
+          if (first?.id) openStaffChat(first);
         }, [effectiveSelectedForm, activeChatMemberId, staffChatList]);
 
         useEffect(() => {
@@ -8917,6 +8929,7 @@
           updateChatPendingFlag(member.id, false);
           setChatMenuOpen(false);
           setChatEmojiPickerOpen(false);
+          void markConversationAsRead(member);
         }
 
         function closeStaffChatModal() {
@@ -8959,6 +8972,28 @@
             await batch.commit();
           } catch (error) {
             console.error('Error marcando notificaciones internas como leídas:', error);
+          }
+        }
+
+        async function markConversationAsRead(member) {
+          if (!member?.id) return;
+          const targetEmail = String(member.email || '').trim().toLowerCase();
+          const targetUid = String(member.uid || '').trim();
+          const pending = internalNotifications.filter((item) => {
+            if (item?.leida || !item?.id) return false;
+            const senderEmail = String(item?.remitenteEmail || '').trim().toLowerCase();
+            const senderUid = String(item?.remitenteUid || '').trim();
+            return (targetEmail && senderEmail === targetEmail) || (targetUid && senderUid === targetUid);
+          });
+          if (pending.length === 0) return;
+          const batch = db.batch();
+          pending.forEach((item) => {
+            batch.set(db.collection('notificaciones_internas').doc(item.id), { leida: true }, { merge: true });
+          });
+          try {
+            await batch.commit();
+          } catch (error) {
+            console.error('Error marcando conversación como leída:', error);
           }
         }
 
