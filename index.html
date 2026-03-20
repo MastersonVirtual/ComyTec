@@ -165,6 +165,16 @@
       .search-detail { padding: 10px 12px; border-top: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.06); }
 
       .main { max-width: 1320px; margin: 20px auto; padding: 0 16px 24px; }
+      .main.main-chat-expanded {
+        max-width: 100%;
+        width: 100%;
+        margin: 8px auto 0;
+        padding: 0 8px 8px;
+        height: calc(100vh - 74px);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
       .hero {
         border-radius: 24px;
         padding: 60px 30px;
@@ -3709,7 +3719,9 @@
         display: grid;
         grid-template-columns: minmax(270px, 360px) minmax(0, 1fr);
         gap: 14px;
-        min-height: calc(100vh - 210px);
+        flex: 1;
+        min-height: 0;
+        height: 100%;
         background: #f4f7f7;
         border-radius: 22px;
         border: 1px solid rgba(0, 100, 101, .16);
@@ -3811,6 +3823,7 @@
         display: flex;
         flex-direction: column;
         background: linear-gradient(180deg, #f8fbfb, #eef6f6);
+        overflow: hidden;
       }
       .staff-chat-conversation-head {
         display: flex;
@@ -4000,6 +4013,7 @@
         border-radius: 10px;
         margin-top: 6px;
         border: 1px solid rgba(255,255,255,.2);
+        cursor: zoom-in;
       }
       .staff-chat-file-link {
         margin-top: 8px;
@@ -4227,6 +4241,13 @@
         }
       }
       @media (max-width: 720px) {
+        .main.main-chat-expanded {
+          width: 100%;
+          max-width: 100%;
+          height: auto;
+          overflow: visible;
+          padding: 0 8px 12px;
+        }
         .funcionarios-filters {
           grid-template-columns: 1fr;
         }
@@ -4246,7 +4267,14 @@
         box-shadow: 0 10px 20px rgba(12, 45, 44, .08);
       }
       .funcionarios-view {
-        width: min(1600px, 100%);
+        width: 100%;
+        height: 100%;
+        margin-bottom: 0;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
       }
       .profile-option h3 {
         margin: 0 0 12px;
@@ -8795,6 +8823,7 @@
             setSelectedForm('home');
             setMobileTab('home');
             setTipoAccion('');
+            setActiveChatMemberId('');
             return;
           }
           const previous = formHistory[formHistory.length - 2] || 'home';
@@ -8809,6 +8838,17 @@
         function openProfileView() {
           setSelectedForm('perfil');
           setMobileTab('perfil');
+          closeSidebar();
+        }
+
+        function goToHomeView() {
+          setSelectedForm('home');
+          setSelectedService(null);
+          setTipoAccion('');
+          setMobileTab('home');
+          setActiveChatMemberId('');
+          setChatMenuOpen(false);
+          setChatEmojiPickerOpen(false);
           closeSidebar();
         }
 
@@ -9290,7 +9330,7 @@
               </div>
               <div className="menu">
                 <div className="sidebar-section-label">Inicio</div>
-                <button className="menu-button" onClick={() => { setSelectedForm('home'); setSelectedService(null); setTipoAccion(''); closeSidebar(); }}><span className="menu-icon">🏠</span><span>Inicio</span></button>
+                <button className="menu-button" onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
                 {!isMobile && (
                   <>
                     <div className="sidebar-section-label">Operaciones</div>
@@ -9336,7 +9376,7 @@
                       className="topbar-home-btn"
                       type="button"
                       aria-label="Inicio"
-                      onClick={() => { setSelectedForm('home'); setSelectedService(null); setTipoAccion(''); setMobileTab('home'); closeSidebar(); }}
+                      onClick={goToHomeView}
                     >
                       <i data-lucide="house" />
                     </button>
@@ -9493,7 +9533,7 @@
                 </>
               )}
 
-              <main className={`main ${grupo === 'charla-detalle' ? 'charla-main-wide' : ''}`}>
+              <main className={`main ${grupo === 'charla-detalle' ? 'charla-main-wide' : ''} ${effectiveSelectedForm === 'funcionarios' ? 'main-chat-expanded' : ''}`}>
                 {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'acciones' && effectiveSelectedForm === 'home' ? renderMobileActions() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : isMobile && mobileTab === 'actividad' ? (
                   <section className="mobile-section-stack">
                     <div className="mobile-section-card">
@@ -9655,7 +9695,7 @@
                                       <div>{message.mensaje || '-'}</div>
                                       {Array.isArray(message.adjuntos) && message.adjuntos.map((adjunto) => {
                                         const mime = String(adjunto?.mimeType || '');
-                                        if (mime.startsWith('image/')) return <img key={adjunto.id || adjunto.nombre} className="staff-chat-media" src={adjunto.dataUrl} alt={adjunto.nombre || 'Imagen adjunta'} />;
+                                        if (mime.startsWith('image/')) return <img key={adjunto.id || adjunto.nombre} className="staff-chat-media" src={adjunto.dataUrl} alt={adjunto.nombre || 'Imagen adjunta'} onClick={() => openImageViewer(adjunto.dataUrl)} />;
                                         if (mime.startsWith('video/')) return <video key={adjunto.id || adjunto.nombre} className="staff-chat-media" src={adjunto.dataUrl} controls />;
                                         return <a key={adjunto.id || adjunto.nombre} className="staff-chat-file-link" href={adjunto.dataUrl} download={adjunto.nombre || 'archivo'}>📎 {adjunto.nombre || 'archivo adjunto'}</a>;
                                       })}
@@ -9857,7 +9897,7 @@
                       )}
                     </article>
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                      <button className="edit-btn profile-back-btn" type="button" onClick={() => { setSelectedForm('home'); setSelectedService(null); setTipoAccion(''); }}>Volver a inicio</button>
+                      <button className="edit-btn profile-back-btn" type="button" onClick={goToHomeView}>Volver a inicio</button>
                       <button className="logout-btn profile-logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar sesión</button>
                     </div>
                   </section>
@@ -10736,7 +10776,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                               <div>{message.mensaje || '-'}</div>
                               {Array.isArray(message.adjuntos) && message.adjuntos.map((adjunto) => {
                                 const mime = String(adjunto?.mimeType || '');
-                                if (mime.startsWith('image/')) return <img key={adjunto.id || adjunto.nombre} className="staff-chat-media" src={adjunto.dataUrl} alt={adjunto.nombre || 'Imagen adjunta'} />;
+                                if (mime.startsWith('image/')) return <img key={adjunto.id || adjunto.nombre} className="staff-chat-media" src={adjunto.dataUrl} alt={adjunto.nombre || 'Imagen adjunta'} onClick={() => openImageViewer(adjunto.dataUrl)} />;
                                 if (mime.startsWith('video/')) return <video key={adjunto.id || adjunto.nombre} className="staff-chat-media" src={adjunto.dataUrl} controls />;
                                 return <a key={adjunto.id || adjunto.nombre} className="staff-chat-file-link" href={adjunto.dataUrl} download={adjunto.nombre || 'archivo'}>📎 {adjunto.nombre || 'archivo adjunto'}</a>;
                               })}
@@ -10817,10 +10857,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                       className={mobileTab === 'home' && effectiveSelectedForm === 'home' ? 'active' : ''}
                       type="button"
                       onClick={() => {
-                        setMobileTab('home');
-                        setSelectedForm('home');
-                        setSelectedService(null);
-                        setTipoAccion('');
+                        goToHomeView();
                         setMobileBellOpen(false);
                         setMobileSearchOpen(false);
                         setMobileQuickMenuOpen(false);
