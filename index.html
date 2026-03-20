@@ -5833,15 +5833,28 @@
       };
 
       const novacionInicial = {
-        representanteComercial: '',
+        representanteComercial: 'Francisco Bartellone',
+        comercialOtroNombre: '',
+        motivoCambioComercial: '',
+        cambiaMensualidad: 'No',
         creadoPor: '',
         nombreServicio: '',
         duracionNuevoContratoMeses: '',
         nuevoImporteNovacion: '',
         nuevoImporteArrendamiento: '',
         importeVentaEquipos: '',
-        detalleEquipamiento: '',
+        hayBonificacion: 'No',
         descuentosPago: '',
+        nuevoHorarioCobertura: '',
+        incluyeAppPorteria: '',
+        presupuestoProveedorNombre: '',
+        presupuestoProveedorUrl: '',
+        importeSvideoUsd: '',
+        referenteInstalacion: '',
+        telefonoReferenteInstalacion: '',
+        fechaAltaNegociada: '',
+        plazoInstalacionDias: '',
+        detalleEquipamiento: '',
         facturado: 'No',
       };
 
@@ -6700,6 +6713,7 @@
         const [ticketDragOver, setTicketDragOver] = useState(false);
         const [technicalDocDragOver, setTechnicalDocDragOver] = useState(false);
         const [serviceBudgetDragOver, setServiceBudgetDragOver] = useState(false);
+        const [novacionBudgetDragOver, setNovacionBudgetDragOver] = useState(false);
         const [uploadingTechnicalDoc, setUploadingTechnicalDoc] = useState(false);
         const [ticketSaving, setTicketSaving] = useState(false);
         const [imageViewerSrc, setImageViewerSrc] = useState('');
@@ -8294,7 +8308,7 @@
           const stamp = formatUruguayDateTime();
           setServicioForm((prev) => ({ ...prev, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: prev.fechaIngresoDatos || stamp }));
           setObraForm((prev) => ({ ...prev, representanteComercial: currentUserName, creadoPor: currentUserName }));
-          setNovacionForm((prev) => ({ ...prev, representanteComercial: currentUserName, creadoPor: currentUserName }));
+          setNovacionForm((prev) => ({ ...prev, representanteComercial: prev.representanteComercial || 'Francisco Bartellone', creadoPor: currentUserName }));
         }
 
         function captureFormOpen(action) {
@@ -8341,7 +8355,7 @@
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
           setEditingServiceId(null);
           const stamp = formatUruguayDateTime();
-          setServicioForm({ ...servicioInicial, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: stamp }); setObraForm({ ...obraInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setNovacionForm({ ...novacionInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setAgregadoForm({ ...agregadoInicial, responsableAdicionales: currentUserName || '' }); setMovimientoForm(movimientoInicial); setBajaForm(bajaInicial); setCharlaForm(charlaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
+          setServicioForm({ ...servicioInicial, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: stamp }); setObraForm({ ...obraInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setNovacionForm({ ...novacionInicial, representanteComercial: 'Francisco Bartellone', creadoPor: currentUserName }); setAgregadoForm({ ...agregadoInicial, responsableAdicionales: currentUserName || '' }); setMovimientoForm(movimientoInicial); setBajaForm(bajaInicial); setCharlaForm(charlaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
         }
 
         function setServicioField(key, value) {
@@ -8412,6 +8426,17 @@
           setNovacionForm((prev) => ({ ...prev, [key]: value }));
         }
 
+        function handleNovacionFileUpload(file) {
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            setNovacionForm((prev) => ({ ...prev, presupuestoProveedorUrl: String(reader.result || ''), presupuestoProveedorNombre: file.name || 'presupuesto-novacion' }));
+            setNotificacion({ mensaje: '✔ Archivo de novación cargado', tipo: 'ok' });
+          };
+          reader.onerror = () => setNotificacion({ mensaje: '✖ No se pudo leer el archivo', tipo: 'error' });
+          reader.readAsDataURL(file);
+        }
+
         function setAgregadoField(key, value) {
           setAgregadoForm((prev) => ({ ...prev, [key]: value }));
         }
@@ -8470,7 +8495,7 @@
           const catalog = getServiceCatalogById(clienteIdAsociado);
           if (!catalog) return;
           if (grupo === 'novacion') {
-            setNovacionForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio, representanteComercial: catalog.representanteComercial || prev.representanteComercial, atencionCliente: catalog.atencionCliente || prev.atencionCliente }));
+            setNovacionForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio, atencionCliente: catalog.atencionCliente || prev.atencionCliente }));
           }
           if (grupo === 'agregado') {
             setAgregadoForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio }));
@@ -8528,6 +8553,9 @@
           if (['Nuevo Servicio', 'Novación'].includes(action)) {
             captureFormOpen(action);
             applyUserDefaultsToForms();
+          }
+          if (action === 'Novación') {
+            setNovacionForm((prev) => ({ ...prev, representanteComercial: 'Francisco Bartellone' }));
           }
           if (action === 'Adicionales') {
             setAgregadoForm((prev) => ({ ...prev, responsableAdicionales: prev.responsableAdicionales || currentUserName || '' }));
@@ -8611,6 +8639,9 @@
           if (grupo === 'novacion') {
             if (!novacionForm.nombreServicio || !novacionForm.duracionNuevoContratoMeses) {
               return alert('Completá al menos: Nombre del servicio y Duración del nuevo contrato.');
+            }
+            if (novacionForm.representanteComercial === 'Otro' && (!novacionForm.comercialOtroNombre || !novacionForm.motivoCambioComercial)) {
+              return alert('Si seleccionás representante comercial "Otro", completá quién es y el motivo del cambio.');
             }
             Object.assign(doc, { ...novacionForm, formulario: 'novacion', creadoPor: novacionForm.creadoPor || currentUserName, auditoriaApertura: formOpenAudit });
           }
@@ -10627,44 +10658,110 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     ) : grupo === 'novacion' ? (
-                      <div className="service-layout bento-grid facturacion-module">
+                      <div className="service-layout">
                         <div className="service-card">
-                          <h3>Facturación · Novaciones</h3>
+                          <h3>Novación</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
-                            <div className="field"><label>Representante Comercial</label><input value={novacionForm.representanteComercial} onChange={(e) => setNovacionField('representanteComercial', e.target.value)} type="text" readOnly={lockCommercialField} /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>1. Identificación y Vigencia</h3>
+                          <h3>1. Identificación del Servicio</h3>
                           <div className="card-grid">
                             <div className="field span-2"><label>Nombre de servicio</label><input value={novacionForm.nombreServicio} onChange={(e) => setNovacionField('nombreServicio', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Duración del nuevo contrato</label><input value={novacionForm.duracionNuevoContratoMeses} onChange={(e) => setNovacionField('duracionNuevoContratoMeses', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>ID del servicio</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio" /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>2. Actualización de Abonos Mensuales</h3>
+                          <h3>2. Comercial</h3>
                           <div className="card-grid">
-                            <div className="field"><label>Nuevo importe de la novación</label><input value={novacionForm.nuevoImporteNovacion} onChange={(e) => setNovacionField('nuevoImporteNovacion', e.target.value)} type="number" min="0" /></div>
-                            <div className="field"><label>Nuevo importe por arrendamiento</label><input value={novacionForm.nuevoImporteArrendamiento} onChange={(e) => setNovacionField('nuevoImporteArrendamiento', e.target.value)} type="number" min="0" /></div>
+                            <div className="field">
+                              <label>Representante comercial</label>
+                              <select value={novacionForm.representanteComercial} onChange={(e) => setNovacionField('representanteComercial', e.target.value)}>
+                                <option value="Francisco Bartellone">Francisco Bartellone</option>
+                                <option value="Gastón Silva">Gastón Silva</option>
+                                <option value="Gonzalo Claudio">Gonzalo Claudio</option>
+                                <option value="Nicolás Leguizamón">Nicolás Leguizamón</option>
+                                <option value="Otro">Otro</option>
+                              </select>
+                            </div>
+                            {novacionForm.representanteComercial === 'Otro' && (
+                              <>
+                                <div className="field"><label>Indicar quién es</label><input value={novacionForm.comercialOtroNombre || ''} onChange={(e) => setNovacionField('comercialOtroNombre', e.target.value)} type="text" /></div>
+                                <div className="field span-2"><label>Indicar motivo del cambio</label><input value={novacionForm.motivoCambioComercial || ''} onChange={(e) => setNovacionField('motivoCambioComercial', e.target.value)} type="text" /></div>
+                              </>
+                            )}
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>3. Cargos por Única Vez y Respaldo</h3>
+                          <h3>3. Cambios Económicos</h3>
                           <div className="card-grid">
+                            <div className="field"><label>¿Cambia la mensualidad del servicio por novación?</label><select value={novacionForm.cambiaMensualidad || 'No'} onChange={(e) => setNovacionField('cambiaMensualidad', e.target.value)}><option value="Sí">Sí</option><option value="No">No</option></select></div>
+                            {novacionForm.cambiaMensualidad === 'Sí' && <div className="field"><label>Nuevo importe de la mensualidad</label><input value={novacionForm.nuevoImporteNovacion} onChange={(e) => setNovacionField('nuevoImporteNovacion', e.target.value)} type="number" min="0" /></div>}
+                            <div className="field"><label>Nuevo importe por arrendamiento de equipos (si corresponde)</label><input value={novacionForm.nuevoImporteArrendamiento} onChange={(e) => setNovacionField('nuevoImporteArrendamiento', e.target.value)} type="number" min="0" /></div>
                             <div className="field"><label>Importe por venta de equipos</label><input value={novacionForm.importeVentaEquipos} onChange={(e) => setNovacionField('importeVentaEquipos', e.target.value)} type="number" min="0" /></div>
-                            <div className="field span-2"><label>Detalle del equipamiento</label><textarea value={novacionForm.detalleEquipamiento} onChange={(e) => setNovacionField('detalleEquipamiento', e.target.value)} /></div>
+                            <div className="field"><label>Duración del nuevo contrato (meses)</label><input value={novacionForm.duracionNuevoContratoMeses} onChange={(e) => setNovacionField('duracionNuevoContratoMeses', e.target.value)} type="number" min="0" /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>4. Ajustes y Cierre de Ciclo</h3>
+                          <h3>4. Bonificaciones</h3>
                           <div className="card-grid">
-                            <div className="field span-2"><label>Descuentos en el pago</label><textarea value={novacionForm.descuentosPago} onChange={(e) => setNovacionField('descuentosPago', e.target.value)} /></div>
+                            <div className="field"><label>¿Hay bonificación o descuento?</label><select value={novacionForm.hayBonificacion || 'No'} onChange={(e) => setNovacionField('hayBonificacion', e.target.value)}><option value="Sí">Sí</option><option value="No">No</option></select></div>
+                            {novacionForm.hayBonificacion === 'Sí' && <div className="field span-2"><label>Indicar descuento</label><textarea value={novacionForm.descuentosPago} onChange={(e) => setNovacionField('descuentosPago', e.target.value)} /></div>}
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>5. Operativa del Servicio</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Nuevo horario de cobertura (si corresponde)</label><input value={novacionForm.nuevoHorarioCobertura || ''} onChange={(e) => setNovacionField('nuevoHorarioCobertura', e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>6. App de Portería Virtual</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>¿La novación incluye App de portería virtual?</label><select value={novacionForm.incluyeAppPorteria || ''} onChange={(e) => setNovacionField('incluyeAppPorteria', e.target.value)}><option value="">Seleccionar...</option><option value="Sí, con apertura de puertas por app Akuvox">Sí, con apertura de puertas por app Akuvox</option><option value="Sí, sin apertura de puertas">Sí, sin apertura de puertas</option><option value="No utilizarán app">No utilizarán app</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>7. Instalación y Costos</h3>
+                          <div className="card-grid">
+                            <div className="field span-2">
+                              <label>Presupuesto proveedor (archivo)</label>
+                              <div
+                                className={`ticket-upload-dropzone ${novacionBudgetDragOver ? 'dragover' : ''}`}
+                                onDragOver={(e) => { e.preventDefault(); setNovacionBudgetDragOver(true); }}
+                                onDragLeave={() => setNovacionBudgetDragOver(false)}
+                                onDrop={(e) => { e.preventDefault(); setNovacionBudgetDragOver(false); handleNovacionFileUpload(e.dataTransfer?.files?.[0]); }}
+                              >
+                                <input type="file" onChange={(e) => handleNovacionFileUpload(e.target.files?.[0])} />
+                              </div>
+                            </div>
+                            {novacionForm.presupuestoProveedorNombre && <div className="field span-2"><label>Archivo cargado</label><input value={novacionForm.presupuestoProveedorNombre} readOnly type="text" /></div>}
+                            <div className="field"><label>Importe de Svideo en USD</label><input value={novacionForm.importeSvideoUsd || ''} onChange={(e) => setNovacionField('importeSvideoUsd', e.target.value)} type="number" min="0" placeholder="Completar solo si hay instalación" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>8. Referente de Instalación</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Nombre y apellido</label><input value={novacionForm.referenteInstalacion || ''} onChange={(e) => setNovacionField('referenteInstalacion', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Teléfono</label><input value={novacionForm.telefonoReferenteInstalacion || ''} onChange={(e) => setNovacionField('telefonoReferenteInstalacion', e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>9. Fechas y Plazos</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Fecha de alta del servicio negociada con el cliente</label><input value={novacionForm.fechaAltaNegociada || ''} onChange={(e) => setNovacionField('fechaAltaNegociada', e.target.value)} type="date" /></div>
+                            <div className="field"><label>Plazo de instalación (días)</label><input value={novacionForm.plazoInstalacionDias || ''} onChange={(e) => setNovacionField('plazoInstalacionDias', e.target.value)} type="number" min="0" /></div>
                             <div className="field"><label>FACTURADO</label><select value={novacionForm.facturado} onChange={(e) => setNovacionField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
                           </div>
                         </div>
