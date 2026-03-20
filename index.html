@@ -5899,14 +5899,19 @@
       };
 
       const bajaInicial = {
+        servicioIdSeleccionado: '',
         nombreServicio: '',
         direccionServicio: '',
-        fechaIngreso: '',
+        fechaIngresoAuto: '',
         quienSolicita: '',
+        nombreCliente: '',
+        telefono: '',
         motivoBaja: '',
-        internetEstado: '',
-        propietarioEquipamiento: 'S-Video',
+        internetResponsable: 'Masterson',
+        propietarioEquipamiento: 'Masterson',
         equipamientoRetirar: '',
+        equipamientoRetirarUrl: '',
+        motivoBajaCategoria: '',
         observaciones: '',
       };
 
@@ -6726,6 +6731,7 @@
         const [technicalDocDragOver, setTechnicalDocDragOver] = useState(false);
         const [serviceBudgetDragOver, setServiceBudgetDragOver] = useState(false);
         const [novacionBudgetDragOver, setNovacionBudgetDragOver] = useState(false);
+        const [bajaEquipDragOver, setBajaEquipDragOver] = useState(false);
         const [uploadingTechnicalDoc, setUploadingTechnicalDoc] = useState(false);
         const [ticketSaving, setTicketSaving] = useState(false);
         const [imageViewerSrc, setImageViewerSrc] = useState('');
@@ -8367,7 +8373,7 @@
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
           setEditingServiceId(null);
           const stamp = formatUruguayDateTime();
-          setServicioForm({ ...servicioInicial, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: stamp }); setObraForm({ ...obraInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setNovacionForm({ ...novacionInicial, representanteComercial: 'Francisco Bartellone', creadoPor: currentUserName }); setAgregadoForm({ ...agregadoInicial, responsableAdicionales: currentUserName || '' }); setMovimientoForm({ ...movimientoInicial, fechaIngresoAuto: stamp }); setBajaForm(bajaInicial); setCharlaForm(charlaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
+          setServicioForm({ ...servicioInicial, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: stamp }); setObraForm({ ...obraInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setNovacionForm({ ...novacionInicial, representanteComercial: 'Francisco Bartellone', creadoPor: currentUserName }); setAgregadoForm({ ...agregadoInicial, responsableAdicionales: currentUserName || '' }); setMovimientoForm({ ...movimientoInicial, fechaIngresoAuto: stamp }); setBajaForm({ ...bajaInicial, fechaIngresoAuto: stamp }); setCharlaForm(charlaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
         }
 
         function setServicioField(key, value) {
@@ -8472,6 +8478,17 @@
           setBajaForm((prev) => ({ ...prev, [key]: value }));
         }
 
+        function handleBajaEquipFileUpload(file) {
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            setBajaForm((prev) => ({ ...prev, equipamientoRetirar: file.name || 'planilla-equipamiento', equipamientoRetirarUrl: String(reader.result || '') }));
+            setNotificacion({ mensaje: '✔ Planilla de equipamiento cargada', tipo: 'ok' });
+          };
+          reader.onerror = () => setNotificacion({ mensaje: '✖ No se pudo leer la planilla', tipo: 'error' });
+          reader.readAsDataURL(file);
+        }
+
         function setCharlaField(key, value) {
           setCharlaForm((prev) => ({ ...prev, [key]: value }));
         }
@@ -8513,7 +8530,7 @@
             setAgregadoForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio }));
           }
           if (grupo === 'baja-detalle') {
-            setBajaForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio, direccionServicio: catalog.direccionServicio || prev.direccionServicio }));
+            setBajaForm((prev) => ({ ...prev, servicioIdSeleccionado: clienteIdAsociado || prev.servicioIdSeleccionado, nombreServicio: catalog.nombreServicio || prev.nombreServicio, direccionServicio: catalog.direccionServicio || prev.direccionServicio }));
           }
           if (grupo === 'movimiento-detalle') {
             setMovimientoForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio }));
@@ -8681,8 +8698,11 @@
             Object.assign(doc, { ...movimientoForm, formulario: 'movimiento-obra' });
           }
           if (grupo === 'baja-detalle') {
-            if (!bajaForm.nombreServicio || !bajaForm.direccionServicio || !bajaForm.fechaIngreso) {
-              return alert('Completá al menos: Nombre del servicio, Dirección y Fecha de ingreso.');
+            if (!bajaForm.nombreServicio || !normalizedClientId) {
+              return alert('Seleccioná un servicio existente y verificá el nombre del servicio.');
+            }
+            if (!bajaForm.motivoBajaCategoria) {
+              return alert('Seleccioná un motivo principal de baja.');
             }
             Object.assign(doc, { ...bajaForm, formulario: 'baja-servicio', status: 'Baja', estado: 'Baja' });
           }
@@ -8720,6 +8740,25 @@
             const existingLogs = Array.isArray(targetSource?.logs_cambios) ? targetSource.logs_cambios : [];
 
             if (targetDocId) {
+              if (grupo === 'baja-detalle') {
+                const bajaPayload = {
+                  ...doc,
+                  servicioPadreId: targetDocId,
+                  creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+                  creadoPor: currentUserName,
+                };
+                await db.collection('operaciones').doc(targetDocId).collection('bajasServicio').add(bajaPayload);
+                await db.collection('operaciones').doc(targetDocId).set({
+                  status: 'Baja',
+                  estado: 'Baja',
+                  actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+                  editadoPor: currentUserName,
+                }, { merge: true });
+                resetFields();
+                setNotificacion({ mensaje: '✔ Baja registrada (Servicios 1 → Bajas N)', tipo: 'ok' });
+                void logRealtimeActivityEvent({ usuario: currentUserName, accion: 'registró baja del servicio', clienteId: normalizedClientId });
+                return;
+              }
               const payload = {
                 ...doc,
                 actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
@@ -10975,41 +11014,103 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>Baja de Servicio</h3>
                           <div className="card-grid">
-                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => { setClienteIdAsociado(e.target.value); setBajaField('servicioIdSeleccionado', e.target.value); }} type="text" placeholder="ID del servicio existente" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>1. Identificación del Punto de Baja</h3>
+                          <h3>1. Identificación del Servicio</h3>
                           <div className="card-grid">
-                            <div className="field span-2"><label>Nombre del Servicio</label><input value={bajaForm.nombreServicio} onChange={(e) => setBajaField('nombreServicio', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Dirección</label><input value={bajaForm.direccionServicio} onChange={(e) => setBajaField('direccionServicio', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Fecha de Ingreso</label><input value={bajaForm.fechaIngreso} onChange={(e) => setBajaField('fechaIngreso', e.target.value)} type="date" /></div>
+                            <div className="field span-2"><label>Nombre del servicio</label><input value={bajaForm.nombreServicio} onChange={(e) => setBajaField('nombreServicio', e.target.value)} type="text" /></div>
+                            <div className="field">
+                              <label>ID del servicio (selector)</label>
+                              <select value={clienteIdAsociado || bajaForm.servicioIdSeleccionado || ''} onChange={(e) => { setClienteIdAsociado(e.target.value); setBajaField('servicioIdSeleccionado', e.target.value); }}>
+                                <option value="">Seleccionar servicio...</option>
+                                {visibleRows.map((row) => (
+                                  <option key={`baja-id-${row.id}`} value={row.clienteId || ''}>
+                                    {(row.clienteId || '-') + ' · ' + (row.nombreServicio || 'Servicio sin nombre')}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="field span-2"><label>Dirección (automática)</label><input value={bajaForm.direccionServicio} readOnly type="text" /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>2. Contacto y Justificación</h3>
+                          <h3>2. Fecha</h3>
                           <div className="card-grid">
-                            <div className="field span-2"><label>Quien lo Solicita</label><input value={bajaForm.quienSolicita} onChange={(e) => setBajaField('quienSolicita', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Motivo de Baja</label><input value={bajaForm.motivoBaja} onChange={(e) => setBajaField('motivoBaja', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Fecha de ingreso (automática)</label><input value={bajaForm.fechaIngresoAuto || ''} readOnly type="text" /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>3. Detalles Técnicos y Conectividad</h3>
+                          <h3>3. Solicitud</h3>
                           <div className="card-grid">
-                            <div className="field span-2"><label>Internet</label><input value={bajaForm.internetEstado} onChange={(e) => setBajaField('internetEstado', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Propietario de Equipamiento</label><select value={bajaForm.propietarioEquipamiento} onChange={(e) => setBajaField('propietarioEquipamiento', e.target.value)}><option>S-Video</option><option>Cliente</option><option>Mixto</option></select></div>
+                            <div className="field"><label>Quién lo solicita</label><input value={bajaForm.quienSolicita} onChange={(e) => setBajaField('quienSolicita', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Nombre del cliente</label><input value={bajaForm.nombreCliente || ''} onChange={(e) => setBajaField('nombreCliente', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Teléfono</label><input value={bajaForm.telefono || ''} onChange={(e) => setBajaField('telefono', e.target.value)} type="text" /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>4. Logística de Retiro y Cierre</h3>
+                          <h3>4. Motivo de Baja</h3>
                           <div className="card-grid">
-                            <div className="field span-3"><label>Equipamiento a Retirar</label><input value={bajaForm.equipamientoRetirar} onChange={(e) => setBajaField('equipamientoRetirar', e.target.value)} type="text" placeholder="Referencia o nombre de planilla" /></div>
-                            <div className="field span-3"><label>Observaciones</label><textarea value={bajaForm.observaciones} onChange={(e) => setBajaField('observaciones', e.target.value)} /></div>
+                            <div className="field span-2">
+                              <label>Motivo principal</label>
+                              <select value={bajaForm.motivoBajaCategoria || ''} onChange={(e) => setBajaField('motivoBajaCategoria', e.target.value)}>
+                                <option value="">Seleccionar...</option>
+                                <option value="Precio">Motivos Comerciales · Precio</option>
+                                <option value="No acuerdo comercial">Motivos Comerciales · No acuerdo comercial</option>
+                                <option value="Mala gestión">Motivos de Calidad · Mala gestión</option>
+                                <option value="Mal servicio">Motivos de Calidad · Mal servicio</option>
+                                <option value="Fin de obra">Motivos Operativos · Fin de obra</option>
+                                <option value="Demolición">Motivos Operativos · Demolición</option>
+                                <option value="Término de servicio">Motivos Operativos · Término de servicio</option>
+                                <option value="Corte de servicio">Motivos Operativos · Corte de servicio</option>
+                                <option value="Cambio de proveedor">Cambio de Proveedor</option>
+                                <option value="No especifica">No especificado</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>5. Internet</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Responsable del servicio de internet</label><select value={bajaForm.internetResponsable || 'Masterson'} onChange={(e) => setBajaField('internetResponsable', e.target.value)}><option value="Masterson">Masterson</option><option value="Cliente">Cliente</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>6. Equipamiento</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Propietario del equipamiento</label><select value={bajaForm.propietarioEquipamiento || 'Masterson'} onChange={(e) => setBajaField('propietarioEquipamiento', e.target.value)}><option value="Masterson">Masterson</option><option value="Cliente">Cliente</option></select></div>
+                            <div className="field span-2">
+                              <label>Equipamiento a retirar (planilla)</label>
+                              <div
+                                className={`ticket-upload-dropzone ${bajaEquipDragOver ? 'dragover' : ''}`}
+                                onDragOver={(e) => { e.preventDefault(); setBajaEquipDragOver(true); }}
+                                onDragLeave={() => setBajaEquipDragOver(false)}
+                                onDrop={(e) => { e.preventDefault(); setBajaEquipDragOver(false); handleBajaEquipFileUpload(e.dataTransfer?.files?.[0]); }}
+                                onPaste={(e) => {
+                                  const items = e.clipboardData?.items || [];
+                                  const fileItem = Array.from(items).find((it) => it.kind === 'file');
+                                  if (fileItem) handleBajaEquipFileUpload(fileItem.getAsFile());
+                                }}
+                              >
+                                <input type="file" onChange={(e) => handleBajaEquipFileUpload(e.target.files?.[0])} />
+                              </div>
+                            </div>
+                            {bajaForm.equipamientoRetirar && <div className="field span-2"><label>Archivo cargado</label><input value={bajaForm.equipamientoRetirar} readOnly type="text" /></div>}
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>7. Observaciones</h3>
+                          <div className="card-grid">
+                            <div className="field span-3"><label>Detalles adicionales</label><textarea value={bajaForm.observaciones} onChange={(e) => setBajaField('observaciones', e.target.value)} /></div>
                           </div>
                         </div>
 
