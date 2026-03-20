@@ -3808,6 +3808,98 @@
         align-items: flex-end;
         gap: 10px;
       }
+      .staff-chat-compose-tools {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .staff-chat-tool-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        border: 1px solid rgba(126, 247, 223, .3);
+        background: rgba(8, 43, 41, .9);
+        color: #d8f8f3;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        cursor: pointer;
+      }
+      .staff-chat-tool-btn:hover { background: rgba(16, 77, 71, .94); }
+      .staff-chat-attachments {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .staff-chat-attachment-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        max-width: 100%;
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 11px;
+        border: 1px solid rgba(126, 247, 223, .3);
+        background: rgba(7, 57, 53, .72);
+      }
+      .staff-chat-attachment-chip button {
+        border: 0;
+        background: transparent;
+        color: #fff;
+        cursor: pointer;
+        padding: 0;
+        font-size: 12px;
+      }
+      .staff-chat-media {
+        display: block;
+        max-width: 220px;
+        border-radius: 10px;
+        margin-top: 6px;
+        border: 1px solid rgba(255,255,255,.2);
+      }
+      .staff-chat-file-link {
+        margin-top: 8px;
+        display: inline-flex;
+        gap: 6px;
+        align-items: center;
+        color: #c8fffb;
+        text-decoration: underline;
+      }
+      .staff-chat-head-actions {
+        margin-left: auto;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .staff-chat-menu {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        min-width: 210px;
+        z-index: 6;
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,.18);
+        background: rgba(2, 24, 23, .98);
+        box-shadow: 0 14px 26px rgba(0,0,0,.28);
+        overflow: hidden;
+      }
+      .staff-chat-menu button {
+        width: 100%;
+        border: 0;
+        border-bottom: 1px solid rgba(255,255,255,.09);
+        border-radius: 0;
+        background: transparent;
+        color: #e8f8f6;
+        padding: 10px 12px;
+        text-align: left;
+        cursor: pointer;
+        font-size: 12px;
+      }
+      .staff-chat-menu button:last-child { border-bottom: 0; }
+      .staff-chat-menu button:hover { background: rgba(255,255,255,.08); }
       .staff-pending-pill {
         display: inline-flex;
         align-items: center;
@@ -6361,6 +6453,11 @@
         const [staffMessageDraft, setStaffMessageDraft] = useState({});
         const [sendingStaffMessageId, setSendingStaffMessageId] = useState('');
         const [activeChatMemberId, setActiveChatMemberId] = useState('');
+        const [chatMenuOpen, setChatMenuOpen] = useState(false);
+        const [chatPendingFlags, setChatPendingFlags] = useState({});
+        const [chatPinnedFlags, setChatPinnedFlags] = useState({});
+        const [chatReminderFlags, setChatReminderFlags] = useState({});
+        const [chatAttachmentDraft, setChatAttachmentDraft] = useState({});
         const [notificationStaffFilter, setNotificationStaffFilter] = useState('');
         const [chatSearchTerm, setChatSearchTerm] = useState('');
         const [internalMessages, setInternalMessages] = useState([]);
@@ -6385,6 +6482,7 @@
         const topServicesLeaderRef = useRef('');
         const topSalesLeaderRef = useRef('');
         const desktopBellRef = useRef(null);
+        const chatFileInputsRef = useRef({});
         const sellerFilterRef = useRef(null);
         const recentActivitySourcesRef = useRef({});
         const upcomingInstallationsSourcesRef = useRef({});
@@ -6443,6 +6541,15 @@
           const hh = String(date.getHours()).padStart(2, '0');
           const min = String(date.getMinutes()).padStart(2, '0');
           return `${dd}/${mm} ${hh}:${min}`;
+        }
+
+        function getChatTimestampMs(value) {
+          if (!value) return 0;
+          const date = typeof value?.toDate === 'function'
+            ? value.toDate()
+            : (typeof value?.seconds === 'number' ? new Date(value.seconds * 1000) : new Date(value));
+          if (!(date instanceof Date) || Number.isNaN(date.getTime())) return 0;
+          return date.getTime();
         }
 
         function getChatDisplayName(message, staffList = []) {
@@ -7612,6 +7719,35 @@
           return () => unsubs.forEach((unsub) => typeof unsub === 'function' && unsub());
         }, [user?.uid, user?.email]);
 
+        const chatSettingsStorageKey = useMemo(() => {
+          const identity = String(user?.uid || user?.email || '').trim().toLowerCase();
+          return identity ? `chat_settings_${identity}` : '';
+        }, [user?.uid, user?.email]);
+
+        useEffect(() => {
+          if (!chatSettingsStorageKey) return;
+          try {
+            const raw = localStorage.getItem(chatSettingsStorageKey);
+            if (!raw) return;
+            const parsed = JSON.parse(raw) || {};
+            setChatPendingFlags(parsed.pending || {});
+            setChatPinnedFlags(parsed.pinned || {});
+            setChatReminderFlags(parsed.reminders || {});
+          } catch (error) {
+            console.error('No se pudieron cargar preferencias de chat:', error);
+          }
+        }, [chatSettingsStorageKey]);
+
+        useEffect(() => {
+          if (!chatSettingsStorageKey) return;
+          const payload = {
+            pending: chatPendingFlags,
+            pinned: chatPinnedFlags,
+            reminders: chatReminderFlags,
+          };
+          localStorage.setItem(chatSettingsStorageKey, JSON.stringify(payload));
+        }, [chatSettingsStorageKey, chatPendingFlags, chatPinnedFlags, chatReminderFlags]);
+
         const isGerencia = userRole === 'gerentes';
         const isVendedor = userRole.includes('vendedor');
         const isTechnicalOnly = (/tecnic/.test(userRole) || userArea === 'tecnica') && !isVendedor && userRole !== 'admin';
@@ -7747,11 +7883,58 @@
         }, [chatSearchTerm, internalMessages]);
         const activeChatMember = useMemo(() => staffMembers.find((member) => member.id === activeChatMemberId) || null, [staffMembers, activeChatMemberId]);
         const activeChatMessages = useMemo(() => activeChatMember ? (staffConversations[activeChatMember.id] || []) : [], [activeChatMember, staffConversations]);
+        const pinnedStaffMembers = useMemo(() => staffMembers.filter((member) => !!chatPinnedFlags[member.id]), [staffMembers, chatPinnedFlags]);
+        const groupedStaffMembersWithoutPinned = useMemo(() => Object.entries(groupedStaffMembers).reduce((acc, [area, members]) => {
+          const next = members.filter((member) => !chatPinnedFlags[member.id]);
+          if (next.length > 0) acc[area] = next;
+          return acc;
+        }, {}), [groupedStaffMembers, chatPinnedFlags]);
         const isTicketManager = String(user?.email || '').trim().toLowerCase() === 'alfonso332estigarribia@gmail.com';
         const isAdminUser = userRole === 'admin';
         const mobileUnreadAlerts = useMemo(() => mobileAlerts.filter((a) => !a.read).length, [mobileAlerts]);
         const adminPendingRequests = useMemo(() => adminCredentialRequests.filter((r) => r?.estado === 'pendiente'), [adminCredentialRequests]);
         const adminUnreadCount = useMemo(() => adminPendingRequests.filter((r) => !r?.leidaPorAdmin).length, [adminPendingRequests]);
+
+        useEffect(() => {
+          if (!user) return () => {};
+          const timers = [];
+          Object.entries(chatReminderFlags).forEach(([memberId, reminder]) => {
+            if (!reminder || reminder.notified || !reminder.setAt) return;
+            const messages = staffConversations[memberId] || [];
+            const wasAnswered = messages.some((message) => {
+              const senderIsMember = String(message?.remitenteUid || '') === String(staffMembers.find((m) => m.id === memberId)?.uid || '')
+                || String(message?.remitenteEmail || '').trim().toLowerCase() === String(staffMembers.find((m) => m.id === memberId)?.email || '').trim().toLowerCase();
+              return senderIsMember && getChatTimestampMs(message?.creadoEn) > Number(reminder.setAt || 0);
+            });
+            if (wasAnswered) {
+              setChatReminderFlags((prev) => ({ ...prev, [memberId]: { ...prev[memberId], answered: true, notified: true } }));
+              return;
+            }
+            const elapsed = Date.now() - Number(reminder.setAt || 0);
+            const remaining = Math.max(0, (3 * 60 * 60 * 1000) - elapsed);
+            timers.push(setTimeout(() => {
+              setChatReminderFlags((prev) => {
+                const current = prev[memberId];
+                if (!current || current.notified) return prev;
+                return { ...prev, [memberId]: { ...current, notified: true } };
+              });
+              setNotificacion({ mensaje: `⏰ Recordatorio: ${staffMembers.find((m) => m.id === memberId)?.nombre || 'el chat'} sigue sin responder.`, tipo: 'warn' });
+            }, remaining));
+          });
+          return () => timers.forEach((timerId) => clearTimeout(timerId));
+        }, [chatReminderFlags, staffConversations, staffMembers, user]);
+
+        useEffect(() => {
+          staffMembers.forEach((member) => {
+            const conversation = staffConversations[member.id] || [];
+            const last = conversation[conversation.length - 1];
+            if (!last) return;
+            const isIncoming = !((user?.uid && String(last?.remitenteUid || '') === String(user.uid)) || (user?.email && String(last?.remitenteEmail || '').trim().toLowerCase() === String(user.email).trim().toLowerCase()));
+            if (isIncoming && activeChatMemberId !== member.id) {
+              setChatPendingFlags((prev) => (prev[member.id] ? prev : { ...prev, [member.id]: true }));
+            }
+          });
+        }, [staffMembers, staffConversations, activeChatMemberId, user?.uid, user?.email]);
 
         useEffect(() => {
           if (!profileAvatarModalOpen) setPendingProfileAvatarId(profileAvatarId);
@@ -8413,6 +8596,65 @@
           setStaffMessageDraft((prev) => ({ ...prev, [staffId]: value }));
         }
 
+        function addEmojiToDraft(member, emoji) {
+          if (!member?.id || !emoji) return;
+          setStaffMessageDraft((prev) => ({ ...prev, [member.id]: `${String(prev[member.id] || '')}${emoji}` }));
+        }
+
+        function updateChatPendingFlag(memberId, value) {
+          setChatPendingFlags((prev) => ({ ...prev, [memberId]: value }));
+        }
+
+        function togglePinChat(memberId) {
+          setChatPinnedFlags((prev) => ({ ...prev, [memberId]: !prev[memberId] }));
+        }
+
+        function setReminderForChat(memberId) {
+          setChatReminderFlags((prev) => ({ ...prev, [memberId]: { setAt: Date.now(), notified: false, answered: false } }));
+          setNotificacion({ mensaje: '⏰ Recordatorio configurado para 3 horas (si no hay respuesta).', tipo: 'ok' });
+        }
+
+        async function parseChatFiles(fileList) {
+          const files = Array.from(fileList || []);
+          const mapped = await Promise.all(files.map((file) => new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve({
+              id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+              nombre: file.name || 'archivo',
+              mimeType: file.type || 'application/octet-stream',
+              dataUrl: String(reader.result || ''),
+            });
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(file);
+          })));
+          return mapped.filter(Boolean);
+        }
+
+        async function appendAttachmentsToDraft(memberId, files) {
+          const attachments = await parseChatFiles(files);
+          if (attachments.length === 0) return;
+          setChatAttachmentDraft((prev) => ({ ...prev, [memberId]: [...(prev[memberId] || []), ...attachments].slice(-6) }));
+        }
+
+        async function handleChatPaste(member, event) {
+          const files = Array.from(event.clipboardData?.items || [])
+            .filter((item) => item.kind === 'file')
+            .map((item) => item.getAsFile())
+            .filter(Boolean);
+          if (files.length === 0) return;
+          event.preventDefault();
+          await appendAttachmentsToDraft(member.id, files);
+        }
+
+        async function handleChatFileInput(member, event) {
+          await appendAttachmentsToDraft(member.id, event.target.files || []);
+          event.target.value = '';
+        }
+
+        function removeChatAttachment(memberId, attachmentId) {
+          setChatAttachmentDraft((prev) => ({ ...prev, [memberId]: (prev[memberId] || []).filter((item) => item.id !== attachmentId) }));
+        }
+
 
         function getStaffMemberFromMessage(message) {
           const email = String(message?.remitenteEmail || message?.destinatarioEmail || '').trim().toLowerCase();
@@ -8442,10 +8684,13 @@
         function openStaffChat(member) {
           if (!member?.id) return;
           setActiveChatMemberId(member.id);
+          updateChatPendingFlag(member.id, false);
+          setChatMenuOpen(false);
         }
 
         function closeStaffChatModal() {
           setActiveChatMemberId('');
+          setChatMenuOpen(false);
         }
 
         function openStaffNotifications(member) {
@@ -8487,8 +8732,9 @@
 
         async function handleSendStaffMessage(member) {
           const text = String(staffMessageDraft[member.id] || '').trim();
-          if (!text) {
-            setNotificacion({ mensaje: 'Escribí un mensaje para enviar al funcionario.', tipo: 'error' });
+          const attachments = chatAttachmentDraft[member.id] || [];
+          if (!text && attachments.length === 0) {
+            setNotificacion({ mensaje: 'Escribí un mensaje o adjuntá un archivo para enviar.', tipo: 'error' });
             return;
           }
           setSendingStaffMessageId(member.id);
@@ -8501,10 +8747,12 @@
               remitenteNombre: currentUserName,
               titulo: 'Chat interno',
               mensaje: text,
+              adjuntos: attachments,
               leida: false,
               creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
             });
             setStaffMessageDraft((prev) => ({ ...prev, [member.id]: '' }));
+            setChatAttachmentDraft((prev) => ({ ...prev, [member.id]: [] }));
             setNotificacion({ mensaje: `Mensaje enviado a ${member.nombre || member.email}.`, tipo: 'ok' });
           } catch (error) {
             console.error('Error enviando mensaje interno:', error);
@@ -9075,14 +9323,47 @@
                         </select>
                       </div>
                     </div>
-                    {Object.keys(groupedStaffMembers).length === 0 ? (
+                    {Object.keys(groupedStaffMembersWithoutPinned).length === 0 && pinnedStaffMembers.length === 0 ? (
                       <article className="profile-option">No se encontraron funcionarios para los filtros seleccionados.</article>
                     ) : (
-                      Object.entries(groupedStaffMembers).map(([area, members]) => (
-                        <section key={area} className="staff-group-section">
-                          <div className="staff-group-title">{area}</div>
-                          <div className="staff-card-grid">
-                            {members.map((member) => {
+                      <>
+                        {pinnedStaffMembers.length > 0 && (
+                          <section className="staff-group-section">
+                            <div className="staff-group-title">📍 Chats fijados</div>
+                            <div className="staff-card-grid">
+                              {pinnedStaffMembers.map((member) => {
+                                const avatar = PROFILE_AVATAR_OPTIONS.find((option) => option.id === member.avatarId) || PROFILE_AVATAR_OPTIONS[0];
+                                return (
+                                  <article key={`pinned-${member.id}`} className="staff-card">
+                                    <div className="staff-card-top">
+                                      <img className="staff-card-avatar" src={avatar.src} alt={`Perfil de ${member.nombre}`} />
+                                      <div>
+                                        <h3>{member.nombre || 'Funcionario'}</h3>
+                                        <div className="staff-card-role">{member.cargo || 'Cargo pendiente'}</div>
+                                      </div>
+                                    </div>
+                                    <div className="kv"><b>Email:</b> {member.email || '-'}</div>
+                                    <div className="staff-card-actions">
+                                      <button type="button" className="staff-toggle-btn" onClick={() => openStaffChat(member)}>
+                                        <span>💬</span>
+                                        <span>Abrir chat</span>
+                                      </button>
+                                      <button type="button" className="staff-toggle-btn" onClick={() => togglePinChat(member.id)}>
+                                        <span>📌</span>
+                                        <span>Desfijar</span>
+                                      </button>
+                                    </div>
+                                  </article>
+                                );
+                              })}
+                            </div>
+                          </section>
+                        )}
+                        {Object.entries(groupedStaffMembersWithoutPinned).map(([area, members]) => (
+                          <section key={area} className="staff-group-section">
+                            <div className="staff-group-title">{area}</div>
+                            <div className="staff-card-grid">
+                              {members.map((member) => {
                               const avatar = PROFILE_AVATAR_OPTIONS.find((option) => option.id === member.avatarId) || PROFILE_AVATAR_OPTIONS[0];
                               return (
                                 <article key={member.id} className="staff-card">
@@ -9104,15 +9385,16 @@
                                     <button type="button" className="staff-toggle-btn" onClick={() => openStaffNotifications(member)}>
                                       <span>🔔</span>
                                       <span>Notificaciones</span>
-                                      <span className="staff-pending-pill">{pendingMessagesByStaff[member.id] || 0}</span>
+                                      <span className="staff-pending-pill">{Math.max(pendingMessagesByStaff[member.id] || 0, chatPendingFlags[member.id] ? 1 : 0)}</span>
                                     </button>
                                   </div>
                                 </article>
                               );
-                            })}
-                          </div>
-                        </section>
-                      ))
+                              })}
+                            </div>
+                          </section>
+                        ))}
+                      </>
                     )}
                   </section>
 
@@ -10104,7 +10386,19 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <strong>{activeChatMember.nombre || 'Funcionario'}</strong>
                         <small>{getStaffPresenceLabel(activeChatMember)}</small>
                       </div>
-                      <button type="button" className="staff-chat-modal-close" onClick={closeStaffChatModal} aria-label="Cerrar chat">×</button>
+                      <div className="staff-chat-head-actions">
+                        <button type="button" className="staff-chat-tool-btn" onClick={() => setChatMenuOpen((prev) => !prev)} aria-label="Opciones del chat">⋮</button>
+                        {chatMenuOpen && (
+                          <div className="staff-chat-menu">
+                            <button type="button" onClick={() => { updateChatPendingFlag(activeChatMember.id, true); setChatMenuOpen(false); }}>📌 Marcar como no leído</button>
+                            <button type="button" onClick={() => { setReminderForChat(activeChatMember.id); setChatMenuOpen(false); }}>⏰ Recordar más tarde</button>
+                            <button type="button" onClick={() => { togglePinChat(activeChatMember.id); setChatMenuOpen(false); }}>
+                              {chatPinnedFlags[activeChatMember.id] ? '📍 Desfijar chat' : '📍 Fijar chat'}
+                            </button>
+                          </div>
+                        )}
+                        <button type="button" className="staff-chat-modal-close" onClick={closeStaffChatModal} aria-label="Cerrar chat">×</button>
+                      </div>
                     </div>
                     <div className="staff-chat-modal-body">
                       {activeChatMessages.length === 0 ? (
@@ -10119,14 +10413,35 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                                 <span>{formatChatTimestamp(message.creadoEn)}</span>
                               </div>
                               <div>{message.mensaje || '-'}</div>
+                              {Array.isArray(message.adjuntos) && message.adjuntos.map((adjunto) => {
+                                const mime = String(adjunto?.mimeType || '');
+                                if (mime.startsWith('image/')) return <img key={adjunto.id || adjunto.nombre} className="staff-chat-media" src={adjunto.dataUrl} alt={adjunto.nombre || 'Imagen adjunta'} />;
+                                if (mime.startsWith('video/')) return <video key={adjunto.id || adjunto.nombre} className="staff-chat-media" src={adjunto.dataUrl} controls />;
+                                return <a key={adjunto.id || adjunto.nombre} className="staff-chat-file-link" href={adjunto.dataUrl} download={adjunto.nombre || 'archivo'}>📎 {adjunto.nombre || 'archivo adjunto'}</a>;
+                              })}
                             </div>
                           );
                         })
                       )}
                     </div>
                     <div className="staff-chat-modal-compose">
+                      {(chatAttachmentDraft[activeChatMember.id] || []).length > 0 && (
+                        <div className="staff-chat-attachments">
+                          {(chatAttachmentDraft[activeChatMember.id] || []).map((attachment) => (
+                            <div key={attachment.id} className="staff-chat-attachment-chip">
+                              <span>{attachment.mimeType.startsWith('image/') ? '🖼️' : attachment.mimeType.startsWith('video/') ? '🎬' : '📄'} {attachment.nombre}</span>
+                              <button type="button" onClick={() => removeChatAttachment(activeChatMember.id, attachment.id)} aria-label="Quitar adjunto">✕</button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                       <div className="staff-chat-compose-row">
-                        <textarea className="staff-message-box" placeholder="Escribí tu mensaje..." value={staffMessageDraft[activeChatMember.id] || ''} onChange={(e) => updateStaffMessageDraft(activeChatMember.id, e.target.value)} />
+                        <div className="staff-chat-compose-tools">
+                          <button type="button" className="staff-chat-tool-btn" onClick={() => chatFileInputsRef.current[activeChatMember.id]?.click()} aria-label="Adjuntar archivo">📎</button>
+                          <input ref={(node) => { chatFileInputsRef.current[activeChatMember.id] = node; }} type="file" style={{ display: 'none' }} multiple onChange={(e) => handleChatFileInput(activeChatMember, e)} />
+                          <button type="button" className="staff-chat-tool-btn" onClick={() => addEmojiToDraft(activeChatMember, '😊')} aria-label="Insertar emoji">😊</button>
+                        </div>
+                        <textarea className="staff-message-box" placeholder="Escribí tu mensaje..." value={staffMessageDraft[activeChatMember.id] || ''} onPaste={(e) => handleChatPaste(activeChatMember, e)} onChange={(e) => updateStaffMessageDraft(activeChatMember.id, e.target.value)} />
                         <button type="button" className="staff-chat-send-btn" disabled={sendingStaffMessageId === activeChatMember.id} onClick={() => handleSendStaffMessage(activeChatMember)} aria-label={sendingStaffMessageId === activeChatMember.id ? 'Enviando mensaje' : 'Enviar mensaje'} title={sendingStaffMessageId === activeChatMember.id ? 'Enviando...' : 'Enviar mensaje'}>
                           {sendingStaffMessageId === activeChatMember.id ? (
                             <span style={{ fontSize: 11, fontWeight: 800 }}>...</span>
