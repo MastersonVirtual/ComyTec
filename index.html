@@ -3673,6 +3673,39 @@
         font-weight: 700;
         cursor: pointer;
       }
+      .chat-search-wrap {
+        position: relative;
+        margin-bottom: 12px;
+      }
+      .chat-search-wrap input {
+        width: 100%;
+        min-height: 44px;
+        padding-left: 40px;
+      }
+      .chat-search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #fb923c;
+        font-size: 15px;
+      }
+      .chat-action-btn {
+        background: #050505 !important;
+        border: 1px solid rgba(251, 146, 60, .7) !important;
+        color: #fb923c !important;
+      }
+      .chat-search-results {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .chat-search-result {
+        border: 1px solid rgba(251, 146, 60, .24);
+        border-radius: 14px;
+        padding: 12px;
+        background: rgba(0,0,0,.18);
+      }
       .staff-pending-pill {
         display: inline-flex;
         align-items: center;
@@ -6132,6 +6165,7 @@
         const [openStaffChatId, setOpenStaffChatId] = useState('');
         const [openNotificationChatId, setOpenNotificationChatId] = useState('');
         const [notificationStaffFilter, setNotificationStaffFilter] = useState('');
+        const [chatSearchTerm, setChatSearchTerm] = useState('');
         const [internalMessages, setInternalMessages] = useState([]);
         const [internalNotifications, setInternalNotifications] = useState([]);
         const [updatingRequestId, setUpdatingRequestId] = useState('');
@@ -6212,6 +6246,29 @@
           const hh = String(date.getHours()).padStart(2, '0');
           const min = String(date.getMinutes()).padStart(2, '0');
           return `${dd}/${mm} ${hh}:${min}`;
+        }
+
+        function getChatDisplayName(message, staffList = []) {
+          const senderEmail = String(message?.remitenteEmail || '').trim().toLowerCase();
+          const recipientEmail = String(message?.destinatarioEmail || '').trim().toLowerCase();
+          const senderUid = String(message?.remitenteUid || '').trim();
+          const recipientUid = String(message?.destinatarioUid || '').trim();
+          const currentEmail = String(user?.email || '').trim().toLowerCase();
+          const currentUid = String(user?.uid || '').trim();
+          const peer = staffList.find((member) => {
+            const memberEmail = String(member.email || '').trim().toLowerCase();
+            const memberUid = String(member.uid || '').trim();
+            const matchesSender = ((memberEmail && memberEmail === senderEmail) || (memberUid && memberUid === senderUid));
+            const matchesRecipient = ((memberEmail && memberEmail === recipientEmail) || (memberUid && memberUid === recipientUid));
+            const isCurrentSender = (currentEmail && currentEmail === senderEmail) || (currentUid && currentUid === senderUid);
+            const isCurrentRecipient = (currentEmail && currentEmail === recipientEmail) || (currentUid && currentUid === recipientUid);
+            return (matchesSender && !isCurrentSender) || (matchesRecipient && !isCurrentRecipient);
+          });
+          return peer?.nombre || peer?.email || message?.remitenteNombre || message?.remitenteEmail || 'Usuario';
+        }
+
+        function getChatTitleForMessage(message, staffList = []) {
+          return `Chat interno · ${getChatDisplayName(message, staffList)}`;
         }
 
         function getServiceCatalogById(rawId) {
@@ -7416,7 +7473,7 @@
           const internalItems = internalNotifications.map((item) => ({
             id: `internal-${item.id}`,
             source: 'interna',
-            title: item.titulo || `Mensaje de ${item.remitenteNombre || item.remitenteEmail || 'usuario'}`,
+            title: getChatTitleForMessage(item, staffMembers),
             status: item.mensaje || '',
             createdAt: item.creadoEn,
             raw: item,
@@ -7427,7 +7484,7 @@
             const bv = b?.createdAt?.seconds || 0;
             return bv - av;
           });
-        }, [adminCredentialRequests, internalNotifications, userRole]);
+        }, [adminCredentialRequests, internalNotifications, userRole, staffMembers]);
         const staffAreaOptions = useMemo(() => {
           const labels = Array.from(new Set(staffMembers.map((member) => normalizeAreaLabel(member.area || 'Sin área'))));
           return ['todas', ...labels];
@@ -7486,6 +7543,11 @@
             return email === notificationStaffFilter || uid === notificationStaffFilter;
           });
         }, [allNotifications, notificationStaffFilter]);
+        const chatSearchResults = useMemo(() => {
+          const term = String(chatSearchTerm || '').trim().toLowerCase();
+          if (!term) return [];
+          return internalMessages.filter((message) => String(message?.mensaje || '').toLowerCase().includes(term)).slice(-50).reverse();
+        }, [chatSearchTerm, internalMessages]);
         const isTicketManager = String(user?.email || '').trim().toLowerCase() === 'alfonso332estigarribia@gmail.com';
         const isAdminUser = userRole === 'admin';
         const mobileUnreadAlerts = useMemo(() => mobileAlerts.filter((a) => !a.read).length, [mobileAlerts]);
@@ -8717,9 +8779,28 @@
                     <h2>Notificaciones</h2>
                     <div className="hint">Mensajes internos y solicitudes recibidas dentro del sistema.</div>
                     <div className="request-status-row" style={{ marginBottom: 12 }}>
-                      <button type="button" className="status-action-btn accept" onClick={() => { setNotificationStaffFilter(''); setOpenNotificationChatId(''); }}>Todas</button>
-                      {notificationStaffFilter && <button type="button" className="status-action-btn resolve" onClick={() => { setNotificationStaffFilter(''); setOpenNotificationChatId(''); }}>Quitar filtro</button>}
+                      <button type="button" className="status-action-btn chat-action-btn" onClick={() => { setNotificationStaffFilter(''); setOpenNotificationChatId(''); }}>Todas</button>
+                      {notificationStaffFilter && <button type="button" className="status-action-btn chat-action-btn" onClick={() => { setNotificationStaffFilter(''); setOpenNotificationChatId(''); }}>Quitar filtro</button>}
                     </div>
+                    <div className="chat-search-wrap">
+                      <span className="chat-search-icon">🔎</span>
+                      <input type="text" placeholder="Buscar palabras en todos los chats" value={chatSearchTerm} onChange={(e) => setChatSearchTerm(e.target.value)} />
+                    </div>
+                    {chatSearchResults.length > 0 && (
+                      <div className="chat-search-results">
+                        {chatSearchResults.map((message) => {
+                          const targetStaff = getStaffMemberFromMessage(message);
+                          return (
+                            <article key={`search-${message.id}`} className="chat-search-result">
+                              <strong>{getChatTitleForMessage(message, staffMembers)}</strong>
+                              <div className="kv"><b>Coincidencia:</b> {message.mensaje || '-'}</div>
+                              <div className="kv"><b>Fecha:</b> {formatChatTimestamp(message.creadoEn)}</div>
+                              {targetStaff && <button type="button" className="status-action-btn chat-action-btn" onClick={() => { setNotificationStaffFilter(String(targetStaff.email || '').trim().toLowerCase() || String(targetStaff.uid || '').trim()); setOpenNotificationChatId(message.id); }}>Abrir resultado</button>}
+                            </article>
+                          );
+                        })}
+                      </div>
+                    )}
                     {visibleNotifications.length === 0 ? (
                       <div className="profile-option">No hay notificaciones registradas.</div>
                     ) : (
@@ -8749,13 +8830,13 @@
                         </article>
                       ) : (
                         <article className="profile-option" key={item.id}>
-                          <h3>{item.raw.titulo || 'Mensaje interno'}</h3>
+                          <h3>{getChatTitleForMessage(item.raw, staffMembers)}</h3>
                           <div className="kv"><b>De:</b> {item.raw.remitenteNombre || item.raw.remitenteEmail || 'Usuario'}</div>
                           <div className="kv"><b>Mensaje:</b> {item.raw.mensaje || '-'}</div>
                           <div className="kv"><b>Recibido:</b> {formatRequestDateTime(item.raw.creadoEn)}</div>
                           {getStaffMemberFromMessage(item.raw) && (
                             <div className="request-status-row">
-                              <button type="button" className="status-action-btn accept" onClick={() => toggleNotificationChat(item.raw.id || item.id)}>{openNotificationChatId === (item.raw.id || item.id) ? 'Ocultar chat' : 'Ver chat'}</button>
+                              <button type="button" className="status-action-btn chat-action-btn" onClick={() => toggleNotificationChat(item.raw.id || item.id)}>{openNotificationChatId === (item.raw.id || item.id) ? 'Ocultar chat' : 'Ver chat'}</button>
                             </div>
                           )}
                           {openNotificationChatId === (item.raw.id || item.id) && getStaffMemberFromMessage(item.raw) && (
