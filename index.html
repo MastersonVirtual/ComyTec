@@ -1625,6 +1625,7 @@
       }
       .logout-btn:hover { background: rgba(127,29,29,.28); }
       .sidebar-signature {
+        position: relative;
         margin-top: 10px;
         text-align: center;
         font-size: 10px;
@@ -1632,9 +1633,40 @@
         color: rgba(230,255,253,.72);
       }
       .sidebar-signature strong {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(0, 14, 14, .42);
+        border: 1px solid rgba(0,251,255,.24);
         color: #00fbff;
         text-shadow: 0 0 8px rgba(0,251,255,.45);
         font-weight: 700;
+      }
+      .sidebar-signature-tooltip {
+        position: absolute;
+        left: 50%;
+        bottom: calc(100% + 12px);
+        transform: translateX(-50%) translateY(8px);
+        width: min(280px, 92vw);
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: rgba(3, 22, 22, .96);
+        border: 1px solid rgba(251, 146, 60, .35);
+        color: #e9fbf9;
+        font-size: 11px;
+        line-height: 1.45;
+        text-align: left;
+        box-shadow: 0 16px 34px rgba(0,0,0,.32);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity var(--motion-fast) ease, transform var(--motion-fast) ease;
+      }
+      .sidebar-signature:hover .sidebar-signature-tooltip,
+      .sidebar-signature:focus-within .sidebar-signature-tooltip {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
       }
 
       .toast {
@@ -3655,6 +3687,68 @@
       .staff-card-role {
         color: #cceeed;
         font-size: 12px;
+      }
+      .staff-card-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .staff-toggle-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 36px;
+        padding: 8px 10px;
+        border-radius: 10px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .chat-search-wrap {
+        position: relative;
+        margin-bottom: 12px;
+      }
+      .chat-search-wrap input {
+        width: 100%;
+        min-height: 44px;
+        padding-left: 40px;
+      }
+      .chat-search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #fb923c;
+        font-size: 15px;
+      }
+      .chat-action-btn {
+        background: #050505 !important;
+        border: 1px solid rgba(251, 146, 60, .7) !important;
+        color: #fb923c !important;
+      }
+      .chat-search-results {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .chat-search-result {
+        border: 1px solid rgba(251, 146, 60, .24);
+        border-radius: 14px;
+        padding: 12px;
+        background: rgba(0,0,0,.18);
+      }
+      .staff-pending-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 6px;
+        border-radius: 999px;
+        background: rgba(248, 113, 113, .22);
+        color: #fee2e2;
+        font-size: 11px;
       }
       .staff-chat-thread {
         display: flex;
@@ -6034,7 +6128,7 @@
               </section>
             )}
 
-            <div className="app-footer" aria-label="signature"><strong>v1.0 | Powered by Alfonso Carballo</strong></div>
+            <div className="app-footer" aria-label="signature"><strong>v1.2 | Powered by Alfonso Carballo</strong></div>
           </div>
         );
       }
@@ -6100,6 +6194,10 @@
         const [staffAreaFilter, setStaffAreaFilter] = useState('todas');
         const [staffMessageDraft, setStaffMessageDraft] = useState({});
         const [sendingStaffMessageId, setSendingStaffMessageId] = useState('');
+        const [openStaffChatId, setOpenStaffChatId] = useState('');
+        const [openNotificationChatId, setOpenNotificationChatId] = useState('');
+        const [notificationStaffFilter, setNotificationStaffFilter] = useState('');
+        const [chatSearchTerm, setChatSearchTerm] = useState('');
         const [internalMessages, setInternalMessages] = useState([]);
         const [internalNotifications, setInternalNotifications] = useState([]);
         const [updatingRequestId, setUpdatingRequestId] = useState('');
@@ -6180,6 +6278,29 @@
           const hh = String(date.getHours()).padStart(2, '0');
           const min = String(date.getMinutes()).padStart(2, '0');
           return `${dd}/${mm} ${hh}:${min}`;
+        }
+
+        function getChatDisplayName(message, staffList = []) {
+          const senderEmail = String(message?.remitenteEmail || '').trim().toLowerCase();
+          const recipientEmail = String(message?.destinatarioEmail || '').trim().toLowerCase();
+          const senderUid = String(message?.remitenteUid || '').trim();
+          const recipientUid = String(message?.destinatarioUid || '').trim();
+          const currentEmail = String(user?.email || '').trim().toLowerCase();
+          const currentUid = String(user?.uid || '').trim();
+          const peer = staffList.find((member) => {
+            const memberEmail = String(member.email || '').trim().toLowerCase();
+            const memberUid = String(member.uid || '').trim();
+            const matchesSender = ((memberEmail && memberEmail === senderEmail) || (memberUid && memberUid === senderUid));
+            const matchesRecipient = ((memberEmail && memberEmail === recipientEmail) || (memberUid && memberUid === recipientUid));
+            const isCurrentSender = (currentEmail && currentEmail === senderEmail) || (currentUid && currentUid === senderUid);
+            const isCurrentRecipient = (currentEmail && currentEmail === recipientEmail) || (currentUid && currentUid === recipientUid);
+            return (matchesSender && !isCurrentSender) || (matchesRecipient && !isCurrentRecipient);
+          });
+          return peer?.nombre || peer?.email || message?.remitenteNombre || message?.remitenteEmail || 'Usuario';
+        }
+
+        function getChatTitleForMessage(message, staffList = []) {
+          return `Chat interno · ${getChatDisplayName(message, staffList)}`;
         }
 
         function getServiceCatalogById(rawId) {
@@ -7384,7 +7505,7 @@
           const internalItems = internalNotifications.map((item) => ({
             id: `internal-${item.id}`,
             source: 'interna',
-            title: item.titulo || `Mensaje de ${item.remitenteNombre || item.remitenteEmail || 'usuario'}`,
+            title: getChatTitleForMessage(item, staffMembers),
             status: item.mensaje || '',
             createdAt: item.creadoEn,
             raw: item,
@@ -7395,7 +7516,7 @@
             const bv = b?.createdAt?.seconds || 0;
             return bv - av;
           });
-        }, [adminCredentialRequests, internalNotifications, userRole]);
+        }, [adminCredentialRequests, internalNotifications, userRole, staffMembers]);
         const staffAreaOptions = useMemo(() => {
           const labels = Array.from(new Set(staffMembers.map((member) => normalizeAreaLabel(member.area || 'Sin área'))));
           return ['todas', ...labels];
@@ -7434,6 +7555,31 @@
           });
           return acc;
         }, {}), [staffMembers, internalMessages, user?.uid, user?.email]);
+
+        const pendingMessagesByStaff = useMemo(() => staffMembers.reduce((acc, member) => {
+          const memberEmail = String(member.email || '').trim().toLowerCase();
+          const memberUid = String(member.uid || '').trim();
+          acc[member.id] = internalNotifications.filter((item) => {
+            const senderUid = String(item?.remitenteUid || '').trim();
+            const senderEmail = String(item?.remitenteEmail || '').trim().toLowerCase();
+            return (memberUid && senderUid === memberUid) || (memberEmail && senderEmail === memberEmail);
+          }).length;
+          return acc;
+        }, {}), [staffMembers, internalNotifications]);
+        const visibleNotifications = useMemo(() => {
+          if (!notificationStaffFilter) return allNotifications;
+          return allNotifications.filter((item) => {
+            const raw = item.raw || {};
+            const email = String(raw.remitenteEmail || raw.solicitanteEmail || '').trim().toLowerCase();
+            const uid = String(raw.remitenteUid || raw.solicitanteUid || '').trim();
+            return email === notificationStaffFilter || uid === notificationStaffFilter;
+          });
+        }, [allNotifications, notificationStaffFilter]);
+        const chatSearchResults = useMemo(() => {
+          const term = String(chatSearchTerm || '').trim().toLowerCase();
+          if (!term) return [];
+          return internalMessages.filter((message) => String(message?.mensaje || '').toLowerCase().includes(term)).slice(-50).reverse();
+        }, [chatSearchTerm, internalMessages]);
         const isTicketManager = String(user?.email || '').trim().toLowerCase() === 'alfonso332estigarribia@gmail.com';
         const isAdminUser = userRole === 'admin';
         const mobileUnreadAlerts = useMemo(() => mobileAlerts.filter((a) => !a.read).length, [mobileAlerts]);
@@ -8100,6 +8246,51 @@
           setStaffMessageDraft((prev) => ({ ...prev, [staffId]: value }));
         }
 
+
+        function getStaffMemberFromMessage(message) {
+          const email = String(message?.remitenteEmail || message?.destinatarioEmail || '').trim().toLowerCase();
+          const uid = String(message?.remitenteUid || message?.destinatarioUid || '').trim();
+          return staffMembers.find((member) => {
+            const memberEmail = String(member.email || '').trim().toLowerCase();
+            const memberUid = String(member.uid || '').trim();
+            return (email && memberEmail === email) || (uid && memberUid === uid);
+          }) || null;
+        }
+
+        async function openNotificationsView(target = null) {
+          const targetRaw = target?.raw || target || null;
+          const relatedStaff = targetRaw ? getStaffMemberFromMessage(targetRaw) : null;
+          setSelectedForm('notificaciones');
+          setMobileTab('perfil');
+          setDesktopBellOpen(false);
+          closeSidebar();
+          if (relatedStaff) {
+            setNotificationStaffFilter(String(relatedStaff.email || relatedStaff.uid || '').trim().toLowerCase() || String(relatedStaff.uid || '').trim());
+            setOpenNotificationChatId(targetRaw?.id || '');
+          } else {
+            setNotificationStaffFilter('');
+            setOpenNotificationChatId('');
+          }
+          await Promise.all([markAdminNotificationsAsRead(), markInternalNotificationsAsRead()]);
+        }
+
+        function toggleStaffChat(memberId) {
+          setOpenStaffChatId((prev) => prev === memberId ? '' : memberId);
+        }
+
+        function openStaffNotifications(member) {
+          const key = String(member.email || '').trim().toLowerCase() || String(member.uid || '').trim();
+          setNotificationStaffFilter(key);
+          setOpenNotificationChatId('');
+          setSelectedForm('notificaciones');
+          setMobileTab('perfil');
+          closeSidebar();
+        }
+
+        function toggleNotificationChat(itemId) {
+          setOpenNotificationChatId((prev) => prev === itemId ? '' : itemId);
+        }
+
         async function markInternalNotificationsAsRead() {
           const pending = internalNotifications.filter((item) => !item?.leida && item?.id);
           if (pending.length === 0) return;
@@ -8287,15 +8478,6 @@
           await Promise.all([markAdminNotificationsAsRead(), markInternalNotificationsAsRead()]);
         }
 
-        async function openNotificationsView() {
-          if (!isAdminUser && internalNotifications.length === 0) return;
-          setSelectedForm('notificaciones');
-          setMobileTab('perfil');
-          setDesktopBellOpen(false);
-          closeSidebar();
-          await Promise.all([markAdminNotificationsAsRead(), markInternalNotificationsAsRead()]);
-        }
-
         async function deleteNotificationRequest(req) {
           if (!isAdminUser || !req?.id) return;
           try {
@@ -8441,7 +8623,7 @@
                 <button className="menu-button" onClick={openFuncionariosView}><span className="menu-icon">🧑‍💼</span><span>Funcionarios</span></button>
                 <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
-                <div className="sidebar-signature" aria-label="signature"><strong>v1.0 | Powered by Alfonso Carballo</strong></div>
+                <div className="sidebar-signature" aria-label="signature" tabIndex={0}><strong>v1.2 | Powered by Alfonso Carballo</strong><div className="sidebar-signature-tooltip">Actualización 1.2: se agregó la gestión de Funcionarios con listado por áreas, búsqueda rápida y chats internos persistidos en Firebase para que todos vean el historial compartido.</div></div>
               </div>
             </aside>
 
@@ -8555,13 +8737,13 @@
                             <div className="topbar-notify-head">Notificaciones</div>
                             <div className="topbar-notify-list">
                               {allNotifications.length === 0 ? <div className="topbar-notify-empty">Sin notificaciones nuevas.</div> : allNotifications.slice(0, 8).map((item) => (
-                                <article className="topbar-notify-item" key={`popover-${item.id}`}>
+                                <article className="topbar-notify-item" key={`popover-${item.id}`} onClick={() => openNotificationsView(item)}>
                                   <strong>{item.title}</strong>
                                   <small>{item.status}</small>
                                   <small>{formatRequestDateTime(item.createdAt)}</small>
                                   <div className="topbar-notify-actions">
-                                    <button type="button" className="topbar-notify-action" aria-label="Ver notificación" onClick={openNotificationsView}><i data-lucide="eye" /></button>
-                                    {item.source === 'credencial' && <button type="button" className="topbar-notify-action" aria-label="Eliminar notificación" onClick={() => deleteNotificationRequest(item.raw)}><i data-lucide="trash-2" /></button>}
+                                    {item.source === 'interna' && <button type="button" className="topbar-notify-action" aria-label="Abrir chat" onClick={(e) => { e.stopPropagation(); openNotificationsView(item); toggleNotificationChat(item.raw?.id || ''); }}><i data-lucide="messages-square" /></button>}
+                                    {item.source === 'credencial' && <button type="button" className="topbar-notify-action" aria-label="Eliminar notificación" onClick={(e) => { e.stopPropagation(); deleteNotificationRequest(item.raw); }}><i data-lucide="trash-2" /></button>}
                                   </div>
                                 </article>
                               ))}
@@ -8608,7 +8790,10 @@
                 <>
                   <div className="mobile-alert-backdrop" onClick={() => setMobileBellOpen(false)} />
                   <div className="mobile-alert-panel" onClick={(e) => e.stopPropagation()}>
-                    {mobileAlerts.length === 0 ? <div className="mobile-alert-item">Sin notificaciones nuevas.</div> : mobileAlerts.map((a) => (<div key={a.id} className="mobile-alert-item">{a.message}</div>))}
+                    {mobileAlerts.length === 0 ? <div className="mobile-alert-item">Sin notificaciones nuevas.</div> : mobileAlerts.map((a) => {
+                      const related = internalNotifications.find((item) => `internal-alert-${item.id}` === a.id);
+                      return <div key={a.id} className="mobile-alert-item" onClick={() => related ? openNotificationsView(related) : null}>{a.message}</div>;
+                    })}
                   </div>
                 </>
               )}
@@ -8625,10 +8810,33 @@
                   <section className="panel profile-view">
                     <h2>Notificaciones</h2>
                     <div className="hint">Mensajes internos y solicitudes recibidas dentro del sistema.</div>
-                    {allNotifications.length === 0 ? (
+                    <div className="request-status-row" style={{ marginBottom: 12 }}>
+                      <button type="button" className="status-action-btn chat-action-btn" onClick={() => { setNotificationStaffFilter(''); setOpenNotificationChatId(''); }}>Todas</button>
+                      {notificationStaffFilter && <button type="button" className="status-action-btn chat-action-btn" onClick={() => { setNotificationStaffFilter(''); setOpenNotificationChatId(''); }}>Quitar filtro</button>}
+                    </div>
+                    <div className="chat-search-wrap">
+                      <span className="chat-search-icon">🔎</span>
+                      <input type="text" placeholder="Buscar palabras en todos los chats" value={chatSearchTerm} onChange={(e) => setChatSearchTerm(e.target.value)} />
+                    </div>
+                    {chatSearchResults.length > 0 && (
+                      <div className="chat-search-results">
+                        {chatSearchResults.map((message) => {
+                          const targetStaff = getStaffMemberFromMessage(message);
+                          return (
+                            <article key={`search-${message.id}`} className="chat-search-result">
+                              <strong>{getChatTitleForMessage(message, staffMembers)}</strong>
+                              <div className="kv"><b>Coincidencia:</b> {message.mensaje || '-'}</div>
+                              <div className="kv"><b>Fecha:</b> {formatChatTimestamp(message.creadoEn)}</div>
+                              {targetStaff && <button type="button" className="status-action-btn chat-action-btn" onClick={() => { setNotificationStaffFilter(String(targetStaff.email || '').trim().toLowerCase() || String(targetStaff.uid || '').trim()); setOpenNotificationChatId(message.id); }}>Abrir resultado</button>}
+                            </article>
+                          );
+                        })}
+                      </div>
+                    )}
+                    {visibleNotifications.length === 0 ? (
                       <div className="profile-option">No hay notificaciones registradas.</div>
                     ) : (
-                      allNotifications.map((item) => item.source === 'credencial' ? (
+                      visibleNotifications.map((item) => item.source === 'credencial' ? (
                         <article className="profile-option" key={item.id}>
                           <h3>
                             {item.raw.solicitanteNombre || item.raw.solicitanteEmail || 'Usuario'}
@@ -8654,10 +8862,35 @@
                         </article>
                       ) : (
                         <article className="profile-option" key={item.id}>
-                          <h3>{item.raw.titulo || 'Mensaje interno'}</h3>
+                          <h3>{getChatTitleForMessage(item.raw, staffMembers)}</h3>
                           <div className="kv"><b>De:</b> {item.raw.remitenteNombre || item.raw.remitenteEmail || 'Usuario'}</div>
                           <div className="kv"><b>Mensaje:</b> {item.raw.mensaje || '-'}</div>
                           <div className="kv"><b>Recibido:</b> {formatRequestDateTime(item.raw.creadoEn)}</div>
+                          {getStaffMemberFromMessage(item.raw) && (
+                            <div className="request-status-row">
+                              <button type="button" className="status-action-btn chat-action-btn" onClick={() => toggleNotificationChat(item.raw.id || item.id)}>{openNotificationChatId === (item.raw.id || item.id) ? 'Ocultar chat' : 'Ver chat'}</button>
+                            </div>
+                          )}
+                          {openNotificationChatId === (item.raw.id || item.id) && getStaffMemberFromMessage(item.raw) && (
+                            <>
+                              <div className="staff-chat-thread">
+                                {(staffConversations[getStaffMemberFromMessage(item.raw).id] || []).map((message) => {
+                                  const isOutgoing = ((user?.uid && message?.remitenteUid === user.uid) || (user?.email && String(message?.remitenteEmail || '').trim().toLowerCase() === String(user.email).trim().toLowerCase()));
+                                  return (
+                                    <div key={message.id} className={`staff-chat-bubble ${isOutgoing ? 'outgoing' : 'incoming'}`}>
+                                      <div className="staff-chat-meta">
+                                        <span>{isOutgoing ? 'Vos' : (getStaffMemberFromMessage(item.raw)?.nombre || 'Funcionario')}</span>
+                                        <span>{formatChatTimestamp(message.creadoEn)}</span>
+                                      </div>
+                                      <div>{message.mensaje || '-'}</div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              <textarea className="staff-message-box" placeholder="Responder desde notificaciones..." value={staffMessageDraft[getStaffMemberFromMessage(item.raw).id] || ''} onChange={(e) => updateStaffMessageDraft(getStaffMemberFromMessage(item.raw).id, e.target.value)} />
+                              <button type="button" className="save-btn profile-save-btn" disabled={sendingStaffMessageId === getStaffMemberFromMessage(item.raw).id} onClick={() => handleSendStaffMessage(getStaffMemberFromMessage(item.raw))}>{sendingStaffMessageId === getStaffMemberFromMessage(item.raw).id ? 'Enviando...' : 'Responder'}</button>
+                            </>
+                          )}
                         </article>
                       ))
                     )}
@@ -8703,33 +8936,48 @@
                                   <div className="kv"><b>Email:</b> {member.email || '-'}</div>
                                   <div className="kv"><b>Teléfono:</b> {formatStaffPhone(member.telefono)}</div>
                                   <div className="kv"><b>Área:</b> {normalizeAreaLabel(member.area || 'Sin área')}</div>
-                                  <div className="staff-chat-thread">
-                                    {(staffConversations[member.id] || []).length === 0 ? (
-                                      <div className="staff-chat-empty">Todavía no hay mensajes en esta conversación.</div>
-                                    ) : (
-                                      (staffConversations[member.id] || []).map((message) => {
-                                        const isOutgoing = ((user?.uid && message?.remitenteUid === user.uid) || (user?.email && String(message?.remitenteEmail || '').trim().toLowerCase() === String(user.email).trim().toLowerCase()));
-                                        return (
-                                          <div key={message.id} className={`staff-chat-bubble ${isOutgoing ? 'outgoing' : 'incoming'}`}>
-                                            <div className="staff-chat-meta">
-                                              <span>{isOutgoing ? 'Vos' : (member.nombre || 'Funcionario')}</span>
-                                              <span>{formatChatTimestamp(message.creadoEn)}</span>
-                                            </div>
-                                            <div>{message.mensaje || '-'}</div>
-                                          </div>
-                                        );
-                                      })
-                                    )}
+                                  <div className="staff-card-actions">
+                                    <button type="button" className="staff-toggle-btn" onClick={() => toggleStaffChat(member.id)}>
+                                      <span>💬</span>
+                                      <span>{openStaffChatId === member.id ? 'Ocultar chat' : 'Abrir chat'}</span>
+                                    </button>
+                                    <button type="button" className="staff-toggle-btn" onClick={() => openStaffNotifications(member)}>
+                                      <span>🔔</span>
+                                      <span>Notificaciones</span>
+                                      <span className="staff-pending-pill">{pendingMessagesByStaff[member.id] || 0}</span>
+                                    </button>
                                   </div>
-                                  <textarea
-                                    className="staff-message-box"
-                                    placeholder="Escribí tu respuesta..."
-                                    value={staffMessageDraft[member.id] || ''}
-                                    onChange={(e) => updateStaffMessageDraft(member.id, e.target.value)}
-                                  />
-                                  <button type="button" className="save-btn profile-save-btn" disabled={sendingStaffMessageId === member.id} onClick={() => handleSendStaffMessage(member)}>
-                                    {sendingStaffMessageId === member.id ? 'Enviando...' : 'Enviar mensaje'}
-                                  </button>
+                                  {openStaffChatId === member.id && (
+                                    <>
+                                      <div className="staff-chat-thread">
+                                        {(staffConversations[member.id] || []).length === 0 ? (
+                                          <div className="staff-chat-empty">Todavía no hay mensajes en esta conversación.</div>
+                                        ) : (
+                                          (staffConversations[member.id] || []).map((message) => {
+                                            const isOutgoing = ((user?.uid && message?.remitenteUid === user.uid) || (user?.email && String(message?.remitenteEmail || '').trim().toLowerCase() === String(user.email).trim().toLowerCase()));
+                                            return (
+                                              <div key={message.id} className={`staff-chat-bubble ${isOutgoing ? 'outgoing' : 'incoming'}`}>
+                                                <div className="staff-chat-meta">
+                                                  <span>{isOutgoing ? 'Vos' : (member.nombre || 'Funcionario')}</span>
+                                                  <span>{formatChatTimestamp(message.creadoEn)}</span>
+                                                </div>
+                                                <div>{message.mensaje || '-'}</div>
+                                              </div>
+                                            );
+                                          })
+                                        )}
+                                      </div>
+                                      <textarea
+                                        className="staff-message-box"
+                                        placeholder="Escribí tu respuesta..."
+                                        value={staffMessageDraft[member.id] || ''}
+                                        onChange={(e) => updateStaffMessageDraft(member.id, e.target.value)}
+                                      />
+                                      <button type="button" className="save-btn profile-save-btn" disabled={sendingStaffMessageId === member.id} onClick={() => handleSendStaffMessage(member)}>
+                                        {sendingStaffMessageId === member.id ? 'Enviando...' : 'Enviar mensaje'}
+                                      </button>
+                                    </>
+                                  )}
                                 </article>
                               );
                             })}
