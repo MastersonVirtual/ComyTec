@@ -114,6 +114,11 @@
         backdrop-filter: blur(10px) saturate(125%);
         box-shadow: 0 8px 22px rgba(0,0,0,.24);
       }
+      .ops-alert-ping { animation: ops-ping 1.3s infinite; display: inline-flex; }
+      @keyframes ops-ping {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.18); opacity: .55; }
+      }
       .burger {
         width: 44px;
         height: 44px;
@@ -174,6 +179,12 @@
         overflow: hidden;
         display: flex;
         flex-direction: column;
+      }
+      .main.main-ops-expanded {
+        max-width: 100%;
+        width: 100%;
+        margin: 8px auto 0;
+        padding: 0 10px 14px;
       }
       .hero {
         border-radius: 24px;
@@ -6892,6 +6903,39 @@
         const [historyCommercialFilter, setHistoryCommercialFilter] = useState('todos');
         const [historyTypeFilter, setHistoryTypeFilter] = useState('todos');
         const [historyDateFilter, setHistoryDateFilter] = useState('');
+        const [workflowTaskChecks, setWorkflowTaskChecks] = useState({});
+        const [opsSideTab, setOpsSideTab] = useState('activity');
+        const [opsCommentDraft, setOpsCommentDraft] = useState('');
+        const [opsObservationsOpen, setOpsObservationsOpen] = useState(false);
+        const [opsSelectedTaskId, setOpsSelectedTaskId] = useState('4184');
+        const [draggingTaskId, setDraggingTaskId] = useState(null);
+        const [dragOverColumn, setDragOverColumn] = useState('');
+        const [kanbanColumns, setKanbanColumns] = useState(() => ({
+          todo: [
+            { id: '4184', title: 'San Felipe y Santiago', executive: 'Alfonso Carballo', checklistDone: 2, checklistTotal: 5, dueSoon: true },
+            { id: '4291', title: 'Torre Palermo', executive: 'Gastón Silva', checklistDone: 1, checklistTotal: 4, dueSoon: false },
+            { id: '4350', title: 'Altos del Prado', executive: 'Francisco Bartellone', checklistDone: 0, checklistTotal: 3, dueSoon: false },
+          ],
+          progress: [
+            { id: '4150', title: 'Green Park', executive: 'Nicolás Leguizamón', checklistDone: 3, checklistTotal: 6, dueSoon: false },
+          ],
+          done: [],
+        }));
+        const [opsActivityFeed, setOpsActivityFeed] = useState([
+          '[Técnico extra asignado por coordinación]',
+          "[Tarea movida a 'En Proceso' por Alfonso]",
+          '[Comentario agregado por Juan]',
+        ]);
+        const [opsComments, setOpsComments] = useState([
+          { id: 'c1', user: 'Juan Pérez', handle: '@JuanPerez', text: 'Revisemos la instalación de San Felipe hoy.', attachment: 'plano_instalacion.pdf', createdAt: Date.now() - 1000 * 60 * 50, reactions: ['Juan Pérez'], replies: [] },
+          { id: 'c2', user: 'Alfonso Carballo', handle: '@AlfonsoCarballo', text: 'Recibido, ya solicité equipos a compras.', attachment: '', createdAt: Date.now() - 1000 * 60 * 20, reactions: [], replies: [] },
+        ]);
+        const [opsTaskMeta, setOpsTaskMeta] = useState({
+          '4184': { executive: 'Alfonso Carballo', checklist: ['Instalación', 'Configuración', 'Certificación'], checked: { 'Instalación': true }, presupuesto: '24000', costoUsd: '1800', equipamiento: 'Compra' },
+        });
+        const [opsCommentSort, setOpsCommentSort] = useState('recent');
+        const [opsReplyTargetId, setOpsReplyTargetId] = useState('');
+        const [opsReplyDraft, setOpsReplyDraft] = useState('');
         const [historyPage, setHistoryPage] = useState(1);
         const [sellerFilterOpen, setSellerFilterOpen] = useState(false);
         const [sellerFiltersDraft, setSellerFiltersDraft] = useState({
@@ -7228,6 +7272,86 @@
           proceso: operationalQueueRows.filter((r) => normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente')) === 'En proceso').length,
           esperando: operationalQueueRows.filter((r) => normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente')) === 'Esperando información').length,
         }), [operationalQueueRows]);
+
+        const workflowBuckets = useMemo(() => ({
+          todo: operationalQueueRows.filter((r) => normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente')) === 'Pendiente').slice(0, 5),
+          progress: operationalQueueRows.filter((r) => normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente')) === 'En proceso').slice(0, 5),
+          done: historyFilteredRows.filter((r) => normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente')) === 'Finalizado').slice(0, 5),
+        }), [operationalQueueRows, historyFilteredRows]);
+
+        const workflowWorkloadLabel = useMemo(() => {
+          const entries = Object.entries(queueCounts);
+          if (entries.length === 0) return 'Sin carga operativa';
+          const [key, value] = entries.sort((a, b) => b[1] - a[1])[0];
+          if (!value) return 'Sin carga operativa';
+          if (key === 'pendiente') return `Mayor carga en Por hacer (${value})`;
+          if (key === 'proceso') return `Mayor carga en En proceso (${value})`;
+          return `Mayor carga en Esperando info (${value})`;
+        }, [queueCounts]);
+
+        const selectedOpsTask = useMemo(() => (
+          Object.values(kanbanColumns).flat().find((task) => task.id === opsSelectedTaskId) || kanbanColumns.todo[0] || null
+        ), [kanbanColumns, opsSelectedTaskId]);
+
+        function moveKanbanTask(taskId, targetColumn) {
+          if (!taskId || !targetColumn) return;
+          setKanbanColumns((prev) => {
+            const next = {
+              todo: [...prev.todo],
+              progress: [...prev.progress],
+              done: [...prev.done],
+            };
+            let moved = null;
+            Object.keys(next).forEach((col) => {
+              const idx = next[col].findIndex((task) => task.id === taskId);
+              if (idx >= 0) {
+                moved = next[col][idx];
+                next[col].splice(idx, 1);
+              }
+            });
+            if (!moved) return prev;
+            next[targetColumn].push(moved);
+            return next;
+          });
+          setOpsActivityFeed((prev) => [`[Tarea movida a '${targetColumn === 'todo' ? 'Por Hacer' : targetColumn === 'progress' ? 'En Proceso' : 'Finalizado'}' por Alfonso]`, ...prev].slice(0, 8));
+        }
+
+        const OPS_USERS = useMemo(() => ([
+          { name: 'Juan Pérez', handle: '@JuanPerez' },
+          { name: 'Alfonso Carballo', handle: '@AlfonsoCarballo' },
+          { name: 'María Gómez', handle: '@MariaGomez' },
+          { name: 'Francisco Bartellone', handle: '@FranciscoB' },
+        ]), []);
+
+        function formatOpsCommentDate(value) {
+          const date = new Date(value || Date.now());
+          if (Number.isNaN(date.getTime())) return '-';
+          return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+        }
+
+        function buildReactionSummary(reactions = []) {
+          if (!Array.isArray(reactions) || reactions.length === 0) return '';
+          if (reactions.length === 1) return reactions[0];
+          return `👍 ${reactions.length} personas`;
+        }
+
+        const mentionMatch = useMemo(() => {
+          const match = opsCommentDraft.match(/(?:^|\s)@([\w]*)$/);
+          return match ? match[1].toLowerCase() : null;
+        }, [opsCommentDraft]);
+
+        const mentionSuggestions = useMemo(() => {
+          if (mentionMatch === null) return [];
+          return OPS_USERS.filter((u) => u.handle.toLowerCase().includes(mentionMatch) || u.name.toLowerCase().includes(mentionMatch)).slice(0, 5);
+        }, [mentionMatch, OPS_USERS]);
+
+        const sortedOpsComments = useMemo(() => {
+          const rows = [...opsComments];
+          if (opsCommentSort === 'relevant') {
+            return rows.sort((a, b) => (b.reactions?.length || 0) - (a.reactions?.length || 0) || (b.createdAt || 0) - (a.createdAt || 0));
+          }
+          return rows.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        }, [opsComments, opsCommentSort]);
 
         async function handleSyncPreloadedServicesToFirebase() {
           if (!isAdminUser) {
@@ -9569,8 +9693,7 @@
               </div>
               <div className="menu">
                 <button className="menu-button" onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
-                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }} style={{ borderColor: '#f97316', boxShadow: '0 0 0 1px rgba(249,115,22,.35) inset' }}><span className="menu-icon">📌</span><span>Pendientes</span><span className="menu-arrow" style={{ color: '#fb923c' }}>{queueCounts.pendiente + queueCounts.proceso + queueCounts.esperando}</span></button>
-                <button className="menu-button" onClick={() => { setSelectedForm('historial'); setHistoryStatusFilter('todos'); closeSidebar(); }}><span className="menu-icon">📋</span><span>Todos</span></button>
+                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">📌</span><span>Coordinación de servicios</span></button>
                 {!isMobile && (
                   <>
                     <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: !p.operaciones, nuevo: false, baseDatos: false }))}><span className="menu-icon">🗂️</span><span>Operaciones</span><span className="menu-arrow">{openMenus.operaciones ? '▾' : '▸'}</span></button>
@@ -9777,7 +9900,7 @@
                 </>
               )}
 
-              <main className={`main ${grupo === 'charla-detalle' ? 'charla-main-wide' : ''} ${effectiveSelectedForm === 'funcionarios' ? 'main-chat-expanded' : ''}`}>
+              <main className={`main ${grupo === 'charla-detalle' ? 'charla-main-wide' : ''} ${effectiveSelectedForm === 'funcionarios' ? 'main-chat-expanded' : ''} ${effectiveSelectedForm === 'historial' ? 'main-ops-expanded' : ''}`}>
                 {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'acciones' && effectiveSelectedForm === 'home' ? renderMobileActions() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : isMobile && mobileTab === 'actividad' ? (
                   <section className="mobile-section-stack">
                     <div className="mobile-section-card">
@@ -10400,159 +10523,310 @@
                 ) : effectiveSelectedForm === 'historial' ? (
                   <section className="panel">
                     <h2>Gestión Operativa</h2>
-                    <div className="hint">Módulo central para Servicios, Adicionales, Novaciones, Movimientos de obra, Bajas y Solicitudes de presupuesto.</div>
-                    <section className="panel" style={{ background: '#f5f7f8', color: '#123436', marginBottom: 12 }}>
-                      <h3 style={{ marginTop: 0, color: '#005a5b' }}>Pendientes</h3>
-                      <div className="hint" style={{ color: '#496a6b' }}>Bandeja activa de trabajo: pendientes, en proceso y bloqueados por información.</div>
-                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
-                        <button type="button" className={`history-page-num ${historyStatusFilter === 'Pendiente' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('Pendiente')}>Por hacer <span style={{ color: '#ef4444' }}>({queueCounts.pendiente})</span></button>
-                        <button type="button" className={`history-page-num ${historyStatusFilter === 'En proceso' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('En proceso')}>En proceso <span style={{ color: '#2563eb' }}>({queueCounts.proceso})</span></button>
-                        <button type="button" className={`history-page-num ${historyStatusFilter === 'Esperando información' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('Esperando información')}>Esperando info <span style={{ color: '#7c3aed' }}>({queueCounts.esperando})</span></button>
-                      </div>
-                      <div className="history-toolbar">
-                        <div className="field span-2"><label>Buscar</label><input value={historySearchTerm} onChange={(e) => setHistorySearchTerm(e.target.value)} placeholder="Buscar servicio..." /></div>
-                        <div className="field"><label>Tipo</label><select value={historyTypeFilter} onChange={(e) => setHistoryTypeFilter(e.target.value)}><option value="todos">Todos</option>{historyTypeOptions.map((tp) => <option key={`ht-${tp}`} value={tp}>{tp}</option>)}</select></div>
-                        <div className="field"><label>Responsable</label><select value={historyCommercialFilter} onChange={(e) => setHistoryCommercialFilter(e.target.value)}><option value="todos">Todos</option>{historyCommercialOptions.map((cm) => <option key={`hc-${cm}`} value={cm}>{cm}</option>)}</select></div>
-                        <div className="field"><label>Fecha</label><input type="date" value={historyDateFilter} onChange={(e) => setHistoryDateFilter(e.target.value)} /></div>
-                        <button type="button" className="history-add-btn" onClick={() => setHistoryPage(1)}>Filtrar</button>
-                      </div>
-                      <div style={{ display: 'grid', gap: 10, marginTop: 12 }}>
-                        {operationalQueueRows.length === 0 ? (
-                          <div className="hint" style={{ padding: 14, margin: 0 }}>No hay tareas activas con los filtros actuales.</div>
-                        ) : operationalQueueRows.map((service) => {
-                          const statusNorm = normalizeLegacyStatusName(service.status || service.estado || 'Pendiente');
-                          const tone = statusNorm === 'Pendiente' ? '#ef4444' : statusNorm === 'En proceso' ? '#2563eb' : '#7c3aed';
-                          const createdSeconds = service.creadoEn?.seconds || service.actualizadoEn?.seconds || 0;
-                          const daysPending = createdSeconds ? Math.max(0, Math.floor((Date.now() - (createdSeconds * 1000)) / 86400000)) : 0;
-                          return (
-                            <article key={`opq-${service.id}`} style={{ background: '#fff', borderRadius: 14, boxShadow: '0 6px 20px rgba(0,0,0,.08)', border: '1px solid #e5eaec', display: 'grid', gridTemplateColumns: '6px 1fr auto', overflow: 'hidden' }}>
-                              <div style={{ background: tone }} />
-                              <div style={{ padding: 12 }}>
-                                <strong style={{ color: '#0e3c3d' }}>{service.nombreServicio || 'Servicio sin nombre'}</strong>
-                                <div style={{ fontSize: 12, color: '#5d7677', marginTop: 4 }}>
-                                  Tipo: {service.tipoAccion === 'Nuevo Servicio' ? 'Servicio' : service.tipoAccion === 'Adicionales' ? 'Adicional' : service.tipoAccion === 'Solicitud de presupuesto' ? 'Presupuesto' : (service.tipoAccion || '-')} · Responsable: {service.representanteComercial || 'Sin responsable'} · ID: {service.clienteId || '-'}
-                                </div>
-                                <div style={{ fontSize: 13, color: '#3b5657', marginTop: 6 }}>{service.descripcionTrabajo || service.observaciones || service.observacionesComentarios || 'Sin descripción adicional.'}</div>
-                              </div>
-                              <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
-                                <span style={{ background: `${tone}22`, color: tone, border: `1px solid ${tone}55`, padding: '4px 10px', borderRadius: 999, fontSize: 12, fontWeight: 700 }}>{statusNorm}</span>
-                                <button type="button" className="history-edit-btn" onClick={() => setSelectedService(service)}>Ver</button>
-                                <small style={{ color: '#6b7f80' }}>{daysPending} días pendiente</small>
-                              </div>
-                            </article>
-                          );
-                        })}
-                      </div>
-                    </section>
-                    {!selectedService ? (
-                      <div className="hero" style={{padding: '26px 18px'}}>
-                        <h2 style={{fontSize:'1.4rem'}}>Selecciona un servicio desde la búsqueda</h2>
-                        <p style={{fontSize:'1rem'}}>Usa la lupita arriba y toca una vista previa para ver el detalle completo.</p>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="pdf-toolbar" style={{ gap: 8, flexWrap: 'wrap' }}>
-                          <button className="pdf-btn" type="button" onClick={() => handleDownloadPdf(selectedService)}>📄 Descargar PDF</button>
-                          <button
-                            className="edit-btn"
-                            type="button"
-                            disabled={isTechnicalOnly || !canEditService(selectedService)}
-                            onClick={() => startEditService(selectedService)}
-                          >
-                            {isTechnicalOnly ? '🔒 Solo lectura técnica' : (canEditService(selectedService) ? '✎ Editar servicio' : '🔒 Editar')}
-                          </button>
-                          {isAdminUser && (
-                            <button
-                              className="danger-btn"
-                              type="button"
-                              onClick={() => setDeleteTargetService(selectedService)}
-                            >
-                              🗑 Eliminar
-                            </button>
-                          )}
-                          {!isAdminUser && !canEditService(selectedService) && <span className="lock-hint">🔒 Solo lectura</span>}
-                        </div>
-                        <div className="history-grid">
-                        <div className="widget"><h4>Identificación</h4><div className="kv"><b>ID:</b> {selectedService.clienteId || '-'}</div><div className="kv"><b>Nombre:</b> {selectedService.nombreServicio || '-'}</div><div className="kv"><b>Tipo:</b> {selectedService.tipoServicioBrindar || '-'}</div><div className="kv"><b>Dirección:</b> {selectedService.direccionServicio || '-'}</div><div className="kv"><b>Unidades:</b> {selectedService.cantidadUnidades || '-'}</div></div>
-                        <div className="widget"><h4>Comercial / Facturación</h4><div className="kv"><b>Representante:</b> {selectedService.representanteComercial || '-'}</div><div className="kv"><b>Atención cliente:</b> {selectedService.atencionCliente || '-'}</div><div className="kv"><b>Razón Social:</b> {selectedService.razonSocial || '-'}</div><div className="kv"><b>RUT:</b> {selectedService.rut || '-'}</div><div className="kv"><b>Mail:</b> {selectedService.mailFacturacion || '-'}</div><div className="kv"><b>Duración:</b> {selectedService.duracionContratoMeses || '-'}</div></div>
-                        <div className="widget"><h4>Costos</h4><div className="kv"><b>Importe mensual:</b> {selectedService.importeMensualServicioSinIva || '-'}</div><div className="kv"><b>Costo instalación US$:</b> {selectedService.costoInstalacionUsdSinIva || '-'}</div><div className="kv"><b>Presupuesto proveedor:</b> {selectedService.presupuestoProveedor || '-'}</div><div className="kv"><b>Condición equipamiento:</b> {selectedService.condicionEquipamiento || '-'}</div>{selectedService.presupuestoPdfUrl && <div className="kv"><a className="link-btn" href={selectedService.presupuestoPdfUrl} target="_blank" rel="noreferrer">Ver PDF presupuesto</a></div>}</div>
-                        <div className="widget"><h4>Técnica</h4><div className="kv"><b>Control acceso:</b> {selectedService.condicionControlAcceso || '-'}</div><div className="kv"><b>Tags:</b> {selectedService.tagsPorAptos || '-'}</div><div className="kv"><b>Akuvox:</b> {selectedService.appAkuvox || '-'}</div><div className="kv"><b>Llaves:</b> {selectedService.llavesServicio || '-'}</div></div>
-                        <div className="widget"><h4>Instalación</h4><div className="kv"><b>Referente:</b> {selectedService.referenteInstalacion || '-'}</div><div className="kv"><b>Técnico asignado:</b> {selectedService.tecnicoAsignado || '-'}</div><div className="kv"><b>Teléfono:</b> {selectedService.telefonoReferenteInstalacion || '-'}</div><div className="kv"><b>Botti contacto:</b> {selectedService.bottiSeContactaCon || '-'}</div><div className="kv"><b>Jornales:</b> {selectedService.cantidadJornalesEstimados || '-'}</div><div className="kv"><b>Fecha inicio:</b> {selectedService.fechaEspecificaInicio || '-'}</div></div>
-                        <div className="widget"><h4>Seguimiento</h4><div className="kv"><b>Tipo acción:</b> {selectedService.tipoAccion || '-'}</div><div className="kv"><b>Status:</b> {selectedService.status || selectedService.estado || '-'}</div><div className="kv"><b>Fecha ingreso:</b> {selectedService.fechaIngresoDatos || selectedService.fechaCarga || selectedService.fechaCharla || '-'}</div><div className="kv"><b>Proyecto:</b> {selectedService.proyectoServicio || '-'}</div></div>
-                        <div className="widget full"><h4>Observaciones y Excepciones</h4><div className="detail-box">Observaciones: {selectedService.observacionesComentarios || '-'}
+                    <div className="hint">Módulo de inteligencia operativa con tablero Kanban, tabla activa y panel lateral colaborativo.</div>
 
-Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
-                        {isTechnicalOnly && (
-                          <div className="widget full">
-                            <h4>Documentos adjuntos del trabajo (PDF)</h4>
-                            <div className="hint">Vista técnica de consulta: podés adjuntar presupuestos/documentos PDF sin editar datos del trabajo.</div>
-                            <div
-                              className={`ticket-upload-dropzone ${technicalDocDragOver ? 'dragover' : ''}`}
-                              onDragOver={(e) => { e.preventDefault(); setTechnicalDocDragOver(true); }}
-                              onDragLeave={(e) => { e.preventDefault(); setTechnicalDocDragOver(false); }}
-                              onDrop={(e) => {
-                                e.preventDefault();
-                                setTechnicalDocDragOver(false);
-                                const file = e.dataTransfer?.files?.[0];
-                                if (file) handleTechnicalDocumentUpload(file, selectedService);
-                              }}
-                            >
-                              Arrastrá y soltá un PDF aquí o usá el selector de archivo.
+                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.6fr) minmax(430px,1fr)', gap: 14, alignItems: 'stretch', width: '100%' }}>
+                      <section className="panel" style={{ background: '#f7fafb', color: '#103839', border: '1px solid #dde8ea', marginBottom: 0 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 10, alignItems: 'center', marginBottom: 14 }}>
+                          <button type="button" className="burger" style={{ width: 42, height: 42 }}>☰</button>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 10, alignItems: 'center' }}>
+                            <div style={{ textAlign: 'center' }}>
+                              <div style={{ fontSize: 28, color: '#ff8a2a', fontWeight: 800, lineHeight: 1 }}>Masterson Seguridad</div>
+                              <div style={{ color: '#ff8a2a', fontSize: 13 }}>Administrador</div>
                             </div>
-                            <div className="field" style={{ marginTop: 8 }}>
-                              <label>Seleccionar documento PDF</label>
-                              <input
-                                type="file"
-                                accept="application/pdf"
-                                disabled={uploadingTechnicalDoc}
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) handleTechnicalDocumentUpload(file, selectedService);
-                                  e.target.value = '';
-                                }}
-                              />
+                            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                              <button type="button" className="burger" style={{ width: 36, height: 36, borderRadius: '50%', color: '#ff8a2a' }}><i data-lucide="search"></i></button>
+                              <button type="button" className="burger" style={{ width: 36, height: 36, borderRadius: '50%', color: '#ff8a2a', position: 'relative' }}><i data-lucide="bell"></i><span style={{ position: 'absolute', top: 8, right: 8, width: 7, height: 7, borderRadius: '50%', background: '#ef4444' }}></span></button>
+                              <button type="button" className="burger" style={{ width: 36, height: 36, borderRadius: '50%', color: '#ff8a2a' }}><i data-lucide="user-circle-2"></i></button>
                             </div>
-                            {uploadingTechnicalDoc && <div className="hint" style={{ marginBottom: 0 }}>Subiendo documento...</div>}
-                            {!Array.isArray(selectedService.documentosAdjuntos) || selectedService.documentosAdjuntos.length === 0 ? (
-                              <div className="hint" style={{ marginBottom: 0 }}>Aún no hay documentos adjuntos para este trabajo.</div>
-                            ) : (
-                              <div className="gerencia-status-list" style={{ marginTop: 8 }}>
-                                {selectedService.documentosAdjuntos.map((doc, idx) => (
-                                  <div className="gerencia-item" key={`doc-tecnico-${doc.id || idx}`}>
-                                    <span>{doc.name || `Documento ${idx + 1}`}</span>
-                                    {doc.url ? <a className="link-btn" href={doc.url} target="_blank" rel="noreferrer">Abrir PDF</a> : <b>Sin enlace</b>}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
                           </div>
-                        )}
-                        <div className="widget full">
-                          <h4>Micro-Historial de Cambios</h4>
-                          {!Array.isArray(selectedService.logs_cambios) || selectedService.logs_cambios.length === 0 ? (
-                            <div className="hint" style={{ marginBottom: 0 }}>Sin cambios registrados aún.</div>
-                          ) : (
-                            <ul className="micro-log-list">
-                              {selectedService.logs_cambios
-                                .slice()
-                                .sort((a, b) => {
-                                  const av = a?.fecha;
-                                  const bv = b?.fecha;
-                                  const at = av && typeof av.toDate === 'function' ? av.toDate().getTime() : new Date(av || 0).getTime();
-                                  const bt = bv && typeof bv.toDate === 'function' ? bv.toDate().getTime() : new Date(bv || 0).getTime();
-                                  return at - bt;
-                                })
-                                .map((log, idx) => (
-                                  <li key={`log-${idx}`} className="micro-log-item">
-                                    {formatLogDate(log?.fecha)} · {log?.usuario || '-'} · {log?.accion || 'Actualización de datos'}
-                                  </li>
-                                ))}
-                            </ul>
-                          )}
                         </div>
-                      </div>
-                      </>
-                    )}
+
+                        <div style={{ background: '#fff', border: '1px solid #dbe7e8', borderRadius: 16, padding: 12, marginBottom: 12 }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 10, alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <div style={{ width: 42, height: 42, borderRadius: 12, background: 'linear-gradient(135deg,#075e5f,#14b8a6)', display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 900 }}>MS</div>
+                              <div>
+                                <strong style={{ display: 'block', color: '#0c4b4c', textAlign: 'center' }}>Gestión Operativa</strong>
+                                <small style={{ color: '#5a7a7b', display: 'block', textAlign: 'center' }}>Gestión Operativa Integral</small>
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                              <div className="search-wrap" style={{ margin: 0, flex: 1 }}>
+                                <span className="search-icon"><i data-lucide="search"></i></span>
+                                <input value={historySearchTerm} onChange={(e) => setHistorySearchTerm(e.target.value)} placeholder="Buscar servicio, cliente o responsable..." style={{ width: '100%', background: '#fff', color: '#123436', borderColor: '#d6e3e4', borderRadius: 999, textAlign: 'center' }} />
+                              </div>
+                              <button type="button" className="history-edit-btn" style={{ display: 'grid', placeItems: 'center' }}><i data-lucide="calendar"></i></button>
+                              <button type="button" className="history-edit-btn" style={{ display: 'grid', placeItems: 'center' }}><i data-lucide="user"></i></button>
+                              <button type="button" className="history-edit-btn" style={{ display: 'grid', placeItems: 'center' }}><i data-lucide="list-filter"></i></button>
+                              {['GS', 'FB', 'NL'].map((tag) => <div key={tag} style={{ width: 30, height: 30, borderRadius: '50%', background: '#0f5f60', color: '#fff', display: 'grid', placeItems: 'center', textAlign: 'center', fontSize: 10, fontWeight: 700 }}>{tag}</div>)}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(210px, 1fr))', gap: 10, marginBottom: 12 }}>
+                          <article style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 14, padding: 10 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: '#c2410c', fontWeight: 700, textAlign: 'center' }}><span className="ops-alert-ping">🚨</span> Urgencia Operativa</div>
+                            <div style={{ fontWeight: 800, marginTop: 4, textAlign: 'center' }}>1 Tarea Crítica</div>
+                            <small style={{ display: 'block', textAlign: 'center' }}>San Felipe (vence mañana)</small>
+                            <div style={{ textAlign: 'center' }}><button type="button" className="history-edit-btn" style={{ marginTop: 8 }}>Ver Tarea</button></div>
+                          </article>
+                          <article style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 14, padding: 10 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: '#c2410c', fontWeight: 700, textAlign: 'center' }}>📈 Previsión de Flujo</div>
+                            <div style={{ fontWeight: 800, marginTop: 4, textAlign: 'center' }}>Cuello de Botella en 'En Proceso'</div>
+                            <small style={{ display: 'block', textAlign: 'center' }}>Demora en aprobación de equipos.</small>
+                            <div style={{ textAlign: 'center' }}><button type="button" className="history-edit-btn" style={{ marginTop: 8 }}>Gestionar</button></div>
+                          </article>
+                          <article style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 14, padding: 10 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: '#15803d', fontWeight: 700, textAlign: 'center' }}>💡 Optimización de Recursos</div>
+                            <div style={{ fontWeight: 800, marginTop: 4, textAlign: 'center' }}>Asignar Técnico Extra</div>
+                            <small style={{ display: 'block', textAlign: 'center' }}>Alta carga de instalaciones Akuvox.</small>
+                            <div style={{ textAlign: 'center' }}><button type="button" className="history-edit-btn" style={{ marginTop: 8, color: '#15803d' }}>Ver Disponibilidad</button></div>
+                          </article>
+                        </div>
+
+                        <div style={{ marginBottom: 12 }}>
+                          <h3 style={{ margin: '0 0 8px', color: '#0c4b4c', textAlign: 'center' }}>Tablero Interactivo</h3>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(200px, 1fr))', gap: 10 }}>
+                            {[
+                              { key: 'todo', title: 'Por Hacer', tone: '#dc2626' },
+                              { key: 'progress', title: 'En Proceso', tone: '#2563eb' },
+                              { key: 'done', title: 'Finalizado', tone: '#16a34a' },
+                            ].map((col) => (
+                              <div
+                                key={col.key}
+                                onDragOver={(e) => { e.preventDefault(); setDragOverColumn(col.key); }}
+                                onDragLeave={() => setDragOverColumn('')}
+                                onDrop={() => { moveKanbanTask(draggingTaskId, col.key); setDraggingTaskId(null); setDragOverColumn(''); }}
+                                style={{ background: dragOverColumn === col.key ? '#eef7ff' : '#fff', border: `1px solid ${dragOverColumn === col.key ? '#93c5fd' : '#e2ebec'}`, borderRadius: 14, padding: 10, minHeight: 220 }}
+                              >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                                  <strong style={{ color: col.tone, textAlign: 'center' }}>{col.title} ({kanbanColumns[col.key].length})</strong>
+                                  {col.key === 'done' && kanbanColumns[col.key].length === 0 && <span style={{ color: '#16a34a' }}>✅</span>}
+                                </div>
+                                <div style={{ display: 'grid', gap: 8 }}>
+                                  {kanbanColumns[col.key].map((task, idx) => (
+                                    <article
+                                      key={`${col.key}-${task.id}`}
+                                      draggable
+                                      onDragStart={() => setDraggingTaskId(task.id)}
+                                      onClick={() => { setOpsSelectedTaskId(task.id); setSelectedService(historySourceRows.find((row) => String(row.clienteId || '').trim() === task.id) || selectedService); }}
+                                      style={{ border: task.id === opsSelectedTaskId ? '2px solid #fb923c' : '1px solid #e3eaeb', borderRadius: 12, padding: 8, background: '#fcfefe', cursor: 'grab' }}
+                                    >
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                                        <small style={{ color: '#5f7778' }}>ID: {task.id}</small>
+                                        {idx === 0 && col.key === 'todo' && <span title="Arrastrar">🖐️</span>}
+                                      </div>
+                                      <strong style={{ display: 'block', color: '#214849' }}>{task.title}</strong>
+                                      <small style={{ color: '#5f7778' }}>{task.executive}</small>
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginTop: 4 }}>
+                                        <span>{task.dueSoon ? '⏰ Vence pronto' : '✅ En tiempo'}</span>
+                                        <span>Checklist: {task.checklistDone}/{task.checklistTotal}</span>
+                                      </div>
+                                    </article>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <h3 style={{ margin: '0 0 8px', color: '#0c4b4c' }}>Tabla Dinámica de Gestión Operativa</h3>
+                          <div style={{ overflowX: 'auto', background: '#fff', borderRadius: 14, border: '1px solid #e2ebec' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 940 }}>
+                              <thead>
+                                <tr style={{ background: '#f2f7f8', color: '#245152' }}>
+                                  <th style={{ textAlign: 'left', padding: '10px 12px' }}>Servicio</th>
+                                  <th style={{ textAlign: 'left', padding: '10px 12px' }}>Ejecutivo</th>
+                                  <th style={{ textAlign: 'left', padding: '10px 12px' }}>Trabajo a Realizar</th>
+                                  <th style={{ textAlign: 'left', padding: '10px 12px' }}>Acciones</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {(kanbanColumns.todo.concat(kanbanColumns.progress).slice(0, 6)).map((task) => {
+                                  const meta = opsTaskMeta[task.id] || { executive: task.executive, checklist: ['Instalación'], checked: {}, presupuesto: '', costoUsd: '', equipamiento: 'Compra' };
+                                  const isSelected = task.id === opsSelectedTaskId;
+                                  return (
+                                    <React.Fragment key={`tbl-${task.id}`}>
+                                      <tr style={{ borderTop: '1px solid #ebf1f2', outline: isSelected ? '2px solid #fb923c' : 'none' }}>
+                                        <td style={{ padding: '10px 12px' }}><strong>{task.title}</strong><br /><small>ID: {task.id}</small></td>
+                                        <td style={{ padding: '10px 12px' }}>
+                                          <select value={meta.executive} onChange={(e) => setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, executive: e.target.value } }))}>
+                                            <option>Alfonso Carballo</option><option>Gastón Silva</option><option>Francisco Bartellone</option><option>Nicolás Leguizamón</option>
+                                          </select>
+                                        </td>
+                                        <td style={{ padding: '10px 12px' }}>
+                                          <div style={{ display: 'grid', gap: 5 }}>
+                                            {meta.checklist.map((sub) => (
+                                              <label key={`${task.id}-${sub}`} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                                <input type="checkbox" checked={Boolean(meta.checked[sub])} onChange={(e) => setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, checked: { ...meta.checked, [sub]: e.target.checked } } }))} />
+                                                <span>{sub}</span>
+                                              </label>
+                                            ))}
+                                            <button type="button" className="history-edit-btn" onClick={() => {
+                                              const label = window.prompt('Nueva subtarea');
+                                              if (!label) return;
+                                              setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, checklist: [...meta.checklist, label] } }));
+                                            }}>+ Añadir subtarea</button>
+                                          </div>
+                                        </td>
+                                        <td style={{ padding: '10px 12px' }}>
+                                          <div style={{ display: 'grid', gap: 6 }}>
+                                            <button type="button" className="history-edit-btn" onClick={() => setOpsSelectedTaskId(task.id)}>Asignar</button>
+                                            <button type="button" className="history-edit-btn" onClick={() => setOpsActivityFeed((prev) => ['[Reporte generado y tarea finalizada]', ...prev].slice(0, 8))}>Generar Reporte y Finalizar</button>
+                                            <button type="button" className="history-edit-btn" onClick={() => moveKanbanTask(task.id, 'progress')}>Mover a En Proceso</button>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                      {isSelected && (
+                                        <tr>
+                                          <td colSpan={4} style={{ padding: 12, background: '#fff7ed' }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(180px,1fr))', gap: 10 }}>
+                                              <div className="field"><label>Presupuesto Solicitado <span title="Ayuda">❔</span></label><input value={meta.presupuesto} onChange={(e) => setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, presupuesto: e.target.value } }))} /></div>
+                                              <div className="field"><label>Costo Instalación US$ <span title="Ayuda">❔</span></label><input value={meta.costoUsd} onChange={(e) => setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, costoUsd: e.target.value } }))} /></div>
+                                              <div className="field"><label>Condición Equipamiento <span title="Ayuda">❔</span></label><select value={meta.equipamiento} onChange={(e) => setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, equipamiento: e.target.value } }))}><option>Compra</option><option>Alquiler</option></select></div>
+                                            </div>
+                                          </td>
+                                        </tr>
+                                      )}
+                                    </React.Fragment>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center', gap: 8 }}>
+                          <button className="pdf-btn" type="button" onClick={() => selectedService && handleDownloadPdf(selectedService)}>Descargar PDF</button>
+                          <button className="edit-btn" type="button" onClick={() => selectedService && startEditService(selectedService)}>Editar Servicio</button>
+                          <button className="danger-btn" type="button" onClick={() => selectedService && setDeleteTargetService(selectedService)}>Eliminar Tarea</button>
+                        </div>
+
+                        <div style={{ marginTop: 12, background: '#fff', borderRadius: 12, border: '1px solid #e3eaeb' }}>
+                          <button type="button" onClick={() => setOpsObservationsOpen((v) => !v)} style={{ width: '100%', textAlign: 'left', border: '0', background: 'transparent', padding: '10px 12px', color: '#184647', fontWeight: 700 }}>Observaciones y Excepciones {opsObservationsOpen ? '▲' : '▼'}</button>
+                          {opsObservationsOpen && <div style={{ padding: '0 12px 12px', color: '#466566' }}>{selectedService?.observacionesComentarios || 'Sin observaciones registradas.'}<br />{selectedService?.excepcionesAcordadas || 'Sin excepciones registradas.'}</div>}
+                        </div>
+                      </section>
+
+                      <aside className="panel" style={{ marginBottom: 0, position: 'sticky', top: 84, background: '#ffffff', color: '#123436', border: '1px solid #d9e5e7', maxHeight: 'calc(100vh - 96px)', overflow: 'hidden' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <h3 style={{ margin: 0, textAlign: 'center', width: '100%', color: '#0b5a5b' }}>Servicio {selectedOpsTask?.title || 'San Felipe'}</h3>
+                          <small>ID {selectedOpsTask?.id || '4184'}</small>
+                        </div>
+                        <div style={{ marginTop: 10, borderRadius: 14, padding: 10, background: 'linear-gradient(180deg,#212121,#121212)', border: '1px solid rgba(0,100,101,.55)', boxShadow: '0 10px 24px rgba(0,0,0,.25)' }}>
+                          <section style={{ display: 'grid', gap: 10 }}>
+                            <div style={{ display: 'grid', gap: 10, maxHeight: 520, overflowY: 'auto', paddingRight: 4 }}>
+                              {sortedOpsComments.map((item) => (
+                                <article key={item.id} style={{ border: '1px solid #d2dbdc', borderRadius: 12, padding: 10, background: '#eceff0', boxShadow: '0 6px 14px rgba(0,0,0,.08)' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                      <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#006465', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 10 }}>👤</div>
+                                      <div><strong style={{ color: '#14393a' }}>{item.user}</strong> <small style={{ color: '#5f6d6e' }}>{item.handle}</small></div>
+                                    </div>
+                                    <small style={{ color: '#4f6263' }}>{formatOpsCommentDate(item.createdAt)}</small>
+                                  </div>
+                                  <div style={{ marginTop: 8, color: '#1e3637', lineHeight: 1.4 }}>
+                                    {String(item.text || '').split(/(\@[A-Za-z0-9_]+)/g).map((token, idx) => token.startsWith('@')
+                                      ? <span key={`${item.id}-m-${idx}`} style={{ color: '#0b5fc2', fontWeight: 700, background: 'rgba(59,130,246,.14)', borderRadius: 8, padding: '0 4px' }}>{token}</span>
+                                      : <span key={`${item.id}-t-${idx}`}>{token}</span>)}
+                                  </div>
+                                  {item.attachment && <div style={{ marginTop: 6, color: '#355455', fontSize: 13 }}>📄 {item.attachment}</div>}
+                                  <div style={{ display: 'flex', gap: 6, marginTop: 9, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+                                    <div style={{ display: 'inline-flex', gap: 4, alignItems: 'center' }}>
+                                      {['👍', '❤️', '❌'].map((emoji) => (
+                                        <button
+                                          key={`${item.id}-${emoji}`}
+                                          type="button"
+                                          className="history-edit-btn"
+                                          style={{ minWidth: 34, height: 30, padding: '4px 8px', borderRadius: 9, lineHeight: 1, transition: 'all .2s ease' }}
+                                          onClick={() => {
+                                            setOpsComments((prev) => prev.map((row) => row.id !== item.id
+                                              ? row
+                                              : { ...row, reactions: Array.from(new Set([...(row.reactions || []), `Juan Pérez marcó ${emoji}`])) }));
+                                          }}
+                                        >
+                                          {emoji}
+                                        </button>
+                                      ))}
+                                    </div>
+                                    <button type="button" className="history-edit-btn" style={{ padding: '5px 10px', borderRadius: 9, transition: 'all .2s ease', whiteSpace: 'nowrap' }} onClick={() => { setOpsReplyTargetId(item.id); setOpsReplyDraft(''); }}>↩ Responder</button>
+                                    {buildReactionSummary(item.reactions) && (
+                                      <button type="button" onClick={() => window.alert((item.reactions || []).join('\n'))} style={{ color: '#204d4e', background: '#dde8e9', border: '1px solid #bdd1d2', borderRadius: 999, padding: '2px 10px', fontSize: 12, cursor: 'pointer' }}>
+                                        {buildReactionSummary(item.reactions)}
+                                      </button>
+                                    )}
+                                  </div>
+                                  {opsReplyTargetId === item.id && (
+                                    <div style={{ marginTop: 8, display: 'grid', gap: 6 }}>
+                                      <textarea value={opsReplyDraft} onChange={(e) => setOpsReplyDraft(e.target.value)} placeholder="Responder comentario" style={{ minHeight: 64, background: '#f8fbfb', color: '#1f3d3e' }} />
+                                      <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                                        <button type="button" className="history-edit-btn" onClick={() => { setOpsReplyTargetId(''); setOpsReplyDraft(''); }}>Cancelar</button>
+                                        <button type="button" className="history-edit-btn" onClick={() => {
+                                          if (!opsReplyDraft.trim()) return;
+                                          setOpsComments((prev) => prev.map((row) => row.id !== item.id ? row : { ...row, replies: [...(row.replies || []), { id: `r-${Date.now()}`, user: 'Juan Pérez', text: opsReplyDraft.trim(), createdAt: Date.now() }] }));
+                                          setOpsReplyTargetId('');
+                                          setOpsReplyDraft('');
+                                        }}>Publicar respuesta</button>
+                                      </div>
+                                    </div>
+                                  )}
+                                  {Array.isArray(item.replies) && item.replies.length > 0 && (
+                                    <div style={{ marginTop: 8, paddingLeft: 12, borderLeft: '2px solid #b8c9ca', display: 'grid', gap: 6 }}>
+                                      {item.replies.map((reply) => (
+                                        <div key={reply.id} style={{ background: '#f7fafa', border: '1px solid #dae6e7', borderRadius: 8, padding: '6px 8px' }}>
+                                          <strong>{reply.user}</strong> <small style={{ color: '#547172' }}>{formatOpsCommentDate(reply.createdAt)}</small>
+                                          <div>{reply.text}</div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </article>
+                              ))}
+                            </div>
+
+                            <div className="field" style={{ marginTop: 2 }}>
+                              <label><span style={{ background: '#0f5f60', color: '#ff8a2a', padding: '3px 10px', borderRadius: 999 }}>Comentario</span></label>
+                              <textarea value={opsCommentDraft} onChange={(e) => setOpsCommentDraft(e.target.value)} placeholder="Escribe un comentario con @menciones" style={{ background: '#e7eced', borderColor: '#8cb4b5', color: '#234243' }} />
+                              {mentionSuggestions.length > 0 && (
+                                <div style={{ border: '1px solid #7ba9aa', borderRadius: 10, background: '#eef3f4', marginTop: 6, overflow: 'hidden', boxShadow: '0 8px 16px rgba(0,0,0,.18)' }}>
+                                  {mentionSuggestions.map((u) => (
+                                    <button
+                                      key={u.handle}
+                                      type="button"
+                                      onClick={() => setOpsCommentDraft((prev) => prev.replace(/(?:^|\s)@([\w]*)$/, ` ${u.handle} `))}
+                                      style={{ width: '100%', textAlign: 'left', border: 0, borderBottom: '1px solid #d7e3e4', background: '#eef3f4', padding: '8px 10px', cursor: 'pointer' }}
+                                    >
+                                      <strong>{u.name}</strong> <small>{u.handle}</small>
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                              <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+                                <button type="button" className="history-edit-btn">@ Mencionar</button>
+                                <button type="button" className="history-edit-btn">Adjuntar</button>
+                                <button type="button" className="history-edit-btn" style={{ background: 'rgba(22,163,74,.18)', color: '#166534', borderColor: 'rgba(22,163,74,.35)' }} onClick={() => {
+                                  if (!opsCommentDraft.trim()) return;
+                                  const text = opsCommentDraft.trim();
+                                  const mentioned = Array.from(new Set((text.match(/\@[A-Za-z0-9_]+/g) || [])));
+                                  setOpsComments((prev) => [{ id: `c-${Date.now()}`, user: 'Juan Pérez', handle: '@JuanPerez', text, attachment: '', createdAt: Date.now(), reactions: [], replies: [] }, ...prev]);
+                                  setOpsActivityFeed((prev) => ['[Comentario agregado por Juan]', ...prev].slice(0, 8));
+                                  if (mentioned.length > 0) {
+                                    setOpsActivityFeed((prev) => [`[Notificación enviada a: ${mentioned.join(', ')}]`, ...prev].slice(0, 8));
+                                  }
+                                  setOpsCommentDraft('');
+                                }}>Publicar</button>
+                              </div>
+                            </div>
+
+                            <div style={{ marginTop: 4, borderTop: '1px solid rgba(196,220,221,.35)', paddingTop: 8 }}>
+                              {opsActivityFeed.filter((line) => !String(line).toLowerCase().includes('ia')).map((line, idx) => <div key={`act-${idx}`} style={{ fontSize: 13, color: '#b8d4d5', marginBottom: 4 }}>{line}</div>)}
+                            </div>
+                          </section>
+                        </div>
+                      </aside>
+                    </div>
                   </section>
                 ) : (
                 <section className="panel">
