@@ -6888,7 +6888,7 @@
         const [activeKpi, setActiveKpi] = useState(null);
         const [selectedCommercial, setSelectedCommercial] = useState('');
         const [historySearchTerm, setHistorySearchTerm] = useState('');
-        const [historyStatusFilter, setHistoryStatusFilter] = useState('todos');
+        const [historyStatusFilter, setHistoryStatusFilter] = useState('Pendiente');
         const [historyCommercialFilter, setHistoryCommercialFilter] = useState('todos');
         const [historyTypeFilter, setHistoryTypeFilter] = useState('todos');
         const [historyDateFilter, setHistoryDateFilter] = useState('');
@@ -7217,6 +7217,17 @@
           const start = (safeHistoryPage - 1) * HISTORY_PAGE_SIZE;
           return historyFilteredRows.slice(start, start + HISTORY_PAGE_SIZE);
         }, [historyFilteredRows, safeHistoryPage]);
+
+        const operationalQueueRows = useMemo(() => {
+          const activeStates = new Set(['Pendiente', 'En proceso', 'Esperando información']);
+          return historyFilteredRows.filter((r) => activeStates.has(normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente'))));
+        }, [historyFilteredRows]);
+
+        const queueCounts = useMemo(() => ({
+          pendiente: operationalQueueRows.filter((r) => normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente')) === 'Pendiente').length,
+          proceso: operationalQueueRows.filter((r) => normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente')) === 'En proceso').length,
+          esperando: operationalQueueRows.filter((r) => normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente')) === 'Esperando información').length,
+        }), [operationalQueueRows]);
 
         async function handleSyncPreloadedServicesToFirebase() {
           if (!isAdminUser) {
@@ -9558,6 +9569,8 @@
               </div>
               <div className="menu">
                 <button className="menu-button" onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
+                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }} style={{ borderColor: '#f97316', boxShadow: '0 0 0 1px rgba(249,115,22,.35) inset' }}><span className="menu-icon">📌</span><span>Pendientes</span><span className="menu-arrow" style={{ color: '#fb923c' }}>{queueCounts.pendiente + queueCounts.proceso + queueCounts.esperando}</span></button>
+                <button className="menu-button" onClick={() => { setSelectedForm('historial'); setHistoryStatusFilter('todos'); closeSidebar(); }}><span className="menu-icon">📋</span><span>Todos</span></button>
                 {!isMobile && (
                   <>
                     <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: !p.operaciones, nuevo: false, baseDatos: false }))}><span className="menu-icon">🗂️</span><span>Operaciones</span><span className="menu-arrow">{openMenus.operaciones ? '▾' : '▸'}</span></button>
@@ -10388,106 +10401,47 @@
                   <section className="panel">
                     <h2>Gestión Operativa</h2>
                     <div className="hint">Módulo central para Servicios, Adicionales, Novaciones, Movimientos de obra, Bajas y Solicitudes de presupuesto.</div>
-                    <section className="panel" style={{ background: 'rgba(255,255,255,.04)', marginBottom: 12 }}>
-                      <h3 style={{ marginTop: 0 }}>Registros ({historyFilteredRows.length} filtrados de {historySourceRows.length})</h3>
-                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
-                        <button type="button" className={`history-page-num ${historyStatusFilter === 'todos' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('todos')}>Todos</button>
-                        <button type="button" className={`history-page-num ${historyStatusFilter === 'Pendiente' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('Pendiente')}>Pendientes</button>
-                        <button type="button" className={`history-page-num ${historyStatusFilter === 'En proceso' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('En proceso')}>En proceso</button>
-                        <button type="button" className={`history-page-num ${historyStatusFilter === 'Finalizado' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('Finalizado')}>Finalizados</button>
-                        <button type="button" className={`history-page-num ${historyStatusFilter === 'Cancelado' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('Cancelado')}>Cancelados</button>
+                    <section className="panel" style={{ background: '#f5f7f8', color: '#123436', marginBottom: 12 }}>
+                      <h3 style={{ marginTop: 0, color: '#005a5b' }}>Pendientes</h3>
+                      <div className="hint" style={{ color: '#496a6b' }}>Bandeja activa de trabajo: pendientes, en proceso y bloqueados por información.</div>
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+                        <button type="button" className={`history-page-num ${historyStatusFilter === 'Pendiente' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('Pendiente')}>Por hacer <span style={{ color: '#ef4444' }}>({queueCounts.pendiente})</span></button>
+                        <button type="button" className={`history-page-num ${historyStatusFilter === 'En proceso' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('En proceso')}>En proceso <span style={{ color: '#2563eb' }}>({queueCounts.proceso})</span></button>
+                        <button type="button" className={`history-page-num ${historyStatusFilter === 'Esperando información' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('Esperando información')}>Esperando info <span style={{ color: '#7c3aed' }}>({queueCounts.esperando})</span></button>
                       </div>
                       <div className="history-toolbar">
-                        <div className="field span-2"><label>Buscar</label><input value={historySearchTerm} onChange={(e) => setHistorySearchTerm(e.target.value)} placeholder="ID, servicio, razón social, RUT, dirección..." /></div>
-                        <div className="field"><label>Estado</label><select value={historyStatusFilter} onChange={(e) => setHistoryStatusFilter(e.target.value)}><option value="todos">Todos</option>{historyStatusOptions.map((st) => <option key={`hs-${st}`} value={st}>{st}</option>)}</select></div>
+                        <div className="field span-2"><label>Buscar</label><input value={historySearchTerm} onChange={(e) => setHistorySearchTerm(e.target.value)} placeholder="Buscar servicio..." /></div>
                         <div className="field"><label>Tipo</label><select value={historyTypeFilter} onChange={(e) => setHistoryTypeFilter(e.target.value)}><option value="todos">Todos</option>{historyTypeOptions.map((tp) => <option key={`ht-${tp}`} value={tp}>{tp}</option>)}</select></div>
                         <div className="field"><label>Responsable</label><select value={historyCommercialFilter} onChange={(e) => setHistoryCommercialFilter(e.target.value)}><option value="todos">Todos</option>{historyCommercialOptions.map((cm) => <option key={`hc-${cm}`} value={cm}>{cm}</option>)}</select></div>
                         <div className="field"><label>Fecha</label><input type="date" value={historyDateFilter} onChange={(e) => setHistoryDateFilter(e.target.value)} /></div>
-                        {isAdminUser && <button type="button" className="history-add-btn" onClick={() => setShowManualCatalogForm((prev) => !prev)}>{showManualCatalogForm ? "Cerrar agregar servicio" : "Agregar servicio"}</button>}
+                        <button type="button" className="history-add-btn" onClick={() => setHistoryPage(1)}>Filtrar</button>
                       </div>
-                      <div className="hint" style={{ marginBottom: 10 }}>Catálogo local visible en historial: {preloadedHistoryRows.length} servicio(s) aún no guardado(s) en Firebase.</div>
-                      {isAdminUser && (
-                        <div style={{ marginBottom: 12 }}>
-                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                            <button type="button" className="link-btn" disabled={catalogSyncing} onClick={handleSyncPreloadedServicesToFirebase}>
-                              {catalogSyncing ? 'Sincronizando catálogo…' : 'Sincronizar catálogo precargado en Firebase'}
-                            </button>
-                          </div>
-                          {showManualCatalogForm && (
-                            <div className="panel" style={{ marginTop: 10, background: 'rgba(255,255,255,.03)' }}>
-                              <h4 style={{ marginTop: 0 }}>Agregar servicio al catálogo/Firebase</h4>
-                              <div className="grid cols-3">
-                                <div className="field"><label>Número</label><input value={manualCatalogForm.numero} onChange={(e) => setManualCatalogField('numero', e.target.value)} placeholder="Ej: 0001" /></div>
-                                <div className="field"><label>Servicio</label><input value={manualCatalogForm.nombreServicio} onChange={(e) => setManualCatalogField('nombreServicio', e.target.value)} placeholder="Nombre del servicio" /></div>
-                                <div className="field"><label>Dirección</label><input value={manualCatalogForm.direccionServicio} onChange={(e) => setManualCatalogField('direccionServicio', e.target.value)} placeholder="Dirección" /></div>
-                                <div className="field"><label>Tipo de Servicio</label><input value={manualCatalogForm.tipoServicioBrindar} onChange={(e) => setManualCatalogField('tipoServicioBrindar', e.target.value)} placeholder="MONITOREO / PORTERIA..." /></div>
-                                <div className="field"><label>Comercial</label><input value={manualCatalogForm.representanteComercial} onChange={(e) => setManualCatalogField('representanteComercial', e.target.value)} placeholder="Nombre comercial" /></div>
-                                <div className="field"><label>Atención al cliente</label><input value={manualCatalogForm.atencionCliente} onChange={(e) => setManualCatalogField('atencionCliente', e.target.value)} placeholder="Nombre atención cliente" /></div>
-                              </div>
-                              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                <button type="button" className="save-btn" disabled={savingManualCatalogService} onClick={handleCreateManualCatalogService}>{savingManualCatalogService ? 'Guardando...' : 'Guardar servicio en operaciones'}</button>
-                                <button type="button" className="link-btn" disabled={savingManualCatalogService} onClick={resetManualCatalogForm}>Limpiar</button>
-                              </div>
-                              <div className="field" style={{ marginTop: 10 }}>
-                                <label>Pegar listado masivo (TSV: Numero, Servicio, Dirección, Tipo de Servicio, Comercial, Atencion al cliente)</label>
-                                <textarea rows={8} value={bulkCatalogRawInput} onChange={(e) => setBulkCatalogRawInput(e.target.value)} placeholder="Pegá aquí el listado completo..." />
-                              </div>
-                              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                <button type="button" className="save-btn" disabled={bulkCatalogSyncing} onClick={handleSyncBulkCatalogRawToFirebase}>{bulkCatalogSyncing ? 'Sincronizando listado...' : 'Sincronizar listado completo en operaciones'}</button>
-                                <span className="hint" style={{ margin: 0 }}>Filas válidas detectadas: {parseExtraPreloadedServices(bulkCatalogRawInput).length}</span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      <div className="history-list-shell">
-                        <div className="history-list-head">
-                          <strong>Listado paginado</strong>
-                          <span className="hint" style={{ margin: 0 }}>Página {safeHistoryPage} de {totalHistoryPages}</span>
-                        </div>
-                        <div className="history-list">
-                          {historyRowsPage.length === 0 ? (
-                            <div className="hint" style={{ padding: 14, margin: 0 }}>No hay resultados con los filtros aplicados.</div>
-                          ) : historyRowsPage.map((service) => {
-                            const allowedEdit = canEditService(service);
-                            return (
-                              <div className="history-row" key={`hist-${service.id}`} data-status={String(service.status || service.estado || "pendiente").toLowerCase()}>
-                                <button type="button" className="ranking-service-btn" onClick={() => setSelectedService(service)}>
-                                  <div className="history-row-main">
-                                    <strong>{service.nombreServicio || service.cliente || 'Servicio sin nombre'}</strong>
-                                    <div className="history-row-meta">
-                                      <span>ID {service.clienteId || '-'}</span>
-                                      <span>·</span>
-                                      <span>{service.tipoAccion === 'Nuevo Servicio' ? 'Servicio' : service.tipoAccion === 'Adicionales' ? 'Adicional' : service.tipoAccion === 'Solicitud de presupuesto' ? 'Presupuesto' : (service.tipoAccion || 'Sin tipo')}</span>
-                                      <span>·</span>
-                                      <span>{service.representanteComercial || 'Sin responsable'}</span>
-                                      <span>·</span>
-                                      <span>{service.fechaIngresoAuto || service.fechaAltaServicio || service.fechaAltaNegociada || service.fechaAlta || '-'}</span>
-                                    </div>
-                                  </div>
-                                </button>
-                                <span className={`history-status-badge ${statusClass(normalizeLegacyStatusName(service.status || service.estado || 'Pendiente'))}`} data-status={String(normalizeLegacyStatusName(service.status || service.estado || 'Pendiente')).toLowerCase()}>{normalizeLegacyStatusName(service.status || service.estado || 'Pendiente')}</span>
-                                <div className="ranking-service-actions">
-                                  <button type="button" className="history-edit-btn" disabled={!allowedEdit} onClick={() => startEditService(service)}>
-                                    {allowedEdit ? '✏ Editar' : '🔒 Solo lectura'}
-                                  </button>
+                      <div style={{ display: 'grid', gap: 10, marginTop: 12 }}>
+                        {operationalQueueRows.length === 0 ? (
+                          <div className="hint" style={{ padding: 14, margin: 0 }}>No hay tareas activas con los filtros actuales.</div>
+                        ) : operationalQueueRows.map((service) => {
+                          const statusNorm = normalizeLegacyStatusName(service.status || service.estado || 'Pendiente');
+                          const tone = statusNorm === 'Pendiente' ? '#ef4444' : statusNorm === 'En proceso' ? '#2563eb' : '#7c3aed';
+                          const createdSeconds = service.creadoEn?.seconds || service.actualizadoEn?.seconds || 0;
+                          const daysPending = createdSeconds ? Math.max(0, Math.floor((Date.now() - (createdSeconds * 1000)) / 86400000)) : 0;
+                          return (
+                            <article key={`opq-${service.id}`} style={{ background: '#fff', borderRadius: 14, boxShadow: '0 6px 20px rgba(0,0,0,.08)', border: '1px solid #e5eaec', display: 'grid', gridTemplateColumns: '6px 1fr auto', overflow: 'hidden' }}>
+                              <div style={{ background: tone }} />
+                              <div style={{ padding: 12 }}>
+                                <strong style={{ color: '#0e3c3d' }}>{service.nombreServicio || 'Servicio sin nombre'}</strong>
+                                <div style={{ fontSize: 12, color: '#5d7677', marginTop: 4 }}>
+                                  Tipo: {service.tipoAccion === 'Nuevo Servicio' ? 'Servicio' : service.tipoAccion === 'Adicionales' ? 'Adicional' : service.tipoAccion === 'Solicitud de presupuesto' ? 'Presupuesto' : (service.tipoAccion || '-')} · Responsable: {service.representanteComercial || 'Sin responsable'} · ID: {service.clienteId || '-'}
                                 </div>
+                                <div style={{ fontSize: 13, color: '#3b5657', marginTop: 6 }}>{service.descripcionTrabajo || service.observaciones || service.observacionesComentarios || 'Sin descripción adicional.'}</div>
                               </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      <div className="history-pagination">
-                        <span className="hint" style={{ margin: 0 }}>Mostrando {historyRowsPage.length} registros en esta página.</span>
-                        <div className="history-page-actions">
-                          <button type="button" className="link-btn" disabled={safeHistoryPage <= 1} onClick={() => setHistoryPage((p) => Math.max(1, p - 1))}>← Anterior</button>
-                          {Array.from({ length: totalHistoryPages }, (_, idx) => idx + 1).slice(Math.max(0, safeHistoryPage - 3), Math.min(totalHistoryPages, safeHistoryPage + 2)).map((pageNum) => (
-                            <button key={`history-page-${pageNum}`} type="button" className={`history-page-num ${pageNum === safeHistoryPage ? 'active' : ''}`} onClick={() => setHistoryPage(pageNum)}>{pageNum}</button>
-                          ))}
-                          <button type="button" className="link-btn" disabled={safeHistoryPage >= totalHistoryPages} onClick={() => setHistoryPage((p) => Math.min(totalHistoryPages, p + 1))}>Siguiente →</button>
-                        </div>
+                              <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
+                                <span style={{ background: `${tone}22`, color: tone, border: `1px solid ${tone}55`, padding: '4px 10px', borderRadius: 999, fontSize: 12, fontWeight: 700 }}>{statusNorm}</span>
+                                <button type="button" className="history-edit-btn" onClick={() => setSelectedService(service)}>Ver</button>
+                                <small style={{ color: '#6b7f80' }}>{daysPending} días pendiente</small>
+                              </div>
+                            </article>
+                          );
+                        })}
                       </div>
                     </section>
                     {!selectedService ? (
