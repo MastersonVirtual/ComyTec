@@ -7323,9 +7323,8 @@
 
         function buildReactionSummary(reactions = []) {
           if (!Array.isArray(reactions) || reactions.length === 0) return '';
-          if (reactions.length === 1) return `${reactions[0]} marcó 👍`;
-          if (reactions.length === 2) return `${reactions[0]} y ${reactions[1]} marcaron 👍`;
-          return `${reactions[0]}, ${reactions[1]} y ${reactions.length - 2} más marcaron 👍`;
+          if (reactions.length === 1) return reactions[0];
+          return `👍 ${reactions.length} personas`;
         }
 
         const mentionMatch = useMemo(() => {
@@ -10518,7 +10517,7 @@
                     <h2>Gestión Operativa</h2>
                     <div className="hint">Módulo de inteligencia operativa con tablero Kanban, tabla activa y panel lateral colaborativo.</div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '2fr minmax(300px, 1fr)', gap: 14, alignItems: 'start' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.6fr) minmax(430px,1fr)', gap: 14, alignItems: 'stretch', width: '100%' }}>
                       <section className="panel" style={{ background: '#f7fafb', color: '#103839', border: '1px solid #dde8ea', marginBottom: 0 }}>
                         <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 10, alignItems: 'center', marginBottom: 14 }}>
                           <button type="button" className="burger" style={{ width: 42, height: 42 }}>☰</button>
@@ -10703,7 +10702,7 @@
                         </div>
                       </section>
 
-                      <aside className="panel" style={{ marginBottom: 0, position: 'sticky', top: 84, background: '#ffffff', color: '#123436', border: '1px solid #d9e5e7' }}>
+                      <aside className="panel" style={{ marginBottom: 0, position: 'sticky', top: 84, background: '#ffffff', color: '#123436', border: '1px solid #d9e5e7', maxHeight: 'calc(100vh - 96px)', overflow: 'hidden' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <h3 style={{ margin: 0, textAlign: 'center', width: '100%', color: '#0b5a5b' }}>Servicio {selectedOpsTask?.title || 'San Felipe'}</h3>
                           <small>ID {selectedOpsTask?.id || '4184'}</small>
@@ -10740,13 +10739,25 @@
                                           : <span key={`${item.id}-t-${idx}`}>{token}</span>)}
                                       </div>
                                       {item.attachment && <div style={{ marginTop: 6, color: '#355455', fontSize: 13 }}>📄 {item.attachment}</div>}
-                                      <div style={{ display: 'flex', gap: 8, marginTop: 9, alignItems: 'center', flexWrap: 'wrap' }}>
-                                        <button type="button" className="history-edit-btn" style={{ borderRadius: 10, transition: 'all .2s ease' }} onClick={() => {
-                                          setOpsComments((prev) => prev.map((row) => row.id !== item.id
-                                            ? row
-                                            : { ...row, reactions: Array.from(new Set([...(row.reactions || []), 'Juan Pérez'])) }));
-                                        }}>👍 Reaccionar</button>
-                                        <button type="button" className="history-edit-btn" style={{ borderRadius: 10, transition: 'all .2s ease' }} onClick={() => {
+                                      <div style={{ display: 'flex', gap: 6, marginTop: 9, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+                                        <div style={{ display: 'inline-flex', gap: 4, alignItems: 'center' }}>
+                                          {['👍', '❤️', '❌'].map((emoji) => (
+                                            <button
+                                              key={`${item.id}-${emoji}`}
+                                              type="button"
+                                              className="history-edit-btn"
+                                              style={{ minWidth: 34, height: 30, padding: '4px 8px', borderRadius: 9, lineHeight: 1, transition: 'all .2s ease' }}
+                                              onClick={() => {
+                                                setOpsComments((prev) => prev.map((row) => row.id !== item.id
+                                                  ? row
+                                                  : { ...row, reactions: Array.from(new Set([...(row.reactions || []), `Juan Pérez marcó ${emoji}`])) }));
+                                              }}
+                                            >
+                                              {emoji}
+                                            </button>
+                                          ))}
+                                        </div>
+                                        <button type="button" className="history-edit-btn" style={{ padding: '5px 10px', borderRadius: 9, transition: 'all .2s ease', whiteSpace: 'nowrap' }} onClick={() => {
                                           const text = window.prompt('Responder comentario');
                                           if (!text) return;
                                           setOpsComments((prev) => prev.map((row) => row.id !== item.id ? row : { ...row, replies: [...(row.replies || []), { id: `r-${Date.now()}`, user: 'Juan Pérez', text, createdAt: Date.now() }] }));
