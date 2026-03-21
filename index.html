@@ -180,6 +180,12 @@
         display: flex;
         flex-direction: column;
       }
+      .main.main-ops-expanded {
+        max-width: 100%;
+        width: 100%;
+        margin: 8px auto 0;
+        padding: 0 10px 14px;
+      }
       .hero {
         border-radius: 24px;
         padding: 60px 30px;
@@ -9892,7 +9898,7 @@
                 </>
               )}
 
-              <main className={`main ${grupo === 'charla-detalle' ? 'charla-main-wide' : ''} ${effectiveSelectedForm === 'funcionarios' ? 'main-chat-expanded' : ''}`}>
+              <main className={`main ${grupo === 'charla-detalle' ? 'charla-main-wide' : ''} ${effectiveSelectedForm === 'funcionarios' ? 'main-chat-expanded' : ''} ${effectiveSelectedForm === 'historial' ? 'main-ops-expanded' : ''}`}>
                 {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'acciones' && effectiveSelectedForm === 'home' ? renderMobileActions() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : isMobile && mobileTab === 'actividad' ? (
                   <section className="mobile-section-stack">
                     <div className="mobile-section-card">
