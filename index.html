@@ -10548,10 +10548,15 @@
 
                     <div className="ops-main-layout">
                       <section className="panel" style={{ background: '#f7fafb', color: '#103839', border: '1px solid #dde8ea', marginBottom: 0 }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 10, alignItems: 'center', marginBottom: 14 }}>
-                          <div style={{ textAlign: 'center' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 10, alignItems: 'center', marginBottom: 14 }}>
+                          <div style={{ textAlign: 'center', marginLeft: 90 }}>
                             <div style={{ fontSize: 28, color: '#ff8a2a', fontWeight: 800, lineHeight: 1 }}>Masterson Seguridad</div>
                             <div style={{ color: '#ff8a2a', fontSize: 13 }}>Administrador</div>
+                          </div>
+                          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                            <button type="button" className="burger" style={{ width: 42, height: 42, borderRadius: '50%', color: '#e8fbfb', background: '#006d72' }}><i data-lucide="search"></i></button>
+                            <button type="button" className="burger" style={{ width: 42, height: 42, borderRadius: '50%', color: '#e8fbfb', background: '#006d72', position: 'relative' }}><i data-lucide="bell"></i><span style={{ position: 'absolute', top: 8, right: 8, width: 7, height: 7, borderRadius: '50%', background: '#ef4444' }}></span></button>
+                            <button type="button" className="burger" style={{ width: 42, height: 42, borderRadius: '50%', color: '#e8fbfb', background: '#006d72' }}><i data-lucide="user-circle-2"></i></button>
                           </div>
                         </div>
 
@@ -10728,115 +10733,81 @@
                           <h3 style={{ margin: 0, textAlign: 'center', width: '100%', color: '#0b5a5b' }}>Servicio {selectedOpsTask?.title || 'San Felipe'}</h3>
                           <small>ID {selectedOpsTask?.id || '4184'}</small>
                         </div>
-                        <div style={{ marginTop: 10, borderRadius: 14, padding: 10, background: 'linear-gradient(180deg,#212121,#121212)', border: '1px solid rgba(0,100,101,.55)', boxShadow: '0 10px 24px rgba(0,0,0,.25)' }}>
-                          <section style={{ display: 'grid', gap: 10 }}>
-                            <div className="ops-comment-list" style={{ display: 'grid', gap: 10, paddingRight: 4 }}>
-                              {sortedOpsComments.map((item) => (
-                                <article key={item.id} style={{ border: '1px solid #d2dbdc', borderRadius: 12, padding: 10, background: '#eceff0', boxShadow: '0 6px 14px rgba(0,0,0,.08)' }}>
-                                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                      <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#006465', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 10 }}>👤</div>
-                                      <div><strong style={{ color: '#14393a' }}>{item.user}</strong> <small style={{ color: '#5f6d6e' }}>{item.handle}</small></div>
-                                    </div>
-                                    <small style={{ color: '#4f6263' }}>{formatOpsCommentDate(item.createdAt)}</small>
-                                  </div>
-                                  <div style={{ marginTop: 8, color: '#1e3637', lineHeight: 1.4 }}>
-                                    {String(item.text || '').split(/(\@[A-Za-z0-9_]+)/g).map((token, idx) => token.startsWith('@')
-                                      ? <span key={`${item.id}-m-${idx}`} style={{ color: '#0b5fc2', fontWeight: 700, background: 'rgba(59,130,246,.14)', borderRadius: 8, padding: '0 4px' }}>{token}</span>
-                                      : <span key={`${item.id}-t-${idx}`}>{token}</span>)}
-                                  </div>
-                                  {item.attachment && <div style={{ marginTop: 6, color: '#355455', fontSize: 13 }}>📄 {item.attachment}</div>}
-                                  <div style={{ display: 'flex', gap: 6, marginTop: 9, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-                                    <div style={{ display: 'inline-flex', gap: 4, alignItems: 'center' }}>
-                                      {['👍', '❤️', '❌'].map((emoji) => (
-                                        <button
-                                          key={`${item.id}-${emoji}`}
-                                          type="button"
-                                          className="history-edit-btn"
-                                          style={{ minWidth: 34, height: 30, padding: '4px 8px', borderRadius: 9, lineHeight: 1, transition: 'all .2s ease' }}
-                                          onClick={() => {
-                                            setOpsComments((prev) => prev.map((row) => row.id !== item.id
-                                              ? row
-                                              : { ...row, reactions: Array.from(new Set([...(row.reactions || []), `Juan Pérez marcó ${emoji}`])) }));
-                                          }}
-                                        >
-                                          {emoji}
-                                        </button>
-                                      ))}
-                                    </div>
-                                    <button type="button" className="history-edit-btn" style={{ padding: '5px 10px', borderRadius: 9, transition: 'all .2s ease', whiteSpace: 'nowrap' }} onClick={() => { setOpsReplyTargetId(item.id); setOpsReplyDraft(''); }}>↩ Responder</button>
-                                    {buildReactionSummary(item.reactions) && (
-                                      <button type="button" onClick={() => window.alert((item.reactions || []).join('\n'))} style={{ color: '#204d4e', background: '#dde8e9', border: '1px solid #bdd1d2', borderRadius: 999, padding: '2px 10px', fontSize: 12, cursor: 'pointer' }}>
-                                        {buildReactionSummary(item.reactions)}
-                                      </button>
-                                    )}
-                                  </div>
-                                  {opsReplyTargetId === item.id && (
-                                    <div style={{ marginTop: 8, display: 'grid', gap: 6 }}>
-                                      <textarea value={opsReplyDraft} onChange={(e) => setOpsReplyDraft(e.target.value)} placeholder="Responder comentario" style={{ minHeight: 64, background: '#f8fbfb', color: '#1f3d3e' }} />
-                                      <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                                        <button type="button" className="history-edit-btn" onClick={() => { setOpsReplyTargetId(''); setOpsReplyDraft(''); }}>Cancelar</button>
-                                        <button type="button" className="history-edit-btn" onClick={() => {
-                                          if (!opsReplyDraft.trim()) return;
-                                          setOpsComments((prev) => prev.map((row) => row.id !== item.id ? row : { ...row, replies: [...(row.replies || []), { id: `r-${Date.now()}`, user: 'Juan Pérez', text: opsReplyDraft.trim(), createdAt: Date.now() }] }));
-                                          setOpsReplyTargetId('');
-                                          setOpsReplyDraft('');
-                                        }}>Publicar respuesta</button>
-                                      </div>
-                                    </div>
-                                  )}
-                                  {Array.isArray(item.replies) && item.replies.length > 0 && (
-                                    <div style={{ marginTop: 8, paddingLeft: 12, borderLeft: '2px solid #b8c9ca', display: 'grid', gap: 6 }}>
-                                      {item.replies.map((reply) => (
-                                        <div key={reply.id} style={{ background: '#f7fafa', border: '1px solid #dae6e7', borderRadius: 8, padding: '6px 8px' }}>
-                                          <strong>{reply.user}</strong> <small style={{ color: '#547172' }}>{formatOpsCommentDate(reply.createdAt)}</small>
-                                          <div>{reply.text}</div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  )}
-                                </article>
-                              ))}
-                            </div>
+                        <div style={{ marginTop: 10, borderRadius: 14, padding: 10, background: '#d7e1e3', border: '1px solid #c5d3d6' }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, marginBottom: 10, borderRadius: 999, overflow: 'hidden', border: '1px solid #b8c7ca' }}>
+                            <button type="button" className="history-page-num active" style={{ borderRadius: 0, margin: 0 }}>Actividad y Comentarios</button>
+                            <button type="button" className="history-page-num" style={{ borderRadius: 0, margin: 0 }}>Detalles Completos</button>
+                          </div>
 
-                            <div className="field" style={{ marginTop: 2 }}>
-                              <label><span style={{ background: '#0f5f60', color: '#ff8a2a', padding: '3px 10px', borderRadius: 999 }}>Comentario</span></label>
-                              <textarea value={opsCommentDraft} onChange={(e) => setOpsCommentDraft(e.target.value)} placeholder="Escribe un comentario con @menciones" style={{ background: '#e7eced', borderColor: '#8cb4b5', color: '#234243' }} />
-                              {mentionSuggestions.length > 0 && (
-                                <div style={{ border: '1px solid #7ba9aa', borderRadius: 10, background: '#eef3f4', marginTop: 6, overflow: 'hidden', boxShadow: '0 8px 16px rgba(0,0,0,.18)' }}>
-                                  {mentionSuggestions.map((u) => (
+                          <div className="ops-comment-list" style={{ display: 'grid', gap: 10, paddingRight: 4 }}>
+                            {sortedOpsComments.map((item) => (
+                              <article key={item.id} style={{ border: '1px solid #cfdadc', borderRadius: 14, padding: 10, background: '#f4f7f8', boxShadow: '0 3px 9px rgba(0,0,0,.06)' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#006465', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 10 }}>👤</div>
+                                    <div><strong style={{ color: '#14393a' }}>{item.user}</strong> <small style={{ color: '#5f6d6e' }}>{item.handle}</small></div>
+                                  </div>
+                                  <small style={{ color: '#4f6263' }}>{formatOpsCommentDate(item.createdAt)}</small>
+                                </div>
+                                <div style={{ marginTop: 8, color: '#1e3637', lineHeight: 1.4 }}>{item.text}</div>
+                                {item.attachment && <div style={{ marginTop: 6, color: '#355455', fontSize: 13 }}>📄 {item.attachment}</div>}
+                                <div style={{ display: 'flex', gap: 6, marginTop: 9, alignItems: 'center', flexWrap: 'wrap' }}>
+                                  {['👍', '❤️', '❌'].map((emoji) => (
                                     <button
-                                      key={u.handle}
+                                      key={`${item.id}-${emoji}`}
                                       type="button"
-                                      onClick={() => setOpsCommentDraft((prev) => prev.replace(/(?:^|\s)@([\w]*)$/, ` ${u.handle} `))}
-                                      style={{ width: '100%', textAlign: 'left', border: 0, borderBottom: '1px solid #d7e3e4', background: '#eef3f4', padding: '8px 10px', cursor: 'pointer' }}
+                                      className="history-edit-btn"
+                                      style={{ minWidth: 34, height: 30, padding: '4px 8px', borderRadius: 9, lineHeight: 1 }}
+                                      onClick={() => {
+                                        setOpsComments((prev) => prev.map((row) => row.id !== item.id ? row : { ...row, reactions: Array.from(new Set([...(row.reactions || []), `Juan Pérez marcó ${emoji}`])) }));
+                                      }}
                                     >
-                                      <strong>{u.name}</strong> <small>{u.handle}</small>
+                                      {emoji}
                                     </button>
                                   ))}
+                                  <button type="button" className="history-edit-btn" style={{ marginLeft: 'auto', padding: '5px 10px', borderRadius: 9 }} onClick={() => { setOpsReplyTargetId(item.id); setOpsReplyDraft(''); }}>↩ Responder</button>
                                 </div>
-                              )}
-                              <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
-                                <button type="button" className="history-edit-btn">@ Mencionar</button>
-                                <button type="button" className="history-edit-btn">Adjuntar</button>
-                                <button type="button" className="history-edit-btn" style={{ background: 'rgba(22,163,74,.18)', color: '#166534', borderColor: 'rgba(22,163,74,.35)' }} onClick={() => {
-                                  if (!opsCommentDraft.trim()) return;
-                                  const text = opsCommentDraft.trim();
-                                  const mentioned = Array.from(new Set((text.match(/\@[A-Za-z0-9_]+/g) || [])));
-                                  setOpsComments((prev) => [{ id: `c-${Date.now()}`, user: 'Juan Pérez', handle: '@JuanPerez', text, attachment: '', createdAt: Date.now(), reactions: [], replies: [] }, ...prev]);
-                                  setOpsActivityFeed((prev) => ['[Comentario agregado por Juan]', ...prev].slice(0, 8));
-                                  if (mentioned.length > 0) {
-                                    setOpsActivityFeed((prev) => [`[Notificación enviada a: ${mentioned.join(', ')}]`, ...prev].slice(0, 8));
-                                  }
-                                  setOpsCommentDraft('');
-                                }}>Publicar</button>
-                              </div>
-                            </div>
+                                {opsReplyTargetId === item.id && (
+                                  <div style={{ marginTop: 8, display: 'grid', gap: 6 }}>
+                                    <textarea value={opsReplyDraft} onChange={(e) => setOpsReplyDraft(e.target.value)} placeholder="Responder comentario" style={{ minHeight: 64, background: '#f8fbfb', color: '#1f3d3e' }} />
+                                    <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                                      <button type="button" className="history-edit-btn" onClick={() => { setOpsReplyTargetId(''); setOpsReplyDraft(''); }}>Cancelar</button>
+                                      <button type="button" className="history-edit-btn" onClick={() => {
+                                        if (!opsReplyDraft.trim()) return;
+                                        setOpsComments((prev) => prev.map((row) => row.id !== item.id ? row : { ...row, replies: [...(row.replies || []), { id: `r-${Date.now()}`, user: 'Juan Pérez', text: opsReplyDraft.trim(), createdAt: Date.now() }] }));
+                                        setOpsReplyTargetId('');
+                                        setOpsReplyDraft('');
+                                      }}>Publicar respuesta</button>
+                                    </div>
+                                  </div>
+                                )}
+                              </article>
+                            ))}
+                          </div>
 
-                            <div style={{ marginTop: 4, borderTop: '1px solid rgba(196,220,221,.35)', paddingTop: 8 }}>
-                              {opsActivityFeed.filter((line) => !String(line).toLowerCase().includes('ia')).map((line, idx) => <div key={`act-${idx}`} style={{ fontSize: 13, color: '#b8d4d5', marginBottom: 4 }}>{line}</div>)}
+                          <div className="field" style={{ marginTop: 10 }}>
+                            <textarea value={opsCommentDraft} onChange={(e) => setOpsCommentDraft(e.target.value)} placeholder="Escribe un comentario con @menciones" style={{ background: '#f2f6f7', borderColor: '#b7cacc', color: '#234243' }} />
+                            {mentionSuggestions.length > 0 && (
+                              <div style={{ border: '1px solid #7ba9aa', borderRadius: 10, background: '#eef3f4', marginTop: 6, overflow: 'hidden' }}>
+                                {mentionSuggestions.map((u) => (
+                                  <button key={u.handle} type="button" onClick={() => setOpsCommentDraft((prev) => prev.replace(/(?:^|\s)@([\w]*)$/, ` ${u.handle} `))} style={{ width: '100%', textAlign: 'left', border: 0, borderBottom: '1px solid #d7e3e4', background: '#eef3f4', padding: '8px 10px', cursor: 'pointer' }}>
+                                    <strong>{u.name}</strong> <small>{u.handle}</small>
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                              <button type="button" className="history-edit-btn">@ Mencionar</button>
+                              <button type="button" className="history-edit-btn">Adjuntar</button>
+                              <button type="button" className="history-edit-btn" style={{ background: 'rgba(22,163,74,.18)', color: '#166534', borderColor: 'rgba(22,163,74,.35)' }} onClick={() => {
+                                if (!opsCommentDraft.trim()) return;
+                                const text = opsCommentDraft.trim();
+                                setOpsComments((prev) => [{ id: `c-${Date.now()}`, user: 'Juan Pérez', handle: '@JuanPerez', text, attachment: '', createdAt: Date.now(), reactions: [], replies: [] }, ...prev]);
+                                setOpsActivityFeed((prev) => ['[Comentario agregado por Juan]', ...prev].slice(0, 8));
+                                setOpsCommentDraft('');
+                              }}>Publicar</button>
                             </div>
-                          </section>
+                          </div>
                         </div>
                       </aside>
                     </div>
