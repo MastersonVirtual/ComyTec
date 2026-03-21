@@ -6916,9 +6916,9 @@
           done: [],
         }));
         const [opsActivityFeed, setOpsActivityFeed] = useState([
-          '[IA Suggestion: Assign extra tech]',
-          "[Task moved to 'En Proceso' by Alfonso]",
-          '[Comment added by Juan]',
+          '[Sugerencia IA: Asignar técnico extra]',
+          "[Tarea movida a 'En Proceso' por Alfonso]",
+          '[Comentario agregado por Juan]',
         ]);
         const [opsComments, setOpsComments] = useState([
           { id: 'c1', user: 'Juan Pérez', handle: '@JuanPerez', text: 'Revisemos la instalación de San Felipe hoy.', attachment: 'plano_instalacion.pdf' },
@@ -7304,7 +7304,7 @@
             next[targetColumn].push(moved);
             return next;
           });
-          setOpsActivityFeed((prev) => [`[Task moved to '${targetColumn === 'todo' ? 'Por Hacer' : targetColumn === 'progress' ? 'En Proceso' : 'Finalizado'}' by Alfonso]`, ...prev].slice(0, 8));
+          setOpsActivityFeed((prev) => [`[Tarea movida a '${targetColumn === 'todo' ? 'Por Hacer' : targetColumn === 'progress' ? 'En Proceso' : 'Finalizado'}' por Alfonso]`, ...prev].slice(0, 8));
         }
 
         async function handleSyncPreloadedServicesToFirebase() {
@@ -10501,46 +10501,46 @@
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                               <div style={{ width: 42, height: 42, borderRadius: 12, background: 'linear-gradient(135deg,#075e5f,#14b8a6)', display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 900 }}>MS</div>
                               <div>
-                                <strong style={{ display: 'block', color: '#0c4b4c' }}>ComyTec Ops</strong>
-                                <small style={{ color: '#5a7a7b' }}>Gestión Operativa Integral</small>
+                                <strong style={{ display: 'block', color: '#0c4b4c', textAlign: 'center' }}>Gestión Operativa</strong>
+                                <small style={{ color: '#5a7a7b', display: 'block', textAlign: 'center' }}>Gestión Operativa Integral</small>
                               </div>
                             </div>
                             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                               <div className="search-wrap" style={{ margin: 0, flex: 1 }}>
                                 <span className="search-icon"><i data-lucide="search"></i></span>
-                                <input value={historySearchTerm} onChange={(e) => setHistorySearchTerm(e.target.value)} placeholder="Buscar servicio, cliente o responsable..." style={{ width: '100%', background: '#fff', color: '#123436', borderColor: '#d6e3e4', borderRadius: 999 }} />
+                                <input value={historySearchTerm} onChange={(e) => setHistorySearchTerm(e.target.value)} placeholder="Buscar servicio, cliente o responsable..." style={{ width: '100%', background: '#fff', color: '#123436', borderColor: '#d6e3e4', borderRadius: 999, textAlign: 'center' }} />
                               </div>
-                              <button type="button" className="history-edit-btn"><i data-lucide="calendar"></i></button>
-                              <button type="button" className="history-edit-btn"><i data-lucide="user"></i></button>
-                              <button type="button" className="history-edit-btn"><i data-lucide="list-filter"></i></button>
-                              {['GS', 'FB', 'NL'].map((tag) => <div key={tag} style={{ width: 30, height: 30, borderRadius: '50%', background: '#0f5f60', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 10, fontWeight: 700 }}>{tag}</div>)}
+                              <button type="button" className="history-edit-btn" style={{ display: 'grid', placeItems: 'center' }}><i data-lucide="calendar"></i></button>
+                              <button type="button" className="history-edit-btn" style={{ display: 'grid', placeItems: 'center' }}><i data-lucide="user"></i></button>
+                              <button type="button" className="history-edit-btn" style={{ display: 'grid', placeItems: 'center' }}><i data-lucide="list-filter"></i></button>
+                              {['GS', 'FB', 'NL'].map((tag) => <div key={tag} style={{ width: 30, height: 30, borderRadius: '50%', background: '#0f5f60', color: '#fff', display: 'grid', placeItems: 'center', textAlign: 'center', fontSize: 10, fontWeight: 700 }}>{tag}</div>)}
                             </div>
                           </div>
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(210px, 1fr))', gap: 10, marginBottom: 12 }}>
                           <article style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 14, padding: 10 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#c2410c', fontWeight: 700 }}><span className="ops-alert-ping">🚨</span> Urgencia Operativa</div>
-                            <div style={{ fontWeight: 800, marginTop: 4 }}>1 Tarea Crítica</div>
-                            <small>San Felipe (vence mañana)</small>
-                            <div><button type="button" className="history-edit-btn" style={{ marginTop: 8 }}>Ver Tarea</button></div>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: '#c2410c', fontWeight: 700, textAlign: 'center' }}><span className="ops-alert-ping">🚨</span> Urgencia Operativa</div>
+                            <div style={{ fontWeight: 800, marginTop: 4, textAlign: 'center' }}>1 Tarea Crítica</div>
+                            <small style={{ display: 'block', textAlign: 'center' }}>San Felipe (vence mañana)</small>
+                            <div style={{ textAlign: 'center' }}><button type="button" className="history-edit-btn" style={{ marginTop: 8 }}>Ver Tarea</button></div>
                           </article>
                           <article style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 14, padding: 10 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#c2410c', fontWeight: 700 }}>📈 Previsión de Flujo</div>
-                            <div style={{ fontWeight: 800, marginTop: 4 }}>Cuello de Botella en 'En Proceso'</div>
-                            <small>Demora en aprobación de equipos.</small>
-                            <div><button type="button" className="history-edit-btn" style={{ marginTop: 8 }}>Gestionar</button></div>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: '#c2410c', fontWeight: 700, textAlign: 'center' }}>📈 Previsión de Flujo</div>
+                            <div style={{ fontWeight: 800, marginTop: 4, textAlign: 'center' }}>Cuello de Botella en 'En Proceso'</div>
+                            <small style={{ display: 'block', textAlign: 'center' }}>Demora en aprobación de equipos.</small>
+                            <div style={{ textAlign: 'center' }}><button type="button" className="history-edit-btn" style={{ marginTop: 8 }}>Gestionar</button></div>
                           </article>
                           <article style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 14, padding: 10 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#15803d', fontWeight: 700 }}>💡 Optimización de Recursos</div>
-                            <div style={{ fontWeight: 800, marginTop: 4 }}>Asignar Técnico Extra</div>
-                            <small>Alta carga de instalaciones Akuvox.</small>
-                            <div><button type="button" className="history-edit-btn" style={{ marginTop: 8, color: '#15803d' }}>Ver Disponibilidad</button></div>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: '#15803d', fontWeight: 700, textAlign: 'center' }}>💡 Optimización de Recursos</div>
+                            <div style={{ fontWeight: 800, marginTop: 4, textAlign: 'center' }}>Asignar Técnico Extra</div>
+                            <small style={{ display: 'block', textAlign: 'center' }}>Alta carga de instalaciones Akuvox.</small>
+                            <div style={{ textAlign: 'center' }}><button type="button" className="history-edit-btn" style={{ marginTop: 8, color: '#15803d' }}>Ver Disponibilidad</button></div>
                           </article>
                         </div>
 
                         <div style={{ marginBottom: 12 }}>
-                          <h3 style={{ margin: '0 0 8px', color: '#0c4b4c' }}>Tablero Kanban Interactivo</h3>
+                          <h3 style={{ margin: '0 0 8px', color: '#0c4b4c', textAlign: 'center' }}>Tablero Interactivo</h3>
                           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(200px, 1fr))', gap: 10 }}>
                             {[
                               { key: 'todo', title: 'Por Hacer', tone: '#dc2626' },
@@ -10555,7 +10555,7 @@
                                 style={{ background: dragOverColumn === col.key ? '#eef7ff' : '#fff', border: `1px solid ${dragOverColumn === col.key ? '#93c5fd' : '#e2ebec'}`, borderRadius: 14, padding: 10, minHeight: 220 }}
                               >
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                  <strong style={{ color: col.tone }}>{col.title} ({kanbanColumns[col.key].length})</strong>
+                                  <strong style={{ color: col.tone, textAlign: 'center' }}>{col.title} ({kanbanColumns[col.key].length})</strong>
                                   {col.key === 'done' && kanbanColumns[col.key].length === 0 && <span style={{ color: '#16a34a' }}>✅</span>}
                                 </div>
                                 <div style={{ display: 'grid', gap: 8 }}>
@@ -10628,7 +10628,7 @@
                                         <td style={{ padding: '10px 12px' }}>
                                           <div style={{ display: 'grid', gap: 6 }}>
                                             <button type="button" className="history-edit-btn" onClick={() => setOpsSelectedTaskId(task.id)}>Asignar</button>
-                                            <button type="button" className="history-edit-btn" onClick={() => setOpsActivityFeed((prev) => ['[IA Suggestion: Generate report and finish]', ...prev].slice(0, 8))}>Generar Reporte y Finalizar</button>
+                                            <button type="button" className="history-edit-btn" onClick={() => setOpsActivityFeed((prev) => ['[Sugerencia IA: Generar reporte y finalizar]', ...prev].slice(0, 8))}>Generar Reporte y Finalizar</button>
                                             <button type="button" className="history-edit-btn" onClick={() => moveKanbanTask(task.id, 'progress')}>Mover a En Proceso</button>
                                           </div>
                                         </td>
@@ -10697,7 +10697,7 @@
                                 <button type="button" className="history-edit-btn" onClick={() => {
                                   if (!opsCommentDraft.trim()) return;
                                   setOpsComments((prev) => [{ id: `c-${Date.now()}`, user: 'Juan Pérez', handle: '@JuanPerez', text: opsCommentDraft.trim(), attachment: '' }, ...prev]);
-                                  setOpsActivityFeed((prev) => ['[Comment added by Juan]', ...prev].slice(0, 8));
+                                  setOpsActivityFeed((prev) => ['[Comentario agregado por Juan]', ...prev].slice(0, 8));
                                   setOpsCommentDraft('');
                                 }}>Publicar</button>
                               </div>
