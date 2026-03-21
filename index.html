@@ -4971,7 +4971,7 @@
       const rtdb = typeof firebase.database === 'function' ? firebase.database() : null;
 
       const ACCIONES = ['Nuevo Servicio', 'Adicionales', 'Solicitud de presupuesto', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa'];
-      const STATUS_OPTIONS = ['Pendiente', 'Presupuesto enviado', 'Aprobado', 'En agenda', 'En instalación', 'En progreso', 'Finalizado', 'Cancelado', 'En mantenimiento'];
+      const STATUS_OPTIONS = ['Pendiente', 'En proceso', 'Esperando información', 'Finalizado', 'Cancelado'];
       const SERVICE_TYPE_OPTIONS = ['Monitoreo', 'Portería virtual', 'Respuesta de alarma', 'Servicio Técnico', 'Control de acceso'];
 
       function normalizeServiceType(value) {
@@ -6890,6 +6890,8 @@
         const [historySearchTerm, setHistorySearchTerm] = useState('');
         const [historyStatusFilter, setHistoryStatusFilter] = useState('todos');
         const [historyCommercialFilter, setHistoryCommercialFilter] = useState('todos');
+        const [historyTypeFilter, setHistoryTypeFilter] = useState('todos');
+        const [historyDateFilter, setHistoryDateFilter] = useState('');
         const [historyPage, setHistoryPage] = useState(1);
         const [sellerFilterOpen, setSellerFilterOpen] = useState(false);
         const [sellerFiltersDraft, setSellerFiltersDraft] = useState({
@@ -7143,14 +7145,7 @@
 
         const historySourceRows = useMemo(() => ([...visibleRows, ...preloadedHistoryRows]), [visibleRows, preloadedHistoryRows]);
 
-        const historyStatusOptions = useMemo(() => {
-          const set = new Set();
-          historySourceRows.forEach((r) => {
-            const value = String(r.status || r.estado || '').trim();
-            if (value) set.add(value);
-          });
-          return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
-        }, [historySourceRows]);
+        const historyStatusOptions = useMemo(() => [...STATUS_OPTIONS], []);
 
         const historyCommercialOptions = useMemo(() => {
           const set = new Set();
@@ -7161,13 +7156,42 @@
           return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
         }, [historySourceRows]);
 
+        const historyTypeOptions = useMemo(() => {
+          const set = new Set();
+          historySourceRows.forEach((r) => {
+            const value = String(r.tipoAccion || '').trim();
+            if (!value) return;
+            if (value === 'Nuevo Servicio') set.add('Servicio');
+            else if (value === 'Adicionales') set.add('Adicional');
+            else if (value === 'Solicitud de presupuesto') set.add('Presupuesto');
+            else if (value === 'Novación') set.add('Novación');
+            else if (value === 'Movimiento de obra') set.add('Movimiento de obra');
+            else if (value === 'Baja') set.add('Baja');
+            else set.add(value);
+          });
+          return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+        }, [historySourceRows]);
+
         const historyFilteredRows = useMemo(() => {
           const query = historySearchTerm.trim().toLowerCase();
           const filtered = historySourceRows.filter((r) => {
-            const statusValue = String(r.status || r.estado || '').trim();
+            const statusValue = normalizeLegacyStatusName(String(r.status || r.estado || '').trim() || 'Pendiente');
             const commercialValue = String(r.representanteComercial || '').trim();
+            const actionValueRaw = String(r.tipoAccion || '').trim();
+            const actionValue = actionValueRaw === 'Nuevo Servicio' ? 'Servicio'
+              : actionValueRaw === 'Adicionales' ? 'Adicional'
+                : actionValueRaw === 'Solicitud de presupuesto' ? 'Presupuesto'
+                  : actionValueRaw;
+            const rowDate = (() => {
+              const ts = r.actualizadoEn?.seconds || r.creadoEn?.seconds || null;
+              if (ts) return new Date(ts * 1000).toISOString().slice(0, 10);
+              const fallback = String(r.fechaIngresoAuto || r.fechaAltaServicio || r.fechaAltaNegociada || '').slice(0, 10);
+              return fallback || '';
+            })();
             const matchStatus = historyStatusFilter === 'todos' || statusValue === historyStatusFilter;
             const matchCommercial = historyCommercialFilter === 'todos' || commercialValue === historyCommercialFilter;
+            const matchType = historyTypeFilter === 'todos' || actionValue === historyTypeFilter;
+            const matchDate = !historyDateFilter || rowDate === historyDateFilter;
             const matchQuery = !query || [
               r.nombreServicio,
               r.cliente,
@@ -7176,7 +7200,7 @@
               r.rut,
               r.direccionServicio,
             ].filter(Boolean).some((v) => String(v).toLowerCase().includes(query));
-            return matchStatus && matchCommercial && matchQuery;
+            return matchStatus && matchCommercial && matchType && matchDate && matchQuery;
           });
 
           return filtered.sort((a, b) => {
@@ -7184,7 +7208,7 @@
             const bTs = b.actualizadoEn?.seconds || b.creadoEn?.seconds || 0;
             return bTs - aTs;
           });
-        }, [historySourceRows, historySearchTerm, historyStatusFilter, historyCommercialFilter]);
+        }, [historySourceRows, historySearchTerm, historyStatusFilter, historyCommercialFilter, historyTypeFilter, historyDateFilter]);
 
         const HISTORY_PAGE_SIZE = 18;
         const totalHistoryPages = Math.max(1, Math.ceil(historyFilteredRows.length / HISTORY_PAGE_SIZE));
@@ -8378,7 +8402,7 @@
 
         useEffect(() => {
           setHistoryPage(1);
-        }, [historySearchTerm, historyStatusFilter, historyCommercialFilter]);
+        }, [historySearchTerm, historyStatusFilter, historyCommercialFilter, historyTypeFilter, historyDateFilter]);
 
         useEffect(() => {
           if (historyPage > totalHistoryPages) {
@@ -10362,14 +10386,23 @@
                   </section>
                 ) : effectiveSelectedForm === 'historial' ? (
                   <section className="panel">
-                    <h2>Historial de Servicios · Vista Ejecutiva</h2>
-                    <div className="hint">Rediseño escalable con filtros, paginación y vista rápida para manejar alto volumen de servicios.</div>
+                    <h2>Gestión Operativa</h2>
+                    <div className="hint">Módulo central para Servicios, Adicionales, Novaciones, Movimientos de obra, Bajas y Solicitudes de presupuesto.</div>
                     <section className="panel" style={{ background: 'rgba(255,255,255,.04)', marginBottom: 12 }}>
-                      <h3 style={{ marginTop: 0 }}>Servicios ({historyFilteredRows.length} filtrados de {historySourceRows.length})</h3>
+                      <h3 style={{ marginTop: 0 }}>Registros ({historyFilteredRows.length} filtrados de {historySourceRows.length})</h3>
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
+                        <button type="button" className={`history-page-num ${historyStatusFilter === 'todos' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('todos')}>Todos</button>
+                        <button type="button" className={`history-page-num ${historyStatusFilter === 'Pendiente' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('Pendiente')}>Pendientes</button>
+                        <button type="button" className={`history-page-num ${historyStatusFilter === 'En proceso' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('En proceso')}>En proceso</button>
+                        <button type="button" className={`history-page-num ${historyStatusFilter === 'Finalizado' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('Finalizado')}>Finalizados</button>
+                        <button type="button" className={`history-page-num ${historyStatusFilter === 'Cancelado' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('Cancelado')}>Cancelados</button>
+                      </div>
                       <div className="history-toolbar">
                         <div className="field span-2"><label>Buscar</label><input value={historySearchTerm} onChange={(e) => setHistorySearchTerm(e.target.value)} placeholder="ID, servicio, razón social, RUT, dirección..." /></div>
-                        <div className="field"><label>Status</label><select value={historyStatusFilter} onChange={(e) => setHistoryStatusFilter(e.target.value)}><option value="todos">Todos</option>{historyStatusOptions.map((st) => <option key={`hs-${st}`} value={st}>{st}</option>)}</select></div>
-                        <div className="field"><label>Comercial</label><select value={historyCommercialFilter} onChange={(e) => setHistoryCommercialFilter(e.target.value)}><option value="todos">Todos</option>{historyCommercialOptions.map((cm) => <option key={`hc-${cm}`} value={cm}>{cm}</option>)}</select></div>
+                        <div className="field"><label>Estado</label><select value={historyStatusFilter} onChange={(e) => setHistoryStatusFilter(e.target.value)}><option value="todos">Todos</option>{historyStatusOptions.map((st) => <option key={`hs-${st}`} value={st}>{st}</option>)}</select></div>
+                        <div className="field"><label>Tipo</label><select value={historyTypeFilter} onChange={(e) => setHistoryTypeFilter(e.target.value)}><option value="todos">Todos</option>{historyTypeOptions.map((tp) => <option key={`ht-${tp}`} value={tp}>{tp}</option>)}</select></div>
+                        <div className="field"><label>Responsable</label><select value={historyCommercialFilter} onChange={(e) => setHistoryCommercialFilter(e.target.value)}><option value="todos">Todos</option>{historyCommercialOptions.map((cm) => <option key={`hc-${cm}`} value={cm}>{cm}</option>)}</select></div>
+                        <div className="field"><label>Fecha</label><input type="date" value={historyDateFilter} onChange={(e) => setHistoryDateFilter(e.target.value)} /></div>
                         {isAdminUser && <button type="button" className="history-add-btn" onClick={() => setShowManualCatalogForm((prev) => !prev)}>{showManualCatalogForm ? "Cerrar agregar servicio" : "Agregar servicio"}</button>}
                       </div>
                       <div className="hint" style={{ marginBottom: 10 }}>Catálogo local visible en historial: {preloadedHistoryRows.length} servicio(s) aún no guardado(s) en Firebase.</div>
@@ -10426,13 +10459,15 @@
                                     <div className="history-row-meta">
                                       <span>ID {service.clienteId || '-'}</span>
                                       <span>·</span>
-                                      <span>{service.razonSocial || 'Sin razón social'}</span>
+                                      <span>{service.tipoAccion === 'Nuevo Servicio' ? 'Servicio' : service.tipoAccion === 'Adicionales' ? 'Adicional' : service.tipoAccion === 'Solicitud de presupuesto' ? 'Presupuesto' : (service.tipoAccion || 'Sin tipo')}</span>
                                       <span>·</span>
-                                      <span>{service.representanteComercial || 'Sin comercial'}</span>
+                                      <span>{service.representanteComercial || 'Sin responsable'}</span>
+                                      <span>·</span>
+                                      <span>{service.fechaIngresoAuto || service.fechaAltaServicio || service.fechaAltaNegociada || service.fechaAlta || '-'}</span>
                                     </div>
                                   </div>
                                 </button>
-                                <span className={`history-status-badge ${statusClass(service.status || service.estado)}`} data-status={String(service.status || service.estado || "pendiente").toLowerCase()}>{service.status || service.estado || 'Pendiente'}</span>
+                                <span className={`history-status-badge ${statusClass(normalizeLegacyStatusName(service.status || service.estado || 'Pendiente'))}`} data-status={String(normalizeLegacyStatusName(service.status || service.estado || 'Pendiente')).toLowerCase()}>{normalizeLegacyStatusName(service.status || service.estado || 'Pendiente')}</span>
                                 <div className="ranking-service-actions">
                                   <button type="button" className="history-edit-btn" disabled={!allowedEdit} onClick={() => startEditService(service)}>
                                     {allowedEdit ? '✏ Editar' : '🔒 Solo lectura'}
