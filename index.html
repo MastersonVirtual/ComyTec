@@ -6921,12 +6921,13 @@
           '[Comentario agregado por Juan]',
         ]);
         const [opsComments, setOpsComments] = useState([
-          { id: 'c1', user: 'Juan Pérez', handle: '@JuanPerez', text: 'Revisemos la instalación de San Felipe hoy.', attachment: 'plano_instalacion.pdf' },
-          { id: 'c2', user: 'Alfonso Carballo', handle: '@AlfonsoCarballo', text: 'Recibido, ya solicité equipos a compras.', attachment: '' },
+          { id: 'c1', user: 'Juan Pérez', handle: '@JuanPerez', text: 'Revisemos la instalación de San Felipe hoy.', attachment: 'plano_instalacion.pdf', createdAt: Date.now() - 1000 * 60 * 50, reactions: ['Juan Pérez'], replies: [] },
+          { id: 'c2', user: 'Alfonso Carballo', handle: '@AlfonsoCarballo', text: 'Recibido, ya solicité equipos a compras.', attachment: '', createdAt: Date.now() - 1000 * 60 * 20, reactions: [], replies: [] },
         ]);
         const [opsTaskMeta, setOpsTaskMeta] = useState({
           '4184': { executive: 'Alfonso Carballo', checklist: ['Instalación', 'Configuración', 'Certificación'], checked: { 'Instalación': true }, presupuesto: '24000', costoUsd: '1800', equipamiento: 'Compra' },
         });
+        const [opsCommentSort, setOpsCommentSort] = useState('recent');
         const [historyPage, setHistoryPage] = useState(1);
         const [sellerFilterOpen, setSellerFilterOpen] = useState(false);
         const [sellerFiltersDraft, setSellerFiltersDraft] = useState({
@@ -7306,6 +7307,44 @@
           });
           setOpsActivityFeed((prev) => [`[Tarea movida a '${targetColumn === 'todo' ? 'Por Hacer' : targetColumn === 'progress' ? 'En Proceso' : 'Finalizado'}' por Alfonso]`, ...prev].slice(0, 8));
         }
+
+        const OPS_USERS = useMemo(() => ([
+          { name: 'Juan Pérez', handle: '@JuanPerez' },
+          { name: 'Alfonso Carballo', handle: '@AlfonsoCarballo' },
+          { name: 'María Gómez', handle: '@MariaGomez' },
+          { name: 'Francisco Bartellone', handle: '@FranciscoB' },
+        ]), []);
+
+        function formatOpsCommentDate(value) {
+          const date = new Date(value || Date.now());
+          if (Number.isNaN(date.getTime())) return '-';
+          return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+        }
+
+        function buildReactionSummary(reactions = []) {
+          if (!Array.isArray(reactions) || reactions.length === 0) return '';
+          if (reactions.length === 1) return `${reactions[0]} marcó 👍`;
+          if (reactions.length === 2) return `${reactions[0]} y ${reactions[1]} marcaron 👍`;
+          return `${reactions[0]}, ${reactions[1]} y ${reactions.length - 2} más marcaron 👍`;
+        }
+
+        const mentionMatch = useMemo(() => {
+          const match = opsCommentDraft.match(/(?:^|\s)@([\w]*)$/);
+          return match ? match[1].toLowerCase() : null;
+        }, [opsCommentDraft]);
+
+        const mentionSuggestions = useMemo(() => {
+          if (mentionMatch === null) return [];
+          return OPS_USERS.filter((u) => u.handle.toLowerCase().includes(mentionMatch) || u.name.toLowerCase().includes(mentionMatch)).slice(0, 5);
+        }, [mentionMatch, OPS_USERS]);
+
+        const sortedOpsComments = useMemo(() => {
+          const rows = [...opsComments];
+          if (opsCommentSort === 'relevant') {
+            return rows.sort((a, b) => (b.reactions?.length || 0) - (a.reactions?.length || 0) || (b.createdAt || 0) - (a.createdAt || 0));
+          }
+          return rows.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        }, [opsComments, opsCommentSort]);
 
         async function handleSyncPreloadedServicesToFirebase() {
           if (!isAdminUser) {
@@ -10666,38 +10705,88 @@
 
                       <aside className="panel" style={{ marginBottom: 0, position: 'sticky', top: 84, background: '#ffffff', color: '#123436', border: '1px solid #d9e5e7' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <h3 style={{ margin: 0 }}>Servicio {selectedOpsTask?.title || 'San Felipe'}</h3>
+                          <h3 style={{ margin: 0, textAlign: 'center', width: '100%', color: '#0b5a5b' }}>Servicio {selectedOpsTask?.title || 'San Felipe'}</h3>
                           <small>ID {selectedOpsTask?.id || '4184'}</small>
                         </div>
                         <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                          <button type="button" className={`history-page-num ${opsSideTab === 'activity' ? 'active' : ''}`} onClick={() => setOpsSideTab('activity')}>Actividad y Comentarios</button>
-                          <button type="button" className={`history-page-num ${opsSideTab === 'details' ? 'active' : ''}`} onClick={() => setOpsSideTab('details')}>Detalles Completos</button>
+                          <button type="button" className={`history-page-num ${opsSideTab === 'activity' ? 'active' : ''}`} style={{ flex: 1, textAlign: 'center' }} onClick={() => setOpsSideTab('activity')}>Actividad y Comentarios</button>
+                          <button type="button" className={`history-page-num ${opsSideTab === 'details' ? 'active' : ''}`} style={{ flex: 1, textAlign: 'center' }} onClick={() => setOpsSideTab('details')}>Detalles Completos</button>
                         </div>
 
                         {opsSideTab === 'activity' ? (
                           <>
+                            <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 8 }}>
+                              <button type="button" className={`history-page-num ${opsCommentSort === 'recent' ? 'active' : ''}`} onClick={() => setOpsCommentSort('recent')}>Más recientes</button>
+                              <button type="button" className={`history-page-num ${opsCommentSort === 'relevant' ? 'active' : ''}`} onClick={() => setOpsCommentSort('relevant')}>Más relevantes</button>
+                            </div>
                             <div style={{ display: 'grid', gap: 8, marginTop: 10 }}>
-                              {opsComments.map((item) => (
+                              {sortedOpsComments.map((item) => (
                                 <article key={item.id} style={{ border: '1px solid #e2ebec', borderRadius: 10, padding: 8, background: '#f9fcfc' }}>
                                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                     <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#0f5f60', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 10 }}>👤</div>
-                                    <div><strong>{item.user}</strong> <small>{item.handle}</small></div>
+                                    <div><strong>{item.user}</strong> <small>{item.handle}</small> <small style={{ color: '#547172' }}>· {formatOpsCommentDate(item.createdAt)}</small></div>
                                   </div>
-                                  <div style={{ marginTop: 6 }}>{item.text}</div>
+                                  <div style={{ marginTop: 6 }}>
+                                    {String(item.text || '').split(/(\@[A-Za-z0-9_]+)/g).map((token, idx) => token.startsWith('@')
+                                      ? <span key={`${item.id}-m-${idx}`} style={{ color: '#1d4ed8', fontWeight: 700, background: 'rgba(59,130,246,.12)', borderRadius: 8, padding: '0 4px' }}>{token}</span>
+                                      : <span key={`${item.id}-t-${idx}`}>{token}</span>)}
+                                  </div>
                                   {item.attachment && <small>📎 {item.attachment}</small>}
+                                  <div style={{ display: 'flex', gap: 8, marginTop: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+                                    <button type="button" className="history-edit-btn" onClick={() => {
+                                      setOpsComments((prev) => prev.map((row) => row.id !== item.id
+                                        ? row
+                                        : { ...row, reactions: Array.from(new Set([...(row.reactions || []), 'Juan Pérez'])) }));
+                                    }}>👍 Reaccionar</button>
+                                    <button type="button" className="history-edit-btn" onClick={() => {
+                                      const text = window.prompt('Responder comentario');
+                                      if (!text) return;
+                                      setOpsComments((prev) => prev.map((row) => row.id !== item.id ? row : { ...row, replies: [...(row.replies || []), { id: `r-${Date.now()}`, user: 'Juan Pérez', text, createdAt: Date.now() }] }));
+                                    }}>↩ Responder</button>
+                                    {buildReactionSummary(item.reactions) && <small style={{ color: '#285556' }}>{buildReactionSummary(item.reactions)}</small>}
+                                  </div>
+                                  {Array.isArray(item.replies) && item.replies.length > 0 && (
+                                    <div style={{ marginTop: 8, paddingLeft: 12, borderLeft: '2px solid #d4e5e6', display: 'grid', gap: 6 }}>
+                                      {item.replies.map((reply) => (
+                                        <div key={reply.id} style={{ background: '#ffffff', border: '1px solid #e0ebec', borderRadius: 8, padding: '6px 8px' }}>
+                                          <strong>{reply.user}</strong> <small style={{ color: '#547172' }}>{formatOpsCommentDate(reply.createdAt)}</small>
+                                          <div>{reply.text}</div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
                                 </article>
                               ))}
                             </div>
                             <div className="field" style={{ marginTop: 10 }}>
-                              <label>Comentario</label>
+                              <label><span style={{ background: '#0f5f60', color: '#ff8a2a', padding: '3px 10px', borderRadius: 999 }}>Comentario</span></label>
                               <textarea value={opsCommentDraft} onChange={(e) => setOpsCommentDraft(e.target.value)} placeholder="Escribe un comentario con @menciones" />
+                              {mentionSuggestions.length > 0 && (
+                                <div style={{ border: '1px solid #cfe1e3', borderRadius: 10, background: '#fff', marginTop: 6, overflow: 'hidden' }}>
+                                  {mentionSuggestions.map((u) => (
+                                    <button
+                                      key={u.handle}
+                                      type="button"
+                                      onClick={() => setOpsCommentDraft((prev) => prev.replace(/(?:^|\s)@([\w]*)$/, ` ${u.handle} `))}
+                                      style={{ width: '100%', textAlign: 'left', border: 0, borderBottom: '1px solid #e6eff0', background: '#fff', padding: '8px 10px', cursor: 'pointer' }}
+                                    >
+                                      <strong>{u.name}</strong> <small>{u.handle}</small>
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
                               <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
                                 <button type="button" className="history-edit-btn">@ Mencionar</button>
                                 <button type="button" className="history-edit-btn">+ Adjuntar</button>
                                 <button type="button" className="history-edit-btn" onClick={() => {
                                   if (!opsCommentDraft.trim()) return;
-                                  setOpsComments((prev) => [{ id: `c-${Date.now()}`, user: 'Juan Pérez', handle: '@JuanPerez', text: opsCommentDraft.trim(), attachment: '' }, ...prev]);
+                                  const text = opsCommentDraft.trim();
+                                  const mentioned = Array.from(new Set((text.match(/\@[A-Za-z0-9_]+/g) || [])));
+                                  setOpsComments((prev) => [{ id: `c-${Date.now()}`, user: 'Juan Pérez', handle: '@JuanPerez', text, attachment: '', createdAt: Date.now(), reactions: [], replies: [] }, ...prev]);
                                   setOpsActivityFeed((prev) => ['[Comentario agregado por Juan]', ...prev].slice(0, 8));
+                                  if (mentioned.length > 0) {
+                                    setOpsActivityFeed((prev) => [`[Notificación enviada a: ${mentioned.join(', ')}]`, ...prev].slice(0, 8));
+                                  }
                                   setOpsCommentDraft('');
                                 }}>Publicar</button>
                               </div>
