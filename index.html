@@ -4970,8 +4970,8 @@
       const auth = firebase.auth();
       const rtdb = typeof firebase.database === 'function' ? firebase.database() : null;
 
-      const ACCIONES = ['Nuevo Servicio', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa', 'Solicitud de presupuesto'];
-      const STATUS_OPTIONS = ['Pendiente', 'Presupuesto enviado', 'Aprobado', 'En agenda', 'En instalación', 'En progreso', 'Finalizado', 'Cancelado', 'En mantenimiento'];
+      const ACCIONES = ['Nuevo Servicio', 'Adicionales', 'Solicitud de presupuesto', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa'];
+      const STATUS_OPTIONS = ['Pendiente', 'En proceso', 'Esperando información', 'Finalizado', 'Cancelado'];
       const SERVICE_TYPE_OPTIONS = ['Monitoreo', 'Portería virtual', 'Respuesta de alarma', 'Servicio Técnico', 'Control de acceso'];
 
       function normalizeServiceType(value) {
@@ -5764,6 +5764,7 @@
       }
 
       const servicioInicial = {
+        tipoAltaServicio: 'Edificio',
         nombreServicio: '',
         tipoServicioBrindar: 'Portería Virtual',
         direccionServicio: '',
@@ -5807,6 +5808,10 @@
         observacionesComentarios: '',
 
         fechaAltaServicio: '',
+        fechaAltaNegociadaEstado: 'Sí',
+        diasInstalacion: '',
+        horarioCoberturaExacto: '',
+        tipoClienteServicio: 'Obra',
         importeMensualArrendamiento: '',
         importeCompraEquipamiento: '',
         descuentosNegociados: '',
@@ -5828,44 +5833,100 @@
       };
 
       const novacionInicial = {
-        representanteComercial: '',
+        representanteComercial: 'Francisco Bartellone',
+        comercialOtroNombre: '',
+        motivoCambioComercial: '',
+        cambiaMensualidad: 'No',
         creadoPor: '',
         nombreServicio: '',
         duracionNuevoContratoMeses: '',
         nuevoImporteNovacion: '',
         nuevoImporteArrendamiento: '',
         importeVentaEquipos: '',
-        detalleEquipamiento: '',
+        hayBonificacion: 'No',
         descuentosPago: '',
+        nuevoHorarioCobertura: '',
+        incluyeAppPorteria: '',
+        presupuestoProveedorNombre: '',
+        presupuestoProveedorUrl: '',
+        importeSvideoUsd: '',
+        referenteInstalacion: '',
+        telefonoReferenteInstalacion: '',
+        fechaAltaNegociada: '',
+        plazoInstalacionDias: '',
+        detalleEquipamiento: '',
         facturado: 'No',
       };
 
       const agregadoInicial = {
         nombreServicio: '',
+        idServicio: '',
+        presupuestoTrabajoNombre: '',
+        presupuestoTrabajoUrl: '',
+        descripcionTrabajo: '',
+        observaciones: '',
+        responsableAdicionales: '',
+        quienAsumeCostos: '',
+        aclaracionCostoMasterson: '',
         administracion: '',
-        detalleAdicional: '',
         fechaAltaAdicional: '',
         importeFacturarCliente: '',
+        monedaFacturacion: 'Pesos',
+        referenteInstalacion: '',
+        telefonoReferente: '',
+        plazoInstalacion: '',
         facturado: 'No',
+      };
+
+      const solicitudPresupuestoInicial = {
+        servicioIdSeleccionado: '',
+        ejecutivoCuenta: '',
+        referenteNombre: '',
+        referenteTelefono: '',
+        seCobraCliente: 'Sí',
+        seCobraDetalle: '',
+        tieneTrabajosPendientes: 'No',
+        origenSolicitud: '',
+        coordinarConTerceros: 'No',
+        descripcionTrabajo: '',
+        fotoTrabajoNombre: '',
+        fotoTrabajoUrl: '',
       };
 
       const movimientoInicial = {
         nombreServicio: '',
+        servicioIdSeleccionado: '',
+        fechaIngresoAuto: '',
         nombreSolicitante: '',
-        fechaMovimiento: '',
-        montoUsd: '',
+        solicitanteNombreCliente: '',
+        solicitanteTelefono: '',
+        costoUsd: '',
+        costoIvaTipo: 'Sin IVA',
+        motivoNoCobro: '',
+        autorizaNoCobro: '',
+        motivoMovimiento: '',
+        otroMotivoMovimiento: '',
+        canalSolicitud: '',
+        otroCanalSolicitud: '',
+        tipoAlarmaInstalada: '',
+        observaciones: '',
         facturado: 'No',
       };
 
       const bajaInicial = {
+        servicioIdSeleccionado: '',
         nombreServicio: '',
         direccionServicio: '',
-        fechaIngreso: '',
+        fechaIngresoAuto: '',
         quienSolicita: '',
+        nombreCliente: '',
+        telefono: '',
         motivoBaja: '',
-        internetEstado: '',
-        propietarioEquipamiento: 'S-Video',
+        internetResponsable: 'Masterson',
+        propietarioEquipamiento: 'Masterson',
         equipamientoRetirar: '',
+        equipamientoRetirarUrl: '',
+        motivoBajaCategoria: '',
         observaciones: '',
       };
 
@@ -6600,7 +6661,7 @@
 
       function App() {
         const [menuOpen, setMenuOpen] = useState(false);
-        const [openMenus, setOpenMenus] = useState({ nuevo: false, historial: false });
+        const [openMenus, setOpenMenus] = useState({ operaciones: false, nuevo: false, baseDatos: false });
         const [user, setUser] = useState(null);
         const [authLoading, setAuthLoading] = useState(true);
         const [userRole, setUserRole] = useState('');
@@ -6631,6 +6692,7 @@
         const [obraForm, setObraForm] = useState(obraInicial);
         const [novacionForm, setNovacionForm] = useState(novacionInicial);
         const [agregadoForm, setAgregadoForm] = useState(agregadoInicial);
+        const [solicitudPresupuestoForm, setSolicitudPresupuestoForm] = useState(solicitudPresupuestoInicial);
         const [movimientoForm, setMovimientoForm] = useState(movimientoInicial);
         const [bajaForm, setBajaForm] = useState(bajaInicial);
         const [charlaForm, setCharlaForm] = useState(charlaInicial);
@@ -6683,6 +6745,10 @@
         const [ticketImagenes, setTicketImagenes] = useState([]);
         const [ticketDragOver, setTicketDragOver] = useState(false);
         const [technicalDocDragOver, setTechnicalDocDragOver] = useState(false);
+        const [serviceBudgetDragOver, setServiceBudgetDragOver] = useState(false);
+        const [novacionBudgetDragOver, setNovacionBudgetDragOver] = useState(false);
+        const [bajaEquipDragOver, setBajaEquipDragOver] = useState(false);
+        const [solicitudFotoDragOver, setSolicitudFotoDragOver] = useState(false);
         const [uploadingTechnicalDoc, setUploadingTechnicalDoc] = useState(false);
         const [ticketSaving, setTicketSaving] = useState(false);
         const [imageViewerSrc, setImageViewerSrc] = useState('');
@@ -6704,7 +6770,8 @@
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
           if (tipoAccion === 'Obra') return 'obra';
           if (tipoAccion === 'Novación') return 'novacion';
-          if (tipoAccion === 'Solicitud de presupuesto') return 'agregado';
+          if (tipoAccion === 'Adicionales') return 'agregado';
+          if (tipoAccion === 'Solicitud de presupuesto') return 'solicitud-presupuesto';
           if (tipoAccion === 'Baja') return 'baja-detalle';
           if (tipoAccion === 'Charla informativa') return 'charla-detalle';
           if (tipoAccion === 'Movimiento de obra') return 'movimiento-detalle';
@@ -6798,6 +6865,7 @@
             direccionServicio: fromRows.direccionServicio || '',
             tipoServicioBrindar: normalizeServiceType(fromRows.tipoServicioBrindar) || '',
             representanteComercial: fromRows.representanteComercial || '',
+            administracion: fromRows.administracion || '',
             atencionCliente: fromRows.atencionCliente || fromRows.bottiSeContactaCon || '',
           };
           return PRELOADED_SERVICES.find((s) => normalizeServiceId(s.numero) === target) || null;
@@ -6820,8 +6888,10 @@
         const [activeKpi, setActiveKpi] = useState(null);
         const [selectedCommercial, setSelectedCommercial] = useState('');
         const [historySearchTerm, setHistorySearchTerm] = useState('');
-        const [historyStatusFilter, setHistoryStatusFilter] = useState('todos');
+        const [historyStatusFilter, setHistoryStatusFilter] = useState('Pendiente');
         const [historyCommercialFilter, setHistoryCommercialFilter] = useState('todos');
+        const [historyTypeFilter, setHistoryTypeFilter] = useState('todos');
+        const [historyDateFilter, setHistoryDateFilter] = useState('');
         const [historyPage, setHistoryPage] = useState(1);
         const [sellerFilterOpen, setSellerFilterOpen] = useState(false);
         const [sellerFiltersDraft, setSellerFiltersDraft] = useState({
@@ -7075,14 +7145,7 @@
 
         const historySourceRows = useMemo(() => ([...visibleRows, ...preloadedHistoryRows]), [visibleRows, preloadedHistoryRows]);
 
-        const historyStatusOptions = useMemo(() => {
-          const set = new Set();
-          historySourceRows.forEach((r) => {
-            const value = String(r.status || r.estado || '').trim();
-            if (value) set.add(value);
-          });
-          return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
-        }, [historySourceRows]);
+        const historyStatusOptions = useMemo(() => [...STATUS_OPTIONS], []);
 
         const historyCommercialOptions = useMemo(() => {
           const set = new Set();
@@ -7093,13 +7156,42 @@
           return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
         }, [historySourceRows]);
 
+        const historyTypeOptions = useMemo(() => {
+          const set = new Set();
+          historySourceRows.forEach((r) => {
+            const value = String(r.tipoAccion || '').trim();
+            if (!value) return;
+            if (value === 'Nuevo Servicio') set.add('Servicio');
+            else if (value === 'Adicionales') set.add('Adicional');
+            else if (value === 'Solicitud de presupuesto') set.add('Presupuesto');
+            else if (value === 'Novación') set.add('Novación');
+            else if (value === 'Movimiento de obra') set.add('Movimiento de obra');
+            else if (value === 'Baja') set.add('Baja');
+            else set.add(value);
+          });
+          return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+        }, [historySourceRows]);
+
         const historyFilteredRows = useMemo(() => {
           const query = historySearchTerm.trim().toLowerCase();
           const filtered = historySourceRows.filter((r) => {
-            const statusValue = String(r.status || r.estado || '').trim();
+            const statusValue = normalizeLegacyStatusName(String(r.status || r.estado || '').trim() || 'Pendiente');
             const commercialValue = String(r.representanteComercial || '').trim();
+            const actionValueRaw = String(r.tipoAccion || '').trim();
+            const actionValue = actionValueRaw === 'Nuevo Servicio' ? 'Servicio'
+              : actionValueRaw === 'Adicionales' ? 'Adicional'
+                : actionValueRaw === 'Solicitud de presupuesto' ? 'Presupuesto'
+                  : actionValueRaw;
+            const rowDate = (() => {
+              const ts = r.actualizadoEn?.seconds || r.creadoEn?.seconds || null;
+              if (ts) return new Date(ts * 1000).toISOString().slice(0, 10);
+              const fallback = String(r.fechaIngresoAuto || r.fechaAltaServicio || r.fechaAltaNegociada || '').slice(0, 10);
+              return fallback || '';
+            })();
             const matchStatus = historyStatusFilter === 'todos' || statusValue === historyStatusFilter;
             const matchCommercial = historyCommercialFilter === 'todos' || commercialValue === historyCommercialFilter;
+            const matchType = historyTypeFilter === 'todos' || actionValue === historyTypeFilter;
+            const matchDate = !historyDateFilter || rowDate === historyDateFilter;
             const matchQuery = !query || [
               r.nombreServicio,
               r.cliente,
@@ -7108,7 +7200,7 @@
               r.rut,
               r.direccionServicio,
             ].filter(Boolean).some((v) => String(v).toLowerCase().includes(query));
-            return matchStatus && matchCommercial && matchQuery;
+            return matchStatus && matchCommercial && matchType && matchDate && matchQuery;
           });
 
           return filtered.sort((a, b) => {
@@ -7116,7 +7208,7 @@
             const bTs = b.actualizadoEn?.seconds || b.creadoEn?.seconds || 0;
             return bTs - aTs;
           });
-        }, [historySourceRows, historySearchTerm, historyStatusFilter, historyCommercialFilter]);
+        }, [historySourceRows, historySearchTerm, historyStatusFilter, historyCommercialFilter, historyTypeFilter, historyDateFilter]);
 
         const HISTORY_PAGE_SIZE = 18;
         const totalHistoryPages = Math.max(1, Math.ceil(historyFilteredRows.length / HISTORY_PAGE_SIZE));
@@ -7125,6 +7217,17 @@
           const start = (safeHistoryPage - 1) * HISTORY_PAGE_SIZE;
           return historyFilteredRows.slice(start, start + HISTORY_PAGE_SIZE);
         }, [historyFilteredRows, safeHistoryPage]);
+
+        const operationalQueueRows = useMemo(() => {
+          const activeStates = new Set(['Pendiente', 'En proceso', 'Esperando información']);
+          return historyFilteredRows.filter((r) => activeStates.has(normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente'))));
+        }, [historyFilteredRows]);
+
+        const queueCounts = useMemo(() => ({
+          pendiente: operationalQueueRows.filter((r) => normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente')) === 'Pendiente').length,
+          proceso: operationalQueueRows.filter((r) => normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente')) === 'En proceso').length,
+          esperando: operationalQueueRows.filter((r) => normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente')) === 'Esperando información').length,
+        }), [operationalQueueRows]);
 
         async function handleSyncPreloadedServicesToFirebase() {
           if (!isAdminUser) {
@@ -7589,7 +7692,7 @@
           if (prevIds.size > 0) {
             const news = rows.filter((r) => !prevIds.has(r.id));
             if (news.length > 0) {
-              const relevant = news.filter((r) => ['Nuevo Servicio', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa', 'Solicitud de presupuesto', 'Obra'].includes(String(r.tipoAccion || '').trim()));
+              const relevant = news.filter((r) => ['Nuevo Servicio', 'Adicionales', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa', 'Solicitud de presupuesto', 'Obra'].includes(String(r.tipoAccion || '').trim()));
               if (relevant.length > 0) {
                 const alerts = relevant.map((r) => ({
                   id: `alert-${r.id}`,
@@ -8216,6 +8319,7 @@
 
         const ACTION_LABELS = {
           'Nuevo Servicio': 'Servicio',
+          'Adicionales': 'Adicionales',
           'Novación': 'Novación',
           'Movimiento de obra': 'Movimiento de obra',
           'Baja': 'Baja de servicio',
@@ -8232,7 +8336,7 @@
           return [
             {
               title: 'Nuevo',
-              items: ['Nuevo Servicio', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa', 'Solicitud de presupuesto'].filter(actionInRole).map(toItem),
+              items: ['Nuevo Servicio', 'Adicionales', 'Solicitud de presupuesto', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa'].filter(actionInRole).map(toItem),
             },
           ].filter((section) => section.items.length > 0);
         }, [mobileAllowedActions]);
@@ -8275,7 +8379,7 @@
           const stamp = formatUruguayDateTime();
           setServicioForm((prev) => ({ ...prev, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: prev.fechaIngresoDatos || stamp }));
           setObraForm((prev) => ({ ...prev, representanteComercial: currentUserName, creadoPor: currentUserName }));
-          setNovacionForm((prev) => ({ ...prev, representanteComercial: currentUserName, creadoPor: currentUserName }));
+          setNovacionForm((prev) => ({ ...prev, representanteComercial: prev.representanteComercial || 'Francisco Bartellone', creadoPor: currentUserName }));
         }
 
         function captureFormOpen(action) {
@@ -8294,8 +8398,22 @@
         }, [currentUserName, isAdminUser, isSalesOrTechUser]);
 
         useEffect(() => {
+          if (grupo !== 'agregado') return;
+          const fromServiceId = String(clienteIdAsociado || agregadoForm.idServicio || '').trim();
+          if (!fromServiceId) return;
+          const catalog = getServiceCatalogById(fromServiceId);
+          if (!catalog) return;
+          setAgregadoForm((prev) => ({
+            ...prev,
+            idServicio: fromServiceId,
+            nombreServicio: prev.nombreServicio || catalog.nombreServicio || '',
+            administracion: prev.administracion || catalog.administracion || '',
+          }));
+        }, [grupo, clienteIdAsociado, agregadoForm.idServicio, rows]);
+
+        useEffect(() => {
           setHistoryPage(1);
-        }, [historySearchTerm, historyStatusFilter, historyCommercialFilter]);
+        }, [historySearchTerm, historyStatusFilter, historyCommercialFilter, historyTypeFilter, historyDateFilter]);
 
         useEffect(() => {
           if (historyPage > totalHistoryPages) {
@@ -8308,7 +8426,7 @@
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
           setEditingServiceId(null);
           const stamp = formatUruguayDateTime();
-          setServicioForm({ ...servicioInicial, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: stamp }); setObraForm({ ...obraInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setNovacionForm({ ...novacionInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setAgregadoForm(agregadoInicial); setMovimientoForm(movimientoInicial); setBajaForm(bajaInicial); setCharlaForm(charlaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
+          setServicioForm({ ...servicioInicial, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: stamp }); setObraForm({ ...obraInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setNovacionForm({ ...novacionInicial, representanteComercial: 'Francisco Bartellone', creadoPor: currentUserName }); setAgregadoForm({ ...agregadoInicial, responsableAdicionales: currentUserName || '' }); setSolicitudPresupuestoForm(solicitudPresupuestoInicial); setMovimientoForm({ ...movimientoInicial, fechaIngresoAuto: stamp }); setBajaForm({ ...bajaInicial, fechaIngresoAuto: stamp }); setCharlaForm(charlaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
         }
 
         function setServicioField(key, value) {
@@ -8379,8 +8497,45 @@
           setNovacionForm((prev) => ({ ...prev, [key]: value }));
         }
 
+        function handleNovacionFileUpload(file) {
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            setNovacionForm((prev) => ({ ...prev, presupuestoProveedorUrl: String(reader.result || ''), presupuestoProveedorNombre: file.name || 'presupuesto-novacion' }));
+            setNotificacion({ mensaje: '✔ Archivo de novación cargado', tipo: 'ok' });
+          };
+          reader.onerror = () => setNotificacion({ mensaje: '✖ No se pudo leer el archivo', tipo: 'error' });
+          reader.readAsDataURL(file);
+        }
+
         function setAgregadoField(key, value) {
           setAgregadoForm((prev) => ({ ...prev, [key]: value }));
+        }
+
+        function setSolicitudPresupuestoField(key, value) {
+          setSolicitudPresupuestoForm((prev) => ({ ...prev, [key]: value }));
+        }
+
+        function handleSolicitudFotoUpload(file) {
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            setSolicitudPresupuestoForm((prev) => ({ ...prev, fotoTrabajoNombre: file.name || 'foto-trabajo', fotoTrabajoUrl: String(reader.result || '') }));
+            setNotificacion({ mensaje: '✔ Foto de solicitud cargada', tipo: 'ok' });
+          };
+          reader.onerror = () => setNotificacion({ mensaje: '✖ No se pudo leer la foto', tipo: 'error' });
+          reader.readAsDataURL(file);
+        }
+
+        function handleAgregadoFileUpload(file) {
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            setAgregadoForm((prev) => ({ ...prev, presupuestoTrabajoUrl: String(reader.result || ''), presupuestoTrabajoNombre: file.name || 'archivo-adicional' }));
+            setNotificacion({ mensaje: '✔ Archivo de adicionales cargado', tipo: 'ok' });
+          };
+          reader.onerror = () => setNotificacion({ mensaje: '✖ No se pudo leer el archivo', tipo: 'error' });
+          reader.readAsDataURL(file);
         }
 
         function setMovimientoField(key, value) {
@@ -8389,6 +8544,17 @@
 
         function setBajaField(key, value) {
           setBajaForm((prev) => ({ ...prev, [key]: value }));
+        }
+
+        function handleBajaEquipFileUpload(file) {
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            setBajaForm((prev) => ({ ...prev, equipamientoRetirar: file.name || 'planilla-equipamiento', equipamientoRetirarUrl: String(reader.result || '') }));
+            setNotificacion({ mensaje: '✔ Planilla de equipamiento cargada', tipo: 'ok' });
+          };
+          reader.onerror = () => setNotificacion({ mensaje: '✖ No se pudo leer la planilla', tipo: 'error' });
+          reader.readAsDataURL(file);
         }
 
         function setCharlaField(key, value) {
@@ -8426,15 +8592,15 @@
           const catalog = getServiceCatalogById(clienteIdAsociado);
           if (!catalog) return;
           if (grupo === 'novacion') {
-            setNovacionForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio, representanteComercial: catalog.representanteComercial || prev.representanteComercial, atencionCliente: catalog.atencionCliente || prev.atencionCliente }));
+            setNovacionForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio, atencionCliente: catalog.atencionCliente || prev.atencionCliente }));
           }
-          if (grupo === 'agregado' || grupo === 'movimiento-detalle') {
+          if (grupo === 'agregado') {
             setAgregadoForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio }));
           }
           if (grupo === 'baja-detalle') {
-            setBajaForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio, direccionServicio: catalog.direccionServicio || prev.direccionServicio }));
+            setBajaForm((prev) => ({ ...prev, servicioIdSeleccionado: clienteIdAsociado || prev.servicioIdSeleccionado, nombreServicio: catalog.nombreServicio || prev.nombreServicio, direccionServicio: catalog.direccionServicio || prev.direccionServicio }));
           }
-          if (grupo === 'movimiento-detalle' || grupo === 'agregado') {
+          if (grupo === 'movimiento-detalle') {
             setMovimientoForm((prev) => ({ ...prev, nombreServicio: catalog.nombreServicio || prev.nombreServicio }));
           }
         }, [clienteIdAsociado, grupo, autoIdMode, rows]);
@@ -8484,6 +8650,12 @@
           if (['Nuevo Servicio', 'Novación'].includes(action)) {
             captureFormOpen(action);
             applyUserDefaultsToForms();
+          }
+          if (action === 'Novación') {
+            setNovacionForm((prev) => ({ ...prev, representanteComercial: 'Francisco Bartellone' }));
+          }
+          if (action === 'Adicionales') {
+            setAgregadoForm((prev) => ({ ...prev, responsableAdicionales: prev.responsableAdicionales || currentUserName || '' }));
           }
           closeSidebar();
         }
@@ -8535,13 +8707,23 @@
 
           const normalizedStatusToSave = normalizeLegacyStatusName(status);
           const normalizedClientId = normalizeServiceId(effectiveClienteId) || String(effectiveClienteId || '').trim();
-          const actionNeedsExistingService = ['Baja', 'Novación', 'Obra', 'Movimiento de obra', 'Charla informativa', 'Solicitud de presupuesto'].includes(tipoAccion);
+          const actionNeedsExistingService = ['Baja', 'Novación', 'Obra', 'Movimiento de obra', 'Charla informativa', 'Adicionales', 'Solicitud de presupuesto'].includes(tipoAccion);
 
           const doc = { tipoAccion, clienteId: normalizedClientId, status: normalizedStatusToSave, estado: normalizedStatusToSave };
 
           if (grupo === 'servicio') {
-            if (!servicioForm.nombreServicio || !servicioForm.razonSocial || !servicioForm.rut || !servicioForm.fechaAltaServicio) {
-              return alert('Completá al menos: Nombre del servicio, Razón social, RUT y Fecha de alta.');
+            if (servicioForm.tipoAltaServicio === 'Obra') {
+              if (!servicioForm.nombreServicio || !servicioForm.direccionServicio || !servicioForm.tipoServicioBrindar) {
+                return alert('Completá al menos: Nombre del servicio, Dirección y Tipo de servicio.');
+              }
+              if (servicioForm.fechaAltaNegociadaEstado !== 'No se negoció' && !servicioForm.fechaAltaServicio) {
+                return alert('Indicá la fecha de alta negociada o marcá "No se negoció".');
+              }
+              if (servicioForm.llavesServicio !== 'Entregadas a Operaciones') {
+                return alert('No se puede dar de alta el servicio si las llaves no están marcadas como "Entregadas a Operaciones".');
+              }
+            } else if (!servicioForm.nombreServicio || !servicioForm.direccionServicio || !servicioForm.tipoServicioBrindar) {
+              return alert('Completá al menos: Nombre del servicio, Dirección y Tipo de servicio.');
             }
             Object.assign(doc, { ...servicioForm, formulario: 'nuevo-servicio-optimizado', creadoPor: servicioForm.creadoPor || currentUserName, auditoriaApertura: formOpenAudit });
           }
@@ -8555,27 +8737,46 @@
             if (!novacionForm.nombreServicio || !novacionForm.duracionNuevoContratoMeses) {
               return alert('Completá al menos: Nombre del servicio y Duración del nuevo contrato.');
             }
+            if (novacionForm.representanteComercial === 'Otro' && (!novacionForm.comercialOtroNombre || !novacionForm.motivoCambioComercial)) {
+              return alert('Si seleccionás representante comercial "Otro", completá quién es y el motivo del cambio.');
+            }
             Object.assign(doc, { ...novacionForm, formulario: 'novacion', creadoPor: novacionForm.creadoPor || currentUserName, auditoriaApertura: formOpenAudit });
           }
-          if (grupo === 'agregado' || grupo === 'movimiento-detalle') {
+          if (grupo === 'agregado') {
             if (!agregadoForm.nombreServicio || !agregadoForm.fechaAltaAdicional) {
-              return alert('Completá al menos: Nombre del servicio y Fecha de alta del adicional.');
+              return alert('Completá al menos: Nombre del servicio y Fecha de alta de los adicionales.');
             }
             Object.assign(doc, { ...agregadoForm, formulario: 'agregado' });
+          }
+          if (grupo === 'solicitud-presupuesto') {
+            if (!normalizedClientId || !solicitudPresupuestoForm.ejecutivoCuenta) {
+              return alert('Completá al menos: ID del servicio y Ejecutivo de cuenta.');
+            }
+            Object.assign(doc, { ...solicitudPresupuestoForm, formulario: 'solicitud-presupuesto' });
           }
           if (grupo === 'base') {
             if (!cliente || !fechaCarga) return alert('Completá Cliente y Fecha Carga.');
             Object.assign(doc, { cliente, fechaCarga, tiempoInstalacion, fechaAlta, cobro });
           }
-          if (grupo === 'movimiento-detalle' || grupo === 'agregado') {
-            if (!movimientoForm.nombreServicio || !movimientoForm.nombreSolicitante || !movimientoForm.fechaMovimiento) {
-              return alert('Completá al menos: Nombre del servicio, Solicitante y Fecha del movimiento.');
+          if (grupo === 'movimiento-detalle') {
+            if (!movimientoForm.nombreServicio || !normalizedClientId) {
+              return alert('Seleccioná un servicio existente (ID) y verificá el nombre del servicio.');
+            }
+            if (!movimientoForm.nombreSolicitante || !movimientoForm.solicitanteNombreCliente || !movimientoForm.solicitanteTelefono) {
+              return alert('Completá: Quién lo solicita, Nombre del cliente y Teléfono.');
+            }
+            const costoNum = Number(movimientoForm.costoUsd || 0);
+            if (costoNum === 0 && (!movimientoForm.motivoNoCobro || !movimientoForm.autorizaNoCobro)) {
+              return alert('Si el costo es 0, debés completar Motivo por el cual no se cobra y Quién autoriza.');
             }
             Object.assign(doc, { ...movimientoForm, formulario: 'movimiento-obra' });
           }
           if (grupo === 'baja-detalle') {
-            if (!bajaForm.nombreServicio || !bajaForm.direccionServicio || !bajaForm.fechaIngreso) {
-              return alert('Completá al menos: Nombre del servicio, Dirección y Fecha de ingreso.');
+            if (!bajaForm.nombreServicio || !normalizedClientId) {
+              return alert('Seleccioná un servicio existente y verificá el nombre del servicio.');
+            }
+            if (!bajaForm.motivoBajaCategoria) {
+              return alert('Seleccioná un motivo principal de baja.');
             }
             Object.assign(doc, { ...bajaForm, formulario: 'baja-servicio', status: 'Baja', estado: 'Baja' });
           }
@@ -8613,6 +8814,25 @@
             const existingLogs = Array.isArray(targetSource?.logs_cambios) ? targetSource.logs_cambios : [];
 
             if (targetDocId) {
+              if (grupo === 'baja-detalle') {
+                const bajaPayload = {
+                  ...doc,
+                  servicioPadreId: targetDocId,
+                  creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+                  creadoPor: currentUserName,
+                };
+                await db.collection('operaciones').doc(targetDocId).collection('bajasServicio').add(bajaPayload);
+                await db.collection('operaciones').doc(targetDocId).set({
+                  status: 'Baja',
+                  estado: 'Baja',
+                  actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+                  editadoPor: currentUserName,
+                }, { merge: true });
+                resetFields();
+                setNotificacion({ mensaje: '✔ Baja registrada (Servicios 1 → Bajas N)', tipo: 'ok' });
+                void logRealtimeActivityEvent({ usuario: currentUserName, accion: 'registró baja del servicio', clienteId: normalizedClientId });
+                return;
+              }
               const payload = {
                 ...doc,
                 actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
@@ -8628,7 +8848,7 @@
               }
               void logRealtimeActivityEvent({
                 usuario: currentUserName,
-                accion: tipoAccion === 'Baja' ? 'registró baja del servicio' : tipoAccion === 'Novación' ? 'registró novación del servicio' : tipoAccion === 'Obra' ? 'registró obra' : tipoAccion === 'Movimiento de obra' ? 'registró movimiento de obra' : tipoAccion === 'Charla informativa' ? 'registró charla informativa' : tipoAccion === 'Solicitud de presupuesto' ? 'registró solicitud de presupuesto' : 'modificó servicio',
+                accion: tipoAccion === 'Baja' ? 'registró baja del servicio' : tipoAccion === 'Novación' ? 'registró novación del servicio' : tipoAccion === 'Obra' ? 'registró obra' : tipoAccion === 'Movimiento de obra' ? 'registró movimiento de obra' : tipoAccion === 'Charla informativa' ? 'registró charla informativa' : tipoAccion === 'Adicionales' ? 'registró adicionales' : tipoAccion === 'Solicitud de presupuesto' ? 'registró solicitud de presupuesto' : 'modificó servicio',
                 clienteId: normalizedClientId,
               });
               return;
@@ -8753,11 +8973,12 @@
                 {mobileQuickMenuOpen && (
                   <div className="mobile-quick-menu">
                     <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Nuevo Servicio'); }}>Servicio</button>
+                    <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Adicionales'); }}>Adicionales</button>
+                    <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Solicitud de presupuesto'); }}>Solicitud de presupuesto</button>
                     <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Novación'); }}>Novación</button>
                     <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Movimiento de obra'); }}>Movimiento de obra</button>
                     <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Baja'); }}>Baja de servicio</button>
                     <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Charla informativa'); }}>Charla informativa</button>
-                    <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Solicitud de presupuesto'); }}>Solicitud de presupuesto</button>
                   </div>
                 )}
               </div>
@@ -8772,11 +8993,12 @@
                 <h3 className="mobile-section-title">Carga operativa</h3>
                 <div className="mobile-actions-grid">
                   <button type="button" className="mobile-action-btn" onClick={() => selectAction('Nuevo Servicio')}>Servicio</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Adicionales')}>Adicionales</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Solicitud de presupuesto')}>Solicitud de presupuesto</button>
                   <button type="button" className="mobile-action-btn" onClick={() => selectAction('Novación')}>Novación</button>
                   <button type="button" className="mobile-action-btn" onClick={() => selectAction('Movimiento de obra')}>Movimiento de obra</button>
                   <button type="button" className="mobile-action-btn" onClick={() => selectAction('Baja')}>Baja de servicio</button>
                   <button type="button" className="mobile-action-btn" onClick={() => selectAction('Charla informativa')}>Charla informativa</button>
-                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Solicitud de presupuesto')}>Solicitud de presupuesto</button>
                 </div>
               </div>
             </section>
@@ -9346,29 +9568,34 @@
                 </div>
               </div>
               <div className="menu">
-                <div className="sidebar-section-label">Inicio</div>
                 <button className="menu-button" onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
+                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }} style={{ borderColor: '#f97316', boxShadow: '0 0 0 1px rgba(249,115,22,.35) inset' }}><span className="menu-icon">📌</span><span>Pendientes</span><span className="menu-arrow" style={{ color: '#fb923c' }}>{queueCounts.pendiente + queueCounts.proceso + queueCounts.esperando}</span></button>
+                <button className="menu-button" onClick={() => { setSelectedForm('historial'); setHistoryStatusFilter('todos'); closeSidebar(); }}><span className="menu-icon">📋</span><span>Todos</span></button>
                 {!isMobile && (
                   <>
-                    <div className="sidebar-section-label">Operaciones</div>
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ nuevo: !p.nuevo, historial: false }))}><span className="menu-icon">➕</span><span>Nuevo</span><span className="menu-arrow">{openMenus.nuevo ? '▾' : '▸'}</span></button>
-                    <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
-                      <button className="submenu-button" onClick={() => selectAction('Nuevo Servicio')}>Servicio</button>
-                      <button className="submenu-button" onClick={() => selectAction('Novación')}>Novación</button>
-                      <button className="submenu-button" onClick={() => selectAction('Movimiento de obra')}>Movimiento de obra</button>
-                      <button className="submenu-button" onClick={() => selectAction('Baja')}>Baja de servicio</button>
-                      <button className="submenu-button" onClick={() => selectAction('Charla informativa')}>Charla informativa</button>
-                      <button className="submenu-button" onClick={() => selectAction('Solicitud de presupuesto')}>Solicitud de presupuesto</button>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: !p.operaciones, nuevo: false, baseDatos: false }))}><span className="menu-icon">🗂️</span><span>Operaciones</span><span className="menu-arrow">{openMenus.operaciones ? '▾' : '▸'}</span></button>
+                    <div className={`submenu ${openMenus.operaciones ? 'open' : ''}`}>
+                      <button className="submenu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}><span>Nuevo</span><span className="menu-arrow">{openMenus.nuevo ? '▾' : '▸'}</span></button>
+                      <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
+                        <button className="submenu-button" onClick={() => { selectAction('Nuevo Servicio'); closeSidebar(); }}>Servicio</button>
+                        <button className="submenu-button" onClick={() => { selectAction('Adicionales'); closeSidebar(); }}>Adicionales</button>
+                        <button className="submenu-button" onClick={() => { selectAction('Solicitud de presupuesto'); closeSidebar(); }}>Solicitud de presupuesto</button>
+                        <button className="submenu-button" onClick={() => { selectAction('Novación'); closeSidebar(); }}>Novación</button>
+                        <button className="submenu-button" onClick={() => { selectAction('Movimiento de obra'); closeSidebar(); }}>Movimiento de obra</button>
+                        <button className="submenu-button" onClick={() => { selectAction('Baja'); closeSidebar(); }}>Baja de servicio</button>
+                        <button className="submenu-button" onClick={() => { selectAction('Charla informativa'); closeSidebar(); }}>Charla informativa</button>
+                      </div>
+                      <button className="submenu-button" onClick={() => { setSelectedForm('home'); closeSidebar(); }}>Instalaciones</button>
+                      <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Gestión de servicios</button>
                     </div>
                     <div className="sidebar-divider" />
-                    <div className="sidebar-section-label">Gestión</div>
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ nuevo: false, historial: !p.historial }))}><span className="menu-icon">📚</span><span>Historial</span><span className="menu-arrow">{openMenus.historial ? '▾' : '▸'}</span></button>
-                    <div className={`submenu ${openMenus.historial ? 'open' : ''}`}>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: false, nuevo: false, baseDatos: !p.baseDatos }))}><span className="menu-icon">📚</span><span>Base de datos</span><span className="menu-arrow">{openMenus.baseDatos ? '▾' : '▸'}</span></button>
+                    <div className={`submenu ${openMenus.baseDatos ? 'open' : ''}`}>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial-charlas'); closeSidebar(); }}>Historial de Charlas</button>
                     </div>
                     {ENABLE_CLIENT_TRACKING_VIEW && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}><span className="menu-icon">👥</span><span>Vista Clientes</span></button>}
-                    <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}><span className="menu-icon">📊</span><span>Vista Gerencia</span></button>
+                    <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}><span className="menu-icon">📊</span><span>Dashboard</span></button>
                   </>
                 )}
                 <div className="sidebar-divider" />
@@ -10172,97 +10399,49 @@
                   </section>
                 ) : effectiveSelectedForm === 'historial' ? (
                   <section className="panel">
-                    <h2>Historial de Servicios · Vista Ejecutiva</h2>
-                    <div className="hint">Rediseño escalable con filtros, paginación y vista rápida para manejar alto volumen de servicios.</div>
-                    <section className="panel" style={{ background: 'rgba(255,255,255,.04)', marginBottom: 12 }}>
-                      <h3 style={{ marginTop: 0 }}>Servicios ({historyFilteredRows.length} filtrados de {historySourceRows.length})</h3>
+                    <h2>Gestión Operativa</h2>
+                    <div className="hint">Módulo central para Servicios, Adicionales, Novaciones, Movimientos de obra, Bajas y Solicitudes de presupuesto.</div>
+                    <section className="panel" style={{ background: '#f5f7f8', color: '#123436', marginBottom: 12 }}>
+                      <h3 style={{ marginTop: 0, color: '#005a5b' }}>Pendientes</h3>
+                      <div className="hint" style={{ color: '#496a6b' }}>Bandeja activa de trabajo: pendientes, en proceso y bloqueados por información.</div>
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+                        <button type="button" className={`history-page-num ${historyStatusFilter === 'Pendiente' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('Pendiente')}>Por hacer <span style={{ color: '#ef4444' }}>({queueCounts.pendiente})</span></button>
+                        <button type="button" className={`history-page-num ${historyStatusFilter === 'En proceso' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('En proceso')}>En proceso <span style={{ color: '#2563eb' }}>({queueCounts.proceso})</span></button>
+                        <button type="button" className={`history-page-num ${historyStatusFilter === 'Esperando información' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('Esperando información')}>Esperando info <span style={{ color: '#7c3aed' }}>({queueCounts.esperando})</span></button>
+                      </div>
                       <div className="history-toolbar">
-                        <div className="field span-2"><label>Buscar</label><input value={historySearchTerm} onChange={(e) => setHistorySearchTerm(e.target.value)} placeholder="ID, servicio, razón social, RUT, dirección..." /></div>
-                        <div className="field"><label>Status</label><select value={historyStatusFilter} onChange={(e) => setHistoryStatusFilter(e.target.value)}><option value="todos">Todos</option>{historyStatusOptions.map((st) => <option key={`hs-${st}`} value={st}>{st}</option>)}</select></div>
-                        <div className="field"><label>Comercial</label><select value={historyCommercialFilter} onChange={(e) => setHistoryCommercialFilter(e.target.value)}><option value="todos">Todos</option>{historyCommercialOptions.map((cm) => <option key={`hc-${cm}`} value={cm}>{cm}</option>)}</select></div>
-                        {isAdminUser && <button type="button" className="history-add-btn" onClick={() => setShowManualCatalogForm((prev) => !prev)}>{showManualCatalogForm ? "Cerrar agregar servicio" : "Agregar servicio"}</button>}
+                        <div className="field span-2"><label>Buscar</label><input value={historySearchTerm} onChange={(e) => setHistorySearchTerm(e.target.value)} placeholder="Buscar servicio..." /></div>
+                        <div className="field"><label>Tipo</label><select value={historyTypeFilter} onChange={(e) => setHistoryTypeFilter(e.target.value)}><option value="todos">Todos</option>{historyTypeOptions.map((tp) => <option key={`ht-${tp}`} value={tp}>{tp}</option>)}</select></div>
+                        <div className="field"><label>Responsable</label><select value={historyCommercialFilter} onChange={(e) => setHistoryCommercialFilter(e.target.value)}><option value="todos">Todos</option>{historyCommercialOptions.map((cm) => <option key={`hc-${cm}`} value={cm}>{cm}</option>)}</select></div>
+                        <div className="field"><label>Fecha</label><input type="date" value={historyDateFilter} onChange={(e) => setHistoryDateFilter(e.target.value)} /></div>
+                        <button type="button" className="history-add-btn" onClick={() => setHistoryPage(1)}>Filtrar</button>
                       </div>
-                      <div className="hint" style={{ marginBottom: 10 }}>Catálogo local visible en historial: {preloadedHistoryRows.length} servicio(s) aún no guardado(s) en Firebase.</div>
-                      {isAdminUser && (
-                        <div style={{ marginBottom: 12 }}>
-                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                            <button type="button" className="link-btn" disabled={catalogSyncing} onClick={handleSyncPreloadedServicesToFirebase}>
-                              {catalogSyncing ? 'Sincronizando catálogo…' : 'Sincronizar catálogo precargado en Firebase'}
-                            </button>
-                          </div>
-                          {showManualCatalogForm && (
-                            <div className="panel" style={{ marginTop: 10, background: 'rgba(255,255,255,.03)' }}>
-                              <h4 style={{ marginTop: 0 }}>Agregar servicio al catálogo/Firebase</h4>
-                              <div className="grid cols-3">
-                                <div className="field"><label>Número</label><input value={manualCatalogForm.numero} onChange={(e) => setManualCatalogField('numero', e.target.value)} placeholder="Ej: 0001" /></div>
-                                <div className="field"><label>Servicio</label><input value={manualCatalogForm.nombreServicio} onChange={(e) => setManualCatalogField('nombreServicio', e.target.value)} placeholder="Nombre del servicio" /></div>
-                                <div className="field"><label>Dirección</label><input value={manualCatalogForm.direccionServicio} onChange={(e) => setManualCatalogField('direccionServicio', e.target.value)} placeholder="Dirección" /></div>
-                                <div className="field"><label>Tipo de Servicio</label><input value={manualCatalogForm.tipoServicioBrindar} onChange={(e) => setManualCatalogField('tipoServicioBrindar', e.target.value)} placeholder="MONITOREO / PORTERIA..." /></div>
-                                <div className="field"><label>Comercial</label><input value={manualCatalogForm.representanteComercial} onChange={(e) => setManualCatalogField('representanteComercial', e.target.value)} placeholder="Nombre comercial" /></div>
-                                <div className="field"><label>Atención al cliente</label><input value={manualCatalogForm.atencionCliente} onChange={(e) => setManualCatalogField('atencionCliente', e.target.value)} placeholder="Nombre atención cliente" /></div>
-                              </div>
-                              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                <button type="button" className="save-btn" disabled={savingManualCatalogService} onClick={handleCreateManualCatalogService}>{savingManualCatalogService ? 'Guardando...' : 'Guardar servicio en operaciones'}</button>
-                                <button type="button" className="link-btn" disabled={savingManualCatalogService} onClick={resetManualCatalogForm}>Limpiar</button>
-                              </div>
-                              <div className="field" style={{ marginTop: 10 }}>
-                                <label>Pegar listado masivo (TSV: Numero, Servicio, Dirección, Tipo de Servicio, Comercial, Atencion al cliente)</label>
-                                <textarea rows={8} value={bulkCatalogRawInput} onChange={(e) => setBulkCatalogRawInput(e.target.value)} placeholder="Pegá aquí el listado completo..." />
-                              </div>
-                              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                <button type="button" className="save-btn" disabled={bulkCatalogSyncing} onClick={handleSyncBulkCatalogRawToFirebase}>{bulkCatalogSyncing ? 'Sincronizando listado...' : 'Sincronizar listado completo en operaciones'}</button>
-                                <span className="hint" style={{ margin: 0 }}>Filas válidas detectadas: {parseExtraPreloadedServices(bulkCatalogRawInput).length}</span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      <div className="history-list-shell">
-                        <div className="history-list-head">
-                          <strong>Listado paginado</strong>
-                          <span className="hint" style={{ margin: 0 }}>Página {safeHistoryPage} de {totalHistoryPages}</span>
-                        </div>
-                        <div className="history-list">
-                          {historyRowsPage.length === 0 ? (
-                            <div className="hint" style={{ padding: 14, margin: 0 }}>No hay resultados con los filtros aplicados.</div>
-                          ) : historyRowsPage.map((service) => {
-                            const allowedEdit = canEditService(service);
-                            return (
-                              <div className="history-row" key={`hist-${service.id}`} data-status={String(service.status || service.estado || "pendiente").toLowerCase()}>
-                                <button type="button" className="ranking-service-btn" onClick={() => setSelectedService(service)}>
-                                  <div className="history-row-main">
-                                    <strong>{service.nombreServicio || service.cliente || 'Servicio sin nombre'}</strong>
-                                    <div className="history-row-meta">
-                                      <span>ID {service.clienteId || '-'}</span>
-                                      <span>·</span>
-                                      <span>{service.razonSocial || 'Sin razón social'}</span>
-                                      <span>·</span>
-                                      <span>{service.representanteComercial || 'Sin comercial'}</span>
-                                    </div>
-                                  </div>
-                                </button>
-                                <span className={`history-status-badge ${statusClass(service.status || service.estado)}`} data-status={String(service.status || service.estado || "pendiente").toLowerCase()}>{service.status || service.estado || 'Pendiente'}</span>
-                                <div className="ranking-service-actions">
-                                  <button type="button" className="history-edit-btn" disabled={!allowedEdit} onClick={() => startEditService(service)}>
-                                    {allowedEdit ? '✏ Editar' : '🔒 Solo lectura'}
-                                  </button>
+                      <div style={{ display: 'grid', gap: 10, marginTop: 12 }}>
+                        {operationalQueueRows.length === 0 ? (
+                          <div className="hint" style={{ padding: 14, margin: 0 }}>No hay tareas activas con los filtros actuales.</div>
+                        ) : operationalQueueRows.map((service) => {
+                          const statusNorm = normalizeLegacyStatusName(service.status || service.estado || 'Pendiente');
+                          const tone = statusNorm === 'Pendiente' ? '#ef4444' : statusNorm === 'En proceso' ? '#2563eb' : '#7c3aed';
+                          const createdSeconds = service.creadoEn?.seconds || service.actualizadoEn?.seconds || 0;
+                          const daysPending = createdSeconds ? Math.max(0, Math.floor((Date.now() - (createdSeconds * 1000)) / 86400000)) : 0;
+                          return (
+                            <article key={`opq-${service.id}`} style={{ background: '#fff', borderRadius: 14, boxShadow: '0 6px 20px rgba(0,0,0,.08)', border: '1px solid #e5eaec', display: 'grid', gridTemplateColumns: '6px 1fr auto', overflow: 'hidden' }}>
+                              <div style={{ background: tone }} />
+                              <div style={{ padding: 12 }}>
+                                <strong style={{ color: '#0e3c3d' }}>{service.nombreServicio || 'Servicio sin nombre'}</strong>
+                                <div style={{ fontSize: 12, color: '#5d7677', marginTop: 4 }}>
+                                  Tipo: {service.tipoAccion === 'Nuevo Servicio' ? 'Servicio' : service.tipoAccion === 'Adicionales' ? 'Adicional' : service.tipoAccion === 'Solicitud de presupuesto' ? 'Presupuesto' : (service.tipoAccion || '-')} · Responsable: {service.representanteComercial || 'Sin responsable'} · ID: {service.clienteId || '-'}
                                 </div>
+                                <div style={{ fontSize: 13, color: '#3b5657', marginTop: 6 }}>{service.descripcionTrabajo || service.observaciones || service.observacionesComentarios || 'Sin descripción adicional.'}</div>
                               </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      <div className="history-pagination">
-                        <span className="hint" style={{ margin: 0 }}>Mostrando {historyRowsPage.length} registros en esta página.</span>
-                        <div className="history-page-actions">
-                          <button type="button" className="link-btn" disabled={safeHistoryPage <= 1} onClick={() => setHistoryPage((p) => Math.max(1, p - 1))}>← Anterior</button>
-                          {Array.from({ length: totalHistoryPages }, (_, idx) => idx + 1).slice(Math.max(0, safeHistoryPage - 3), Math.min(totalHistoryPages, safeHistoryPage + 2)).map((pageNum) => (
-                            <button key={`history-page-${pageNum}`} type="button" className={`history-page-num ${pageNum === safeHistoryPage ? 'active' : ''}`} onClick={() => setHistoryPage(pageNum)}>{pageNum}</button>
-                          ))}
-                          <button type="button" className="link-btn" disabled={safeHistoryPage >= totalHistoryPages} onClick={() => setHistoryPage((p) => Math.min(totalHistoryPages, p + 1))}>Siguiente →</button>
-                        </div>
+                              <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
+                                <span style={{ background: `${tone}22`, color: tone, border: `1px solid ${tone}55`, padding: '4px 10px', borderRadius: 999, fontSize: 12, fontWeight: 700 }}>{statusNorm}</span>
+                                <button type="button" className="history-edit-btn" onClick={() => setSelectedService(service)}>Ver</button>
+                                <small style={{ color: '#6b7f80' }}>{daysPending} días pendiente</small>
+                              </div>
+                            </article>
+                          );
+                        })}
                       </div>
                     </section>
                     {!selectedService ? (
@@ -10378,7 +10557,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                 ) : (
                 <section className="panel">
                   <h2>Formulario Operativo · Gestión de Acciones</h2>
-                  <div className="hint">Nuevo incluye: Servicio, Novación, Movimiento de obra, Baja de servicio, Charla informativa y Solicitud de presupuesto.</div>
+                  <div className="hint">Nuevo incluye: Servicio, Adicionales, Solicitud de presupuesto, Novación, Movimiento de obra, Baja de servicio y Charla informativa.</div>
 
                   <form onSubmit={handleSubmit}>
                     {grupo === 'servicio' ? (
@@ -10388,69 +10567,142 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID</label><input value={clienteId} readOnly type="text" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
-                            <div className="field"><label>Representante Comercial</label><input value={servicioForm.representanteComercial} onChange={(e) => setServicioField('representanteComercial', e.target.value)} type="text" readOnly={lockCommercialField} /></div>
+                            <div className="field"><label>Tipo</label><select value={servicioForm.tipoAltaServicio || 'Edificio'} onChange={(e) => setServicioField('tipoAltaServicio', e.target.value)}><option value="Edificio">Edificio</option><option value="Obra">Obra</option></select></div>
                           </div>
                         </div>
+                        {servicioForm.tipoAltaServicio === 'Obra' ? (
+                          <>
+                            <div className="service-card">
+                              <h3>2. Información General</h3>
+                              <div className="card-grid">
+                                <div className="field span-2"><label>Nombre del servicio</label><input value={servicioForm.nombreServicio} onChange={(e) => setServicioField('nombreServicio', e.target.value)} type="text" /></div>
+                                <div className="field span-2"><label>Dirección del servicio</label><input value={servicioForm.direccionServicio} onChange={(e) => setServicioField('direccionServicio', e.target.value)} type="text" /></div>
+                                <div className="field"><label>Tipo de servicio</label><select value={servicioForm.tipoServicioBrindar} onChange={(e) => setServicioField('tipoServicioBrindar', e.target.value)}><option value="">Seleccionar...</option><option value="Monitoreo">Monitoreo</option><option value="Respuesta de Alarma">Respuesta de alarma</option></select></div>
+                              </div>
+                            </div>
 
-                        <div className="service-card">
-                          <h3>1. Identificación del Cliente (Datos Fiscales)</h3>
-                          <div className="card-grid">
-                            <div className="field span-2"><label>Nombre de servicio</label><input value={servicioForm.nombreServicio} onChange={(e) => setServicioField('nombreServicio', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Administración</label><input value={servicioForm.administracion} onChange={(e) => setServicioField('administracion', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Razón social</label><input value={servicioForm.razonSocial} onChange={(e) => setServicioField('razonSocial', e.target.value)} type="text" /></div>
-                            <div className="field"><label>RUT</label><input value={servicioForm.rut} onChange={(e) => setServicioField('rut', e.target.value)} type="text" /></div>
-                            <div className="field span-2"><label>Mail</label><input value={servicioForm.mailFacturacion} onChange={(e) => setServicioField('mailFacturacion', e.target.value)} type="email" /></div>
-                          </div>
-                        </div>
+                            <div className="service-card">
+                              <h3>3. Comercial</h3>
+                              <div className="card-grid">
+                                <div className="field"><label>Representante comercial</label><select value={servicioForm.representanteComercial} onChange={(e) => setServicioField('representanteComercial', e.target.value)}><option value="">Seleccionar...</option><option value="Gastón Silva">Gastón Silva</option><option value="Gonzalo Claudio">Gonzalo Claudio</option><option value="Francisco Bartellone">Francisco Bartellone</option><option value="Nicolás Leguizamón">Nicolás Leguizamón</option></select></div>
+                              </div>
+                            </div>
 
-                        <div className="service-card">
-                          <h3>2. Clasificación y Vigencia</h3>
-                          <div className="card-grid">
-                            <div className="field"><label>Tipo de servicio</label><select value={servicioForm.tipoServicioBrindar} onChange={(e) => setServicioField('tipoServicioBrindar', e.target.value)}>{SERVICE_TYPE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></div>
-                            <div className="field"><label>Fecha de alta</label><input value={servicioForm.fechaAltaServicio} onChange={(e) => setServicioField('fechaAltaServicio', e.target.value)} type="date" /></div>
-                            <div className="field"><label>Fecha específica de inicio</label><input value={servicioForm.fechaEspecificaInicio} onChange={(e) => setServicioField('fechaEspecificaInicio', e.target.value)} type="date" /></div>
-                            <div className="field"><label>Duración del contrato (meses)</label><input value={servicioForm.duracionContratoMeses} onChange={(e) => setServicioField('duracionContratoMeses', e.target.value)} type="number" min="0" /></div>
-                            <div className="field span-2"><label>Dirección de servicio</label><input value={servicioForm.direccionServicio} onChange={(e) => setServicioField('direccionServicio', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Cantidad de unidades</label><input value={servicioForm.cantidadUnidades} onChange={(e) => setServicioField('cantidadUnidades', e.target.value)} type="number" min="0" /></div>
-                            <div className="field"><label>Jornales estimados</label><input value={servicioForm.cantidadJornalesEstimados} onChange={(e) => setServicioField('cantidadJornalesEstimados', e.target.value)} type="number" min="0" /></div>
-                            <div className="field"><label>Técnico asignado</label><input value={servicioForm.tecnicoAsignado} onChange={(e) => setServicioField('tecnicoAsignado', e.target.value)} type="text" /></div>
-                          </div>
-                        </div>
+                            <div className="service-card">
+                              <h3>4. Fechas e Instalación</h3>
+                              <div className="card-grid">
+                                <div className="field"><label>Fecha de alta del servicio negociada con el cliente</label><select value={servicioForm.fechaAltaNegociadaEstado || 'Sí'} onChange={(e) => setServicioField('fechaAltaNegociadaEstado', e.target.value)}><option value="Sí">Sí</option><option value="No se negoció">No se negoció</option></select></div>
+                                {servicioForm.fechaAltaNegociadaEstado !== 'No se negoció' && <div className="field"><label>Fecha negociada</label><input value={servicioForm.fechaAltaServicio} onChange={(e) => setServicioField('fechaAltaServicio', e.target.value)} type="date" /></div>}
+                                <div className="field"><label>Cantidad de días de instalación</label><input value={servicioForm.diasInstalacion || ''} onChange={(e) => setServicioField('diasInstalacion', e.target.value)} type="number" min="0" /></div>
+                              </div>
+                            </div>
 
-                        <div className="service-card">
-                          <h3>3. Instalación y Coordinación Técnica</h3>
-                          <div className="card-grid">
-                            <div className="field"><label>Referente de instalación</label><input value={servicioForm.referenteInstalacion} onChange={(e) => setServicioField('referenteInstalacion', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Teléfono referente</label><input value={servicioForm.telefonoReferenteInstalacion} onChange={(e) => setServicioField('telefonoReferenteInstalacion', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Contacto Botti</label><input value={servicioForm.bottiSeContactaCon} onChange={(e) => setServicioField('bottiSeContactaCon', e.target.value)} type="text" /></div>
-                            <div className="field span-2"><label>Proyecto / Servicio</label><input value={servicioForm.proyectoServicio} onChange={(e) => setServicioField('proyectoServicio', e.target.value)} type="text" placeholder="Ej: Nostrum Bay" /></div>
-                            <div className="field span-2"><label>Comisión / Referente</label><input value={servicioForm.personaReferenteComision} onChange={(e) => setServicioField('personaReferenteComision', e.target.value)} type="text" /></div>
-                            <div className="field span-3"><label>Observaciones de comisión</label><textarea value={servicioForm.excepcionesAcordadas} onChange={(e) => setServicioField('excepcionesAcordadas', e.target.value)} /></div>
-                          </div>
-                        </div>
+                            <div className="service-card">
+                              <h3>5. Documentación y Costos</h3>
+                              <div className="card-grid">
+                                <div className="field span-2">
+                                  <label>Presupuesto proveedor (archivo)</label>
+                                  <div
+                                    className={`ticket-upload-dropzone ${serviceBudgetDragOver ? 'dragover' : ''}`}
+                                    onDragOver={(e) => { e.preventDefault(); setServiceBudgetDragOver(true); }}
+                                    onDragLeave={() => setServiceBudgetDragOver(false)}
+                                    onDrop={(e) => { e.preventDefault(); setServiceBudgetDragOver(false); handlePresupuestoPdfUpload(e.dataTransfer?.files?.[0]); }}
+                                  >
+                                    <input type="file" accept="application/pdf" onChange={(e) => handlePresupuestoPdfUpload(e.target.files?.[0])} />
+                                  </div>
+                                </div>
+                                {servicioForm.presupuestoPdfNombre && <div className="field span-2"><label>Archivo cargado</label><input value={servicioForm.presupuestoPdfNombre} readOnly type="text" /></div>}
+                                <div className="field"><label>Costo de instalación en USD (sin IVA)</label><input value={servicioForm.costoInstalacionUsdSinIva} onChange={(e) => setServicioField('costoInstalacionUsdSinIva', e.target.value)} type="number" min="0" /></div>
+                              </div>
+                            </div>
 
-                        <div className="service-card">
-                          <h3>4. Liquidación Económica (Conceptos a Cobrar)</h3>
-                          <div className="card-grid">
-                            <div className="field"><label>Importe mensual por servicio</label><input value={servicioForm.importeMensualServicioSinIva} onChange={(e) => setServicioField('importeMensualServicioSinIva', e.target.value)} type="number" min="0" /></div>
-                            <div className="field"><label>Importe mensual por arrendamiento</label><input value={servicioForm.importeMensualArrendamiento} onChange={(e) => setServicioField('importeMensualArrendamiento', e.target.value)} type="number" min="0" /></div>
-                            <div className="field"><label>Importe por compra de equipamiento</label><input value={servicioForm.importeCompraEquipamiento} onChange={(e) => setServicioField('importeCompraEquipamiento', e.target.value)} type="number" min="0" /></div>
-                            <div className="field"><label>Costo instalación (USD sin IVA)</label><input value={servicioForm.costoInstalacionUsdSinIva} onChange={(e) => setServicioField('costoInstalacionUsdSinIva', e.target.value)} type="number" min="0" /></div>
-                            <div className="field"><label>Presupuesto proveedor tercero (USD)</label><input value={servicioForm.presupuestoProveedor} onChange={(e) => setServicioField('presupuestoProveedor', e.target.value)} type="number" min="0" /></div>
-                            <div className="field span-2"><label>Presupuesto PDF</label><input type="file" accept="application/pdf" onChange={(e) => handlePresupuestoPdfUpload(e.target.files?.[0])} /></div>
-                            {servicioForm.presupuestoPdfNombre && <div className="field span-2"><label>PDF cargado</label><input value={servicioForm.presupuestoPdfNombre} readOnly type="text" /></div>}
-                            <div className="field span-2"><label>Motivo de no cobro</label><input value={servicioForm.porQueNoSeCobraServicio} onChange={(e) => setServicioField('porQueNoSeCobraServicio', e.target.value)} type="text" /></div>
-                            <div className="field span-3"><label>Descuentos negociados</label><textarea value={servicioForm.descuentosNegociados} onChange={(e) => setServicioField('descuentosNegociados', e.target.value)} /></div>
-                          </div>
-                        </div>
+                            <div className="service-card">
+                              <h3>6. Contrato y Facturación</h3>
+                              <div className="card-grid">
+                                <div className="field"><label>Duración del contrato (meses)</label><input value={servicioForm.duracionContratoMeses} onChange={(e) => setServicioField('duracionContratoMeses', e.target.value)} type="number" min="0" /></div>
+                                <div className="field"><label>Importe mensual del servicio en pesos</label><input value={servicioForm.importeMensualServicioSinIva} onChange={(e) => setServicioField('importeMensualServicioSinIva', e.target.value)} type="number" min="0" /></div>
+                                <div className="field"><label>Razón social</label><input value={servicioForm.razonSocial} onChange={(e) => setServicioField('razonSocial', e.target.value)} type="text" /></div>
+                                <div className="field"><label>RUT</label><input value={servicioForm.rut} onChange={(e) => setServicioField('rut', e.target.value)} type="text" /></div>
+                                <div className="field span-2"><label>Dirección de mail</label><input value={servicioForm.mailFacturacion} onChange={(e) => setServicioField('mailFacturacion', e.target.value)} type="email" /></div>
+                              </div>
+                            </div>
 
-                        <div className="service-card">
-                          <h3>5. Observaciones y Control de Cierre</h3>
-                          <div className="card-grid">
-                            <div className="field span-3"><label>Observaciones y comentarios</label><textarea value={servicioForm.observacionesComentarios} onChange={(e) => setServicioField('observacionesComentarios', e.target.value)} /></div>
-                            <div className="field"><label>FACTURADO</label><select value={servicioForm.facturado} onChange={(e) => setServicioField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
-                          </div>
-                        </div>
+                            <div className="service-card">
+                              <h3>7. Referente de Instalación</h3>
+                              <div className="card-grid">
+                                <div className="field"><label>Nombre y apellido</label><input value={servicioForm.referenteInstalacion} onChange={(e) => setServicioField('referenteInstalacion', e.target.value)} type="text" /></div>
+                                <div className="field"><label>Teléfono</label><input value={servicioForm.telefonoReferenteInstalacion} onChange={(e) => setServicioField('telefonoReferenteInstalacion', e.target.value)} type="text" /></div>
+                              </div>
+                            </div>
+
+                            <div className="service-card">
+                              <h3>8. Operativa del Servicio</h3>
+                              <div className="card-grid">
+                                <div className="field span-2"><label>Horario exacto de cobertura del servicio</label><input value={servicioForm.horarioCoberturaExacto || ''} onChange={(e) => setServicioField('horarioCoberturaExacto', e.target.value)} type="text" placeholder="Ej: Lunes a Domingo 00:00 a 23:59" /></div>
+                              </div>
+                            </div>
+
+                            <div className="service-card">
+                              <h3>9. Tipo de Cliente</h3>
+                              <div className="card-grid">
+                                <div className="field"><label>Tipo de cliente</label><select value={servicioForm.tipoClienteServicio || 'Obra'} onChange={(e) => setServicioField('tipoClienteServicio', e.target.value)}><option value="Obra">Obra</option><option value="Predio abandonado">Predio abandonado</option><option value="Casa">Casa</option><option value="Otro">Otro</option></select></div>
+                              </div>
+                            </div>
+
+                            <div className="service-card">
+                              <h3>10. Control de Llaves (Condición Crítica)</h3>
+                              <div className="card-grid">
+                                <div className="field"><label>Llaves del servicio</label><select value={servicioForm.llavesServicio || ''} onChange={(e) => setServicioField('llavesServicio', e.target.value)}><option value="">Seleccionar...</option><option value="Entregadas a Operaciones">Entregadas a Operaciones</option><option value="Aún no entregadas">Aún no entregadas</option></select></div>
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="service-card">
+                              <h3>1. Información General del Servicio</h3>
+                              <div className="card-grid">
+                                <div className="field span-2"><label>Nombre de servicio</label><input value={servicioForm.nombreServicio} onChange={(e) => setServicioField('nombreServicio', e.target.value)} type="text" /></div>
+                                <div className="field span-2"><label>Dirección de servicio</label><input value={servicioForm.direccionServicio} onChange={(e) => setServicioField('direccionServicio', e.target.value)} type="text" /></div>
+                                <div className="field"><label>Tipo de servicio a brindar</label><select value={servicioForm.tipoServicioBrindar} onChange={(e) => setServicioField('tipoServicioBrindar', e.target.value)}><option value="">Seleccionar...</option><option value="Portería Virtual">Portería Virtual</option><option value="Monitoreo">Monitoreo</option><option value="Control de acceso">Control de acceso</option><option value="Respuesta de Alarma">Respuesta de Alarma</option></select></div>
+                                <div className="field"><label>Horario del servicio contratado</label><input value={servicioForm.horarioServicioContratado || ''} onChange={(e) => setServicioField('horarioServicioContratado', e.target.value)} type="text" placeholder="Ej: 24 horas / Lun a Vie 08:00-18:00" /></div>
+                              </div>
+                            </div>
+                            <div className="service-card">
+                              <h3>2. Inicio del Servicio</h3>
+                              <div className="card-grid">
+                                <div className="field"><label>¿Se negoció una fecha específica para iniciar el servicio?</label><select value={servicioForm.fechaInicioNegociada || ''} onChange={(e) => setServicioField('fechaInicioNegociada', e.target.value)}><option value="">Seleccionar...</option><option value="Sí">Sí</option><option value="No">No</option></select></div>
+                                <div className="field"><label>Fecha negociada con el cliente para alta del servicio</label><input value={servicioForm.fechaEspecificaInicio} onChange={(e) => setServicioField('fechaEspecificaInicio', e.target.value)} type="date" /></div>
+                              </div>
+                            </div>
+                            <div className="service-card">
+                              <h3>3. Instalación</h3>
+                              <div className="card-grid">
+                                <div className="field span-2"><label>Adjuntar proyecto del servicio (archivo)</label><input type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" onChange={(e) => handlePresupuestoPdfUpload(e.target.files?.[0])} /></div>
+                                {servicioForm.presupuestoPdfNombre && <div className="field span-2"><label>PDF cargado</label><input value={servicioForm.presupuestoPdfNombre} readOnly type="text" /></div>}
+                                <div className="field"><label>Presupuesto proveedor</label><input value={servicioForm.presupuestoProveedor} onChange={(e) => setServicioField('presupuestoProveedor', e.target.value)} type="number" min="0" /></div>
+                                <div className="field"><label>Cantidad de jornales estimados de instalación</label><input value={servicioForm.cantidadJornalesEstimados} onChange={(e) => setServicioField('cantidadJornalesEstimados', e.target.value)} type="number" min="0" /></div>
+                                <div className="field"><label>Referente de instalación</label><input value={servicioForm.referenteInstalacion} onChange={(e) => setServicioField('referenteInstalacion', e.target.value)} type="text" /></div>
+                                <div className="field"><label>Referente para la instalación</label><input value={servicioForm.referenteParaInstalacion || ''} onChange={(e) => setServicioField('referenteParaInstalacion', e.target.value)} type="text" /></div>
+                                <div className="field"><label>Teléfono del referente</label><input value={servicioForm.telefonoReferenteInstalacion} onChange={(e) => setServicioField('telefonoReferenteInstalacion', e.target.value)} type="text" /></div>
+                                <div className="field"><label>Llaves del servicio</label><select value={servicioForm.llavesServicio || ''} onChange={(e) => setServicioField('llavesServicio', e.target.value)}><option value="">Seleccionar...</option><option value="Entregadas">Entregadas</option><option value="Pendiente">Pendiente</option><option value="No corresponde">No corresponde</option></select></div>
+                              </div>
+                            </div>
+                            <div className="service-card">
+                              <h3>4. Control de Acceso</h3>
+                              <div className="card-grid">
+                                <div className="field span-2"><label>Condiciones</label><select value={servicioForm.controlAccesoCondiciones || ''} onChange={(e) => setServicioField('controlAccesoCondiciones', e.target.value)}><option value="">Seleccionar...</option><option value="El control de acceso es nuestro">El control de acceso es nuestro</option><option value="El edificio mantiene su control">El edificio mantiene su control</option><option value="Mixto">Mixto (detallar en observaciones)</option><option value="No corresponde">No corresponde</option></select></div>
+                                <div className="field"><label>Tags por apartamentos</label><select value={servicioForm.tagsPorApartamentos || ''} onChange={(e) => setServicioField('tagsPorApartamentos', e.target.value)}><option value="">Seleccionar...</option><option value="Sí (3 tags por unidad)">Sí (3 tags por unidad)</option><option value="No">No</option></select></div>
+                                <div className="field"><label>Cantidad de apartamentos / unidades</label><input value={servicioForm.cantidadUnidades} onChange={(e) => setServicioField('cantidadUnidades', e.target.value)} type="number" min="0" /></div>
+                              </div>
+                            </div>
+                            <div className="service-card"><h3>5. App y Tecnología</h3><div className="card-grid"><div className="field span-2"><label>¿El servicio usará App de Akuvox?</label><select value={servicioForm.appAkuvox || ''} onChange={(e) => setServicioField('appAkuvox', e.target.value)}><option value="">Seleccionar...</option><option value="Sí, con apertura remota">Sí, con apertura remota</option><option value="Sí, sin apertura remota">Sí, sin apertura remota</option><option value="El cliente no usará la app">El cliente no usará la app</option></select></div></div></div>
+                            <div className="service-card"><h3>6. Comercial</h3><div className="card-grid"><div className="field"><label>Representante comercial</label><select value={servicioForm.representanteComercial} onChange={(e) => setServicioField('representanteComercial', e.target.value)} disabled={lockCommercialField}><option value="">Seleccionar...</option><option value="Gastón Silva">Gastón Silva</option><option value="Gonzalo Claudio">Gonzalo Claudio</option><option value="Francisco Bartellone">Francisco Bartellone</option><option value="Nicolás Leguizamón">Nicolás Leguizamón</option></select></div><div className="field"><label>Condiciones comerciales del equipamiento</label><select value={servicioForm.condicionesComercialesEquipamiento || ''} onChange={(e) => setServicioField('condicionesComercialesEquipamiento', e.target.value)}><option value="">Seleccionar...</option><option value="Compra">Compra</option><option value="Arrendamiento">Arrendamiento</option><option value="Otro">Otro</option></select></div><div className="field span-2"><label>Descuentos negociados</label><textarea value={servicioForm.descuentosNegociados} onChange={(e) => setServicioField('descuentosNegociados', e.target.value)} /></div><div className="field"><label>Duración del contrato (meses)</label><input value={servicioForm.duracionContratoMeses} onChange={(e) => setServicioField('duracionContratoMeses', e.target.value)} type="number" min="0" /></div></div></div>
+                            <div className="service-card"><h3>7. Facturación</h3><div className="card-grid"><div className="field"><label>Costo de instalación en USD (sin IVA)</label><input value={servicioForm.costoInstalacionUsdSinIva} onChange={(e) => setServicioField('costoInstalacionUsdSinIva', e.target.value)} type="number" min="0" /></div><div className="field"><label>Importe mensual en pesos por servicio (sin IVA)</label><input value={servicioForm.importeMensualServicioSinIva} onChange={(e) => setServicioField('importeMensualServicioSinIva', e.target.value)} type="number" min="0" /></div><div className="field"><label>Importe mensual en pesos por arrendamiento de equipos</label><input value={servicioForm.importeMensualArrendamiento} onChange={(e) => setServicioField('importeMensualArrendamiento', e.target.value)} type="number" min="0" /></div><div className="field"><label>Importe en USD por compra de equipamiento</label><input value={servicioForm.importeCompraEquipamiento} onChange={(e) => setServicioField('importeCompraEquipamiento', e.target.value)} type="number" min="0" /></div></div></div>
+                            <div className="service-card"><h3>8. Datos de Facturación</h3><div className="card-grid"><div className="field"><label>Razón Social</label><input value={servicioForm.razonSocial} onChange={(e) => setServicioField('razonSocial', e.target.value)} type="text" /></div><div className="field"><label>RUT</label><input value={servicioForm.rut} onChange={(e) => setServicioField('rut', e.target.value)} type="text" /></div><div className="field span-2"><label>Mail para facturación</label><input value={servicioForm.mailFacturacion} onChange={(e) => setServicioField('mailFacturacion', e.target.value)} type="email" /></div></div></div>
+                            <div className="service-card"><h3>9. Administración</h3><div className="card-grid"><div className="field span-2"><label>Administración</label><input value={servicioForm.administracion} onChange={(e) => setServicioField('administracion', e.target.value)} type="text" /></div></div></div>
+                            <div className="service-card"><h3>10. Servicios del Grupo</h3><div className="card-grid"><div className="field span-2"><label>¿El servicio cuenta con otro servicio del grupo?</label><select value={servicioForm.serviciosGrupo || ''} onChange={(e) => setServicioField('serviciosGrupo', e.target.value)}><option value="">Seleccionar...</option><option value="Portería Física Masterson">Portería Física Masterson</option><option value="Limpieza de Onesta">Limpieza de Onesta</option><option value="TecnoBombas">TecnoBombas</option><option value="Automatismos de Alse">Automatismos de Alse</option><option value="No tiene otro servicio del grupo">No tiene otro servicio del grupo</option></select></div><div className="field span-3"><label>Observaciones y comentarios</label><textarea value={servicioForm.observacionesComentarios} onChange={(e) => setServicioField('observacionesComentarios', e.target.value)} /></div><div className="field"><label>FACTURADO</label><select value={servicioForm.facturado} onChange={(e) => setServicioField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div></div></div>
+                          </>
+                        )}
 
                         <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
@@ -10495,54 +10747,9 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     ) : grupo === 'novacion' ? (
-                      <div className="service-layout bento-grid facturacion-module">
-                        <div className="service-card">
-                          <h3>Facturación · Novaciones</h3>
-                          <div className="card-grid">
-                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
-                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
-                            <div className="field"><label>Representante Comercial</label><input value={novacionForm.representanteComercial} onChange={(e) => setNovacionField('representanteComercial', e.target.value)} type="text" readOnly={lockCommercialField} /></div>
-                          </div>
-                        </div>
-
-                        <div className="service-card">
-                          <h3>1. Identificación y Vigencia</h3>
-                          <div className="card-grid">
-                            <div className="field span-2"><label>Nombre de servicio</label><input value={novacionForm.nombreServicio} onChange={(e) => setNovacionField('nombreServicio', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Duración del nuevo contrato</label><input value={novacionForm.duracionNuevoContratoMeses} onChange={(e) => setNovacionField('duracionNuevoContratoMeses', e.target.value)} type="number" min="0" /></div>
-                          </div>
-                        </div>
-
-                        <div className="service-card">
-                          <h3>2. Actualización de Abonos Mensuales</h3>
-                          <div className="card-grid">
-                            <div className="field"><label>Nuevo importe de la novación</label><input value={novacionForm.nuevoImporteNovacion} onChange={(e) => setNovacionField('nuevoImporteNovacion', e.target.value)} type="number" min="0" /></div>
-                            <div className="field"><label>Nuevo importe por arrendamiento</label><input value={novacionForm.nuevoImporteArrendamiento} onChange={(e) => setNovacionField('nuevoImporteArrendamiento', e.target.value)} type="number" min="0" /></div>
-                          </div>
-                        </div>
-
-                        <div className="service-card">
-                          <h3>3. Cargos por Única Vez y Respaldo</h3>
-                          <div className="card-grid">
-                            <div className="field"><label>Importe por venta de equipos</label><input value={novacionForm.importeVentaEquipos} onChange={(e) => setNovacionField('importeVentaEquipos', e.target.value)} type="number" min="0" /></div>
-                            <div className="field span-2"><label>Detalle del equipamiento</label><textarea value={novacionForm.detalleEquipamiento} onChange={(e) => setNovacionField('detalleEquipamiento', e.target.value)} /></div>
-                          </div>
-                        </div>
-
-                        <div className="service-card">
-                          <h3>4. Ajustes y Cierre de Ciclo</h3>
-                          <div className="card-grid">
-                            <div className="field span-2"><label>Descuentos en el pago</label><textarea value={novacionForm.descuentosPago} onChange={(e) => setNovacionField('descuentosPago', e.target.value)} /></div>
-                            <div className="field"><label>FACTURADO</label><select value={novacionForm.facturado} onChange={(e) => setNovacionField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
-                          </div>
-                        </div>
-
-                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
-                      </div>
-                    ) : grupo === 'agregado' ? (
                       <div className="service-layout">
                         <div className="service-card">
-                          <h3>Obra</h3>
+                          <h3>Novación</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
@@ -10552,24 +10759,288 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>1. Identificación del Servicio</h3>
                           <div className="card-grid">
+                            <div className="field span-2"><label>Nombre de servicio</label><input value={novacionForm.nombreServicio} onChange={(e) => setNovacionField('nombreServicio', e.target.value)} type="text" /></div>
+                            <div className="field"><label>ID del servicio</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>2. Comercial</h3>
+                          <div className="card-grid">
+                            <div className="field">
+                              <label>Representante comercial</label>
+                              <select value={novacionForm.representanteComercial} onChange={(e) => setNovacionField('representanteComercial', e.target.value)}>
+                                <option value="Francisco Bartellone">Francisco Bartellone</option>
+                                <option value="Gastón Silva">Gastón Silva</option>
+                                <option value="Gonzalo Claudio">Gonzalo Claudio</option>
+                                <option value="Nicolás Leguizamón">Nicolás Leguizamón</option>
+                                <option value="Otro">Otro</option>
+                              </select>
+                            </div>
+                            {novacionForm.representanteComercial === 'Otro' && (
+                              <>
+                                <div className="field"><label>Indicar quién es</label><input value={novacionForm.comercialOtroNombre || ''} onChange={(e) => setNovacionField('comercialOtroNombre', e.target.value)} type="text" /></div>
+                                <div className="field span-2"><label>Indicar motivo del cambio</label><input value={novacionForm.motivoCambioComercial || ''} onChange={(e) => setNovacionField('motivoCambioComercial', e.target.value)} type="text" /></div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>3. Cambios Económicos</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>¿Cambia la mensualidad del servicio por novación?</label><select value={novacionForm.cambiaMensualidad || 'No'} onChange={(e) => setNovacionField('cambiaMensualidad', e.target.value)}><option value="Sí">Sí</option><option value="No">No</option></select></div>
+                            {novacionForm.cambiaMensualidad === 'Sí' && <div className="field"><label>Nuevo importe de la mensualidad</label><input value={novacionForm.nuevoImporteNovacion} onChange={(e) => setNovacionField('nuevoImporteNovacion', e.target.value)} type="number" min="0" /></div>}
+                            <div className="field"><label>Nuevo importe por arrendamiento de equipos (si corresponde)</label><input value={novacionForm.nuevoImporteArrendamiento} onChange={(e) => setNovacionField('nuevoImporteArrendamiento', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Importe por venta de equipos</label><input value={novacionForm.importeVentaEquipos} onChange={(e) => setNovacionField('importeVentaEquipos', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Duración del nuevo contrato (meses)</label><input value={novacionForm.duracionNuevoContratoMeses} onChange={(e) => setNovacionField('duracionNuevoContratoMeses', e.target.value)} type="number" min="0" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>4. Bonificaciones</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>¿Hay bonificación o descuento?</label><select value={novacionForm.hayBonificacion || 'No'} onChange={(e) => setNovacionField('hayBonificacion', e.target.value)}><option value="Sí">Sí</option><option value="No">No</option></select></div>
+                            {novacionForm.hayBonificacion === 'Sí' && <div className="field span-2"><label>Indicar descuento</label><textarea value={novacionForm.descuentosPago} onChange={(e) => setNovacionField('descuentosPago', e.target.value)} /></div>}
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>5. Operativa del Servicio</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Nuevo horario de cobertura (si corresponde)</label><input value={novacionForm.nuevoHorarioCobertura || ''} onChange={(e) => setNovacionField('nuevoHorarioCobertura', e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>6. App de Portería Virtual</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>¿La novación incluye App de portería virtual?</label><select value={novacionForm.incluyeAppPorteria || ''} onChange={(e) => setNovacionField('incluyeAppPorteria', e.target.value)}><option value="">Seleccionar...</option><option value="Sí, con apertura de puertas por app Akuvox">Sí, con apertura de puertas por app Akuvox</option><option value="Sí, sin apertura de puertas">Sí, sin apertura de puertas</option><option value="No utilizarán app">No utilizarán app</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>7. Instalación y Costos</h3>
+                          <div className="card-grid">
+                            <div className="field span-2">
+                              <label>Presupuesto proveedor (archivo)</label>
+                              <div
+                                className={`ticket-upload-dropzone ${novacionBudgetDragOver ? 'dragover' : ''}`}
+                                onDragOver={(e) => { e.preventDefault(); setNovacionBudgetDragOver(true); }}
+                                onDragLeave={() => setNovacionBudgetDragOver(false)}
+                                onDrop={(e) => { e.preventDefault(); setNovacionBudgetDragOver(false); handleNovacionFileUpload(e.dataTransfer?.files?.[0]); }}
+                              >
+                                <input type="file" onChange={(e) => handleNovacionFileUpload(e.target.files?.[0])} />
+                              </div>
+                            </div>
+                            {novacionForm.presupuestoProveedorNombre && <div className="field span-2"><label>Archivo cargado</label><input value={novacionForm.presupuestoProveedorNombre} readOnly type="text" /></div>}
+                            <div className="field"><label>Importe de Svideo en USD</label><input value={novacionForm.importeSvideoUsd || ''} onChange={(e) => setNovacionField('importeSvideoUsd', e.target.value)} type="number" min="0" placeholder="Completar solo si hay instalación" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>8. Referente de Instalación</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Nombre y apellido</label><input value={novacionForm.referenteInstalacion || ''} onChange={(e) => setNovacionField('referenteInstalacion', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Teléfono</label><input value={novacionForm.telefonoReferenteInstalacion || ''} onChange={(e) => setNovacionField('telefonoReferenteInstalacion', e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>9. Fechas y Plazos</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Fecha de alta del servicio negociada con el cliente</label><input value={novacionForm.fechaAltaNegociada || ''} onChange={(e) => setNovacionField('fechaAltaNegociada', e.target.value)} type="date" /></div>
+                            <div className="field"><label>Plazo de instalación (días)</label><input value={novacionForm.plazoInstalacionDias || ''} onChange={(e) => setNovacionField('plazoInstalacionDias', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>FACTURADO</label><select value={novacionForm.facturado} onChange={(e) => setNovacionField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
+                      </div>
+                    ) : grupo === 'agregado' ? (
+                      <div className="service-layout">
+                        <div className="service-card">
+                          <h3>Adicionales</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => { setClienteIdAsociado(e.target.value); setAgregadoField('idServicio', e.target.value); }} type="text" placeholder="ID del servicio existente" /></div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>1. Identificación del Servicio</h3>
+                          <div className="card-grid">
                             <div className="field span-2"><label>Nombre de servicio</label><input value={agregadoForm.nombreServicio} onChange={(e) => setAgregadoField('nombreServicio', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Administración</label><input value={agregadoForm.administracion} onChange={(e) => setAgregadoField('administracion', e.target.value)} type="text" placeholder="Consorcio/empresa responsable" /></div>
+                            <div className="field"><label>ID del servicio</label><input value={agregadoForm.idServicio || ''} onChange={(e) => { setAgregadoField('idServicio', e.target.value); setClienteIdAsociado(e.target.value); }} type="text" placeholder="ID del servicio" /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>2. Detalles del Movimiento</h3>
+                          <h3>2. Información del Trabajo</h3>
                           <div className="card-grid">
-                            <div className="field span-3"><label>Detalles del adicional agregado</label><textarea value={agregadoForm.detalleAdicional} onChange={(e) => setAgregadoField('detalleAdicional', e.target.value)} placeholder="Qué se instaló: cámaras, sensores, controles, etc." /></div>
-                            <div className="field"><label>Fecha de alta</label><input value={agregadoForm.fechaAltaAdicional} onChange={(e) => setAgregadoField('fechaAltaAdicional', e.target.value)} type="date" /></div>
+                            <div className="field span-2"><label>Presupuesto del trabajo a realizar (archivo)</label><input type="file" onChange={(e) => handleAgregadoFileUpload(e.target.files?.[0])} /></div>
+                            {agregadoForm.presupuestoTrabajoNombre && <div className="field span-2"><label>Archivo cargado</label><input value={agregadoForm.presupuestoTrabajoNombre} readOnly type="text" /></div>}
+                            <div className="field span-3"><label>Descripción del trabajo</label><textarea value={agregadoForm.descripcionTrabajo || ''} onChange={(e) => setAgregadoField('descripcionTrabajo', e.target.value)} placeholder="Detallar en qué consiste el trabajo a realizar" /></div>
+                            <div className="field span-3"><label>Observaciones</label><textarea value={agregadoForm.observaciones || ''} onChange={(e) => setAgregadoField('observaciones', e.target.value)} placeholder="Observaciones relevantes para ejecutar la instalación" /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>3. Control Administrativo y Contable</h3>
+                          <h3>3. Responsables</h3>
                           <div className="card-grid">
-                            <div className="field span-2"><label>Importe a facturar por el adicional instalado</label><input value={agregadoForm.importeFacturarCliente} onChange={(e) => setAgregadoField('importeFacturarCliente', e.target.value)} type="text" placeholder="Monto acordado" /></div>
+                            <div className="field span-2">
+                              <label>Responsable de los adicionales acordados con el cliente</label>
+                              <select value={agregadoForm.responsableAdicionales || ''} onChange={(e) => setAgregadoField('responsableAdicionales', e.target.value)}>
+                                <option value="">Seleccionar...</option>
+                                <option value="Francisco Bartellone">Francisco Bartellone</option>
+                                <option value="Mariana Sposito">Mariana Sposito</option>
+                                <option value="María José Rivero">María José Rivero</option>
+                                <option value="David Genta">David Genta</option>
+                                <option value="Gonzalo Claudio">Gonzalo Claudio</option>
+                                <option value="Gastón Silva">Gastón Silva</option>
+                                <option value="Nicolás Leguizamón">Nicolás Leguizamón</option>
+                                <option value="Macarena Otero">Macarena Otero</option>
+                                <option value="Adrián Aguiar">Adrián Aguiar</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>4. Costos</h3>
+                          <div className="card-grid">
+                            <div className="field">
+                              <label>¿Quién asume los costos?</label>
+                              <select value={agregadoForm.quienAsumeCostos || ''} onChange={(e) => setAgregadoField('quienAsumeCostos', e.target.value)}>
+                                <option value="">Seleccionar...</option>
+                                <option value="Masterson">Masterson</option>
+                                <option value="Cliente">Cliente</option>
+                              </select>
+                            </div>
+                            <div className="field span-2"><label>Aclaración (solo si Masterson asume los costos)</label><input value={agregadoForm.aclaracionCostoMasterson || ''} onChange={(e) => setAgregadoField('aclaracionCostoMasterson', e.target.value)} type="text" placeholder="Motivo por el cual no se le cobra al cliente" /></div>
+                            <div className="field"><label>Importe a facturar al cliente</label><input value={agregadoForm.importeFacturarCliente} onChange={(e) => setAgregadoField('importeFacturarCliente', e.target.value)} type="number" min="0" placeholder="Monto" /></div>
+                            <div className="field"><label>Moneda</label><select value={agregadoForm.monedaFacturacion || 'Pesos'} onChange={(e) => setAgregadoField('monedaFacturacion', e.target.value)}><option value="Pesos">Pesos</option><option value="Dólares">Dólares</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>5. Administración</h3>
+                          <div className="card-grid">
+                            <div className="field span-2"><label>Nombre de la administración del servicio</label><input value={agregadoForm.administracion} onChange={(e) => setAgregadoField('administracion', e.target.value)} type="text" placeholder="Se autocompleta por ID si existe" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>6. Referente de Instalación</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Nombre y apellido del referente</label><input value={agregadoForm.referenteInstalacion || ''} onChange={(e) => setAgregadoField('referenteInstalacion', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Teléfono del referente</label><input value={agregadoForm.telefonoReferente || ''} onChange={(e) => setAgregadoField('telefonoReferente', e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>7. Fechas y Plazos</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Fecha de alta de los adicionales</label><input value={agregadoForm.fechaAltaAdicional} onChange={(e) => setAgregadoField('fechaAltaAdicional', e.target.value)} type="date" /></div>
+                            <div className="field"><label>Plazo de instalación</label><input value={agregadoForm.plazoInstalacion || ''} onChange={(e) => setAgregadoField('plazoInstalacion', e.target.value)} type="text" placeholder="Días o fecha estimada de finalización" /></div>
                             <div className="field"><label>FACTURADO</label><select value={agregadoForm.facturado} onChange={(e) => setAgregadoField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
+                      </div>
+                    ) : grupo === 'solicitud-presupuesto' ? (
+                      <div className="service-layout">
+                        <div className="service-card">
+                          <h3>Solicitud de Presupuesto</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>ID del servicio</label><input value={clienteIdAsociado} onChange={(e) => { setClienteIdAsociado(e.target.value); setSolicitudPresupuestoField('servicioIdSeleccionado', e.target.value); }} type="text" placeholder="ID del servicio existente" /></div>
+                            <div className="field">
+                              <label>Selector de servicio existente</label>
+                              <select value={clienteIdAsociado || solicitudPresupuestoForm.servicioIdSeleccionado || ''} onChange={(e) => { setClienteIdAsociado(e.target.value); setSolicitudPresupuestoField('servicioIdSeleccionado', e.target.value); }}>
+                                <option value="">Seleccionar servicio...</option>
+                                {visibleRows.map((row) => (
+                                  <option key={`sol-id-${row.id}`} value={row.clienteId || ''}>
+                                    {(row.clienteId || '-') + ' · ' + (row.nombreServicio || 'Servicio sin nombre')}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>2. Ejecutivo / Atención al Cliente</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Ejecutivo de cuenta</label><select value={solicitudPresupuestoForm.ejecutivoCuenta || ''} onChange={(e) => setSolicitudPresupuestoField('ejecutivoCuenta', e.target.value)}><option value="">Seleccionar...</option><option value="David Genta">David Genta</option><option value="Laura Aguilar">Laura Aguilar</option><option value="Mariana Sposito">Mariana Sposito</option><option value="María José">María José</option><option value="Francisco Bartellone">Francisco Bartellone</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>3. Referente en el Lugar</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Nombre del referente</label><input value={solicitudPresupuestoForm.referenteNombre || ''} onChange={(e) => setSolicitudPresupuestoField('referenteNombre', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Teléfono del referente</label><input value={solicitudPresupuestoForm.referenteTelefono || ''} onChange={(e) => setSolicitudPresupuestoField('referenteTelefono', e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>4. Condiciones Comerciales</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>¿Se cobra al cliente?</label><select value={solicitudPresupuestoForm.seCobraCliente || 'Sí'} onChange={(e) => setSolicitudPresupuestoField('seCobraCliente', e.target.value)}><option value="Sí">Sí</option><option value="No">No</option><option value="Otros">Otros</option></select></div>
+                            {solicitudPresupuestoForm.seCobraCliente === 'Otros' && <div className="field span-2"><label>Detalle</label><input value={solicitudPresupuestoForm.seCobraDetalle || ''} onChange={(e) => setSolicitudPresupuestoField('seCobraDetalle', e.target.value)} type="text" /></div>}
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>5. Estado del Servicio</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>¿Tiene trabajos pendientes?</label><select value={solicitudPresupuestoForm.tieneTrabajosPendientes || 'No'} onChange={(e) => setSolicitudPresupuestoField('tieneTrabajosPendientes', e.target.value)}><option value="Sí">Sí</option><option value="No">No</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>6. Origen de la Solicitud</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Quién solicita el trabajo</label><select value={solicitudPresupuestoForm.origenSolicitud || ''} onChange={(e) => setSolicitudPresupuestoField('origenSolicitud', e.target.value)}><option value="">Seleccionar...</option><option value="Administración">Administración</option><option value="Comisión">Comisión</option><option value="Solicitud interna">Solicitud interna</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>7. Coordinación</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>¿Se debe coordinar con terceros?</label><select value={solicitudPresupuestoForm.coordinarConTerceros || 'No'} onChange={(e) => setSolicitudPresupuestoField('coordinarConTerceros', e.target.value)}><option value="Sí">Sí</option><option value="No">No</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>8. Detalle del Trabajo</h3>
+                          <div className="card-grid">
+                            <div className="field span-3"><label>Descripción del trabajo a realizar</label><textarea value={solicitudPresupuestoForm.descripcionTrabajo || ''} onChange={(e) => setSolicitudPresupuestoField('descripcionTrabajo', e.target.value)} /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>9. Archivos</h3>
+                          <div className="card-grid">
+                            <div className="field span-2">
+                              <label>Foto del trabajo</label>
+                              <div
+                                className={`ticket-upload-dropzone ${solicitudFotoDragOver ? 'dragover' : ''}`}
+                                onDragOver={(e) => { e.preventDefault(); setSolicitudFotoDragOver(true); }}
+                                onDragLeave={() => setSolicitudFotoDragOver(false)}
+                                onDrop={(e) => { e.preventDefault(); setSolicitudFotoDragOver(false); handleSolicitudFotoUpload(e.dataTransfer?.files?.[0]); }}
+                                onPaste={(e) => {
+                                  const items = e.clipboardData?.items || [];
+                                  const fileItem = Array.from(items).find((it) => it.kind === 'file');
+                                  if (fileItem) handleSolicitudFotoUpload(fileItem.getAsFile());
+                                }}
+                              >
+                                <input type="file" accept="image/*" onChange={(e) => handleSolicitudFotoUpload(e.target.files?.[0])} />
+                              </div>
+                            </div>
+                            {solicitudPresupuestoForm.fotoTrabajoNombre && <div className="field span-2"><label>Archivo cargado</label><input value={solicitudPresupuestoForm.fotoTrabajoNombre} readOnly type="text" /></div>}
                           </div>
                         </div>
 
@@ -10580,24 +11051,86 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>Movimiento de obra</h3>
                           <div className="card-grid">
-                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => { setClienteIdAsociado(e.target.value); setMovimientoField('servicioIdSeleccionado', e.target.value); }} type="text" placeholder="ID del servicio existente" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>1. Identificación de la Gestión</h3>
+                          <h3>1. Identificación del Servicio</h3>
                           <div className="card-grid">
-                            <div className="field span-2"><label>Nombre de servicio</label><input value={movimientoForm.nombreServicio} onChange={(e) => setMovimientoField('nombreServicio', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Nombre del solicitante</label><input value={movimientoForm.nombreSolicitante} onChange={(e) => setMovimientoField('nombreSolicitante', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Fecha del movimiento</label><input value={movimientoForm.fechaMovimiento} onChange={(e) => setMovimientoField('fechaMovimiento', e.target.value)} type="date" /></div>
+                            <div className="field span-2"><label>Nombre del servicio</label><input value={movimientoForm.nombreServicio} onChange={(e) => setMovimientoField('nombreServicio', e.target.value)} type="text" /></div>
+                            <div className="field">
+                              <label>ID del servicio (selector)</label>
+                              <select value={clienteIdAsociado || movimientoForm.servicioIdSeleccionado || ''} onChange={(e) => { setClienteIdAsociado(e.target.value); setMovimientoField('servicioIdSeleccionado', e.target.value); }}>
+                                <option value="">Seleccionar servicio...</option>
+                                {visibleRows.map((row) => (
+                                  <option key={`mov-id-${row.id}`} value={row.clienteId || ''}>
+                                    {(row.clienteId || '-') + ' · ' + (row.nombreServicio || 'Servicio sin nombre')}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>2. Liquidación y Cobro</h3>
+                          <h3>2. Fecha</h3>
                           <div className="card-grid">
-                            <div className="field"><label>Monto en dólares</label><input value={movimientoForm.montoUsd} onChange={(e) => setMovimientoField('montoUsd', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Fecha de ingreso (automática)</label><input value={movimientoForm.fechaIngresoAuto || ''} readOnly type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>3. Solicitud</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Quién lo solicita</label><input value={movimientoForm.nombreSolicitante} onChange={(e) => setMovimientoField('nombreSolicitante', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Nombre del cliente</label><input value={movimientoForm.solicitanteNombreCliente || ''} onChange={(e) => setMovimientoField('solicitanteNombreCliente', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Teléfono</label><input value={movimientoForm.solicitanteTelefono || ''} onChange={(e) => setMovimientoField('solicitanteTelefono', e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>4. Costos</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Costo (USD)</label><input value={movimientoForm.costoUsd || ''} onChange={(e) => setMovimientoField('costoUsd', e.target.value)} type="number" min="0" /></div>
+                            <div className="field"><label>Tipo de IVA</label><select value={movimientoForm.costoIvaTipo || 'Sin IVA'} onChange={(e) => setMovimientoField('costoIvaTipo', e.target.value)}><option value="Con IVA">Con IVA</option><option value="Sin IVA">Sin IVA</option></select></div>
+                            {Number(movimientoForm.costoUsd || 0) === 0 && (
+                              <>
+                                <div className="field span-2"><label>Motivo por el cual no se cobra</label><input value={movimientoForm.motivoNoCobro || ''} onChange={(e) => setMovimientoField('motivoNoCobro', e.target.value)} type="text" /></div>
+                                <div className="field"><label>Indicar quién autoriza</label><input value={movimientoForm.autorizaNoCobro || ''} onChange={(e) => setMovimientoField('autorizaNoCobro', e.target.value)} type="text" /></div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>5. Motivo del Movimiento</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Motivo</label><select value={movimientoForm.motivoMovimiento || ''} onChange={(e) => setMovimientoField('motivoMovimiento', e.target.value)}><option value="">Seleccionar...</option><option value="Demolición">Demolición</option><option value="Reubicación">Reubicación</option><option value="Recableado">Recableado</option><option value="Otros">Otros</option></select></div>
+                            {movimientoForm.motivoMovimiento === 'Otros' && <div className="field span-2"><label>Detalle</label><input value={movimientoForm.otroMotivoMovimiento || ''} onChange={(e) => setMovimientoField('otroMotivoMovimiento', e.target.value)} type="text" /></div>}
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>6. Canal de Solicitud</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Solicitud formal recibida por</label><select value={movimientoForm.canalSolicitud || ''} onChange={(e) => setMovimientoField('canalSolicitud', e.target.value)}><option value="">Seleccionar...</option><option value="Mail">Mail</option><option value="Portería Virtual">Portería Virtual</option><option value="Comercial (Francisco o Mariana)">Comercial (Francisco o Mariana)</option><option value="Otros">Otros</option></select></div>
+                            {movimientoForm.canalSolicitud === 'Otros' && <div className="field span-2"><label>Detalle</label><input value={movimientoForm.otroCanalSolicitud || ''} onChange={(e) => setMovimientoField('otroCanalSolicitud', e.target.value)} type="text" /></div>}
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>7. Tipo de Alarma Instalada</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Tipo de alarma</label><select value={movimientoForm.tipoAlarmaInstalada || ''} onChange={(e) => setMovimientoField('tipoAlarmaInstalada', e.target.value)}><option value="">Seleccionar...</option><option value="Svideo">Svideo</option><option value="Botti">Botti</option><option value="Contratada por la obra">Contratada por la obra</option><option value="No tiene">No tiene</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>8. Observaciones</h3>
+                          <div className="card-grid">
+                            <div className="field span-3"><label>Comentarios adicionales</label><textarea value={movimientoForm.observaciones || ''} onChange={(e) => setMovimientoField('observaciones', e.target.value)} /></div>
                             <div className="field"><label>FACTURADO</label><select value={movimientoForm.facturado} onChange={(e) => setMovimientoField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
                           </div>
                         </div>
@@ -10609,41 +11142,103 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                         <div className="service-card">
                           <h3>Baja de Servicio</h3>
                           <div className="card-grid">
-                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
+                            <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => { setClienteIdAsociado(e.target.value); setBajaField('servicioIdSeleccionado', e.target.value); }} type="text" placeholder="ID del servicio existente" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>1. Identificación del Punto de Baja</h3>
+                          <h3>1. Identificación del Servicio</h3>
                           <div className="card-grid">
-                            <div className="field span-2"><label>Nombre del Servicio</label><input value={bajaForm.nombreServicio} onChange={(e) => setBajaField('nombreServicio', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Dirección</label><input value={bajaForm.direccionServicio} onChange={(e) => setBajaField('direccionServicio', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Fecha de Ingreso</label><input value={bajaForm.fechaIngreso} onChange={(e) => setBajaField('fechaIngreso', e.target.value)} type="date" /></div>
+                            <div className="field span-2"><label>Nombre del servicio</label><input value={bajaForm.nombreServicio} onChange={(e) => setBajaField('nombreServicio', e.target.value)} type="text" /></div>
+                            <div className="field">
+                              <label>ID del servicio (selector)</label>
+                              <select value={clienteIdAsociado || bajaForm.servicioIdSeleccionado || ''} onChange={(e) => { setClienteIdAsociado(e.target.value); setBajaField('servicioIdSeleccionado', e.target.value); }}>
+                                <option value="">Seleccionar servicio...</option>
+                                {visibleRows.map((row) => (
+                                  <option key={`baja-id-${row.id}`} value={row.clienteId || ''}>
+                                    {(row.clienteId || '-') + ' · ' + (row.nombreServicio || 'Servicio sin nombre')}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="field span-2"><label>Dirección (automática)</label><input value={bajaForm.direccionServicio} readOnly type="text" /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>2. Contacto y Justificación</h3>
+                          <h3>2. Fecha</h3>
                           <div className="card-grid">
-                            <div className="field span-2"><label>Quien lo Solicita</label><input value={bajaForm.quienSolicita} onChange={(e) => setBajaField('quienSolicita', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Motivo de Baja</label><input value={bajaForm.motivoBaja} onChange={(e) => setBajaField('motivoBaja', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Fecha de ingreso (automática)</label><input value={bajaForm.fechaIngresoAuto || ''} readOnly type="text" /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>3. Detalles Técnicos y Conectividad</h3>
+                          <h3>3. Solicitud</h3>
                           <div className="card-grid">
-                            <div className="field span-2"><label>Internet</label><input value={bajaForm.internetEstado} onChange={(e) => setBajaField('internetEstado', e.target.value)} type="text" /></div>
-                            <div className="field"><label>Propietario de Equipamiento</label><select value={bajaForm.propietarioEquipamiento} onChange={(e) => setBajaField('propietarioEquipamiento', e.target.value)}><option>S-Video</option><option>Cliente</option><option>Mixto</option></select></div>
+                            <div className="field"><label>Quién lo solicita</label><input value={bajaForm.quienSolicita} onChange={(e) => setBajaField('quienSolicita', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Nombre del cliente</label><input value={bajaForm.nombreCliente || ''} onChange={(e) => setBajaField('nombreCliente', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Teléfono</label><input value={bajaForm.telefono || ''} onChange={(e) => setBajaField('telefono', e.target.value)} type="text" /></div>
                           </div>
                         </div>
 
                         <div className="service-card">
-                          <h3>4. Logística de Retiro y Cierre</h3>
+                          <h3>4. Motivo de Baja</h3>
                           <div className="card-grid">
-                            <div className="field span-3"><label>Equipamiento a Retirar</label><input value={bajaForm.equipamientoRetirar} onChange={(e) => setBajaField('equipamientoRetirar', e.target.value)} type="text" placeholder="Referencia o nombre de planilla" /></div>
-                            <div className="field span-3"><label>Observaciones</label><textarea value={bajaForm.observaciones} onChange={(e) => setBajaField('observaciones', e.target.value)} /></div>
+                            <div className="field span-2">
+                              <label>Motivo principal</label>
+                              <select value={bajaForm.motivoBajaCategoria || ''} onChange={(e) => setBajaField('motivoBajaCategoria', e.target.value)}>
+                                <option value="">Seleccionar...</option>
+                                <option value="Precio">Motivos Comerciales · Precio</option>
+                                <option value="No acuerdo comercial">Motivos Comerciales · No acuerdo comercial</option>
+                                <option value="Mala gestión">Motivos de Calidad · Mala gestión</option>
+                                <option value="Mal servicio">Motivos de Calidad · Mal servicio</option>
+                                <option value="Fin de obra">Motivos Operativos · Fin de obra</option>
+                                <option value="Demolición">Motivos Operativos · Demolición</option>
+                                <option value="Término de servicio">Motivos Operativos · Término de servicio</option>
+                                <option value="Corte de servicio">Motivos Operativos · Corte de servicio</option>
+                                <option value="Cambio de proveedor">Cambio de Proveedor</option>
+                                <option value="No especifica">No especificado</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>5. Internet</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Responsable del servicio de internet</label><select value={bajaForm.internetResponsable || 'Masterson'} onChange={(e) => setBajaField('internetResponsable', e.target.value)}><option value="Masterson">Masterson</option><option value="Cliente">Cliente</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>6. Equipamiento</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Propietario del equipamiento</label><select value={bajaForm.propietarioEquipamiento || 'Masterson'} onChange={(e) => setBajaField('propietarioEquipamiento', e.target.value)}><option value="Masterson">Masterson</option><option value="Cliente">Cliente</option></select></div>
+                            <div className="field span-2">
+                              <label>Equipamiento a retirar (planilla)</label>
+                              <div
+                                className={`ticket-upload-dropzone ${bajaEquipDragOver ? 'dragover' : ''}`}
+                                onDragOver={(e) => { e.preventDefault(); setBajaEquipDragOver(true); }}
+                                onDragLeave={() => setBajaEquipDragOver(false)}
+                                onDrop={(e) => { e.preventDefault(); setBajaEquipDragOver(false); handleBajaEquipFileUpload(e.dataTransfer?.files?.[0]); }}
+                                onPaste={(e) => {
+                                  const items = e.clipboardData?.items || [];
+                                  const fileItem = Array.from(items).find((it) => it.kind === 'file');
+                                  if (fileItem) handleBajaEquipFileUpload(fileItem.getAsFile());
+                                }}
+                              >
+                                <input type="file" onChange={(e) => handleBajaEquipFileUpload(e.target.files?.[0])} />
+                              </div>
+                            </div>
+                            {bajaForm.equipamientoRetirar && <div className="field span-2"><label>Archivo cargado</label><input value={bajaForm.equipamientoRetirar} readOnly type="text" /></div>}
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>7. Observaciones</h3>
+                          <div className="card-grid">
+                            <div className="field span-3"><label>Detalles adicionales</label><textarea value={bajaForm.observaciones} onChange={(e) => setBajaField('observaciones', e.target.value)} /></div>
                           </div>
                         </div>
 
