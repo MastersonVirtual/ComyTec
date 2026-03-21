@@ -9569,8 +9569,7 @@
               </div>
               <div className="menu">
                 <button className="menu-button" onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
-                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }} style={{ borderColor: '#f97316', boxShadow: '0 0 0 1px rgba(249,115,22,.35) inset' }}><span className="menu-icon">📌</span><span>Pendientes</span><span className="menu-arrow" style={{ color: '#fb923c' }}>{queueCounts.pendiente + queueCounts.proceso + queueCounts.esperando}</span></button>
-                <button className="menu-button" onClick={() => { setSelectedForm('historial'); setHistoryStatusFilter('todos'); closeSidebar(); }}><span className="menu-icon">📋</span><span>Todos</span></button>
+                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">📌</span><span>Coordinación de servicios</span></button>
                 {!isMobile && (
                   <>
                     <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: !p.operaciones, nuevo: false, baseDatos: false }))}><span className="menu-icon">🗂️</span><span>Operaciones</span><span className="menu-arrow">{openMenus.operaciones ? '▾' : '▸'}</span></button>
