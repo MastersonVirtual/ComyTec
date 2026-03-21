@@ -114,6 +114,11 @@
         backdrop-filter: blur(10px) saturate(125%);
         box-shadow: 0 8px 22px rgba(0,0,0,.24);
       }
+      .ops-alert-ping { animation: ops-ping 1.3s infinite; display: inline-flex; }
+      @keyframes ops-ping {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.18); opacity: .55; }
+      }
       .burger {
         width: 44px;
         height: 44px;
@@ -6893,6 +6898,35 @@
         const [historyTypeFilter, setHistoryTypeFilter] = useState('todos');
         const [historyDateFilter, setHistoryDateFilter] = useState('');
         const [workflowTaskChecks, setWorkflowTaskChecks] = useState({});
+        const [opsSideTab, setOpsSideTab] = useState('activity');
+        const [opsCommentDraft, setOpsCommentDraft] = useState('');
+        const [opsObservationsOpen, setOpsObservationsOpen] = useState(false);
+        const [opsSelectedTaskId, setOpsSelectedTaskId] = useState('4184');
+        const [draggingTaskId, setDraggingTaskId] = useState(null);
+        const [dragOverColumn, setDragOverColumn] = useState('');
+        const [kanbanColumns, setKanbanColumns] = useState(() => ({
+          todo: [
+            { id: '4184', title: 'San Felipe y Santiago', executive: 'Alfonso Carballo', checklistDone: 2, checklistTotal: 5, dueSoon: true },
+            { id: '4291', title: 'Torre Palermo', executive: 'Gastón Silva', checklistDone: 1, checklistTotal: 4, dueSoon: false },
+            { id: '4350', title: 'Altos del Prado', executive: 'Francisco Bartellone', checklistDone: 0, checklistTotal: 3, dueSoon: false },
+          ],
+          progress: [
+            { id: '4150', title: 'Green Park', executive: 'Nicolás Leguizamón', checklistDone: 3, checklistTotal: 6, dueSoon: false },
+          ],
+          done: [],
+        }));
+        const [opsActivityFeed, setOpsActivityFeed] = useState([
+          '[IA Suggestion: Assign extra tech]',
+          "[Task moved to 'En Proceso' by Alfonso]",
+          '[Comment added by Juan]',
+        ]);
+        const [opsComments, setOpsComments] = useState([
+          { id: 'c1', user: 'Juan Pérez', handle: '@JuanPerez', text: 'Revisemos la instalación de San Felipe hoy.', attachment: 'plano_instalacion.pdf' },
+          { id: 'c2', user: 'Alfonso Carballo', handle: '@AlfonsoCarballo', text: 'Recibido, ya solicité equipos a compras.', attachment: '' },
+        ]);
+        const [opsTaskMeta, setOpsTaskMeta] = useState({
+          '4184': { executive: 'Alfonso Carballo', checklist: ['Instalación', 'Configuración', 'Certificación'], checked: { 'Instalación': true }, presupuesto: '24000', costoUsd: '1800', equipamiento: 'Compra' },
+        });
         const [historyPage, setHistoryPage] = useState(1);
         const [sellerFilterOpen, setSellerFilterOpen] = useState(false);
         const [sellerFiltersDraft, setSellerFiltersDraft] = useState({
@@ -7245,6 +7279,33 @@
           if (key === 'proceso') return `Mayor carga en En proceso (${value})`;
           return `Mayor carga en Esperando info (${value})`;
         }, [queueCounts]);
+
+        const selectedOpsTask = useMemo(() => (
+          Object.values(kanbanColumns).flat().find((task) => task.id === opsSelectedTaskId) || kanbanColumns.todo[0] || null
+        ), [kanbanColumns, opsSelectedTaskId]);
+
+        function moveKanbanTask(taskId, targetColumn) {
+          if (!taskId || !targetColumn) return;
+          setKanbanColumns((prev) => {
+            const next = {
+              todo: [...prev.todo],
+              progress: [...prev.progress],
+              done: [...prev.done],
+            };
+            let moved = null;
+            Object.keys(next).forEach((col) => {
+              const idx = next[col].findIndex((task) => task.id === taskId);
+              if (idx >= 0) {
+                moved = next[col][idx];
+                next[col].splice(idx, 1);
+              }
+            });
+            if (!moved) return prev;
+            next[targetColumn].push(moved);
+            return next;
+          });
+          setOpsActivityFeed((prev) => [`[Task moved to '${targetColumn === 'todo' ? 'Por Hacer' : targetColumn === 'progress' ? 'En Proceso' : 'Finalizado'}' by Alfonso]`, ...prev].slice(0, 8));
+        }
 
         async function handleSyncPreloadedServicesToFirebase() {
           if (!isAdminUser) {
@@ -10416,227 +10477,250 @@
                 ) : effectiveSelectedForm === 'historial' ? (
                   <section className="panel">
                     <h2>Gestión Operativa</h2>
-                    <div className="hint">Vista central con widgets inteligentes, workflow y acciones operativas asistidas por IA.</div>
+                    <div className="hint">Módulo de inteligencia operativa con tablero Kanban, tabla activa y panel lateral colaborativo.</div>
 
-                    <section className="panel" style={{ background: '#f7fafb', color: '#103839', border: '1px solid #dde8ea' }}>
-                      <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1.4fr auto', gap: 12, alignItems: 'center', marginBottom: 14 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={{ width: 42, height: 42, borderRadius: 12, background: 'linear-gradient(135deg,#075e5f,#14b8a6)', display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 900 }}>MS</div>
-                          <div>
-                            <strong style={{ display: 'block', color: '#0c4b4c' }}>ComyTec Ops AI</strong>
-                            <small style={{ color: '#5a7a7b' }}>Gestión Operativa Inteligente</small>
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr minmax(300px, 1fr)', gap: 14, alignItems: 'start' }}>
+                      <section className="panel" style={{ background: '#f7fafb', color: '#103839', border: '1px solid #dde8ea', marginBottom: 0 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 10, alignItems: 'center', marginBottom: 14 }}>
+                          <button type="button" className="burger" style={{ width: 42, height: 42 }}>☰</button>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 10, alignItems: 'center' }}>
+                            <div style={{ textAlign: 'center' }}>
+                              <div style={{ fontSize: 28, color: '#ff8a2a', fontWeight: 800, lineHeight: 1 }}>Masterson Seguridad</div>
+                              <div style={{ color: '#ff8a2a', fontSize: 13 }}>Administrador</div>
+                            </div>
+                            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                              <button type="button" className="burger" style={{ width: 36, height: 36, borderRadius: '50%', color: '#ff8a2a' }}><i data-lucide="search"></i></button>
+                              <button type="button" className="burger" style={{ width: 36, height: 36, borderRadius: '50%', color: '#ff8a2a', position: 'relative' }}><i data-lucide="bell"></i><span style={{ position: 'absolute', top: 8, right: 8, width: 7, height: 7, borderRadius: '50%', background: '#ef4444' }}></span></button>
+                              <button type="button" className="burger" style={{ width: 36, height: 36, borderRadius: '50%', color: '#ff8a2a' }}><i data-lucide="user-circle-2"></i></button>
+                            </div>
                           </div>
                         </div>
-                        <div className="search-wrap" style={{ margin: 0 }}>
-                          <span className="search-icon"><i data-lucide="search"></i></span>
-                          <input value={historySearchTerm} onChange={(e) => setHistorySearchTerm(e.target.value)} placeholder="Buscar servicio, cliente o responsable..." style={{ width: '100%', background: '#fff', color: '#123436', borderColor: '#d6e3e4' }} />
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-                          {['GS', 'FB', 'NL'].map((tag) => (
-                            <div key={tag} style={{ width: 34, height: 34, borderRadius: '50%', background: '#0f5f60', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 700 }}>{tag}</div>
-                          ))}
-                        </div>
-                      </div>
 
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(220px, 1fr))', gap: 10, marginBottom: 14 }}>
-                        <article style={{ background: '#fff', borderRadius: 14, padding: 12, border: '1px solid #e2ebec' }}>
-                          <small style={{ color: '#5d7677' }}>Prioridad Alta</small>
-                          <div style={{ fontSize: 30, fontWeight: 800, color: '#dc2626', lineHeight: 1 }}>{queueCounts.pendiente}</div>
-                          <div style={{ fontSize: 12, color: '#6a8283' }}>Servicios en cola inicial.</div>
-                        </article>
-                        <article style={{ background: '#fff', borderRadius: 14, padding: 12, border: '1px solid #e2ebec' }}>
-                          <small style={{ color: '#5d7677' }}>Predicción de Cuellos de Botella</small>
-                          <div style={{ fontSize: 14, fontWeight: 700, color: '#1d4ed8', marginTop: 4 }}>{workflowWorkloadLabel}</div>
-                          <div style={{ fontSize: 12, color: '#6a8283' }}>Sugerencia basada en estado actual del pipeline.</div>
-                        </article>
-                        <article style={{ background: '#fff', borderRadius: 14, padding: 12, border: '1px solid #e2ebec' }}>
-                          <small style={{ color: '#5d7677' }}>Sugerencia de Recursos</small>
-                          <div style={{ fontSize: 14, fontWeight: 700, color: '#0f766e', marginTop: 4 }}>Asignar {Math.max(1, Math.ceil(queueCounts.pendiente / 3))} técnico(s) extra</div>
-                          <div style={{ fontSize: 12, color: '#6a8283' }}>Recomendación automática por volumen pendiente.</div>
-                        </article>
-                      </div>
-
-                      <div style={{ marginBottom: 14 }}>
-                        <h3 style={{ margin: '0 0 8px', color: '#0c4b4c' }}>Workflow de Trabajo</h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(210px, 1fr))', gap: 10 }}>
-                          {[
-                            { key: 'todo', title: 'Por Hacer', tone: '#ef4444', items: workflowBuckets.todo },
-                            { key: 'progress', title: 'En Proceso', tone: '#2563eb', items: workflowBuckets.progress },
-                            { key: 'done', title: 'Finalizado', tone: '#16a34a', items: workflowBuckets.done },
-                          ].map((bucket) => (
-                            <div key={bucket.key} style={{ background: '#fff', border: '1px solid #e2ebec', borderRadius: 14, padding: 10 }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                                <strong style={{ color: bucket.tone }}>{bucket.title}</strong>
-                                <span style={{ fontSize: 12, color: '#647d7e' }}>{bucket.items.length}</span>
-                              </div>
-                              <div style={{ display: 'grid', gap: 8 }}>
-                                {bucket.items.length === 0 ? (
-                                  <small style={{ color: '#799394' }}>Sin items</small>
-                                ) : bucket.items.map((item) => (
-                                  <button key={`wf-${bucket.key}-${item.id}`} type="button" onClick={() => setSelectedService(item)} style={{ textAlign: 'left', border: '1px solid #e4ecee', borderRadius: 10, background: '#f9fcfc', padding: 8, cursor: 'pointer' }}>
-                                    <strong style={{ display: 'block', color: '#1f4041', fontSize: 12 }}>{item.nombreServicio || 'Servicio sin nombre'}</strong>
-                                    <small style={{ color: '#708889' }}>ID {item.clienteId || '-'} · {item.representanteComercial || 'Sin responsable'}</small>
-                                  </button>
-                                ))}
+                        <div style={{ background: '#fff', border: '1px solid #dbe7e8', borderRadius: 16, padding: 12, marginBottom: 12 }}>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 10, alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <div style={{ width: 42, height: 42, borderRadius: 12, background: 'linear-gradient(135deg,#075e5f,#14b8a6)', display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 900 }}>MS</div>
+                              <div>
+                                <strong style={{ display: 'block', color: '#0c4b4c' }}>ComyTec Ops</strong>
+                                <small style={{ color: '#5a7a7b' }}>Gestión Operativa Integral</small>
                               </div>
                             </div>
-                          ))}
+                            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                              <div className="search-wrap" style={{ margin: 0, flex: 1 }}>
+                                <span className="search-icon"><i data-lucide="search"></i></span>
+                                <input value={historySearchTerm} onChange={(e) => setHistorySearchTerm(e.target.value)} placeholder="Buscar servicio, cliente o responsable..." style={{ width: '100%', background: '#fff', color: '#123436', borderColor: '#d6e3e4', borderRadius: 999 }} />
+                              </div>
+                              <button type="button" className="history-edit-btn"><i data-lucide="calendar"></i></button>
+                              <button type="button" className="history-edit-btn"><i data-lucide="user"></i></button>
+                              <button type="button" className="history-edit-btn"><i data-lucide="list-filter"></i></button>
+                              {['GS', 'FB', 'NL'].map((tag) => <div key={tag} style={{ width: 30, height: 30, borderRadius: '50%', background: '#0f5f60', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 10, fontWeight: 700 }}>{tag}</div>)}
+                            </div>
+                          </div>
                         </div>
-                      </div>
 
-                      <div>
-                        <h3 style={{ margin: '0 0 8px', color: '#0c4b4c' }}>Tabla Dinámica de Gestión</h3>
-                        <div style={{ overflowX: 'auto', background: '#fff', borderRadius: 14, border: '1px solid #e2ebec' }}>
-                          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 940 }}>
-                            <thead>
-                              <tr style={{ background: '#f2f7f8', color: '#245152' }}>
-                                <th style={{ textAlign: 'left', padding: '10px 12px' }}>Servicio</th>
-                                <th style={{ textAlign: 'left', padding: '10px 12px' }}>Ejecutivo</th>
-                                <th style={{ textAlign: 'left', padding: '10px 12px' }}>Trabajo a Realizar</th>
-                                <th style={{ textAlign: 'left', padding: '10px 12px' }}>Presupuesto</th>
-                                <th style={{ textAlign: 'left', padding: '10px 12px' }}>Recomendaciones IA</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {operationalQueueRows.slice(0, 12).map((service) => {
-                                const todoText = service.descripcionTrabajo || service.observaciones || service.observacionesComentarios || 'Sin detalle';
-                                const budgetRaw = Number(String(service.importeMensualServicioSinIva || service.costoInstalacionUsdSinIva || 0).replace(/[^\d.-]/g, '')) || 0;
-                                const checkKey = `${service.id}-task`;
-                                const checked = Boolean(workflowTaskChecks[checkKey]);
-                                return (
-                                  <tr key={`dyn-${service.id}`} style={{ borderTop: '1px solid #ebf1f2' }}>
-                                    <td style={{ padding: '10px 12px', color: '#184647' }}><strong>{service.nombreServicio || 'Servicio sin nombre'}</strong><br /><small>ID {service.clienteId || '-'}</small></td>
-                                    <td style={{ padding: '10px 12px', color: '#335d5e' }}>{service.representanteComercial || 'Sin responsable'}</td>
-                                    <td style={{ padding: '10px 12px', color: '#335d5e' }}>
-                                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                                        <input type="checkbox" checked={checked} onChange={(e) => setWorkflowTaskChecks((prev) => ({ ...prev, [checkKey]: e.target.checked }))} />
-                                        <span style={{ textDecoration: checked ? 'line-through' : 'none', opacity: checked ? 0.75 : 1 }}>{todoText}</span>
-                                      </label>
-                                    </td>
-                                    <td style={{ padding: '10px 12px', color: '#335d5e' }}>${budgetRaw.toLocaleString('es-UY')}</td>
-                                    <td style={{ padding: '10px 12px' }}>
-                                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                        <button type="button" className="history-edit-btn" onClick={() => setSelectedService(service)}>Confirmar OK</button>
-                                        <button type="button" className="history-edit-btn" onClick={() => setSelectedService(service)} style={{ background: 'rgba(37,99,235,.12)', borderColor: 'rgba(37,99,235,.3)', color: '#1d4ed8' }}>Asignar</button>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(210px, 1fr))', gap: 10, marginBottom: 12 }}>
+                          <article style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 14, padding: 10 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#c2410c', fontWeight: 700 }}><span className="ops-alert-ping">🚨</span> Urgencia Operativa</div>
+                            <div style={{ fontWeight: 800, marginTop: 4 }}>1 Tarea Crítica</div>
+                            <small>San Felipe (vence mañana)</small>
+                            <div><button type="button" className="history-edit-btn" style={{ marginTop: 8 }}>Ver Tarea</button></div>
+                          </article>
+                          <article style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 14, padding: 10 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#c2410c', fontWeight: 700 }}>📈 Previsión de Flujo</div>
+                            <div style={{ fontWeight: 800, marginTop: 4 }}>Cuello de Botella en 'En Proceso'</div>
+                            <small>Demora en aprobación de equipos.</small>
+                            <div><button type="button" className="history-edit-btn" style={{ marginTop: 8 }}>Gestionar</button></div>
+                          </article>
+                          <article style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 14, padding: 10 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#15803d', fontWeight: 700 }}>💡 Optimización de Recursos</div>
+                            <div style={{ fontWeight: 800, marginTop: 4 }}>Asignar Técnico Extra</div>
+                            <small>Alta carga de instalaciones Akuvox.</small>
+                            <div><button type="button" className="history-edit-btn" style={{ marginTop: 8, color: '#15803d' }}>Ver Disponibilidad</button></div>
+                          </article>
+                        </div>
+
+                        <div style={{ marginBottom: 12 }}>
+                          <h3 style={{ margin: '0 0 8px', color: '#0c4b4c' }}>Tablero Kanban Interactivo</h3>
+                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(200px, 1fr))', gap: 10 }}>
+                            {[
+                              { key: 'todo', title: 'Por Hacer', tone: '#dc2626' },
+                              { key: 'progress', title: 'En Proceso', tone: '#2563eb' },
+                              { key: 'done', title: 'Finalizado', tone: '#16a34a' },
+                            ].map((col) => (
+                              <div
+                                key={col.key}
+                                onDragOver={(e) => { e.preventDefault(); setDragOverColumn(col.key); }}
+                                onDragLeave={() => setDragOverColumn('')}
+                                onDrop={() => { moveKanbanTask(draggingTaskId, col.key); setDraggingTaskId(null); setDragOverColumn(''); }}
+                                style={{ background: dragOverColumn === col.key ? '#eef7ff' : '#fff', border: `1px solid ${dragOverColumn === col.key ? '#93c5fd' : '#e2ebec'}`, borderRadius: 14, padding: 10, minHeight: 220 }}
+                              >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                                  <strong style={{ color: col.tone }}>{col.title} ({kanbanColumns[col.key].length})</strong>
+                                  {col.key === 'done' && kanbanColumns[col.key].length === 0 && <span style={{ color: '#16a34a' }}>✅</span>}
+                                </div>
+                                <div style={{ display: 'grid', gap: 8 }}>
+                                  {kanbanColumns[col.key].map((task, idx) => (
+                                    <article
+                                      key={`${col.key}-${task.id}`}
+                                      draggable
+                                      onDragStart={() => setDraggingTaskId(task.id)}
+                                      onClick={() => { setOpsSelectedTaskId(task.id); setSelectedService(historySourceRows.find((row) => String(row.clienteId || '').trim() === task.id) || selectedService); }}
+                                      style={{ border: task.id === opsSelectedTaskId ? '2px solid #fb923c' : '1px solid #e3eaeb', borderRadius: 12, padding: 8, background: '#fcfefe', cursor: 'grab' }}
+                                    >
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                                        <small style={{ color: '#5f7778' }}>ID: {task.id}</small>
+                                        {idx === 0 && col.key === 'todo' && <span title="Arrastrar">🖐️</span>}
                                       </div>
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-                    </section>
-                    {!selectedService ? (
-                      <div className="hero" style={{padding: '26px 18px'}}>
-                        <h2 style={{fontSize:'1.4rem'}}>Selecciona un servicio desde la búsqueda</h2>
-                        <p style={{fontSize:'1rem'}}>Usa la lupita arriba y toca una vista previa para ver el detalle completo.</p>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="pdf-toolbar" style={{ gap: 8, flexWrap: 'wrap' }}>
-                          <button className="pdf-btn" type="button" onClick={() => handleDownloadPdf(selectedService)}>📄 Descargar PDF</button>
-                          <button
-                            className="edit-btn"
-                            type="button"
-                            disabled={isTechnicalOnly || !canEditService(selectedService)}
-                            onClick={() => startEditService(selectedService)}
-                          >
-                            {isTechnicalOnly ? '🔒 Solo lectura técnica' : (canEditService(selectedService) ? '✎ Editar servicio' : '🔒 Editar')}
-                          </button>
-                          {isAdminUser && (
-                            <button
-                              className="danger-btn"
-                              type="button"
-                              onClick={() => setDeleteTargetService(selectedService)}
-                            >
-                              🗑 Eliminar
-                            </button>
-                          )}
-                          {!isAdminUser && !canEditService(selectedService) && <span className="lock-hint">🔒 Solo lectura</span>}
-                        </div>
-                        <div className="history-grid">
-                        <div className="widget"><h4>Identificación</h4><div className="kv"><b>ID:</b> {selectedService.clienteId || '-'}</div><div className="kv"><b>Nombre:</b> {selectedService.nombreServicio || '-'}</div><div className="kv"><b>Tipo:</b> {selectedService.tipoServicioBrindar || '-'}</div><div className="kv"><b>Dirección:</b> {selectedService.direccionServicio || '-'}</div><div className="kv"><b>Unidades:</b> {selectedService.cantidadUnidades || '-'}</div></div>
-                        <div className="widget"><h4>Comercial / Facturación</h4><div className="kv"><b>Representante:</b> {selectedService.representanteComercial || '-'}</div><div className="kv"><b>Atención cliente:</b> {selectedService.atencionCliente || '-'}</div><div className="kv"><b>Razón Social:</b> {selectedService.razonSocial || '-'}</div><div className="kv"><b>RUT:</b> {selectedService.rut || '-'}</div><div className="kv"><b>Mail:</b> {selectedService.mailFacturacion || '-'}</div><div className="kv"><b>Duración:</b> {selectedService.duracionContratoMeses || '-'}</div></div>
-                        <div className="widget"><h4>Costos</h4><div className="kv"><b>Importe mensual:</b> {selectedService.importeMensualServicioSinIva || '-'}</div><div className="kv"><b>Costo instalación US$:</b> {selectedService.costoInstalacionUsdSinIva || '-'}</div><div className="kv"><b>Presupuesto proveedor:</b> {selectedService.presupuestoProveedor || '-'}</div><div className="kv"><b>Condición equipamiento:</b> {selectedService.condicionEquipamiento || '-'}</div>{selectedService.presupuestoPdfUrl && <div className="kv"><a className="link-btn" href={selectedService.presupuestoPdfUrl} target="_blank" rel="noreferrer">Ver PDF presupuesto</a></div>}</div>
-                        <div className="widget"><h4>Técnica</h4><div className="kv"><b>Control acceso:</b> {selectedService.condicionControlAcceso || '-'}</div><div className="kv"><b>Tags:</b> {selectedService.tagsPorAptos || '-'}</div><div className="kv"><b>Akuvox:</b> {selectedService.appAkuvox || '-'}</div><div className="kv"><b>Llaves:</b> {selectedService.llavesServicio || '-'}</div></div>
-                        <div className="widget"><h4>Instalación</h4><div className="kv"><b>Referente:</b> {selectedService.referenteInstalacion || '-'}</div><div className="kv"><b>Técnico asignado:</b> {selectedService.tecnicoAsignado || '-'}</div><div className="kv"><b>Teléfono:</b> {selectedService.telefonoReferenteInstalacion || '-'}</div><div className="kv"><b>Botti contacto:</b> {selectedService.bottiSeContactaCon || '-'}</div><div className="kv"><b>Jornales:</b> {selectedService.cantidadJornalesEstimados || '-'}</div><div className="kv"><b>Fecha inicio:</b> {selectedService.fechaEspecificaInicio || '-'}</div></div>
-                        <div className="widget"><h4>Seguimiento</h4><div className="kv"><b>Tipo acción:</b> {selectedService.tipoAccion || '-'}</div><div className="kv"><b>Status:</b> {selectedService.status || selectedService.estado || '-'}</div><div className="kv"><b>Fecha ingreso:</b> {selectedService.fechaIngresoDatos || selectedService.fechaCarga || selectedService.fechaCharla || '-'}</div><div className="kv"><b>Proyecto:</b> {selectedService.proyectoServicio || '-'}</div></div>
-                        <div className="widget full"><h4>Observaciones y Excepciones</h4><div className="detail-box">Observaciones: {selectedService.observacionesComentarios || '-'}
-
-Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
-                        {isTechnicalOnly && (
-                          <div className="widget full">
-                            <h4>Documentos adjuntos del trabajo (PDF)</h4>
-                            <div className="hint">Vista técnica de consulta: podés adjuntar presupuestos/documentos PDF sin editar datos del trabajo.</div>
-                            <div
-                              className={`ticket-upload-dropzone ${technicalDocDragOver ? 'dragover' : ''}`}
-                              onDragOver={(e) => { e.preventDefault(); setTechnicalDocDragOver(true); }}
-                              onDragLeave={(e) => { e.preventDefault(); setTechnicalDocDragOver(false); }}
-                              onDrop={(e) => {
-                                e.preventDefault();
-                                setTechnicalDocDragOver(false);
-                                const file = e.dataTransfer?.files?.[0];
-                                if (file) handleTechnicalDocumentUpload(file, selectedService);
-                              }}
-                            >
-                              Arrastrá y soltá un PDF aquí o usá el selector de archivo.
-                            </div>
-                            <div className="field" style={{ marginTop: 8 }}>
-                              <label>Seleccionar documento PDF</label>
-                              <input
-                                type="file"
-                                accept="application/pdf"
-                                disabled={uploadingTechnicalDoc}
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) handleTechnicalDocumentUpload(file, selectedService);
-                                  e.target.value = '';
-                                }}
-                              />
-                            </div>
-                            {uploadingTechnicalDoc && <div className="hint" style={{ marginBottom: 0 }}>Subiendo documento...</div>}
-                            {!Array.isArray(selectedService.documentosAdjuntos) || selectedService.documentosAdjuntos.length === 0 ? (
-                              <div className="hint" style={{ marginBottom: 0 }}>Aún no hay documentos adjuntos para este trabajo.</div>
-                            ) : (
-                              <div className="gerencia-status-list" style={{ marginTop: 8 }}>
-                                {selectedService.documentosAdjuntos.map((doc, idx) => (
-                                  <div className="gerencia-item" key={`doc-tecnico-${doc.id || idx}`}>
-                                    <span>{doc.name || `Documento ${idx + 1}`}</span>
-                                    {doc.url ? <a className="link-btn" href={doc.url} target="_blank" rel="noreferrer">Abrir PDF</a> : <b>Sin enlace</b>}
-                                  </div>
-                                ))}
+                                      <strong style={{ display: 'block', color: '#214849' }}>{task.title}</strong>
+                                      <small style={{ color: '#5f7778' }}>{task.executive}</small>
+                                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginTop: 4 }}>
+                                        <span>{task.dueSoon ? '⏰ Vence pronto' : '✅ En tiempo'}</span>
+                                        <span>Checklist: {task.checklistDone}/{task.checklistTotal}</span>
+                                      </div>
+                                    </article>
+                                  ))}
+                                </div>
                               </div>
-                            )}
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <h3 style={{ margin: '0 0 8px', color: '#0c4b4c' }}>Tabla Dinámica de Gestión Operativa</h3>
+                          <div style={{ overflowX: 'auto', background: '#fff', borderRadius: 14, border: '1px solid #e2ebec' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 940 }}>
+                              <thead>
+                                <tr style={{ background: '#f2f7f8', color: '#245152' }}>
+                                  <th style={{ textAlign: 'left', padding: '10px 12px' }}>Servicio</th>
+                                  <th style={{ textAlign: 'left', padding: '10px 12px' }}>Ejecutivo</th>
+                                  <th style={{ textAlign: 'left', padding: '10px 12px' }}>Trabajo a Realizar</th>
+                                  <th style={{ textAlign: 'left', padding: '10px 12px' }}>Acciones</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {(kanbanColumns.todo.concat(kanbanColumns.progress).slice(0, 6)).map((task) => {
+                                  const meta = opsTaskMeta[task.id] || { executive: task.executive, checklist: ['Instalación'], checked: {}, presupuesto: '', costoUsd: '', equipamiento: 'Compra' };
+                                  const isSelected = task.id === opsSelectedTaskId;
+                                  return (
+                                    <React.Fragment key={`tbl-${task.id}`}>
+                                      <tr style={{ borderTop: '1px solid #ebf1f2', outline: isSelected ? '2px solid #fb923c' : 'none' }}>
+                                        <td style={{ padding: '10px 12px' }}><strong>{task.title}</strong><br /><small>ID: {task.id}</small></td>
+                                        <td style={{ padding: '10px 12px' }}>
+                                          <select value={meta.executive} onChange={(e) => setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, executive: e.target.value } }))}>
+                                            <option>Alfonso Carballo</option><option>Gastón Silva</option><option>Francisco Bartellone</option><option>Nicolás Leguizamón</option>
+                                          </select>
+                                        </td>
+                                        <td style={{ padding: '10px 12px' }}>
+                                          <div style={{ display: 'grid', gap: 5 }}>
+                                            {meta.checklist.map((sub) => (
+                                              <label key={`${task.id}-${sub}`} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                                <input type="checkbox" checked={Boolean(meta.checked[sub])} onChange={(e) => setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, checked: { ...meta.checked, [sub]: e.target.checked } } }))} />
+                                                <span>{sub}</span>
+                                              </label>
+                                            ))}
+                                            <button type="button" className="history-edit-btn" onClick={() => {
+                                              const label = window.prompt('Nueva subtarea');
+                                              if (!label) return;
+                                              setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, checklist: [...meta.checklist, label] } }));
+                                            }}>+ Añadir subtarea</button>
+                                          </div>
+                                        </td>
+                                        <td style={{ padding: '10px 12px' }}>
+                                          <div style={{ display: 'grid', gap: 6 }}>
+                                            <button type="button" className="history-edit-btn" onClick={() => setOpsSelectedTaskId(task.id)}>Asignar</button>
+                                            <button type="button" className="history-edit-btn" onClick={() => setOpsActivityFeed((prev) => ['[IA Suggestion: Generate report and finish]', ...prev].slice(0, 8))}>Generar Reporte y Finalizar</button>
+                                            <button type="button" className="history-edit-btn" onClick={() => moveKanbanTask(task.id, 'progress')}>Mover a En Proceso</button>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                      {isSelected && (
+                                        <tr>
+                                          <td colSpan={4} style={{ padding: 12, background: '#fff7ed' }}>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(180px,1fr))', gap: 10 }}>
+                                              <div className="field"><label>Presupuesto Solicitado <span title="Ayuda">❔</span></label><input value={meta.presupuesto} onChange={(e) => setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, presupuesto: e.target.value } }))} /></div>
+                                              <div className="field"><label>Costo Instalación US$ <span title="Ayuda">❔</span></label><input value={meta.costoUsd} onChange={(e) => setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, costoUsd: e.target.value } }))} /></div>
+                                              <div className="field"><label>Condición Equipamiento <span title="Ayuda">❔</span></label><select value={meta.equipamiento} onChange={(e) => setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, equipamiento: e.target.value } }))}><option>Compra</option><option>Alquiler</option></select></div>
+                                            </div>
+                                          </td>
+                                        </tr>
+                                      )}
+                                    </React.Fragment>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+
+                        <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center', gap: 8 }}>
+                          <button className="pdf-btn" type="button" onClick={() => selectedService && handleDownloadPdf(selectedService)}>Descargar PDF</button>
+                          <button className="edit-btn" type="button" onClick={() => selectedService && startEditService(selectedService)}>Editar Servicio</button>
+                          <button className="danger-btn" type="button" onClick={() => selectedService && setDeleteTargetService(selectedService)}>Eliminar Tarea</button>
+                        </div>
+
+                        <div style={{ marginTop: 12, background: '#fff', borderRadius: 12, border: '1px solid #e3eaeb' }}>
+                          <button type="button" onClick={() => setOpsObservationsOpen((v) => !v)} style={{ width: '100%', textAlign: 'left', border: '0', background: 'transparent', padding: '10px 12px', color: '#184647', fontWeight: 700 }}>Observaciones y Excepciones {opsObservationsOpen ? '▲' : '▼'}</button>
+                          {opsObservationsOpen && <div style={{ padding: '0 12px 12px', color: '#466566' }}>{selectedService?.observacionesComentarios || 'Sin observaciones registradas.'}<br />{selectedService?.excepcionesAcordadas || 'Sin excepciones registradas.'}</div>}
+                        </div>
+                      </section>
+
+                      <aside className="panel" style={{ marginBottom: 0, position: 'sticky', top: 84, background: '#ffffff', color: '#123436', border: '1px solid #d9e5e7' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <h3 style={{ margin: 0 }}>Servicio {selectedOpsTask?.title || 'San Felipe'}</h3>
+                          <small>ID {selectedOpsTask?.id || '4184'}</small>
+                        </div>
+                        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                          <button type="button" className={`history-page-num ${opsSideTab === 'activity' ? 'active' : ''}`} onClick={() => setOpsSideTab('activity')}>Actividad y Comentarios</button>
+                          <button type="button" className={`history-page-num ${opsSideTab === 'details' ? 'active' : ''}`} onClick={() => setOpsSideTab('details')}>Detalles Completos</button>
+                        </div>
+
+                        {opsSideTab === 'activity' ? (
+                          <>
+                            <div style={{ display: 'grid', gap: 8, marginTop: 10 }}>
+                              {opsComments.map((item) => (
+                                <article key={item.id} style={{ border: '1px solid #e2ebec', borderRadius: 10, padding: 8, background: '#f9fcfc' }}>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#0f5f60', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 10 }}>👤</div>
+                                    <div><strong>{item.user}</strong> <small>{item.handle}</small></div>
+                                  </div>
+                                  <div style={{ marginTop: 6 }}>{item.text}</div>
+                                  {item.attachment && <small>📎 {item.attachment}</small>}
+                                </article>
+                              ))}
+                            </div>
+                            <div className="field" style={{ marginTop: 10 }}>
+                              <label>Comentario</label>
+                              <textarea value={opsCommentDraft} onChange={(e) => setOpsCommentDraft(e.target.value)} placeholder="Escribe un comentario con @menciones" />
+                              <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+                                <button type="button" className="history-edit-btn">@ Mencionar</button>
+                                <button type="button" className="history-edit-btn">+ Adjuntar</button>
+                                <button type="button" className="history-edit-btn" onClick={() => {
+                                  if (!opsCommentDraft.trim()) return;
+                                  setOpsComments((prev) => [{ id: `c-${Date.now()}`, user: 'Juan Pérez', handle: '@JuanPerez', text: opsCommentDraft.trim(), attachment: '' }, ...prev]);
+                                  setOpsActivityFeed((prev) => ['[Comment added by Juan]', ...prev].slice(0, 8));
+                                  setOpsCommentDraft('');
+                                }}>Publicar</button>
+                              </div>
+                            </div>
+                            <div style={{ marginTop: 10, borderTop: '1px solid #e2ebec', paddingTop: 10 }}>
+                              {opsActivityFeed.map((line, idx) => <div key={`act-${idx}`} style={{ fontSize: 13, color: '#315859', marginBottom: 4 }}>{line}</div>)}
+                            </div>
+                          </>
+                        ) : (
+                          <div style={{ marginTop: 10, display: 'grid', gap: 8 }}>
+                            {['Identificación', 'Comercial', 'Técnica'].map((sec) => (
+                              <details key={sec} open>
+                                <summary style={{ cursor: 'pointer', fontWeight: 700 }}>{sec}</summary>
+                                <div style={{ display: 'grid', gap: 6, marginTop: 6 }}>
+                                  <input placeholder={`${sec} campo 1`} />
+                                  <input placeholder={`${sec} campo 2`} />
+                                </div>
+                              </details>
+                            ))}
                           </div>
                         )}
-                        <div className="widget full">
-                          <h4>Micro-Historial de Cambios</h4>
-                          {!Array.isArray(selectedService.logs_cambios) || selectedService.logs_cambios.length === 0 ? (
-                            <div className="hint" style={{ marginBottom: 0 }}>Sin cambios registrados aún.</div>
-                          ) : (
-                            <ul className="micro-log-list">
-                              {selectedService.logs_cambios
-                                .slice()
-                                .sort((a, b) => {
-                                  const av = a?.fecha;
-                                  const bv = b?.fecha;
-                                  const at = av && typeof av.toDate === 'function' ? av.toDate().getTime() : new Date(av || 0).getTime();
-                                  const bt = bv && typeof bv.toDate === 'function' ? bv.toDate().getTime() : new Date(bv || 0).getTime();
-                                  return at - bt;
-                                })
-                                .map((log, idx) => (
-                                  <li key={`log-${idx}`} className="micro-log-item">
-                                    {formatLogDate(log?.fecha)} · {log?.usuario || '-'} · {log?.accion || 'Actualización de datos'}
-                                  </li>
-                                ))}
-                            </ul>
-                          )}
-                        </div>
-                      </div>
-                      </>
-                    )}
+                      </aside>
+                    </div>
                   </section>
                 ) : (
                 <section className="panel">
