@@ -4970,7 +4970,7 @@
       const auth = firebase.auth();
       const rtdb = typeof firebase.database === 'function' ? firebase.database() : null;
 
-      const ACCIONES = ['Nuevo Servicio', 'Adicionales', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa'];
+      const ACCIONES = ['Nuevo Servicio', 'Adicionales', 'Solicitud de presupuesto', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa'];
       const STATUS_OPTIONS = ['Pendiente', 'Presupuesto enviado', 'Aprobado', 'En agenda', 'En instalación', 'En progreso', 'Finalizado', 'Cancelado', 'En mantenimiento'];
       const SERVICE_TYPE_OPTIONS = ['Monitoreo', 'Portería virtual', 'Respuesta de alarma', 'Servicio Técnico', 'Control de acceso'];
 
@@ -5878,6 +5878,21 @@
         facturado: 'No',
       };
 
+      const solicitudPresupuestoInicial = {
+        servicioIdSeleccionado: '',
+        ejecutivoCuenta: '',
+        referenteNombre: '',
+        referenteTelefono: '',
+        seCobraCliente: 'Sí',
+        seCobraDetalle: '',
+        tieneTrabajosPendientes: 'No',
+        origenSolicitud: '',
+        coordinarConTerceros: 'No',
+        descripcionTrabajo: '',
+        fotoTrabajoNombre: '',
+        fotoTrabajoUrl: '',
+      };
+
       const movimientoInicial = {
         nombreServicio: '',
         servicioIdSeleccionado: '',
@@ -6677,6 +6692,7 @@
         const [obraForm, setObraForm] = useState(obraInicial);
         const [novacionForm, setNovacionForm] = useState(novacionInicial);
         const [agregadoForm, setAgregadoForm] = useState(agregadoInicial);
+        const [solicitudPresupuestoForm, setSolicitudPresupuestoForm] = useState(solicitudPresupuestoInicial);
         const [movimientoForm, setMovimientoForm] = useState(movimientoInicial);
         const [bajaForm, setBajaForm] = useState(bajaInicial);
         const [charlaForm, setCharlaForm] = useState(charlaInicial);
@@ -6732,6 +6748,7 @@
         const [serviceBudgetDragOver, setServiceBudgetDragOver] = useState(false);
         const [novacionBudgetDragOver, setNovacionBudgetDragOver] = useState(false);
         const [bajaEquipDragOver, setBajaEquipDragOver] = useState(false);
+        const [solicitudFotoDragOver, setSolicitudFotoDragOver] = useState(false);
         const [uploadingTechnicalDoc, setUploadingTechnicalDoc] = useState(false);
         const [ticketSaving, setTicketSaving] = useState(false);
         const [imageViewerSrc, setImageViewerSrc] = useState('');
@@ -6753,7 +6770,8 @@
           if (tipoAccion === 'Nuevo Servicio' && selectedForm === 'servicio') return 'servicio';
           if (tipoAccion === 'Obra') return 'obra';
           if (tipoAccion === 'Novación') return 'novacion';
-          if (tipoAccion === 'Adicionales' || tipoAccion === 'Solicitud de presupuesto') return 'agregado';
+          if (tipoAccion === 'Adicionales') return 'agregado';
+          if (tipoAccion === 'Solicitud de presupuesto') return 'solicitud-presupuesto';
           if (tipoAccion === 'Baja') return 'baja-detalle';
           if (tipoAccion === 'Charla informativa') return 'charla-detalle';
           if (tipoAccion === 'Movimiento de obra') return 'movimiento-detalle';
@@ -8283,7 +8301,7 @@
           return [
             {
               title: 'Nuevo',
-              items: ['Nuevo Servicio', 'Adicionales', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa'].filter(actionInRole).map(toItem),
+              items: ['Nuevo Servicio', 'Adicionales', 'Solicitud de presupuesto', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa'].filter(actionInRole).map(toItem),
             },
           ].filter((section) => section.items.length > 0);
         }, [mobileAllowedActions]);
@@ -8373,7 +8391,7 @@
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
           setEditingServiceId(null);
           const stamp = formatUruguayDateTime();
-          setServicioForm({ ...servicioInicial, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: stamp }); setObraForm({ ...obraInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setNovacionForm({ ...novacionInicial, representanteComercial: 'Francisco Bartellone', creadoPor: currentUserName }); setAgregadoForm({ ...agregadoInicial, responsableAdicionales: currentUserName || '' }); setMovimientoForm({ ...movimientoInicial, fechaIngresoAuto: stamp }); setBajaForm({ ...bajaInicial, fechaIngresoAuto: stamp }); setCharlaForm(charlaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
+          setServicioForm({ ...servicioInicial, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: stamp }); setObraForm({ ...obraInicial, representanteComercial: currentUserName, creadoPor: currentUserName }); setNovacionForm({ ...novacionInicial, representanteComercial: 'Francisco Bartellone', creadoPor: currentUserName }); setAgregadoForm({ ...agregadoInicial, responsableAdicionales: currentUserName || '' }); setSolicitudPresupuestoForm(solicitudPresupuestoInicial); setMovimientoForm({ ...movimientoInicial, fechaIngresoAuto: stamp }); setBajaForm({ ...bajaInicial, fechaIngresoAuto: stamp }); setCharlaForm(charlaInicial); setClienteId(generarClienteId()); setClienteIdAsociado('');
         }
 
         function setServicioField(key, value) {
@@ -8457,6 +8475,21 @@
 
         function setAgregadoField(key, value) {
           setAgregadoForm((prev) => ({ ...prev, [key]: value }));
+        }
+
+        function setSolicitudPresupuestoField(key, value) {
+          setSolicitudPresupuestoForm((prev) => ({ ...prev, [key]: value }));
+        }
+
+        function handleSolicitudFotoUpload(file) {
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = () => {
+            setSolicitudPresupuestoForm((prev) => ({ ...prev, fotoTrabajoNombre: file.name || 'foto-trabajo', fotoTrabajoUrl: String(reader.result || '') }));
+            setNotificacion({ mensaje: '✔ Foto de solicitud cargada', tipo: 'ok' });
+          };
+          reader.onerror = () => setNotificacion({ mensaje: '✖ No se pudo leer la foto', tipo: 'error' });
+          reader.readAsDataURL(file);
         }
 
         function handleAgregadoFileUpload(file) {
@@ -8680,6 +8713,12 @@
             }
             Object.assign(doc, { ...agregadoForm, formulario: 'agregado' });
           }
+          if (grupo === 'solicitud-presupuesto') {
+            if (!normalizedClientId || !solicitudPresupuestoForm.ejecutivoCuenta) {
+              return alert('Completá al menos: ID del servicio y Ejecutivo de cuenta.');
+            }
+            Object.assign(doc, { ...solicitudPresupuestoForm, formulario: 'solicitud-presupuesto' });
+          }
           if (grupo === 'base') {
             if (!cliente || !fechaCarga) return alert('Completá Cliente y Fecha Carga.');
             Object.assign(doc, { cliente, fechaCarga, tiempoInstalacion, fechaAlta, cobro });
@@ -8774,7 +8813,7 @@
               }
               void logRealtimeActivityEvent({
                 usuario: currentUserName,
-                accion: tipoAccion === 'Baja' ? 'registró baja del servicio' : tipoAccion === 'Novación' ? 'registró novación del servicio' : tipoAccion === 'Obra' ? 'registró obra' : tipoAccion === 'Movimiento de obra' ? 'registró movimiento de obra' : tipoAccion === 'Charla informativa' ? 'registró charla informativa' : (tipoAccion === 'Adicionales' || tipoAccion === 'Solicitud de presupuesto') ? 'registró adicionales' : 'modificó servicio',
+                accion: tipoAccion === 'Baja' ? 'registró baja del servicio' : tipoAccion === 'Novación' ? 'registró novación del servicio' : tipoAccion === 'Obra' ? 'registró obra' : tipoAccion === 'Movimiento de obra' ? 'registró movimiento de obra' : tipoAccion === 'Charla informativa' ? 'registró charla informativa' : tipoAccion === 'Adicionales' ? 'registró adicionales' : tipoAccion === 'Solicitud de presupuesto' ? 'registró solicitud de presupuesto' : 'modificó servicio',
                 clienteId: normalizedClientId,
               });
               return;
@@ -8900,6 +8939,7 @@
                   <div className="mobile-quick-menu">
                     <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Nuevo Servicio'); }}>Servicio</button>
                     <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Adicionales'); }}>Adicionales</button>
+                    <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Solicitud de presupuesto'); }}>Solicitud de presupuesto</button>
                     <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Novación'); }}>Novación</button>
                     <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Movimiento de obra'); }}>Movimiento de obra</button>
                     <button type="button" onClick={() => { setMobileQuickMenuOpen(false); selectAction('Baja'); }}>Baja de servicio</button>
@@ -8919,6 +8959,7 @@
                 <div className="mobile-actions-grid">
                   <button type="button" className="mobile-action-btn" onClick={() => selectAction('Nuevo Servicio')}>Servicio</button>
                   <button type="button" className="mobile-action-btn" onClick={() => selectAction('Adicionales')}>Adicionales</button>
+                  <button type="button" className="mobile-action-btn" onClick={() => selectAction('Solicitud de presupuesto')}>Solicitud de presupuesto</button>
                   <button type="button" className="mobile-action-btn" onClick={() => selectAction('Novación')}>Novación</button>
                   <button type="button" className="mobile-action-btn" onClick={() => selectAction('Movimiento de obra')}>Movimiento de obra</button>
                   <button type="button" className="mobile-action-btn" onClick={() => selectAction('Baja')}>Baja de servicio</button>
@@ -9501,6 +9542,7 @@
                       <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
                         <button className="submenu-button" onClick={() => { selectAction('Nuevo Servicio'); closeSidebar(); }}>Servicio</button>
                         <button className="submenu-button" onClick={() => { selectAction('Adicionales'); closeSidebar(); }}>Adicionales</button>
+                        <button className="submenu-button" onClick={() => { selectAction('Solicitud de presupuesto'); closeSidebar(); }}>Solicitud de presupuesto</button>
                         <button className="submenu-button" onClick={() => { selectAction('Novación'); closeSidebar(); }}>Novación</button>
                         <button className="submenu-button" onClick={() => { selectAction('Movimiento de obra'); closeSidebar(); }}>Movimiento de obra</button>
                         <button className="submenu-button" onClick={() => { selectAction('Baja'); closeSidebar(); }}>Baja de servicio</button>
@@ -10526,7 +10568,7 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                 ) : (
                 <section className="panel">
                   <h2>Formulario Operativo · Gestión de Acciones</h2>
-                  <div className="hint">Nuevo incluye: Servicio, Adicionales, Novación, Movimiento de obra, Baja de servicio y Charla informativa.</div>
+                  <div className="hint">Nuevo incluye: Servicio, Adicionales, Solicitud de presupuesto, Novación, Movimiento de obra, Baja de servicio y Charla informativa.</div>
 
                   <form onSubmit={handleSubmit}>
                     {grupo === 'servicio' ? (
@@ -10913,6 +10955,103 @@ Excepciones: {selectedService.excepcionesAcordadas || '-'}</div></div>
                             <div className="field"><label>Fecha de alta de los adicionales</label><input value={agregadoForm.fechaAltaAdicional} onChange={(e) => setAgregadoField('fechaAltaAdicional', e.target.value)} type="date" /></div>
                             <div className="field"><label>Plazo de instalación</label><input value={agregadoForm.plazoInstalacion || ''} onChange={(e) => setAgregadoField('plazoInstalacion', e.target.value)} type="text" placeholder="Días o fecha estimada de finalización" /></div>
                             <div className="field"><label>FACTURADO</label><select value={agregadoForm.facturado} onChange={(e) => setAgregadoField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
+                      </div>
+                    ) : grupo === 'solicitud-presupuesto' ? (
+                      <div className="service-layout">
+                        <div className="service-card">
+                          <h3>Solicitud de Presupuesto</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>ID del servicio</label><input value={clienteIdAsociado} onChange={(e) => { setClienteIdAsociado(e.target.value); setSolicitudPresupuestoField('servicioIdSeleccionado', e.target.value); }} type="text" placeholder="ID del servicio existente" /></div>
+                            <div className="field">
+                              <label>Selector de servicio existente</label>
+                              <select value={clienteIdAsociado || solicitudPresupuestoForm.servicioIdSeleccionado || ''} onChange={(e) => { setClienteIdAsociado(e.target.value); setSolicitudPresupuestoField('servicioIdSeleccionado', e.target.value); }}>
+                                <option value="">Seleccionar servicio...</option>
+                                {visibleRows.map((row) => (
+                                  <option key={`sol-id-${row.id}`} value={row.clienteId || ''}>
+                                    {(row.clienteId || '-') + ' · ' + (row.nombreServicio || 'Servicio sin nombre')}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>2. Ejecutivo / Atención al Cliente</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Ejecutivo de cuenta</label><select value={solicitudPresupuestoForm.ejecutivoCuenta || ''} onChange={(e) => setSolicitudPresupuestoField('ejecutivoCuenta', e.target.value)}><option value="">Seleccionar...</option><option value="David Genta">David Genta</option><option value="Laura Aguilar">Laura Aguilar</option><option value="Mariana Sposito">Mariana Sposito</option><option value="María José">María José</option><option value="Francisco Bartellone">Francisco Bartellone</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>3. Referente en el Lugar</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Nombre del referente</label><input value={solicitudPresupuestoForm.referenteNombre || ''} onChange={(e) => setSolicitudPresupuestoField('referenteNombre', e.target.value)} type="text" /></div>
+                            <div className="field"><label>Teléfono del referente</label><input value={solicitudPresupuestoForm.referenteTelefono || ''} onChange={(e) => setSolicitudPresupuestoField('referenteTelefono', e.target.value)} type="text" /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>4. Condiciones Comerciales</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>¿Se cobra al cliente?</label><select value={solicitudPresupuestoForm.seCobraCliente || 'Sí'} onChange={(e) => setSolicitudPresupuestoField('seCobraCliente', e.target.value)}><option value="Sí">Sí</option><option value="No">No</option><option value="Otros">Otros</option></select></div>
+                            {solicitudPresupuestoForm.seCobraCliente === 'Otros' && <div className="field span-2"><label>Detalle</label><input value={solicitudPresupuestoForm.seCobraDetalle || ''} onChange={(e) => setSolicitudPresupuestoField('seCobraDetalle', e.target.value)} type="text" /></div>}
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>5. Estado del Servicio</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>¿Tiene trabajos pendientes?</label><select value={solicitudPresupuestoForm.tieneTrabajosPendientes || 'No'} onChange={(e) => setSolicitudPresupuestoField('tieneTrabajosPendientes', e.target.value)}><option value="Sí">Sí</option><option value="No">No</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>6. Origen de la Solicitud</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>Quién solicita el trabajo</label><select value={solicitudPresupuestoForm.origenSolicitud || ''} onChange={(e) => setSolicitudPresupuestoField('origenSolicitud', e.target.value)}><option value="">Seleccionar...</option><option value="Administración">Administración</option><option value="Comisión">Comisión</option><option value="Solicitud interna">Solicitud interna</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>7. Coordinación</h3>
+                          <div className="card-grid">
+                            <div className="field"><label>¿Se debe coordinar con terceros?</label><select value={solicitudPresupuestoForm.coordinarConTerceros || 'No'} onChange={(e) => setSolicitudPresupuestoField('coordinarConTerceros', e.target.value)}><option value="Sí">Sí</option><option value="No">No</option></select></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>8. Detalle del Trabajo</h3>
+                          <div className="card-grid">
+                            <div className="field span-3"><label>Descripción del trabajo a realizar</label><textarea value={solicitudPresupuestoForm.descripcionTrabajo || ''} onChange={(e) => setSolicitudPresupuestoField('descripcionTrabajo', e.target.value)} /></div>
+                          </div>
+                        </div>
+
+                        <div className="service-card">
+                          <h3>9. Archivos</h3>
+                          <div className="card-grid">
+                            <div className="field span-2">
+                              <label>Foto del trabajo</label>
+                              <div
+                                className={`ticket-upload-dropzone ${solicitudFotoDragOver ? 'dragover' : ''}`}
+                                onDragOver={(e) => { e.preventDefault(); setSolicitudFotoDragOver(true); }}
+                                onDragLeave={() => setSolicitudFotoDragOver(false)}
+                                onDrop={(e) => { e.preventDefault(); setSolicitudFotoDragOver(false); handleSolicitudFotoUpload(e.dataTransfer?.files?.[0]); }}
+                                onPaste={(e) => {
+                                  const items = e.clipboardData?.items || [];
+                                  const fileItem = Array.from(items).find((it) => it.kind === 'file');
+                                  if (fileItem) handleSolicitudFotoUpload(fileItem.getAsFile());
+                                }}
+                              >
+                                <input type="file" accept="image/*" onChange={(e) => handleSolicitudFotoUpload(e.target.files?.[0])} />
+                              </div>
+                            </div>
+                            {solicitudPresupuestoForm.fotoTrabajoNombre && <div className="field span-2"><label>Archivo cargado</label><input value={solicitudPresupuestoForm.fotoTrabajoNombre} readOnly type="text" /></div>}
                           </div>
                         </div>
 
