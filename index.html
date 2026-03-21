@@ -6892,6 +6892,7 @@
         const [historyCommercialFilter, setHistoryCommercialFilter] = useState('todos');
         const [historyTypeFilter, setHistoryTypeFilter] = useState('todos');
         const [historyDateFilter, setHistoryDateFilter] = useState('');
+        const [workflowTaskChecks, setWorkflowTaskChecks] = useState({});
         const [historyPage, setHistoryPage] = useState(1);
         const [sellerFilterOpen, setSellerFilterOpen] = useState(false);
         const [sellerFiltersDraft, setSellerFiltersDraft] = useState({
@@ -7228,6 +7229,22 @@
           proceso: operationalQueueRows.filter((r) => normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente')) === 'En proceso').length,
           esperando: operationalQueueRows.filter((r) => normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente')) === 'Esperando información').length,
         }), [operationalQueueRows]);
+
+        const workflowBuckets = useMemo(() => ({
+          todo: operationalQueueRows.filter((r) => normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente')) === 'Pendiente').slice(0, 5),
+          progress: operationalQueueRows.filter((r) => normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente')) === 'En proceso').slice(0, 5),
+          done: historyFilteredRows.filter((r) => normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente')) === 'Finalizado').slice(0, 5),
+        }), [operationalQueueRows, historyFilteredRows]);
+
+        const workflowWorkloadLabel = useMemo(() => {
+          const entries = Object.entries(queueCounts);
+          if (entries.length === 0) return 'Sin carga operativa';
+          const [key, value] = entries.sort((a, b) => b[1] - a[1])[0];
+          if (!value) return 'Sin carga operativa';
+          if (key === 'pendiente') return `Mayor carga en Por hacer (${value})`;
+          if (key === 'proceso') return `Mayor carga en En proceso (${value})`;
+          return `Mayor carga en Esperando info (${value})`;
+        }, [queueCounts]);
 
         async function handleSyncPreloadedServicesToFirebase() {
           if (!isAdminUser) {
@@ -10399,48 +10416,116 @@
                 ) : effectiveSelectedForm === 'historial' ? (
                   <section className="panel">
                     <h2>Gestión Operativa</h2>
-                    <div className="hint">Módulo central para Servicios, Adicionales, Novaciones, Movimientos de obra, Bajas y Solicitudes de presupuesto.</div>
-                    <section className="panel" style={{ background: '#f5f7f8', color: '#123436', marginBottom: 12 }}>
-                      <h3 style={{ marginTop: 0, color: '#005a5b' }}>Pendientes</h3>
-                      <div className="hint" style={{ color: '#496a6b' }}>Bandeja activa de trabajo: pendientes, en proceso y bloqueados por información.</div>
-                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
-                        <button type="button" className={`history-page-num ${historyStatusFilter === 'Pendiente' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('Pendiente')}>Por hacer <span style={{ color: '#ef4444' }}>({queueCounts.pendiente})</span></button>
-                        <button type="button" className={`history-page-num ${historyStatusFilter === 'En proceso' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('En proceso')}>En proceso <span style={{ color: '#2563eb' }}>({queueCounts.proceso})</span></button>
-                        <button type="button" className={`history-page-num ${historyStatusFilter === 'Esperando información' ? 'active' : ''}`} onClick={() => setHistoryStatusFilter('Esperando información')}>Esperando info <span style={{ color: '#7c3aed' }}>({queueCounts.esperando})</span></button>
+                    <div className="hint">Vista central con widgets inteligentes, workflow y acciones operativas asistidas por IA.</div>
+
+                    <section className="panel" style={{ background: '#f7fafb', color: '#103839', border: '1px solid #dde8ea' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1.4fr auto', gap: 12, alignItems: 'center', marginBottom: 14 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{ width: 42, height: 42, borderRadius: 12, background: 'linear-gradient(135deg,#075e5f,#14b8a6)', display: 'grid', placeItems: 'center', color: '#fff', fontWeight: 900 }}>MS</div>
+                          <div>
+                            <strong style={{ display: 'block', color: '#0c4b4c' }}>ComyTec Ops AI</strong>
+                            <small style={{ color: '#5a7a7b' }}>Gestión Operativa Inteligente</small>
+                          </div>
+                        </div>
+                        <div className="search-wrap" style={{ margin: 0 }}>
+                          <span className="search-icon"><i data-lucide="search"></i></span>
+                          <input value={historySearchTerm} onChange={(e) => setHistorySearchTerm(e.target.value)} placeholder="Buscar servicio, cliente o responsable..." style={{ width: '100%', background: '#fff', color: '#123436', borderColor: '#d6e3e4' }} />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                          {['GS', 'FB', 'NL'].map((tag) => (
+                            <div key={tag} style={{ width: 34, height: 34, borderRadius: '50%', background: '#0f5f60', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 700 }}>{tag}</div>
+                          ))}
+                        </div>
                       </div>
-                      <div className="history-toolbar">
-                        <div className="field span-2"><label>Buscar</label><input value={historySearchTerm} onChange={(e) => setHistorySearchTerm(e.target.value)} placeholder="Buscar servicio..." /></div>
-                        <div className="field"><label>Tipo</label><select value={historyTypeFilter} onChange={(e) => setHistoryTypeFilter(e.target.value)}><option value="todos">Todos</option>{historyTypeOptions.map((tp) => <option key={`ht-${tp}`} value={tp}>{tp}</option>)}</select></div>
-                        <div className="field"><label>Responsable</label><select value={historyCommercialFilter} onChange={(e) => setHistoryCommercialFilter(e.target.value)}><option value="todos">Todos</option>{historyCommercialOptions.map((cm) => <option key={`hc-${cm}`} value={cm}>{cm}</option>)}</select></div>
-                        <div className="field"><label>Fecha</label><input type="date" value={historyDateFilter} onChange={(e) => setHistoryDateFilter(e.target.value)} /></div>
-                        <button type="button" className="history-add-btn" onClick={() => setHistoryPage(1)}>Filtrar</button>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(220px, 1fr))', gap: 10, marginBottom: 14 }}>
+                        <article style={{ background: '#fff', borderRadius: 14, padding: 12, border: '1px solid #e2ebec' }}>
+                          <small style={{ color: '#5d7677' }}>Prioridad Alta</small>
+                          <div style={{ fontSize: 30, fontWeight: 800, color: '#dc2626', lineHeight: 1 }}>{queueCounts.pendiente}</div>
+                          <div style={{ fontSize: 12, color: '#6a8283' }}>Servicios en cola inicial.</div>
+                        </article>
+                        <article style={{ background: '#fff', borderRadius: 14, padding: 12, border: '1px solid #e2ebec' }}>
+                          <small style={{ color: '#5d7677' }}>Predicción de Cuellos de Botella</small>
+                          <div style={{ fontSize: 14, fontWeight: 700, color: '#1d4ed8', marginTop: 4 }}>{workflowWorkloadLabel}</div>
+                          <div style={{ fontSize: 12, color: '#6a8283' }}>Sugerencia basada en estado actual del pipeline.</div>
+                        </article>
+                        <article style={{ background: '#fff', borderRadius: 14, padding: 12, border: '1px solid #e2ebec' }}>
+                          <small style={{ color: '#5d7677' }}>Sugerencia de Recursos</small>
+                          <div style={{ fontSize: 14, fontWeight: 700, color: '#0f766e', marginTop: 4 }}>Asignar {Math.max(1, Math.ceil(queueCounts.pendiente / 3))} técnico(s) extra</div>
+                          <div style={{ fontSize: 12, color: '#6a8283' }}>Recomendación automática por volumen pendiente.</div>
+                        </article>
                       </div>
-                      <div style={{ display: 'grid', gap: 10, marginTop: 12 }}>
-                        {operationalQueueRows.length === 0 ? (
-                          <div className="hint" style={{ padding: 14, margin: 0 }}>No hay tareas activas con los filtros actuales.</div>
-                        ) : operationalQueueRows.map((service) => {
-                          const statusNorm = normalizeLegacyStatusName(service.status || service.estado || 'Pendiente');
-                          const tone = statusNorm === 'Pendiente' ? '#ef4444' : statusNorm === 'En proceso' ? '#2563eb' : '#7c3aed';
-                          const createdSeconds = service.creadoEn?.seconds || service.actualizadoEn?.seconds || 0;
-                          const daysPending = createdSeconds ? Math.max(0, Math.floor((Date.now() - (createdSeconds * 1000)) / 86400000)) : 0;
-                          return (
-                            <article key={`opq-${service.id}`} style={{ background: '#fff', borderRadius: 14, boxShadow: '0 6px 20px rgba(0,0,0,.08)', border: '1px solid #e5eaec', display: 'grid', gridTemplateColumns: '6px 1fr auto', overflow: 'hidden' }}>
-                              <div style={{ background: tone }} />
-                              <div style={{ padding: 12 }}>
-                                <strong style={{ color: '#0e3c3d' }}>{service.nombreServicio || 'Servicio sin nombre'}</strong>
-                                <div style={{ fontSize: 12, color: '#5d7677', marginTop: 4 }}>
-                                  Tipo: {service.tipoAccion === 'Nuevo Servicio' ? 'Servicio' : service.tipoAccion === 'Adicionales' ? 'Adicional' : service.tipoAccion === 'Solicitud de presupuesto' ? 'Presupuesto' : (service.tipoAccion || '-')} · Responsable: {service.representanteComercial || 'Sin responsable'} · ID: {service.clienteId || '-'}
-                                </div>
-                                <div style={{ fontSize: 13, color: '#3b5657', marginTop: 6 }}>{service.descripcionTrabajo || service.observaciones || service.observacionesComentarios || 'Sin descripción adicional.'}</div>
+
+                      <div style={{ marginBottom: 14 }}>
+                        <h3 style={{ margin: '0 0 8px', color: '#0c4b4c' }}>Workflow de Trabajo</h3>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(210px, 1fr))', gap: 10 }}>
+                          {[
+                            { key: 'todo', title: 'Por Hacer', tone: '#ef4444', items: workflowBuckets.todo },
+                            { key: 'progress', title: 'En Proceso', tone: '#2563eb', items: workflowBuckets.progress },
+                            { key: 'done', title: 'Finalizado', tone: '#16a34a', items: workflowBuckets.done },
+                          ].map((bucket) => (
+                            <div key={bucket.key} style={{ background: '#fff', border: '1px solid #e2ebec', borderRadius: 14, padding: 10 }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                                <strong style={{ color: bucket.tone }}>{bucket.title}</strong>
+                                <span style={{ fontSize: 12, color: '#647d7e' }}>{bucket.items.length}</span>
                               </div>
-                              <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
-                                <span style={{ background: `${tone}22`, color: tone, border: `1px solid ${tone}55`, padding: '4px 10px', borderRadius: 999, fontSize: 12, fontWeight: 700 }}>{statusNorm}</span>
-                                <button type="button" className="history-edit-btn" onClick={() => setSelectedService(service)}>Ver</button>
-                                <small style={{ color: '#6b7f80' }}>{daysPending} días pendiente</small>
+                              <div style={{ display: 'grid', gap: 8 }}>
+                                {bucket.items.length === 0 ? (
+                                  <small style={{ color: '#799394' }}>Sin items</small>
+                                ) : bucket.items.map((item) => (
+                                  <button key={`wf-${bucket.key}-${item.id}`} type="button" onClick={() => setSelectedService(item)} style={{ textAlign: 'left', border: '1px solid #e4ecee', borderRadius: 10, background: '#f9fcfc', padding: 8, cursor: 'pointer' }}>
+                                    <strong style={{ display: 'block', color: '#1f4041', fontSize: 12 }}>{item.nombreServicio || 'Servicio sin nombre'}</strong>
+                                    <small style={{ color: '#708889' }}>ID {item.clienteId || '-'} · {item.representanteComercial || 'Sin responsable'}</small>
+                                  </button>
+                                ))}
                               </div>
-                            </article>
-                          );
-                        })}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h3 style={{ margin: '0 0 8px', color: '#0c4b4c' }}>Tabla Dinámica de Gestión</h3>
+                        <div style={{ overflowX: 'auto', background: '#fff', borderRadius: 14, border: '1px solid #e2ebec' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 940 }}>
+                            <thead>
+                              <tr style={{ background: '#f2f7f8', color: '#245152' }}>
+                                <th style={{ textAlign: 'left', padding: '10px 12px' }}>Servicio</th>
+                                <th style={{ textAlign: 'left', padding: '10px 12px' }}>Ejecutivo</th>
+                                <th style={{ textAlign: 'left', padding: '10px 12px' }}>Trabajo a Realizar</th>
+                                <th style={{ textAlign: 'left', padding: '10px 12px' }}>Presupuesto</th>
+                                <th style={{ textAlign: 'left', padding: '10px 12px' }}>Recomendaciones IA</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {operationalQueueRows.slice(0, 12).map((service) => {
+                                const todoText = service.descripcionTrabajo || service.observaciones || service.observacionesComentarios || 'Sin detalle';
+                                const budgetRaw = Number(String(service.importeMensualServicioSinIva || service.costoInstalacionUsdSinIva || 0).replace(/[^\d.-]/g, '')) || 0;
+                                const checkKey = `${service.id}-task`;
+                                const checked = Boolean(workflowTaskChecks[checkKey]);
+                                return (
+                                  <tr key={`dyn-${service.id}`} style={{ borderTop: '1px solid #ebf1f2' }}>
+                                    <td style={{ padding: '10px 12px', color: '#184647' }}><strong>{service.nombreServicio || 'Servicio sin nombre'}</strong><br /><small>ID {service.clienteId || '-'}</small></td>
+                                    <td style={{ padding: '10px 12px', color: '#335d5e' }}>{service.representanteComercial || 'Sin responsable'}</td>
+                                    <td style={{ padding: '10px 12px', color: '#335d5e' }}>
+                                      <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                                        <input type="checkbox" checked={checked} onChange={(e) => setWorkflowTaskChecks((prev) => ({ ...prev, [checkKey]: e.target.checked }))} />
+                                        <span style={{ textDecoration: checked ? 'line-through' : 'none', opacity: checked ? 0.75 : 1 }}>{todoText}</span>
+                                      </label>
+                                    </td>
+                                    <td style={{ padding: '10px 12px', color: '#335d5e' }}>${budgetRaw.toLocaleString('es-UY')}</td>
+                                    <td style={{ padding: '10px 12px' }}>
+                                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                        <button type="button" className="history-edit-btn" onClick={() => setSelectedService(service)}>Confirmar OK</button>
+                                        <button type="button" className="history-edit-btn" onClick={() => setSelectedService(service)} style={{ background: 'rgba(37,99,235,.12)', borderColor: 'rgba(37,99,235,.3)', color: '#1d4ed8' }}>Asignar</button>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
                     </section>
                     {!selectedService ? (
