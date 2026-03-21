@@ -186,6 +186,27 @@
         margin: 8px auto 0;
         padding: 0 10px 14px;
       }
+      .ops-main-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.6fr) minmax(430px, 1fr);
+        gap: 14px;
+        align-items: stretch;
+        width: 100%;
+      }
+      .ops-side-panel {
+        max-height: calc(100vh - 96px);
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+      .ops-comment-list {
+        max-height: min(46vh, 520px);
+        overflow-y: auto;
+      }
+      @media (max-width: 1460px) {
+        .ops-main-layout { grid-template-columns: 1fr; }
+        .ops-side-panel { position: relative !important; top: 0 !important; max-height: none; }
+        .ops-comment-list { max-height: none; }
+      }
       .hero {
         border-radius: 24px;
         padding: 60px 30px;
@@ -10525,7 +10546,7 @@
                     <h2>Gestión Operativa</h2>
                     <div className="hint">Módulo de inteligencia operativa con tablero Kanban, tabla activa y panel lateral colaborativo.</div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.6fr) minmax(430px,1fr)', gap: 14, alignItems: 'stretch', width: '100%' }}>
+                    <div className="ops-main-layout">
                       <section className="panel" style={{ background: '#f7fafb', color: '#103839', border: '1px solid #dde8ea', marginBottom: 0 }}>
                         <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 10, alignItems: 'center', marginBottom: 14 }}>
                           <button type="button" className="burger" style={{ width: 42, height: 42 }}>☰</button>
@@ -10710,14 +10731,14 @@
                         </div>
                       </section>
 
-                      <aside className="panel" style={{ marginBottom: 0, position: 'sticky', top: 84, background: '#ffffff', color: '#123436', border: '1px solid #d9e5e7', maxHeight: 'calc(100vh - 96px)', overflow: 'hidden' }}>
+                      <aside className="panel ops-side-panel" style={{ marginBottom: 0, position: 'sticky', top: 84, background: '#ffffff', color: '#123436', border: '1px solid #d9e5e7' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <h3 style={{ margin: 0, textAlign: 'center', width: '100%', color: '#0b5a5b' }}>Servicio {selectedOpsTask?.title || 'San Felipe'}</h3>
                           <small>ID {selectedOpsTask?.id || '4184'}</small>
                         </div>
                         <div style={{ marginTop: 10, borderRadius: 14, padding: 10, background: 'linear-gradient(180deg,#212121,#121212)', border: '1px solid rgba(0,100,101,.55)', boxShadow: '0 10px 24px rgba(0,0,0,.25)' }}>
                           <section style={{ display: 'grid', gap: 10 }}>
-                            <div style={{ display: 'grid', gap: 10, maxHeight: 520, overflowY: 'auto', paddingRight: 4 }}>
+                            <div className="ops-comment-list" style={{ display: 'grid', gap: 10, paddingRight: 4 }}>
                               {sortedOpsComments.map((item) => (
                                 <article key={item.id} style={{ border: '1px solid #d2dbdc', borderRadius: 12, padding: 10, background: '#eceff0', boxShadow: '0 6px 14px rgba(0,0,0,.08)' }}>
                                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
