@@ -4971,56 +4971,103 @@
 
 
 
-      /* === Neumorfismo táctil (override visual sin eliminar funcionalidad previa) === */
+      /* === Remodelación visual integral (teal + naranja, manteniendo funcionalidad) === */
       :root {
-        --base: #DFEDEA;
-        --base-900: #DFEDEA;
-        --base-700: #DFEDEA;
-        --text: #1D2A31;
-        --muted: #4f5f67;
-        --accent: #E07D1E;
-        --accent-soft: #E07D1E;
-        --line: #3E4E59;
-        --panel: #DFEDEA;
-        --panel-2: #DFEDEA;
-        --shadow-soft: -10px -10px 18px #FFFFFF, 10px 10px 18px #CCCCCC;
-        --shadow-deep: -14px -14px 26px #FFFFFF, 14px 14px 26px #CCCCCC;
+        --brand-primary: #006465;
+        --brand-primary-soft: #0b7879;
+        --brand-surface: #e6f1ef;
+        --brand-card: #edf5f3;
+        --brand-title: #E07D1E;
+        --brand-dark-text: #111111;
+        --brand-light-text: #ffffff;
+        --brand-border: #0a4f50;
       }
 
       body {
-        background: #DFEDEA !important;
-        color: #1D2A31;
-      }
-
-      .topbar,
-      .hero,
-      .welcome-card,
-      .dashboard-info-card,
-      .kpi-card,
-      .panel {
-        background: #DFEDEA !important;
-        border: none !important;
-        backdrop-filter: none !important;
+        background: radial-gradient(circle at top left, #f3f9f8 0%, #e6f1ef 40%, #dcebe8 100%) !important;
+        color: var(--brand-dark-text) !important;
       }
 
       .topbar {
-        box-shadow: -8px -8px 16px #FFFFFF, 8px 8px 16px #CCCCCC !important;
+        background: linear-gradient(145deg, var(--brand-primary-soft), var(--brand-primary)) !important;
+        border: 1px solid rgba(255, 255, 255, 0.18) !important;
+        box-shadow: 0 10px 24px rgba(0, 69, 70, 0.28) !important;
+        backdrop-filter: none !important;
       }
 
       .top-titles h1,
       .hero h2,
-      .panel h2 {
-        color: #1D2A31 !important;
+      .panel h2,
+      .dashboard-info-card h3,
+      .kpi-label {
+        color: var(--brand-title) !important;
         text-shadow: none !important;
       }
 
       .top-titles p,
-      .hero p,
-      .welcome-meta,
+      .subtitle-voga {
+        color: var(--brand-light-text) !important;
+        opacity: 0.95;
+      }
+
+      .hero,
+      .welcome-card,
+      .dashboard-info-card,
+      .kpi-card,
+      .panel,
+      .search-preview,
+      .top-search-panel .search-wrap,
+      .topbar-notify-popover,
+      .sidebar-header,
+      .menu-button,
+      .submenu-button {
+        background: var(--brand-card) !important;
+        border: 1px solid rgba(0, 100, 101, 0.16) !important;
+        box-shadow: -10px -10px 18px #ffffff, 10px 10px 18px rgba(0, 100, 101, 0.18) !important;
+        border-radius: 18px !important;
+        color: var(--brand-dark-text) !important;
+        backdrop-filter: none !important;
+      }
+
+      .hero {
+        background: linear-gradient(145deg, #0b7879, #006465) !important;
+      }
+
+      .hero h2,
+      .hero p {
+        color: var(--brand-light-text) !important;
+      }
+
+      .welcome-profile,
+      .dashboard-info-item,
       .dashboard-info-empty,
+      .kpi-breakdown,
+      .search-item {
+        background: #f5fbfa !important;
+        border: 1px solid rgba(0, 100, 101, 0.14) !important;
+        border-radius: 14px !important;
+        color: var(--brand-dark-text) !important;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 6px 14px rgba(0, 80, 81, 0.08) !important;
+      }
+
+      .dashboard-info-item b,
       .dashboard-info-item small,
-      .kpi-label {
-        color: #4f5f67 !important;
+      .dashboard-info-empty,
+      .welcome-meta,
+      .kpi-breakdown,
+      .kpi-breakdown h3 {
+        color: #1a1a1a !important;
+      }
+
+      .welcome-title,
+      .welcome-title b,
+      .welcome-title strong {
+        color: var(--brand-title) !important;
+      }
+
+      .welcome-avatar {
+        border: 2px solid rgba(0, 100, 101, 0.22) !important;
+        box-shadow: inset -6px -6px 12px #ffffff, inset 6px 6px 12px rgba(0, 100, 101, 0.18) !important;
       }
 
       .burger,
@@ -5029,54 +5076,26 @@
       .topbar-back-btn,
       .topbar-mini-bell,
       .mobile-icon-btn {
-        background: #DFEDEA !important;
-        color: #3E4E59 !important;
-        border: 1px solid rgba(62, 78, 89, 0.25) !important;
-        box-shadow: inset -6px -6px 12px #FFFFFF, inset 6px 6px 12px #CCCCCC !important;
+        background: rgba(255, 255, 255, 0.12) !important;
+        color: var(--brand-light-text) !important;
+        border: 1px solid rgba(255, 255, 255, 0.35) !important;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.28), 0 6px 14px rgba(0, 49, 50, 0.28) !important;
       }
 
-      .welcome-card,
-      .dashboard-info-card,
-      .kpi-card,
-      .hero,
-      .sidebar-header,
-      .menu-button,
-      .submenu-button,
-      .top-search-panel .search-wrap,
-      .search-preview {
-        box-shadow: -10px -10px 18px #FFFFFF, 10px 10px 18px #CCCCCC !important;
-        border-radius: 20px !important;
+      .burger:hover,
+      .topbar-action-btn:hover,
+      .topbar-home-btn:hover,
+      .topbar-back-btn:hover {
+        transform: translateY(-1px);
+        background: rgba(255, 255, 255, 0.2) !important;
       }
 
-      .welcome-profile,
-      .dashboard-info-item,
-      .dashboard-info-empty,
-      .kpi-breakdown,
-      .search-item,
-      .topbar-notify-popover {
-        background: #DFEDEA !important;
-        border: 1px solid rgba(62, 78, 89, 0.18) !important;
-        box-shadow: inset -6px -6px 12px #FFFFFF, inset 6px 6px 12px #CCCCCC !important;
-        border-radius: 16px !important;
-      }
-
-      .welcome-avatar {
-        box-shadow: inset -7px -7px 14px #FFFFFF, inset 7px 7px 14px #CCCCCC !important;
-        border: 1px solid rgba(62, 78, 89, 0.2) !important;
-      }
-
-      .welcome-title b,
-      .welcome-title strong {
-        color: #E07D1E !important;
-      }
-
-      .dashboard-info-card h3,
-      .dashboard-info-item b {
-        color: #1D2A31 !important;
+      .kpi-card {
+        background: linear-gradient(145deg, #f8fcfb, #eaf4f2) !important;
       }
 
       .kpi-card:nth-child(1) .kpi-value {
-        color: #223545 !important;
+        color: #006465 !important;
       }
 
       .kpi-card:nth-child(2) .kpi-value {
@@ -5084,11 +5103,32 @@
       }
 
       .kpi-label {
+        letter-spacing: 0.08em;
         text-transform: uppercase;
-        letter-spacing: .08em;
       }
 
-      .sidebar,
+      .sidebar {
+        background: linear-gradient(180deg, #0a7677 0%, #006465 100%) !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.24) !important;
+        box-shadow: 10px 0 28px rgba(0, 61, 62, 0.35) !important;
+      }
+
+      .sidebar .menu-button,
+      .sidebar .submenu-button,
+      .sidebar .sidebar-header,
+      .sidebar .sidebar-signature {
+        color: #ffffff !important;
+        background: rgba(255,255,255,0.08) !important;
+        border: 1px solid rgba(255,255,255,0.22) !important;
+      }
+
+      .sidebar .menu-button span,
+      .sidebar .submenu-button span,
+      .sidebar .sidebar-header-title,
+      .sidebar .sidebar-header-sub {
+        color: #ffffff !important;
+      }
+
       .overlay {
         backdrop-filter: none !important;
       }
