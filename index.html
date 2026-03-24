@@ -5023,7 +5023,7 @@
       .submenu-button {
         background: var(--brand-card) !important;
         border: 1px solid rgba(0, 100, 101, 0.16) !important;
-        box-shadow: -10px -10px 18px #ffffff, 10px 10px 18px rgba(0, 100, 101, 0.18) !important;
+        box-shadow: 0 8px 18px rgba(0, 80, 81, 0.14) !important;
         border-radius: 18px !important;
         color: var(--brand-dark-text) !important;
         backdrop-filter: none !important;
@@ -5047,7 +5047,7 @@
         border: 1px solid rgba(0, 100, 101, 0.14) !important;
         border-radius: 14px !important;
         color: var(--brand-dark-text) !important;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), 0 6px 14px rgba(0, 80, 81, 0.08) !important;
+        box-shadow: 0 4px 12px rgba(0, 80, 81, 0.12) !important;
       }
 
       .dashboard-info-item b,
@@ -5067,7 +5067,7 @@
 
       .welcome-avatar {
         border: 2px solid rgba(0, 100, 101, 0.22) !important;
-        box-shadow: inset -6px -6px 12px #ffffff, inset 6px 6px 12px rgba(0, 100, 101, 0.18) !important;
+        box-shadow: 0 3px 10px rgba(0, 80, 81, 0.16) !important;
       }
 
       .burger,
@@ -5120,6 +5120,13 @@
         color: #ffffff !important;
         background: rgba(255,255,255,0.08) !important;
         border: 1px solid rgba(255,255,255,0.22) !important;
+        box-shadow: 0 4px 10px rgba(0, 40, 41, 0.22) !important;
+      }
+
+      .sidebar .menu-button:hover,
+      .sidebar .submenu-button:hover {
+        box-shadow: 0 6px 14px rgba(0, 40, 41, 0.28) !important;
+        background: rgba(255, 255, 255, 0.14) !important;
       }
 
       .sidebar .menu-button span,
@@ -5127,6 +5134,49 @@
       .sidebar .sidebar-header-title,
       .sidebar .sidebar-header-sub {
         color: #ffffff !important;
+      }
+
+      /* Contraste forzado: oscuro sobre fondos claros */
+      .welcome-card,
+      .dashboard-info-card,
+      .kpi-card,
+      .panel,
+      .search-preview,
+      .top-search-panel .search-wrap,
+      .topbar-notify-popover,
+      .search-item,
+      .dashboard-info-item,
+      .dashboard-info-empty {
+        color: #111111 !important;
+      }
+
+      .welcome-card *,
+      .dashboard-info-card *,
+      .kpi-card *,
+      .panel *,
+      .search-preview *,
+      .top-search-panel .search-wrap *,
+      .topbar-notify-popover *,
+      .search-item *,
+      .dashboard-info-item *,
+      .dashboard-info-empty * {
+        color: #111111 !important;
+      }
+
+      /* Contraste forzado: blanco sobre fondos oscuros */
+      .topbar,
+      .topbar *,
+      .hero,
+      .hero *,
+      .sidebar,
+      .sidebar * {
+        color: #ffffff !important;
+      }
+
+      .topbar .top-titles h1,
+      .hero h2,
+      .sidebar .sidebar-header-title {
+        color: #E07D1E !important;
       }
 
       .overlay {
