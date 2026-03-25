@@ -7303,6 +7303,8 @@
         const [ticketSaving, setTicketSaving] = useState(false);
         const [imageViewerSrc, setImageViewerSrc] = useState('');
         const [ticketsHistorial, setTicketsHistorial] = useState([]);
+        const [ticketSearchCode, setTicketSearchCode] = useState('');
+        const [ticketReassignModal, setTicketReassignModal] = useState({ open: false, ticket: null, assigneeKey: '' });
         const seenRowIdsRef = useRef(new Set());
         const seenOperationalAlertsRef = useRef(new Set());
         const topServicesLeaderRef = useRef('');
@@ -9530,8 +9532,19 @@
                   actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
                   editadoPor: currentUserName,
                 }, { merge: true });
+                const bajaTicket = await createGestionTicketFromForm({
+                  operacionId: targetDocId,
+                  tipoAccion,
+                  formulario: doc.formulario || '',
+                  clienteId: normalizedClientId,
+                  nombreServicio: doc.nombreServicio || bajaForm.nombreServicio || '',
+                  direccionServicio: doc.direccionServicio || bajaForm.direccionServicio || '',
+                  status: 'Baja',
+                  asignadoAEmail: doc.atencionCliente || '',
+                  asignadoANombre: doc.atencionCliente || '',
+                });
                 resetFields();
-                setNotificacion({ mensaje: '✔ Baja registrada (Servicios 1 → Bajas N)', tipo: 'ok' });
+                setNotificacion({ mensaje: `✔ Baja registrada (ticket ${bajaTicket})`, tipo: 'ok' });
                 void logRealtimeActivityEvent({ usuario: currentUserName, accion: 'registró baja del servicio', clienteId: normalizedClientId });
                 return;
               }
@@ -9542,11 +9555,22 @@
                 logs_cambios: [...existingLogs, nextLog],
               };
               await db.collection('operaciones').doc(targetDocId).set(payload, { merge: true });
+              const updateTicket = await createGestionTicketFromForm({
+                operacionId: targetDocId,
+                tipoAccion,
+                formulario: payload.formulario || '',
+                clienteId: normalizedClientId,
+                nombreServicio: payload.nombreServicio || '',
+                direccionServicio: payload.direccionServicio || '',
+                status: payload.status || '',
+                asignadoAEmail: payload.atencionCliente || '',
+                asignadoANombre: payload.atencionCliente || '',
+              });
               resetFields();
               if (!editingServiceId && existingDocIdByClient && ['Nuevo Servicio'].includes(tipoAccion)) {
-                setNotificacion({ mensaje: '✔ Servicio existente actualizado (sin duplicar ID).', tipo: 'ok' });
+                setNotificacion({ mensaje: `✔ Servicio existente actualizado (ticket ${updateTicket})`, tipo: 'ok' });
               } else {
-                setNotificacion({ mensaje: '✔ Servicio actualizado correctamente', tipo: 'ok' });
+                setNotificacion({ mensaje: `✔ Servicio actualizado correctamente (ticket ${updateTicket})`, tipo: 'ok' });
               }
               void logRealtimeActivityEvent({
                 usuario: currentUserName,
@@ -9562,9 +9586,20 @@
               creadoPor: doc.creadoPor || currentUserName,
               logs_cambios: [],
             };
-            await db.collection('operaciones').add(createPayload);
+            const createdRef = await db.collection('operaciones').add(createPayload);
+            const createTicket = await createGestionTicketFromForm({
+              operacionId: createdRef.id,
+              tipoAccion,
+              formulario: createPayload.formulario || '',
+              clienteId: normalizedClientId,
+              nombreServicio: createPayload.nombreServicio || '',
+              direccionServicio: createPayload.direccionServicio || '',
+              status: createPayload.status || '',
+              asignadoAEmail: createPayload.atencionCliente || '',
+              asignadoANombre: createPayload.atencionCliente || '',
+            });
             resetFields();
-            setNotificacion({ mensaje: '✔ Datos guardados correctamente', tipo: 'ok' });
+            setNotificacion({ mensaje: `✔ Datos guardados correctamente (ticket ${createTicket})`, tipo: 'ok' });
             void logRealtimeActivityEvent({
               usuario: currentUserName,
               accion: 'creó servicio',
@@ -10036,6 +10071,13 @@
           await handleTicketFilesInput(e.dataTransfer?.files || []);
         }
 
+        function generateTicketCode(prefix = 'TCK') {
+          const now = new Date();
+          const datePart = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+          const randomPart = Math.floor(1000 + Math.random() * 9000);
+          return `${prefix}-${datePart}-${randomPart}`;
+        }
+
         function openImageViewer(src) {
           const next = String(src || '').trim();
           if (!next) return;
@@ -10051,7 +10093,9 @@
           }
           setTicketSaving(true);
           try {
+            const ticketCodigo = generateTicketCode('WEB');
             await db.collection('tickets_app').add({
+              ticketCodigo,
               creadoPorUid: user?.uid || '',
               creadoPorEmail: user?.email || '',
               creadoPorNombre: currentUserName,
@@ -10065,13 +10109,41 @@
             setTicketComentario('');
             setTicketPrioridad('Media');
             setTicketImagenes([]);
-            setNotificacion({ mensaje: '✔ Ticket enviado', tipo: 'ok' });
+            setNotificacion({ mensaje: `✔ Ticket enviado (${ticketCodigo})`, tipo: 'ok' });
           } catch (error) {
             console.error('Error creando ticket:', error);
             setNotificacion({ mensaje: '✖ No se pudo crear el ticket', tipo: 'error' });
           } finally {
             setTicketSaving(false);
           }
+        }
+
+        async function createGestionTicketFromForm(payload = {}) {
+          const ticketCodigo = generateTicketCode('GST');
+          const baseComment = `${payload.tipoAccion || 'Gestión'} · ID ${payload.clienteId || '-'} · ${payload.nombreServicio || 'Servicio sin nombre'}`;
+          await db.collection('tickets_app').add({
+            ticketCodigo,
+            origen: 'form-gestion',
+            operacionId: payload.operacionId || '',
+            tipoAccion: payload.tipoAccion || '',
+            formulario: payload.formulario || '',
+            clienteId: payload.clienteId || '',
+            nombreServicio: payload.nombreServicio || '',
+            direccionServicio: payload.direccionServicio || '',
+            estadoGestion: payload.status || '',
+            comentario: baseComment,
+            asignadoAEmail: payload.asignadoAEmail || '',
+            asignadoANombre: payload.asignadoANombre || '',
+            creadoPorUid: user?.uid || '',
+            creadoPorEmail: user?.email || '',
+            creadoPorNombre: currentUserName,
+            fechaHoraLocal: formatUruguayDateTime(),
+            prioridad: 'Media',
+            estado: 'pendiente',
+            imagenesAdjuntas: [],
+            creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          return ticketCodigo;
         }
 
         async function handleResolveTicket(ticket) {
@@ -10121,6 +10193,68 @@
           }, {});
           return Object.entries(groups).map(([dateLabel, items]) => ({ dateLabel, items }));
         }, [ticketsHistorial, isTicketManager]);
+
+        const ticketAssignableUsers = useMemo(() => {
+          const map = new Map();
+          staffMembers.forEach((member) => {
+            const email = String(member.email || '').trim().toLowerCase();
+            const uid = String(member.uid || '').trim();
+            const key = email || uid;
+            if (!key) return;
+            map.set(key, { key, nombre: member.nombre || member.displayName || email || uid, email, uid });
+          });
+          const myEmail = String(user?.email || '').trim().toLowerCase();
+          const myUid = String(user?.uid || '').trim();
+          const myKey = myEmail || myUid;
+          if (myKey && !map.has(myKey)) map.set(myKey, { key: myKey, nombre: currentUserName || myEmail || myUid, email: myEmail, uid: myUid });
+          return Array.from(map.values()).sort((a, b) => String(a.nombre).localeCompare(String(b.nombre), 'es', { sensitivity: 'base' }));
+        }, [staffMembers, user?.email, user?.uid, currentUserName]);
+
+        const ticketSearchResults = useMemo(() => {
+          const q = ticketSearchCode.trim().toLowerCase();
+          if (!q) return [];
+          return ticketsHistorial.filter((ticket) => [
+            ticket.ticketCodigo,
+            ticket.comentario,
+            ticket.clienteId,
+            ticket.nombreServicio,
+            ticket.operacionId,
+          ].filter(Boolean).some((value) => String(value).toLowerCase().includes(q))).slice(0, 30);
+        }, [ticketsHistorial, ticketSearchCode]);
+
+        function openTicketReassignModal(ticket) {
+          if (!ticket?.id) return;
+          const currentKey = String(ticket.asignadoAEmail || '').trim().toLowerCase() || String(ticket.asignadoAUid || '').trim();
+          setTicketReassignModal({ open: true, ticket, assigneeKey: currentKey });
+        }
+
+        async function handleConfirmTicketReassign() {
+          if (!ticketReassignModal.ticket?.id || !ticketReassignModal.assigneeKey) return;
+          const selected = ticketAssignableUsers.find((item) => item.key === ticketReassignModal.assigneeKey);
+          if (!selected) return;
+          const ticket = ticketReassignModal.ticket;
+          const historial = Array.isArray(ticket.historialReasignacion) ? ticket.historialReasignacion : [];
+          try {
+            await db.collection('tickets_app').doc(ticket.id).set({
+              asignadoAEmail: selected.email || '',
+              asignadoANombre: selected.nombre || '',
+              asignadoAUid: selected.uid || '',
+              historialReasignacion: [...historial, {
+                fecha: new Date().toISOString(),
+                asignadoPor: currentUserName,
+                asignadoANombre: selected.nombre || '',
+                asignadoAEmail: selected.email || '',
+              }],
+              actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+              editadoPor: currentUserName,
+            }, { merge: true });
+            setTicketReassignModal({ open: false, ticket: null, assigneeKey: '' });
+            setNotificacion({ mensaje: '✔ Ticket reasignado correctamente', tipo: 'ok' });
+          } catch (error) {
+            console.error('Error reasignando ticket:', error);
+            setNotificacion({ mensaje: '✖ No se pudo reasignar el ticket', tipo: 'error' });
+          }
+        }
 
         function formatRequestDateTime(value) {
           if (!value) return '-';
@@ -10718,6 +10852,31 @@
                     <h2>Tickets</h2>
                     <div className="hint">Sugerencias para mejorar la web y el sistema.</div>
                     <article className="profile-option">
+                      <h3>Buscar ticket por número / gestión</h3>
+                      <div className="chat-search-wrap">
+                        <span className="chat-search-icon">🔎</span>
+                        <input type="search" placeholder="Ej: GST-20260325-1234" value={ticketSearchCode} onChange={(e) => setTicketSearchCode(e.target.value)} />
+                      </div>
+                      {ticketSearchCode.trim() && (
+                        <div className="chat-search-results" style={{ marginTop: 10 }}>
+                          {ticketSearchResults.length === 0 ? (
+                            <div className="kv">No se encontraron tickets para esa búsqueda.</div>
+                          ) : ticketSearchResults.map((ticket) => (
+                            <article className="chat-search-result" key={`ticket-search-${ticket.id}`}>
+                              <strong>{ticket.ticketCodigo || `TICKET-${ticket.id}`}</strong>
+                              <div className="kv"><b>Tipo:</b> {ticket.origen === 'form-gestion' ? 'Ticket por gestión (form)' : 'Ticket manual'}</div>
+                              <div className="kv"><b>Cliente ID:</b> {ticket.clienteId || '-'}</div>
+                              <div className="kv"><b>Servicio:</b> {ticket.nombreServicio || '-'}</div>
+                              <div className="kv"><b>Operación:</b> {ticket.operacionId || '-'}</div>
+                              <div className="kv"><b>Asignado a:</b> {ticket.asignadoANombre || ticket.asignadoAEmail || 'Sin asignar'}</div>
+                              <div className="kv"><b>Comentario:</b> {ticket.comentario || '-'}</div>
+                              <div className="kv"><b>Estado:</b> {ticket.estado || 'pendiente'}</div>
+                            </article>
+                          ))}
+                        </div>
+                      )}
+                    </article>
+                    <article className="profile-option">
                       <h3>Nuevo ticket</h3>
                       <form className="profile-form" onSubmit={handleCreateTicket}>
                         <input type="text" value={currentUserName} readOnly />
@@ -10756,10 +10915,19 @@
                               <h4 className="ticket-date-title">{group.dateLabel}</h4>
                               {group.items.map((ticket) => (
                                 <div key={ticket.id} className="ticket-item-card">
+                                  <div className="kv"><b>N° ticket:</b> {ticket.ticketCodigo || `TICKET-${ticket.id}`}</div>
                                   <div className="kv"><b>Usuario:</b> {ticket.creadoPorNombre || ticket.creadoPorEmail || '-'}</div>
                                   <div className="kv"><b>Fecha:</b> {ticket.fechaHoraLocal || formatRequestDateTime(ticket.creadoEn)}</div>
                                   <div className="kv"><b>Prioridad:</b> {ticket.prioridad || '-'}</div>
                                   <div className="kv"><b>Comentario:</b> {ticket.comentario || '-'}</div>
+                                  <div className="kv"><b>Asignado a:</b> {ticket.asignadoANombre || ticket.asignadoAEmail || 'Sin asignar'}</div>
+                                  {ticket.origen === 'form-gestion' && (
+                                    <>
+                                      <div className="kv"><b>Cliente ID:</b> {ticket.clienteId || '-'}</div>
+                                      <div className="kv"><b>Servicio:</b> {ticket.nombreServicio || '-'}</div>
+                                      <div className="kv"><b>Tipo de acción:</b> {ticket.tipoAccion || '-'}</div>
+                                    </>
+                                  )}
                                   {Array.isArray(ticket.imagenesAdjuntas) && ticket.imagenesAdjuntas.length > 0 && (
                                     <div className="ticket-image-grid">
                                       {ticket.imagenesAdjuntas.map((img, idx) => (<img key={`hist-img-${ticket.id}-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `adj-${idx + 1}`} onClick={() => openImageViewer(img.dataUrl)} />))}
@@ -10767,6 +10935,7 @@
                                   )}
                                   <div className="kv"><b>Estado:</b> {ticket.estado || 'pendiente'}</div>
                                   <div className="request-status-row" style={{ marginTop: 8 }}>
+                                    <button type="button" className="status-action-btn chat-action-btn" onClick={() => openTicketReassignModal(ticket)}>Reasignar</button>
                                     {ticket.estado !== 'resuelto' && <button type="button" className="status-action-btn accept" onClick={() => handleResolveTicket(ticket)}>Marcar resuelto</button>}
                                     <button type="button" className="status-action-btn reject" onClick={() => handleDeleteTicket(ticket)}>Eliminar</button>
                                   </div>
@@ -11999,6 +12168,28 @@
                 </section>
                 )}
               </main>
+
+              {ticketReassignModal.open && (
+                <div className="confirm-modal" onClick={() => setTicketReassignModal({ open: false, ticket: null, assigneeKey: '' })}>
+                  <div className="confirm-modal-card profile-avatar-modal" onClick={(e) => e.stopPropagation()}>
+                    <h3>Reasignar ticket</h3>
+                    <div className="hint" style={{ marginBottom: 8 }}>Ticket: <b>{ticketReassignModal.ticket?.ticketCodigo || `TICKET-${ticketReassignModal.ticket?.id || ''}`}</b></div>
+                    <div className="field">
+                      <label>Asignar a usuario</label>
+                      <select value={ticketReassignModal.assigneeKey} onChange={(e) => setTicketReassignModal((prev) => ({ ...prev, assigneeKey: e.target.value }))}>
+                        <option value="">Seleccionar usuario...</option>
+                        {ticketAssignableUsers.map((member) => (
+                          <option key={`assign-ticket-${member.key}`} value={member.key}>{member.nombre}{member.email ? ` · ${member.email}` : ''}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="profile-avatar-modal-actions" style={{ marginTop: 12 }}>
+                      <button type="button" className="edit-btn" onClick={() => setTicketReassignModal({ open: false, ticket: null, assigneeKey: '' })}>Cancelar</button>
+                      <button type="button" className="save-btn" onClick={handleConfirmTicketReassign} disabled={!ticketReassignModal.assigneeKey}>Guardar reasignación</button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {profileAvatarModalOpen && (
                 <div className="confirm-modal" onClick={closeProfileAvatarModal}>
