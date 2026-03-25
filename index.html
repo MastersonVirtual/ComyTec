@@ -1216,6 +1216,154 @@
           grid-template-columns: 1fr;
         }
       }
+      .service-coord-shell {
+        background: #f3f6f8;
+        border: 1px solid rgba(208, 222, 226, .75);
+      }
+      .service-coord-title {
+        margin: 0 0 16px;
+        color: #0a3738;
+        font-size: clamp(1.65rem, 2.6vw, 2.08rem);
+        letter-spacing: .2px;
+      }
+      .service-coord-filters {
+        display: grid;
+        grid-template-columns: minmax(260px, 2fr) repeat(3, minmax(160px, 1fr));
+        gap: 12px;
+        background: #ffffff;
+        border: 1px solid rgba(185, 204, 208, .68);
+        border-radius: 14px;
+        padding: 14px;
+        box-shadow: 0 8px 22px rgba(16, 24, 40, .06);
+      }
+      .service-coord-filters .field label { color: #35595c; }
+      .service-coord-filters .field input,
+      .service-coord-filters .field select {
+        min-height: 46px;
+        border-radius: 12px;
+        background: #f9fbfc;
+        border-color: rgba(184, 202, 206, .9);
+        color: #123c3f;
+      }
+      .service-coord-search-wrap { position: relative; }
+      .service-coord-search-wrap input { padding-left: 38px; }
+      .service-coord-search-icon {
+        position: absolute;
+        top: 50%;
+        left: 12px;
+        transform: translateY(-50%);
+        color: #0b6b6c;
+        display: inline-flex;
+      }
+      .service-coord-search-icon i { width: 16px; height: 16px; }
+      .service-coord-table-card,
+      .service-coord-detail-card {
+        margin-top: 14px;
+        background: #ffffff;
+        border: 1px solid rgba(191, 207, 211, .72);
+        border-radius: 14px;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, .06);
+        padding: 14px;
+      }
+      .service-coord-table-wrap { overflow-x: auto; }
+      .service-coord-table {
+        width: 100%;
+        min-width: 980px;
+        border-collapse: separate;
+        border-spacing: 0;
+        color: #224649;
+      }
+      .service-coord-table th {
+        background: #f1f5f7;
+        color: #35575a;
+        text-align: left;
+        font-size: 12px;
+        letter-spacing: .18px;
+        padding: 12px 10px;
+        font-weight: 700;
+        border-bottom: 1px solid #dfebee;
+      }
+      .service-coord-table td {
+        padding: 12px 10px;
+        border-bottom: 1px solid #edf3f5;
+        vertical-align: middle;
+        font-size: 13px;
+      }
+      .service-coord-table tbody tr:hover { background: #f7fbfc; }
+      .service-coord-client { color: #0f3133; font-weight: 700; }
+      .service-coord-action-cell { text-align: right; }
+      .service-coord-action-head { text-align: right; }
+      .service-coord-detail-btn {
+        border: 1px solid rgba(0, 100, 101, .32);
+        border-radius: 10px;
+        height: 34px;
+        padding: 0 12px;
+        background: rgba(0, 100, 101, .12);
+        color: #045659;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform .16s ease, box-shadow .16s ease;
+      }
+      .service-coord-detail-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0, 100, 101, .16); }
+      .service-coord-status {
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        border: 1px solid transparent;
+      }
+      .service-coord-status-pendiente { background: #fff3e4; border-color: #f9d3a7; color: #9a5b18; }
+      .service-coord-status-activo { background: #e8f6ef; border-color: #b8dfca; color: #2a6b46; }
+      .service-coord-status-finalizado { background: #eef1f3; border-color: #d8dfe4; color: #5a6670; }
+      .service-coord-pagination {
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+      }
+      .service-coord-page-btn,
+      .service-coord-page-current {
+        height: 32px;
+        min-width: 32px;
+        border-radius: 10px;
+        border: 1px solid #c9d8dc;
+        padding: 0 10px;
+        background: #ffffff;
+        color: #355659;
+        font-weight: 700;
+      }
+      .service-coord-page-current {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #0a5f61;
+        color: #fff;
+        border-color: #0a5f61;
+      }
+      .service-coord-page-btn:disabled { opacity: .45; cursor: not-allowed; }
+      .service-coord-empty {
+        text-align: center;
+        color: #6a7f82;
+        padding: 26px 10px !important;
+      }
+      .service-coord-detail-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .service-coord-detail-head h3 {
+        margin: 0;
+        color: #133e41;
+      }
+      @media (max-width: 1180px) {
+        .service-coord-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      @media (max-width: 760px) {
+        .service-coord-filters { grid-template-columns: 1fr; }
+      }
       .edit-btn {
         text-align: left;
         border: 1px solid rgba(230,255,253,.2);
@@ -7508,16 +7656,10 @@
               : actionValueRaw === 'Adicionales' ? 'Adicional'
                 : actionValueRaw === 'Solicitud de presupuesto' ? 'Presupuesto'
                   : actionValueRaw;
-            const rowDate = (() => {
-              const ts = r.actualizadoEn?.seconds || r.creadoEn?.seconds || null;
-              if (ts) return new Date(ts * 1000).toISOString().slice(0, 10);
-              const fallback = String(r.fechaIngresoAuto || r.fechaAltaServicio || r.fechaAltaNegociada || '').slice(0, 10);
-              return fallback || '';
-            })();
             const matchStatus = historyStatusFilter === 'todos' || statusValue === historyStatusFilter;
             const matchCommercial = historyCommercialFilter === 'todos' || commercialValue === historyCommercialFilter;
             const matchType = historyTypeFilter === 'todos' || actionValue === historyTypeFilter;
-            const matchDate = !historyDateFilter || rowDate === historyDateFilter;
+            const matchDate = true;
             const matchQuery = !query || [
               r.nombreServicio,
               r.cliente,
@@ -10803,109 +10945,98 @@
                     )}
                   </section>
                 ) : effectiveSelectedForm === 'historial' ? (
-                  <section className="panel">
-                    <h2>Historial y coordinación de servicios</h2>
-                    <div className="hint">Historial de servicios en formato listado + one page de detalle con toda la información inicial, equipamiento instalado y seguimiento operativo.</div>
+                  <section className="panel service-coord-shell">
+                    <h2 className="service-coord-title">Historial y coordinación de servicios</h2>
 
-                    <div className="history-toolbar" style={{ marginTop: 12 }}>
-                      <div className="field"><label>Buscar</label><input type="search" value={historySearchTerm} onChange={(e) => setHistorySearchTerm(e.target.value)} placeholder="Nombre, ID, dirección o cliente" /></div>
-                      <div className="field"><label>Estado</label><select value={historyStatusFilter} onChange={(e) => setHistoryStatusFilter(e.target.value)}><option value="todos">Todos</option>{historyStatusOptions.map((opt) => <option key={`history-status-${opt}`} value={opt}>{opt}</option>)}</select></div>
-                      <div className="field"><label>Comercial</label><select value={historyCommercialFilter} onChange={(e) => setHistoryCommercialFilter(e.target.value)}><option value="todos">Todos</option>{historyCommercialOptions.map((opt) => <option key={`history-commercial-${opt}`} value={opt}>{opt}</option>)}</select></div>
-                      <div className="field"><label>Tipo</label><select value={historyTypeFilter} onChange={(e) => setHistoryTypeFilter(e.target.value)}><option value="todos">Todos</option>{historyTypeOptions.map((opt) => <option key={`history-type-${opt}`} value={opt}>{opt}</option>)}</select></div>
-                      <div className="field"><label>Fecha</label><input type="date" value={historyDateFilter} onChange={(e) => setHistoryDateFilter(e.target.value)} /></div>
-                    </div>
-
-                    <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'minmax(320px, .95fr) minmax(0, 1.45fr)', marginTop: 12 }}>
-                      <div className="history-list-shell" style={{ marginBottom: 0 }}>
-                        <div className="history-list-head">
-                          <strong>Listado de servicios ({historyFilteredRows.length})</strong>
-                          <small>Página {safeHistoryPage} de {totalHistoryPages}</small>
-                        </div>
-                        {historyRowsPage.length === 0 ? (
-                          <div className="hint" style={{ marginBottom: 0, padding: 14 }}>No hay servicios para los filtros seleccionados.</div>
-                        ) : (
-                          <div className="history-list">
-                            {historyRowsPage.map((row) => {
-                              const rowStatus = normalizeLegacyStatusName(String(row.status || row.estado || 'Pendiente'));
-                              const isActive = selectedService?.id === row.id;
-                              return (
-                                <article key={`history-row-${row.id}`} className="history-row" data-status={String(rowStatus || '').toLowerCase()} style={{ border: isActive ? '1px solid rgba(255,138,42,.65)' : undefined }}>
-                                  <button type="button" className="ranking-service-btn" style={{ width: '100%', textAlign: 'left' }} onClick={() => setSelectedService(row)}>
-                                    <div className="history-row-main">
-                                      <strong>{row.nombreServicio || row.cliente || 'Servicio sin nombre'}</strong>
-                                      <div className="history-row-meta">
-                                        <span>ID {row.clienteId || '-'}</span><span>·</span>
-                                        <span>{row.tipoServicioBrindar || 'Sin tipo'}</span><span>·</span>
-                                        <span>{row.representanteComercial || 'Sin comercial'}</span>
-                                      </div>
-                                    </div>
-                                  </button>
-                                  <span className="history-status-badge" data-status={String(rowStatus || '').toLowerCase()}>{rowStatus}</span>
-                                </article>
-                              );
-                            })}
-                          </div>
-                        )}
-                        <div className="history-pagination">
-                          <div className="history-page-actions">
-                            <button type="button" className="history-page-num" onClick={() => setHistoryPage(1)} disabled={safeHistoryPage <= 1}>«</button>
-                            <button type="button" className="history-page-num" onClick={() => setHistoryPage((p) => Math.max(1, p - 1))} disabled={safeHistoryPage <= 1}>Anterior</button>
-                            <span className="history-page-num active">{safeHistoryPage}</span>
-                            <button type="button" className="history-page-num" onClick={() => setHistoryPage((p) => Math.min(totalHistoryPages, p + 1))} disabled={safeHistoryPage >= totalHistoryPages}>Siguiente</button>
-                            <button type="button" className="history-page-num" onClick={() => setHistoryPage(totalHistoryPages)} disabled={safeHistoryPage >= totalHistoryPages}>»</button>
-                          </div>
+                    <div className="service-coord-filters">
+                      <div className="field service-coord-search-field">
+                        <label>Buscador</label>
+                        <div className="service-coord-search-wrap">
+                          <span className="service-coord-search-icon"><i data-lucide="search"></i></span>
+                          <input type="search" value={historySearchTerm} onChange={(e) => setHistorySearchTerm(e.target.value)} placeholder="Buscar por cliente, ID o dirección" />
                         </div>
                       </div>
-
-                      {(() => {
-                        const detailService = selectedService || historyRowsPage[0] || null;
-                        if (!detailService) {
-                          return <section className="panel" style={{ marginBottom: 0 }}><div className="hint" style={{ marginBottom: 0 }}>Seleccioná un servicio para ver su detalle.</div></section>;
-                        }
-                        const serviceStatus = normalizeLegacyStatusName(String(detailService.status || detailService.estado || 'Pendiente'));
-                        return (
-                          <section className="panel" style={{ marginBottom: 0 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                              <h3 style={{ margin: 0 }}>{detailService.nombreServicio || detailService.cliente || 'Servicio sin nombre'}</h3>
-                              <span className={statusClass(serviceStatus)}>{serviceStatus}</span>
-                            </div>
-                            <div className="hint" style={{ marginTop: 6 }}>One page de detalle completo del servicio seleccionado.</div>
-
-                            <div className="history-grid" style={{ marginTop: 10 }}>
-                              <div className="field"><label>ID Servicio</label><input value={detailService.clienteId || '-'} readOnly type="text" /></div>
-                              <div className="field"><label>Tipo de servicio</label><input value={detailService.tipoServicioBrindar || '-'} readOnly type="text" /></div>
-                              <div className="field"><label>Fecha de alta</label><input value={detailService.fechaAltaServicio || detailService.fechaAlta || detailService.fechaEspecificaInicio || '-'} readOnly type="text" /></div>
-
-                              <div className="field span-2"><label>Dirección del servicio</label><input value={detailService.direccionServicio || detailService.direccion || '-'} readOnly type="text" /></div>
-                              <div className="field"><label>Horario contratado</label><input value={detailService.horarioServicioContratado || detailService.horarioCoberturaExacto || '-'} readOnly type="text" /></div>
-
-                              <div className="field"><label>Representante comercial</label><input value={detailService.representanteComercial || '-'} readOnly type="text" /></div>
-                              <div className="field"><label>Atención al cliente</label><input value={detailService.atencionCliente || detailService.atencion || '-'} readOnly type="text" /></div>
-                              <div className="field"><label>Técnico asignado</label><input value={detailService.tecnico || detailService.tecnicoAsignado || '-'} readOnly type="text" /></div>
-
-                              <div className="field"><label>Equipamiento instalado</label><input value={detailService.equipamientoInstalado || detailService.detalleEquipamiento || detailService.equipamientoRetirar || '-'} readOnly type="text" /></div>
-                              <div className="field"><label>Propietario equipamiento</label><input value={detailService.propietarioEquipamiento || '-'} readOnly type="text" /></div>
-                              <div className="field"><label>Condición equipamiento</label><input value={detailService.condicionEquipamiento || detailService.condicionEquipamientoInstalado || '-'} readOnly type="text" /></div>
-
-                              <div className="field"><label>Importe mensual sin IVA</label><input value={detailService.importeMensualServicioSinIva || detailService.importeMensualServicio || '-'} readOnly type="text" /></div>
-                              <div className="field"><label>Razón social</label><input value={detailService.razonSocial || '-'} readOnly type="text" /></div>
-                              <div className="field"><label>RUT</label><input value={detailService.rut || '-'} readOnly type="text" /></div>
-                            </div>
-
-                            <div className="field" style={{ marginTop: 12 }}>
-                              <label>Información inicial cargada</label>
-                              <textarea readOnly value={detailService.observacionesComentarios || detailService.observaciones || detailService.excepcionesAcordadas || 'Sin observaciones iniciales registradas.'} />
-                            </div>
-
-                            <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                              <button className="pdf-btn" type="button" onClick={() => handleDownloadPdf(detailService)}>Descargar PDF</button>
-                              {!detailService.origenCatalogo && <button className="edit-btn" type="button" onClick={() => startEditService(detailService)}>Editar Servicio</button>}
-                              {!detailService.origenCatalogo && <button className="danger-btn" type="button" onClick={() => setDeleteTargetService(detailService)}>Eliminar</button>}
-                            </div>
-                          </section>
-                        );
-                      })()}
+                      <div className="field"><label>Estado</label><select value={historyStatusFilter} onChange={(e) => setHistoryStatusFilter(e.target.value)}><option value="todos">Todos</option>{historyStatusOptions.map((opt) => <option key={`history-status-${opt}`} value={opt}>{opt}</option>)}</select></div>
+                      <div className="field"><label>Encargado</label><select value={historyCommercialFilter} onChange={(e) => setHistoryCommercialFilter(e.target.value)}><option value="todos">Todos</option>{historyCommercialOptions.map((opt) => <option key={`history-commercial-${opt}`} value={opt}>{opt}</option>)}</select></div>
+                      <div className="field"><label>Tipo</label><select value={historyTypeFilter} onChange={(e) => setHistoryTypeFilter(e.target.value)}><option value="todos">Todos</option>{historyTypeOptions.map((opt) => <option key={`history-type-${opt}`} value={opt}>{opt}</option>)}</select></div>
                     </div>
+
+                    <section className="service-coord-table-card">
+                      <div className="service-coord-table-wrap">
+                        <table className="service-coord-table">
+                          <thead>
+                            <tr>
+                              <th>ID</th>
+                              <th>Cliente</th>
+                              <th>Dirección</th>
+                              <th>Tipo</th>
+                              <th>Encargado</th>
+                              <th>Fecha</th>
+                              <th>Estado</th>
+                              <th className="service-coord-action-head">Acción</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {historyRowsPage.length === 0 ? (
+                              <tr><td colSpan={8} className="service-coord-empty">No hay servicios para los filtros seleccionados.</td></tr>
+                            ) : historyRowsPage.map((row) => {
+                              const rawStatus = normalizeLegacyStatusName(String(row.status || row.estado || 'Pendiente'));
+                              const tableStatus = rawStatus === 'Finalizado' || rawStatus === 'Completado'
+                                ? 'Finalizado'
+                                : rawStatus === 'En proceso' || rawStatus === 'Esperando información'
+                                  ? 'Activo'
+                                  : 'Pendiente';
+                              return (
+                                <tr key={`history-row-${row.id}`}>
+                                  <td>{row.clienteId || '-'}</td>
+                                  <td><strong className="service-coord-client">{row.nombreServicio || row.cliente || 'Servicio sin nombre'}</strong></td>
+                                  <td>{row.direccionServicio || row.direccion || '-'}</td>
+                                  <td>{row.tipoServicioBrindar || 'Sin tipo'}</td>
+                                  <td>{row.representanteComercial || 'Sin encargado'}</td>
+                                  <td>{row.fechaAltaServicio || row.fechaAlta || row.fechaEspecificaInicio || '-'}</td>
+                                  <td>
+                                    <span className={`service-coord-status service-coord-status-${tableStatus.toLowerCase()}`}>{tableStatus}</span>
+                                  </td>
+                                  <td className="service-coord-action-cell">
+                                    <button type="button" className="service-coord-detail-btn" onClick={() => setSelectedService(row)}>Ver detalles</button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div className="service-coord-pagination">
+                        <button type="button" className="service-coord-page-btn" onClick={() => setHistoryPage((p) => Math.max(1, p - 1))} disabled={safeHistoryPage <= 1}>Anterior</button>
+                        <span className="service-coord-page-current">{safeHistoryPage}</span>
+                        <button type="button" className="service-coord-page-btn" onClick={() => setHistoryPage((p) => Math.min(totalHistoryPages, p + 1))} disabled={safeHistoryPage >= totalHistoryPages}>Siguiente</button>
+                      </div>
+                    </section>
+
+                    {(() => {
+                      const detailService = selectedService || historyRowsPage[0] || null;
+                      if (!detailService) return null;
+                      const serviceStatus = normalizeLegacyStatusName(String(detailService.status || detailService.estado || 'Pendiente'));
+                      return (
+                        <section className="service-coord-detail-card">
+                          <div className="service-coord-detail-head">
+                            <h3>{detailService.nombreServicio || detailService.cliente || 'Servicio sin nombre'}</h3>
+                            <span className={statusClass(serviceStatus)}>{serviceStatus}</span>
+                          </div>
+                          <div className="history-grid" style={{ marginTop: 10 }}>
+                            <div className="field"><label>ID Servicio</label><input value={detailService.clienteId || '-'} readOnly type="text" /></div>
+                            <div className="field"><label>Tipo de servicio</label><input value={detailService.tipoServicioBrindar || '-'} readOnly type="text" /></div>
+                            <div className="field"><label>Fecha de alta</label><input value={detailService.fechaAltaServicio || detailService.fechaAlta || detailService.fechaEspecificaInicio || '-'} readOnly type="text" /></div>
+                            <div className="field span-2"><label>Dirección del servicio</label><input value={detailService.direccionServicio || detailService.direccion || '-'} readOnly type="text" /></div>
+                            <div className="field"><label>Encargado</label><input value={detailService.representanteComercial || '-'} readOnly type="text" /></div>
+                            <div className="field"><label>Equipamiento instalado</label><input value={detailService.equipamientoInstalado || detailService.detalleEquipamiento || detailService.equipamientoRetirar || '-'} readOnly type="text" /></div>
+                            <div className="field"><label>Propietario equipamiento</label><input value={detailService.propietarioEquipamiento || '-'} readOnly type="text" /></div>
+                            <div className="field"><label>Importe mensual sin IVA</label><input value={detailService.importeMensualServicioSinIva || detailService.importeMensualServicio || '-'} readOnly type="text" /></div>
+                          </div>
+                        </section>
+                      );
+                    })()}
                   </section>
                 ) : (
                 <section className="panel">
