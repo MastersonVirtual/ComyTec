@@ -5720,10 +5720,28 @@
         return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
       }
 
-      const PROFILE_AVATAR_OPTIONS = PROFILE_AVATAR_PRESETS.map((preset) => ({
-        ...preset,
-        src: buildAvatarSvgDataUri(preset),
-      }));
+      const PROFILE_AVATAR_OPTIONS = [
+        { id: 'icon-01', label: 'Ícono 1', src: 'https://i.postimg.cc/bS18zLcP/10496279.jpg' },
+        { id: 'icon-02', label: 'Ícono 2', src: 'https://i.postimg.cc/9wyVW15M/Captura-de-pantalla-2026-03-25-073135.png' },
+        { id: 'icon-03', label: 'Ícono 3', src: 'https://i.postimg.cc/3027K95w/Captura-de-pantalla-2026-03-25-073159.png' },
+        { id: 'icon-04', label: 'Ícono 4', src: 'https://i.postimg.cc/H8bHp3Dk/Captura-de-pantalla-2026-03-25-073215.png' },
+        { id: 'icon-05', label: 'Ícono 5', src: 'https://i.postimg.cc/CnbYFJT5/Captura-de-pantalla-2026-03-25-073251.png' },
+        { id: 'icon-06', label: 'Ícono 6', src: 'https://i.postimg.cc/Mf1xWt2f/Captura-de-pantalla-2026-03-25-073306.png' },
+        { id: 'icon-07', label: 'Ícono 7', src: 'https://i.postimg.cc/dZGvqnPy/Captura-de-pantalla-2026-03-25-073328.png' },
+        { id: 'icon-08', label: 'Ícono 8', src: 'https://i.postimg.cc/2LnmzTRW/Captura-de-pantalla-2026-03-25-073345.png' },
+        { id: 'icon-09', label: 'Ícono 9', src: 'https://i.postimg.cc/5Q81xpdv/Captura-de-pantalla-2026-03-25-073403.png' },
+        { id: 'icon-10', label: 'Ícono 10', src: 'https://i.postimg.cc/V0X1Y4Qq/Captura-de-pantalla-2026-03-25-073425.png' },
+        { id: 'icon-11', label: 'Ícono 11', src: 'https://i.postimg.cc/QV7jkNBf/Captura-de-pantalla-2026-03-25-073450.png' },
+        { id: 'icon-12', label: 'Ícono 12', src: 'https://i.postimg.cc/QV7jkNB6/Captura-de-pantalla-2026-03-25-073520.png' },
+        { id: 'icon-13', label: 'Ícono 13', src: 'https://i.postimg.cc/LhPmB4qQ/Captura-de-pantalla-2026-03-25-073536.png' },
+        { id: 'icon-14', label: 'Ícono 14', src: 'https://i.postimg.cc/DmG7dfWD/Captura-de-pantalla-2026-03-25-073548.png' },
+        { id: 'icon-15', label: 'Ícono 15', src: 'https://i.postimg.cc/7bzqMPCd/Captura-de-pantalla-2026-03-25-073608.png' },
+        { id: 'icon-16', label: 'Ícono 16', src: 'https://i.postimg.cc/4ncXb4Kj/Captura-de-pantalla-2026-03-25-073629.png' },
+        { id: 'icon-17', label: 'Ícono 17', src: 'https://i.postimg.cc/yWR7X6JM/Captura-de-pantalla-2026-03-25-073646.png' },
+        { id: 'icon-18', label: 'Ícono 18', src: 'https://i.postimg.cc/grhGqcXW/Captura-de-pantalla-2026-03-25-073704.png' },
+        { id: 'icon-19', label: 'Ícono 19', src: 'https://i.postimg.cc/0rS9d5Mv/Captura-de-pantalla-2026-03-25-073743.png' },
+        { id: 'icon-20', label: 'Ícono 20', src: 'https://i.postimg.cc/7bzqMPGx/Captura-de-pantalla-2026-03-25-073757.png' },
+      ];
 
       const DEFAULT_PROFILE_AVATAR_ID = PROFILE_AVATAR_OPTIONS[0].id;
 
