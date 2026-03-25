@@ -10804,251 +10804,107 @@
                   </section>
                 ) : effectiveSelectedForm === 'historial' ? (
                   <section className="panel">
-                    <h2>Gestión Operativa</h2>
-                    <div className="hint">Módulo de inteligencia operativa con tablero Kanban, tabla activa y panel lateral colaborativo.</div>
+                    <h2>Historial y coordinación de servicios</h2>
+                    <div className="hint">Historial de servicios en formato listado + one page de detalle con toda la información inicial, equipamiento instalado y seguimiento operativo.</div>
 
-                    <div className="ops-main-layout">
-                      <section className="panel" style={{ background: '#f7fafb', color: '#103839', border: '1px solid #dde8ea', marginBottom: 0 }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 10, alignItems: 'center', marginBottom: 14 }}>
-                          <div style={{ textAlign: 'center', marginLeft: 90 }}>
-                            <div style={{ fontSize: 28, color: '#ff8a2a', fontWeight: 800, lineHeight: 1 }}>Masterson Seguridad</div>
-                            <div style={{ color: '#ff8a2a', fontSize: 13 }}>Administrador</div>
-                          </div>
-                          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                            <button type="button" className="burger" style={{ width: 42, height: 42, borderRadius: '50%', color: '#e8fbfb', background: '#006d72' }}><i data-lucide="search"></i></button>
-                            <button type="button" className="burger" style={{ width: 42, height: 42, borderRadius: '50%', color: '#e8fbfb', background: '#006d72', position: 'relative' }}><i data-lucide="bell"></i><span style={{ position: 'absolute', top: 8, right: 8, width: 7, height: 7, borderRadius: '50%', background: '#ef4444' }}></span></button>
-                            <button type="button" className="burger" style={{ width: 42, height: 42, borderRadius: '50%', color: '#e8fbfb', background: '#006d72' }}><i data-lucide="user-circle-2"></i></button>
-                          </div>
+                    <div className="history-toolbar" style={{ marginTop: 12 }}>
+                      <div className="field"><label>Buscar</label><input type="search" value={historySearchTerm} onChange={(e) => setHistorySearchTerm(e.target.value)} placeholder="Nombre, ID, dirección o cliente" /></div>
+                      <div className="field"><label>Estado</label><select value={historyStatusFilter} onChange={(e) => setHistoryStatusFilter(e.target.value)}><option value="todos">Todos</option>{historyStatusOptions.map((opt) => <option key={`history-status-${opt}`} value={opt}>{opt}</option>)}</select></div>
+                      <div className="field"><label>Comercial</label><select value={historyCommercialFilter} onChange={(e) => setHistoryCommercialFilter(e.target.value)}><option value="todos">Todos</option>{historyCommercialOptions.map((opt) => <option key={`history-commercial-${opt}`} value={opt}>{opt}</option>)}</select></div>
+                      <div className="field"><label>Tipo</label><select value={historyTypeFilter} onChange={(e) => setHistoryTypeFilter(e.target.value)}><option value="todos">Todos</option>{historyTypeOptions.map((opt) => <option key={`history-type-${opt}`} value={opt}>{opt}</option>)}</select></div>
+                      <div className="field"><label>Fecha</label><input type="date" value={historyDateFilter} onChange={(e) => setHistoryDateFilter(e.target.value)} /></div>
+                    </div>
+
+                    <div style={{ display: 'grid', gap: 14, gridTemplateColumns: 'minmax(320px, .95fr) minmax(0, 1.45fr)', marginTop: 12 }}>
+                      <div className="history-list-shell" style={{ marginBottom: 0 }}>
+                        <div className="history-list-head">
+                          <strong>Listado de servicios ({historyFilteredRows.length})</strong>
+                          <small>Página {safeHistoryPage} de {totalHistoryPages}</small>
                         </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(210px, 1fr))', gap: 10, marginBottom: 12 }}>
-                          <article style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 14, padding: 10 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: '#c2410c', fontWeight: 700, textAlign: 'center' }}><span className="ops-alert-ping">🚨</span> Urgencia Operativa</div>
-                            <div style={{ fontWeight: 800, marginTop: 4, textAlign: 'center' }}>1 Tarea Crítica</div>
-                            <small style={{ display: 'block', textAlign: 'center' }}>San Felipe (vence mañana)</small>
-                            <div style={{ textAlign: 'center' }}><button type="button" className="history-edit-btn" style={{ marginTop: 8 }}>Ver Tarea</button></div>
-                          </article>
-                          <article style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 14, padding: 10 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: '#c2410c', fontWeight: 700, textAlign: 'center' }}>📈 Previsión de Flujo</div>
-                            <div style={{ fontWeight: 800, marginTop: 4, textAlign: 'center' }}>Cuello de Botella en 'En Proceso'</div>
-                            <small style={{ display: 'block', textAlign: 'center' }}>Demora en aprobación de equipos.</small>
-                            <div style={{ textAlign: 'center' }}><button type="button" className="history-edit-btn" style={{ marginTop: 8 }}>Gestionar</button></div>
-                          </article>
-                          <article style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 14, padding: 10 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: '#15803d', fontWeight: 700, textAlign: 'center' }}>💡 Optimización de Recursos</div>
-                            <div style={{ fontWeight: 800, marginTop: 4, textAlign: 'center' }}>Asignar Técnico Extra</div>
-                            <small style={{ display: 'block', textAlign: 'center' }}>Alta carga de instalaciones Akuvox.</small>
-                            <div style={{ textAlign: 'center' }}><button type="button" className="history-edit-btn" style={{ marginTop: 8, color: '#15803d' }}>Ver Disponibilidad</button></div>
-                          </article>
-                        </div>
-
-                        <div style={{ marginBottom: 12 }}>
-                          <h3 style={{ margin: '0 0 8px', color: '#0c4b4c', textAlign: 'center' }}>Tablero Interactivo</h3>
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(200px, 1fr))', gap: 10 }}>
-                            {[
-                              { key: 'todo', title: 'Por Hacer', tone: '#dc2626' },
-                              { key: 'progress', title: 'En Proceso', tone: '#2563eb' },
-                              { key: 'done', title: 'Finalizado', tone: '#16a34a' },
-                            ].map((col) => (
-                              <div
-                                key={col.key}
-                                onDragOver={(e) => { e.preventDefault(); setDragOverColumn(col.key); }}
-                                onDragLeave={() => setDragOverColumn('')}
-                                onDrop={() => { moveKanbanTask(draggingTaskId, col.key); setDraggingTaskId(null); setDragOverColumn(''); }}
-                                style={{ background: dragOverColumn === col.key ? '#eef7ff' : '#fff', border: `1px solid ${dragOverColumn === col.key ? '#93c5fd' : '#e2ebec'}`, borderRadius: 14, padding: 10, minHeight: 220 }}
-                              >
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                  <strong style={{ color: col.tone, textAlign: 'center' }}>{col.title} ({kanbanColumns[col.key].length})</strong>
-                                  {col.key === 'done' && kanbanColumns[col.key].length === 0 && <span style={{ color: '#16a34a' }}>✅</span>}
-                                </div>
-                                <div style={{ display: 'grid', gap: 8 }}>
-                                  {kanbanColumns[col.key].map((task, idx) => (
-                                    <article
-                                      key={`${col.key}-${task.id}`}
-                                      draggable
-                                      onDragStart={() => setDraggingTaskId(task.id)}
-                                      onClick={() => { setOpsSelectedTaskId(task.id); setSelectedService(historySourceRows.find((row) => String(row.clienteId || '').trim() === task.id) || selectedService); }}
-                                      style={{ border: task.id === opsSelectedTaskId ? '2px solid #fb923c' : '1px solid #e3eaeb', borderRadius: 12, padding: 8, background: '#fcfefe', cursor: 'grab' }}
-                                    >
-                                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-                                        <small style={{ color: '#5f7778' }}>ID: {task.id}</small>
-                                        {idx === 0 && col.key === 'todo' && <span title="Arrastrar">🖐️</span>}
+                        {historyRowsPage.length === 0 ? (
+                          <div className="hint" style={{ marginBottom: 0, padding: 14 }}>No hay servicios para los filtros seleccionados.</div>
+                        ) : (
+                          <div className="history-list">
+                            {historyRowsPage.map((row) => {
+                              const rowStatus = normalizeLegacyStatusName(String(row.status || row.estado || 'Pendiente'));
+                              const isActive = selectedService?.id === row.id;
+                              return (
+                                <article key={`history-row-${row.id}`} className="history-row" data-status={String(rowStatus || '').toLowerCase()} style={{ border: isActive ? '1px solid rgba(255,138,42,.65)' : undefined }}>
+                                  <button type="button" className="ranking-service-btn" style={{ width: '100%', textAlign: 'left' }} onClick={() => setSelectedService(row)}>
+                                    <div className="history-row-main">
+                                      <strong>{row.nombreServicio || row.cliente || 'Servicio sin nombre'}</strong>
+                                      <div className="history-row-meta">
+                                        <span>ID {row.clienteId || '-'}</span><span>·</span>
+                                        <span>{row.tipoServicioBrindar || 'Sin tipo'}</span><span>·</span>
+                                        <span>{row.representanteComercial || 'Sin comercial'}</span>
                                       </div>
-                                      <strong style={{ display: 'block', color: '#214849' }}>{task.title}</strong>
-                                      <small style={{ color: '#5f7778' }}>{task.executive}</small>
-                                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginTop: 4 }}>
-                                        <span>{task.dueSoon ? '⏰ Vence pronto' : '✅ En tiempo'}</span>
-                                        <span>Checklist: {task.checklistDone}/{task.checklistTotal}</span>
-                                      </div>
-                                    </article>
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div>
-                          <h3 style={{ margin: '0 0 8px', color: '#0c4b4c' }}>Tabla Dinámica de Gestión Operativa</h3>
-                          <div style={{ overflowX: 'auto', background: '#fff', borderRadius: 14, border: '1px solid #e2ebec' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 940 }}>
-                              <thead>
-                                <tr style={{ background: '#f2f7f8', color: '#245152' }}>
-                                  <th style={{ textAlign: 'left', padding: '10px 12px' }}>Servicio</th>
-                                  <th style={{ textAlign: 'left', padding: '10px 12px' }}>Ejecutivo</th>
-                                  <th style={{ textAlign: 'left', padding: '10px 12px' }}>Trabajo a Realizar</th>
-                                  <th style={{ textAlign: 'left', padding: '10px 12px' }}>Acciones</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {(kanbanColumns.todo.concat(kanbanColumns.progress).slice(0, 6)).map((task) => {
-                                  const meta = opsTaskMeta[task.id] || { executive: task.executive, checklist: ['Instalación'], checked: {}, presupuesto: '', costoUsd: '', equipamiento: 'Compra' };
-                                  const isSelected = task.id === opsSelectedTaskId;
-                                  return (
-                                    <React.Fragment key={`tbl-${task.id}`}>
-                                      <tr style={{ borderTop: '1px solid #ebf1f2', outline: isSelected ? '2px solid #fb923c' : 'none' }}>
-                                        <td style={{ padding: '10px 12px' }}><strong>{task.title}</strong><br /><small>ID: {task.id}</small></td>
-                                        <td style={{ padding: '10px 12px' }}>
-                                          <select value={meta.executive} onChange={(e) => setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, executive: e.target.value } }))}>
-                                            <option>Alfonso Carballo</option><option>Gastón Silva</option><option>Francisco Bartellone</option><option>Nicolás Leguizamón</option>
-                                          </select>
-                                        </td>
-                                        <td style={{ padding: '10px 12px' }}>
-                                          <div style={{ display: 'grid', gap: 5 }}>
-                                            {meta.checklist.map((sub) => (
-                                              <label key={`${task.id}-${sub}`} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                                                <input type="checkbox" checked={Boolean(meta.checked[sub])} onChange={(e) => setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, checked: { ...meta.checked, [sub]: e.target.checked } } }))} />
-                                                <span>{sub}</span>
-                                              </label>
-                                            ))}
-                                            <button type="button" className="history-edit-btn" onClick={() => {
-                                              const label = window.prompt('Nueva subtarea');
-                                              if (!label) return;
-                                              setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, checklist: [...meta.checklist, label] } }));
-                                            }}>+ Añadir subtarea</button>
-                                          </div>
-                                        </td>
-                                        <td style={{ padding: '10px 12px' }}>
-                                          <div style={{ display: 'grid', gap: 6 }}>
-                                            <button type="button" className="history-edit-btn" onClick={() => setOpsSelectedTaskId(task.id)}>Asignar</button>
-                                            <button type="button" className="history-edit-btn" onClick={() => setOpsActivityFeed((prev) => ['[Reporte generado y tarea finalizada]', ...prev].slice(0, 8))}>Generar Reporte y Finalizar</button>
-                                            <button type="button" className="history-edit-btn" onClick={() => moveKanbanTask(task.id, 'progress')}>Mover a En Proceso</button>
-                                          </div>
-                                        </td>
-                                      </tr>
-                                      {isSelected && (
-                                        <tr>
-                                          <td colSpan={4} style={{ padding: 12, background: '#fff7ed' }}>
-                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(180px,1fr))', gap: 10 }}>
-                                              <div className="field"><label>Presupuesto Solicitado <span title="Ayuda">❔</span></label><input value={meta.presupuesto} onChange={(e) => setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, presupuesto: e.target.value } }))} /></div>
-                                              <div className="field"><label>Costo Instalación US$ <span title="Ayuda">❔</span></label><input value={meta.costoUsd} onChange={(e) => setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, costoUsd: e.target.value } }))} /></div>
-                                              <div className="field"><label>Condición Equipamiento <span title="Ayuda">❔</span></label><select value={meta.equipamiento} onChange={(e) => setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, equipamiento: e.target.value } }))}><option>Compra</option><option>Alquiler</option></select></div>
-                                            </div>
-                                          </td>
-                                        </tr>
-                                      )}
-                                    </React.Fragment>
-                                  );
-                                })}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-
-                        <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center', gap: 8 }}>
-                          <button className="pdf-btn" type="button" onClick={() => selectedService && handleDownloadPdf(selectedService)}>Descargar PDF</button>
-                          <button className="edit-btn" type="button" onClick={() => selectedService && startEditService(selectedService)}>Editar Servicio</button>
-                          <button className="danger-btn" type="button" onClick={() => selectedService && setDeleteTargetService(selectedService)}>Eliminar Tarea</button>
-                        </div>
-
-                        <div style={{ marginTop: 12, background: '#fff', borderRadius: 12, border: '1px solid #e3eaeb' }}>
-                          <button type="button" onClick={() => setOpsObservationsOpen((v) => !v)} style={{ width: '100%', textAlign: 'left', border: '0', background: 'transparent', padding: '10px 12px', color: '#184647', fontWeight: 700 }}>Observaciones y Excepciones {opsObservationsOpen ? '▲' : '▼'}</button>
-                          {opsObservationsOpen && <div style={{ padding: '0 12px 12px', color: '#466566' }}>{selectedService?.observacionesComentarios || 'Sin observaciones registradas.'}<br />{selectedService?.excepcionesAcordadas || 'Sin excepciones registradas.'}</div>}
-                        </div>
-                      </section>
-
-                      <aside className="panel ops-side-panel" style={{ marginBottom: 0, position: 'sticky', top: 84, background: '#ffffff', color: '#123436', border: '1px solid #d9e5e7' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <h3 style={{ margin: 0, textAlign: 'center', width: '100%', color: '#0b5a5b' }}>Servicio {selectedOpsTask?.title || 'San Felipe'}</h3>
-                          <small>ID {selectedOpsTask?.id || '4184'}</small>
-                        </div>
-                        <div style={{ marginTop: 10, borderRadius: 14, padding: 10, background: '#d7e1e3', border: '1px solid #c5d3d6' }}>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, marginBottom: 10, borderRadius: 999, overflow: 'hidden', border: '1px solid #b8c7ca' }}>
-                            <button type="button" className="history-page-num active" style={{ borderRadius: 0, margin: 0 }}>Actividad y Comentarios</button>
-                            <button type="button" className="history-page-num" style={{ borderRadius: 0, margin: 0 }}>Detalles Completos</button>
-                          </div>
-
-                          <div className="ops-comment-list" style={{ display: 'grid', gap: 10, paddingRight: 4 }}>
-                            {sortedOpsComments.map((item) => (
-                              <article key={item.id} style={{ border: '1px solid #cfdadc', borderRadius: 14, padding: 10, background: '#f4f7f8', boxShadow: '0 3px 9px rgba(0,0,0,.06)' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                    <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#006465', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 10 }}>👤</div>
-                                    <div><strong style={{ color: '#14393a' }}>{item.user}</strong> <small style={{ color: '#5f6d6e' }}>{item.handle}</small></div>
-                                  </div>
-                                  <small style={{ color: '#4f6263' }}>{formatOpsCommentDate(item.createdAt)}</small>
-                                </div>
-                                <div style={{ marginTop: 8, color: '#1e3637', lineHeight: 1.4 }}>{item.text}</div>
-                                {item.attachment && <div style={{ marginTop: 6, color: '#355455', fontSize: 13 }}>📄 {item.attachment}</div>}
-                                <div style={{ display: 'flex', gap: 6, marginTop: 9, alignItems: 'center', flexWrap: 'wrap' }}>
-                                  {['👍', '❤️', '❌'].map((emoji) => (
-                                    <button
-                                      key={`${item.id}-${emoji}`}
-                                      type="button"
-                                      className="history-edit-btn"
-                                      style={{ minWidth: 34, height: 30, padding: '4px 8px', borderRadius: 9, lineHeight: 1 }}
-                                      onClick={() => {
-                                        setOpsComments((prev) => prev.map((row) => row.id !== item.id ? row : { ...row, reactions: Array.from(new Set([...(row.reactions || []), `Juan Pérez marcó ${emoji}`])) }));
-                                      }}
-                                    >
-                                      {emoji}
-                                    </button>
-                                  ))}
-                                  <button type="button" className="history-edit-btn" style={{ marginLeft: 'auto', padding: '5px 10px', borderRadius: 9 }} onClick={() => { setOpsReplyTargetId(item.id); setOpsReplyDraft(''); }}>↩ Responder</button>
-                                </div>
-                                {opsReplyTargetId === item.id && (
-                                  <div style={{ marginTop: 8, display: 'grid', gap: 6 }}>
-                                    <textarea value={opsReplyDraft} onChange={(e) => setOpsReplyDraft(e.target.value)} placeholder="Responder comentario" style={{ minHeight: 64, background: '#f8fbfb', color: '#1f3d3e' }} />
-                                    <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                                      <button type="button" className="history-edit-btn" onClick={() => { setOpsReplyTargetId(''); setOpsReplyDraft(''); }}>Cancelar</button>
-                                      <button type="button" className="history-edit-btn" onClick={() => {
-                                        if (!opsReplyDraft.trim()) return;
-                                        setOpsComments((prev) => prev.map((row) => row.id !== item.id ? row : { ...row, replies: [...(row.replies || []), { id: `r-${Date.now()}`, user: 'Juan Pérez', text: opsReplyDraft.trim(), createdAt: Date.now() }] }));
-                                        setOpsReplyTargetId('');
-                                        setOpsReplyDraft('');
-                                      }}>Publicar respuesta</button>
                                     </div>
-                                  </div>
-                                )}
-                              </article>
-                            ))}
-                          </div>
-
-                          <div className="field" style={{ marginTop: 10 }}>
-                            <textarea value={opsCommentDraft} onChange={(e) => setOpsCommentDraft(e.target.value)} placeholder="Escribe un comentario con @menciones" style={{ background: '#f2f6f7', borderColor: '#b7cacc', color: '#234243' }} />
-                            {mentionSuggestions.length > 0 && (
-                              <div style={{ border: '1px solid #7ba9aa', borderRadius: 10, background: '#eef3f4', marginTop: 6, overflow: 'hidden' }}>
-                                {mentionSuggestions.map((u) => (
-                                  <button key={u.handle} type="button" onClick={() => setOpsCommentDraft((prev) => prev.replace(/(?:^|\s)@([\w]*)$/, ` ${u.handle} `))} style={{ width: '100%', textAlign: 'left', border: 0, borderBottom: '1px solid #d7e3e4', background: '#eef3f4', padding: '8px 10px', cursor: 'pointer' }}>
-                                    <strong>{u.name}</strong> <small>{u.handle}</small>
                                   </button>
-                                ))}
-                              </div>
-                            )}
-                            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                              <button type="button" className="history-edit-btn">@ Mencionar</button>
-                              <button type="button" className="history-edit-btn">Adjuntar</button>
-                              <button type="button" className="history-edit-btn" style={{ background: 'rgba(22,163,74,.18)', color: '#166534', borderColor: 'rgba(22,163,74,.35)' }} onClick={() => {
-                                if (!opsCommentDraft.trim()) return;
-                                const text = opsCommentDraft.trim();
-                                setOpsComments((prev) => [{ id: `c-${Date.now()}`, user: 'Juan Pérez', handle: '@JuanPerez', text, attachment: '', createdAt: Date.now(), reactions: [], replies: [] }, ...prev]);
-                                setOpsActivityFeed((prev) => ['[Comentario agregado por Juan]', ...prev].slice(0, 8));
-                                setOpsCommentDraft('');
-                              }}>Publicar</button>
-                            </div>
+                                  <span className="history-status-badge" data-status={String(rowStatus || '').toLowerCase()}>{rowStatus}</span>
+                                </article>
+                              );
+                            })}
+                          </div>
+                        )}
+                        <div className="history-pagination">
+                          <div className="history-page-actions">
+                            <button type="button" className="history-page-num" onClick={() => setHistoryPage(1)} disabled={safeHistoryPage <= 1}>«</button>
+                            <button type="button" className="history-page-num" onClick={() => setHistoryPage((p) => Math.max(1, p - 1))} disabled={safeHistoryPage <= 1}>Anterior</button>
+                            <span className="history-page-num active">{safeHistoryPage}</span>
+                            <button type="button" className="history-page-num" onClick={() => setHistoryPage((p) => Math.min(totalHistoryPages, p + 1))} disabled={safeHistoryPage >= totalHistoryPages}>Siguiente</button>
+                            <button type="button" className="history-page-num" onClick={() => setHistoryPage(totalHistoryPages)} disabled={safeHistoryPage >= totalHistoryPages}>»</button>
                           </div>
                         </div>
-                      </aside>
+                      </div>
+
+                      {(() => {
+                        const detailService = selectedService || historyRowsPage[0] || null;
+                        if (!detailService) {
+                          return <section className="panel" style={{ marginBottom: 0 }}><div className="hint" style={{ marginBottom: 0 }}>Seleccioná un servicio para ver su detalle.</div></section>;
+                        }
+                        const serviceStatus = normalizeLegacyStatusName(String(detailService.status || detailService.estado || 'Pendiente'));
+                        return (
+                          <section className="panel" style={{ marginBottom: 0 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                              <h3 style={{ margin: 0 }}>{detailService.nombreServicio || detailService.cliente || 'Servicio sin nombre'}</h3>
+                              <span className={statusClass(serviceStatus)}>{serviceStatus}</span>
+                            </div>
+                            <div className="hint" style={{ marginTop: 6 }}>One page de detalle completo del servicio seleccionado.</div>
+
+                            <div className="history-grid" style={{ marginTop: 10 }}>
+                              <div className="field"><label>ID Servicio</label><input value={detailService.clienteId || '-'} readOnly type="text" /></div>
+                              <div className="field"><label>Tipo de servicio</label><input value={detailService.tipoServicioBrindar || '-'} readOnly type="text" /></div>
+                              <div className="field"><label>Fecha de alta</label><input value={detailService.fechaAltaServicio || detailService.fechaAlta || detailService.fechaEspecificaInicio || '-'} readOnly type="text" /></div>
+
+                              <div className="field span-2"><label>Dirección del servicio</label><input value={detailService.direccionServicio || detailService.direccion || '-'} readOnly type="text" /></div>
+                              <div className="field"><label>Horario contratado</label><input value={detailService.horarioServicioContratado || detailService.horarioCoberturaExacto || '-'} readOnly type="text" /></div>
+
+                              <div className="field"><label>Representante comercial</label><input value={detailService.representanteComercial || '-'} readOnly type="text" /></div>
+                              <div className="field"><label>Atención al cliente</label><input value={detailService.atencionCliente || detailService.atencion || '-'} readOnly type="text" /></div>
+                              <div className="field"><label>Técnico asignado</label><input value={detailService.tecnico || detailService.tecnicoAsignado || '-'} readOnly type="text" /></div>
+
+                              <div className="field"><label>Equipamiento instalado</label><input value={detailService.equipamientoInstalado || detailService.detalleEquipamiento || detailService.equipamientoRetirar || '-'} readOnly type="text" /></div>
+                              <div className="field"><label>Propietario equipamiento</label><input value={detailService.propietarioEquipamiento || '-'} readOnly type="text" /></div>
+                              <div className="field"><label>Condición equipamiento</label><input value={detailService.condicionEquipamiento || detailService.condicionEquipamientoInstalado || '-'} readOnly type="text" /></div>
+
+                              <div className="field"><label>Importe mensual sin IVA</label><input value={detailService.importeMensualServicioSinIva || detailService.importeMensualServicio || '-'} readOnly type="text" /></div>
+                              <div className="field"><label>Razón social</label><input value={detailService.razonSocial || '-'} readOnly type="text" /></div>
+                              <div className="field"><label>RUT</label><input value={detailService.rut || '-'} readOnly type="text" /></div>
+                            </div>
+
+                            <div className="field" style={{ marginTop: 12 }}>
+                              <label>Información inicial cargada</label>
+                              <textarea readOnly value={detailService.observacionesComentarios || detailService.observaciones || detailService.excepcionesAcordadas || 'Sin observaciones iniciales registradas.'} />
+                            </div>
+
+                            <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                              <button className="pdf-btn" type="button" onClick={() => handleDownloadPdf(detailService)}>Descargar PDF</button>
+                              {!detailService.origenCatalogo && <button className="edit-btn" type="button" onClick={() => startEditService(detailService)}>Editar Servicio</button>}
+                              {!detailService.origenCatalogo && <button className="danger-btn" type="button" onClick={() => setDeleteTargetService(detailService)}>Eliminar</button>}
+                            </div>
+                          </section>
+                        );
+                      })()}
                     </div>
                   </section>
                 ) : (
