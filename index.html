@@ -1380,6 +1380,81 @@
       @media (max-width: 760px) {
         .service-coord-filters { grid-template-columns: 1fr; }
       }
+      .form-history-shell {
+        margin-top: 18px;
+        background: #ffffff;
+        border: 1px solid rgba(190, 214, 224, .75);
+        border-radius: 16px;
+        padding: 14px;
+        box-shadow: 0 12px 22px rgba(10, 31, 35, .08);
+      }
+      .form-history-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .form-history-head h3 {
+        margin: 0;
+        color: #0f4b4d;
+        font-size: 1.02rem;
+      }
+      .form-history-head p {
+        margin: 5px 0 0;
+        color: #5f777b;
+        font-size: 12px;
+      }
+      .form-history-count {
+        background: rgba(0,100,101,.11);
+        border: 1px solid rgba(0,100,101,.28);
+        color: #0f5e60;
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .form-history-table-wrap { overflow-x: auto; }
+      .form-history-table {
+        width: 100%;
+        min-width: 860px;
+        border-collapse: separate;
+        border-spacing: 0;
+      }
+      .form-history-table th {
+        background: #eef5f6;
+        color: #33575a;
+        font-size: 12px;
+        letter-spacing: .16px;
+        text-align: left;
+        padding: 10px;
+        border-bottom: 1px solid #dde8eb;
+      }
+      .form-history-table td {
+        padding: 10px;
+        border-bottom: 1px solid #edf3f5;
+        color: #163f42;
+        vertical-align: middle;
+      }
+      .form-history-table td strong {
+        display: block;
+      }
+      .form-history-table td small {
+        display: block;
+        color: #6b8386;
+        margin-top: 2px;
+      }
+      .form-history-table tr:hover td { background: #f8fbfc; }
+      .form-history-empty {
+        text-align: center;
+        color: #6d8387;
+        padding: 18px !important;
+      }
+      .form-history-table td select {
+        min-width: 170px;
+        background: #fff !important;
+        color: #0f172a !important;
+      }
       .edit-btn {
         text-align: left;
         border: 1px solid rgba(230,255,253,.2);
@@ -7663,6 +7738,14 @@
           });
           return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
         }, [historySourceRows]);
+        const historyAtencionOptions = useMemo(() => {
+          const set = new Set();
+          historySourceRows.forEach((r) => {
+            const value = String(r.atencionCliente || r.atencion || '').trim();
+            if (value) set.add(value);
+          });
+          return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+        }, [historySourceRows]);
 
         const historyTypeOptions = useMemo(() => {
           const set = new Set();
@@ -7719,6 +7802,27 @@
           const start = (safeHistoryPage - 1) * HISTORY_PAGE_SIZE;
           return historyFilteredRows.slice(start, start + HISTORY_PAGE_SIZE);
         }, [historyFilteredRows, safeHistoryPage]);
+
+        const formHistoryRows = useMemo(() => {
+          if (!grupo || selectedForm === 'home' || selectedForm === 'historial' || selectedForm === 'historial-charlas') return [];
+          const matchesByGrupo = (row) => {
+            const tipo = String(row.tipoAccion || '').trim();
+            const formKey = String(row.formulario || '').trim();
+            if (grupo === 'servicio') return tipo === 'Nuevo Servicio' || formKey === 'nuevo-servicio-optimizado' || formKey === 'servicio-obra';
+            if (grupo === 'obra') return tipo === 'Obra' || formKey === 'servicio-obra';
+            if (grupo === 'novacion') return tipo === 'Novación' || formKey === 'novacion';
+            if (grupo === 'agregado') return tipo === 'Adicionales' || formKey === 'agregado';
+            if (grupo === 'solicitud-presupuesto') return tipo === 'Solicitud de presupuesto' || formKey === 'solicitud-presupuesto';
+            if (grupo === 'movimiento-detalle') return tipo === 'Movimiento de obra' || formKey === 'movimiento-obra';
+            if (grupo === 'baja-detalle') return tipo === 'Baja' || formKey === 'baja-servicio';
+            if (grupo === 'charla-detalle') return tipo === 'Charla informativa' || formKey === 'charla-informativa';
+            return tipo === tipoAccion;
+          };
+          return visibleRows
+            .filter((row) => !row?.estado_borrado && matchesByGrupo(row))
+            .sort((a, b) => (b.actualizadoEn?.seconds || b.creadoEn?.seconds || 0) - (a.actualizadoEn?.seconds || a.creadoEn?.seconds || 0))
+            .slice(0, 30);
+        }, [visibleRows, grupo, selectedForm, tipoAccion]);
 
         const operationalQueueRows = useMemo(() => {
           const activeStates = new Set(['Pendiente', 'En proceso', 'Esperando información']);
@@ -9279,6 +9383,22 @@
           } finally {
             setDeletingService(false);
             setDeleteTargetService(null);
+          }
+        }
+
+        async function handleAssignServiceField(service, field, value) {
+          if (!service?.id || !field) return;
+          try {
+            await db.collection('operaciones').doc(service.id).set({
+              [field]: value,
+              actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+              editadoPor: currentUserName,
+            }, { merge: true });
+            setRows((prev) => prev.map((row) => row.id === service.id ? { ...row, [field]: value } : row));
+            setSelectedService((prev) => (prev?.id === service.id ? { ...prev, [field]: value } : prev));
+          } catch (error) {
+            console.error('Error asignando campo del servicio:', error);
+            setNotificacion({ mensaje: '✖ No se pudo actualizar la asignación', tipo: 'error' });
           }
         }
 
@@ -11823,6 +11943,59 @@
                       </div>
                     )}
                   </form>
+
+                  <section className="form-history-shell">
+                    <div className="form-history-head">
+                      <div>
+                        <h3>Historial operativo de esta sección</h3>
+                        <p>Todo lo que se guarda queda visible acá para seguimiento y asignación por Comercial / Atención al cliente.</p>
+                      </div>
+                      <span className="form-history-count">{formHistoryRows.length} registro{formHistoryRows.length === 1 ? '' : 's'}</span>
+                    </div>
+                    <div className="form-history-table-wrap">
+                      <table className="form-history-table">
+                        <thead>
+                          <tr>
+                            <th>ID</th>
+                            <th>Servicio</th>
+                            <th>Estado</th>
+                            <th>Comercial</th>
+                            <th>Atención al cliente</th>
+                            <th>Última actualización</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {formHistoryRows.length === 0 ? (
+                            <tr><td colSpan={6} className="form-history-empty">Todavía no hay registros para esta sección.</td></tr>
+                          ) : (
+                            formHistoryRows.map((row) => (
+                              <tr key={`form-history-${row.id}`}>
+                                <td>{row.clienteId || '-'}</td>
+                                <td>
+                                  <strong>{row.nombreServicio || row.cliente || 'Servicio sin nombre'}</strong>
+                                  <small>{row.direccionServicio || '-'}</small>
+                                </td>
+                                <td><span className={statusClass(getStatusLabel(row))}>{getStatusLabel(row)}</span></td>
+                                <td>
+                                  <select value={row.representanteComercial || ''} onChange={(e) => handleAssignServiceField(row, 'representanteComercial', e.target.value)}>
+                                    <option value="">Sin asignar</option>
+                                    {historyCommercialOptions.map((opt) => <option key={`assg-com-${row.id}-${opt}`} value={opt}>{opt}</option>)}
+                                  </select>
+                                </td>
+                                <td>
+                                  <select value={row.atencionCliente || ''} onChange={(e) => handleAssignServiceField(row, 'atencionCliente', e.target.value)}>
+                                    <option value="">Sin asignar</option>
+                                    {historyAtencionOptions.map((opt) => <option key={`assg-ate-${row.id}-${opt}`} value={opt}>{opt}</option>)}
+                                  </select>
+                                </td>
+                                <td>{new Date((row.actualizadoEn?.seconds || row.creadoEn?.seconds || Date.now() / 1000) * 1000).toLocaleDateString('es-UY')}</td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
                 </section>
                 )}
               </main>
