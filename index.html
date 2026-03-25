@@ -286,7 +286,7 @@
         border-color: var(--accent-soft);
         box-shadow: 0 0 0 3px rgba(123,233,223,.22), 0 8px 18px rgba(0,0,0,.18);
       }
-      option { color: #103233; background: #dff3f3; }
+      option { color: #0f172a; background: #ffffff; }
 
       .radio-row, .switch-row, .state-row { display: flex; gap: 12px; flex-wrap: wrap; }
       .radio-pill, .state-pill {
@@ -1216,6 +1216,245 @@
           grid-template-columns: 1fr;
         }
       }
+      .service-coord-shell {
+        background: #f3f6f8;
+        border: 1px solid rgba(208, 222, 226, .75);
+      }
+      .service-coord-title {
+        margin: 0 0 16px;
+        color: #0a3738;
+        font-size: clamp(1.65rem, 2.6vw, 2.08rem);
+        letter-spacing: .2px;
+      }
+      .service-coord-filters {
+        display: grid;
+        grid-template-columns: minmax(260px, 2fr) repeat(3, minmax(160px, 1fr));
+        gap: 12px;
+        background: #ffffff;
+        border: 1px solid rgba(185, 204, 208, .68);
+        border-radius: 14px;
+        padding: 14px;
+        box-shadow: 0 8px 22px rgba(16, 24, 40, .06);
+      }
+      .service-coord-filters .field label { color: #ffb777; }
+      .service-coord-filters .field input,
+      .service-coord-filters .field select {
+        min-height: 46px;
+        border-radius: 12px;
+        background: #ffffff;
+        border-color: rgba(187, 199, 206, .85);
+        color: #0f172a;
+      }
+      .service-coord-search-wrap { position: relative; }
+      .service-coord-search-wrap input { padding-left: 38px; }
+      .service-coord-search-icon {
+        position: absolute;
+        top: 50%;
+        left: 12px;
+        transform: translateY(-50%);
+        color: #687177;
+        display: inline-flex;
+      }
+      .service-coord-search-icon i { width: 16px; height: 16px; }
+      .service-coord-table-card,
+      .service-coord-detail-card {
+        margin-top: 14px;
+        background: #ffffff;
+        border: 1px solid rgba(191, 207, 211, .72);
+        border-radius: 14px;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, .06);
+        padding: 14px;
+      }
+      .service-coord-table-wrap { overflow-x: auto; }
+      .service-coord-table {
+        width: 100%;
+        min-width: 980px;
+        border-collapse: separate;
+        border-spacing: 0;
+        color: #224649;
+      }
+      .service-coord-table th {
+        background: #f1f5f7;
+        color: #35575a;
+        text-align: left;
+        font-size: 12px;
+        letter-spacing: .18px;
+        padding: 12px 10px;
+        font-weight: 700;
+        border-bottom: 1px solid #dfebee;
+      }
+      .service-coord-table td {
+        padding: 12px 10px;
+        border-bottom: 1px solid #edf3f5;
+        vertical-align: middle;
+        font-size: 13px;
+      }
+      .service-coord-table tbody tr:hover { background: #f7fbfc; }
+      .service-coord-client { color: #0f3133; font-weight: 700; }
+      .service-coord-action-cell { text-align: right; }
+      .service-coord-action-head { text-align: right; }
+      .service-coord-detail-btn {
+        border: 1px solid rgba(0, 100, 101, .32);
+        border-radius: 10px;
+        height: 34px;
+        padding: 0 12px;
+        background: rgba(0, 100, 101, .12);
+        color: #045659;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform .16s ease, box-shadow .16s ease;
+      }
+      .service-coord-detail-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0, 100, 101, .16); }
+      .service-coord-status {
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        border: 1px solid transparent;
+      }
+      .service-coord-status-pendiente { background: #fff3e4; border-color: #f9d3a7; color: #9a5b18; }
+      .service-coord-status-activo { background: #e8f6ef; border-color: #b8dfca; color: #2a6b46; }
+      .service-coord-status-finalizado { background: #eef1f3; border-color: #d8dfe4; color: #5a6670; }
+      .service-coord-pagination {
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 8px;
+      }
+      .service-coord-page-btn,
+      .service-coord-page-current {
+        height: 32px;
+        min-width: 32px;
+        border-radius: 10px;
+        border: 1px solid #c9d8dc;
+        padding: 0 10px;
+        background: #ffffff;
+        color: #355659;
+        font-weight: 700;
+      }
+      .service-coord-page-current {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #0a5f61;
+        color: #fff;
+        border-color: #0a5f61;
+      }
+      .service-coord-page-btn:disabled { opacity: .45; cursor: not-allowed; }
+      .service-coord-empty {
+        text-align: center;
+        color: #6a7f82;
+        padding: 26px 10px !important;
+      }
+      .service-coord-detail-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .service-coord-detail-head h3 {
+        margin: 0;
+        color: #133e41;
+      }
+      .service-coord-detail-card .field > label {
+        color: #ffba7e !important;
+        background: rgba(64, 69, 74, .94) !important;
+        border-color: rgba(255, 175, 103, .55) !important;
+      }
+      .service-coord-detail-card input,
+      .service-coord-detail-card textarea,
+      .service-coord-detail-card select {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        -webkit-text-fill-color: #0f172a;
+        border-color: rgba(187, 199, 206, .85) !important;
+      }
+      .service-coord-detail-card input[readonly] {
+        opacity: 1;
+      }
+      @media (max-width: 1180px) {
+        .service-coord-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      @media (max-width: 760px) {
+        .service-coord-filters { grid-template-columns: 1fr; }
+      }
+      .form-history-shell {
+        margin-top: 18px;
+        background: #ffffff;
+        border: 1px solid rgba(190, 214, 224, .75);
+        border-radius: 16px;
+        padding: 14px;
+        box-shadow: 0 12px 22px rgba(10, 31, 35, .08);
+      }
+      .form-history-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .form-history-head h3 {
+        margin: 0;
+        color: #0f4b4d;
+        font-size: 1.02rem;
+      }
+      .form-history-head p {
+        margin: 5px 0 0;
+        color: #5f777b;
+        font-size: 12px;
+      }
+      .form-history-count {
+        background: rgba(0,100,101,.11);
+        border: 1px solid rgba(0,100,101,.28);
+        color: #0f5e60;
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .form-history-table-wrap { overflow-x: auto; }
+      .form-history-table {
+        width: 100%;
+        min-width: 860px;
+        border-collapse: separate;
+        border-spacing: 0;
+      }
+      .form-history-table th {
+        background: #eef5f6;
+        color: #33575a;
+        font-size: 12px;
+        letter-spacing: .16px;
+        text-align: left;
+        padding: 10px;
+        border-bottom: 1px solid #dde8eb;
+      }
+      .form-history-table td {
+        padding: 10px;
+        border-bottom: 1px solid #edf3f5;
+        color: #163f42;
+        vertical-align: middle;
+      }
+      .form-history-table td strong {
+        display: block;
+      }
+      .form-history-table td small {
+        display: block;
+        color: #6b8386;
+        margin-top: 2px;
+      }
+      .form-history-table tr:hover td { background: #f8fbfc; }
+      .form-history-empty {
+        text-align: center;
+        color: #6d8387;
+        padding: 18px !important;
+      }
+      .form-history-table td select {
+        min-width: 170px;
+        background: #fff !important;
+        color: #0f172a !important;
+      }
       .edit-btn {
         text-align: left;
         border: 1px solid rgba(230,255,253,.2);
@@ -1566,10 +1805,10 @@
         font-size: 11px;
         font-weight: 700;
         letter-spacing: .02em;
-        color: rgba(230,255,253,.76);
-        background: rgba(8, 16, 16, .86);
+        color: #ffb46a;
+        background: rgba(52, 57, 62, .9);
         border-radius: 999px;
-        border: 1px solid rgba(0,100,101,.35);
+        border: 1px solid rgba(255, 164, 82, .45);
         z-index: 1;
       }
 
@@ -1577,22 +1816,22 @@
       select,
       textarea {
         border-radius: 12px;
-        border: 1px solid rgba(0,100,101,.42) !important;
-        background: rgba(4, 12, 12, .74) !important;
-        color: #ffffff !important;
+        border: 1px solid rgba(189, 201, 208, .9) !important;
+        background: #ffffff !important;
+        color: #0f172a !important;
         padding: 14px 12px 10px;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 8px 22px rgba(0,0,0,.26);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 6px 14px rgba(0,0,0,.08);
       }
       input::placeholder,
       textarea::placeholder {
-        color: #8ab6b2 !important;
+        color: #8b97a5 !important;
       }
       .field:has(input:focus) > label,
       .field:has(select:focus) > label,
       .field:has(textarea:focus) > label {
-        color: #7be9df !important;
-        border-color: rgba(123,233,223,.7);
-        box-shadow: 0 0 10px rgba(123,233,223,.24);
+        color: #ffc78b !important;
+        border-color: rgba(255, 184, 117, .8);
+        box-shadow: 0 0 10px rgba(255, 186, 127, .25);
       }
 
       .save-btn,
@@ -2625,7 +2864,7 @@
       .service-card:has(.field) label,
       .login-panel label,
       .profile-form label {
-        color: #ffe0c5 !important;
+        color: #ffb778 !important;
         font-weight: 600;
         letter-spacing: .15px;
       }
@@ -2642,11 +2881,11 @@
       .profile-form input,
       .profile-form select,
       .profile-form textarea {
-        background: linear-gradient(180deg, rgba(245, 251, 251, .9), rgba(226, 238, 238, .8)) !important;
-        border: 1px solid rgba(118, 227, 239, .45) !important;
-        color: #0d3638 !important;
+        background: #ffffff !important;
+        border: 1px solid rgba(189, 201, 208, .9) !important;
+        color: #0f172a !important;
         border-radius: 12px;
-        box-shadow: inset 0 1px 4px rgba(255,255,255,.7), inset 0 -1px 5px rgba(0,0,0,.06);
+        box-shadow: inset 0 1px 3px rgba(255,255,255,.2), 0 6px 12px rgba(0,0,0,.06);
       }
 
       .panel:has(form) input::placeholder,
@@ -2657,7 +2896,7 @@
       .login-panel textarea::placeholder,
       .profile-form input::placeholder,
       .profile-form textarea::placeholder {
-        color: #5f8d8f;
+        color: #8b97a5;
       }
 
       .panel:has(form) input:focus,
@@ -2672,11 +2911,11 @@
       .profile-form input:focus,
       .profile-form select:focus,
       .profile-form textarea:focus {
-        border-color: rgba(122, 245, 255, .95) !important;
+        border-color: rgba(255, 193, 134, .95) !important;
         box-shadow:
-          0 0 0 3px rgba(122, 245, 255, .22),
-          0 0 28px rgba(0, 208, 255, .24),
-          inset 0 1px 5px rgba(255,255,255,.75);
+          0 0 0 3px rgba(255, 192, 132, .2),
+          0 0 24px rgba(255, 171, 97, .2),
+          inset 0 1px 5px rgba(255,255,255,.16);
       }
 
       .panel:has(form) .save-btn,
@@ -5556,10 +5795,28 @@
         return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
       }
 
-      const PROFILE_AVATAR_OPTIONS = PROFILE_AVATAR_PRESETS.map((preset) => ({
-        ...preset,
-        src: buildAvatarSvgDataUri(preset),
-      }));
+      const PROFILE_AVATAR_OPTIONS = [
+        { id: 'icon-01', label: 'Ícono 1', src: 'https://i.postimg.cc/bS18zLcP/10496279.jpg' },
+        { id: 'icon-02', label: 'Ícono 2', src: 'https://i.postimg.cc/9wyVW15M/Captura-de-pantalla-2026-03-25-073135.png' },
+        { id: 'icon-03', label: 'Ícono 3', src: 'https://i.postimg.cc/3027K95w/Captura-de-pantalla-2026-03-25-073159.png' },
+        { id: 'icon-04', label: 'Ícono 4', src: 'https://i.postimg.cc/H8bHp3Dk/Captura-de-pantalla-2026-03-25-073215.png' },
+        { id: 'icon-05', label: 'Ícono 5', src: 'https://i.postimg.cc/CnbYFJT5/Captura-de-pantalla-2026-03-25-073251.png' },
+        { id: 'icon-06', label: 'Ícono 6', src: 'https://i.postimg.cc/Mf1xWt2f/Captura-de-pantalla-2026-03-25-073306.png' },
+        { id: 'icon-07', label: 'Ícono 7', src: 'https://i.postimg.cc/dZGvqnPy/Captura-de-pantalla-2026-03-25-073328.png' },
+        { id: 'icon-08', label: 'Ícono 8', src: 'https://i.postimg.cc/2LnmzTRW/Captura-de-pantalla-2026-03-25-073345.png' },
+        { id: 'icon-09', label: 'Ícono 9', src: 'https://i.postimg.cc/5Q81xpdv/Captura-de-pantalla-2026-03-25-073403.png' },
+        { id: 'icon-10', label: 'Ícono 10', src: 'https://i.postimg.cc/V0X1Y4Qq/Captura-de-pantalla-2026-03-25-073425.png' },
+        { id: 'icon-11', label: 'Ícono 11', src: 'https://i.postimg.cc/QV7jkNBf/Captura-de-pantalla-2026-03-25-073450.png' },
+        { id: 'icon-12', label: 'Ícono 12', src: 'https://i.postimg.cc/QV7jkNB6/Captura-de-pantalla-2026-03-25-073520.png' },
+        { id: 'icon-13', label: 'Ícono 13', src: 'https://i.postimg.cc/LhPmB4qQ/Captura-de-pantalla-2026-03-25-073536.png' },
+        { id: 'icon-14', label: 'Ícono 14', src: 'https://i.postimg.cc/DmG7dfWD/Captura-de-pantalla-2026-03-25-073548.png' },
+        { id: 'icon-15', label: 'Ícono 15', src: 'https://i.postimg.cc/7bzqMPCd/Captura-de-pantalla-2026-03-25-073608.png' },
+        { id: 'icon-16', label: 'Ícono 16', src: 'https://i.postimg.cc/4ncXb4Kj/Captura-de-pantalla-2026-03-25-073629.png' },
+        { id: 'icon-17', label: 'Ícono 17', src: 'https://i.postimg.cc/yWR7X6JM/Captura-de-pantalla-2026-03-25-073646.png' },
+        { id: 'icon-18', label: 'Ícono 18', src: 'https://i.postimg.cc/grhGqcXW/Captura-de-pantalla-2026-03-25-073704.png' },
+        { id: 'icon-19', label: 'Ícono 19', src: 'https://i.postimg.cc/0rS9d5Mv/Captura-de-pantalla-2026-03-25-073743.png' },
+        { id: 'icon-20', label: 'Ícono 20', src: 'https://i.postimg.cc/7bzqMPGx/Captura-de-pantalla-2026-03-25-073757.png' },
+      ];
 
       const DEFAULT_PROFILE_AVATAR_ID = PROFILE_AVATAR_OPTIONS[0].id;
 
@@ -7046,6 +7303,8 @@
         const [ticketSaving, setTicketSaving] = useState(false);
         const [imageViewerSrc, setImageViewerSrc] = useState('');
         const [ticketsHistorial, setTicketsHistorial] = useState([]);
+        const [ticketSearchCode, setTicketSearchCode] = useState('');
+        const [ticketReassignModal, setTicketReassignModal] = useState({ open: false, ticket: null, assigneeKey: '' });
         const seenRowIdsRef = useRef(new Set());
         const seenOperationalAlertsRef = useRef(new Set());
         const topServicesLeaderRef = useRef('');
@@ -7481,6 +7740,14 @@
           });
           return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
         }, [historySourceRows]);
+        const historyAtencionOptions = useMemo(() => {
+          const set = new Set();
+          historySourceRows.forEach((r) => {
+            const value = String(r.atencionCliente || r.atencion || '').trim();
+            if (value) set.add(value);
+          });
+          return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+        }, [historySourceRows]);
 
         const historyTypeOptions = useMemo(() => {
           const set = new Set();
@@ -7508,16 +7775,10 @@
               : actionValueRaw === 'Adicionales' ? 'Adicional'
                 : actionValueRaw === 'Solicitud de presupuesto' ? 'Presupuesto'
                   : actionValueRaw;
-            const rowDate = (() => {
-              const ts = r.actualizadoEn?.seconds || r.creadoEn?.seconds || null;
-              if (ts) return new Date(ts * 1000).toISOString().slice(0, 10);
-              const fallback = String(r.fechaIngresoAuto || r.fechaAltaServicio || r.fechaAltaNegociada || '').slice(0, 10);
-              return fallback || '';
-            })();
             const matchStatus = historyStatusFilter === 'todos' || statusValue === historyStatusFilter;
             const matchCommercial = historyCommercialFilter === 'todos' || commercialValue === historyCommercialFilter;
             const matchType = historyTypeFilter === 'todos' || actionValue === historyTypeFilter;
-            const matchDate = !historyDateFilter || rowDate === historyDateFilter;
+            const matchDate = true;
             const matchQuery = !query || [
               r.nombreServicio,
               r.cliente,
@@ -7543,6 +7804,27 @@
           const start = (safeHistoryPage - 1) * HISTORY_PAGE_SIZE;
           return historyFilteredRows.slice(start, start + HISTORY_PAGE_SIZE);
         }, [historyFilteredRows, safeHistoryPage]);
+
+        const formHistoryRows = useMemo(() => {
+          if (!grupo || selectedForm === 'home' || selectedForm === 'historial' || selectedForm === 'historial-charlas') return [];
+          const matchesByGrupo = (row) => {
+            const tipo = String(row.tipoAccion || '').trim();
+            const formKey = String(row.formulario || '').trim();
+            if (grupo === 'servicio') return tipo === 'Nuevo Servicio' || formKey === 'nuevo-servicio-optimizado' || formKey === 'servicio-obra';
+            if (grupo === 'obra') return tipo === 'Obra' || formKey === 'servicio-obra';
+            if (grupo === 'novacion') return tipo === 'Novación' || formKey === 'novacion';
+            if (grupo === 'agregado') return tipo === 'Adicionales' || formKey === 'agregado';
+            if (grupo === 'solicitud-presupuesto') return tipo === 'Solicitud de presupuesto' || formKey === 'solicitud-presupuesto';
+            if (grupo === 'movimiento-detalle') return tipo === 'Movimiento de obra' || formKey === 'movimiento-obra';
+            if (grupo === 'baja-detalle') return tipo === 'Baja' || formKey === 'baja-servicio';
+            if (grupo === 'charla-detalle') return tipo === 'Charla informativa' || formKey === 'charla-informativa';
+            return tipo === tipoAccion;
+          };
+          return visibleRows
+            .filter((row) => !row?.estado_borrado && matchesByGrupo(row))
+            .sort((a, b) => (b.actualizadoEn?.seconds || b.creadoEn?.seconds || 0) - (a.actualizadoEn?.seconds || a.creadoEn?.seconds || 0))
+            .slice(0, 30);
+        }, [visibleRows, grupo, selectedForm, tipoAccion]);
 
         const operationalQueueRows = useMemo(() => {
           const activeStates = new Set(['Pendiente', 'En proceso', 'Esperando información']);
@@ -9106,6 +9388,22 @@
           }
         }
 
+        async function handleAssignServiceField(service, field, value) {
+          if (!service?.id || !field) return;
+          try {
+            await db.collection('operaciones').doc(service.id).set({
+              [field]: value,
+              actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+              editadoPor: currentUserName,
+            }, { merge: true });
+            setRows((prev) => prev.map((row) => row.id === service.id ? { ...row, [field]: value } : row));
+            setSelectedService((prev) => (prev?.id === service.id ? { ...prev, [field]: value } : prev));
+          } catch (error) {
+            console.error('Error asignando campo del servicio:', error);
+            setNotificacion({ mensaje: '✖ No se pudo actualizar la asignación', tipo: 'error' });
+          }
+        }
+
         async function handleSubmit(e) {
           e.preventDefault();
           if (selectedForm === 'home') return;
@@ -9234,8 +9532,19 @@
                   actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
                   editadoPor: currentUserName,
                 }, { merge: true });
+                const bajaTicket = await createGestionTicketFromForm({
+                  operacionId: targetDocId,
+                  tipoAccion,
+                  formulario: doc.formulario || '',
+                  clienteId: normalizedClientId,
+                  nombreServicio: doc.nombreServicio || bajaForm.nombreServicio || '',
+                  direccionServicio: doc.direccionServicio || bajaForm.direccionServicio || '',
+                  status: 'Baja',
+                  asignadoAEmail: doc.atencionCliente || '',
+                  asignadoANombre: doc.atencionCliente || '',
+                });
                 resetFields();
-                setNotificacion({ mensaje: '✔ Baja registrada (Servicios 1 → Bajas N)', tipo: 'ok' });
+                setNotificacion({ mensaje: `✔ Baja registrada (ticket ${bajaTicket})`, tipo: 'ok' });
                 void logRealtimeActivityEvent({ usuario: currentUserName, accion: 'registró baja del servicio', clienteId: normalizedClientId });
                 return;
               }
@@ -9246,11 +9555,22 @@
                 logs_cambios: [...existingLogs, nextLog],
               };
               await db.collection('operaciones').doc(targetDocId).set(payload, { merge: true });
+              const updateTicket = await createGestionTicketFromForm({
+                operacionId: targetDocId,
+                tipoAccion,
+                formulario: payload.formulario || '',
+                clienteId: normalizedClientId,
+                nombreServicio: payload.nombreServicio || '',
+                direccionServicio: payload.direccionServicio || '',
+                status: payload.status || '',
+                asignadoAEmail: payload.atencionCliente || '',
+                asignadoANombre: payload.atencionCliente || '',
+              });
               resetFields();
               if (!editingServiceId && existingDocIdByClient && ['Nuevo Servicio'].includes(tipoAccion)) {
-                setNotificacion({ mensaje: '✔ Servicio existente actualizado (sin duplicar ID).', tipo: 'ok' });
+                setNotificacion({ mensaje: `✔ Servicio existente actualizado (ticket ${updateTicket})`, tipo: 'ok' });
               } else {
-                setNotificacion({ mensaje: '✔ Servicio actualizado correctamente', tipo: 'ok' });
+                setNotificacion({ mensaje: `✔ Servicio actualizado correctamente (ticket ${updateTicket})`, tipo: 'ok' });
               }
               void logRealtimeActivityEvent({
                 usuario: currentUserName,
@@ -9266,9 +9586,20 @@
               creadoPor: doc.creadoPor || currentUserName,
               logs_cambios: [],
             };
-            await db.collection('operaciones').add(createPayload);
+            const createdRef = await db.collection('operaciones').add(createPayload);
+            const createTicket = await createGestionTicketFromForm({
+              operacionId: createdRef.id,
+              tipoAccion,
+              formulario: createPayload.formulario || '',
+              clienteId: normalizedClientId,
+              nombreServicio: createPayload.nombreServicio || '',
+              direccionServicio: createPayload.direccionServicio || '',
+              status: createPayload.status || '',
+              asignadoAEmail: createPayload.atencionCliente || '',
+              asignadoANombre: createPayload.atencionCliente || '',
+            });
             resetFields();
-            setNotificacion({ mensaje: '✔ Datos guardados correctamente', tipo: 'ok' });
+            setNotificacion({ mensaje: `✔ Datos guardados correctamente (ticket ${createTicket})`, tipo: 'ok' });
             void logRealtimeActivityEvent({
               usuario: currentUserName,
               accion: 'creó servicio',
@@ -9740,6 +10071,13 @@
           await handleTicketFilesInput(e.dataTransfer?.files || []);
         }
 
+        function generateTicketCode(prefix = 'TCK') {
+          const now = new Date();
+          const datePart = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
+          const randomPart = Math.floor(1000 + Math.random() * 9000);
+          return `${prefix}-${datePart}-${randomPart}`;
+        }
+
         function openImageViewer(src) {
           const next = String(src || '').trim();
           if (!next) return;
@@ -9755,7 +10093,9 @@
           }
           setTicketSaving(true);
           try {
+            const ticketCodigo = generateTicketCode('WEB');
             await db.collection('tickets_app').add({
+              ticketCodigo,
               creadoPorUid: user?.uid || '',
               creadoPorEmail: user?.email || '',
               creadoPorNombre: currentUserName,
@@ -9769,13 +10109,41 @@
             setTicketComentario('');
             setTicketPrioridad('Media');
             setTicketImagenes([]);
-            setNotificacion({ mensaje: '✔ Ticket enviado', tipo: 'ok' });
+            setNotificacion({ mensaje: `✔ Ticket enviado (${ticketCodigo})`, tipo: 'ok' });
           } catch (error) {
             console.error('Error creando ticket:', error);
             setNotificacion({ mensaje: '✖ No se pudo crear el ticket', tipo: 'error' });
           } finally {
             setTicketSaving(false);
           }
+        }
+
+        async function createGestionTicketFromForm(payload = {}) {
+          const ticketCodigo = generateTicketCode('GST');
+          const baseComment = `${payload.tipoAccion || 'Gestión'} · ID ${payload.clienteId || '-'} · ${payload.nombreServicio || 'Servicio sin nombre'}`;
+          await db.collection('tickets_app').add({
+            ticketCodigo,
+            origen: 'form-gestion',
+            operacionId: payload.operacionId || '',
+            tipoAccion: payload.tipoAccion || '',
+            formulario: payload.formulario || '',
+            clienteId: payload.clienteId || '',
+            nombreServicio: payload.nombreServicio || '',
+            direccionServicio: payload.direccionServicio || '',
+            estadoGestion: payload.status || '',
+            comentario: baseComment,
+            asignadoAEmail: payload.asignadoAEmail || '',
+            asignadoANombre: payload.asignadoANombre || '',
+            creadoPorUid: user?.uid || '',
+            creadoPorEmail: user?.email || '',
+            creadoPorNombre: currentUserName,
+            fechaHoraLocal: formatUruguayDateTime(),
+            prioridad: 'Media',
+            estado: 'pendiente',
+            imagenesAdjuntas: [],
+            creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          return ticketCodigo;
         }
 
         async function handleResolveTicket(ticket) {
@@ -9825,6 +10193,68 @@
           }, {});
           return Object.entries(groups).map(([dateLabel, items]) => ({ dateLabel, items }));
         }, [ticketsHistorial, isTicketManager]);
+
+        const ticketAssignableUsers = useMemo(() => {
+          const map = new Map();
+          staffMembers.forEach((member) => {
+            const email = String(member.email || '').trim().toLowerCase();
+            const uid = String(member.uid || '').trim();
+            const key = email || uid;
+            if (!key) return;
+            map.set(key, { key, nombre: member.nombre || member.displayName || email || uid, email, uid });
+          });
+          const myEmail = String(user?.email || '').trim().toLowerCase();
+          const myUid = String(user?.uid || '').trim();
+          const myKey = myEmail || myUid;
+          if (myKey && !map.has(myKey)) map.set(myKey, { key: myKey, nombre: currentUserName || myEmail || myUid, email: myEmail, uid: myUid });
+          return Array.from(map.values()).sort((a, b) => String(a.nombre).localeCompare(String(b.nombre), 'es', { sensitivity: 'base' }));
+        }, [staffMembers, user?.email, user?.uid, currentUserName]);
+
+        const ticketSearchResults = useMemo(() => {
+          const q = ticketSearchCode.trim().toLowerCase();
+          if (!q) return [];
+          return ticketsHistorial.filter((ticket) => [
+            ticket.ticketCodigo,
+            ticket.comentario,
+            ticket.clienteId,
+            ticket.nombreServicio,
+            ticket.operacionId,
+          ].filter(Boolean).some((value) => String(value).toLowerCase().includes(q))).slice(0, 30);
+        }, [ticketsHistorial, ticketSearchCode]);
+
+        function openTicketReassignModal(ticket) {
+          if (!ticket?.id) return;
+          const currentKey = String(ticket.asignadoAEmail || '').trim().toLowerCase() || String(ticket.asignadoAUid || '').trim();
+          setTicketReassignModal({ open: true, ticket, assigneeKey: currentKey });
+        }
+
+        async function handleConfirmTicketReassign() {
+          if (!ticketReassignModal.ticket?.id || !ticketReassignModal.assigneeKey) return;
+          const selected = ticketAssignableUsers.find((item) => item.key === ticketReassignModal.assigneeKey);
+          if (!selected) return;
+          const ticket = ticketReassignModal.ticket;
+          const historial = Array.isArray(ticket.historialReasignacion) ? ticket.historialReasignacion : [];
+          try {
+            await db.collection('tickets_app').doc(ticket.id).set({
+              asignadoAEmail: selected.email || '',
+              asignadoANombre: selected.nombre || '',
+              asignadoAUid: selected.uid || '',
+              historialReasignacion: [...historial, {
+                fecha: new Date().toISOString(),
+                asignadoPor: currentUserName,
+                asignadoANombre: selected.nombre || '',
+                asignadoAEmail: selected.email || '',
+              }],
+              actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+              editadoPor: currentUserName,
+            }, { merge: true });
+            setTicketReassignModal({ open: false, ticket: null, assigneeKey: '' });
+            setNotificacion({ mensaje: '✔ Ticket reasignado correctamente', tipo: 'ok' });
+          } catch (error) {
+            console.error('Error reasignando ticket:', error);
+            setNotificacion({ mensaje: '✖ No se pudo reasignar el ticket', tipo: 'error' });
+          }
+        }
 
         function formatRequestDateTime(value) {
           if (!value) return '-';
@@ -10422,6 +10852,31 @@
                     <h2>Tickets</h2>
                     <div className="hint">Sugerencias para mejorar la web y el sistema.</div>
                     <article className="profile-option">
+                      <h3>Buscar ticket por número / gestión</h3>
+                      <div className="chat-search-wrap">
+                        <span className="chat-search-icon">🔎</span>
+                        <input type="search" placeholder="Ej: GST-20260325-1234" value={ticketSearchCode} onChange={(e) => setTicketSearchCode(e.target.value)} />
+                      </div>
+                      {ticketSearchCode.trim() && (
+                        <div className="chat-search-results" style={{ marginTop: 10 }}>
+                          {ticketSearchResults.length === 0 ? (
+                            <div className="kv">No se encontraron tickets para esa búsqueda.</div>
+                          ) : ticketSearchResults.map((ticket) => (
+                            <article className="chat-search-result" key={`ticket-search-${ticket.id}`}>
+                              <strong>{ticket.ticketCodigo || `TICKET-${ticket.id}`}</strong>
+                              <div className="kv"><b>Tipo:</b> {ticket.origen === 'form-gestion' ? 'Ticket por gestión (form)' : 'Ticket manual'}</div>
+                              <div className="kv"><b>Cliente ID:</b> {ticket.clienteId || '-'}</div>
+                              <div className="kv"><b>Servicio:</b> {ticket.nombreServicio || '-'}</div>
+                              <div className="kv"><b>Operación:</b> {ticket.operacionId || '-'}</div>
+                              <div className="kv"><b>Asignado a:</b> {ticket.asignadoANombre || ticket.asignadoAEmail || 'Sin asignar'}</div>
+                              <div className="kv"><b>Comentario:</b> {ticket.comentario || '-'}</div>
+                              <div className="kv"><b>Estado:</b> {ticket.estado || 'pendiente'}</div>
+                            </article>
+                          ))}
+                        </div>
+                      )}
+                    </article>
+                    <article className="profile-option">
                       <h3>Nuevo ticket</h3>
                       <form className="profile-form" onSubmit={handleCreateTicket}>
                         <input type="text" value={currentUserName} readOnly />
@@ -10460,10 +10915,19 @@
                               <h4 className="ticket-date-title">{group.dateLabel}</h4>
                               {group.items.map((ticket) => (
                                 <div key={ticket.id} className="ticket-item-card">
+                                  <div className="kv"><b>N° ticket:</b> {ticket.ticketCodigo || `TICKET-${ticket.id}`}</div>
                                   <div className="kv"><b>Usuario:</b> {ticket.creadoPorNombre || ticket.creadoPorEmail || '-'}</div>
                                   <div className="kv"><b>Fecha:</b> {ticket.fechaHoraLocal || formatRequestDateTime(ticket.creadoEn)}</div>
                                   <div className="kv"><b>Prioridad:</b> {ticket.prioridad || '-'}</div>
                                   <div className="kv"><b>Comentario:</b> {ticket.comentario || '-'}</div>
+                                  <div className="kv"><b>Asignado a:</b> {ticket.asignadoANombre || ticket.asignadoAEmail || 'Sin asignar'}</div>
+                                  {ticket.origen === 'form-gestion' && (
+                                    <>
+                                      <div className="kv"><b>Cliente ID:</b> {ticket.clienteId || '-'}</div>
+                                      <div className="kv"><b>Servicio:</b> {ticket.nombreServicio || '-'}</div>
+                                      <div className="kv"><b>Tipo de acción:</b> {ticket.tipoAccion || '-'}</div>
+                                    </>
+                                  )}
                                   {Array.isArray(ticket.imagenesAdjuntas) && ticket.imagenesAdjuntas.length > 0 && (
                                     <div className="ticket-image-grid">
                                       {ticket.imagenesAdjuntas.map((img, idx) => (<img key={`hist-img-${ticket.id}-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `adj-${idx + 1}`} onClick={() => openImageViewer(img.dataUrl)} />))}
@@ -10471,6 +10935,7 @@
                                   )}
                                   <div className="kv"><b>Estado:</b> {ticket.estado || 'pendiente'}</div>
                                   <div className="request-status-row" style={{ marginTop: 8 }}>
+                                    <button type="button" className="status-action-btn chat-action-btn" onClick={() => openTicketReassignModal(ticket)}>Reasignar</button>
                                     {ticket.estado !== 'resuelto' && <button type="button" className="status-action-btn accept" onClick={() => handleResolveTicket(ticket)}>Marcar resuelto</button>}
                                     <button type="button" className="status-action-btn reject" onClick={() => handleDeleteTicket(ticket)}>Eliminar</button>
                                   </div>
@@ -10803,253 +11268,98 @@
                     )}
                   </section>
                 ) : effectiveSelectedForm === 'historial' ? (
-                  <section className="panel">
-                    <h2>Gestión Operativa</h2>
-                    <div className="hint">Módulo de inteligencia operativa con tablero Kanban, tabla activa y panel lateral colaborativo.</div>
+                  <section className="panel service-coord-shell">
+                    <h2 className="service-coord-title">Historial y coordinación de servicios</h2>
 
-                    <div className="ops-main-layout">
-                      <section className="panel" style={{ background: '#f7fafb', color: '#103839', border: '1px solid #dde8ea', marginBottom: 0 }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 10, alignItems: 'center', marginBottom: 14 }}>
-                          <div style={{ textAlign: 'center', marginLeft: 90 }}>
-                            <div style={{ fontSize: 28, color: '#ff8a2a', fontWeight: 800, lineHeight: 1 }}>Masterson Seguridad</div>
-                            <div style={{ color: '#ff8a2a', fontSize: 13 }}>Administrador</div>
-                          </div>
-                          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-                            <button type="button" className="burger" style={{ width: 42, height: 42, borderRadius: '50%', color: '#e8fbfb', background: '#006d72' }}><i data-lucide="search"></i></button>
-                            <button type="button" className="burger" style={{ width: 42, height: 42, borderRadius: '50%', color: '#e8fbfb', background: '#006d72', position: 'relative' }}><i data-lucide="bell"></i><span style={{ position: 'absolute', top: 8, right: 8, width: 7, height: 7, borderRadius: '50%', background: '#ef4444' }}></span></button>
-                            <button type="button" className="burger" style={{ width: 42, height: 42, borderRadius: '50%', color: '#e8fbfb', background: '#006d72' }}><i data-lucide="user-circle-2"></i></button>
-                          </div>
+                    <div className="service-coord-filters">
+                      <div className="field service-coord-search-field">
+                        <label>Buscador</label>
+                        <div className="service-coord-search-wrap">
+                          <span className="service-coord-search-icon"><i data-lucide="search"></i></span>
+                          <input type="search" value={historySearchTerm} onChange={(e) => setHistorySearchTerm(e.target.value)} placeholder="Buscar por cliente, ID o dirección" />
                         </div>
-
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(210px, 1fr))', gap: 10, marginBottom: 12 }}>
-                          <article style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 14, padding: 10 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: '#c2410c', fontWeight: 700, textAlign: 'center' }}><span className="ops-alert-ping">🚨</span> Urgencia Operativa</div>
-                            <div style={{ fontWeight: 800, marginTop: 4, textAlign: 'center' }}>1 Tarea Crítica</div>
-                            <small style={{ display: 'block', textAlign: 'center' }}>San Felipe (vence mañana)</small>
-                            <div style={{ textAlign: 'center' }}><button type="button" className="history-edit-btn" style={{ marginTop: 8 }}>Ver Tarea</button></div>
-                          </article>
-                          <article style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: 14, padding: 10 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: '#c2410c', fontWeight: 700, textAlign: 'center' }}>📈 Previsión de Flujo</div>
-                            <div style={{ fontWeight: 800, marginTop: 4, textAlign: 'center' }}>Cuello de Botella en 'En Proceso'</div>
-                            <small style={{ display: 'block', textAlign: 'center' }}>Demora en aprobación de equipos.</small>
-                            <div style={{ textAlign: 'center' }}><button type="button" className="history-edit-btn" style={{ marginTop: 8 }}>Gestionar</button></div>
-                          </article>
-                          <article style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 14, padding: 10 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, color: '#15803d', fontWeight: 700, textAlign: 'center' }}>💡 Optimización de Recursos</div>
-                            <div style={{ fontWeight: 800, marginTop: 4, textAlign: 'center' }}>Asignar Técnico Extra</div>
-                            <small style={{ display: 'block', textAlign: 'center' }}>Alta carga de instalaciones Akuvox.</small>
-                            <div style={{ textAlign: 'center' }}><button type="button" className="history-edit-btn" style={{ marginTop: 8, color: '#15803d' }}>Ver Disponibilidad</button></div>
-                          </article>
-                        </div>
-
-                        <div style={{ marginBottom: 12 }}>
-                          <h3 style={{ margin: '0 0 8px', color: '#0c4b4c', textAlign: 'center' }}>Tablero Interactivo</h3>
-                          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(200px, 1fr))', gap: 10 }}>
-                            {[
-                              { key: 'todo', title: 'Por Hacer', tone: '#dc2626' },
-                              { key: 'progress', title: 'En Proceso', tone: '#2563eb' },
-                              { key: 'done', title: 'Finalizado', tone: '#16a34a' },
-                            ].map((col) => (
-                              <div
-                                key={col.key}
-                                onDragOver={(e) => { e.preventDefault(); setDragOverColumn(col.key); }}
-                                onDragLeave={() => setDragOverColumn('')}
-                                onDrop={() => { moveKanbanTask(draggingTaskId, col.key); setDraggingTaskId(null); setDragOverColumn(''); }}
-                                style={{ background: dragOverColumn === col.key ? '#eef7ff' : '#fff', border: `1px solid ${dragOverColumn === col.key ? '#93c5fd' : '#e2ebec'}`, borderRadius: 14, padding: 10, minHeight: 220 }}
-                              >
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                  <strong style={{ color: col.tone, textAlign: 'center' }}>{col.title} ({kanbanColumns[col.key].length})</strong>
-                                  {col.key === 'done' && kanbanColumns[col.key].length === 0 && <span style={{ color: '#16a34a' }}>✅</span>}
-                                </div>
-                                <div style={{ display: 'grid', gap: 8 }}>
-                                  {kanbanColumns[col.key].map((task, idx) => (
-                                    <article
-                                      key={`${col.key}-${task.id}`}
-                                      draggable
-                                      onDragStart={() => setDraggingTaskId(task.id)}
-                                      onClick={() => { setOpsSelectedTaskId(task.id); setSelectedService(historySourceRows.find((row) => String(row.clienteId || '').trim() === task.id) || selectedService); }}
-                                      style={{ border: task.id === opsSelectedTaskId ? '2px solid #fb923c' : '1px solid #e3eaeb', borderRadius: 12, padding: 8, background: '#fcfefe', cursor: 'grab' }}
-                                    >
-                                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-                                        <small style={{ color: '#5f7778' }}>ID: {task.id}</small>
-                                        {idx === 0 && col.key === 'todo' && <span title="Arrastrar">🖐️</span>}
-                                      </div>
-                                      <strong style={{ display: 'block', color: '#214849' }}>{task.title}</strong>
-                                      <small style={{ color: '#5f7778' }}>{task.executive}</small>
-                                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginTop: 4 }}>
-                                        <span>{task.dueSoon ? '⏰ Vence pronto' : '✅ En tiempo'}</span>
-                                        <span>Checklist: {task.checklistDone}/{task.checklistTotal}</span>
-                                      </div>
-                                    </article>
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div>
-                          <h3 style={{ margin: '0 0 8px', color: '#0c4b4c' }}>Tabla Dinámica de Gestión Operativa</h3>
-                          <div style={{ overflowX: 'auto', background: '#fff', borderRadius: 14, border: '1px solid #e2ebec' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 940 }}>
-                              <thead>
-                                <tr style={{ background: '#f2f7f8', color: '#245152' }}>
-                                  <th style={{ textAlign: 'left', padding: '10px 12px' }}>Servicio</th>
-                                  <th style={{ textAlign: 'left', padding: '10px 12px' }}>Ejecutivo</th>
-                                  <th style={{ textAlign: 'left', padding: '10px 12px' }}>Trabajo a Realizar</th>
-                                  <th style={{ textAlign: 'left', padding: '10px 12px' }}>Acciones</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {(kanbanColumns.todo.concat(kanbanColumns.progress).slice(0, 6)).map((task) => {
-                                  const meta = opsTaskMeta[task.id] || { executive: task.executive, checklist: ['Instalación'], checked: {}, presupuesto: '', costoUsd: '', equipamiento: 'Compra' };
-                                  const isSelected = task.id === opsSelectedTaskId;
-                                  return (
-                                    <React.Fragment key={`tbl-${task.id}`}>
-                                      <tr style={{ borderTop: '1px solid #ebf1f2', outline: isSelected ? '2px solid #fb923c' : 'none' }}>
-                                        <td style={{ padding: '10px 12px' }}><strong>{task.title}</strong><br /><small>ID: {task.id}</small></td>
-                                        <td style={{ padding: '10px 12px' }}>
-                                          <select value={meta.executive} onChange={(e) => setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, executive: e.target.value } }))}>
-                                            <option>Alfonso Carballo</option><option>Gastón Silva</option><option>Francisco Bartellone</option><option>Nicolás Leguizamón</option>
-                                          </select>
-                                        </td>
-                                        <td style={{ padding: '10px 12px' }}>
-                                          <div style={{ display: 'grid', gap: 5 }}>
-                                            {meta.checklist.map((sub) => (
-                                              <label key={`${task.id}-${sub}`} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                                                <input type="checkbox" checked={Boolean(meta.checked[sub])} onChange={(e) => setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, checked: { ...meta.checked, [sub]: e.target.checked } } }))} />
-                                                <span>{sub}</span>
-                                              </label>
-                                            ))}
-                                            <button type="button" className="history-edit-btn" onClick={() => {
-                                              const label = window.prompt('Nueva subtarea');
-                                              if (!label) return;
-                                              setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, checklist: [...meta.checklist, label] } }));
-                                            }}>+ Añadir subtarea</button>
-                                          </div>
-                                        </td>
-                                        <td style={{ padding: '10px 12px' }}>
-                                          <div style={{ display: 'grid', gap: 6 }}>
-                                            <button type="button" className="history-edit-btn" onClick={() => setOpsSelectedTaskId(task.id)}>Asignar</button>
-                                            <button type="button" className="history-edit-btn" onClick={() => setOpsActivityFeed((prev) => ['[Reporte generado y tarea finalizada]', ...prev].slice(0, 8))}>Generar Reporte y Finalizar</button>
-                                            <button type="button" className="history-edit-btn" onClick={() => moveKanbanTask(task.id, 'progress')}>Mover a En Proceso</button>
-                                          </div>
-                                        </td>
-                                      </tr>
-                                      {isSelected && (
-                                        <tr>
-                                          <td colSpan={4} style={{ padding: 12, background: '#fff7ed' }}>
-                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(180px,1fr))', gap: 10 }}>
-                                              <div className="field"><label>Presupuesto Solicitado <span title="Ayuda">❔</span></label><input value={meta.presupuesto} onChange={(e) => setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, presupuesto: e.target.value } }))} /></div>
-                                              <div className="field"><label>Costo Instalación US$ <span title="Ayuda">❔</span></label><input value={meta.costoUsd} onChange={(e) => setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, costoUsd: e.target.value } }))} /></div>
-                                              <div className="field"><label>Condición Equipamiento <span title="Ayuda">❔</span></label><select value={meta.equipamiento} onChange={(e) => setOpsTaskMeta((prev) => ({ ...prev, [task.id]: { ...meta, equipamiento: e.target.value } }))}><option>Compra</option><option>Alquiler</option></select></div>
-                                            </div>
-                                          </td>
-                                        </tr>
-                                      )}
-                                    </React.Fragment>
-                                  );
-                                })}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-
-                        <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center', gap: 8 }}>
-                          <button className="pdf-btn" type="button" onClick={() => selectedService && handleDownloadPdf(selectedService)}>Descargar PDF</button>
-                          <button className="edit-btn" type="button" onClick={() => selectedService && startEditService(selectedService)}>Editar Servicio</button>
-                          <button className="danger-btn" type="button" onClick={() => selectedService && setDeleteTargetService(selectedService)}>Eliminar Tarea</button>
-                        </div>
-
-                        <div style={{ marginTop: 12, background: '#fff', borderRadius: 12, border: '1px solid #e3eaeb' }}>
-                          <button type="button" onClick={() => setOpsObservationsOpen((v) => !v)} style={{ width: '100%', textAlign: 'left', border: '0', background: 'transparent', padding: '10px 12px', color: '#184647', fontWeight: 700 }}>Observaciones y Excepciones {opsObservationsOpen ? '▲' : '▼'}</button>
-                          {opsObservationsOpen && <div style={{ padding: '0 12px 12px', color: '#466566' }}>{selectedService?.observacionesComentarios || 'Sin observaciones registradas.'}<br />{selectedService?.excepcionesAcordadas || 'Sin excepciones registradas.'}</div>}
-                        </div>
-                      </section>
-
-                      <aside className="panel ops-side-panel" style={{ marginBottom: 0, position: 'sticky', top: 84, background: '#ffffff', color: '#123436', border: '1px solid #d9e5e7' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <h3 style={{ margin: 0, textAlign: 'center', width: '100%', color: '#0b5a5b' }}>Servicio {selectedOpsTask?.title || 'San Felipe'}</h3>
-                          <small>ID {selectedOpsTask?.id || '4184'}</small>
-                        </div>
-                        <div style={{ marginTop: 10, borderRadius: 14, padding: 10, background: '#d7e1e3', border: '1px solid #c5d3d6' }}>
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 0, marginBottom: 10, borderRadius: 999, overflow: 'hidden', border: '1px solid #b8c7ca' }}>
-                            <button type="button" className="history-page-num active" style={{ borderRadius: 0, margin: 0 }}>Actividad y Comentarios</button>
-                            <button type="button" className="history-page-num" style={{ borderRadius: 0, margin: 0 }}>Detalles Completos</button>
-                          </div>
-
-                          <div className="ops-comment-list" style={{ display: 'grid', gap: 10, paddingRight: 4 }}>
-                            {sortedOpsComments.map((item) => (
-                              <article key={item.id} style={{ border: '1px solid #cfdadc', borderRadius: 14, padding: 10, background: '#f4f7f8', boxShadow: '0 3px 9px rgba(0,0,0,.06)' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                    <div style={{ width: 30, height: 30, borderRadius: '50%', background: '#006465', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 10 }}>👤</div>
-                                    <div><strong style={{ color: '#14393a' }}>{item.user}</strong> <small style={{ color: '#5f6d6e' }}>{item.handle}</small></div>
-                                  </div>
-                                  <small style={{ color: '#4f6263' }}>{formatOpsCommentDate(item.createdAt)}</small>
-                                </div>
-                                <div style={{ marginTop: 8, color: '#1e3637', lineHeight: 1.4 }}>{item.text}</div>
-                                {item.attachment && <div style={{ marginTop: 6, color: '#355455', fontSize: 13 }}>📄 {item.attachment}</div>}
-                                <div style={{ display: 'flex', gap: 6, marginTop: 9, alignItems: 'center', flexWrap: 'wrap' }}>
-                                  {['👍', '❤️', '❌'].map((emoji) => (
-                                    <button
-                                      key={`${item.id}-${emoji}`}
-                                      type="button"
-                                      className="history-edit-btn"
-                                      style={{ minWidth: 34, height: 30, padding: '4px 8px', borderRadius: 9, lineHeight: 1 }}
-                                      onClick={() => {
-                                        setOpsComments((prev) => prev.map((row) => row.id !== item.id ? row : { ...row, reactions: Array.from(new Set([...(row.reactions || []), `Juan Pérez marcó ${emoji}`])) }));
-                                      }}
-                                    >
-                                      {emoji}
-                                    </button>
-                                  ))}
-                                  <button type="button" className="history-edit-btn" style={{ marginLeft: 'auto', padding: '5px 10px', borderRadius: 9 }} onClick={() => { setOpsReplyTargetId(item.id); setOpsReplyDraft(''); }}>↩ Responder</button>
-                                </div>
-                                {opsReplyTargetId === item.id && (
-                                  <div style={{ marginTop: 8, display: 'grid', gap: 6 }}>
-                                    <textarea value={opsReplyDraft} onChange={(e) => setOpsReplyDraft(e.target.value)} placeholder="Responder comentario" style={{ minHeight: 64, background: '#f8fbfb', color: '#1f3d3e' }} />
-                                    <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                                      <button type="button" className="history-edit-btn" onClick={() => { setOpsReplyTargetId(''); setOpsReplyDraft(''); }}>Cancelar</button>
-                                      <button type="button" className="history-edit-btn" onClick={() => {
-                                        if (!opsReplyDraft.trim()) return;
-                                        setOpsComments((prev) => prev.map((row) => row.id !== item.id ? row : { ...row, replies: [...(row.replies || []), { id: `r-${Date.now()}`, user: 'Juan Pérez', text: opsReplyDraft.trim(), createdAt: Date.now() }] }));
-                                        setOpsReplyTargetId('');
-                                        setOpsReplyDraft('');
-                                      }}>Publicar respuesta</button>
-                                    </div>
-                                  </div>
-                                )}
-                              </article>
-                            ))}
-                          </div>
-
-                          <div className="field" style={{ marginTop: 10 }}>
-                            <textarea value={opsCommentDraft} onChange={(e) => setOpsCommentDraft(e.target.value)} placeholder="Escribe un comentario con @menciones" style={{ background: '#f2f6f7', borderColor: '#b7cacc', color: '#234243' }} />
-                            {mentionSuggestions.length > 0 && (
-                              <div style={{ border: '1px solid #7ba9aa', borderRadius: 10, background: '#eef3f4', marginTop: 6, overflow: 'hidden' }}>
-                                {mentionSuggestions.map((u) => (
-                                  <button key={u.handle} type="button" onClick={() => setOpsCommentDraft((prev) => prev.replace(/(?:^|\s)@([\w]*)$/, ` ${u.handle} `))} style={{ width: '100%', textAlign: 'left', border: 0, borderBottom: '1px solid #d7e3e4', background: '#eef3f4', padding: '8px 10px', cursor: 'pointer' }}>
-                                    <strong>{u.name}</strong> <small>{u.handle}</small>
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                              <button type="button" className="history-edit-btn">@ Mencionar</button>
-                              <button type="button" className="history-edit-btn">Adjuntar</button>
-                              <button type="button" className="history-edit-btn" style={{ background: 'rgba(22,163,74,.18)', color: '#166534', borderColor: 'rgba(22,163,74,.35)' }} onClick={() => {
-                                if (!opsCommentDraft.trim()) return;
-                                const text = opsCommentDraft.trim();
-                                setOpsComments((prev) => [{ id: `c-${Date.now()}`, user: 'Juan Pérez', handle: '@JuanPerez', text, attachment: '', createdAt: Date.now(), reactions: [], replies: [] }, ...prev]);
-                                setOpsActivityFeed((prev) => ['[Comentario agregado por Juan]', ...prev].slice(0, 8));
-                                setOpsCommentDraft('');
-                              }}>Publicar</button>
-                            </div>
-                          </div>
-                        </div>
-                      </aside>
+                      </div>
+                      <div className="field"><label>Estado</label><select value={historyStatusFilter} onChange={(e) => setHistoryStatusFilter(e.target.value)}><option value="todos">Todos</option>{historyStatusOptions.map((opt) => <option key={`history-status-${opt}`} value={opt}>{opt}</option>)}</select></div>
+                      <div className="field"><label>Encargado</label><select value={historyCommercialFilter} onChange={(e) => setHistoryCommercialFilter(e.target.value)}><option value="todos">Todos</option>{historyCommercialOptions.map((opt) => <option key={`history-commercial-${opt}`} value={opt}>{opt}</option>)}</select></div>
+                      <div className="field"><label>Tipo</label><select value={historyTypeFilter} onChange={(e) => setHistoryTypeFilter(e.target.value)}><option value="todos">Todos</option>{historyTypeOptions.map((opt) => <option key={`history-type-${opt}`} value={opt}>{opt}</option>)}</select></div>
                     </div>
+
+                    <section className="service-coord-table-card">
+                      <div className="service-coord-table-wrap">
+                        <table className="service-coord-table">
+                          <thead>
+                            <tr>
+                              <th>ID</th>
+                              <th>Cliente</th>
+                              <th>Dirección</th>
+                              <th>Tipo</th>
+                              <th>Encargado</th>
+                              <th>Fecha</th>
+                              <th>Estado</th>
+                              <th className="service-coord-action-head">Acción</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {historyRowsPage.length === 0 ? (
+                              <tr><td colSpan={8} className="service-coord-empty">No hay servicios para los filtros seleccionados.</td></tr>
+                            ) : historyRowsPage.map((row) => {
+                              const rawStatus = normalizeLegacyStatusName(String(row.status || row.estado || 'Pendiente'));
+                              const tableStatus = rawStatus === 'Finalizado' || rawStatus === 'Completado'
+                                ? 'Finalizado'
+                                : rawStatus === 'En proceso' || rawStatus === 'Esperando información'
+                                  ? 'Activo'
+                                  : 'Pendiente';
+                              return (
+                                <tr key={`history-row-${row.id}`}>
+                                  <td>{row.clienteId || '-'}</td>
+                                  <td><strong className="service-coord-client">{row.nombreServicio || row.cliente || 'Servicio sin nombre'}</strong></td>
+                                  <td>{row.direccionServicio || row.direccion || '-'}</td>
+                                  <td>{row.tipoServicioBrindar || 'Sin tipo'}</td>
+                                  <td>{row.representanteComercial || 'Sin encargado'}</td>
+                                  <td>{row.fechaAltaServicio || row.fechaAlta || row.fechaEspecificaInicio || '-'}</td>
+                                  <td>
+                                    <span className={`service-coord-status service-coord-status-${tableStatus.toLowerCase()}`}>{tableStatus}</span>
+                                  </td>
+                                  <td className="service-coord-action-cell">
+                                    <button type="button" className="service-coord-detail-btn" onClick={() => setSelectedService(row)}>Ver detalles</button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div className="service-coord-pagination">
+                        <button type="button" className="service-coord-page-btn" onClick={() => setHistoryPage((p) => Math.max(1, p - 1))} disabled={safeHistoryPage <= 1}>Anterior</button>
+                        <span className="service-coord-page-current">{safeHistoryPage}</span>
+                        <button type="button" className="service-coord-page-btn" onClick={() => setHistoryPage((p) => Math.min(totalHistoryPages, p + 1))} disabled={safeHistoryPage >= totalHistoryPages}>Siguiente</button>
+                      </div>
+                    </section>
+
+                    {(() => {
+                      const detailService = selectedService || historyRowsPage[0] || null;
+                      if (!detailService) return null;
+                      const serviceStatus = normalizeLegacyStatusName(String(detailService.status || detailService.estado || 'Pendiente'));
+                      return (
+                        <section className="service-coord-detail-card">
+                          <div className="service-coord-detail-head">
+                            <h3>{detailService.nombreServicio || detailService.cliente || 'Servicio sin nombre'}</h3>
+                            <span className={statusClass(serviceStatus)}>{serviceStatus}</span>
+                          </div>
+                          <div className="history-grid" style={{ marginTop: 10 }}>
+                            <div className="field"><label>ID Servicio</label><input value={detailService.clienteId || '-'} readOnly type="text" /></div>
+                            <div className="field"><label>Tipo de servicio</label><input value={detailService.tipoServicioBrindar || '-'} readOnly type="text" /></div>
+                            <div className="field"><label>Fecha de alta</label><input value={detailService.fechaAltaServicio || detailService.fechaAlta || detailService.fechaEspecificaInicio || '-'} readOnly type="text" /></div>
+                            <div className="field span-2"><label>Dirección del servicio</label><input value={detailService.direccionServicio || detailService.direccion || '-'} readOnly type="text" /></div>
+                            <div className="field"><label>Encargado</label><input value={detailService.representanteComercial || '-'} readOnly type="text" /></div>
+                            <div className="field"><label>Equipamiento instalado</label><input value={detailService.equipamientoInstalado || detailService.detalleEquipamiento || detailService.equipamientoRetirar || '-'} readOnly type="text" /></div>
+                            <div className="field"><label>Propietario equipamiento</label><input value={detailService.propietarioEquipamiento || '-'} readOnly type="text" /></div>
+                            <div className="field"><label>Importe mensual sin IVA</label><input value={detailService.importeMensualServicioSinIva || detailService.importeMensualServicio || '-'} readOnly type="text" /></div>
+                          </div>
+                        </section>
+                      );
+                    })()}
                   </section>
                 ) : (
                 <section className="panel">
@@ -11802,9 +12112,84 @@
                       </div>
                     )}
                   </form>
+
+                  <section className="form-history-shell">
+                    <div className="form-history-head">
+                      <div>
+                        <h3>Historial operativo de esta sección</h3>
+                        <p>Todo lo que se guarda queda visible acá para seguimiento y asignación por Comercial / Atención al cliente.</p>
+                      </div>
+                      <span className="form-history-count">{formHistoryRows.length} registro{formHistoryRows.length === 1 ? '' : 's'}</span>
+                    </div>
+                    <div className="form-history-table-wrap">
+                      <table className="form-history-table">
+                        <thead>
+                          <tr>
+                            <th>ID</th>
+                            <th>Servicio</th>
+                            <th>Estado</th>
+                            <th>Comercial</th>
+                            <th>Atención al cliente</th>
+                            <th>Última actualización</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {formHistoryRows.length === 0 ? (
+                            <tr><td colSpan={6} className="form-history-empty">Todavía no hay registros para esta sección.</td></tr>
+                          ) : (
+                            formHistoryRows.map((row) => (
+                              <tr key={`form-history-${row.id}`}>
+                                <td>{row.clienteId || '-'}</td>
+                                <td>
+                                  <strong>{row.nombreServicio || row.cliente || 'Servicio sin nombre'}</strong>
+                                  <small>{row.direccionServicio || '-'}</small>
+                                </td>
+                                <td><span className={statusClass(getStatusLabel(row))}>{getStatusLabel(row)}</span></td>
+                                <td>
+                                  <select value={row.representanteComercial || ''} onChange={(e) => handleAssignServiceField(row, 'representanteComercial', e.target.value)}>
+                                    <option value="">Sin asignar</option>
+                                    {historyCommercialOptions.map((opt) => <option key={`assg-com-${row.id}-${opt}`} value={opt}>{opt}</option>)}
+                                  </select>
+                                </td>
+                                <td>
+                                  <select value={row.atencionCliente || ''} onChange={(e) => handleAssignServiceField(row, 'atencionCliente', e.target.value)}>
+                                    <option value="">Sin asignar</option>
+                                    {historyAtencionOptions.map((opt) => <option key={`assg-ate-${row.id}-${opt}`} value={opt}>{opt}</option>)}
+                                  </select>
+                                </td>
+                                <td>{new Date((row.actualizadoEn?.seconds || row.creadoEn?.seconds || Date.now() / 1000) * 1000).toLocaleDateString('es-UY')}</td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
                 </section>
                 )}
               </main>
+
+              {ticketReassignModal.open && (
+                <div className="confirm-modal" onClick={() => setTicketReassignModal({ open: false, ticket: null, assigneeKey: '' })}>
+                  <div className="confirm-modal-card profile-avatar-modal" onClick={(e) => e.stopPropagation()}>
+                    <h3>Reasignar ticket</h3>
+                    <div className="hint" style={{ marginBottom: 8 }}>Ticket: <b>{ticketReassignModal.ticket?.ticketCodigo || `TICKET-${ticketReassignModal.ticket?.id || ''}`}</b></div>
+                    <div className="field">
+                      <label>Asignar a usuario</label>
+                      <select value={ticketReassignModal.assigneeKey} onChange={(e) => setTicketReassignModal((prev) => ({ ...prev, assigneeKey: e.target.value }))}>
+                        <option value="">Seleccionar usuario...</option>
+                        {ticketAssignableUsers.map((member) => (
+                          <option key={`assign-ticket-${member.key}`} value={member.key}>{member.nombre}{member.email ? ` · ${member.email}` : ''}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="profile-avatar-modal-actions" style={{ marginTop: 12 }}>
+                      <button type="button" className="edit-btn" onClick={() => setTicketReassignModal({ open: false, ticket: null, assigneeKey: '' })}>Cancelar</button>
+                      <button type="button" className="save-btn" onClick={handleConfirmTicketReassign} disabled={!ticketReassignModal.assigneeKey}>Guardar reasignación</button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {profileAvatarModalOpen && (
                 <div className="confirm-modal" onClick={closeProfileAvatarModal}>
