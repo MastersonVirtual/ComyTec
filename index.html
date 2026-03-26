@@ -4578,11 +4578,21 @@
         flex-wrap: wrap;
       }
       .status-action-btn {
-        border-radius: 10px;
-        padding: 8px 10px;
+        border-radius: 12px;
+        padding: 9px 12px;
         font-size: 12px;
         font-weight: 700;
         cursor: pointer;
+        border: 1px solid rgba(15,23,42,.78);
+        background: linear-gradient(180deg, rgba(31,41,55,.95), rgba(15,23,42,.95));
+        color: #f9fafb;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, .36);
+        transition: transform var(--motion-fast) ease, box-shadow var(--motion-fast) ease, filter var(--motion-fast) ease;
+      }
+      .status-action-btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.06);
+        box-shadow: 0 10px 22px rgba(0, 0, 0, .3);
       }
       .status-action-btn.resolve {
         background: rgba(16, 185, 129, .25) !important;
@@ -4590,14 +4600,19 @@
         color: #d1fae5 !important;
       }
       .status-action-btn.reject {
-        background: rgba(185, 28, 28, .25) !important;
-        border: 1px solid rgba(248, 113, 113, .45) !important;
-        color: #fee2e2 !important;
+        background: linear-gradient(180deg, #b91c1c, #7f1d1d) !important;
+        border: 1px solid #ef4444 !important;
+        color: #fff5f5 !important;
       }
       .status-action-btn.accept {
-        background: rgba(59, 130, 246, .24) !important;
-        border: 1px solid rgba(96, 165, 250, .48) !important;
-        color: #dbeafe !important;
+        background: linear-gradient(180deg, #1d4ed8, #1e3a8a) !important;
+        border: 1px solid #60a5fa !important;
+        color: #eff6ff !important;
+      }
+      .status-action-btn.chat-action-btn {
+        background: linear-gradient(180deg, #0f766e, #134e4a) !important;
+        border: 1px solid #2dd4bf !important;
+        color: #ecfeff !important;
       }
       .status-chip-inline {
         display: inline-flex;
@@ -4608,6 +4623,7 @@
         font-weight: 700;
       }
       .status-chip-inline.pending { background: rgba(245, 158, 11, .22); color: #fde68a; }
+      .status-chip-inline.progress { background: rgba(59, 130, 246, .22); color: #bfdbfe; }
       .status-chip-inline.resolved { background: rgba(16, 185, 129, .22); color: #bbf7d0; }
       .status-chip-inline.rejected { background: rgba(239, 68, 68, .22); color: #fecaca; }
 
@@ -4628,38 +4644,238 @@
         .profile-main-row { flex-direction: column; align-items: flex-start; }
       }
 
-      .ticket-date-group {
-        border: 1px solid rgba(230,255,253,.28);
-        border-radius: 12px;
-        padding: 10px;
-        margin-bottom: 10px;
-        background: rgba(0,0,0,.12);
+      .ticket-filters-row {
+        position: relative;
+        display: flex;
+        justify-content: flex-end;
+        margin: 10px 0 16px;
       }
-      .ticket-date-title {
-        margin: 0 0 8px;
-        font-size: 12px;
+      .ticket-create-card {
+        border: 1px solid rgba(191, 219, 224, .85);
+        border-radius: 18px;
+        background: linear-gradient(180deg, #f2f6f7 0%, #eaf1f3 100%);
+        box-shadow: 0 14px 34px rgba(0,0,0,.2);
+        color: #14353a;
+      }
+      .ticket-create-card h3 {
+        color: #0f4950;
+        font-size: 28px;
+        margin-bottom: 8px;
+      }
+      .ticket-create-subtitle {
+        color: #355e64;
+        font-size: 16px;
+        margin-bottom: 12px;
+      }
+      .ticket-create-form {
+        max-width: min(780px, 100%);
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .ticket-form-surface {
+        border: 1px solid #c2d2d8;
+        border-radius: 14px;
+        background: #f7fbfc;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+        padding: 16px;
+      }
+      .ticket-form-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .ticket-form-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .ticket-form-field.full { grid-column: span 1; }
+      .ticket-form-label {
+        font-size: 15px;
+        font-weight: 700;
+        color: #21464b;
+        letter-spacing: .03em;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .ticket-form-field input,
+      .ticket-form-field select,
+      .ticket-form-field textarea {
+        min-height: 48px;
+        border-radius: 13px;
+        border: 1px solid #b8c9cf;
+        background: #f4f7f8;
+        color: #1c2f35;
+        padding: 12px 14px;
+        font-size: 16px;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+      }
+      .ticket-form-field textarea {
+        min-height: 140px;
+        resize: vertical;
+      }
+      .ticket-create-btn {
+        margin-top: 4px;
+        min-height: 52px;
+        border-radius: 14px;
+        border: 1px solid rgba(16, 116, 110, .85);
+        background: linear-gradient(135deg, #117f81, #0e5d60);
+        color: #f4fffe;
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: .01em;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        cursor: pointer;
+        box-shadow: 0 14px 28px rgba(0,0,0,.28);
+      }
+      .ticket-create-btn:disabled {
+        opacity: .7;
+        cursor: not-allowed;
+      }
+      .ticket-filter-trigger {
+        border: 1px solid rgba(45, 212, 191, .46);
+        background: linear-gradient(140deg, rgba(8, 63, 58, .95), rgba(7, 44, 41, .95));
+        color: #ecfdf5;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 12px 24px rgba(0,0,0,.3);
+      }
+      .ticket-filters-toolbar {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        width: min(820px, 96vw);
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 10px;
+        padding: 14px;
+        border-radius: 16px;
+        border: 1px solid rgba(230,255,253,.35);
+        background: linear-gradient(140deg, rgba(6, 43, 42, .98), rgba(6, 31, 32, .98));
+        box-shadow: 0 16px 34px rgba(0,0,0,.34);
+        z-index: 80;
+      }
+      .ticket-filter-field { grid-column: span 4; }
+      .ticket-filter-field label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .04em;
         color: #d7f4ef;
         text-transform: uppercase;
-        letter-spacing: .04em;
+      }
+      .ticket-filter-field input,
+      .ticket-filter-field select {
+        width: 100%;
+        border-radius: 11px;
+        border: 1px solid rgba(230,255,253,.36);
+        background: rgba(7, 28, 29, .78);
+        color: #f4fffd;
+        padding: 10px 11px;
+      }
+      .ticket-date-group { margin-bottom: 18px; }
+      .ticket-date-title {
+        margin: 0 0 12px;
+        font-size: 13px;
+        color: #e5fcf9;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+        border-bottom: 1px solid rgba(230,255,253,.26);
+        padding-bottom: 7px;
+      }
+      .ticket-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(285px, 1fr));
+        gap: 12px;
       }
       .ticket-item-card {
-        border: 1px solid rgba(230,255,253,.24);
-        border-radius: 10px;
-        padding: 8px;
-        margin-bottom: 8px;
-        background: rgba(255,255,255,.06);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        border: 1px solid rgba(230,255,253,.26);
+        border-radius: 16px;
+        padding: 14px;
+        background: linear-gradient(150deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
+        box-shadow: 0 10px 26px rgba(0,0,0,.21);
       }
-      .ticket-upload-dropzone {
-        border: 1px dashed rgba(230,255,253,.45);
+      .ticket-item-card .kv {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+      .ticket-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .ticket-card-title {
+        margin: 0;
+        font-size: 15px;
+        color: #effffd;
+        letter-spacing: .02em;
+        overflow-wrap: anywhere;
+      }
+      .ticket-comment-block {
+        padding: 8px 10px;
         border-radius: 10px;
+        border: 1px solid rgba(230,255,253,.2);
+        background: rgba(0,0,0,.14);
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+      .ticket-card-main {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 7px 10px;
+      }
+      .ticket-card-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-top: 4px;
+      }
+      .ticket-empty-state {
+        border: 1px dashed rgba(230,255,253,.26);
+        border-radius: 12px;
         padding: 10px;
-        text-align: center;
         color: #d7f4ef;
         background: rgba(0,0,0,.12);
       }
+      @media (max-width: 1024px) {
+        .ticket-filter-field { grid-column: span 6; }
+        .ticket-filters-toolbar { width: min(700px, 96vw); }
+      }
+      @media (max-width: 700px) {
+        .ticket-filter-field { grid-column: span 12; }
+        .ticket-card-main { grid-template-columns: 1fr; }
+        .ticket-filters-row { justify-content: stretch; }
+        .ticket-filter-trigger { width: 100%; }
+        .ticket-filters-toolbar { left: 0; right: 0; width: 100%; }
+        .ticket-form-field { grid-column: span 12; }
+        .ticket-create-card h3 { font-size: 24px; }
+        .ticket-create-btn { font-size: 18px; min-height: 48px; }
+      }
+      .ticket-upload-dropzone {
+        border: 2px dashed rgba(151,243,231,.72);
+        border-radius: 14px;
+        padding: 16px 12px;
+        text-align: center;
+        color: #24464d;
+        background: linear-gradient(145deg, rgba(17, 127, 129, .12), rgba(10, 78, 82, .08));
+        font-weight: 600;
+      }
       .ticket-upload-dropzone.dragover {
-        border-color: #97f3e7;
-        background: rgba(151,243,231,.15);
+        border-color: #4ee3d1;
+        background: rgba(78,227,209,.2);
       }
       .ticket-image-grid {
         display: grid;
@@ -7304,6 +7520,11 @@
         const [imageViewerSrc, setImageViewerSrc] = useState('');
         const [ticketsHistorial, setTicketsHistorial] = useState([]);
         const [ticketSearchCode, setTicketSearchCode] = useState('');
+        const [ticketFilterFrom, setTicketFilterFrom] = useState('');
+        const [ticketFilterTo, setTicketFilterTo] = useState('');
+        const [ticketFilterStatus, setTicketFilterStatus] = useState('todos');
+        const [ticketFilterOrigen, setTicketFilterOrigen] = useState('todos');
+        const [ticketFilterOpen, setTicketFilterOpen] = useState(false);
         const [ticketReassignModal, setTicketReassignModal] = useState({ open: false, ticket: null, assigneeKey: '' });
         const seenRowIdsRef = useRef(new Set());
         const seenOperationalAlertsRef = useRef(new Set());
@@ -10182,9 +10403,36 @@
           return Number.isNaN(parsed.getTime()) ? null : parsed;
         }
 
+        function toDateInputValue(value) {
+          const dt = parseTicketDate(value);
+          if (!dt || Number.isNaN(dt.getTime())) return '';
+          const y = dt.getFullYear();
+          const m = String(dt.getMonth() + 1).padStart(2, '0');
+          const d = String(dt.getDate()).padStart(2, '0');
+          return `${y}-${m}-${d}`;
+        }
+
+        function getTicketStatusLabel(ticket = {}) {
+          const raw = String(ticket.estado || ticket.status || 'pendiente').trim().toLowerCase();
+          if (raw.includes('resuel') || raw.includes('final')) return 'resuelto';
+          if (raw.includes('proceso')) return 'en proceso';
+          return 'pendiente';
+        }
+
         const groupedManagerTickets = useMemo(() => {
           if (!isTicketManager) return [];
-          const groups = ticketsHistorial.reduce((acc, ticket) => {
+          const filteredTickets = ticketsHistorial.filter((ticket) => {
+            const ticketDate = parseTicketDate(ticket?.creadoEn, ticket?.fechaHoraLocal);
+            const ticketDateIso = ticketDate ? toDateInputValue(ticketDate) : '';
+            const matchesFrom = !ticketFilterFrom || (ticketDateIso && ticketDateIso >= ticketFilterFrom);
+            const matchesTo = !ticketFilterTo || (ticketDateIso && ticketDateIso <= ticketFilterTo);
+            const statusLabel = getTicketStatusLabel(ticket);
+            const matchesStatus = ticketFilterStatus === 'todos' || statusLabel === ticketFilterStatus;
+            const originLabel = ticket.origen === 'form-gestion' ? 'formulario' : 'manual';
+            const matchesOrigin = ticketFilterOrigen === 'todos' || originLabel === ticketFilterOrigen;
+            return matchesFrom && matchesTo && matchesStatus && matchesOrigin;
+          });
+          const groups = filteredTickets.reduce((acc, ticket) => {
             const dt = parseTicketDate(ticket?.creadoEn, ticket?.fechaHoraLocal);
             const label = dt ? dt.toLocaleDateString('es-UY', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) : 'Sin fecha';
             if (!acc[label]) acc[label] = [];
@@ -10192,7 +10440,7 @@
             return acc;
           }, {});
           return Object.entries(groups).map(([dateLabel, items]) => ({ dateLabel, items }));
-        }, [ticketsHistorial, isTicketManager]);
+        }, [ticketsHistorial, isTicketManager, ticketFilterFrom, ticketFilterTo, ticketFilterStatus, ticketFilterOrigen]);
 
         const ticketAssignableUsers = useMemo(() => {
           const map = new Map();
@@ -10876,71 +11124,145 @@
                         </div>
                       )}
                     </article>
-                    <article className="profile-option">
+                    <article className="profile-option ticket-create-card">
                       <h3>Nuevo ticket</h3>
-                      <form className="profile-form" onSubmit={handleCreateTicket}>
-                        <input type="text" value={currentUserName} readOnly />
-                        <input type="text" value={formatUruguayDateTime()} readOnly />
-                        <select value={ticketPrioridad} onChange={(e) => setTicketPrioridad(e.target.value)}>
-                          <option>Alta</option>
-                          <option>Media</option>
-                          <option>Baja</option>
-                        </select>
-                        <textarea value={ticketComentario} onChange={(e) => setTicketComentario(e.target.value)} placeholder="Comentá qué mejorarías de la web o del sistema" />
-                        <input type="file" accept="image/*" multiple onChange={(e) => handleTicketFilesInput(e.target.files)} />
-                        <div
-                          className={`ticket-upload-dropzone ${ticketDragOver ? 'dragover' : ''}`}
-                          onDragOver={(e) => { e.preventDefault(); setTicketDragOver(true); }}
-                          onDragLeave={() => setTicketDragOver(false)}
-                          onDrop={handleTicketDrop}
-                        >
-                          Arrastrá imágenes aquí o seleccioná archivos.
+                      <div className="ticket-create-subtitle">Ingresa los detalles para crear un nuevo ticket de forma manual.</div>
+                      <form className="profile-form ticket-create-form" onSubmit={handleCreateTicket}>
+                        <div className="ticket-form-surface">
+                          <div className="ticket-form-grid">
+                            <div className="ticket-form-field">
+                              <label className="ticket-form-label"><span>👤</span><span>Usuario</span></label>
+                              <input type="text" value={currentUserName} readOnly />
+                            </div>
+                            <div className="ticket-form-field">
+                              <label className="ticket-form-label"><span>🗓️</span><span>Fecha y hora</span></label>
+                              <input type="text" value={formatUruguayDateTime()} readOnly />
+                            </div>
+                            <div className="ticket-form-field full">
+                              <label className="ticket-form-label"><span>🚩</span><span>Prioridad</span></label>
+                              <select value={ticketPrioridad} onChange={(e) => setTicketPrioridad(e.target.value)}>
+                                <option>Alta</option>
+                                <option>Media</option>
+                                <option>Baja</option>
+                              </select>
+                            </div>
+                            <div className="ticket-form-field full">
+                              <label className="ticket-form-label"><span>📝</span><span>Descripción</span></label>
+                              <textarea value={ticketComentario} onChange={(e) => setTicketComentario(e.target.value)} placeholder="Descripción del problema o solicitud..." />
+                            </div>
+                            <div className="ticket-form-field full">
+                              <label className="ticket-form-label"><span>📎</span><span>Adjuntos</span></label>
+                              <input type="file" accept="image/*" multiple onChange={(e) => handleTicketFilesInput(e.target.files)} />
+                              <div
+                                className={`ticket-upload-dropzone ${ticketDragOver ? 'dragover' : ''}`}
+                                onDragOver={(e) => { e.preventDefault(); setTicketDragOver(true); }}
+                                onDragLeave={() => setTicketDragOver(false)}
+                                onDrop={handleTicketDrop}
+                              >
+                                Arrastrá imágenes aquí o seleccioná archivos.
+                              </div>
+                            </div>
+                          </div>
                         </div>
                         {ticketImagenes.length > 0 && (
                           <div className="ticket-image-grid">
                             {ticketImagenes.map((img, idx) => (<img key={`ticket-img-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `img-${idx + 1}`} onClick={() => openImageViewer(img.dataUrl)} />))}
                           </div>
                         )}
-                        <button className="save-btn profile-save-btn" type="submit" disabled={ticketSaving}>{ticketSaving ? 'Enviando...' : 'Crear ticket'}</button>
+                        <button className="ticket-create-btn" type="submit" disabled={ticketSaving}>
+                          <span>➕</span>
+                          <span>{ticketSaving ? 'Enviando...' : 'Crear ticket'}</span>
+                        </button>
                       </form>
                     </article>
                     {isTicketManager && (
                       <article className="profile-option">
                         <h3>Historial de tickets</h3>
+                        <div className="ticket-filters-row">
+                          <button type="button" className="ticket-filter-trigger" onClick={() => setTicketFilterOpen((prev) => !prev)}>
+                            🔎 Filtros {ticketFilterOpen ? '▲' : '▼'}
+                          </button>
+                          {ticketFilterOpen && (
+                            <div className="ticket-filters-toolbar">
+                              <div className="ticket-filter-field">
+                                <label>Desde</label>
+                                <input type="date" value={ticketFilterFrom} onChange={(e) => setTicketFilterFrom(e.target.value)} />
+                              </div>
+                              <div className="ticket-filter-field">
+                                <label>Hasta</label>
+                                <input type="date" value={ticketFilterTo} onChange={(e) => setTicketFilterTo(e.target.value)} />
+                              </div>
+                              <div className="ticket-filter-field">
+                                <label>Estado</label>
+                                <select value={ticketFilterStatus} onChange={(e) => setTicketFilterStatus(e.target.value)}>
+                                  <option value="todos">Todos</option>
+                                  <option value="pendiente">Pendiente</option>
+                                  <option value="en proceso">En proceso</option>
+                                  <option value="resuelto">Resuelto</option>
+                                </select>
+                              </div>
+                              <div className="ticket-filter-field">
+                                <label>Origen</label>
+                                <select value={ticketFilterOrigen} onChange={(e) => setTicketFilterOrigen(e.target.value)}>
+                                  <option value="todos">Todos</option>
+                                  <option value="manual">Creado manualmente</option>
+                                  <option value="formulario">Desde formulario</option>
+                                </select>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                         {groupedManagerTickets.length === 0 ? (
-                          <div className="kv">No hay tickets registrados.</div>
+                          <div className="ticket-empty-state">No hay tickets registrados para los filtros seleccionados.</div>
                         ) : (
                           groupedManagerTickets.map((group) => (
                             <div key={`group-${group.dateLabel}`} className="ticket-date-group">
                               <h4 className="ticket-date-title">{group.dateLabel}</h4>
-                              {group.items.map((ticket) => (
-                                <div key={ticket.id} className="ticket-item-card">
-                                  <div className="kv"><b>N° ticket:</b> {ticket.ticketCodigo || `TICKET-${ticket.id}`}</div>
-                                  <div className="kv"><b>Usuario:</b> {ticket.creadoPorNombre || ticket.creadoPorEmail || '-'}</div>
-                                  <div className="kv"><b>Fecha:</b> {ticket.fechaHoraLocal || formatRequestDateTime(ticket.creadoEn)}</div>
-                                  <div className="kv"><b>Prioridad:</b> {ticket.prioridad || '-'}</div>
-                                  <div className="kv"><b>Comentario:</b> {ticket.comentario || '-'}</div>
-                                  <div className="kv"><b>Asignado a:</b> {ticket.asignadoANombre || ticket.asignadoAEmail || 'Sin asignar'}</div>
-                                  {ticket.origen === 'form-gestion' && (
-                                    <>
-                                      <div className="kv"><b>Cliente ID:</b> {ticket.clienteId || '-'}</div>
-                                      <div className="kv"><b>Servicio:</b> {ticket.nombreServicio || '-'}</div>
-                                      <div className="kv"><b>Tipo de acción:</b> {ticket.tipoAccion || '-'}</div>
-                                    </>
-                                  )}
-                                  {Array.isArray(ticket.imagenesAdjuntas) && ticket.imagenesAdjuntas.length > 0 && (
-                                    <div className="ticket-image-grid">
-                                      {ticket.imagenesAdjuntas.map((img, idx) => (<img key={`hist-img-${ticket.id}-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `adj-${idx + 1}`} onClick={() => openImageViewer(img.dataUrl)} />))}
+                              <div className="ticket-cards-grid">
+                                {group.items.map((ticket) => {
+                                  const ticketStatusLabel = getTicketStatusLabel(ticket);
+                                  return (
+                                  <div key={ticket.id} className="ticket-item-card">
+                                    <div className="ticket-card-header">
+                                      <h5 className="ticket-card-title">{ticket.ticketCodigo || `TICKET-${ticket.id}`}</h5>
+                                      <span className={`status-chip-inline ${
+                                        ticketStatusLabel === 'resuelto'
+                                          ? 'resolved'
+                                          : ticketStatusLabel === 'en proceso'
+                                            ? 'progress'
+                                            : 'pending'
+                                      }`}>
+                                        {ticket.estado || 'pendiente'}
+                                      </span>
                                     </div>
-                                  )}
-                                  <div className="kv"><b>Estado:</b> {ticket.estado || 'pendiente'}</div>
-                                  <div className="request-status-row" style={{ marginTop: 8 }}>
-                                    <button type="button" className="status-action-btn chat-action-btn" onClick={() => openTicketReassignModal(ticket)}>Reasignar</button>
-                                    {ticket.estado !== 'resuelto' && <button type="button" className="status-action-btn accept" onClick={() => handleResolveTicket(ticket)}>Marcar resuelto</button>}
-                                    <button type="button" className="status-action-btn reject" onClick={() => handleDeleteTicket(ticket)}>Eliminar</button>
+                                    <div className="ticket-card-main">
+                                      <div className="kv"><b>Usuario:</b> {ticket.creadoPorNombre || ticket.creadoPorEmail || '-'}</div>
+                                      <div className="kv"><b>Fecha:</b> {ticket.fechaHoraLocal || formatRequestDateTime(ticket.creadoEn)}</div>
+                                      <div className="kv"><b>Prioridad:</b> {ticket.prioridad || '-'}</div>
+                                      <div className="kv"><b>Asignado:</b> {ticket.asignadoANombre || ticket.asignadoAEmail || 'Sin asignar'}</div>
+                                      <div className="kv"><b>Origen:</b> {ticket.origen === 'form-gestion' ? 'Formulario' : 'Manual'}</div>
+                                      {ticket.origen === 'form-gestion' && <div className="kv"><b>Cliente ID:</b> {ticket.clienteId || '-'}</div>}
+                                    </div>
+                                    <div className="kv ticket-comment-block"><b>Comentario:</b> {ticket.comentario || '-'}</div>
+                                    {ticket.origen === 'form-gestion' && (
+                                      <div className="ticket-card-main">
+                                        <div className="kv"><b>Servicio:</b> {ticket.nombreServicio || '-'}</div>
+                                        <div className="kv"><b>Tipo acción:</b> {ticket.tipoAccion || '-'}</div>
+                                      </div>
+                                    )}
+                                    {Array.isArray(ticket.imagenesAdjuntas) && ticket.imagenesAdjuntas.length > 0 && (
+                                      <div className="ticket-image-grid">
+                                        {ticket.imagenesAdjuntas.map((img, idx) => (<img key={`hist-img-${ticket.id}-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `adj-${idx + 1}`} onClick={() => openImageViewer(img.dataUrl)} />))}
+                                      </div>
+                                    )}
+                                    <div className="ticket-card-actions">
+                                      <button type="button" className="status-action-btn chat-action-btn" onClick={() => openTicketReassignModal(ticket)}>Reasignar</button>
+                                      {ticket.estado !== 'resuelto' && <button type="button" className="status-action-btn accept" onClick={() => handleResolveTicket(ticket)}>Marcar resuelto</button>}
+                                      <button type="button" className="status-action-btn reject" onClick={() => handleDeleteTicket(ticket)}>Eliminar</button>
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
+                                )})}
+                              </div>
                             </div>
                           ))
                         )}
