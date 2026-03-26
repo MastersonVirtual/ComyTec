@@ -4583,10 +4583,10 @@
         font-size: 12px;
         font-weight: 700;
         cursor: pointer;
-        border: 1px solid rgba(230,255,253,.34);
-        background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.04));
-        color: #eafffc;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, .24);
+        border: 1px solid rgba(15,23,42,.78);
+        background: linear-gradient(180deg, rgba(31,41,55,.95), rgba(15,23,42,.95));
+        color: #f9fafb;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, .36);
         transition: transform var(--motion-fast) ease, box-shadow var(--motion-fast) ease, filter var(--motion-fast) ease;
       }
       .status-action-btn:hover {
@@ -4600,14 +4600,19 @@
         color: #d1fae5 !important;
       }
       .status-action-btn.reject {
-        background: rgba(185, 28, 28, .25) !important;
-        border: 1px solid rgba(248, 113, 113, .45) !important;
-        color: #fee2e2 !important;
+        background: linear-gradient(180deg, #b91c1c, #7f1d1d) !important;
+        border: 1px solid #ef4444 !important;
+        color: #fff5f5 !important;
       }
       .status-action-btn.accept {
-        background: rgba(59, 130, 246, .24) !important;
-        border: 1px solid rgba(96, 165, 250, .48) !important;
-        color: #dbeafe !important;
+        background: linear-gradient(180deg, #1d4ed8, #1e3a8a) !important;
+        border: 1px solid #60a5fa !important;
+        color: #eff6ff !important;
+      }
+      .status-action-btn.chat-action-btn {
+        background: linear-gradient(180deg, #0f766e, #134e4a) !important;
+        border: 1px solid #2dd4bf !important;
+        color: #ecfeff !important;
       }
       .status-chip-inline {
         display: inline-flex;
@@ -4639,16 +4644,36 @@
         .profile-main-row { flex-direction: column; align-items: flex-start; }
       }
 
+      .ticket-filters-row {
+        position: relative;
+        display: flex;
+        justify-content: flex-end;
+        margin: 10px 0 16px;
+      }
+      .ticket-filter-trigger {
+        border: 1px solid rgba(45, 212, 191, .46);
+        background: linear-gradient(140deg, rgba(8, 63, 58, .95), rgba(7, 44, 41, .95));
+        color: #ecfdf5;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 12px 24px rgba(0,0,0,.3);
+      }
       .ticket-filters-toolbar {
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        width: min(820px, 96vw);
         display: grid;
         grid-template-columns: repeat(12, minmax(0, 1fr));
         gap: 10px;
-        margin: 12px 0 16px;
         padding: 14px;
         border-radius: 16px;
-        border: 1px solid rgba(230,255,253,.26);
-        background: linear-gradient(140deg, rgba(7, 46, 45, .72), rgba(9, 27, 29, .62));
-        box-shadow: 0 12px 30px rgba(0,0,0,.22);
+        border: 1px solid rgba(230,255,253,.35);
+        background: linear-gradient(140deg, rgba(6, 43, 42, .98), rgba(6, 31, 32, .98));
+        box-shadow: 0 16px 34px rgba(0,0,0,.34);
+        z-index: 80;
       }
       .ticket-filter-field { grid-column: span 4; }
       .ticket-filter-field label {
@@ -4694,6 +4719,10 @@
         background: linear-gradient(150deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
         box-shadow: 0 10px 26px rgba(0,0,0,.21);
       }
+      .ticket-item-card .kv {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
       .ticket-card-header {
         display: flex;
         align-items: center;
@@ -4705,6 +4734,15 @@
         font-size: 15px;
         color: #effffd;
         letter-spacing: .02em;
+        overflow-wrap: anywhere;
+      }
+      .ticket-comment-block {
+        padding: 8px 10px;
+        border-radius: 10px;
+        border: 1px solid rgba(230,255,253,.2);
+        background: rgba(0,0,0,.14);
+        overflow-wrap: anywhere;
+        word-break: break-word;
       }
       .ticket-card-main {
         display: grid;
@@ -4726,10 +4764,14 @@
       }
       @media (max-width: 1024px) {
         .ticket-filter-field { grid-column: span 6; }
+        .ticket-filters-toolbar { width: min(700px, 96vw); }
       }
       @media (max-width: 700px) {
         .ticket-filter-field { grid-column: span 12; }
         .ticket-card-main { grid-template-columns: 1fr; }
+        .ticket-filters-row { justify-content: stretch; }
+        .ticket-filter-trigger { width: 100%; }
+        .ticket-filters-toolbar { left: 0; right: 0; width: 100%; }
       }
       .ticket-upload-dropzone {
         border: 1px dashed rgba(230,255,253,.45);
@@ -7390,6 +7432,7 @@
         const [ticketFilterTo, setTicketFilterTo] = useState('');
         const [ticketFilterStatus, setTicketFilterStatus] = useState('todos');
         const [ticketFilterOrigen, setTicketFilterOrigen] = useState('todos');
+        const [ticketFilterOpen, setTicketFilterOpen] = useState(false);
         const [ticketReassignModal, setTicketReassignModal] = useState({ open: false, ticket: null, assigneeKey: '' });
         const seenRowIdsRef = useRef(new Set());
         const seenOperationalAlertsRef = useRef(new Set());
@@ -11020,32 +11063,39 @@
                     {isTicketManager && (
                       <article className="profile-option">
                         <h3>Historial de tickets</h3>
-                        <div className="ticket-filters-toolbar">
-                          <div className="ticket-filter-field">
-                            <label>Desde</label>
-                            <input type="date" value={ticketFilterFrom} onChange={(e) => setTicketFilterFrom(e.target.value)} />
-                          </div>
-                          <div className="ticket-filter-field">
-                            <label>Hasta</label>
-                            <input type="date" value={ticketFilterTo} onChange={(e) => setTicketFilterTo(e.target.value)} />
-                          </div>
-                          <div className="ticket-filter-field">
-                            <label>Estado</label>
-                            <select value={ticketFilterStatus} onChange={(e) => setTicketFilterStatus(e.target.value)}>
-                              <option value="todos">Todos</option>
-                              <option value="pendiente">Pendiente</option>
-                              <option value="en proceso">En proceso</option>
-                              <option value="resuelto">Resuelto</option>
-                            </select>
-                          </div>
-                          <div className="ticket-filter-field">
-                            <label>Origen</label>
-                            <select value={ticketFilterOrigen} onChange={(e) => setTicketFilterOrigen(e.target.value)}>
-                              <option value="todos">Todos</option>
-                              <option value="manual">Creado manualmente</option>
-                              <option value="formulario">Desde formulario</option>
-                            </select>
-                          </div>
+                        <div className="ticket-filters-row">
+                          <button type="button" className="ticket-filter-trigger" onClick={() => setTicketFilterOpen((prev) => !prev)}>
+                            🔎 Filtros {ticketFilterOpen ? '▲' : '▼'}
+                          </button>
+                          {ticketFilterOpen && (
+                            <div className="ticket-filters-toolbar">
+                              <div className="ticket-filter-field">
+                                <label>Desde</label>
+                                <input type="date" value={ticketFilterFrom} onChange={(e) => setTicketFilterFrom(e.target.value)} />
+                              </div>
+                              <div className="ticket-filter-field">
+                                <label>Hasta</label>
+                                <input type="date" value={ticketFilterTo} onChange={(e) => setTicketFilterTo(e.target.value)} />
+                              </div>
+                              <div className="ticket-filter-field">
+                                <label>Estado</label>
+                                <select value={ticketFilterStatus} onChange={(e) => setTicketFilterStatus(e.target.value)}>
+                                  <option value="todos">Todos</option>
+                                  <option value="pendiente">Pendiente</option>
+                                  <option value="en proceso">En proceso</option>
+                                  <option value="resuelto">Resuelto</option>
+                                </select>
+                              </div>
+                              <div className="ticket-filter-field">
+                                <label>Origen</label>
+                                <select value={ticketFilterOrigen} onChange={(e) => setTicketFilterOrigen(e.target.value)}>
+                                  <option value="todos">Todos</option>
+                                  <option value="manual">Creado manualmente</option>
+                                  <option value="formulario">Desde formulario</option>
+                                </select>
+                              </div>
+                            </div>
+                          )}
                         </div>
                         {groupedManagerTickets.length === 0 ? (
                           <div className="ticket-empty-state">No hay tickets registrados para los filtros seleccionados.</div>
@@ -11078,7 +11128,7 @@
                                       <div className="kv"><b>Origen:</b> {ticket.origen === 'form-gestion' ? 'Formulario' : 'Manual'}</div>
                                       {ticket.origen === 'form-gestion' && <div className="kv"><b>Cliente ID:</b> {ticket.clienteId || '-'}</div>}
                                     </div>
-                                    <div className="kv"><b>Comentario:</b> {ticket.comentario || '-'}</div>
+                                    <div className="kv ticket-comment-block"><b>Comentario:</b> {ticket.comentario || '-'}</div>
                                     {ticket.origen === 'form-gestion' && (
                                       <div className="ticket-card-main">
                                         <div className="kv"><b>Servicio:</b> {ticket.nombreServicio || '-'}</div>
