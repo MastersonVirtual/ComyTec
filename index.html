@@ -1465,6 +1465,43 @@
         color: #2f4f53;
         font-size: 13px;
       }
+      .service-detail-modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 2100;
+        background: rgba(1, 18, 19, .68);
+        backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+      }
+      .service-detail-modal {
+        width: min(980px, 96vw);
+        max-height: 92vh;
+        overflow-y: auto;
+        background: #ffffff;
+        border-radius: 18px;
+        border: 1px solid rgba(173, 202, 208, .72);
+        box-shadow: 0 24px 48px rgba(2, 20, 23, .4);
+        padding: 16px;
+      }
+      .service-detail-modal-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .service-detail-modal-close {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border: 1px solid rgba(13, 122, 124, .28);
+        background: rgba(13, 122, 124, .1);
+        color: #0b5355;
+        font-size: 22px;
+        cursor: pointer;
+      }
       .service-coord-detail-card .field > label {
         color: #ffba7e !important;
         background: rgba(64, 69, 74, .94) !important;
@@ -7774,6 +7811,7 @@
         const [historyTypeFilter, setHistoryTypeFilter] = useState('todos');
         const [historyDateFilter, setHistoryDateFilter] = useState('');
         const [historyDetailTab, setHistoryDetailTab] = useState('informacion');
+        const [historyDetailModalOpen, setHistoryDetailModalOpen] = useState(false);
         const [workflowTaskChecks, setWorkflowTaskChecks] = useState({});
         const [opsSideTab, setOpsSideTab] = useState('activity');
         const [opsCommentDraft, setOpsCommentDraft] = useState('');
@@ -9421,6 +9459,13 @@
           setSelectedForm('historial');
         }
 
+        function openServiceDetailModal(service, tab = 'informacion') {
+          if (!service) return;
+          openHistoryRecord(service);
+          setHistoryDetailTab(tab);
+          setHistoryDetailModalOpen(true);
+        }
+
         function applyUserDefaultsToForms() {
           const stamp = formatUruguayDateTime();
           setServicioForm((prev) => ({ ...prev, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: prev.fechaIngresoDatos || stamp }));
@@ -9470,6 +9515,10 @@
         useEffect(() => {
           setHistoryDetailTab('informacion');
         }, [selectedService?.id]);
+
+        useEffect(() => {
+          if (effectiveSelectedForm !== 'historial') setHistoryDetailModalOpen(false);
+        }, [effectiveSelectedForm]);
 
         function resetFields() {
           setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('Pendiente');
@@ -11765,7 +11814,7 @@
                               ? 'Activo'
                               : 'Pendiente';
                           return (
-                            <article key={`history-row-${row.id}`} className={`service-coord-service-card ${selectedService?.id === row.id ? 'active' : ''}`} onClick={() => openHistoryRecord(row)}>
+                            <article key={`history-row-${row.id}`} className={`service-coord-service-card ${selectedService?.id === row.id ? 'active' : ''}`} onClick={() => openServiceDetailModal(row, 'informacion')}>
                               <div className="service-card-top">
                                 <strong>{row.nombreServicio || row.cliente || 'Servicio sin nombre'}</strong>
                                 <span className={`service-coord-status service-coord-status-${cardStatus.toLowerCase()}`}>{cardStatus}</span>
@@ -11778,8 +11827,9 @@
                               </div>
                               <div className="service-card-actions">
                                 <button type="button" className="service-card-action-btn primary" onClick={(event) => { event.stopPropagation(); startEditService(row); }}>Editar</button>
-                                <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); openHistoryRecord(row); }}>Ver historial</button>
-                                <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); setSelectedForm('tickets'); setTicketSearchCode(String(row.clienteId || '')); }}>Ver tickets</button>
+                                <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); openServiceDetailModal(row, 'informacion'); }}>Ver detalles</button>
+                                <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); openServiceDetailModal(row, 'historial'); }}>Ver historial</button>
+                                <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); openServiceDetailModal(row, 'tickets'); }}>Ver tickets</button>
                               </div>
                             </article>
                           );
@@ -11793,69 +11843,6 @@
                       <button type="button" className="service-coord-page-btn" onClick={() => setHistoryPage((p) => Math.min(totalHistoryPages, p + 1))} disabled={safeHistoryPage >= totalHistoryPages}>Siguiente</button>
                     </div>
 
-                    {(() => {
-                      const detailService = selectedService || historyRowsPage[0] || null;
-                      if (!detailService) return null;
-                      const serviceStatus = normalizeLegacyStatusName(String(detailService.status || detailService.estado || 'Pendiente'));
-                      const detailServiceId = String(detailService.clienteId || '').trim();
-                      const serviceTimeline = recentActivity
-                        .filter((item) => String(item.clienteId || '').trim() === detailServiceId)
-                        .slice(0, 8);
-                      const serviceTickets = ticketsHistorial
-                        .filter((ticket) => String(ticket.clienteId || '').trim() === detailServiceId)
-                        .slice(0, 8);
-                      return (
-                        <section className="service-coord-detail-card">
-                          <div className="service-coord-detail-head">
-                            <h3>{detailService.nombreServicio || detailService.cliente || 'Servicio sin nombre'}</h3>
-                            <span className={statusClass(serviceStatus)}>{serviceStatus}</span>
-                          </div>
-
-                          <div className="service-coord-tabs">
-                            <button type="button" className={`service-coord-tab-btn ${historyDetailTab === 'informacion' ? 'active' : ''}`} onClick={() => setHistoryDetailTab('informacion')}>Información</button>
-                            <button type="button" className={`service-coord-tab-btn ${historyDetailTab === 'historial' ? 'active' : ''}`} onClick={() => setHistoryDetailTab('historial')}>Historial</button>
-                            <button type="button" className={`service-coord-tab-btn ${historyDetailTab === 'tickets' ? 'active' : ''}`} onClick={() => setHistoryDetailTab('tickets')}>Tickets</button>
-                          </div>
-
-                          {historyDetailTab === 'informacion' && (
-                            <div className="service-coord-detail-grid">
-                              <div className="service-detail-kpi"><small>🪪 ID Servicio</small><strong>{detailService.clienteId || '-'}</strong></div>
-                              <div className="service-detail-kpi"><small>🧩 Tipo</small><strong>{detailService.tipoServicioBrindar || '-'}</strong></div>
-                              <div className="service-detail-kpi"><small>📅 Fecha de alta</small><strong>{detailService.fechaAltaServicio || detailService.fechaAlta || detailService.fechaEspecificaInicio || '-'}</strong></div>
-                              <div className="service-detail-kpi"><small>👤 Encargado</small><strong>{detailService.representanteComercial || '-'}</strong></div>
-                              <div className="service-detail-kpi"><small>📦 Equipamiento</small><strong>{detailService.equipamientoInstalado || detailService.detalleEquipamiento || detailService.equipamientoRetirar || '-'}</strong></div>
-                              <div className="service-detail-kpi"><small>💵 Importe mensual</small><strong>{detailService.importeMensualServicioSinIva || detailService.importeMensualServicio || '-'}</strong></div>
-                              <div className="service-detail-kpi" style={{ gridColumn: '1 / -1' }}><small>📍 Dirección</small><strong>{detailService.direccionServicio || detailService.direccion || '-'}</strong></div>
-                            </div>
-                          )}
-
-                          {historyDetailTab === 'historial' && (
-                            <div className="service-coord-detail-list">
-                              {serviceTimeline.length === 0 ? (
-                                <div className="service-coord-detail-list-item">Sin eventos de historial para este servicio.</div>
-                              ) : serviceTimeline.map((item) => (
-                                <div key={`timeline-${item.id}`} className="service-coord-detail-list-item">
-                                  <strong>{item.dateLabel || '-'}</strong> · {item.message || item.accion || 'Actualización registrada'}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-
-                          {historyDetailTab === 'tickets' && (
-                            <div className="service-coord-detail-list">
-                              {serviceTickets.length === 0 ? (
-                                <div className="service-coord-detail-list-item">No hay tickets asociados a este servicio.</div>
-                              ) : serviceTickets.map((ticket) => (
-                                <div key={`detail-ticket-${ticket.id || ticket.ticketCodigo}`} className="service-coord-detail-list-item">
-                                  <strong>{ticket.ticketCodigo || ticket.id || 'Ticket'}</strong> · {ticket.comentario || 'Sin comentario'}
-                                </div>
-                              ))}
-                              <button type="button" className="service-card-action-btn primary" onClick={() => { setSelectedForm('tickets'); setTicketSearchCode(detailServiceId); }}>Ver todos los tickets del servicio</button>
-                            </div>
-                          )}
-                        </section>
-                      );
-                    })()}
                   </section>
                 ) : (
                 <section className="panel">
@@ -12664,6 +12651,77 @@
                 </section>
                 )}
               </main>
+
+              {historyDetailModalOpen && selectedService && effectiveSelectedForm === 'historial' && (
+                <div className="service-detail-modal-overlay" onClick={() => setHistoryDetailModalOpen(false)}>
+                  <div className="service-detail-modal" onClick={(e) => e.stopPropagation()}>
+                    {(() => {
+                      const detailService = selectedService;
+                      const serviceStatus = normalizeLegacyStatusName(String(detailService.status || detailService.estado || 'Pendiente'));
+                      const detailServiceId = String(detailService.clienteId || '').trim();
+                      const serviceTimeline = recentActivity
+                        .filter((item) => String(item.clienteId || '').trim() === detailServiceId)
+                        .slice(0, 8);
+                      const serviceTickets = ticketsHistorial
+                        .filter((ticket) => String(ticket.clienteId || '').trim() === detailServiceId)
+                        .slice(0, 8);
+                      return (
+                        <>
+                          <div className="service-detail-modal-head">
+                            <div className="service-coord-detail-head" style={{ margin: 0 }}>
+                              <h3>{detailService.nombreServicio || detailService.cliente || 'Servicio sin nombre'}</h3>
+                              <span className={statusClass(serviceStatus)}>{serviceStatus}</span>
+                            </div>
+                            <button type="button" className="service-detail-modal-close" onClick={() => setHistoryDetailModalOpen(false)} aria-label="Cerrar detalle">×</button>
+                          </div>
+
+                          <div className="service-coord-tabs">
+                            <button type="button" className={`service-coord-tab-btn ${historyDetailTab === 'informacion' ? 'active' : ''}`} onClick={() => setHistoryDetailTab('informacion')}>Información</button>
+                            <button type="button" className={`service-coord-tab-btn ${historyDetailTab === 'historial' ? 'active' : ''}`} onClick={() => setHistoryDetailTab('historial')}>Historial</button>
+                            <button type="button" className={`service-coord-tab-btn ${historyDetailTab === 'tickets' ? 'active' : ''}`} onClick={() => setHistoryDetailTab('tickets')}>Tickets</button>
+                          </div>
+
+                          {historyDetailTab === 'informacion' && (
+                            <div className="service-coord-detail-grid">
+                              <div className="service-detail-kpi"><small>🪪 ID Servicio</small><strong>{detailService.clienteId || '-'}</strong></div>
+                              <div className="service-detail-kpi"><small>🧩 Tipo</small><strong>{detailService.tipoServicioBrindar || '-'}</strong></div>
+                              <div className="service-detail-kpi"><small>📅 Fecha de alta</small><strong>{detailService.fechaAltaServicio || detailService.fechaAlta || detailService.fechaEspecificaInicio || '-'}</strong></div>
+                              <div className="service-detail-kpi"><small>👤 Encargado</small><strong>{detailService.representanteComercial || '-'}</strong></div>
+                              <div className="service-detail-kpi"><small>📦 Equipamiento</small><strong>{detailService.equipamientoInstalado || detailService.detalleEquipamiento || detailService.equipamientoRetirar || '-'}</strong></div>
+                              <div className="service-detail-kpi"><small>💵 Importe mensual</small><strong>{detailService.importeMensualServicioSinIva || detailService.importeMensualServicio || '-'}</strong></div>
+                              <div className="service-detail-kpi" style={{ gridColumn: '1 / -1' }}><small>📍 Dirección</small><strong>{detailService.direccionServicio || detailService.direccion || '-'}</strong></div>
+                            </div>
+                          )}
+
+                          {historyDetailTab === 'historial' && (
+                            <div className="service-coord-detail-list">
+                              {serviceTimeline.length === 0 ? (
+                                <div className="service-coord-detail-list-item">Sin eventos de historial para este servicio.</div>
+                              ) : serviceTimeline.map((item) => (
+                                <div key={`timeline-${item.id}`} className="service-coord-detail-list-item">
+                                  <strong>{item.dateLabel || '-'}</strong> · {item.message || item.accion || 'Actualización registrada'}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {historyDetailTab === 'tickets' && (
+                            <div className="service-coord-detail-list">
+                              {serviceTickets.length === 0 ? (
+                                <div className="service-coord-detail-list-item">No hay tickets asociados a este servicio.</div>
+                              ) : serviceTickets.map((ticket) => (
+                                <div key={`detail-ticket-${ticket.id || ticket.ticketCodigo}`} className="service-coord-detail-list-item">
+                                  <strong>{ticket.ticketCodigo || ticket.id || 'Ticket'}</strong> · {ticket.comentario || 'Sin comentario'}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              )}
 
               {ticketReassignModal.open && (
                 <div className="confirm-modal" onClick={() => setTicketReassignModal({ open: false, ticket: null, assigneeKey: '' })}>
