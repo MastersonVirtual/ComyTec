@@ -9284,6 +9284,34 @@
           }
         }
 
+        function openHistoryRecord(service, options = {}) {
+          if (!service) return;
+          const forcedAction = options.forceAction || '';
+          const action = forcedAction || service.tipoAccion || service.tipo || 'Nuevo Servicio';
+          setSelectedService(service);
+          setStatus(normalizeLegacyStatusName(service.status || service.estado || 'Pendiente'));
+
+          if (action === 'Charla informativa') {
+            setTipoAccion('Charla informativa');
+            setClienteId('');
+            setClienteIdAsociado(service.clienteId || '');
+            setCharlaForm((prev) => ({
+              ...prev,
+              ...charlaInicial,
+              nombreServicio: service.nombreServicio || prev.nombreServicio || '',
+              responsableCharla: service.responsableCharla || '',
+              fecha: service.fecha || '',
+              horario: service.horario || '',
+              direccion: service.direccion || service.direccionServicio || '',
+              observaciones: service.observaciones || '',
+            }));
+            setSelectedForm('other');
+            return;
+          }
+
+          setSelectedForm('historial');
+        }
+
         function applyUserDefaultsToForms() {
           const stamp = formatUruguayDateTime();
           setServicioForm((prev) => ({ ...prev, representanteComercial: currentUserName, creadoPor: currentUserName, fechaIngresoDatos: prev.fechaIngresoDatos || stamp }));
@@ -11563,7 +11591,7 @@
                       );
                     })()}
                   </section>
-) : effectiveSelectedForm === 'historial-charlas' ? (
+                ) : effectiveSelectedForm === 'historial-charlas' ? (
                   <section className="panel">
                     <h2>Historial de Charlas Informativas</h2>
                     <div className="hint">Charlas registradas por fecha y hora (más reciente primero).</div>
@@ -11572,8 +11600,8 @@
                     ) : (
                       <div className="history-list">
                         {charlaHistoryRows.map((row) => (
-                          <div className="history-row" key={`charla-${row.id}`}>
-                            <button type="button" className="ranking-service-btn" onClick={() => { setSelectedService(row); setSelectedForm('historial'); }}>
+                          <div className="history-row" key={`charla-${row.id}`} role="button" tabIndex={0} onClick={() => openHistoryRecord(row, { forceAction: 'Charla informativa' })} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openHistoryRecord(row, { forceAction: 'Charla informativa' }); } }}>
+                            <button type="button" className="ranking-service-btn" onClick={(event) => { event.stopPropagation(); openHistoryRecord(row, { forceAction: 'Charla informativa' }); }}>
                               <div className="history-row-main">
                                 <strong>{row.nombreServicio || 'Charla sin nombre'}</strong>
                                 <div className="history-row-meta">
@@ -11632,7 +11660,7 @@
                                   ? 'Activo'
                                   : 'Pendiente';
                               return (
-                                <tr key={`history-row-${row.id}`}>
+                                <tr key={`history-row-${row.id}`} onClick={() => openHistoryRecord(row)} style={{ cursor: 'pointer' }}>
                                   <td>{row.clienteId || '-'}</td>
                                   <td><strong className="service-coord-client">{row.nombreServicio || row.cliente || 'Servicio sin nombre'}</strong></td>
                                   <td>{row.direccionServicio || row.direccion || '-'}</td>
@@ -11643,7 +11671,7 @@
                                     <span className={`service-coord-status service-coord-status-${tableStatus.toLowerCase()}`}>{tableStatus}</span>
                                   </td>
                                   <td className="service-coord-action-cell">
-                                    <button type="button" className="service-coord-detail-btn" onClick={() => setSelectedService(row)}>Ver detalles</button>
+                                    <button type="button" className="service-coord-detail-btn" onClick={(event) => { event.stopPropagation(); openHistoryRecord(row); }}>Ver detalles</button>
                                   </td>
                                 </tr>
                               );
