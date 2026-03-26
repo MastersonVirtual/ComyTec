@@ -4578,11 +4578,21 @@
         flex-wrap: wrap;
       }
       .status-action-btn {
-        border-radius: 10px;
-        padding: 8px 10px;
+        border-radius: 12px;
+        padding: 9px 12px;
         font-size: 12px;
         font-weight: 700;
         cursor: pointer;
+        border: 1px solid rgba(230,255,253,.34);
+        background: linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.04));
+        color: #eafffc;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, .24);
+        transition: transform var(--motion-fast) ease, box-shadow var(--motion-fast) ease, filter var(--motion-fast) ease;
+      }
+      .status-action-btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.06);
+        box-shadow: 0 10px 22px rgba(0, 0, 0, .3);
       }
       .status-action-btn.resolve {
         background: rgba(16, 185, 129, .25) !important;
@@ -4608,6 +4618,7 @@
         font-weight: 700;
       }
       .status-chip-inline.pending { background: rgba(245, 158, 11, .22); color: #fde68a; }
+      .status-chip-inline.progress { background: rgba(59, 130, 246, .22); color: #bfdbfe; }
       .status-chip-inline.resolved { background: rgba(16, 185, 129, .22); color: #bbf7d0; }
       .status-chip-inline.rejected { background: rgba(239, 68, 68, .22); color: #fecaca; }
 
@@ -4628,26 +4639,97 @@
         .profile-main-row { flex-direction: column; align-items: flex-start; }
       }
 
-      .ticket-date-group {
-        border: 1px solid rgba(230,255,253,.28);
-        border-radius: 12px;
-        padding: 10px;
-        margin-bottom: 10px;
-        background: rgba(0,0,0,.12);
+      .ticket-filters-toolbar {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 10px;
+        margin: 12px 0 16px;
+        padding: 14px;
+        border-radius: 16px;
+        border: 1px solid rgba(230,255,253,.26);
+        background: linear-gradient(140deg, rgba(7, 46, 45, .72), rgba(9, 27, 29, .62));
+        box-shadow: 0 12px 30px rgba(0,0,0,.22);
       }
-      .ticket-date-title {
-        margin: 0 0 8px;
-        font-size: 12px;
+      .ticket-filter-field { grid-column: span 4; }
+      .ticket-filter-field label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .04em;
         color: #d7f4ef;
         text-transform: uppercase;
-        letter-spacing: .04em;
+      }
+      .ticket-filter-field input,
+      .ticket-filter-field select {
+        width: 100%;
+        border-radius: 11px;
+        border: 1px solid rgba(230,255,253,.36);
+        background: rgba(7, 28, 29, .78);
+        color: #f4fffd;
+        padding: 10px 11px;
+      }
+      .ticket-date-group { margin-bottom: 18px; }
+      .ticket-date-title {
+        margin: 0 0 12px;
+        font-size: 13px;
+        color: #e5fcf9;
+        letter-spacing: .07em;
+        text-transform: uppercase;
+        border-bottom: 1px solid rgba(230,255,253,.26);
+        padding-bottom: 7px;
+      }
+      .ticket-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(285px, 1fr));
+        gap: 12px;
       }
       .ticket-item-card {
-        border: 1px solid rgba(230,255,253,.24);
-        border-radius: 10px;
-        padding: 8px;
-        margin-bottom: 8px;
-        background: rgba(255,255,255,.06);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        border: 1px solid rgba(230,255,253,.26);
+        border-radius: 16px;
+        padding: 14px;
+        background: linear-gradient(150deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
+        box-shadow: 0 10px 26px rgba(0,0,0,.21);
+      }
+      .ticket-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .ticket-card-title {
+        margin: 0;
+        font-size: 15px;
+        color: #effffd;
+        letter-spacing: .02em;
+      }
+      .ticket-card-main {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 7px 10px;
+      }
+      .ticket-card-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding-top: 4px;
+      }
+      .ticket-empty-state {
+        border: 1px dashed rgba(230,255,253,.26);
+        border-radius: 12px;
+        padding: 10px;
+        color: #d7f4ef;
+        background: rgba(0,0,0,.12);
+      }
+      @media (max-width: 1024px) {
+        .ticket-filter-field { grid-column: span 6; }
+      }
+      @media (max-width: 700px) {
+        .ticket-filter-field { grid-column: span 12; }
+        .ticket-card-main { grid-template-columns: 1fr; }
       }
       .ticket-upload-dropzone {
         border: 1px dashed rgba(230,255,253,.45);
@@ -7304,6 +7386,10 @@
         const [imageViewerSrc, setImageViewerSrc] = useState('');
         const [ticketsHistorial, setTicketsHistorial] = useState([]);
         const [ticketSearchCode, setTicketSearchCode] = useState('');
+        const [ticketFilterFrom, setTicketFilterFrom] = useState('');
+        const [ticketFilterTo, setTicketFilterTo] = useState('');
+        const [ticketFilterStatus, setTicketFilterStatus] = useState('todos');
+        const [ticketFilterOrigen, setTicketFilterOrigen] = useState('todos');
         const [ticketReassignModal, setTicketReassignModal] = useState({ open: false, ticket: null, assigneeKey: '' });
         const seenRowIdsRef = useRef(new Set());
         const seenOperationalAlertsRef = useRef(new Set());
@@ -10182,9 +10268,36 @@
           return Number.isNaN(parsed.getTime()) ? null : parsed;
         }
 
+        function toDateInputValue(value) {
+          const dt = parseTicketDate(value);
+          if (!dt || Number.isNaN(dt.getTime())) return '';
+          const y = dt.getFullYear();
+          const m = String(dt.getMonth() + 1).padStart(2, '0');
+          const d = String(dt.getDate()).padStart(2, '0');
+          return `${y}-${m}-${d}`;
+        }
+
+        function getTicketStatusLabel(ticket = {}) {
+          const raw = String(ticket.estado || ticket.status || 'pendiente').trim().toLowerCase();
+          if (raw.includes('resuel') || raw.includes('final')) return 'resuelto';
+          if (raw.includes('proceso')) return 'en proceso';
+          return 'pendiente';
+        }
+
         const groupedManagerTickets = useMemo(() => {
           if (!isTicketManager) return [];
-          const groups = ticketsHistorial.reduce((acc, ticket) => {
+          const filteredTickets = ticketsHistorial.filter((ticket) => {
+            const ticketDate = parseTicketDate(ticket?.creadoEn, ticket?.fechaHoraLocal);
+            const ticketDateIso = ticketDate ? toDateInputValue(ticketDate) : '';
+            const matchesFrom = !ticketFilterFrom || (ticketDateIso && ticketDateIso >= ticketFilterFrom);
+            const matchesTo = !ticketFilterTo || (ticketDateIso && ticketDateIso <= ticketFilterTo);
+            const statusLabel = getTicketStatusLabel(ticket);
+            const matchesStatus = ticketFilterStatus === 'todos' || statusLabel === ticketFilterStatus;
+            const originLabel = ticket.origen === 'form-gestion' ? 'formulario' : 'manual';
+            const matchesOrigin = ticketFilterOrigen === 'todos' || originLabel === ticketFilterOrigen;
+            return matchesFrom && matchesTo && matchesStatus && matchesOrigin;
+          });
+          const groups = filteredTickets.reduce((acc, ticket) => {
             const dt = parseTicketDate(ticket?.creadoEn, ticket?.fechaHoraLocal);
             const label = dt ? dt.toLocaleDateString('es-UY', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) : 'Sin fecha';
             if (!acc[label]) acc[label] = [];
@@ -10192,7 +10305,7 @@
             return acc;
           }, {});
           return Object.entries(groups).map(([dateLabel, items]) => ({ dateLabel, items }));
-        }, [ticketsHistorial, isTicketManager]);
+        }, [ticketsHistorial, isTicketManager, ticketFilterFrom, ticketFilterTo, ticketFilterStatus, ticketFilterOrigen]);
 
         const ticketAssignableUsers = useMemo(() => {
           const map = new Map();
@@ -10907,40 +11020,84 @@
                     {isTicketManager && (
                       <article className="profile-option">
                         <h3>Historial de tickets</h3>
+                        <div className="ticket-filters-toolbar">
+                          <div className="ticket-filter-field">
+                            <label>Desde</label>
+                            <input type="date" value={ticketFilterFrom} onChange={(e) => setTicketFilterFrom(e.target.value)} />
+                          </div>
+                          <div className="ticket-filter-field">
+                            <label>Hasta</label>
+                            <input type="date" value={ticketFilterTo} onChange={(e) => setTicketFilterTo(e.target.value)} />
+                          </div>
+                          <div className="ticket-filter-field">
+                            <label>Estado</label>
+                            <select value={ticketFilterStatus} onChange={(e) => setTicketFilterStatus(e.target.value)}>
+                              <option value="todos">Todos</option>
+                              <option value="pendiente">Pendiente</option>
+                              <option value="en proceso">En proceso</option>
+                              <option value="resuelto">Resuelto</option>
+                            </select>
+                          </div>
+                          <div className="ticket-filter-field">
+                            <label>Origen</label>
+                            <select value={ticketFilterOrigen} onChange={(e) => setTicketFilterOrigen(e.target.value)}>
+                              <option value="todos">Todos</option>
+                              <option value="manual">Creado manualmente</option>
+                              <option value="formulario">Desde formulario</option>
+                            </select>
+                          </div>
+                        </div>
                         {groupedManagerTickets.length === 0 ? (
-                          <div className="kv">No hay tickets registrados.</div>
+                          <div className="ticket-empty-state">No hay tickets registrados para los filtros seleccionados.</div>
                         ) : (
                           groupedManagerTickets.map((group) => (
                             <div key={`group-${group.dateLabel}`} className="ticket-date-group">
                               <h4 className="ticket-date-title">{group.dateLabel}</h4>
-                              {group.items.map((ticket) => (
-                                <div key={ticket.id} className="ticket-item-card">
-                                  <div className="kv"><b>N° ticket:</b> {ticket.ticketCodigo || `TICKET-${ticket.id}`}</div>
-                                  <div className="kv"><b>Usuario:</b> {ticket.creadoPorNombre || ticket.creadoPorEmail || '-'}</div>
-                                  <div className="kv"><b>Fecha:</b> {ticket.fechaHoraLocal || formatRequestDateTime(ticket.creadoEn)}</div>
-                                  <div className="kv"><b>Prioridad:</b> {ticket.prioridad || '-'}</div>
-                                  <div className="kv"><b>Comentario:</b> {ticket.comentario || '-'}</div>
-                                  <div className="kv"><b>Asignado a:</b> {ticket.asignadoANombre || ticket.asignadoAEmail || 'Sin asignar'}</div>
-                                  {ticket.origen === 'form-gestion' && (
-                                    <>
-                                      <div className="kv"><b>Cliente ID:</b> {ticket.clienteId || '-'}</div>
-                                      <div className="kv"><b>Servicio:</b> {ticket.nombreServicio || '-'}</div>
-                                      <div className="kv"><b>Tipo de acción:</b> {ticket.tipoAccion || '-'}</div>
-                                    </>
-                                  )}
-                                  {Array.isArray(ticket.imagenesAdjuntas) && ticket.imagenesAdjuntas.length > 0 && (
-                                    <div className="ticket-image-grid">
-                                      {ticket.imagenesAdjuntas.map((img, idx) => (<img key={`hist-img-${ticket.id}-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `adj-${idx + 1}`} onClick={() => openImageViewer(img.dataUrl)} />))}
+                              <div className="ticket-cards-grid">
+                                {group.items.map((ticket) => {
+                                  const ticketStatusLabel = getTicketStatusLabel(ticket);
+                                  return (
+                                  <div key={ticket.id} className="ticket-item-card">
+                                    <div className="ticket-card-header">
+                                      <h5 className="ticket-card-title">{ticket.ticketCodigo || `TICKET-${ticket.id}`}</h5>
+                                      <span className={`status-chip-inline ${
+                                        ticketStatusLabel === 'resuelto'
+                                          ? 'resolved'
+                                          : ticketStatusLabel === 'en proceso'
+                                            ? 'progress'
+                                            : 'pending'
+                                      }`}>
+                                        {ticket.estado || 'pendiente'}
+                                      </span>
                                     </div>
-                                  )}
-                                  <div className="kv"><b>Estado:</b> {ticket.estado || 'pendiente'}</div>
-                                  <div className="request-status-row" style={{ marginTop: 8 }}>
-                                    <button type="button" className="status-action-btn chat-action-btn" onClick={() => openTicketReassignModal(ticket)}>Reasignar</button>
-                                    {ticket.estado !== 'resuelto' && <button type="button" className="status-action-btn accept" onClick={() => handleResolveTicket(ticket)}>Marcar resuelto</button>}
-                                    <button type="button" className="status-action-btn reject" onClick={() => handleDeleteTicket(ticket)}>Eliminar</button>
+                                    <div className="ticket-card-main">
+                                      <div className="kv"><b>Usuario:</b> {ticket.creadoPorNombre || ticket.creadoPorEmail || '-'}</div>
+                                      <div className="kv"><b>Fecha:</b> {ticket.fechaHoraLocal || formatRequestDateTime(ticket.creadoEn)}</div>
+                                      <div className="kv"><b>Prioridad:</b> {ticket.prioridad || '-'}</div>
+                                      <div className="kv"><b>Asignado:</b> {ticket.asignadoANombre || ticket.asignadoAEmail || 'Sin asignar'}</div>
+                                      <div className="kv"><b>Origen:</b> {ticket.origen === 'form-gestion' ? 'Formulario' : 'Manual'}</div>
+                                      {ticket.origen === 'form-gestion' && <div className="kv"><b>Cliente ID:</b> {ticket.clienteId || '-'}</div>}
+                                    </div>
+                                    <div className="kv"><b>Comentario:</b> {ticket.comentario || '-'}</div>
+                                    {ticket.origen === 'form-gestion' && (
+                                      <div className="ticket-card-main">
+                                        <div className="kv"><b>Servicio:</b> {ticket.nombreServicio || '-'}</div>
+                                        <div className="kv"><b>Tipo acción:</b> {ticket.tipoAccion || '-'}</div>
+                                      </div>
+                                    )}
+                                    {Array.isArray(ticket.imagenesAdjuntas) && ticket.imagenesAdjuntas.length > 0 && (
+                                      <div className="ticket-image-grid">
+                                        {ticket.imagenesAdjuntas.map((img, idx) => (<img key={`hist-img-${ticket.id}-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `adj-${idx + 1}`} onClick={() => openImageViewer(img.dataUrl)} />))}
+                                      </div>
+                                    )}
+                                    <div className="ticket-card-actions">
+                                      <button type="button" className="status-action-btn chat-action-btn" onClick={() => openTicketReassignModal(ticket)}>Reasignar</button>
+                                      {ticket.estado !== 'resuelto' && <button type="button" className="status-action-btn accept" onClick={() => handleResolveTicket(ticket)}>Marcar resuelto</button>}
+                                      <button type="button" className="status-action-btn reject" onClick={() => handleDeleteTicket(ticket)}>Eliminar</button>
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
+                                )})}
+                              </div>
                             </div>
                           ))
                         )}
