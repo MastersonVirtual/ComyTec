@@ -1217,33 +1217,58 @@
         }
       }
       .service-coord-shell {
-        background: #f3f6f8;
-        border: 1px solid rgba(208, 222, 226, .75);
+        background: linear-gradient(150deg, rgba(255,255,255,.96), rgba(236, 244, 246, .96));
+        border: 1px solid rgba(163, 200, 206, .68);
+      }
+      .service-coord-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
       }
       .service-coord-title {
-        margin: 0 0 16px;
-        color: #0a3738;
-        font-size: clamp(1.65rem, 2.6vw, 2.08rem);
+        margin: 0;
+        color: #093839;
+        font-size: clamp(1.54rem, 2.4vw, 2rem);
         letter-spacing: .2px;
       }
-      .service-coord-filters {
-        display: grid;
-        grid-template-columns: minmax(260px, 2fr) repeat(3, minmax(160px, 1fr));
-        gap: 12px;
-        background: #ffffff;
-        border: 1px solid rgba(185, 204, 208, .68);
-        border-radius: 14px;
-        padding: 14px;
-        box-shadow: 0 8px 22px rgba(16, 24, 40, .06);
+      .service-coord-subtitle {
+        margin: 6px 0 0;
+        color: #3d5e61;
+        font-size: 13px;
       }
-      .service-coord-filters .field label { color: #ffb777; }
+      .service-coord-new-btn {
+        border: 0;
+        border-radius: 12px;
+        min-height: 46px;
+        padding: 0 16px;
+        background: linear-gradient(135deg, #0d7a7c, #0a5f61);
+        color: #fff;
+        font-weight: 800;
+        letter-spacing: .2px;
+        cursor: pointer;
+        box-shadow: 0 12px 22px rgba(10, 95, 97, .24);
+      }
+      .service-coord-filters {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: minmax(220px, 2fr) repeat(3, minmax(150px, 1fr));
+        gap: 10px;
+        background: #ffffff;
+        border: 1px solid rgba(178, 206, 212, .78);
+        border-radius: 16px;
+        padding: 14px;
+        box-shadow: 0 10px 24px rgba(8, 29, 35, .08);
+      }
+      .service-coord-filters .field label { color: #ed9643; }
       .service-coord-filters .field input,
       .service-coord-filters .field select {
         min-height: 46px;
         border-radius: 12px;
-        background: #ffffff;
-        border-color: rgba(187, 199, 206, .85);
-        color: #0f172a;
+        background: #f9fcfd;
+        border-color: rgba(184, 203, 209, .95);
+        color: #072426;
       }
       .service-coord-search-wrap { position: relative; }
       .service-coord-search-wrap input { padding-left: 38px; }
@@ -1252,59 +1277,86 @@
         top: 50%;
         left: 12px;
         transform: translateY(-50%);
-        color: #687177;
+        color: #6b7f82;
         display: inline-flex;
       }
       .service-coord-search-icon i { width: 16px; height: 16px; }
-      .service-coord-table-card,
-      .service-coord-detail-card {
+      .service-coord-cards-grid {
         margin-top: 14px;
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      }
+      .service-coord-service-card {
+        border-radius: 16px;
+        border: 1px solid rgba(170, 196, 201, .75);
         background: #ffffff;
-        border: 1px solid rgba(191, 207, 211, .72);
-        border-radius: 14px;
-        box-shadow: 0 12px 28px rgba(15, 23, 42, .06);
+        box-shadow: 0 10px 24px rgba(8, 25, 33, .1);
         padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        cursor: pointer;
+        transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
       }
-      .service-coord-table-wrap { overflow-x: auto; }
-      .service-coord-table {
-        width: 100%;
-        min-width: 980px;
-        border-collapse: separate;
-        border-spacing: 0;
-        color: #224649;
+      .service-coord-service-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 16px 28px rgba(8, 25, 33, .14);
+        border-color: rgba(13, 122, 124, .45);
       }
-      .service-coord-table th {
-        background: #f1f5f7;
-        color: #35575a;
-        text-align: left;
-        font-size: 12px;
-        letter-spacing: .18px;
-        padding: 12px 10px;
-        font-weight: 700;
-        border-bottom: 1px solid #dfebee;
+      .service-coord-service-card.active {
+        border-color: rgba(13, 122, 124, .65);
+        box-shadow: 0 18px 32px rgba(10, 95, 97, .2);
       }
-      .service-coord-table td {
-        padding: 12px 10px;
-        border-bottom: 1px solid #edf3f5;
-        vertical-align: middle;
+      .service-card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      .service-card-top strong {
+        color: #0f3435;
+        font-size: 15px;
+      }
+      .service-card-meta {
+        display: grid;
+        gap: 8px;
+      }
+      .service-card-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #38565a;
         font-size: 13px;
       }
-      .service-coord-table tbody tr:hover { background: #f7fbfc; }
-      .service-coord-client { color: #0f3133; font-weight: 700; }
-      .service-coord-action-cell { text-align: right; }
-      .service-coord-action-head { text-align: right; }
-      .service-coord-detail-btn {
-        border: 1px solid rgba(0, 100, 101, .32);
+      .service-card-meta-item span:first-child { font-size: 14px; }
+      .service-card-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .service-card-action-btn {
+        border: 1px solid rgba(13, 122, 124, .3);
         border-radius: 10px;
-        height: 34px;
-        padding: 0 12px;
-        background: rgba(0, 100, 101, .12);
-        color: #045659;
+        min-height: 32px;
+        padding: 0 10px;
+        background: rgba(13, 122, 124, .1);
+        color: #08585b;
+        font-size: 12px;
         font-weight: 700;
         cursor: pointer;
-        transition: transform .16s ease, box-shadow .16s ease;
       }
-      .service-coord-detail-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0, 100, 101, .16); }
+      .service-card-action-btn.primary {
+        background: rgba(13, 122, 124, .2);
+      }
+      .service-coord-empty {
+        text-align: center;
+        color: #6a7f82;
+        padding: 26px 10px;
+        background: #fff;
+        border-radius: 14px;
+        border: 1px dashed rgba(167, 194, 199, .85);
+      }
       .service-coord-status {
         border-radius: 999px;
         padding: 6px 12px;
@@ -1316,7 +1368,7 @@
       .service-coord-status-activo { background: #e8f6ef; border-color: #b8dfca; color: #2a6b46; }
       .service-coord-status-finalizado { background: #eef1f3; border-color: #d8dfe4; color: #5a6670; }
       .service-coord-pagination {
-        margin-top: 12px;
+        margin-top: 14px;
         display: flex;
         align-items: center;
         justify-content: flex-start;
@@ -1342,10 +1394,13 @@
         border-color: #0a5f61;
       }
       .service-coord-page-btn:disabled { opacity: .45; cursor: not-allowed; }
-      .service-coord-empty {
-        text-align: center;
-        color: #6a7f82;
-        padding: 26px 10px !important;
+      .service-coord-detail-card {
+        margin-top: 14px;
+        background: #ffffff;
+        border: 1px solid rgba(173, 202, 208, .72);
+        border-radius: 16px;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, .09);
+        padding: 16px;
       }
       .service-coord-detail-head {
         display: flex;
@@ -1357,6 +1412,58 @@
       .service-coord-detail-head h3 {
         margin: 0;
         color: #133e41;
+      }
+      .service-coord-tabs {
+        margin-top: 12px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .service-coord-tab-btn {
+        border: 1px solid rgba(13, 122, 124, .24);
+        background: rgba(13, 122, 124, .1);
+        color: #0a5759;
+        border-radius: 999px;
+        padding: 7px 14px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .service-coord-tab-btn.active {
+        background: #0d7a7c;
+        color: #fff;
+        border-color: #0d7a7c;
+      }
+      .service-coord-detail-grid {
+        margin-top: 12px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .service-detail-kpi {
+        border-radius: 12px;
+        border: 1px solid rgba(183, 206, 210, .88);
+        background: #f8fbfc;
+        padding: 10px;
+      }
+      .service-detail-kpi small {
+        display: block;
+        color: #6a8083;
+        margin-bottom: 4px;
+      }
+      .service-detail-kpi strong { color: #103f42; }
+      .service-coord-detail-list {
+        margin-top: 12px;
+        display: grid;
+        gap: 8px;
+      }
+      .service-coord-detail-list-item {
+        border-radius: 12px;
+        border: 1px solid rgba(182, 204, 209, .8);
+        background: #f8fcfd;
+        padding: 10px;
+        color: #2f4f53;
+        font-size: 13px;
       }
       .service-coord-detail-card .field > label {
         color: #ffba7e !important;
@@ -1376,6 +1483,7 @@
       }
       @media (max-width: 1180px) {
         .service-coord-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .service-coord-detail-grid { grid-template-columns: 1fr; }
       }
       @media (max-width: 760px) {
         .service-coord-filters { grid-template-columns: 1fr; }
@@ -7665,6 +7773,7 @@
         const [historyCommercialFilter, setHistoryCommercialFilter] = useState('todos');
         const [historyTypeFilter, setHistoryTypeFilter] = useState('todos');
         const [historyDateFilter, setHistoryDateFilter] = useState('');
+        const [historyDetailTab, setHistoryDetailTab] = useState('informacion');
         const [workflowTaskChecks, setWorkflowTaskChecks] = useState({});
         const [opsSideTab, setOpsSideTab] = useState('activity');
         const [opsCommentDraft, setOpsCommentDraft] = useState('');
@@ -9357,6 +9466,10 @@
             setHistoryPage(totalHistoryPages);
           }
         }, [historyPage, totalHistoryPages]);
+
+        useEffect(() => {
+          setHistoryDetailTab('informacion');
+        }, [selectedService?.id]);
 
         function resetFields() {
           setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('Pendiente');
@@ -11619,7 +11732,13 @@
                   </section>
                 ) : effectiveSelectedForm === 'historial' ? (
                   <section className="panel service-coord-shell">
-                    <h2 className="service-coord-title">Historial y coordinación de servicios</h2>
+                    <div className="service-coord-head">
+                      <div>
+                        <h2 className="service-coord-title">Historial y base de datos de servicios</h2>
+                        <p className="service-coord-subtitle">Vista visual por cards para coordinar más rápido estado, responsables y seguimiento.</p>
+                      </div>
+                      <button type="button" className="service-coord-new-btn" onClick={() => selectAction('Nuevo Servicio')}>+ Nuevo servicio</button>
+                    </div>
 
                     <div className="service-coord-filters">
                       <div className="field service-coord-search-field">
@@ -11634,79 +11753,106 @@
                       <div className="field"><label>Tipo</label><select value={historyTypeFilter} onChange={(e) => setHistoryTypeFilter(e.target.value)}><option value="todos">Todos</option>{historyTypeOptions.map((opt) => <option key={`history-type-${opt}`} value={opt}>{opt}</option>)}</select></div>
                     </div>
 
-                    <section className="service-coord-table-card">
-                      <div className="service-coord-table-wrap">
-                        <table className="service-coord-table">
-                          <thead>
-                            <tr>
-                              <th>ID</th>
-                              <th>Cliente</th>
-                              <th>Dirección</th>
-                              <th>Tipo</th>
-                              <th>Encargado</th>
-                              <th>Fecha</th>
-                              <th>Estado</th>
-                              <th className="service-coord-action-head">Acción</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {historyRowsPage.length === 0 ? (
-                              <tr><td colSpan={8} className="service-coord-empty">No hay servicios para los filtros seleccionados.</td></tr>
-                            ) : historyRowsPage.map((row) => {
-                              const rawStatus = normalizeLegacyStatusName(String(row.status || row.estado || 'Pendiente'));
-                              const tableStatus = rawStatus === 'Finalizado' || rawStatus === 'Completado'
-                                ? 'Finalizado'
-                                : rawStatus === 'En proceso' || rawStatus === 'Esperando información'
-                                  ? 'Activo'
-                                  : 'Pendiente';
-                              return (
-                                <tr key={`history-row-${row.id}`} onClick={() => openHistoryRecord(row)} style={{ cursor: 'pointer' }}>
-                                  <td>{row.clienteId || '-'}</td>
-                                  <td><strong className="service-coord-client">{row.nombreServicio || row.cliente || 'Servicio sin nombre'}</strong></td>
-                                  <td>{row.direccionServicio || row.direccion || '-'}</td>
-                                  <td>{row.tipoServicioBrindar || 'Sin tipo'}</td>
-                                  <td>{row.representanteComercial || 'Sin encargado'}</td>
-                                  <td>{row.fechaAltaServicio || row.fechaAlta || row.fechaEspecificaInicio || '-'}</td>
-                                  <td>
-                                    <span className={`service-coord-status service-coord-status-${tableStatus.toLowerCase()}`}>{tableStatus}</span>
-                                  </td>
-                                  <td className="service-coord-action-cell">
-                                    <button type="button" className="service-coord-detail-btn" onClick={(event) => { event.stopPropagation(); openHistoryRecord(row); }}>Ver detalles</button>
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
+                    {historyRowsPage.length === 0 ? (
+                      <div className="service-coord-empty">No hay servicios para los filtros seleccionados.</div>
+                    ) : (
+                      <div className="service-coord-cards-grid">
+                        {historyRowsPage.map((row) => {
+                          const rawStatus = normalizeLegacyStatusName(String(row.status || row.estado || 'Pendiente'));
+                          const cardStatus = rawStatus === 'Finalizado' || rawStatus === 'Completado'
+                            ? 'Finalizado'
+                            : rawStatus === 'En proceso' || rawStatus === 'Esperando información'
+                              ? 'Activo'
+                              : 'Pendiente';
+                          return (
+                            <article key={`history-row-${row.id}`} className={`service-coord-service-card ${selectedService?.id === row.id ? 'active' : ''}`} onClick={() => openHistoryRecord(row)}>
+                              <div className="service-card-top">
+                                <strong>{row.nombreServicio || row.cliente || 'Servicio sin nombre'}</strong>
+                                <span className={`service-coord-status service-coord-status-${cardStatus.toLowerCase()}`}>{cardStatus}</span>
+                              </div>
+                              <div className="service-card-meta">
+                                <div className="service-card-meta-item"><span>🪪</span><span>ID {row.clienteId || '-'}</span></div>
+                                <div className="service-card-meta-item"><span>📍</span><span>{row.direccionServicio || row.direccion || '-'}</span></div>
+                                <div className="service-card-meta-item"><span>👤</span><span>{row.representanteComercial || 'Sin encargado'}</span></div>
+                                <div className="service-card-meta-item"><span>📅</span><span>{row.fechaAltaServicio || row.fechaAlta || row.fechaEspecificaInicio || '-'}</span></div>
+                              </div>
+                              <div className="service-card-actions">
+                                <button type="button" className="service-card-action-btn primary" onClick={(event) => { event.stopPropagation(); startEditService(row); }}>Editar</button>
+                                <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); openHistoryRecord(row); }}>Ver historial</button>
+                                <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); setSelectedForm('tickets'); setTicketSearchCode(String(row.clienteId || '')); }}>Ver tickets</button>
+                              </div>
+                            </article>
+                          );
+                        })}
                       </div>
+                    )}
 
-                      <div className="service-coord-pagination">
-                        <button type="button" className="service-coord-page-btn" onClick={() => setHistoryPage((p) => Math.max(1, p - 1))} disabled={safeHistoryPage <= 1}>Anterior</button>
-                        <span className="service-coord-page-current">{safeHistoryPage}</span>
-                        <button type="button" className="service-coord-page-btn" onClick={() => setHistoryPage((p) => Math.min(totalHistoryPages, p + 1))} disabled={safeHistoryPage >= totalHistoryPages}>Siguiente</button>
-                      </div>
-                    </section>
+                    <div className="service-coord-pagination">
+                      <button type="button" className="service-coord-page-btn" onClick={() => setHistoryPage((p) => Math.max(1, p - 1))} disabled={safeHistoryPage <= 1}>Anterior</button>
+                      <span className="service-coord-page-current">{safeHistoryPage}</span>
+                      <button type="button" className="service-coord-page-btn" onClick={() => setHistoryPage((p) => Math.min(totalHistoryPages, p + 1))} disabled={safeHistoryPage >= totalHistoryPages}>Siguiente</button>
+                    </div>
 
                     {(() => {
                       const detailService = selectedService || historyRowsPage[0] || null;
                       if (!detailService) return null;
                       const serviceStatus = normalizeLegacyStatusName(String(detailService.status || detailService.estado || 'Pendiente'));
+                      const detailServiceId = String(detailService.clienteId || '').trim();
+                      const serviceTimeline = recentActivity
+                        .filter((item) => String(item.clienteId || '').trim() === detailServiceId)
+                        .slice(0, 8);
+                      const serviceTickets = ticketsHistorial
+                        .filter((ticket) => String(ticket.clienteId || '').trim() === detailServiceId)
+                        .slice(0, 8);
                       return (
                         <section className="service-coord-detail-card">
                           <div className="service-coord-detail-head">
                             <h3>{detailService.nombreServicio || detailService.cliente || 'Servicio sin nombre'}</h3>
                             <span className={statusClass(serviceStatus)}>{serviceStatus}</span>
                           </div>
-                          <div className="history-grid" style={{ marginTop: 10 }}>
-                            <div className="field"><label>ID Servicio</label><input value={detailService.clienteId || '-'} readOnly type="text" /></div>
-                            <div className="field"><label>Tipo de servicio</label><input value={detailService.tipoServicioBrindar || '-'} readOnly type="text" /></div>
-                            <div className="field"><label>Fecha de alta</label><input value={detailService.fechaAltaServicio || detailService.fechaAlta || detailService.fechaEspecificaInicio || '-'} readOnly type="text" /></div>
-                            <div className="field span-2"><label>Dirección del servicio</label><input value={detailService.direccionServicio || detailService.direccion || '-'} readOnly type="text" /></div>
-                            <div className="field"><label>Encargado</label><input value={detailService.representanteComercial || '-'} readOnly type="text" /></div>
-                            <div className="field"><label>Equipamiento instalado</label><input value={detailService.equipamientoInstalado || detailService.detalleEquipamiento || detailService.equipamientoRetirar || '-'} readOnly type="text" /></div>
-                            <div className="field"><label>Propietario equipamiento</label><input value={detailService.propietarioEquipamiento || '-'} readOnly type="text" /></div>
-                            <div className="field"><label>Importe mensual sin IVA</label><input value={detailService.importeMensualServicioSinIva || detailService.importeMensualServicio || '-'} readOnly type="text" /></div>
+
+                          <div className="service-coord-tabs">
+                            <button type="button" className={`service-coord-tab-btn ${historyDetailTab === 'informacion' ? 'active' : ''}`} onClick={() => setHistoryDetailTab('informacion')}>Información</button>
+                            <button type="button" className={`service-coord-tab-btn ${historyDetailTab === 'historial' ? 'active' : ''}`} onClick={() => setHistoryDetailTab('historial')}>Historial</button>
+                            <button type="button" className={`service-coord-tab-btn ${historyDetailTab === 'tickets' ? 'active' : ''}`} onClick={() => setHistoryDetailTab('tickets')}>Tickets</button>
                           </div>
+
+                          {historyDetailTab === 'informacion' && (
+                            <div className="service-coord-detail-grid">
+                              <div className="service-detail-kpi"><small>🪪 ID Servicio</small><strong>{detailService.clienteId || '-'}</strong></div>
+                              <div className="service-detail-kpi"><small>🧩 Tipo</small><strong>{detailService.tipoServicioBrindar || '-'}</strong></div>
+                              <div className="service-detail-kpi"><small>📅 Fecha de alta</small><strong>{detailService.fechaAltaServicio || detailService.fechaAlta || detailService.fechaEspecificaInicio || '-'}</strong></div>
+                              <div className="service-detail-kpi"><small>👤 Encargado</small><strong>{detailService.representanteComercial || '-'}</strong></div>
+                              <div className="service-detail-kpi"><small>📦 Equipamiento</small><strong>{detailService.equipamientoInstalado || detailService.detalleEquipamiento || detailService.equipamientoRetirar || '-'}</strong></div>
+                              <div className="service-detail-kpi"><small>💵 Importe mensual</small><strong>{detailService.importeMensualServicioSinIva || detailService.importeMensualServicio || '-'}</strong></div>
+                              <div className="service-detail-kpi" style={{ gridColumn: '1 / -1' }}><small>📍 Dirección</small><strong>{detailService.direccionServicio || detailService.direccion || '-'}</strong></div>
+                            </div>
+                          )}
+
+                          {historyDetailTab === 'historial' && (
+                            <div className="service-coord-detail-list">
+                              {serviceTimeline.length === 0 ? (
+                                <div className="service-coord-detail-list-item">Sin eventos de historial para este servicio.</div>
+                              ) : serviceTimeline.map((item) => (
+                                <div key={`timeline-${item.id}`} className="service-coord-detail-list-item">
+                                  <strong>{item.dateLabel || '-'}</strong> · {item.message || item.accion || 'Actualización registrada'}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {historyDetailTab === 'tickets' && (
+                            <div className="service-coord-detail-list">
+                              {serviceTickets.length === 0 ? (
+                                <div className="service-coord-detail-list-item">No hay tickets asociados a este servicio.</div>
+                              ) : serviceTickets.map((ticket) => (
+                                <div key={`detail-ticket-${ticket.id || ticket.ticketCodigo}`} className="service-coord-detail-list-item">
+                                  <strong>{ticket.ticketCodigo || ticket.id || 'Ticket'}</strong> · {ticket.comentario || 'Sin comentario'}
+                                </div>
+                              ))}
+                              <button type="button" className="service-card-action-btn primary" onClick={() => { setSelectedForm('tickets'); setTicketSearchCode(detailServiceId); }}>Ver todos los tickets del servicio</button>
+                            </div>
+                          )}
                         </section>
                       );
                     })()}
