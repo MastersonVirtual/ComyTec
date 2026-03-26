@@ -4651,10 +4651,21 @@
         margin: 10px 0 16px;
       }
       .ticket-create-card {
-        border: 1px solid rgba(230,255,253,.3);
+        border: 1px solid rgba(191, 219, 224, .85);
         border-radius: 18px;
-        background: linear-gradient(145deg, rgba(7, 44, 42, .55), rgba(6, 30, 32, .4));
-        box-shadow: 0 14px 34px rgba(0,0,0,.24);
+        background: linear-gradient(180deg, #f2f6f7 0%, #eaf1f3 100%);
+        box-shadow: 0 14px 34px rgba(0,0,0,.2);
+        color: #14353a;
+      }
+      .ticket-create-card h3 {
+        color: #0f4950;
+        font-size: 28px;
+        margin-bottom: 8px;
+      }
+      .ticket-create-subtitle {
+        color: #355e64;
+        font-size: 16px;
+        margin-bottom: 12px;
       }
       .ticket-create-form {
         max-width: min(780px, 100%);
@@ -4663,22 +4674,28 @@
         flex-direction: column;
         gap: 14px;
       }
+      .ticket-form-surface {
+        border: 1px solid #c2d2d8;
+        border-radius: 14px;
+        background: #f7fbfc;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+        padding: 16px;
+      }
       .ticket-form-grid {
         display: grid;
-        grid-template-columns: repeat(12, minmax(0, 1fr));
+        grid-template-columns: 1fr;
         gap: 12px;
       }
       .ticket-form-field {
-        grid-column: span 6;
         display: flex;
         flex-direction: column;
         gap: 6px;
       }
-      .ticket-form-field.full { grid-column: span 12; }
+      .ticket-form-field.full { grid-column: span 1; }
       .ticket-form-label {
-        font-size: 12px;
+        font-size: 15px;
         font-weight: 700;
-        color: #d9f7f2;
+        color: #21464b;
         letter-spacing: .03em;
         display: inline-flex;
         align-items: center;
@@ -4689,12 +4706,12 @@
       .ticket-form-field textarea {
         min-height: 48px;
         border-radius: 13px;
-        border: 1px solid rgba(230,255,253,.34);
-        background: rgba(4, 30, 29, .68);
-        color: #effffd;
+        border: 1px solid #b8c9cf;
+        background: #f4f7f8;
+        color: #1c2f35;
         padding: 12px 14px;
-        font-size: 14px;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+        font-size: 16px;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
       }
       .ticket-form-field textarea {
         min-height: 140px;
@@ -4704,10 +4721,10 @@
         margin-top: 4px;
         min-height: 52px;
         border-radius: 14px;
-        border: 1px solid rgba(45, 212, 191, .6);
-        background: linear-gradient(135deg, #0b766e, #0f4f49);
-        color: #ecfffb;
-        font-size: 15px;
+        border: 1px solid rgba(16, 116, 110, .85);
+        background: linear-gradient(135deg, #117f81, #0e5d60);
+        color: #f4fffe;
+        font-size: 22px;
         font-weight: 800;
         letter-spacing: .01em;
         display: inline-flex;
@@ -4844,14 +4861,16 @@
         .ticket-filter-trigger { width: 100%; }
         .ticket-filters-toolbar { left: 0; right: 0; width: 100%; }
         .ticket-form-field { grid-column: span 12; }
+        .ticket-create-card h3 { font-size: 24px; }
+        .ticket-create-btn { font-size: 18px; min-height: 48px; }
       }
       .ticket-upload-dropzone {
         border: 2px dashed rgba(151,243,231,.72);
         border-radius: 14px;
         padding: 16px 12px;
         text-align: center;
-        color: #e6fffb;
-        background: linear-gradient(145deg, rgba(11, 78, 73, .22), rgba(0,0,0,.08));
+        color: #24464d;
+        background: linear-gradient(145deg, rgba(17, 127, 129, .12), rgba(10, 78, 82, .08));
         font-weight: 600;
       }
       .ticket-upload-dropzone.dragover {
@@ -11107,38 +11126,41 @@
                     </article>
                     <article className="profile-option ticket-create-card">
                       <h3>Nuevo ticket</h3>
+                      <div className="ticket-create-subtitle">Ingresa los detalles para crear un nuevo ticket de forma manual.</div>
                       <form className="profile-form ticket-create-form" onSubmit={handleCreateTicket}>
-                        <div className="ticket-form-grid">
-                          <div className="ticket-form-field">
-                            <label className="ticket-form-label"><span>👤</span><span>Usuario</span></label>
-                            <input type="text" value={currentUserName} readOnly />
-                          </div>
-                          <div className="ticket-form-field">
-                            <label className="ticket-form-label"><span>📅</span><span>Fecha</span></label>
-                            <input type="text" value={formatUruguayDateTime()} readOnly />
-                          </div>
-                          <div className="ticket-form-field full">
-                            <label className="ticket-form-label"><span>⚡</span><span>Prioridad</span></label>
-                            <select value={ticketPrioridad} onChange={(e) => setTicketPrioridad(e.target.value)}>
-                              <option>Alta</option>
-                              <option>Media</option>
-                              <option>Baja</option>
-                            </select>
-                          </div>
-                          <div className="ticket-form-field full">
-                            <label className="ticket-form-label"><span>📝</span><span>Descripción</span></label>
-                            <textarea value={ticketComentario} onChange={(e) => setTicketComentario(e.target.value)} placeholder="Comentá qué mejorarías de la web o del sistema" />
-                          </div>
-                          <div className="ticket-form-field full">
-                            <label className="ticket-form-label"><span>📎</span><span>Adjuntos</span></label>
-                            <input type="file" accept="image/*" multiple onChange={(e) => handleTicketFilesInput(e.target.files)} />
-                            <div
-                              className={`ticket-upload-dropzone ${ticketDragOver ? 'dragover' : ''}`}
-                              onDragOver={(e) => { e.preventDefault(); setTicketDragOver(true); }}
-                              onDragLeave={() => setTicketDragOver(false)}
-                              onDrop={handleTicketDrop}
-                            >
-                              Arrastrá y soltá imágenes aquí o seleccioná archivos desde tu dispositivo.
+                        <div className="ticket-form-surface">
+                          <div className="ticket-form-grid">
+                            <div className="ticket-form-field">
+                              <label className="ticket-form-label"><span>👤</span><span>Usuario</span></label>
+                              <input type="text" value={currentUserName} readOnly />
+                            </div>
+                            <div className="ticket-form-field">
+                              <label className="ticket-form-label"><span>🗓️</span><span>Fecha y hora</span></label>
+                              <input type="text" value={formatUruguayDateTime()} readOnly />
+                            </div>
+                            <div className="ticket-form-field full">
+                              <label className="ticket-form-label"><span>🚩</span><span>Prioridad</span></label>
+                              <select value={ticketPrioridad} onChange={(e) => setTicketPrioridad(e.target.value)}>
+                                <option>Alta</option>
+                                <option>Media</option>
+                                <option>Baja</option>
+                              </select>
+                            </div>
+                            <div className="ticket-form-field full">
+                              <label className="ticket-form-label"><span>📝</span><span>Descripción</span></label>
+                              <textarea value={ticketComentario} onChange={(e) => setTicketComentario(e.target.value)} placeholder="Descripción del problema o solicitud..." />
+                            </div>
+                            <div className="ticket-form-field full">
+                              <label className="ticket-form-label"><span>📎</span><span>Adjuntos</span></label>
+                              <input type="file" accept="image/*" multiple onChange={(e) => handleTicketFilesInput(e.target.files)} />
+                              <div
+                                className={`ticket-upload-dropzone ${ticketDragOver ? 'dragover' : ''}`}
+                                onDragOver={(e) => { e.preventDefault(); setTicketDragOver(true); }}
+                                onDragLeave={() => setTicketDragOver(false)}
+                                onDrop={handleTicketDrop}
+                              >
+                                Arrastrá imágenes aquí o seleccioná archivos.
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -11148,7 +11170,7 @@
                           </div>
                         )}
                         <button className="ticket-create-btn" type="submit" disabled={ticketSaving}>
-                          <span>🎫</span>
+                          <span>➕</span>
                           <span>{ticketSaving ? 'Enviando...' : 'Crear ticket'}</span>
                         </button>
                       </form>
