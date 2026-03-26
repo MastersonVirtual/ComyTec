@@ -670,6 +670,149 @@
         border-radius: 999px;
         background: #006465;
       }
+      .home-modern-shell {
+        width: min(100%, 1220px);
+        margin: 14px auto 18px;
+        display: grid;
+        gap: 14px;
+      }
+      .home-modern-hero {
+        border-radius: 22px;
+        border: 1px solid rgba(128, 187, 191, .4);
+        background: linear-gradient(135deg, rgba(5, 44, 43, .95), rgba(11, 93, 88, .9));
+        box-shadow: 0 20px 40px rgba(2, 22, 23, .35);
+        padding: clamp(18px, 3vw, 30px);
+        display: grid;
+        grid-template-columns: minmax(0, 1.5fr) minmax(240px, .8fr);
+        gap: 18px;
+        align-items: center;
+      }
+      .home-modern-badge {
+        display: inline-flex;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid rgba(215, 255, 250, .35);
+        background: rgba(216, 255, 248, .13);
+        color: #d8fff9;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .2px;
+        margin-bottom: 10px;
+      }
+      .home-modern-hero h2 {
+        margin: 0;
+        font-size: clamp(1.4rem, 3.2vw, 2.2rem);
+        color: #ffffff;
+      }
+      .home-modern-hero p {
+        margin: 8px 0 0;
+        color: #d8f8f3;
+        max-width: 760px;
+      }
+      .home-modern-actions {
+        margin-top: 14px;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .home-modern-action-btn {
+        border: 1px solid rgba(201, 250, 245, .35);
+        border-radius: 12px;
+        min-height: 40px;
+        padding: 0 12px;
+        background: rgba(219, 255, 250, .14);
+        color: #e8fffd;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .home-modern-action-btn.primary {
+        background: linear-gradient(135deg, #ff8f35, #ff6c2f);
+        border-color: rgba(255, 173, 108, .82);
+        color: #fff;
+      }
+      .home-modern-user {
+        border-radius: 16px;
+        border: 1px solid rgba(186, 247, 239, .38);
+        background: rgba(8, 36, 35, .44);
+        padding: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .home-modern-avatar {
+        width: 62px;
+        height: 62px;
+        border-radius: 14px;
+        object-fit: cover;
+        border: 2px solid rgba(193, 255, 248, .32);
+      }
+      .home-modern-user strong { display: block; color: #f7fffe; }
+      .home-modern-user small { display: block; color: #caeeea; margin-top: 2px; }
+      .home-modern-stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .home-modern-stat-card {
+        border-radius: 14px;
+        border: 1px solid rgba(165, 197, 201, .48);
+        background: linear-gradient(180deg, #f7fcfc, #edf6f6);
+        padding: 12px;
+        box-shadow: 0 10px 20px rgba(4, 24, 28, .08);
+      }
+      .home-modern-stat-card small {
+        color: #4f6f73;
+        display: block;
+        font-size: 12px;
+      }
+      .home-modern-stat-card strong {
+        color: #0d4041;
+        font-size: clamp(1.25rem, 2.8vw, 1.8rem);
+      }
+      .home-modern-panels {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .home-modern-panel {
+        border-radius: 16px;
+        border: 1px solid rgba(163, 193, 197, .44);
+        background: #f9fcfc;
+        box-shadow: 0 10px 20px rgba(6, 27, 30, .08);
+        padding: 14px;
+      }
+      .home-modern-panel h3 {
+        margin: 0 0 10px;
+        color: #0e4345;
+      }
+      .home-modern-list {
+        display: grid;
+        gap: 8px;
+        max-height: 260px;
+        overflow: auto;
+      }
+      .home-modern-list-item {
+        border: 1px solid rgba(169, 196, 201, .56);
+        border-radius: 11px;
+        padding: 9px 10px;
+        background: #ffffff;
+      }
+      .home-modern-list-item small {
+        display: block;
+        color: #678285;
+        font-size: 12px;
+      }
+      .home-modern-list-item b {
+        color: #1e3d40;
+      }
+      @media (max-width: 980px) {
+        .home-modern-hero { grid-template-columns: 1fr; }
+        .home-modern-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .home-modern-panels { grid-template-columns: 1fr; }
+      }
+      @media (max-width: 620px) {
+        .home-modern-stats { grid-template-columns: 1fr; }
+      }
 
       .kpi-grid {
         margin-top: 8px;
@@ -11542,52 +11685,64 @@
                   <DashboardTecnica rows={visibleRows} onGoToDetalle={() => setSelectedForm('historial')} />
                 ) : effectiveSelectedForm === 'home' ? (
                   <>
-                    <section className="hero">
-                      <h2>Masterson Seguridad</h2>
-                      <p className="subtitle-voga">ÁREA TÉCNICA Y COMERCIAL</p>
-                    </section>
-                    <section className="welcome-card">
-                      <div className="welcome-profile">
-                        <img
-                          className="welcome-avatar"
-                          src={selectedProfileAvatar.src}
-                          alt={`Ícono de perfil ${selectedProfileAvatar.label}`}
-                        />
+                    <section className="home-modern-shell">
+                      <article className="home-modern-hero">
                         <div>
-                          <h3 className="welcome-title">Bienvenido, <b>{currentUserName || 'Usuario'}</b></h3>
-                          <div className="welcome-meta">Hoy tienes {resolveWelcomeTasksCount(upcomingInstallations)} tareas pendientes.</div>
-                          <div className="welcome-meta secondary">¡Que tengas una excelente jornada!</div>
+                          <div className="home-modern-badge">Plataforma operativa · Masterson Seguridad</div>
+                          <h2>Centro de control técnico y comercial</h2>
+                          <p>Gestioná servicios, seguimientos y tickets desde una única pantalla más clara, moderna y rápida de operar.</p>
+                          <div className="home-modern-actions">
+                            <button type="button" className="home-modern-action-btn primary" onClick={() => selectAction('Nuevo Servicio')}>+ Nuevo servicio</button>
+                            <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('historial')}>Ver historial</button>
+                            <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('tickets')}>Abrir tickets</button>
+                          </div>
                         </div>
+                        <div className="home-modern-user">
+                          <img className="home-modern-avatar" src={selectedProfileAvatar.src} alt={`Ícono de perfil ${selectedProfileAvatar.label}`} />
+                          <div>
+                            <strong>{currentUserName || 'Usuario'}</strong>
+                            <small>{topbarSubtitle || 'Área operativa'}</small>
+                            <small>{resolveWelcomeTasksCount(upcomingInstallations)} tareas programadas para hoy</small>
+                          </div>
+                        </div>
+                      </article>
+
+                      <div className="home-modern-stats">
+                        <article className="home-modern-stat-card"><small>Servicios activos</small><strong>{kpiStats.active}</strong></article>
+                        <article className="home-modern-stat-card"><small>Servicios de baja</small><strong>{kpiStats.baja}</strong></article>
+                        <article className="home-modern-stat-card"><small>Actividad reciente</small><strong>{recentActivity.length}</strong></article>
+                        <article className="home-modern-stat-card"><small>Instalaciones próximas</small><strong>{upcomingInstallations.length}</strong></article>
                       </div>
-                    </section>
-                    <section className="dashboard-info-grid">
-                      <article className="dashboard-info-card">
-                        <h3>Actividad reciente</h3>
-                        <div className="dashboard-info-list activity-timeline">
-                          {recentActivity.length === 0 ? (
-                            <div className="dashboard-info-empty">Sin actividad reciente disponible.</div>
-                          ) : recentActivity.map((item) => (
-                            <div key={`activity-${item.id}`} className="dashboard-info-item activity-item">
-                              <small>{item.dateLabel}</small>
-                              <b>{item.message}</b>
-                            </div>
-                          ))}
-                        </div>
-                      </article>
-                      <article className="dashboard-info-card">
-                        <h3>Instalaciones próximas</h3>
-                        <div className="dashboard-info-list">
-                          {upcomingInstallations.length === 0 ? (
-                            <div className="dashboard-info-empty">Sin instalaciones próximas programadas.</div>
-                          ) : upcomingInstallations.map((item) => (
-                            <div key={`install-${item.id}`} className="dashboard-info-item">
-                              <small>{item.fecha || 'Sin fecha'} {item.hora || ''}</small>
-                              <b>{item.edificio || item.nombreServicio || item.nombre || 'Edificio sin nombre'}</b>
-                              <small>Técnico: {item.tecnico || item.tecnicoAsignado || item.asignadoA || 'Sin asignar'}</small>
-                            </div>
-                          ))}
-                        </div>
-                      </article>
+
+                      <div className="home-modern-panels">
+                        <article className="home-modern-panel">
+                          <h3>Actividad reciente</h3>
+                          <div className="home-modern-list">
+                            {recentActivity.length === 0 ? (
+                              <div className="dashboard-info-empty">Sin actividad reciente disponible.</div>
+                            ) : recentActivity.slice(0, 8).map((item) => (
+                              <div key={`activity-${item.id}`} className="home-modern-list-item">
+                                <small>{item.dateLabel}</small>
+                                <b>{item.message}</b>
+                              </div>
+                            ))}
+                          </div>
+                        </article>
+                        <article className="home-modern-panel">
+                          <h3>Instalaciones próximas</h3>
+                          <div className="home-modern-list">
+                            {upcomingInstallations.length === 0 ? (
+                              <div className="dashboard-info-empty">Sin instalaciones próximas programadas.</div>
+                            ) : upcomingInstallations.slice(0, 8).map((item) => (
+                              <div key={`install-${item.id}`} className="home-modern-list-item">
+                                <small>{item.fecha || 'Sin fecha'} {item.hora || ''}</small>
+                                <b>{item.edificio || item.nombreServicio || item.nombre || 'Edificio sin nombre'}</b>
+                                <small>Técnico: {item.tecnico || item.tecnicoAsignado || item.asignadoA || 'Sin asignar'}</small>
+                              </div>
+                            ))}
+                          </div>
+                        </article>
+                      </div>
                     </section>
                     <section className="kpi-grid">
                       {[
