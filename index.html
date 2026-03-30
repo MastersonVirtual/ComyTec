@@ -7644,50 +7644,100 @@
 
 
       function DashboardTecnica({ rows, onGoToDetalle }) {
-        const now = new Date();
-        const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() - 7);
-        const monthStart = new Date(now);
-        monthStart.setMonth(now.getMonth() - 1);
+        const monthLabel = new Date().toLocaleDateString('es-UY', { month: 'long', year: 'numeric' });
+        const actionGroups = [
+          { key: 'novaciones', title: 'Novaciones', action: 'Novación', note: 'Renovaciones de contrato' },
+          { key: 'adicionales', title: 'Adicionales', action: 'Adicionales', note: 'Nuevos adicionales cargados' },
+          { key: 'movimientos', title: 'Mov. de Obra', action: 'Movimiento de obra', note: 'Movimientos por avance de obra' },
+          { key: 'bajas', title: 'Bajas', action: 'Baja', note: 'Bajas de servicios con retiro' },
+        ];
 
-        const normalizeStatus = (row) => normalizeLegacyStatusName(row?.status || row?.estado || 'pendiente').toLowerCase();
-        const isTrabajoNuevo = (row) => {
-          const statusRaw = normalizeStatus(row);
-          return statusRaw === 'pendiente' || statusRaw.includes('nuevo') || statusRaw.includes('ingres');
-        };
-        const isTrabajoFinalizado = (row) => {
-          const statusRaw = normalizeStatus(row);
-          return statusRaw.includes('final') || statusRaw.includes('complet') || statusRaw.includes('realiz') || statusRaw.includes('dado de alta');
-        };
+        const cards = actionGroups.map((group) => {
+          const items = rows.filter((row) => String(row?.tipoAccion || '').trim() === group.action);
+          const samples = items.slice(0, 4).map((item) => item.nombreServicio || item.clienteId || 'Servicio');
+          return { ...group, total: items.length, samples };
+        });
 
-        const nuevos = rows.filter((r) => isTrabajoNuevo(r)).length;
-        const finalizados = rows.filter((r) => isTrabajoFinalizado(r)).length;
-        const enProceso = rows.length - nuevos - finalizados;
+        const ongoingRows = rows
+          .map((row) => {
+            const tasks = buildInstallationTasksMap(row?.coordinacionInstalaciones?.tareas || {});
+            const done = Object.values(tasks).filter((task) => task.completada).length;
+            const total = Object.keys(tasks).length || 1;
+            const progress = Math.round((done / total) * 100);
+            return {
+              id: row.id || row.clienteId,
+              name: row.nombreServicio || row.clienteId || 'Servicio',
+              progress,
+              pending: Object.values(tasks).filter((task) => !task.completada).slice(0, 3).map((task) => task.label),
+            };
+          })
+          .filter((row) => row.progress < 100)
+          .sort((a, b) => b.progress - a.progress)
+          .slice(0, 12);
 
-        const thisWeek = rows.filter((r) => {
-          const ts = r.creadoEn?.seconds ? new Date(r.creadoEn.seconds * 1000) : null;
-          return ts && ts >= weekStart;
-        }).length;
-
-        const thisMonth = rows.filter((r) => {
-          const ts = r.creadoEn?.seconds ? new Date(r.creadoEn.seconds * 1000) : null;
-          return ts && ts >= monthStart;
-        }).length;
+        const monthData = useMemo(() => {
+          const months = [];
+          const now = new Date();
+          for (let i = 7; i >= 0; i -= 1) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            months.push({ key, label: d.toLocaleDateString('es-UY', { month: 'short' }), total: 0 });
+          }
+          const map = new Map(months.map((m) => [m.key, m]));
+          rows.forEach((row) => {
+            const raw = row.fechaAltaServicio || row.fechaAlta || '';
+            const d = raw ? new Date(`${raw}T00:00:00`) : null;
+            if (!d || Number.isNaN(d.getTime())) return;
+            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            if (map.has(key)) map.get(key).total += 1;
+          });
+          return months;
+        }, [rows]);
+        const maxMonthValue = Math.max(1, ...monthData.map((item) => item.total));
 
         return (
           <section className="panel">
-            <h2>Dashboard Área Técnica</h2>
-            <div className="hint">Vista solo lectura con resumen de ESTADO DE TRABAJOS y seguimiento operativo semanal/mensual.</div>
-            <div className="compact-grid" style={{ marginBottom: 12 }}>
-              <article className="widget"><h4>Trabajos nuevos cargados</h4><div className="gerencia-value">{nuevos}</div></article>
-              <article className="widget"><h4>Trabajos en proceso</h4><div className="gerencia-value">{Math.max(0, enProceso)}</div></article>
-              <article className="widget"><h4>Trabajos finalizados</h4><div className="gerencia-value">{finalizados}</div></article>
+            <h2 style={{ marginBottom: 4 }}>Detalles de órdenes de trabajo</h2>
+            <div className="hint" style={{ marginBottom: 12 }}>Detalle de {monthLabel} por tipo y cantidad de órdenes.</div>
+            <div className="compact-grid" style={{ marginBottom: 16 }}>
+              {cards.map((card) => (
+                <article key={`card-${card.key}`} className="widget" style={{ position: 'relative', overflow: 'visible' }}>
+                  <div style={{ position: 'absolute', top: -26, right: 14, width: 52, height: 52, borderRadius: '50%', background: '#e6fbfa', color: '#067f88', display: 'grid', placeItems: 'center', border: '3px solid #26c3cf', fontWeight: 800, fontSize: 20 }}>{card.total}</div>
+                  <h4 style={{ marginTop: 12 }}>{card.title}</h4>
+                  <small>{card.note}</small>
+                  <ul style={{ margin: '8px 0 0 16px', padding: 0 }}>
+                    {(card.samples.length ? card.samples : ['Sin registros']).map((name, idx) => (<li key={`sample-${card.key}-${idx}`}>{name}</li>))}
+                  </ul>
+                </article>
+              ))}
             </div>
-            <h3 style={{ marginTop: 0 }}>Indicadores del Área Técnica</h3>
-            <div className="gerencia-status-list">
-              <div className="gerencia-item"><span>Trabajos nuevos (últimos 7 días)</span><b>{thisWeek}</b></div>
-              <div className="gerencia-item"><span>Trabajos nuevos (últimos 30 días)</span><b>{thisMonth}</b></div>
-              <div className="gerencia-item"><span>Total de trabajos registrados</span><b>{rows.length}</b></div>
+
+            <h3 style={{ marginBottom: 6 }}>Instalaciones: Ongoing</h3>
+            <div className="hint" style={{ marginBottom: 10 }}>Detalle de instalaciones activas a la fecha ({ongoingRows.length} ongoing).</div>
+            <div className="gerencia-status-list" style={{ marginBottom: 16 }}>
+              {ongoingRows.length === 0 ? (
+                <div className="gerencia-item"><span>No hay instalaciones en curso.</span></div>
+              ) : ongoingRows.map((item) => (
+                <div key={`ongoing-${item.id}`} className="gerencia-item" style={{ alignItems: 'flex-start' }}>
+                  <span><b>{item.progress}%</b> · {item.name}</span>
+                  <small>{item.pending.length ? `Pendiente: ${item.pending.join(', ')}` : 'Sin pendientes cargados.'}</small>
+                </div>
+              ))}
+            </div>
+
+            <h3 style={{ marginBottom: 6 }}>Instalaciones: Altas</h3>
+            <div className="hint" style={{ marginBottom: 10 }}>Evolución de altas en los últimos 8 meses.</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, minmax(40px, 1fr))', gap: 8, alignItems: 'end', minHeight: 180, marginBottom: 10 }}>
+              {monthData.map((item) => {
+                const h = Math.max(16, Math.round((item.total / maxMonthValue) * 150));
+                return (
+                  <div key={`month-${item.key}`} style={{ textAlign: 'center' }}>
+                    <div style={{ fontWeight: 700, marginBottom: 4 }}>{item.total}</div>
+                    <div style={{ height: h, borderRadius: 8, background: 'linear-gradient(180deg,#2ec4d6,#0c7280)' }} />
+                    <small>{item.label}</small>
+                  </div>
+                );
+              })}
             </div>
             <div style={{ marginTop: 14 }}>
               <button type="button" className="save-btn" onClick={onGoToDetalle}>Ver detalle de trabajos</button>
@@ -11341,11 +11391,11 @@
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>CX</button>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Logística</button>
                       <button className="submenu-button" onClick={() => { setSelectedForm('home'); closeSidebar(); }}>Instalaciones</button>
-                      <button className="submenu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}>Indicadores</button>
+                      <button className="submenu-button" onClick={() => { setSelectedForm('dashboard-tecnica'); closeSidebar(); }}>Indicadores</button>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Gestión de servicios</button>
                       <button className="submenu-button" onClick={() => { openTicketsView(); closeSidebar(); }}>Soporte técnico</button>
                       <button className="submenu-button" onClick={() => { openTicketsView(); closeSidebar(); }}>Tickets</button>
-                      <button className="submenu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}>Indicadores</button>
+                      <button className="submenu-button" onClick={() => { setSelectedForm('dashboard-tecnica'); closeSidebar(); }}>Indicadores</button>
                     </div>
                     <div className="sidebar-divider" />
                     <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, general: false, operaciones: false, gerencia: !p.gerencia, equipo: false, nuevo: false, baseDatos: false }))}><span className="menu-icon">📊</span><span>Gerencia</span><span className="menu-arrow">{openMenus.gerencia ? '▾' : '▸'}</span></button>
