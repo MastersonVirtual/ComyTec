@@ -1510,7 +1510,7 @@
         padding: 14px;
         box-shadow: 0 10px 24px rgba(8, 29, 35, .08);
       }
-      .service-coord-filters .field label { color: #ed9643; }
+      .service-coord-filters .field label { color: #ff8a2a; }
       .service-coord-filters .field input,
       .service-coord-filters .field select {
         min-height: 46px;
@@ -8058,6 +8058,7 @@
         const [historyStatusFilter, setHistoryStatusFilter] = useState('Pendiente');
         const [historyCommercialFilter, setHistoryCommercialFilter] = useState('todos');
         const [historyTypeFilter, setHistoryTypeFilter] = useState('todos');
+        const [historyAdministrationFilter, setHistoryAdministrationFilter] = useState('todos');
         const [historyDateFilter, setHistoryDateFilter] = useState('');
         const [historyDetailTab, setHistoryDetailTab] = useState('informacion');
         const [historyDetailModalOpen, setHistoryDetailModalOpen] = useState(false);
@@ -8382,6 +8383,15 @@
           return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
         }, [historySourceRows]);
 
+        const historyAdministrationOptions = useMemo(() => {
+          const set = new Set();
+          historySourceRows.forEach((r) => {
+            const value = String(r.administracion || r.administración || '').trim();
+            if (value) set.add(value);
+          });
+          return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+        }, [historySourceRows]);
+
         const historyFilteredRows = useMemo(() => {
           const query = historySearchTerm.trim().toLowerCase();
           const filtered = historySourceRows.filter((r) => {
@@ -8392,10 +8402,18 @@
               : actionValueRaw === 'Adicionales' ? 'Adicional'
                 : actionValueRaw === 'Solicitud de presupuesto' ? 'Presupuesto'
                   : actionValueRaw;
+            const administrationValue = String(r.administracion || r.administración || '').trim();
             const matchStatus = historyStatusFilter === 'todos' || statusValue === historyStatusFilter;
             const matchCommercial = historyCommercialFilter === 'todos' || commercialValue === historyCommercialFilter;
             const matchType = historyTypeFilter === 'todos' || actionValue === historyTypeFilter;
-            const matchDate = true;
+            const matchAdministration = historyAdministrationFilter === 'todos' || administrationValue === historyAdministrationFilter;
+            const matchDate = (() => {
+              if (!historyDateFilter) return true;
+              const selectedDate = parseServiceDate(historyDateFilter);
+              const serviceDate = parseServiceDate(r.fechaAltaServicio || r.fechaAlta || r.fechaEspecificaInicio);
+              if (!selectedDate || !serviceDate) return false;
+              return selectedDate.toDateString() === serviceDate.toDateString();
+            })();
             const matchQuery = !query || [
               r.nombreServicio,
               r.cliente,
@@ -8404,7 +8422,7 @@
               r.rut,
               r.direccionServicio,
             ].filter(Boolean).some((v) => String(v).toLowerCase().includes(query));
-            return matchStatus && matchCommercial && matchType && matchDate && matchQuery;
+            return matchStatus && matchCommercial && matchType && matchAdministration && matchDate && matchQuery;
           });
 
           return filtered.sort((a, b) => {
@@ -8412,7 +8430,7 @@
             const bTs = b.actualizadoEn?.seconds || b.creadoEn?.seconds || 0;
             return bTs - aTs;
           });
-        }, [historySourceRows, historySearchTerm, historyStatusFilter, historyCommercialFilter, historyTypeFilter, historyDateFilter]);
+        }, [historySourceRows, historySearchTerm, historyStatusFilter, historyCommercialFilter, historyTypeFilter, historyAdministrationFilter, historyDateFilter]);
 
         const HISTORY_PAGE_SIZE = 18;
         const totalHistoryPages = Math.max(1, Math.ceil(historyFilteredRows.length / HISTORY_PAGE_SIZE));
@@ -9753,7 +9771,7 @@
 
         useEffect(() => {
           setHistoryPage(1);
-        }, [historySearchTerm, historyStatusFilter, historyCommercialFilter, historyTypeFilter, historyDateFilter]);
+        }, [historySearchTerm, historyStatusFilter, historyCommercialFilter, historyTypeFilter, historyAdministrationFilter, historyDateFilter]);
 
         useEffect(() => {
           if (historyPage > totalHistoryPages) {
@@ -12014,6 +12032,8 @@
                       </div>
                       <div className="field"><label>Estado</label><select value={historyStatusFilter} onChange={(e) => setHistoryStatusFilter(e.target.value)}><option value="todos">Todos</option>{historyStatusOptions.map((opt) => <option key={`history-status-${opt}`} value={opt}>{opt}</option>)}</select></div>
                       <div className="field"><label>Encargado</label><select value={historyCommercialFilter} onChange={(e) => setHistoryCommercialFilter(e.target.value)}><option value="todos">Todos</option>{historyCommercialOptions.map((opt) => <option key={`history-commercial-${opt}`} value={opt}>{opt}</option>)}</select></div>
+                      <div className="field"><label>Administración</label><select value={historyAdministrationFilter} onChange={(e) => setHistoryAdministrationFilter(e.target.value)}><option value="todos">Todas</option>{historyAdministrationOptions.map((opt) => <option key={`history-administration-${opt}`} value={opt}>{opt}</option>)}</select></div>
+                      <div className="field"><label>Fecha de alta</label><input type="date" value={historyDateFilter} onChange={(e) => setHistoryDateFilter(e.target.value)} /></div>
                       <div className="field"><label>Tipo</label><select value={historyTypeFilter} onChange={(e) => setHistoryTypeFilter(e.target.value)}><option value="todos">Todos</option>{historyTypeOptions.map((opt) => <option key={`history-type-${opt}`} value={opt}>{opt}</option>)}</select></div>
                     </div>
 
