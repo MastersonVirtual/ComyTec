@@ -7826,8 +7826,8 @@
         const [authLoading, setAuthLoading] = useState(true);
         const [userRole, setUserRole] = useState('');
         const [userArea, setUserArea] = useState('');
-        const [userData, setUserData] = useState({ nombre: '', apellido: '', rol: '', area: '', telefono: '', horarioTrabajo: '', mail: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
-        const [profileFormData, setProfileFormData] = useState({ nombre: '', apellido: '', area: '', rol: '', telefono: '', horarioTrabajo: '', mail: '' });
+        const [userData, setUserData] = useState({ nombre: '', apellido: '', rol: '', area: '', telefono: '', horarioInicio: '', horarioFin: '', horarioTrabajo: '', mail: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
+        const [profileFormData, setProfileFormData] = useState({ nombre: '', apellido: '', area: '', rol: '', telefono: '', horarioInicio: '', horarioFin: '', mail: '' });
         const [savingProfileData, setSavingProfileData] = useState(false);
         const [isProfileEditing, setIsProfileEditing] = useState(false);
         const [roleLoading, setRoleLoading] = useState(true);
@@ -8915,6 +8915,8 @@
               rol: userRole || 'admin',
               area: userArea || '',
               telefono: userData.telefono || '',
+              horarioInicio: userData.horarioInicio || '',
+              horarioFin: userData.horarioFin || '',
               horarioTrabajo: userData.horarioTrabajo || '',
               mail: userData.mail || user.email || '',
               avatarId: nextAvatarId,
@@ -8945,11 +8947,13 @@
             area: String(profileFormData.area || '').trim(),
             rol: String(profileFormData.rol || '').trim(),
             telefono: String(profileFormData.telefono || '').trim(),
-            horarioTrabajo: String(profileFormData.horarioTrabajo || '').trim(),
+            horarioInicio: String(profileFormData.horarioInicio || '').trim(),
+            horarioFin: String(profileFormData.horarioFin || '').trim(),
             mail: String(profileFormData.mail || user.email || '').trim(),
             email: user.email || '',
             actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
           };
+          payload.horarioTrabajo = [payload.horarioInicio, payload.horarioFin].filter(Boolean).join(' - ');
           if (!payload.nombre) {
             setNotificacion({ mensaje: 'Completá al menos el nombre para guardar el perfil.', tipo: 'error' });
             return;
@@ -9114,8 +9118,8 @@
             if (!currentUser) {
               setUserRole('');
               setUserArea('');
-              setUserData({ nombre: '', apellido: '', rol: '', area: '', telefono: '', horarioTrabajo: '', mail: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
-              setProfileFormData({ nombre: '', apellido: '', area: '', rol: '', telefono: '', horarioTrabajo: '', mail: '' });
+              setUserData({ nombre: '', apellido: '', rol: '', area: '', telefono: '', horarioInicio: '', horarioFin: '', horarioTrabajo: '', mail: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
+              setProfileFormData({ nombre: '', apellido: '', area: '', rol: '', telefono: '', horarioInicio: '', horarioFin: '', mail: '' });
               setProfileAvatarId(DEFAULT_PROFILE_AVATAR_ID);
               setRoleLoading(false);
               return;
@@ -9137,13 +9141,16 @@
               const nombre = String(profile?.nombre || currentUser.displayName || (currentUser.email || '').split('@')[0] || 'Usuario').trim();
               const apellido = String(profile?.apellido || '').trim();
               const telefono = String(profile?.telefono || profile?.telefonoMovil || '').trim();
-              const horarioTrabajo = String(profile?.horarioTrabajo || profile?.horario || '').trim();
+              const horarioTrabajoRaw = String(profile?.horarioTrabajo || profile?.horario || '').trim();
+              const horarioInicio = String(profile?.horarioInicio || (horarioTrabajoRaw.includes(' - ') ? horarioTrabajoRaw.split(' - ')[0] : '')).trim();
+              const horarioFin = String(profile?.horarioFin || (horarioTrabajoRaw.includes(' - ') ? horarioTrabajoRaw.split(' - ')[1] : '')).trim();
+              const horarioTrabajo = [horarioInicio, horarioFin].filter(Boolean).join(' - ');
               const mail = String(profile?.mail || currentUser.email || '').trim();
               const avatarId = PROFILE_AVATAR_OPTIONS.some((avatar) => avatar.id === profile?.avatarId) ? profile.avatarId : DEFAULT_PROFILE_AVATAR_ID;
               setUserRole(rol);
               setUserArea(area);
-              setUserData({ nombre, apellido, rol, area, telefono, horarioTrabajo, mail, avatarId });
-              setProfileFormData({ nombre, apellido, area: profile?.area || '', rol: profile?.rol || rol, telefono, horarioTrabajo, mail });
+              setUserData({ nombre, apellido, rol, area, telefono, horarioInicio, horarioFin, horarioTrabajo, mail, avatarId });
+              setProfileFormData({ nombre, apellido, area: profile?.area || '', rol: profile?.rol || rol, telefono, horarioInicio, horarioFin, mail });
               setProfileAvatarId(avatarId);
             } catch (err) {
               console.error('Error leyendo config_usuarios:', err);
@@ -9151,8 +9158,8 @@
               setUserArea('');
               const fallbackName = (currentUser?.email || 'admin').split('@')[0];
               const fallbackMail = currentUser?.email || '';
-              setUserData({ nombre: fallbackName, apellido: '', rol: 'admin', area: '', telefono: '', horarioTrabajo: '', mail: fallbackMail, avatarId: DEFAULT_PROFILE_AVATAR_ID });
-              setProfileFormData({ nombre: fallbackName, apellido: '', area: '', rol: 'admin', telefono: '', horarioTrabajo: '', mail: fallbackMail });
+              setUserData({ nombre: fallbackName, apellido: '', rol: 'admin', area: '', telefono: '', horarioInicio: '', horarioFin: '', horarioTrabajo: '', mail: fallbackMail, avatarId: DEFAULT_PROFILE_AVATAR_ID });
+              setProfileFormData({ nombre: fallbackName, apellido: '', area: '', rol: 'admin', telefono: '', horarioInicio: '', horarioFin: '', mail: fallbackMail });
               setProfileAvatarId(DEFAULT_PROFILE_AVATAR_ID);
             } finally {
               setRoleLoading(false);
@@ -11835,7 +11842,8 @@
                         <div className="kv"><b>Área:</b> {profileFormData.area || '-'}</div>
                         <div className="kv"><b>Rol:</b> {profileFormData.rol || '-'}</div>
                         <div className="kv"><b>Tel:</b> {profileFormData.telefono || '-'}</div>
-                        <div className="kv"><b>Horario:</b> {profileFormData.horarioTrabajo || '-'}</div>
+                        <div className="kv"><b>Horario inicio:</b> {profileFormData.horarioInicio || '-'}</div>
+                        <div className="kv"><b>Horario fin:</b> {profileFormData.horarioFin || '-'}</div>
                         <div className="kv"><b>Mail:</b> {profileFormData.mail || '-'}</div>
                       </div>
                       {!isProfileEditing ? (
@@ -11894,14 +11902,26 @@
                               />
                             </div>
                             <div className="field">
-                              <label>Horario de trabajo</label>
+                              <label>Horario inicio</label>
                               <select
-                                value={profileFormData.horarioTrabajo}
-                                onChange={(e) => setProfileFormData((prev) => ({ ...prev, horarioTrabajo: e.target.value }))}
+                                value={profileFormData.horarioInicio}
+                                onChange={(e) => setProfileFormData((prev) => ({ ...prev, horarioInicio: e.target.value }))}
                               >
-                                <option value="">Seleccionar horario</option>
+                                <option value="">Seleccionar hora de inicio</option>
                                 {workScheduleOptions.map((schedule) => (
                                   <option key={`schedule-${schedule}`} value={schedule}>{schedule}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="field">
+                              <label>Horario fin</label>
+                              <select
+                                value={profileFormData.horarioFin}
+                                onChange={(e) => setProfileFormData((prev) => ({ ...prev, horarioFin: e.target.value }))}
+                              >
+                                <option value="">Seleccionar hora de fin</option>
+                                {workScheduleOptions.map((schedule) => (
+                                  <option key={`schedule-end-${schedule}`} value={schedule}>{schedule}</option>
                                 ))}
                               </select>
                             </div>
