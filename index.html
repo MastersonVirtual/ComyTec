@@ -84,7 +84,7 @@
         opacity: 0;
         transition: max-height var(--motion-mid) ease, opacity var(--motion-fast) ease;
       }
-      .submenu.open { max-height: 420px; opacity: 1; }
+      .submenu.open { max-height: min(1200px, 80vh); opacity: 1; overflow-y: auto; }
       .submenu-button { font-size: 13px; }
 
       .overlay {
@@ -3893,10 +3893,11 @@
         transition: max-height .28s ease, opacity .2s ease, padding .2s ease !important;
       }
       .submenu.open {
-        max-height: 480px !important;
+        max-height: min(1200px, 80vh) !important;
         opacity: 1 !important;
         padding-top: 4px !important;
         padding-bottom: 4px !important;
+        overflow-y: auto !important;
       }
       .submenu-button {
         font-size: 12.5px !important;
@@ -5465,6 +5466,16 @@
         .main {
           margin: 0 auto;
           padding: 90px 12px calc(var(--mobile-nav-height) + 18px);
+        }
+
+        .sidebar {
+          overflow-y: auto !important;
+          overscroll-behavior: contain;
+        }
+
+        .submenu.open {
+          max-height: none !important;
+          overflow: visible !important;
         }
 
         .hero {
