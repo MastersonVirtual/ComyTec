@@ -11344,6 +11344,7 @@
                       <button className="submenu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}>Indicadores</button>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Gestión de servicios</button>
                       <button className="submenu-button" onClick={() => { openTicketsView(); closeSidebar(); }}>Soporte técnico</button>
+                      <button className="submenu-button" onClick={() => { openTicketsView(); closeSidebar(); }}>Tickets</button>
                       <button className="submenu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}>Indicadores</button>
                     </div>
                     <div className="sidebar-divider" />
@@ -11356,6 +11357,7 @@
                       <button className="submenu-button" onClick={() => { openFuncionariosView(); closeSidebar(); }}>Funcionarios</button>
                       <button className="submenu-button" onClick={() => { openFuncionariosView(); closeSidebar(); }}>Organigrama</button>
                     </div>
+                    <button className="menu-button" onClick={() => { openTicketsView(); closeSidebar(); }}><span className="menu-icon">🎫</span><span>Tickets</span></button>
                     {ENABLE_CLIENT_TRACKING_VIEW && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}><span className="menu-icon">👥</span><span>Vista Clientes</span></button>}
                   </>
                 )}
