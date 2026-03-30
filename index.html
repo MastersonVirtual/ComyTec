@@ -84,7 +84,7 @@
         opacity: 0;
         transition: max-height var(--motion-mid) ease, opacity var(--motion-fast) ease;
       }
-      .submenu.open { max-height: 420px; opacity: 1; }
+      .submenu.open { max-height: min(1200px, 80vh); opacity: 1; overflow-y: auto; }
       .submenu-button { font-size: 13px; }
 
       .overlay {
@@ -3893,10 +3893,11 @@
         transition: max-height .28s ease, opacity .2s ease, padding .2s ease !important;
       }
       .submenu.open {
-        max-height: 480px !important;
+        max-height: min(1200px, 80vh) !important;
         opacity: 1 !important;
         padding-top: 4px !important;
         padding-bottom: 4px !important;
+        overflow-y: auto !important;
       }
       .submenu-button {
         font-size: 12.5px !important;
@@ -5467,6 +5468,16 @@
           padding: 90px 12px calc(var(--mobile-nav-height) + 18px);
         }
 
+        .sidebar {
+          overflow-y: auto !important;
+          overscroll-behavior: contain;
+        }
+
+        .submenu.open {
+          max-height: none !important;
+          overflow: visible !important;
+        }
+
         .hero {
           padding: 24px 14px !important;
           border-radius: 20px !important;
@@ -6115,6 +6126,37 @@
       const ACCIONES = ['Nuevo Servicio', 'Adicionales', 'Solicitud de presupuesto', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa'];
       const STATUS_OPTIONS = ['Pendiente', 'En proceso', 'Esperando información', 'Finalizado', 'Cancelado'];
       const SERVICE_TYPE_OPTIONS = ['Monitoreo', 'Portería virtual', 'Respuesta de alarma', 'Servicio Técnico', 'Control de acceso'];
+      const INSTALLATION_TASKS = [
+        'Mail de inicio de instalación',
+        'Día de marcación',
+        'Equipo de Svideo asignado',
+        'Instalación de pulso de portón',
+        'Instalación de pulso de portero',
+        'Agenda de alta',
+        'Finalización de instalación',
+      ];
+
+      function normalizeTaskKey(label) {
+        return String(label || '')
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '_')
+          .replace(/^_|_$/g, '');
+      }
+
+      function buildInstallationTasksMap(existing = {}) {
+        return INSTALLATION_TASKS.reduce((acc, label) => {
+          const key = normalizeTaskKey(label);
+          const prev = existing?.[key] || {};
+          acc[key] = {
+            label,
+            completada: !!prev.completada,
+            completadaEn: prev.completadaEn || null,
+          };
+          return acc;
+        }, {});
+      }
 
       function normalizeServiceType(value) {
         const raw = String(value || '').trim();
@@ -7602,50 +7644,100 @@
 
 
       function DashboardTecnica({ rows, onGoToDetalle }) {
-        const now = new Date();
-        const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() - 7);
-        const monthStart = new Date(now);
-        monthStart.setMonth(now.getMonth() - 1);
+        const monthLabel = new Date().toLocaleDateString('es-UY', { month: 'long', year: 'numeric' });
+        const actionGroups = [
+          { key: 'novaciones', title: 'Novaciones', action: 'Novación', note: 'Renovaciones de contrato' },
+          { key: 'adicionales', title: 'Adicionales', action: 'Adicionales', note: 'Nuevos adicionales cargados' },
+          { key: 'movimientos', title: 'Mov. de Obra', action: 'Movimiento de obra', note: 'Movimientos por avance de obra' },
+          { key: 'bajas', title: 'Bajas', action: 'Baja', note: 'Bajas de servicios con retiro' },
+        ];
 
-        const normalizeStatus = (row) => normalizeLegacyStatusName(row?.status || row?.estado || 'pendiente').toLowerCase();
-        const isTrabajoNuevo = (row) => {
-          const statusRaw = normalizeStatus(row);
-          return statusRaw === 'pendiente' || statusRaw.includes('nuevo') || statusRaw.includes('ingres');
-        };
-        const isTrabajoFinalizado = (row) => {
-          const statusRaw = normalizeStatus(row);
-          return statusRaw.includes('final') || statusRaw.includes('complet') || statusRaw.includes('realiz') || statusRaw.includes('dado de alta');
-        };
+        const cards = actionGroups.map((group) => {
+          const items = rows.filter((row) => String(row?.tipoAccion || '').trim() === group.action);
+          const samples = items.slice(0, 4).map((item) => item.nombreServicio || item.clienteId || 'Servicio');
+          return { ...group, total: items.length, samples };
+        });
 
-        const nuevos = rows.filter((r) => isTrabajoNuevo(r)).length;
-        const finalizados = rows.filter((r) => isTrabajoFinalizado(r)).length;
-        const enProceso = rows.length - nuevos - finalizados;
+        const ongoingRows = rows
+          .map((row) => {
+            const tasks = buildInstallationTasksMap(row?.coordinacionInstalaciones?.tareas || {});
+            const done = Object.values(tasks).filter((task) => task.completada).length;
+            const total = Object.keys(tasks).length || 1;
+            const progress = Math.round((done / total) * 100);
+            return {
+              id: row.id || row.clienteId,
+              name: row.nombreServicio || row.clienteId || 'Servicio',
+              progress,
+              pending: Object.values(tasks).filter((task) => !task.completada).slice(0, 3).map((task) => task.label),
+            };
+          })
+          .filter((row) => row.progress < 100)
+          .sort((a, b) => b.progress - a.progress)
+          .slice(0, 12);
 
-        const thisWeek = rows.filter((r) => {
-          const ts = r.creadoEn?.seconds ? new Date(r.creadoEn.seconds * 1000) : null;
-          return ts && ts >= weekStart;
-        }).length;
-
-        const thisMonth = rows.filter((r) => {
-          const ts = r.creadoEn?.seconds ? new Date(r.creadoEn.seconds * 1000) : null;
-          return ts && ts >= monthStart;
-        }).length;
+        const monthData = useMemo(() => {
+          const months = [];
+          const now = new Date();
+          for (let i = 7; i >= 0; i -= 1) {
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            months.push({ key, label: d.toLocaleDateString('es-UY', { month: 'short' }), total: 0 });
+          }
+          const map = new Map(months.map((m) => [m.key, m]));
+          rows.forEach((row) => {
+            const raw = row.fechaAltaServicio || row.fechaAlta || '';
+            const d = raw ? new Date(`${raw}T00:00:00`) : null;
+            if (!d || Number.isNaN(d.getTime())) return;
+            const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            if (map.has(key)) map.get(key).total += 1;
+          });
+          return months;
+        }, [rows]);
+        const maxMonthValue = Math.max(1, ...monthData.map((item) => item.total));
 
         return (
           <section className="panel">
-            <h2>Dashboard Área Técnica</h2>
-            <div className="hint">Vista solo lectura con resumen de ESTADO DE TRABAJOS y seguimiento operativo semanal/mensual.</div>
-            <div className="compact-grid" style={{ marginBottom: 12 }}>
-              <article className="widget"><h4>Trabajos nuevos cargados</h4><div className="gerencia-value">{nuevos}</div></article>
-              <article className="widget"><h4>Trabajos en proceso</h4><div className="gerencia-value">{Math.max(0, enProceso)}</div></article>
-              <article className="widget"><h4>Trabajos finalizados</h4><div className="gerencia-value">{finalizados}</div></article>
+            <h2 style={{ marginBottom: 4 }}>Detalles de órdenes de trabajo</h2>
+            <div className="hint" style={{ marginBottom: 12 }}>Detalle de {monthLabel} por tipo y cantidad de órdenes.</div>
+            <div className="compact-grid" style={{ marginBottom: 16 }}>
+              {cards.map((card) => (
+                <article key={`card-${card.key}`} className="widget" style={{ position: 'relative', overflow: 'visible' }}>
+                  <div style={{ position: 'absolute', top: -26, right: 14, width: 52, height: 52, borderRadius: '50%', background: '#e6fbfa', color: '#067f88', display: 'grid', placeItems: 'center', border: '3px solid #26c3cf', fontWeight: 800, fontSize: 20 }}>{card.total}</div>
+                  <h4 style={{ marginTop: 12 }}>{card.title}</h4>
+                  <small>{card.note}</small>
+                  <ul style={{ margin: '8px 0 0 16px', padding: 0 }}>
+                    {(card.samples.length ? card.samples : ['Sin registros']).map((name, idx) => (<li key={`sample-${card.key}-${idx}`}>{name}</li>))}
+                  </ul>
+                </article>
+              ))}
             </div>
-            <h3 style={{ marginTop: 0 }}>Indicadores del Área Técnica</h3>
-            <div className="gerencia-status-list">
-              <div className="gerencia-item"><span>Trabajos nuevos (últimos 7 días)</span><b>{thisWeek}</b></div>
-              <div className="gerencia-item"><span>Trabajos nuevos (últimos 30 días)</span><b>{thisMonth}</b></div>
-              <div className="gerencia-item"><span>Total de trabajos registrados</span><b>{rows.length}</b></div>
+
+            <h3 style={{ marginBottom: 6 }}>Instalaciones: Ongoing</h3>
+            <div className="hint" style={{ marginBottom: 10 }}>Detalle de instalaciones activas a la fecha ({ongoingRows.length} ongoing).</div>
+            <div className="gerencia-status-list" style={{ marginBottom: 16 }}>
+              {ongoingRows.length === 0 ? (
+                <div className="gerencia-item"><span>No hay instalaciones en curso.</span></div>
+              ) : ongoingRows.map((item) => (
+                <div key={`ongoing-${item.id}`} className="gerencia-item" style={{ alignItems: 'flex-start' }}>
+                  <span><b>{item.progress}%</b> · {item.name}</span>
+                  <small>{item.pending.length ? `Pendiente: ${item.pending.join(', ')}` : 'Sin pendientes cargados.'}</small>
+                </div>
+              ))}
+            </div>
+
+            <h3 style={{ marginBottom: 6 }}>Instalaciones: Altas</h3>
+            <div className="hint" style={{ marginBottom: 10 }}>Evolución de altas en los últimos 8 meses.</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, minmax(40px, 1fr))', gap: 8, alignItems: 'end', minHeight: 180, marginBottom: 10 }}>
+              {monthData.map((item) => {
+                const h = Math.max(16, Math.round((item.total / maxMonthValue) * 150));
+                return (
+                  <div key={`month-${item.key}`} style={{ textAlign: 'center' }}>
+                    <div style={{ fontWeight: 700, marginBottom: 4 }}>{item.total}</div>
+                    <div style={{ height: h, borderRadius: 8, background: 'linear-gradient(180deg,#2ec4d6,#0c7280)' }} />
+                    <small>{item.label}</small>
+                  </div>
+                );
+              })}
             </div>
             <div style={{ marginTop: 14 }}>
               <button type="button" className="save-btn" onClick={onGoToDetalle}>Ver detalle de trabajos</button>
@@ -7821,12 +7913,15 @@
 
       function App() {
         const [menuOpen, setMenuOpen] = useState(false);
-        const [openMenus, setOpenMenus] = useState({ operaciones: false, nuevo: false, baseDatos: false });
+        const [openMenus, setOpenMenus] = useState({ general: false, operaciones: false, gerencia: false, equipo: false, nuevo: false, baseDatos: false });
         const [user, setUser] = useState(null);
         const [authLoading, setAuthLoading] = useState(true);
         const [userRole, setUserRole] = useState('');
         const [userArea, setUserArea] = useState('');
-        const [userData, setUserData] = useState({ nombre: '', rol: '', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
+        const [userData, setUserData] = useState({ nombre: '', apellido: '', rol: '', area: '', telefono: '', horarioInicio: '', horarioFin: '', horarioTrabajo: '', mail: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
+        const [profileFormData, setProfileFormData] = useState({ nombre: '', apellido: '', area: '', rol: '', telefono: '', horarioInicio: '', horarioFin: '', mail: '' });
+        const [savingProfileData, setSavingProfileData] = useState(false);
+        const [isProfileEditing, setIsProfileEditing] = useState(false);
         const [roleLoading, setRoleLoading] = useState(true);
         const [notificacion, setNotificacion] = useState({ mensaje: '', tipo: '' });
 
@@ -8061,6 +8156,8 @@
         const [historyDateFilter, setHistoryDateFilter] = useState('');
         const [historyDetailTab, setHistoryDetailTab] = useState('informacion');
         const [historyDetailModalOpen, setHistoryDetailModalOpen] = useState(false);
+        const [coordinationRejectReasonDraft, setCoordinationRejectReasonDraft] = useState('');
+        const [savingCoordinationFlow, setSavingCoordinationFlow] = useState(false);
         const [workflowTaskChecks, setWorkflowTaskChecks] = useState({});
         const [opsSideTab, setOpsSideTab] = useState('activity');
         const [opsCommentDraft, setOpsCommentDraft] = useState('');
@@ -8908,8 +9005,14 @@
             await db.collection('config_usuarios').doc(user.email || user.uid).set({
               email: user.email || '',
               nombre: currentUserName || (user.email || '').split('@')[0] || 'Usuario',
+              apellido: userData.apellido || '',
               rol: userRole || 'admin',
               area: userArea || '',
+              telefono: userData.telefono || '',
+              horarioInicio: userData.horarioInicio || '',
+              horarioFin: userData.horarioFin || '',
+              horarioTrabajo: userData.horarioTrabajo || '',
+              mail: userData.mail || user.email || '',
               avatarId: nextAvatarId,
               avatarUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
             }, { merge: true });
@@ -8923,6 +9026,52 @@
             return false;
           } finally {
             setSavingProfileAvatar(false);
+          }
+        }
+
+        async function handleProfileDataSave(event) {
+          event.preventDefault();
+          if (!user) {
+            setNotificacion({ mensaje: 'Necesitás iniciar sesión para editar tu perfil.', tipo: 'error' });
+            return;
+          }
+          const payload = {
+            nombre: String(profileFormData.nombre || '').trim(),
+            apellido: String(profileFormData.apellido || '').trim(),
+            area: String(profileFormData.area || '').trim(),
+            rol: String(profileFormData.rol || '').trim(),
+            telefono: String(profileFormData.telefono || '').trim(),
+            horarioInicio: String(profileFormData.horarioInicio || '').trim(),
+            horarioFin: String(profileFormData.horarioFin || '').trim(),
+            mail: String(profileFormData.mail || user.email || '').trim(),
+            email: user.email || '',
+            actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+          };
+          payload.horarioTrabajo = [payload.horarioInicio, payload.horarioFin].filter(Boolean).join(' - ');
+          if (!payload.nombre) {
+            setNotificacion({ mensaje: 'Completá al menos el nombre para guardar el perfil.', tipo: 'error' });
+            return;
+          }
+          try {
+            setSavingProfileData(true);
+            await db.collection('config_usuarios').doc(user.email || user.uid).set(payload, { merge: true });
+            const nextUserData = {
+              ...userData,
+              ...payload,
+              rol: (payload.rol || userRole || 'admin').toLowerCase(),
+              area: (payload.area || userArea || '').toLowerCase(),
+            };
+            setUserData(nextUserData);
+            setUserRole(nextUserData.rol);
+            setUserArea(nextUserData.area);
+            setProfileFormData((prev) => ({ ...prev, ...payload }));
+            setIsProfileEditing(false);
+            setNotificacion({ mensaje: 'Perfil actualizado y guardado en Firebase.', tipo: 'ok' });
+          } catch (error) {
+            console.error('Error guardando perfil:', error);
+            setNotificacion({ mensaje: 'No se pudo guardar el perfil en Firebase.', tipo: 'error' });
+          } finally {
+            setSavingProfileData(false);
           }
         }
 
@@ -9063,7 +9212,8 @@
             if (!currentUser) {
               setUserRole('');
               setUserArea('');
-              setUserData({ nombre: '', rol: '', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
+              setUserData({ nombre: '', apellido: '', rol: '', area: '', telefono: '', horarioInicio: '', horarioFin: '', horarioTrabajo: '', mail: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
+              setProfileFormData({ nombre: '', apellido: '', area: '', rol: '', telefono: '', horarioInicio: '', horarioFin: '', mail: '' });
               setProfileAvatarId(DEFAULT_PROFILE_AVATAR_ID);
               setRoleLoading(false);
               return;
@@ -9083,16 +9233,27 @@
               const rol = (profile?.rol || 'admin').toLowerCase();
               const area = (profile?.area || '').toLowerCase();
               const nombre = String(profile?.nombre || currentUser.displayName || (currentUser.email || '').split('@')[0] || 'Usuario').trim();
+              const apellido = String(profile?.apellido || '').trim();
+              const telefono = String(profile?.telefono || profile?.telefonoMovil || '').trim();
+              const horarioTrabajoRaw = String(profile?.horarioTrabajo || profile?.horario || '').trim();
+              const horarioInicio = String(profile?.horarioInicio || (horarioTrabajoRaw.includes(' - ') ? horarioTrabajoRaw.split(' - ')[0] : '')).trim();
+              const horarioFin = String(profile?.horarioFin || (horarioTrabajoRaw.includes(' - ') ? horarioTrabajoRaw.split(' - ')[1] : '')).trim();
+              const horarioTrabajo = [horarioInicio, horarioFin].filter(Boolean).join(' - ');
+              const mail = String(profile?.mail || currentUser.email || '').trim();
               const avatarId = PROFILE_AVATAR_OPTIONS.some((avatar) => avatar.id === profile?.avatarId) ? profile.avatarId : DEFAULT_PROFILE_AVATAR_ID;
               setUserRole(rol);
               setUserArea(area);
-              setUserData({ nombre, rol, area, avatarId });
+              setUserData({ nombre, apellido, rol, area, telefono, horarioInicio, horarioFin, horarioTrabajo, mail, avatarId });
+              setProfileFormData({ nombre, apellido, area: profile?.area || '', rol: profile?.rol || rol, telefono, horarioInicio, horarioFin, mail });
               setProfileAvatarId(avatarId);
             } catch (err) {
               console.error('Error leyendo config_usuarios:', err);
               setUserRole('admin');
               setUserArea('');
-              setUserData({ nombre: (currentUser?.email || 'admin').split('@')[0], rol: 'admin', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
+              const fallbackName = (currentUser?.email || 'admin').split('@')[0];
+              const fallbackMail = currentUser?.email || '';
+              setUserData({ nombre: fallbackName, apellido: '', rol: 'admin', area: '', telefono: '', horarioInicio: '', horarioFin: '', horarioTrabajo: '', mail: fallbackMail, avatarId: DEFAULT_PROFILE_AVATAR_ID });
+              setProfileFormData({ nombre: fallbackName, apellido: '', area: '', rol: 'admin', telefono: '', horarioInicio: '', horarioFin: '', mail: fallbackMail });
               setProfileAvatarId(DEFAULT_PROFILE_AVATAR_ID);
             } finally {
               setRoleLoading(false);
@@ -9404,7 +9565,26 @@
         const effectiveSelectedForm = selectedForm;
 
         const [formOpenAudit, setFormOpenAudit] = useState(null);
-        const currentUserName = useMemo(() => (userData.nombre || (user?.email || '').split('@')[0] || 'Usuario').trim(), [userData, user]);
+        const currentUserName = useMemo(() => {
+          const nombreBase = String(userData.nombre || (user?.email || '').split('@')[0] || 'Usuario').trim();
+          const apellidoBase = String(userData.apellido || '').trim();
+          return `${nombreBase} ${apellidoBase}`.trim();
+        }, [userData, user]);
+        const workScheduleOptions = useMemo(() => {
+          const options = [];
+          for (let hour = 0; hour < 24; hour += 1) {
+            const hh = String(hour).padStart(2, '0');
+            options.push(`${hh}:00`);
+          }
+          return options;
+        }, []);
+        const roleOptionsFromFirebase = useMemo(() => {
+          const values = staffMembers
+            .map((member) => String(member?.cargo || '').trim())
+            .filter(Boolean);
+          const merged = Array.from(new Set([...(values || []), String(profileFormData.rol || '').trim(), String(userData.rol || '').trim(), 'admin'].filter(Boolean)));
+          return merged.sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+        }, [staffMembers, profileFormData.rol, userData.rol]);
         const selectedProfileAvatar = useMemo(() => (
           PROFILE_AVATAR_OPTIONS.find((avatar) => avatar.id === profileAvatarId) || PROFILE_AVATAR_OPTIONS[0]
         ), [profileAvatarId]);
@@ -9712,7 +9892,87 @@
           if (!service) return;
           openHistoryRecord(service);
           setHistoryDetailTab(tab);
+          setCoordinationRejectReasonDraft(String(service?.coordinacionInstalaciones?.justificacionRechazo || ''));
           setHistoryDetailModalOpen(true);
+        }
+
+        async function updateCoordinationFlow(serviceId, patch = {}) {
+          if (!serviceId) return;
+          try {
+            setSavingCoordinationFlow(true);
+            await db.collection('operaciones').doc(serviceId).set({
+              coordinacionInstalaciones: {
+                ...patch,
+                actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+                actualizadoPor: currentUserName || 'Usuario',
+              },
+            }, { merge: true });
+          } catch (error) {
+            console.error('Error actualizando coordinación:', error);
+            setNotificacion({ mensaje: 'No se pudo actualizar el flujo de coordinación.', tipo: 'error' });
+          } finally {
+            setSavingCoordinationFlow(false);
+          }
+        }
+
+        async function handleCoordinationDecision(service, nextStatus) {
+          if (!service?.id) return;
+          if (nextStatus === 'rechazada' && !String(coordinationRejectReasonDraft || '').trim()) {
+            setNotificacion({ mensaje: 'Debes ingresar la justificación del rechazo.', tipo: 'error' });
+            return;
+          }
+          const tasks = buildInstallationTasksMap(service?.coordinacionInstalaciones?.tareas || {});
+          await updateCoordinationFlow(service.id, {
+            sectorActual: 'Coordinación de instalaciones',
+            estadoSolicitud: nextStatus,
+            justificacionRechazo: nextStatus === 'rechazada' ? String(coordinationRejectReasonDraft || '').trim() : '',
+            tareas: tasks,
+          });
+          setNotificacion({ mensaje: nextStatus === 'aceptada' ? 'Solicitud aceptada y enviada a Coordinación.' : 'Solicitud rechazada con justificación.', tipo: 'ok' });
+        }
+
+        async function handleToggleInstallationTask(service, taskKey, checked) {
+          if (!service?.id || !taskKey) return;
+          const tasks = buildInstallationTasksMap(service?.coordinacionInstalaciones?.tareas || {});
+          tasks[taskKey] = {
+            ...tasks[taskKey],
+            completada: !!checked,
+            completadaEn: checked ? new Date().toISOString() : null,
+          };
+          await updateCoordinationFlow(service.id, { tareas: tasks });
+        }
+
+        async function handleConfigureServiceAlta(service) {
+          if (!service?.id) return;
+          const tasks = buildInstallationTasksMap(service?.coordinacionInstalaciones?.tareas || {});
+          const allDone = Object.values(tasks).every((task) => task.completada);
+          const status = String(service?.coordinacionInstalaciones?.estadoSolicitud || 'pendiente');
+          if (!allDone || status !== 'aceptada') {
+            setNotificacion({ mensaje: 'Para configurar el alta debes aceptar la solicitud y completar todas las tareas.', tipo: 'error' });
+            return;
+          }
+          try {
+            setSavingCoordinationFlow(true);
+            await db.collection('operaciones').doc(service.id).set({
+              status: 'Activo',
+              estado: 'Activo',
+              fichaClienteCompleta: true,
+              baseDatosActiva: true,
+              actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+              coordinacionInstalaciones: {
+                ...(service.coordinacionInstalaciones || {}),
+                altaConfigurada: true,
+                sectorActual: 'Base de datos',
+                actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+              },
+            }, { merge: true });
+            setNotificacion({ mensaje: 'Alta configurada: el servicio quedó activo y enviado a base de datos.', tipo: 'ok' });
+          } catch (error) {
+            console.error('Error configurando alta de servicio:', error);
+            setNotificacion({ mensaje: 'No se pudo configurar el alta del servicio.', tipo: 'error' });
+          } finally {
+            setSavingCoordinationFlow(false);
+          }
         }
 
         function applyUserDefaultsToForms() {
@@ -9974,7 +10234,7 @@
 
         function closeSidebar() {
           setMenuOpen(false);
-          setOpenMenus({ nuevo: false, historial: false });
+          setOpenMenus({ general: false, operaciones: false, gerencia: false, equipo: false, nuevo: false, baseDatos: false });
         }
 
         function toggleSidebar() {
@@ -10074,6 +10334,7 @@
           const actionNeedsExistingService = ['Baja', 'Novación', 'Obra', 'Movimiento de obra', 'Charla informativa', 'Adicionales', 'Solicitud de presupuesto'].includes(tipoAccion);
 
           const doc = { tipoAccion, clienteId: normalizedClientId, status: normalizedStatusToSave, estado: normalizedStatusToSave };
+          const existingCoordination = selectedService?.coordinacionInstalaciones || {};
 
           if (grupo === 'servicio') {
             if (servicioForm.tipoAltaServicio === 'Obra') {
@@ -10089,7 +10350,19 @@
             } else if (!servicioForm.nombreServicio || !servicioForm.direccionServicio || !servicioForm.tipoServicioBrindar) {
               return alert('Completá al menos: Nombre del servicio, Dirección y Tipo de servicio.');
             }
-            Object.assign(doc, { ...servicioForm, formulario: 'nuevo-servicio-optimizado', creadoPor: servicioForm.creadoPor || currentUserName, auditoriaApertura: formOpenAudit });
+            Object.assign(doc, {
+              ...servicioForm,
+              formulario: 'nuevo-servicio-optimizado',
+              creadoPor: servicioForm.creadoPor || currentUserName,
+              auditoriaApertura: formOpenAudit,
+              coordinacionInstalaciones: {
+                sectorActual: existingCoordination.sectorActual || 'Coordinación de instalaciones',
+                estadoSolicitud: existingCoordination.estadoSolicitud || 'pendiente',
+                justificacionRechazo: existingCoordination.justificacionRechazo || '',
+                tareas: buildInstallationTasksMap(existingCoordination.tareas || {}),
+                altaConfigurada: !!existingCoordination.altaConfigurada,
+              },
+            });
           }
           if (grupo === 'obra') {
             if (!obraForm.razonSocial || !obraForm.rut || !obraForm.mailFacturacion || !obraForm.nombreServicio || !obraForm.fechaAlta) {
@@ -10460,6 +10733,7 @@
         }
 
         function openProfileView() {
+          setIsProfileEditing(false);
           setSelectedForm('perfil');
           setMobileTab('perfil');
           closeSidebar();
@@ -11092,11 +11366,10 @@
               </div>
               <div className="menu">
                 <button className="menu-button" onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
-                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">📌</span><span>Coordinación de servicios</span></button>
                 {!isMobile && (
                   <>
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: !p.operaciones, nuevo: false, baseDatos: false }))}><span className="menu-icon">🗂️</span><span>Operaciones</span><span className="menu-arrow">{openMenus.operaciones ? '▾' : '▸'}</span></button>
-                    <div className={`submenu ${openMenus.operaciones ? 'open' : ''}`}>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, general: !p.general, operaciones: false, gerencia: false, equipo: false, nuevo: false, baseDatos: false }))}><span className="menu-icon">📁</span><span>General</span><span className="menu-arrow">{openMenus.general ? '▾' : '▸'}</span></button>
+                    <div className={`submenu ${openMenus.general ? 'open' : ''}`}>
                       <button className="submenu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}><span>Nuevo</span><span className="menu-arrow">{openMenus.nuevo ? '▾' : '▸'}</span></button>
                       <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
                         <button className="submenu-button" onClick={() => { selectAction('Nuevo Servicio'); closeSidebar(); }}>Servicio</button>
@@ -11107,22 +11380,38 @@
                         <button className="submenu-button" onClick={() => { selectAction('Baja'); closeSidebar(); }}>Baja de servicio</button>
                         <button className="submenu-button" onClick={() => { selectAction('Charla informativa'); closeSidebar(); }}>Charla informativa</button>
                       </div>
+                      <button className="submenu-button" onClick={() => setOpenMenus((p) => ({ ...p, baseDatos: !p.baseDatos }))}><span>Base de datos</span><span className="menu-arrow">{openMenus.baseDatos ? '▾' : '▸'}</span></button>
+                      <div className={`submenu ${openMenus.baseDatos ? 'open' : ''}`}>
+                        <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
+                        <button className="submenu-button" onClick={() => { setSelectedForm('historial-charlas'); closeSidebar(); }}>Historial de Charlas</button>
+                      </div>
+                    </div>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, general: false, operaciones: !p.operaciones, gerencia: false, equipo: false, nuevo: false, baseDatos: false }))}><span className="menu-icon">🗂️</span><span>Operaciones</span><span className="menu-arrow">{openMenus.operaciones ? '▾' : '▸'}</span></button>
+                    <div className={`submenu ${openMenus.operaciones ? 'open' : ''}`}>
+                      <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>CX</button>
+                      <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Logística</button>
                       <button className="submenu-button" onClick={() => { setSelectedForm('home'); closeSidebar(); }}>Instalaciones</button>
+                      <button className="submenu-button" onClick={() => { setSelectedForm('dashboard-tecnica'); closeSidebar(); }}>Indicadores</button>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Gestión de servicios</button>
+                      <button className="submenu-button" onClick={() => { openTicketsView(); closeSidebar(); }}>Soporte técnico</button>
+                      <button className="submenu-button" onClick={() => { openTicketsView(); closeSidebar(); }}>Tickets</button>
+                      <button className="submenu-button" onClick={() => { setSelectedForm('dashboard-tecnica'); closeSidebar(); }}>Indicadores</button>
                     </div>
                     <div className="sidebar-divider" />
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: false, nuevo: false, baseDatos: !p.baseDatos }))}><span className="menu-icon">📚</span><span>Base de datos</span><span className="menu-arrow">{openMenus.baseDatos ? '▾' : '▸'}</span></button>
-                    <div className={`submenu ${openMenus.baseDatos ? 'open' : ''}`}>
-                      <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
-                      <button className="submenu-button" onClick={() => { setSelectedForm('historial-charlas'); closeSidebar(); }}>Historial de Charlas</button>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, general: false, operaciones: false, gerencia: !p.gerencia, equipo: false, nuevo: false, baseDatos: false }))}><span className="menu-icon">📊</span><span>Gerencia</span><span className="menu-arrow">{openMenus.gerencia ? '▾' : '▸'}</span></button>
+                    <div className={`submenu ${openMenus.gerencia ? 'open' : ''}`}>
+                      <button className="submenu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}>Dashboard</button>
                     </div>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, general: false, operaciones: false, gerencia: false, equipo: !p.equipo, nuevo: false, baseDatos: false }))}><span className="menu-icon">👥</span><span>Equipo</span><span className="menu-arrow">{openMenus.equipo ? '▾' : '▸'}</span></button>
+                    <div className={`submenu ${openMenus.equipo ? 'open' : ''}`}>
+                      <button className="submenu-button" onClick={() => { openFuncionariosView(); closeSidebar(); }}>Funcionarios</button>
+                      <button className="submenu-button" onClick={() => { openFuncionariosView(); closeSidebar(); }}>Organigrama</button>
+                    </div>
+                    <button className="menu-button" onClick={() => { openTicketsView(); closeSidebar(); }}><span className="menu-icon">🎫</span><span>Tickets</span></button>
                     {ENABLE_CLIENT_TRACKING_VIEW && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}><span className="menu-icon">👥</span><span>Vista Clientes</span></button>}
-                    <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}><span className="menu-icon">📊</span><span>Dashboard</span></button>
                   </>
                 )}
                 <div className="sidebar-divider" />
-                <button className="menu-button" onClick={openFuncionariosView}><span className="menu-icon">🧑‍💼</span><span>Funcionarios</span></button>
-                <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
                 <div className="sidebar-signature" aria-label="signature" tabIndex={0}><strong>v1.2 | Powered by Alfonso Carballo</strong><div className="sidebar-signature-tooltip">Actualización 1.2: se agregó la gestión de Funcionarios con listado por áreas, búsqueda rápida y chats internos persistidos en Firebase para que todos vean el historial compartido.</div></div>
               </div>
@@ -11733,6 +12022,116 @@
                           <div className="profile-identity-sub">{currentUserName} · {topbarSubtitle}</div>
                         </div>
                       </div>
+                    </article>
+                    <article className="profile-option">
+                      <h3>Datos personales</h3>
+                      <div className="compact-grid">
+                        <div className="kv"><b>Nombre:</b> {profileFormData.nombre || '-'}</div>
+                        <div className="kv"><b>Apellido:</b> {profileFormData.apellido || '-'}</div>
+                        <div className="kv"><b>Área:</b> {profileFormData.area || '-'}</div>
+                        <div className="kv"><b>Rol:</b> {profileFormData.rol || '-'}</div>
+                        <div className="kv"><b>Tel:</b> {profileFormData.telefono || '-'}</div>
+                        <div className="kv"><b>Horario inicio:</b> {profileFormData.horarioInicio || '-'}</div>
+                        <div className="kv"><b>Horario fin:</b> {profileFormData.horarioFin || '-'}</div>
+                        <div className="kv"><b>Mail:</b> {profileFormData.mail || '-'}</div>
+                      </div>
+                      {!isProfileEditing ? (
+                        <div style={{ marginTop: 12 }}>
+                          <button className="save-btn profile-save-btn" type="button" onClick={() => setIsProfileEditing(true)}>Editar perfil</button>
+                        </div>
+                      ) : (
+                        <form className="profile-form" onSubmit={handleProfileDataSave} style={{ marginTop: 12 }}>
+                          <div className="compact-grid">
+                            <div className="field">
+                              <label>Nombre</label>
+                              <input
+                                type="text"
+                                placeholder="Nombre"
+                                value={profileFormData.nombre}
+                                onChange={(e) => setProfileFormData((prev) => ({ ...prev, nombre: e.target.value }))}
+                                required
+                              />
+                            </div>
+                            <div className="field">
+                              <label>Apellido</label>
+                              <input
+                                type="text"
+                                placeholder="Apellido"
+                                value={profileFormData.apellido}
+                                onChange={(e) => setProfileFormData((prev) => ({ ...prev, apellido: e.target.value }))}
+                              />
+                            </div>
+                            <div className="field">
+                              <label>Área</label>
+                              <input
+                                type="text"
+                                placeholder="Área"
+                                value={profileFormData.area}
+                                onChange={(e) => setProfileFormData((prev) => ({ ...prev, area: e.target.value }))}
+                              />
+                            </div>
+                            <div className="field">
+                              <label>Rol</label>
+                              <select
+                                value={profileFormData.rol}
+                                onChange={(e) => setProfileFormData((prev) => ({ ...prev, rol: e.target.value }))}
+                              >
+                                {roleOptionsFromFirebase.map((role) => (
+                                  <option key={`role-${role}`} value={role}>{role}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="field">
+                              <label>Teléfono</label>
+                              <input
+                                type="text"
+                                placeholder="Teléfono"
+                                value={profileFormData.telefono}
+                                onChange={(e) => setProfileFormData((prev) => ({ ...prev, telefono: e.target.value }))}
+                              />
+                            </div>
+                            <div className="field">
+                              <label>Horario inicio</label>
+                              <select
+                                value={profileFormData.horarioInicio}
+                                onChange={(e) => setProfileFormData((prev) => ({ ...prev, horarioInicio: e.target.value }))}
+                              >
+                                <option value="">Seleccionar hora de inicio</option>
+                                {workScheduleOptions.map((schedule) => (
+                                  <option key={`schedule-${schedule}`} value={schedule}>{schedule}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="field">
+                              <label>Horario fin</label>
+                              <select
+                                value={profileFormData.horarioFin}
+                                onChange={(e) => setProfileFormData((prev) => ({ ...prev, horarioFin: e.target.value }))}
+                              >
+                                <option value="">Seleccionar hora de fin</option>
+                                {workScheduleOptions.map((schedule) => (
+                                  <option key={`schedule-end-${schedule}`} value={schedule}>{schedule}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="field">
+                              <label>Mail</label>
+                              <input
+                                type="email"
+                                placeholder="mail@empresa.com"
+                                value={profileFormData.mail}
+                                onChange={(e) => setProfileFormData((prev) => ({ ...prev, mail: e.target.value }))}
+                              />
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                            <button className="save-btn profile-save-btn" type="submit" disabled={savingProfileData}>
+                              {savingProfileData ? 'Guardando...' : 'Guardar perfil'}
+                            </button>
+                            <button className="edit-btn profile-back-btn" type="button" onClick={() => setIsProfileEditing(false)} disabled={savingProfileData}>Cancelar</button>
+                          </div>
+                        </form>
+                      )}
                     </article>
                     <article className="profile-option">
                       <h3>Solicitar cambio de usuario y contraseña</h3>
@@ -12880,6 +13279,12 @@
                       const serviceTickets = ticketsHistorial
                         .filter((ticket) => String(ticket.clienteId || '').trim() === detailServiceId)
                         .slice(0, 8);
+                      const coordinationData = detailService?.coordinacionInstalaciones || {};
+                      const coordinationTasks = buildInstallationTasksMap(coordinationData?.tareas || {});
+                      const completedTasks = Object.values(coordinationTasks).filter((task) => task.completada).length;
+                      const totalTasks = Object.keys(coordinationTasks).length || 1;
+                      const canConfigureAlta = coordinationData?.estadoSolicitud === 'aceptada' && completedTasks === totalTasks;
+                      const ganttPercent = Math.round((completedTasks / totalTasks) * 100);
                       return (
                         <>
                           <div className="service-detail-modal-head">
@@ -12897,15 +13302,71 @@
                           </div>
 
                           {historyDetailTab === 'informacion' && (
-                            <div className="service-coord-detail-grid">
-                              <div className="service-detail-kpi"><small>🪪 ID Servicio</small><strong>{detailService.clienteId || '-'}</strong></div>
-                              <div className="service-detail-kpi"><small>🧩 Tipo</small><strong>{detailService.tipoServicioBrindar || '-'}</strong></div>
-                              <div className="service-detail-kpi"><small>📅 Fecha de alta</small><strong>{detailService.fechaAltaServicio || detailService.fechaAlta || detailService.fechaEspecificaInicio || '-'}</strong></div>
-                              <div className="service-detail-kpi"><small>👤 Encargado</small><strong>{detailService.representanteComercial || '-'}</strong></div>
-                              <div className="service-detail-kpi"><small>📦 Equipamiento</small><strong>{detailService.equipamientoInstalado || detailService.detalleEquipamiento || detailService.equipamientoRetirar || '-'}</strong></div>
-                              <div className="service-detail-kpi"><small>💵 Importe mensual</small><strong>{detailService.importeMensualServicioSinIva || detailService.importeMensualServicio || '-'}</strong></div>
-                              <div className="service-detail-kpi" style={{ gridColumn: '1 / -1' }}><small>📍 Dirección</small><strong>{detailService.direccionServicio || detailService.direccion || '-'}</strong></div>
-                            </div>
+                            <>
+                              <div className="service-coord-detail-grid">
+                                <div className="service-detail-kpi"><small>🪪 ID Servicio</small><strong>{detailService.clienteId || '-'}</strong></div>
+                                <div className="service-detail-kpi"><small>🧩 Tipo</small><strong>{detailService.tipoServicioBrindar || '-'}</strong></div>
+                                <div className="service-detail-kpi"><small>📅 Fecha de alta</small><strong>{detailService.fechaAltaServicio || detailService.fechaAlta || detailService.fechaEspecificaInicio || '-'}</strong></div>
+                                <div className="service-detail-kpi"><small>👤 Encargado</small><strong>{detailService.representanteComercial || '-'}</strong></div>
+                                <div className="service-detail-kpi"><small>📦 Equipamiento</small><strong>{detailService.equipamientoInstalado || detailService.detalleEquipamiento || detailService.equipamientoRetirar || '-'}</strong></div>
+                                <div className="service-detail-kpi"><small>💵 Importe mensual</small><strong>{detailService.importeMensualServicioSinIva || detailService.importeMensualServicio || '-'}</strong></div>
+                                <div className="service-detail-kpi" style={{ gridColumn: '1 / -1' }}><small>📍 Dirección</small><strong>{detailService.direccionServicio || detailService.direccion || '-'}</strong></div>
+                              </div>
+
+                              <div className="panel" style={{ marginTop: 12 }}>
+                                <h4 style={{ marginTop: 0 }}>Coordinación de instalaciones</h4>
+                                <div className="compact-grid">
+                                  <div className="kv"><b>Sector actual:</b> {coordinationData?.sectorActual || 'Coordinación de instalaciones'}</div>
+                                  <div className="kv"><b>Solicitud:</b> {coordinationData?.estadoSolicitud || 'pendiente'}</div>
+                                  <div className="kv"><b>Tareas completas:</b> {completedTasks}/{totalTasks}</div>
+                                </div>
+                                {coordinationData?.estadoSolicitud === 'rechazada' && (
+                                  <div className="kv" style={{ marginTop: 8 }}><b>Justificación:</b> {coordinationData?.justificacionRechazo || '-'}</div>
+                                )}
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
+                                  <button type="button" className="save-btn" onClick={() => handleCoordinationDecision(detailService, 'aceptada')} disabled={savingCoordinationFlow}>Aceptar solicitud</button>
+                                  <button type="button" className="edit-btn" onClick={() => handleCoordinationDecision(detailService, 'rechazada')} disabled={savingCoordinationFlow}>Rechazar solicitud</button>
+                                </div>
+                                <div className="field" style={{ marginTop: 8 }}>
+                                  <label>Justificación de rechazo (obligatoria al rechazar)</label>
+                                  <textarea value={coordinationRejectReasonDraft} onChange={(e) => setCoordinationRejectReasonDraft(e.target.value)} placeholder="Explicá el motivo del rechazo..." />
+                                </div>
+
+                                <h4 style={{ marginBottom: 6 }}>Línea de tiempo</h4>
+                                <div className="service-coord-detail-list" style={{ marginBottom: 10 }}>
+                                  <div className="service-coord-detail-list-item"><strong>Solicitud</strong> · {coordinationData?.estadoSolicitud || 'pendiente'}</div>
+                                  {Object.entries(coordinationTasks).map(([taskKey, task]) => (
+                                    <div key={`coord-timeline-${taskKey}`} className="service-coord-detail-list-item">
+                                      <strong>{task.label}</strong> · {task.completada ? `Completada ${task.completadaEn ? new Date(task.completadaEn).toLocaleString('es-UY') : ''}` : 'Pendiente'}
+                                    </div>
+                                  ))}
+                                </div>
+
+                                <h4 style={{ marginBottom: 6 }}>Diagrama de Gantt</h4>
+                                <div style={{ border: '1px solid rgba(255,255,255,.2)', borderRadius: 10, padding: 8, marginBottom: 10 }}>
+                                  <div style={{ height: 12, borderRadius: 999, background: 'rgba(255,255,255,.14)', overflow: 'hidden' }}>
+                                    <div style={{ width: `${ganttPercent}%`, height: '100%', background: 'linear-gradient(90deg,#34d399,#14b8a6)' }} />
+                                  </div>
+                                  <small>{ganttPercent}% completado</small>
+                                </div>
+
+                                <h4 style={{ marginBottom: 6 }}>Listado de tareas de instalación</h4>
+                                <div className="service-coord-detail-list">
+                                  {Object.entries(coordinationTasks).map(([taskKey, task]) => (
+                                    <label key={`coord-task-${taskKey}`} className="service-coord-detail-list-item" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                      <input type="checkbox" checked={!!task.completada} onChange={(e) => handleToggleInstallationTask(detailService, taskKey, e.target.checked)} disabled={savingCoordinationFlow || coordinationData?.estadoSolicitud !== 'aceptada'} />
+                                      <span>{task.label}</span>
+                                    </label>
+                                  ))}
+                                </div>
+
+                                <div style={{ marginTop: 12 }}>
+                                  <button type="button" className="save-btn" onClick={() => handleConfigureServiceAlta(detailService)} disabled={!canConfigureAlta || savingCoordinationFlow}>
+                                    Configurar ALTA de Servicio
+                                  </button>
+                                </div>
+                              </div>
+                            </>
                           )}
 
                           {historyDetailTab === 'historial' && (
