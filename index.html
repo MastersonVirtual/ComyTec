@@ -7821,7 +7821,7 @@
 
       function App() {
         const [menuOpen, setMenuOpen] = useState(false);
-        const [openMenus, setOpenMenus] = useState({ operaciones: false, nuevo: false, baseDatos: false });
+        const [openMenus, setOpenMenus] = useState({ general: false, operaciones: false, gerencia: false, equipo: false, nuevo: false, baseDatos: false });
         const [user, setUser] = useState(null);
         const [authLoading, setAuthLoading] = useState(true);
         const [userRole, setUserRole] = useState('');
@@ -9974,7 +9974,7 @@
 
         function closeSidebar() {
           setMenuOpen(false);
-          setOpenMenus({ nuevo: false, historial: false });
+          setOpenMenus({ general: false, operaciones: false, gerencia: false, equipo: false, nuevo: false, baseDatos: false });
         }
 
         function toggleSidebar() {
@@ -11092,11 +11092,10 @@
               </div>
               <div className="menu">
                 <button className="menu-button" onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
-                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">📌</span><span>Coordinación de servicios</span></button>
                 {!isMobile && (
                   <>
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: !p.operaciones, nuevo: false, baseDatos: false }))}><span className="menu-icon">🗂️</span><span>Operaciones</span><span className="menu-arrow">{openMenus.operaciones ? '▾' : '▸'}</span></button>
-                    <div className={`submenu ${openMenus.operaciones ? 'open' : ''}`}>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, general: !p.general, operaciones: false, gerencia: false, equipo: false, nuevo: false, baseDatos: false }))}><span className="menu-icon">📁</span><span>General</span><span className="menu-arrow">{openMenus.general ? '▾' : '▸'}</span></button>
+                    <div className={`submenu ${openMenus.general ? 'open' : ''}`}>
                       <button className="submenu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}><span>Nuevo</span><span className="menu-arrow">{openMenus.nuevo ? '▾' : '▸'}</span></button>
                       <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
                         <button className="submenu-button" onClick={() => { selectAction('Nuevo Servicio'); closeSidebar(); }}>Servicio</button>
@@ -11107,22 +11106,36 @@
                         <button className="submenu-button" onClick={() => { selectAction('Baja'); closeSidebar(); }}>Baja de servicio</button>
                         <button className="submenu-button" onClick={() => { selectAction('Charla informativa'); closeSidebar(); }}>Charla informativa</button>
                       </div>
+                      <button className="submenu-button" onClick={() => setOpenMenus((p) => ({ ...p, baseDatos: !p.baseDatos }))}><span>Base de datos</span><span className="menu-arrow">{openMenus.baseDatos ? '▾' : '▸'}</span></button>
+                      <div className={`submenu ${openMenus.baseDatos ? 'open' : ''}`}>
+                        <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
+                        <button className="submenu-button" onClick={() => { setSelectedForm('historial-charlas'); closeSidebar(); }}>Historial de Charlas</button>
+                      </div>
+                    </div>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, general: false, operaciones: !p.operaciones, gerencia: false, equipo: false, nuevo: false, baseDatos: false }))}><span className="menu-icon">🗂️</span><span>Operaciones</span><span className="menu-arrow">{openMenus.operaciones ? '▾' : '▸'}</span></button>
+                    <div className={`submenu ${openMenus.operaciones ? 'open' : ''}`}>
+                      <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>CX</button>
+                      <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Logística</button>
                       <button className="submenu-button" onClick={() => { setSelectedForm('home'); closeSidebar(); }}>Instalaciones</button>
+                      <button className="submenu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}>Indicadores</button>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Gestión de servicios</button>
+                      <button className="submenu-button" onClick={() => { openTicketsView(); closeSidebar(); }}>Soporte técnico</button>
+                      <button className="submenu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}>Indicadores</button>
                     </div>
                     <div className="sidebar-divider" />
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: false, nuevo: false, baseDatos: !p.baseDatos }))}><span className="menu-icon">📚</span><span>Base de datos</span><span className="menu-arrow">{openMenus.baseDatos ? '▾' : '▸'}</span></button>
-                    <div className={`submenu ${openMenus.baseDatos ? 'open' : ''}`}>
-                      <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
-                      <button className="submenu-button" onClick={() => { setSelectedForm('historial-charlas'); closeSidebar(); }}>Historial de Charlas</button>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, general: false, operaciones: false, gerencia: !p.gerencia, equipo: false, nuevo: false, baseDatos: false }))}><span className="menu-icon">📊</span><span>Gerencia</span><span className="menu-arrow">{openMenus.gerencia ? '▾' : '▸'}</span></button>
+                    <div className={`submenu ${openMenus.gerencia ? 'open' : ''}`}>
+                      <button className="submenu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}>Dashboard</button>
+                    </div>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, general: false, operaciones: false, gerencia: false, equipo: !p.equipo, nuevo: false, baseDatos: false }))}><span className="menu-icon">👥</span><span>Equipo</span><span className="menu-arrow">{openMenus.equipo ? '▾' : '▸'}</span></button>
+                    <div className={`submenu ${openMenus.equipo ? 'open' : ''}`}>
+                      <button className="submenu-button" onClick={() => { openFuncionariosView(); closeSidebar(); }}>Funcionarios</button>
+                      <button className="submenu-button" onClick={() => { openFuncionariosView(); closeSidebar(); }}>Organigrama</button>
                     </div>
                     {ENABLE_CLIENT_TRACKING_VIEW && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}><span className="menu-icon">👥</span><span>Vista Clientes</span></button>}
-                    <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}><span className="menu-icon">📊</span><span>Dashboard</span></button>
                   </>
                 )}
                 <div className="sidebar-divider" />
-                <button className="menu-button" onClick={openFuncionariosView}><span className="menu-icon">🧑‍💼</span><span>Funcionarios</span></button>
-                <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
                 <div className="sidebar-signature" aria-label="signature" tabIndex={0}><strong>v1.2 | Powered by Alfonso Carballo</strong><div className="sidebar-signature-tooltip">Actualización 1.2: se agregó la gestión de Funcionarios con listado por áreas, búsqueda rápida y chats internos persistidos en Firebase para que todos vean el historial compartido.</div></div>
               </div>
