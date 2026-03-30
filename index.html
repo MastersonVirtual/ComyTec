@@ -7829,6 +7829,7 @@
         const [userData, setUserData] = useState({ nombre: '', apellido: '', rol: '', area: '', telefono: '', horarioTrabajo: '', mail: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
         const [profileFormData, setProfileFormData] = useState({ nombre: '', apellido: '', area: '', rol: '', telefono: '', horarioTrabajo: '', mail: '' });
         const [savingProfileData, setSavingProfileData] = useState(false);
+        const [isProfileEditing, setIsProfileEditing] = useState(false);
         const [roleLoading, setRoleLoading] = useState(true);
         const [notificacion, setNotificacion] = useState({ mensaje: '', tipo: '' });
 
@@ -8966,6 +8967,7 @@
             setUserRole(nextUserData.rol);
             setUserArea(nextUserData.area);
             setProfileFormData((prev) => ({ ...prev, ...payload }));
+            setIsProfileEditing(false);
             setNotificacion({ mensaje: 'Perfil actualizado y guardado en Firebase.', tipo: 'ok' });
           } catch (error) {
             console.error('Error guardando perfil:', error);
@@ -9467,6 +9469,21 @@
           const apellidoBase = String(userData.apellido || '').trim();
           return `${nombreBase} ${apellidoBase}`.trim();
         }, [userData, user]);
+        const workScheduleOptions = useMemo(() => {
+          const options = [];
+          for (let hour = 0; hour < 24; hour += 1) {
+            const hh = String(hour).padStart(2, '0');
+            options.push(`${hh}:00`);
+          }
+          return options;
+        }, []);
+        const roleOptionsFromFirebase = useMemo(() => {
+          const values = staffMembers
+            .map((member) => String(member?.cargo || '').trim())
+            .filter(Boolean);
+          const merged = Array.from(new Set([...(values || []), String(profileFormData.rol || '').trim(), String(userData.rol || '').trim(), 'admin'].filter(Boolean)));
+          return merged.sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+        }, [staffMembers, profileFormData.rol, userData.rol]);
         const selectedProfileAvatar = useMemo(() => (
           PROFILE_AVATAR_OPTIONS.find((avatar) => avatar.id === profileAvatarId) || PROFILE_AVATAR_OPTIONS[0]
         ), [profileAvatarId]);
@@ -10522,6 +10539,7 @@
         }
 
         function openProfileView() {
+          setIsProfileEditing(false);
           setSelectedForm('perfil');
           setMobileTab('perfil');
           closeSidebar();
@@ -11811,77 +11829,100 @@
                     </article>
                     <article className="profile-option">
                       <h3>Datos personales</h3>
-                      <form className="profile-form" onSubmit={handleProfileDataSave}>
-                        <div className="compact-grid">
-                          <div className="field">
-                            <label>Nombre</label>
-                            <input
-                              type="text"
-                              placeholder="Nombre"
-                              value={profileFormData.nombre}
-                              onChange={(e) => setProfileFormData((prev) => ({ ...prev, nombre: e.target.value }))}
-                              required
-                            />
-                          </div>
-                          <div className="field">
-                            <label>Apellido</label>
-                            <input
-                              type="text"
-                              placeholder="Apellido"
-                              value={profileFormData.apellido}
-                              onChange={(e) => setProfileFormData((prev) => ({ ...prev, apellido: e.target.value }))}
-                            />
-                          </div>
-                          <div className="field">
-                            <label>Área</label>
-                            <input
-                              type="text"
-                              placeholder="Área"
-                              value={profileFormData.area}
-                              onChange={(e) => setProfileFormData((prev) => ({ ...prev, area: e.target.value }))}
-                            />
-                          </div>
-                          <div className="field">
-                            <label>Rol</label>
-                            <input
-                              type="text"
-                              placeholder="Rol"
-                              value={profileFormData.rol}
-                              onChange={(e) => setProfileFormData((prev) => ({ ...prev, rol: e.target.value }))}
-                            />
-                          </div>
-                          <div className="field">
-                            <label>Teléfono</label>
-                            <input
-                              type="text"
-                              placeholder="Teléfono"
-                              value={profileFormData.telefono}
-                              onChange={(e) => setProfileFormData((prev) => ({ ...prev, telefono: e.target.value }))}
-                            />
-                          </div>
-                          <div className="field">
-                            <label>Horario de trabajo</label>
-                            <input
-                              type="text"
-                              placeholder="Ej: 08:00 a 17:00"
-                              value={profileFormData.horarioTrabajo}
-                              onChange={(e) => setProfileFormData((prev) => ({ ...prev, horarioTrabajo: e.target.value }))}
-                            />
-                          </div>
-                          <div className="field">
-                            <label>Mail</label>
-                            <input
-                              type="email"
-                              placeholder="mail@empresa.com"
-                              value={profileFormData.mail}
-                              onChange={(e) => setProfileFormData((prev) => ({ ...prev, mail: e.target.value }))}
-                            />
-                          </div>
+                      <div className="compact-grid">
+                        <div className="kv"><b>Nombre:</b> {profileFormData.nombre || '-'}</div>
+                        <div className="kv"><b>Apellido:</b> {profileFormData.apellido || '-'}</div>
+                        <div className="kv"><b>Área:</b> {profileFormData.area || '-'}</div>
+                        <div className="kv"><b>Rol:</b> {profileFormData.rol || '-'}</div>
+                        <div className="kv"><b>Tel:</b> {profileFormData.telefono || '-'}</div>
+                        <div className="kv"><b>Horario:</b> {profileFormData.horarioTrabajo || '-'}</div>
+                        <div className="kv"><b>Mail:</b> {profileFormData.mail || '-'}</div>
+                      </div>
+                      {!isProfileEditing ? (
+                        <div style={{ marginTop: 12 }}>
+                          <button className="save-btn profile-save-btn" type="button" onClick={() => setIsProfileEditing(true)}>Editar perfil</button>
                         </div>
-                        <button className="save-btn profile-save-btn" type="submit" disabled={savingProfileData}>
-                          {savingProfileData ? 'Guardando...' : 'Guardar perfil'}
-                        </button>
-                      </form>
+                      ) : (
+                        <form className="profile-form" onSubmit={handleProfileDataSave} style={{ marginTop: 12 }}>
+                          <div className="compact-grid">
+                            <div className="field">
+                              <label>Nombre</label>
+                              <input
+                                type="text"
+                                placeholder="Nombre"
+                                value={profileFormData.nombre}
+                                onChange={(e) => setProfileFormData((prev) => ({ ...prev, nombre: e.target.value }))}
+                                required
+                              />
+                            </div>
+                            <div className="field">
+                              <label>Apellido</label>
+                              <input
+                                type="text"
+                                placeholder="Apellido"
+                                value={profileFormData.apellido}
+                                onChange={(e) => setProfileFormData((prev) => ({ ...prev, apellido: e.target.value }))}
+                              />
+                            </div>
+                            <div className="field">
+                              <label>Área</label>
+                              <input
+                                type="text"
+                                placeholder="Área"
+                                value={profileFormData.area}
+                                onChange={(e) => setProfileFormData((prev) => ({ ...prev, area: e.target.value }))}
+                              />
+                            </div>
+                            <div className="field">
+                              <label>Rol</label>
+                              <select
+                                value={profileFormData.rol}
+                                onChange={(e) => setProfileFormData((prev) => ({ ...prev, rol: e.target.value }))}
+                              >
+                                {roleOptionsFromFirebase.map((role) => (
+                                  <option key={`role-${role}`} value={role}>{role}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="field">
+                              <label>Teléfono</label>
+                              <input
+                                type="text"
+                                placeholder="Teléfono"
+                                value={profileFormData.telefono}
+                                onChange={(e) => setProfileFormData((prev) => ({ ...prev, telefono: e.target.value }))}
+                              />
+                            </div>
+                            <div className="field">
+                              <label>Horario de trabajo</label>
+                              <select
+                                value={profileFormData.horarioTrabajo}
+                                onChange={(e) => setProfileFormData((prev) => ({ ...prev, horarioTrabajo: e.target.value }))}
+                              >
+                                <option value="">Seleccionar horario</option>
+                                {workScheduleOptions.map((schedule) => (
+                                  <option key={`schedule-${schedule}`} value={schedule}>{schedule}</option>
+                                ))}
+                              </select>
+                            </div>
+                            <div className="field">
+                              <label>Mail</label>
+                              <input
+                                type="email"
+                                placeholder="mail@empresa.com"
+                                value={profileFormData.mail}
+                                onChange={(e) => setProfileFormData((prev) => ({ ...prev, mail: e.target.value }))}
+                              />
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                            <button className="save-btn profile-save-btn" type="submit" disabled={savingProfileData}>
+                              {savingProfileData ? 'Guardando...' : 'Guardar perfil'}
+                            </button>
+                            <button className="edit-btn profile-back-btn" type="button" onClick={() => setIsProfileEditing(false)} disabled={savingProfileData}>Cancelar</button>
+                          </div>
+                        </form>
+                      )}
                     </article>
                     <article className="profile-option">
                       <h3>Solicitar cambio de usuario y contraseña</h3>
