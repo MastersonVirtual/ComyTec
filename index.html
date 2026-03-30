@@ -5237,6 +5237,28 @@
         gap: 8px;
         padding-top: 4px;
       }
+      .ticket-resolution-editor {
+        margin-top: 10px;
+        border: 1px solid rgba(151,243,231,.35);
+        border-radius: 12px;
+        padding: 10px;
+        background: rgba(2, 36, 38, .5);
+      }
+      .ticket-resolution-editor textarea {
+        width: 100%;
+        min-height: 74px;
+        resize: vertical;
+      }
+      .ticket-resolution-hint {
+        margin: 6px 0 0;
+        font-size: 12px;
+        color: #bfeae4;
+      }
+      .ticket-resolution-summary {
+        margin-top: 8px;
+        border-top: 1px dashed rgba(230,255,253,.2);
+        padding-top: 8px;
+      }
       .ticket-empty-state {
         border: 1px dashed rgba(230,255,253,.26);
         border-radius: 12px;
@@ -7920,6 +7942,7 @@
         const [ticketFilterOrigen, setTicketFilterOrigen] = useState('todos');
         const [ticketFilterOpen, setTicketFilterOpen] = useState(false);
         const [ticketReassignModal, setTicketReassignModal] = useState({ open: false, ticket: null, assigneeKey: '' });
+        const [ticketResolutionDrafts, setTicketResolutionDrafts] = useState({});
         const seenRowIdsRef = useRef(new Set());
         const seenOperationalAlertsRef = useRef(new Set());
         const topServicesLeaderRef = useRef('');
@@ -10749,6 +10772,44 @@
           await handleTicketFilesInput(e.dataTransfer?.files || []);
         }
 
+        function setTicketResolutionDraft(ticketId, nextValue) {
+          if (!ticketId) return;
+          setTicketResolutionDrafts((prev) => {
+            const current = prev[ticketId] || { open: false, comentario: '', imagenes: [], dragOver: false };
+            const patch = typeof nextValue === 'function' ? nextValue(current) : nextValue;
+            return { ...prev, [ticketId]: { ...current, ...(patch || {}) } };
+          });
+        }
+
+        function toggleTicketResolutionEditor(ticketId) {
+          setTicketResolutionDraft(ticketId, (prev) => ({ open: !prev.open }));
+        }
+
+        async function handleTicketResolutionFiles(ticketId, fileList) {
+          const parsed = await readImageFiles(fileList);
+          if (parsed.length === 0) {
+            setNotificacion({ mensaje: 'Solo se permiten imágenes para la resolución', tipo: 'error' });
+            return;
+          }
+          setTicketResolutionDraft(ticketId, (prev) => ({ imagenes: [...(prev.imagenes || []), ...parsed].slice(0, 12) }));
+        }
+
+        async function handleTicketResolutionPaste(ticketId, event) {
+          const files = Array.from(event.clipboardData?.items || [])
+            .filter((item) => item.kind === 'file')
+            .map((item) => item.getAsFile())
+            .filter(Boolean);
+          if (files.length === 0) return;
+          event.preventDefault();
+          await handleTicketResolutionFiles(ticketId, files);
+        }
+
+        async function handleTicketResolutionDrop(ticketId, event) {
+          event.preventDefault();
+          setTicketResolutionDraft(ticketId, { dragOver: false });
+          await handleTicketResolutionFiles(ticketId, event.dataTransfer?.files || []);
+        }
+
         function generateTicketCode(prefix = 'TCK') {
           const now = new Date();
           const datePart = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
@@ -10824,15 +10885,25 @@
           return ticketCodigo;
         }
 
-        async function handleResolveTicket(ticket) {
+        async function handleResolveTicket(ticket, resolution = null) {
           if (!isTicketManager || !ticket?.id) return;
           try {
+            const resolutionComment = String(resolution?.comentario || '').trim();
+            const resolutionImages = Array.isArray(resolution?.imagenes) ? resolution.imagenes : [];
             await db.collection('tickets_app').doc(ticket.id).set({
               estado: 'resuelto',
               resueltoPor: currentUserName,
               resueltoPorEmail: user?.email || '',
+              resolucionComentario: resolutionComment,
+              resolucionImagenes: resolutionImages,
               resueltoEn: firebase.firestore.FieldValue.serverTimestamp(),
             }, { merge: true });
+            setTicketResolutionDrafts((prev) => {
+              if (!prev[ticket.id]) return prev;
+              const next = { ...prev };
+              delete next[ticket.id];
+              return next;
+            });
             setNotificacion({ mensaje: '✔ Ticket marcado como resuelto', tipo: 'ok' });
           } catch (error) {
             console.error('Error resolviendo ticket:', error);
@@ -11701,6 +11772,9 @@
                                       {ticket.origen === 'form-gestion' && <div className="kv"><b>Cliente ID:</b> {ticket.clienteId || '-'}</div>}
                                     </div>
                                     <div className="kv ticket-comment-block"><b>Comentario:</b> {ticket.comentario || '-'}</div>
+                                    {!!String(ticket.resolucionComentario || '').trim() && (
+                                      <div className="kv ticket-comment-block ticket-resolution-summary"><b>Resolución:</b> {ticket.resolucionComentario}</div>
+                                    )}
                                     {ticket.origen === 'form-gestion' && (
                                       <div className="ticket-card-main">
                                         <div className="kv"><b>Servicio:</b> {ticket.nombreServicio || '-'}</div>
@@ -11712,11 +11786,58 @@
                                         {ticket.imagenesAdjuntas.map((img, idx) => (<img key={`hist-img-${ticket.id}-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `adj-${idx + 1}`} onClick={() => openImageViewer(img.dataUrl)} />))}
                                       </div>
                                     )}
+                                    {Array.isArray(ticket.resolucionImagenes) && ticket.resolucionImagenes.length > 0 && (
+                                      <div className="ticket-image-grid">
+                                        {ticket.resolucionImagenes.map((img, idx) => (<img key={`hist-resolution-img-${ticket.id}-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `res-${idx + 1}`} onClick={() => openImageViewer(img.dataUrl)} />))}
+                                      </div>
+                                    )}
                                     <div className="ticket-card-actions">
                                       <button type="button" className="status-action-btn chat-action-btn" onClick={() => openTicketReassignModal(ticket)}>Reasignar</button>
-                                      {ticket.estado !== 'resuelto' && <button type="button" className="status-action-btn accept" onClick={() => handleResolveTicket(ticket)}>Marcar resuelto</button>}
+                                      {ticket.estado !== 'resuelto' && (
+                                        <>
+                                          <button type="button" className="status-action-btn chat-action-btn" onClick={() => toggleTicketResolutionEditor(ticket.id)}>
+                                            Resolver con comentario
+                                          </button>
+                                          <button type="button" className="status-action-btn accept" onClick={() => {
+                                            const draft = ticketResolutionDrafts[ticket.id] || { comentario: '', imagenes: [] };
+                                            handleResolveTicket(ticket, draft);
+                                          }}>
+                                            Marcar resuelto
+                                          </button>
+                                        </>
+                                      )}
                                       <button type="button" className="status-action-btn reject" onClick={() => handleDeleteTicket(ticket)}>Eliminar</button>
                                     </div>
+                                    {ticket.estado !== 'resuelto' && ticketResolutionDrafts[ticket.id]?.open && (
+                                      <div className="ticket-resolution-editor">
+                                        <textarea
+                                          value={ticketResolutionDrafts[ticket.id]?.comentario || ''}
+                                          onChange={(e) => setTicketResolutionDraft(ticket.id, { comentario: e.target.value })}
+                                          onPaste={(e) => { void handleTicketResolutionPaste(ticket.id, e); }}
+                                          placeholder="Comentario de resolución (opcional)"
+                                        />
+                                        <div
+                                          className={`ticket-upload-dropzone ${ticketResolutionDrafts[ticket.id]?.dragOver ? 'dragover' : ''}`}
+                                          onDragOver={(e) => { e.preventDefault(); setTicketResolutionDraft(ticket.id, { dragOver: true }); }}
+                                          onDragLeave={() => setTicketResolutionDraft(ticket.id, { dragOver: false })}
+                                          onDrop={(e) => { void handleTicketResolutionDrop(ticket.id, e); }}
+                                        >
+                                          <input
+                                            type="file"
+                                            accept="image/*"
+                                            multiple
+                                            onChange={(e) => { void handleTicketResolutionFiles(ticket.id, e.target.files || []); e.target.value = ''; }}
+                                          />
+                                          Arrastrá, pegá (Ctrl+V) o seleccioná imágenes para la resolución
+                                        </div>
+                                        <div className="ticket-resolution-hint">Podés resolver sin comentario ni imagen, o adjuntar evidencia opcional.</div>
+                                        {Array.isArray(ticketResolutionDrafts[ticket.id]?.imagenes) && ticketResolutionDrafts[ticket.id].imagenes.length > 0 && (
+                                          <div className="ticket-image-grid">
+                                            {ticketResolutionDrafts[ticket.id].imagenes.map((img, idx) => (<img key={`ticket-resolution-draft-${ticket.id}-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `res-draft-${idx + 1}`} onClick={() => openImageViewer(img.dataUrl)} />))}
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
                                   </div>
                                 )})}
                               </div>
