@@ -6115,6 +6115,37 @@
       const ACCIONES = ['Nuevo Servicio', 'Adicionales', 'Solicitud de presupuesto', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa'];
       const STATUS_OPTIONS = ['Pendiente', 'En proceso', 'Esperando información', 'Finalizado', 'Cancelado'];
       const SERVICE_TYPE_OPTIONS = ['Monitoreo', 'Portería virtual', 'Respuesta de alarma', 'Servicio Técnico', 'Control de acceso'];
+      const INSTALLATION_TASKS = [
+        'Mail de inicio de instalación',
+        'Día de marcación',
+        'Equipo de Svideo asignado',
+        'Instalación de pulso de portón',
+        'Instalación de pulso de portero',
+        'Agenda de alta',
+        'Finalización de instalación',
+      ];
+
+      function normalizeTaskKey(label) {
+        return String(label || '')
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '_')
+          .replace(/^_|_$/g, '');
+      }
+
+      function buildInstallationTasksMap(existing = {}) {
+        return INSTALLATION_TASKS.reduce((acc, label) => {
+          const key = normalizeTaskKey(label);
+          const prev = existing?.[key] || {};
+          acc[key] = {
+            label,
+            completada: !!prev.completada,
+            completadaEn: prev.completadaEn || null,
+          };
+          return acc;
+        }, {});
+      }
 
       function normalizeServiceType(value) {
         const raw = String(value || '').trim();
@@ -8064,6 +8095,8 @@
         const [historyDateFilter, setHistoryDateFilter] = useState('');
         const [historyDetailTab, setHistoryDetailTab] = useState('informacion');
         const [historyDetailModalOpen, setHistoryDetailModalOpen] = useState(false);
+        const [coordinationRejectReasonDraft, setCoordinationRejectReasonDraft] = useState('');
+        const [savingCoordinationFlow, setSavingCoordinationFlow] = useState(false);
         const [workflowTaskChecks, setWorkflowTaskChecks] = useState({});
         const [opsSideTab, setOpsSideTab] = useState('activity');
         const [opsCommentDraft, setOpsCommentDraft] = useState('');
@@ -9798,7 +9831,87 @@
           if (!service) return;
           openHistoryRecord(service);
           setHistoryDetailTab(tab);
+          setCoordinationRejectReasonDraft(String(service?.coordinacionInstalaciones?.justificacionRechazo || ''));
           setHistoryDetailModalOpen(true);
+        }
+
+        async function updateCoordinationFlow(serviceId, patch = {}) {
+          if (!serviceId) return;
+          try {
+            setSavingCoordinationFlow(true);
+            await db.collection('operaciones').doc(serviceId).set({
+              coordinacionInstalaciones: {
+                ...patch,
+                actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+                actualizadoPor: currentUserName || 'Usuario',
+              },
+            }, { merge: true });
+          } catch (error) {
+            console.error('Error actualizando coordinación:', error);
+            setNotificacion({ mensaje: 'No se pudo actualizar el flujo de coordinación.', tipo: 'error' });
+          } finally {
+            setSavingCoordinationFlow(false);
+          }
+        }
+
+        async function handleCoordinationDecision(service, nextStatus) {
+          if (!service?.id) return;
+          if (nextStatus === 'rechazada' && !String(coordinationRejectReasonDraft || '').trim()) {
+            setNotificacion({ mensaje: 'Debes ingresar la justificación del rechazo.', tipo: 'error' });
+            return;
+          }
+          const tasks = buildInstallationTasksMap(service?.coordinacionInstalaciones?.tareas || {});
+          await updateCoordinationFlow(service.id, {
+            sectorActual: 'Coordinación de instalaciones',
+            estadoSolicitud: nextStatus,
+            justificacionRechazo: nextStatus === 'rechazada' ? String(coordinationRejectReasonDraft || '').trim() : '',
+            tareas: tasks,
+          });
+          setNotificacion({ mensaje: nextStatus === 'aceptada' ? 'Solicitud aceptada y enviada a Coordinación.' : 'Solicitud rechazada con justificación.', tipo: 'ok' });
+        }
+
+        async function handleToggleInstallationTask(service, taskKey, checked) {
+          if (!service?.id || !taskKey) return;
+          const tasks = buildInstallationTasksMap(service?.coordinacionInstalaciones?.tareas || {});
+          tasks[taskKey] = {
+            ...tasks[taskKey],
+            completada: !!checked,
+            completadaEn: checked ? new Date().toISOString() : null,
+          };
+          await updateCoordinationFlow(service.id, { tareas: tasks });
+        }
+
+        async function handleConfigureServiceAlta(service) {
+          if (!service?.id) return;
+          const tasks = buildInstallationTasksMap(service?.coordinacionInstalaciones?.tareas || {});
+          const allDone = Object.values(tasks).every((task) => task.completada);
+          const status = String(service?.coordinacionInstalaciones?.estadoSolicitud || 'pendiente');
+          if (!allDone || status !== 'aceptada') {
+            setNotificacion({ mensaje: 'Para configurar el alta debes aceptar la solicitud y completar todas las tareas.', tipo: 'error' });
+            return;
+          }
+          try {
+            setSavingCoordinationFlow(true);
+            await db.collection('operaciones').doc(service.id).set({
+              status: 'Activo',
+              estado: 'Activo',
+              fichaClienteCompleta: true,
+              baseDatosActiva: true,
+              actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+              coordinacionInstalaciones: {
+                ...(service.coordinacionInstalaciones || {}),
+                altaConfigurada: true,
+                sectorActual: 'Base de datos',
+                actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+              },
+            }, { merge: true });
+            setNotificacion({ mensaje: 'Alta configurada: el servicio quedó activo y enviado a base de datos.', tipo: 'ok' });
+          } catch (error) {
+            console.error('Error configurando alta de servicio:', error);
+            setNotificacion({ mensaje: 'No se pudo configurar el alta del servicio.', tipo: 'error' });
+          } finally {
+            setSavingCoordinationFlow(false);
+          }
         }
 
         function applyUserDefaultsToForms() {
@@ -10160,6 +10273,7 @@
           const actionNeedsExistingService = ['Baja', 'Novación', 'Obra', 'Movimiento de obra', 'Charla informativa', 'Adicionales', 'Solicitud de presupuesto'].includes(tipoAccion);
 
           const doc = { tipoAccion, clienteId: normalizedClientId, status: normalizedStatusToSave, estado: normalizedStatusToSave };
+          const existingCoordination = selectedService?.coordinacionInstalaciones || {};
 
           if (grupo === 'servicio') {
             if (servicioForm.tipoAltaServicio === 'Obra') {
@@ -10175,7 +10289,19 @@
             } else if (!servicioForm.nombreServicio || !servicioForm.direccionServicio || !servicioForm.tipoServicioBrindar) {
               return alert('Completá al menos: Nombre del servicio, Dirección y Tipo de servicio.');
             }
-            Object.assign(doc, { ...servicioForm, formulario: 'nuevo-servicio-optimizado', creadoPor: servicioForm.creadoPor || currentUserName, auditoriaApertura: formOpenAudit });
+            Object.assign(doc, {
+              ...servicioForm,
+              formulario: 'nuevo-servicio-optimizado',
+              creadoPor: servicioForm.creadoPor || currentUserName,
+              auditoriaApertura: formOpenAudit,
+              coordinacionInstalaciones: {
+                sectorActual: existingCoordination.sectorActual || 'Coordinación de instalaciones',
+                estadoSolicitud: existingCoordination.estadoSolicitud || 'pendiente',
+                justificacionRechazo: existingCoordination.justificacionRechazo || '',
+                tareas: buildInstallationTasksMap(existingCoordination.tareas || {}),
+                altaConfigurada: !!existingCoordination.altaConfigurada,
+              },
+            });
           }
           if (grupo === 'obra') {
             if (!obraForm.razonSocial || !obraForm.rut || !obraForm.mailFacturacion || !obraForm.nombreServicio || !obraForm.fechaAlta) {
@@ -13090,6 +13216,12 @@
                       const serviceTickets = ticketsHistorial
                         .filter((ticket) => String(ticket.clienteId || '').trim() === detailServiceId)
                         .slice(0, 8);
+                      const coordinationData = detailService?.coordinacionInstalaciones || {};
+                      const coordinationTasks = buildInstallationTasksMap(coordinationData?.tareas || {});
+                      const completedTasks = Object.values(coordinationTasks).filter((task) => task.completada).length;
+                      const totalTasks = Object.keys(coordinationTasks).length || 1;
+                      const canConfigureAlta = coordinationData?.estadoSolicitud === 'aceptada' && completedTasks === totalTasks;
+                      const ganttPercent = Math.round((completedTasks / totalTasks) * 100);
                       return (
                         <>
                           <div className="service-detail-modal-head">
@@ -13107,15 +13239,71 @@
                           </div>
 
                           {historyDetailTab === 'informacion' && (
-                            <div className="service-coord-detail-grid">
-                              <div className="service-detail-kpi"><small>🪪 ID Servicio</small><strong>{detailService.clienteId || '-'}</strong></div>
-                              <div className="service-detail-kpi"><small>🧩 Tipo</small><strong>{detailService.tipoServicioBrindar || '-'}</strong></div>
-                              <div className="service-detail-kpi"><small>📅 Fecha de alta</small><strong>{detailService.fechaAltaServicio || detailService.fechaAlta || detailService.fechaEspecificaInicio || '-'}</strong></div>
-                              <div className="service-detail-kpi"><small>👤 Encargado</small><strong>{detailService.representanteComercial || '-'}</strong></div>
-                              <div className="service-detail-kpi"><small>📦 Equipamiento</small><strong>{detailService.equipamientoInstalado || detailService.detalleEquipamiento || detailService.equipamientoRetirar || '-'}</strong></div>
-                              <div className="service-detail-kpi"><small>💵 Importe mensual</small><strong>{detailService.importeMensualServicioSinIva || detailService.importeMensualServicio || '-'}</strong></div>
-                              <div className="service-detail-kpi" style={{ gridColumn: '1 / -1' }}><small>📍 Dirección</small><strong>{detailService.direccionServicio || detailService.direccion || '-'}</strong></div>
-                            </div>
+                            <>
+                              <div className="service-coord-detail-grid">
+                                <div className="service-detail-kpi"><small>🪪 ID Servicio</small><strong>{detailService.clienteId || '-'}</strong></div>
+                                <div className="service-detail-kpi"><small>🧩 Tipo</small><strong>{detailService.tipoServicioBrindar || '-'}</strong></div>
+                                <div className="service-detail-kpi"><small>📅 Fecha de alta</small><strong>{detailService.fechaAltaServicio || detailService.fechaAlta || detailService.fechaEspecificaInicio || '-'}</strong></div>
+                                <div className="service-detail-kpi"><small>👤 Encargado</small><strong>{detailService.representanteComercial || '-'}</strong></div>
+                                <div className="service-detail-kpi"><small>📦 Equipamiento</small><strong>{detailService.equipamientoInstalado || detailService.detalleEquipamiento || detailService.equipamientoRetirar || '-'}</strong></div>
+                                <div className="service-detail-kpi"><small>💵 Importe mensual</small><strong>{detailService.importeMensualServicioSinIva || detailService.importeMensualServicio || '-'}</strong></div>
+                                <div className="service-detail-kpi" style={{ gridColumn: '1 / -1' }}><small>📍 Dirección</small><strong>{detailService.direccionServicio || detailService.direccion || '-'}</strong></div>
+                              </div>
+
+                              <div className="panel" style={{ marginTop: 12 }}>
+                                <h4 style={{ marginTop: 0 }}>Coordinación de instalaciones</h4>
+                                <div className="compact-grid">
+                                  <div className="kv"><b>Sector actual:</b> {coordinationData?.sectorActual || 'Coordinación de instalaciones'}</div>
+                                  <div className="kv"><b>Solicitud:</b> {coordinationData?.estadoSolicitud || 'pendiente'}</div>
+                                  <div className="kv"><b>Tareas completas:</b> {completedTasks}/{totalTasks}</div>
+                                </div>
+                                {coordinationData?.estadoSolicitud === 'rechazada' && (
+                                  <div className="kv" style={{ marginTop: 8 }}><b>Justificación:</b> {coordinationData?.justificacionRechazo || '-'}</div>
+                                )}
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
+                                  <button type="button" className="save-btn" onClick={() => handleCoordinationDecision(detailService, 'aceptada')} disabled={savingCoordinationFlow}>Aceptar solicitud</button>
+                                  <button type="button" className="edit-btn" onClick={() => handleCoordinationDecision(detailService, 'rechazada')} disabled={savingCoordinationFlow}>Rechazar solicitud</button>
+                                </div>
+                                <div className="field" style={{ marginTop: 8 }}>
+                                  <label>Justificación de rechazo (obligatoria al rechazar)</label>
+                                  <textarea value={coordinationRejectReasonDraft} onChange={(e) => setCoordinationRejectReasonDraft(e.target.value)} placeholder="Explicá el motivo del rechazo..." />
+                                </div>
+
+                                <h4 style={{ marginBottom: 6 }}>Línea de tiempo</h4>
+                                <div className="service-coord-detail-list" style={{ marginBottom: 10 }}>
+                                  <div className="service-coord-detail-list-item"><strong>Solicitud</strong> · {coordinationData?.estadoSolicitud || 'pendiente'}</div>
+                                  {Object.entries(coordinationTasks).map(([taskKey, task]) => (
+                                    <div key={`coord-timeline-${taskKey}`} className="service-coord-detail-list-item">
+                                      <strong>{task.label}</strong> · {task.completada ? `Completada ${task.completadaEn ? new Date(task.completadaEn).toLocaleString('es-UY') : ''}` : 'Pendiente'}
+                                    </div>
+                                  ))}
+                                </div>
+
+                                <h4 style={{ marginBottom: 6 }}>Diagrama de Gantt</h4>
+                                <div style={{ border: '1px solid rgba(255,255,255,.2)', borderRadius: 10, padding: 8, marginBottom: 10 }}>
+                                  <div style={{ height: 12, borderRadius: 999, background: 'rgba(255,255,255,.14)', overflow: 'hidden' }}>
+                                    <div style={{ width: `${ganttPercent}%`, height: '100%', background: 'linear-gradient(90deg,#34d399,#14b8a6)' }} />
+                                  </div>
+                                  <small>{ganttPercent}% completado</small>
+                                </div>
+
+                                <h4 style={{ marginBottom: 6 }}>Listado de tareas de instalación</h4>
+                                <div className="service-coord-detail-list">
+                                  {Object.entries(coordinationTasks).map(([taskKey, task]) => (
+                                    <label key={`coord-task-${taskKey}`} className="service-coord-detail-list-item" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                      <input type="checkbox" checked={!!task.completada} onChange={(e) => handleToggleInstallationTask(detailService, taskKey, e.target.checked)} disabled={savingCoordinationFlow || coordinationData?.estadoSolicitud !== 'aceptada'} />
+                                      <span>{task.label}</span>
+                                    </label>
+                                  ))}
+                                </div>
+
+                                <div style={{ marginTop: 12 }}>
+                                  <button type="button" className="save-btn" onClick={() => handleConfigureServiceAlta(detailService)} disabled={!canConfigureAlta || savingCoordinationFlow}>
+                                    Configurar ALTA de Servicio
+                                  </button>
+                                </div>
+                              </div>
+                            </>
                           )}
 
                           {historyDetailTab === 'historial' && (
