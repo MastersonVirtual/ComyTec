@@ -7826,7 +7826,9 @@
         const [authLoading, setAuthLoading] = useState(true);
         const [userRole, setUserRole] = useState('');
         const [userArea, setUserArea] = useState('');
-        const [userData, setUserData] = useState({ nombre: '', rol: '', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
+        const [userData, setUserData] = useState({ nombre: '', apellido: '', rol: '', area: '', telefono: '', horarioTrabajo: '', mail: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
+        const [profileFormData, setProfileFormData] = useState({ nombre: '', apellido: '', area: '', rol: '', telefono: '', horarioTrabajo: '', mail: '' });
+        const [savingProfileData, setSavingProfileData] = useState(false);
         const [roleLoading, setRoleLoading] = useState(true);
         const [notificacion, setNotificacion] = useState({ mensaje: '', tipo: '' });
 
@@ -8908,8 +8910,12 @@
             await db.collection('config_usuarios').doc(user.email || user.uid).set({
               email: user.email || '',
               nombre: currentUserName || (user.email || '').split('@')[0] || 'Usuario',
+              apellido: userData.apellido || '',
               rol: userRole || 'admin',
               area: userArea || '',
+              telefono: userData.telefono || '',
+              horarioTrabajo: userData.horarioTrabajo || '',
+              mail: userData.mail || user.email || '',
               avatarId: nextAvatarId,
               avatarUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
             }, { merge: true });
@@ -8923,6 +8929,49 @@
             return false;
           } finally {
             setSavingProfileAvatar(false);
+          }
+        }
+
+        async function handleProfileDataSave(event) {
+          event.preventDefault();
+          if (!user) {
+            setNotificacion({ mensaje: 'Necesitás iniciar sesión para editar tu perfil.', tipo: 'error' });
+            return;
+          }
+          const payload = {
+            nombre: String(profileFormData.nombre || '').trim(),
+            apellido: String(profileFormData.apellido || '').trim(),
+            area: String(profileFormData.area || '').trim(),
+            rol: String(profileFormData.rol || '').trim(),
+            telefono: String(profileFormData.telefono || '').trim(),
+            horarioTrabajo: String(profileFormData.horarioTrabajo || '').trim(),
+            mail: String(profileFormData.mail || user.email || '').trim(),
+            email: user.email || '',
+            actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+          };
+          if (!payload.nombre) {
+            setNotificacion({ mensaje: 'Completá al menos el nombre para guardar el perfil.', tipo: 'error' });
+            return;
+          }
+          try {
+            setSavingProfileData(true);
+            await db.collection('config_usuarios').doc(user.email || user.uid).set(payload, { merge: true });
+            const nextUserData = {
+              ...userData,
+              ...payload,
+              rol: (payload.rol || userRole || 'admin').toLowerCase(),
+              area: (payload.area || userArea || '').toLowerCase(),
+            };
+            setUserData(nextUserData);
+            setUserRole(nextUserData.rol);
+            setUserArea(nextUserData.area);
+            setProfileFormData((prev) => ({ ...prev, ...payload }));
+            setNotificacion({ mensaje: 'Perfil actualizado y guardado en Firebase.', tipo: 'ok' });
+          } catch (error) {
+            console.error('Error guardando perfil:', error);
+            setNotificacion({ mensaje: 'No se pudo guardar el perfil en Firebase.', tipo: 'error' });
+          } finally {
+            setSavingProfileData(false);
           }
         }
 
@@ -9063,7 +9112,8 @@
             if (!currentUser) {
               setUserRole('');
               setUserArea('');
-              setUserData({ nombre: '', rol: '', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
+              setUserData({ nombre: '', apellido: '', rol: '', area: '', telefono: '', horarioTrabajo: '', mail: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
+              setProfileFormData({ nombre: '', apellido: '', area: '', rol: '', telefono: '', horarioTrabajo: '', mail: '' });
               setProfileAvatarId(DEFAULT_PROFILE_AVATAR_ID);
               setRoleLoading(false);
               return;
@@ -9083,16 +9133,24 @@
               const rol = (profile?.rol || 'admin').toLowerCase();
               const area = (profile?.area || '').toLowerCase();
               const nombre = String(profile?.nombre || currentUser.displayName || (currentUser.email || '').split('@')[0] || 'Usuario').trim();
+              const apellido = String(profile?.apellido || '').trim();
+              const telefono = String(profile?.telefono || profile?.telefonoMovil || '').trim();
+              const horarioTrabajo = String(profile?.horarioTrabajo || profile?.horario || '').trim();
+              const mail = String(profile?.mail || currentUser.email || '').trim();
               const avatarId = PROFILE_AVATAR_OPTIONS.some((avatar) => avatar.id === profile?.avatarId) ? profile.avatarId : DEFAULT_PROFILE_AVATAR_ID;
               setUserRole(rol);
               setUserArea(area);
-              setUserData({ nombre, rol, area, avatarId });
+              setUserData({ nombre, apellido, rol, area, telefono, horarioTrabajo, mail, avatarId });
+              setProfileFormData({ nombre, apellido, area: profile?.area || '', rol: profile?.rol || rol, telefono, horarioTrabajo, mail });
               setProfileAvatarId(avatarId);
             } catch (err) {
               console.error('Error leyendo config_usuarios:', err);
               setUserRole('admin');
               setUserArea('');
-              setUserData({ nombre: (currentUser?.email || 'admin').split('@')[0], rol: 'admin', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
+              const fallbackName = (currentUser?.email || 'admin').split('@')[0];
+              const fallbackMail = currentUser?.email || '';
+              setUserData({ nombre: fallbackName, apellido: '', rol: 'admin', area: '', telefono: '', horarioTrabajo: '', mail: fallbackMail, avatarId: DEFAULT_PROFILE_AVATAR_ID });
+              setProfileFormData({ nombre: fallbackName, apellido: '', area: '', rol: 'admin', telefono: '', horarioTrabajo: '', mail: fallbackMail });
               setProfileAvatarId(DEFAULT_PROFILE_AVATAR_ID);
             } finally {
               setRoleLoading(false);
@@ -9404,7 +9462,11 @@
         const effectiveSelectedForm = selectedForm;
 
         const [formOpenAudit, setFormOpenAudit] = useState(null);
-        const currentUserName = useMemo(() => (userData.nombre || (user?.email || '').split('@')[0] || 'Usuario').trim(), [userData, user]);
+        const currentUserName = useMemo(() => {
+          const nombreBase = String(userData.nombre || (user?.email || '').split('@')[0] || 'Usuario').trim();
+          const apellidoBase = String(userData.apellido || '').trim();
+          return `${nombreBase} ${apellidoBase}`.trim();
+        }, [userData, user]);
         const selectedProfileAvatar = useMemo(() => (
           PROFILE_AVATAR_OPTIONS.find((avatar) => avatar.id === profileAvatarId) || PROFILE_AVATAR_OPTIONS[0]
         ), [profileAvatarId]);
@@ -11746,6 +11808,80 @@
                           <div className="profile-identity-sub">{currentUserName} · {topbarSubtitle}</div>
                         </div>
                       </div>
+                    </article>
+                    <article className="profile-option">
+                      <h3>Datos personales</h3>
+                      <form className="profile-form" onSubmit={handleProfileDataSave}>
+                        <div className="compact-grid">
+                          <div className="field">
+                            <label>Nombre</label>
+                            <input
+                              type="text"
+                              placeholder="Nombre"
+                              value={profileFormData.nombre}
+                              onChange={(e) => setProfileFormData((prev) => ({ ...prev, nombre: e.target.value }))}
+                              required
+                            />
+                          </div>
+                          <div className="field">
+                            <label>Apellido</label>
+                            <input
+                              type="text"
+                              placeholder="Apellido"
+                              value={profileFormData.apellido}
+                              onChange={(e) => setProfileFormData((prev) => ({ ...prev, apellido: e.target.value }))}
+                            />
+                          </div>
+                          <div className="field">
+                            <label>Área</label>
+                            <input
+                              type="text"
+                              placeholder="Área"
+                              value={profileFormData.area}
+                              onChange={(e) => setProfileFormData((prev) => ({ ...prev, area: e.target.value }))}
+                            />
+                          </div>
+                          <div className="field">
+                            <label>Rol</label>
+                            <input
+                              type="text"
+                              placeholder="Rol"
+                              value={profileFormData.rol}
+                              onChange={(e) => setProfileFormData((prev) => ({ ...prev, rol: e.target.value }))}
+                            />
+                          </div>
+                          <div className="field">
+                            <label>Teléfono</label>
+                            <input
+                              type="text"
+                              placeholder="Teléfono"
+                              value={profileFormData.telefono}
+                              onChange={(e) => setProfileFormData((prev) => ({ ...prev, telefono: e.target.value }))}
+                            />
+                          </div>
+                          <div className="field">
+                            <label>Horario de trabajo</label>
+                            <input
+                              type="text"
+                              placeholder="Ej: 08:00 a 17:00"
+                              value={profileFormData.horarioTrabajo}
+                              onChange={(e) => setProfileFormData((prev) => ({ ...prev, horarioTrabajo: e.target.value }))}
+                            />
+                          </div>
+                          <div className="field">
+                            <label>Mail</label>
+                            <input
+                              type="email"
+                              placeholder="mail@empresa.com"
+                              value={profileFormData.mail}
+                              onChange={(e) => setProfileFormData((prev) => ({ ...prev, mail: e.target.value }))}
+                            />
+                          </div>
+                        </div>
+                        <button className="save-btn profile-save-btn" type="submit" disabled={savingProfileData}>
+                          {savingProfileData ? 'Guardando...' : 'Guardar perfil'}
+                        </button>
+                      </form>
                     </article>
                     <article className="profile-option">
                       <h3>Solicitar cambio de usuario y contraseña</h3>
