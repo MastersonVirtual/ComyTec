@@ -41,6 +41,7 @@
       .app-shell { min-height: 100vh; display: flex; }
       .sidebar {
         position: fixed; inset: 0 auto 0 0; width: 320px;
+        height: 100dvh;
         background: linear-gradient(180deg, rgba(4, 25, 24, 0.95), rgba(10, 52, 49, 0.9));
         border-right: 1px solid var(--line);
         backdrop-filter: blur(8px) saturate(120%);
@@ -67,6 +68,8 @@
         flex: 1 1 auto;
         min-height: 0;
         scrollbar-gutter: stable both-edges;
+        overscroll-behavior: contain;
+        -webkit-overflow-scrolling: touch;
       }
       .menu-button, .submenu-button {
         width: 100%;
@@ -94,9 +97,9 @@
         transition: max-height var(--motion-mid) ease, opacity var(--motion-fast) ease;
       }
       .submenu.open {
-        max-height: min(72vh, 680px);
+        max-height: 2200px;
         opacity: 1;
-        overflow-y: auto;
+        overflow: visible;
         padding-right: 6px;
       }
       .submenu-button { font-size: 13px; }
