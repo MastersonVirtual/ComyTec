@@ -1510,7 +1510,16 @@
         padding: 14px;
         box-shadow: 0 10px 24px rgba(8, 29, 35, .08);
       }
-      .service-coord-filters .field label { color: #ed9643; }
+      .service-coord-filters .field label {
+        color: #ff8a2a;
+        background: #edf1f3;
+        border: 1px solid rgba(196, 205, 210, .95);
+        border-radius: 999px;
+        padding: 4px 10px;
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+      }
       .service-coord-filters .field input,
       .service-coord-filters .field select {
         min-height: 46px;
@@ -5237,6 +5246,28 @@
         gap: 8px;
         padding-top: 4px;
       }
+      .ticket-resolution-editor {
+        margin-top: 10px;
+        border: 1px solid rgba(151,243,231,.35);
+        border-radius: 12px;
+        padding: 10px;
+        background: rgba(2, 36, 38, .5);
+      }
+      .ticket-resolution-editor textarea {
+        width: 100%;
+        min-height: 74px;
+        resize: vertical;
+      }
+      .ticket-resolution-hint {
+        margin: 6px 0 0;
+        font-size: 12px;
+        color: #bfeae4;
+      }
+      .ticket-resolution-summary {
+        margin-top: 8px;
+        border-top: 1px dashed rgba(230,255,253,.2);
+        padding-top: 8px;
+      }
       .ticket-empty-state {
         border: 1px dashed rgba(230,255,253,.26);
         border-radius: 12px;
@@ -6115,6 +6146,34 @@
       const ACCIONES = ['Nuevo Servicio', 'Adicionales', 'Solicitud de presupuesto', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa'];
       const STATUS_OPTIONS = ['Pendiente', 'En proceso', 'Esperando información', 'Finalizado', 'Cancelado'];
       const SERVICE_TYPE_OPTIONS = ['Monitoreo', 'Portería virtual', 'Respuesta de alarma', 'Servicio Técnico', 'Control de acceso'];
+      const GNS_WORKFLOW_STAGES = [
+        'Contrato Firmado',
+        'OS Cargada',
+        'Pendiente a Agendar',
+        'Agendado',
+        'Instalando – Ongoing',
+        'Pausa',
+        'Finalizado Instalación',
+        'Agendado Alta',
+        'Servicio Activo – Alta',
+      ];
+      const GNS_WORKFLOW_TRANSITIONS = Object.freeze({
+        'Contrato Firmado': ['OS Cargada'],
+        'OS Cargada': ['Pendiente a Agendar'],
+        'Pendiente a Agendar': ['Agendado'],
+        Agendado: ['Instalando – Ongoing', 'Pausa'],
+        'Instalando – Ongoing': ['Pausa', 'Finalizado Instalación'],
+        Pausa: ['Agendado', 'Instalando – Ongoing'],
+        'Finalizado Instalación': ['Agendado Alta'],
+        'Agendado Alta': ['Servicio Activo – Alta'],
+        'Servicio Activo – Alta': [],
+      });
+      const PENDING_TO_SCHEDULE_TASKS = [
+        { key: 'comunicacionInicial', label: 'Comunicación inicial enviada al cliente' },
+        { key: 'pulsosVerificados', label: 'Pulsos solicitados/verificados (si aplica)' },
+        { key: 'proveedorElegido', label: 'Proveedor de instalación elegido' },
+        { key: 'tareasTecnicas', label: 'Tareas operativas técnicas completadas' },
+      ];
 
       function normalizeServiceType(value) {
         const raw = String(value || '').trim();
@@ -7920,6 +7979,7 @@
         const [ticketFilterOrigen, setTicketFilterOrigen] = useState('todos');
         const [ticketFilterOpen, setTicketFilterOpen] = useState(false);
         const [ticketReassignModal, setTicketReassignModal] = useState({ open: false, ticket: null, assigneeKey: '' });
+        const [ticketResolutionDrafts, setTicketResolutionDrafts] = useState({});
         const seenRowIdsRef = useRef(new Set());
         const seenOperationalAlertsRef = useRef(new Set());
         const topServicesLeaderRef = useRef('');
@@ -8058,10 +8118,12 @@
         const [historyStatusFilter, setHistoryStatusFilter] = useState('Pendiente');
         const [historyCommercialFilter, setHistoryCommercialFilter] = useState('todos');
         const [historyTypeFilter, setHistoryTypeFilter] = useState('todos');
+        const [historyAdministrationFilter, setHistoryAdministrationFilter] = useState('todos');
         const [historyDateFilter, setHistoryDateFilter] = useState('');
         const [historyDetailTab, setHistoryDetailTab] = useState('informacion');
         const [historyDetailModalOpen, setHistoryDetailModalOpen] = useState(false);
         const [workflowTaskChecks, setWorkflowTaskChecks] = useState({});
+        const [workflowTransitionDrafts, setWorkflowTransitionDrafts] = useState({});
         const [opsSideTab, setOpsSideTab] = useState('activity');
         const [opsCommentDraft, setOpsCommentDraft] = useState('');
         const [opsObservationsOpen, setOpsObservationsOpen] = useState(false);
@@ -8195,6 +8257,72 @@
             return Number.isNaN(dt.getTime()) ? null : dt;
           }
           return null;
+        }
+
+        function normalizeWorkflowStage(value) {
+          const raw = String(value || '').trim();
+          return GNS_WORKFLOW_STAGES.includes(raw) ? raw : '';
+        }
+
+        function getDefaultWorkflowStage(action = '') {
+          const clean = String(action || '').trim();
+          if (clean === 'Nuevo Servicio') return 'Contrato Firmado';
+          return 'OS Cargada';
+        }
+
+        function canTransitionWorkflowStage(fromStage, toStage) {
+          const from = normalizeWorkflowStage(fromStage);
+          const to = normalizeWorkflowStage(toStage);
+          if (!from || !to) return false;
+          const allowed = GNS_WORKFLOW_TRANSITIONS[from] || [];
+          return allowed.includes(to);
+        }
+
+        function createWorkflowEvent({ from = '', to = '', note = '', actor = '' } = {}) {
+          return {
+            fromStage: normalizeWorkflowStage(from) || '',
+            toStage: normalizeWorkflowStage(to) || '',
+            note: String(note || '').trim(),
+            actor: String(actor || currentUserName || 'Sistema').trim() || 'Sistema',
+            timestamp: Date.now(),
+            fechaHoraUy: formatUruguayDateTime(),
+          };
+        }
+
+        function stageToOperationalStatus(stage = '') {
+          const normalized = normalizeWorkflowStage(stage);
+          if (normalized === 'Instalando – Ongoing') return 'En proceso';
+          if (normalized === 'Finalizado Instalación' || normalized === 'Servicio Activo – Alta') return 'Finalizado';
+          if (normalized === 'Pausa') return 'Esperando información';
+          return 'Pendiente';
+        }
+
+        function getWorkflowDraftDefaults(service = {}) {
+          const currentStage = normalizeWorkflowStage(service.workflowStage) || 'Contrato Firmado';
+          const nextOptions = GNS_WORKFLOW_TRANSITIONS[currentStage] || [];
+          return {
+            nextStage: nextOptions[0] || '',
+            note: '',
+            pauseReason: '',
+            pauseComment: '',
+            installChecklistComplete: false,
+            activationConfirmed: false,
+            fechaAgenda: '',
+            horarioAgenda: '',
+            tecnicoAsignado: '',
+            fechaAltaAgenda: '',
+            responsableAlta: '',
+            checklist: PENDING_TO_SCHEDULE_TASKS.reduce((acc, task) => ({ ...acc, [task.key]: false }), {}),
+          };
+        }
+
+        function setWorkflowTransitionDraft(serviceId, patch) {
+          if (!serviceId) return;
+          setWorkflowTransitionDrafts((prev) => {
+            const current = prev[serviceId] || getWorkflowDraftDefaults({});
+            const nextPatch = typeof patch === 'function' ? patch(current) : patch;
+            return { ...prev, [serviceId]: { ...current, ...(nextPatch || {}) } };
+          });
         }
 
         function resolveWelcomeTasksCount(installations) {
@@ -8382,6 +8510,15 @@
           return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
         }, [historySourceRows]);
 
+        const historyAdministrationOptions = useMemo(() => {
+          const set = new Set();
+          historySourceRows.forEach((r) => {
+            const value = String(r.administracion || r.administración || '').trim();
+            if (value) set.add(value);
+          });
+          return Array.from(set).sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+        }, [historySourceRows]);
+
         const historyFilteredRows = useMemo(() => {
           const query = historySearchTerm.trim().toLowerCase();
           const filtered = historySourceRows.filter((r) => {
@@ -8392,10 +8529,18 @@
               : actionValueRaw === 'Adicionales' ? 'Adicional'
                 : actionValueRaw === 'Solicitud de presupuesto' ? 'Presupuesto'
                   : actionValueRaw;
+            const administrationValue = String(r.administracion || r.administración || '').trim();
             const matchStatus = historyStatusFilter === 'todos' || statusValue === historyStatusFilter;
             const matchCommercial = historyCommercialFilter === 'todos' || commercialValue === historyCommercialFilter;
             const matchType = historyTypeFilter === 'todos' || actionValue === historyTypeFilter;
-            const matchDate = true;
+            const matchAdministration = historyAdministrationFilter === 'todos' || administrationValue === historyAdministrationFilter;
+            const matchDate = (() => {
+              if (!historyDateFilter) return true;
+              const selectedDate = parseServiceDate(historyDateFilter);
+              const serviceDate = parseServiceDate(r.fechaAltaServicio || r.fechaAlta || r.fechaEspecificaInicio);
+              if (!selectedDate || !serviceDate) return false;
+              return selectedDate.toDateString() === serviceDate.toDateString();
+            })();
             const matchQuery = !query || [
               r.nombreServicio,
               r.cliente,
@@ -8404,7 +8549,7 @@
               r.rut,
               r.direccionServicio,
             ].filter(Boolean).some((v) => String(v).toLowerCase().includes(query));
-            return matchStatus && matchCommercial && matchType && matchDate && matchQuery;
+            return matchStatus && matchCommercial && matchType && matchAdministration && matchDate && matchQuery;
           });
 
           return filtered.sort((a, b) => {
@@ -8412,7 +8557,7 @@
             const bTs = b.actualizadoEn?.seconds || b.creadoEn?.seconds || 0;
             return bTs - aTs;
           });
-        }, [historySourceRows, historySearchTerm, historyStatusFilter, historyCommercialFilter, historyTypeFilter, historyDateFilter]);
+        }, [historySourceRows, historySearchTerm, historyStatusFilter, historyCommercialFilter, historyTypeFilter, historyAdministrationFilter, historyDateFilter]);
 
         const HISTORY_PAGE_SIZE = 18;
         const totalHistoryPages = Math.max(1, Math.ceil(historyFilteredRows.length / HISTORY_PAGE_SIZE));
@@ -9753,7 +9898,7 @@
 
         useEffect(() => {
           setHistoryPage(1);
-        }, [historySearchTerm, historyStatusFilter, historyCommercialFilter, historyTypeFilter, historyDateFilter]);
+        }, [historySearchTerm, historyStatusFilter, historyCommercialFilter, historyTypeFilter, historyAdministrationFilter, historyDateFilter]);
 
         useEffect(() => {
           if (historyPage > totalHistoryPages) {
@@ -9764,6 +9909,15 @@
         useEffect(() => {
           setHistoryDetailTab('informacion');
         }, [selectedService?.id]);
+
+        useEffect(() => {
+          const serviceId = String(selectedService?.id || '').trim();
+          if (!serviceId || effectiveSelectedForm !== 'historial') return;
+          setWorkflowTransitionDrafts((prev) => prev[serviceId] ? prev : ({
+            ...prev,
+            [serviceId]: getWorkflowDraftDefaults(selectedService || {}),
+          }));
+        }, [selectedService?.id, effectiveSelectedForm]);
 
         useEffect(() => {
           if (effectiveSelectedForm !== 'historial') setHistoryDetailModalOpen(false);
@@ -10064,6 +10218,96 @@
           }
         }
 
+        async function handleWorkflowTransition(service) {
+          if (!service?.id) return;
+          const serviceId = String(service.id || '').trim();
+          const currentStage = normalizeWorkflowStage(service.workflowStage) || 'Contrato Firmado';
+          const draft = workflowTransitionDrafts[serviceId] || getWorkflowDraftDefaults(service);
+          const nextStage = normalizeWorkflowStage(draft.nextStage);
+          if (!nextStage) {
+            setNotificacion({ mensaje: 'Seleccioná la siguiente etapa del workflow.', tipo: 'warn' });
+            return;
+          }
+          if (!canTransitionWorkflowStage(currentStage, nextStage)) {
+            setNotificacion({ mensaje: `No se permite pasar de "${currentStage}" a "${nextStage}" sin cumplir el flujo.`, tipo: 'error' });
+            return;
+          }
+
+          if (currentStage === 'Pendiente a Agendar' && nextStage === 'Agendado') {
+            const completed = PENDING_TO_SCHEDULE_TASKS.every((task) => !!draft.checklist?.[task.key]);
+            if (!completed) {
+              setNotificacion({ mensaje: 'Completá todas las tareas obligatorias antes de agendar.', tipo: 'warn' });
+              return;
+            }
+          }
+          if (nextStage === 'Agendado' && (!draft.fechaAgenda || !draft.horarioAgenda || !draft.tecnicoAsignado)) {
+            setNotificacion({ mensaje: 'Para Agendado debés indicar fecha, horario y técnico asignado.', tipo: 'warn' });
+            return;
+          }
+          if (nextStage === 'Pausa' && (!draft.pauseReason || !String(draft.pauseComment || '').trim())) {
+            setNotificacion({ mensaje: 'En Pausa el motivo y comentario son obligatorios.', tipo: 'warn' });
+            return;
+          }
+          if (nextStage === 'Finalizado Instalación' && !draft.installChecklistComplete) {
+            setNotificacion({ mensaje: 'Confirmá el checklist de instalación para finalizar.', tipo: 'warn' });
+            return;
+          }
+          if (nextStage === 'Agendado Alta' && (!draft.fechaAltaAgenda || !String(draft.responsableAlta || '').trim())) {
+            setNotificacion({ mensaje: 'Para Agendado Alta completá fecha y responsable.', tipo: 'warn' });
+            return;
+          }
+          if (nextStage === 'Servicio Activo – Alta' && !draft.activationConfirmed) {
+            setNotificacion({ mensaje: 'Confirmá la activación técnica para cerrar el proceso.', tipo: 'warn' });
+            return;
+          }
+
+          const workflowEvent = createWorkflowEvent({
+            from: currentStage,
+            to: nextStage,
+            note: draft.note || `Transición manual a ${nextStage}`,
+            actor: currentUserName,
+          });
+          const existingTimeline = Array.isArray(service.workflowTimeline) ? service.workflowTimeline : [];
+          const payload = {
+            workflowStage: nextStage,
+            workflowAvailableNextStages: GNS_WORKFLOW_TRANSITIONS[nextStage] || [],
+            workflowTimeline: [...existingTimeline, workflowEvent],
+            workflowChecklistPendienteAgendar: draft.checklist || {},
+            workflowPauseReason: draft.pauseReason || '',
+            workflowPauseComment: draft.pauseComment || '',
+            workflowInstallChecklistComplete: !!draft.installChecklistComplete,
+            workflowActivationConfirmed: !!draft.activationConfirmed,
+            workflowFechaAgendaInstalacion: draft.fechaAgenda || '',
+            workflowHorarioAgendaInstalacion: draft.horarioAgenda || '',
+            workflowTecnicoAsignado: draft.tecnicoAsignado || '',
+            workflowFechaAltaAgenda: draft.fechaAltaAgenda || '',
+            workflowResponsableAlta: draft.responsableAlta || '',
+            status: stageToOperationalStatus(nextStage),
+            estado: stageToOperationalStatus(nextStage),
+            actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+            editadoPor: currentUserName,
+          };
+          try {
+            await db.collection('operaciones').doc(service.id).set(payload, { merge: true });
+            setRows((prev) => prev.map((row) => row.id === service.id ? { ...row, ...payload, actualizadoEn: new Date() } : row));
+            setSelectedService((prev) => (prev?.id === service.id ? { ...prev, ...payload, actualizadoEn: new Date() } : prev));
+            setNotificacion({ mensaje: `✔ Etapa actualizada a "${nextStage}"`, tipo: 'ok' });
+            setWorkflowTransitionDrafts((prev) => ({
+              ...prev,
+              [serviceId]: getWorkflowDraftDefaults({ ...service, ...payload }),
+            }));
+            void logRealtimeActivityEvent({
+              usuario: currentUserName,
+              accion: `movió workflow a ${nextStage}`,
+              clienteId: service.clienteId || '',
+              detalle: draft.note || '',
+            });
+          } catch (error) {
+            console.error('Error actualizando workflow:', error);
+            setNotificacion({ mensaje: '✖ No se pudo actualizar la etapa del workflow.', tipo: 'error' });
+          }
+        }
+
         async function handleSubmit(e) {
           e.preventDefault();
           if (selectedForm === 'home') return;
@@ -10214,6 +10458,23 @@
                 editadoPor: currentUserName,
                 logs_cambios: [...existingLogs, nextLog],
               };
+              const currentWorkflowStage = normalizeWorkflowStage(targetSource?.workflowStage) || getDefaultWorkflowStage(tipoAccion);
+              const requestedWorkflowStage = normalizeWorkflowStage(doc.workflowStage);
+              const nextWorkflowStage = requestedWorkflowStage && canTransitionWorkflowStage(currentWorkflowStage, requestedWorkflowStage)
+                ? requestedWorkflowStage
+                : currentWorkflowStage;
+              const existingWorkflowTimeline = Array.isArray(targetSource?.workflowTimeline) ? targetSource.workflowTimeline : [];
+              const shouldAppendWorkflowEvent = nextWorkflowStage !== currentWorkflowStage;
+              payload.workflowStage = nextWorkflowStage;
+              payload.workflowAvailableNextStages = GNS_WORKFLOW_TRANSITIONS[nextWorkflowStage] || [];
+              payload.workflowTimeline = shouldAppendWorkflowEvent
+                ? [...existingWorkflowTimeline, createWorkflowEvent({
+                  from: currentWorkflowStage,
+                  to: nextWorkflowStage,
+                  note: `Transición por ${tipoAccion || 'actualización'}`,
+                  actor: currentUserName,
+                })]
+                : existingWorkflowTimeline;
               await db.collection('operaciones').doc(targetDocId).set(payload, { merge: true });
               const updateTicket = await createGestionTicketFromForm({
                 operacionId: targetDocId,
@@ -10246,6 +10507,17 @@
               creadoPor: doc.creadoPor || currentUserName,
               logs_cambios: [],
             };
+            const initialWorkflowStage = normalizeWorkflowStage(doc.workflowStage) || getDefaultWorkflowStage(tipoAccion);
+            createPayload.workflowStage = initialWorkflowStage;
+            createPayload.workflowAvailableNextStages = GNS_WORKFLOW_TRANSITIONS[initialWorkflowStage] || [];
+            createPayload.workflowTimeline = [
+              createWorkflowEvent({
+                from: '',
+                to: initialWorkflowStage,
+                note: `Inicio del proceso por ${tipoAccion || 'alta'}`,
+                actor: currentUserName,
+              }),
+            ];
             const createdRef = await db.collection('operaciones').add(createPayload);
             const createTicket = await createGestionTicketFromForm({
               operacionId: createdRef.id,
@@ -10731,6 +11003,44 @@
           await handleTicketFilesInput(e.dataTransfer?.files || []);
         }
 
+        function setTicketResolutionDraft(ticketId, nextValue) {
+          if (!ticketId) return;
+          setTicketResolutionDrafts((prev) => {
+            const current = prev[ticketId] || { open: false, comentario: '', imagenes: [], dragOver: false };
+            const patch = typeof nextValue === 'function' ? nextValue(current) : nextValue;
+            return { ...prev, [ticketId]: { ...current, ...(patch || {}) } };
+          });
+        }
+
+        function toggleTicketResolutionEditor(ticketId) {
+          setTicketResolutionDraft(ticketId, (prev) => ({ open: !prev.open }));
+        }
+
+        async function handleTicketResolutionFiles(ticketId, fileList) {
+          const parsed = await readImageFiles(fileList);
+          if (parsed.length === 0) {
+            setNotificacion({ mensaje: 'Solo se permiten imágenes para la resolución', tipo: 'error' });
+            return;
+          }
+          setTicketResolutionDraft(ticketId, (prev) => ({ imagenes: [...(prev.imagenes || []), ...parsed].slice(0, 12) }));
+        }
+
+        async function handleTicketResolutionPaste(ticketId, event) {
+          const files = Array.from(event.clipboardData?.items || [])
+            .filter((item) => item.kind === 'file')
+            .map((item) => item.getAsFile())
+            .filter(Boolean);
+          if (files.length === 0) return;
+          event.preventDefault();
+          await handleTicketResolutionFiles(ticketId, files);
+        }
+
+        async function handleTicketResolutionDrop(ticketId, event) {
+          event.preventDefault();
+          setTicketResolutionDraft(ticketId, { dragOver: false });
+          await handleTicketResolutionFiles(ticketId, event.dataTransfer?.files || []);
+        }
+
         function generateTicketCode(prefix = 'TCK') {
           const now = new Date();
           const datePart = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
@@ -10806,15 +11116,25 @@
           return ticketCodigo;
         }
 
-        async function handleResolveTicket(ticket) {
+        async function handleResolveTicket(ticket, resolution = null) {
           if (!isTicketManager || !ticket?.id) return;
           try {
+            const resolutionComment = String(resolution?.comentario || '').trim();
+            const resolutionImages = Array.isArray(resolution?.imagenes) ? resolution.imagenes : [];
             await db.collection('tickets_app').doc(ticket.id).set({
               estado: 'resuelto',
               resueltoPor: currentUserName,
               resueltoPorEmail: user?.email || '',
+              resolucionComentario: resolutionComment,
+              resolucionImagenes: resolutionImages,
               resueltoEn: firebase.firestore.FieldValue.serverTimestamp(),
             }, { merge: true });
+            setTicketResolutionDrafts((prev) => {
+              if (!prev[ticket.id]) return prev;
+              const next = { ...prev };
+              delete next[ticket.id];
+              return next;
+            });
             setNotificacion({ mensaje: '✔ Ticket marcado como resuelto', tipo: 'ok' });
           } catch (error) {
             console.error('Error resolviendo ticket:', error);
@@ -11124,7 +11444,7 @@
                 <button className="menu-button" onClick={openFuncionariosView}><span className="menu-icon">🧑‍💼</span><span>Funcionarios</span></button>
                 <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
-                <div className="sidebar-signature" aria-label="signature" tabIndex={0}><strong>v1.2 | Powered by Alfonso Carballo</strong><div className="sidebar-signature-tooltip">Actualización 1.2: se agregó la gestión de Funcionarios con listado por áreas, búsqueda rápida y chats internos persistidos en Firebase para que todos vean el historial compartido.</div></div>
+                <div className="sidebar-signature" aria-label="signature" tabIndex={0}><strong>v2.0 | Powered by Alfonso Carballo</strong><div className="sidebar-signature-tooltip">Actualización 2.0: workflow operativo GNS con transiciones validadas por etapa, checklist obligatorio para agendado, resolución de tickets con comentario + imágenes (pegar/arrastrar), y nuevos filtros de historial por administración y fecha de alta.</div></div>
               </div>
             </aside>
 
@@ -11683,6 +12003,9 @@
                                       {ticket.origen === 'form-gestion' && <div className="kv"><b>Cliente ID:</b> {ticket.clienteId || '-'}</div>}
                                     </div>
                                     <div className="kv ticket-comment-block"><b>Comentario:</b> {ticket.comentario || '-'}</div>
+                                    {!!String(ticket.resolucionComentario || '').trim() && (
+                                      <div className="kv ticket-comment-block ticket-resolution-summary"><b>Resolución:</b> {ticket.resolucionComentario}</div>
+                                    )}
                                     {ticket.origen === 'form-gestion' && (
                                       <div className="ticket-card-main">
                                         <div className="kv"><b>Servicio:</b> {ticket.nombreServicio || '-'}</div>
@@ -11694,11 +12017,58 @@
                                         {ticket.imagenesAdjuntas.map((img, idx) => (<img key={`hist-img-${ticket.id}-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `adj-${idx + 1}`} onClick={() => openImageViewer(img.dataUrl)} />))}
                                       </div>
                                     )}
+                                    {Array.isArray(ticket.resolucionImagenes) && ticket.resolucionImagenes.length > 0 && (
+                                      <div className="ticket-image-grid">
+                                        {ticket.resolucionImagenes.map((img, idx) => (<img key={`hist-resolution-img-${ticket.id}-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `res-${idx + 1}`} onClick={() => openImageViewer(img.dataUrl)} />))}
+                                      </div>
+                                    )}
                                     <div className="ticket-card-actions">
                                       <button type="button" className="status-action-btn chat-action-btn" onClick={() => openTicketReassignModal(ticket)}>Reasignar</button>
-                                      {ticket.estado !== 'resuelto' && <button type="button" className="status-action-btn accept" onClick={() => handleResolveTicket(ticket)}>Marcar resuelto</button>}
+                                      {ticket.estado !== 'resuelto' && (
+                                        <>
+                                          <button type="button" className="status-action-btn chat-action-btn" onClick={() => toggleTicketResolutionEditor(ticket.id)}>
+                                            Resolver con comentario
+                                          </button>
+                                          <button type="button" className="status-action-btn accept" onClick={() => {
+                                            const draft = ticketResolutionDrafts[ticket.id] || { comentario: '', imagenes: [] };
+                                            handleResolveTicket(ticket, draft);
+                                          }}>
+                                            Marcar resuelto
+                                          </button>
+                                        </>
+                                      )}
                                       <button type="button" className="status-action-btn reject" onClick={() => handleDeleteTicket(ticket)}>Eliminar</button>
                                     </div>
+                                    {ticket.estado !== 'resuelto' && ticketResolutionDrafts[ticket.id]?.open && (
+                                      <div className="ticket-resolution-editor">
+                                        <textarea
+                                          value={ticketResolutionDrafts[ticket.id]?.comentario || ''}
+                                          onChange={(e) => setTicketResolutionDraft(ticket.id, { comentario: e.target.value })}
+                                          onPaste={(e) => { void handleTicketResolutionPaste(ticket.id, e); }}
+                                          placeholder="Comentario de resolución (opcional)"
+                                        />
+                                        <div
+                                          className={`ticket-upload-dropzone ${ticketResolutionDrafts[ticket.id]?.dragOver ? 'dragover' : ''}`}
+                                          onDragOver={(e) => { e.preventDefault(); setTicketResolutionDraft(ticket.id, { dragOver: true }); }}
+                                          onDragLeave={() => setTicketResolutionDraft(ticket.id, { dragOver: false })}
+                                          onDrop={(e) => { void handleTicketResolutionDrop(ticket.id, e); }}
+                                        >
+                                          <input
+                                            type="file"
+                                            accept="image/*"
+                                            multiple
+                                            onChange={(e) => { void handleTicketResolutionFiles(ticket.id, e.target.files || []); e.target.value = ''; }}
+                                          />
+                                          Arrastrá, pegá (Ctrl+V) o seleccioná imágenes para la resolución
+                                        </div>
+                                        <div className="ticket-resolution-hint">Podés resolver sin comentario ni imagen, o adjuntar evidencia opcional.</div>
+                                        {Array.isArray(ticketResolutionDrafts[ticket.id]?.imagenes) && ticketResolutionDrafts[ticket.id].imagenes.length > 0 && (
+                                          <div className="ticket-image-grid">
+                                            {ticketResolutionDrafts[ticket.id].imagenes.map((img, idx) => (<img key={`ticket-resolution-draft-${ticket.id}-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `res-draft-${idx + 1}`} onClick={() => openImageViewer(img.dataUrl)} />))}
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
                                   </div>
                                 )})}
                               </div>
@@ -12014,6 +12384,8 @@
                       </div>
                       <div className="field"><label>Estado</label><select value={historyStatusFilter} onChange={(e) => setHistoryStatusFilter(e.target.value)}><option value="todos">Todos</option>{historyStatusOptions.map((opt) => <option key={`history-status-${opt}`} value={opt}>{opt}</option>)}</select></div>
                       <div className="field"><label>Encargado</label><select value={historyCommercialFilter} onChange={(e) => setHistoryCommercialFilter(e.target.value)}><option value="todos">Todos</option>{historyCommercialOptions.map((opt) => <option key={`history-commercial-${opt}`} value={opt}>{opt}</option>)}</select></div>
+                      <div className="field"><label>Administración</label><select value={historyAdministrationFilter} onChange={(e) => setHistoryAdministrationFilter(e.target.value)}><option value="todos">Todas</option>{historyAdministrationOptions.map((opt) => <option key={`history-administration-${opt}`} value={opt}>{opt}</option>)}</select></div>
+                      <div className="field"><label>Fecha de alta</label><input type="date" value={historyDateFilter} onChange={(e) => setHistoryDateFilter(e.target.value)} /></div>
                       <div className="field"><label>Tipo</label><select value={historyTypeFilter} onChange={(e) => setHistoryTypeFilter(e.target.value)}><option value="todos">Todos</option>{historyTypeOptions.map((opt) => <option key={`history-type-${opt}`} value={opt}>{opt}</option>)}</select></div>
                     </div>
 
@@ -12039,6 +12411,7 @@
                                 <div className="service-card-meta-item"><span>📍</span><span>{row.direccionServicio || row.direccion || '-'}</span></div>
                                 <div className="service-card-meta-item"><span>👤</span><span>{row.representanteComercial || 'Sin encargado'}</span></div>
                                 <div className="service-card-meta-item"><span>📅</span><span>{row.fechaAltaServicio || row.fechaAlta || row.fechaEspecificaInicio || '-'}</span></div>
+                                <div className="service-card-meta-item"><span>🧭</span><span>{normalizeWorkflowStage(row.workflowStage) || 'Contrato Firmado'}</span></div>
                               </div>
                               <div className="service-card-actions">
                                 <button type="button" className="service-card-action-btn primary" onClick={(event) => { event.stopPropagation(); startEditService(row); }}>Editar</button>
@@ -12880,6 +13253,9 @@
                       const serviceTickets = ticketsHistorial
                         .filter((ticket) => String(ticket.clienteId || '').trim() === detailServiceId)
                         .slice(0, 8);
+                      const detailWorkflowStage = normalizeWorkflowStage(detailService.workflowStage) || 'Contrato Firmado';
+                      const detailWorkflowNextOptions = GNS_WORKFLOW_TRANSITIONS[detailWorkflowStage] || [];
+                      const workflowDraft = workflowTransitionDrafts[detailService.id] || getWorkflowDraftDefaults(detailService);
                       return (
                         <>
                           <div className="service-detail-modal-head">
@@ -12897,15 +13273,86 @@
                           </div>
 
                           {historyDetailTab === 'informacion' && (
-                            <div className="service-coord-detail-grid">
-                              <div className="service-detail-kpi"><small>🪪 ID Servicio</small><strong>{detailService.clienteId || '-'}</strong></div>
-                              <div className="service-detail-kpi"><small>🧩 Tipo</small><strong>{detailService.tipoServicioBrindar || '-'}</strong></div>
-                              <div className="service-detail-kpi"><small>📅 Fecha de alta</small><strong>{detailService.fechaAltaServicio || detailService.fechaAlta || detailService.fechaEspecificaInicio || '-'}</strong></div>
-                              <div className="service-detail-kpi"><small>👤 Encargado</small><strong>{detailService.representanteComercial || '-'}</strong></div>
-                              <div className="service-detail-kpi"><small>📦 Equipamiento</small><strong>{detailService.equipamientoInstalado || detailService.detalleEquipamiento || detailService.equipamientoRetirar || '-'}</strong></div>
-                              <div className="service-detail-kpi"><small>💵 Importe mensual</small><strong>{detailService.importeMensualServicioSinIva || detailService.importeMensualServicio || '-'}</strong></div>
-                              <div className="service-detail-kpi" style={{ gridColumn: '1 / -1' }}><small>📍 Dirección</small><strong>{detailService.direccionServicio || detailService.direccion || '-'}</strong></div>
-                            </div>
+                            <>
+                              <div className="service-coord-detail-grid">
+                                <div className="service-detail-kpi"><small>🪪 ID Servicio</small><strong>{detailService.clienteId || '-'}</strong></div>
+                                <div className="service-detail-kpi"><small>🧩 Tipo</small><strong>{detailService.tipoServicioBrindar || '-'}</strong></div>
+                                <div className="service-detail-kpi"><small>📅 Fecha de alta</small><strong>{detailService.fechaAltaServicio || detailService.fechaAlta || detailService.fechaEspecificaInicio || '-'}</strong></div>
+                                <div className="service-detail-kpi"><small>👤 Encargado</small><strong>{detailService.representanteComercial || '-'}</strong></div>
+                                <div className="service-detail-kpi"><small>📦 Equipamiento</small><strong>{detailService.equipamientoInstalado || detailService.detalleEquipamiento || detailService.equipamientoRetirar || '-'}</strong></div>
+                                <div className="service-detail-kpi"><small>💵 Importe mensual</small><strong>{detailService.importeMensualServicioSinIva || detailService.importeMensualServicio || '-'}</strong></div>
+                                <div className="service-detail-kpi"><small>🧭 Etapa actual</small><strong>{detailWorkflowStage}</strong></div>
+                                <div className="service-detail-kpi" style={{ gridColumn: '1 / -1' }}><small>📍 Dirección</small><strong>{detailService.direccionServicio || detailService.direccion || '-'}</strong></div>
+                              </div>
+                              <div className="service-coord-detail-card" style={{ marginTop: 10 }}>
+                                <h4 style={{ margin: '0 0 8px 0' }}>Workflow Operativo GNS</h4>
+                                <div className="service-coord-detail-grid">
+                                  <div className="field">
+                                    <label>Siguiente etapa</label>
+                                    <select value={workflowDraft.nextStage || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { nextStage: e.target.value })}>
+                                      <option value="">Seleccionar...</option>
+                                      {detailWorkflowNextOptions.map((stage) => <option key={`wf-next-${detailService.id}-${stage}`} value={stage}>{stage}</option>)}
+                                    </select>
+                                  </div>
+                                  <div className="field">
+                                    <label>Nota de transición</label>
+                                    <input value={workflowDraft.note || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { note: e.target.value })} type="text" placeholder="Observación (opcional)" />
+                                  </div>
+                                </div>
+
+                                {detailWorkflowStage === 'Pendiente a Agendar' && (workflowDraft.nextStage || '') === 'Agendado' && (
+                                  <div className="service-coord-detail-card" style={{ marginTop: 8 }}>
+                                    <h4 style={{ margin: '0 0 8px 0' }}>Checklist obligatorio · Pendiente a Agendar</h4>
+                                    {PENDING_TO_SCHEDULE_TASKS.map((task) => (
+                                      <label key={`workflow-check-${detailService.id}-${task.key}`} className="seller-filter-option" style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+                                        <input type="checkbox" checked={!!workflowDraft.checklist?.[task.key]} onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ checklist: { ...(prev.checklist || {}), [task.key]: e.target.checked } }))} />
+                                        <span>{task.label}</span>
+                                      </label>
+                                    ))}
+                                  </div>
+                                )}
+
+                                {(workflowDraft.nextStage || '') === 'Agendado' && (
+                                  <div className="service-coord-detail-grid" style={{ marginTop: 8 }}>
+                                    <div className="field"><label>Fecha agenda</label><input type="date" value={workflowDraft.fechaAgenda || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { fechaAgenda: e.target.value })} /></div>
+                                    <div className="field"><label>Horario</label><input type="time" value={workflowDraft.horarioAgenda || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { horarioAgenda: e.target.value })} /></div>
+                                    <div className="field"><label>Técnico asignado</label><input type="text" value={workflowDraft.tecnicoAsignado || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { tecnicoAsignado: e.target.value })} /></div>
+                                  </div>
+                                )}
+
+                                {(workflowDraft.nextStage || '') === 'Pausa' && (
+                                  <div className="service-coord-detail-grid" style={{ marginTop: 8 }}>
+                                    <div className="field"><label>Motivo de pausa</label><input type="text" value={workflowDraft.pauseReason || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { pauseReason: e.target.value })} /></div>
+                                    <div className="field" style={{ gridColumn: '1 / -1' }}><label>Comentario obligatorio</label><textarea value={workflowDraft.pauseComment || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { pauseComment: e.target.value })} /></div>
+                                  </div>
+                                )}
+
+                                {(workflowDraft.nextStage || '') === 'Finalizado Instalación' && (
+                                  <label className="seller-filter-option" style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                                    <input type="checkbox" checked={!!workflowDraft.installChecklistComplete} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { installChecklistComplete: e.target.checked })} />
+                                    <span>Checklist técnico de instalación validado</span>
+                                  </label>
+                                )}
+
+                                {(workflowDraft.nextStage || '') === 'Agendado Alta' && (
+                                  <div className="service-coord-detail-grid" style={{ marginTop: 8 }}>
+                                    <div className="field"><label>Fecha de alta</label><input type="date" value={workflowDraft.fechaAltaAgenda || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { fechaAltaAgenda: e.target.value })} /></div>
+                                    <div className="field"><label>Responsable del alta</label><input type="text" value={workflowDraft.responsableAlta || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { responsableAlta: e.target.value })} /></div>
+                                  </div>
+                                )}
+
+                                {(workflowDraft.nextStage || '') === 'Servicio Activo – Alta' && (
+                                  <label className="seller-filter-option" style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                                    <input type="checkbox" checked={!!workflowDraft.activationConfirmed} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { activationConfirmed: e.target.checked })} />
+                                    <span>Confirmo activación técnica en sistemas</span>
+                                  </label>
+                                )}
+
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+                                  <button type="button" className="save-btn" onClick={() => handleWorkflowTransition(detailService)} disabled={!detailWorkflowNextOptions.length}>Aplicar transición</button>
+                                </div>
+                              </div>
+                            </>
                           )}
 
                           {historyDetailTab === 'historial' && (
