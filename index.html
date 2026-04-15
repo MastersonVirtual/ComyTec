@@ -5210,6 +5210,15 @@
         background: linear-gradient(150deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
         box-shadow: 0 10px 26px rgba(0,0,0,.21);
       }
+      .ticket-item-card.clickable {
+        cursor: pointer;
+        transition: transform var(--motion-fast) ease, box-shadow var(--motion-fast) ease, border-color var(--motion-fast) ease;
+      }
+      .ticket-item-card.clickable:hover {
+        transform: translateY(-2px);
+        border-color: rgba(151,243,231,.65);
+        box-shadow: 0 16px 34px rgba(0,0,0,.24);
+      }
       .ticket-item-card .kv {
         overflow-wrap: anywhere;
         word-break: break-word;
@@ -5275,6 +5284,78 @@
         color: #d7f4ef;
         background: rgba(0,0,0,.12);
       }
+      .ticket-detail-modal {
+        width: min(980px, 96vw);
+        max-height: 90vh;
+        overflow: auto;
+        padding: 18px;
+        border-radius: 18px;
+        border: 1px solid rgba(169, 223, 217, .35);
+        background: linear-gradient(165deg, #0f2a2b 0%, #143738 65%, #102829 100%);
+        box-shadow: 0 30px 70px rgba(0,0,0,.45);
+      }
+      .ticket-detail-overlay {
+        background: rgba(3, 10, 10, .72) !important;
+        backdrop-filter: blur(5px) saturate(110%);
+      }
+      .ticket-detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(220, 255, 250, .2);
+      }
+      .ticket-detail-subtitle {
+        color: #cfeeed;
+        font-size: 13px;
+        margin: 4px 0 0;
+      }
+      .ticket-detail-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+      }
+      .ticket-detail-meta-card {
+        border: 1px solid rgba(220, 255, 250, .2);
+        border-radius: 12px;
+        padding: 10px;
+        background: rgba(255, 255, 255, .04);
+      }
+      .ticket-detail-meta-card small {
+        display: block;
+        color: #b8dedd;
+        margin-bottom: 5px;
+      }
+      .ticket-detail-meta-card strong {
+        display: block;
+        color: #f1fffd;
+        font-size: 15px;
+      }
+      .ticket-detail-section-title {
+        margin: 14px 0 6px;
+        font-size: 14px;
+        letter-spacing: .03em;
+        color: #dffbf8;
+      }
+      .ticket-detail-comment {
+        border: 1px solid rgba(220, 255, 250, .24);
+        background: rgba(6, 20, 21, .74);
+        border-radius: 12px;
+        padding: 12px;
+        min-height: 120px;
+        max-height: 280px;
+        overflow: auto;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        line-height: 1.45;
+        color: #efffff;
+      }
+      @media (max-width: 740px) {
+        .ticket-detail-modal { width: 98vw; max-height: 92vh; padding: 14px; }
+        .ticket-detail-comment { max-height: 220px; }
+      }
       @media (max-width: 1024px) {
         .ticket-filter-field { grid-column: span 6; }
         .ticket-filters-toolbar { width: min(700px, 96vw); }
@@ -5316,6 +5397,43 @@
         border: 1px solid rgba(230,255,253,.35);
         cursor: zoom-in;
       }
+      .ticket-pdf-assistant {
+        margin-top: 14px;
+        border: 1px solid rgba(151,243,231,.28);
+        border-radius: 14px;
+        padding: 12px;
+        background: linear-gradient(145deg, rgba(9, 80, 85, .36), rgba(6, 38, 40, .26));
+      }
+      .ticket-pdf-assistant-grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .ticket-pdf-assistant-grid .field { grid-column: span 12; }
+      .ticket-pdf-preview {
+        margin-top: 10px;
+        border: 1px solid rgba(220,255,250,.2);
+        border-radius: 12px;
+        padding: 10px;
+        background: rgba(5, 29, 31, .46);
+      }
+      .ticket-pdf-preview-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 8px;
+      }
+      .ticket-pdf-preview-item {
+        border: 1px solid rgba(220,255,250,.14);
+        border-radius: 10px;
+        padding: 8px;
+        background: rgba(255,255,255,.03);
+      }
+      .ticket-pdf-preview-item small { display: block; opacity: .75; }
+      .ticket-pdf-items-list {
+        margin: 8px 0 0;
+        padding-left: 18px;
+      }
+      .ticket-pdf-items-list li { margin-bottom: 6px; }
       .image-viewer-modal {
         position: fixed;
         inset: 0;
@@ -6121,6 +6239,15 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+      if (typeof pdfjsLib !== 'undefined' && pdfjsLib?.GlobalWorkerOptions) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      }
+      if (typeof pdfjsLib === 'undefined') {
+        console.error('PDF.js no se cargó correctamente');
+      }
+    </script>
     <script src="https://unpkg.com/lucide@latest"></script>
   </head>
   <body>
@@ -6147,32 +6274,26 @@
       const STATUS_OPTIONS = ['Pendiente', 'En proceso', 'Esperando información', 'Finalizado', 'Cancelado'];
       const SERVICE_TYPE_OPTIONS = ['Monitoreo', 'Portería virtual', 'Respuesta de alarma', 'Servicio Técnico', 'Control de acceso'];
       const GNS_WORKFLOW_STAGES = [
-        'Contrato Firmado',
-        'OS Cargada',
-        'Pendiente a Agendar',
-        'Agendado',
-        'Instalando – Ongoing',
-        'Pausa',
-        'Finalizado Instalación',
-        'Agendado Alta',
-        'Servicio Activo – Alta',
+        'Pendiente de aprobación – Coordinación de Instalaciones',
+        'Rechazado',
+        'En proceso de instalación',
+        'Alta de Servicio en configuración',
+        'Activo',
       ];
       const GNS_WORKFLOW_TRANSITIONS = Object.freeze({
-        'Contrato Firmado': ['OS Cargada'],
-        'OS Cargada': ['Pendiente a Agendar'],
-        'Pendiente a Agendar': ['Agendado'],
-        Agendado: ['Instalando – Ongoing', 'Pausa'],
-        'Instalando – Ongoing': ['Pausa', 'Finalizado Instalación'],
-        Pausa: ['Agendado', 'Instalando – Ongoing'],
-        'Finalizado Instalación': ['Agendado Alta'],
-        'Agendado Alta': ['Servicio Activo – Alta'],
-        'Servicio Activo – Alta': [],
+        'Pendiente de aprobación – Coordinación de Instalaciones': ['En proceso de instalación', 'Rechazado'],
+        Rechazado: ['Pendiente de aprobación – Coordinación de Instalaciones'],
+        'En proceso de instalación': ['Alta de Servicio en configuración'],
+        'Alta de Servicio en configuración': ['Activo'],
+        Activo: [],
       });
-      const PENDING_TO_SCHEDULE_TASKS = [
-        { key: 'comunicacionInicial', label: 'Comunicación inicial enviada al cliente' },
-        { key: 'pulsosVerificados', label: 'Pulsos solicitados/verificados (si aplica)' },
-        { key: 'proveedorElegido', label: 'Proveedor de instalación elegido' },
-        { key: 'tareasTecnicas', label: 'Tareas operativas técnicas completadas' },
+      const INSTALLATION_REQUIRED_TASKS = [
+        { key: 'mailInicioInstalacion', label: 'Mail de inicio de instalación' },
+        { key: 'diaMarcacion', label: 'Día de marcación' },
+        { key: 'equipoSvideoAsignado', label: 'Equipo de Svideo asignado' },
+        { key: 'pulsoPorton', label: 'Instalación de pulso de portón' },
+        { key: 'pulsoPortero', label: 'Instalación de pulso de portero' },
+        { key: 'agendaAlta', label: 'Agenda de alta' },
       ];
 
       function normalizeServiceType(value) {
@@ -7980,6 +8101,13 @@
         const [ticketFilterOpen, setTicketFilterOpen] = useState(false);
         const [ticketReassignModal, setTicketReassignModal] = useState({ open: false, ticket: null, assigneeKey: '' });
         const [ticketResolutionDrafts, setTicketResolutionDrafts] = useState({});
+        const [ticketPdfFile, setTicketPdfFile] = useState(null);
+        const [ticketPdfParsing, setTicketPdfParsing] = useState(false);
+        const [ticketPdfPreview, setTicketPdfPreview] = useState(null);
+        const [ticketPdfError, setTicketPdfError] = useState('');
+        const [ticketPdfCreating, setTicketPdfCreating] = useState(false);
+        const [ticketPdfRecordPreview, setTicketPdfRecordPreview] = useState(null);
+        const [ticketDetailModal, setTicketDetailModal] = useState({ open: false, ticket: null });
         const seenRowIdsRef = useRef(new Set());
         const seenOperationalAlertsRef = useRef(new Set());
         const topServicesLeaderRef = useRef('');
@@ -8266,8 +8394,8 @@
 
         function getDefaultWorkflowStage(action = '') {
           const clean = String(action || '').trim();
-          if (clean === 'Nuevo Servicio') return 'Contrato Firmado';
-          return 'OS Cargada';
+          if (clean === 'Nuevo Servicio') return 'Pendiente de aprobación – Coordinación de Instalaciones';
+          return 'Pendiente de aprobación – Coordinación de Instalaciones';
         }
 
         function canTransitionWorkflowStage(fromStage, toStage) {
@@ -8291,28 +8419,22 @@
 
         function stageToOperationalStatus(stage = '') {
           const normalized = normalizeWorkflowStage(stage);
-          if (normalized === 'Instalando – Ongoing') return 'En proceso';
-          if (normalized === 'Finalizado Instalación' || normalized === 'Servicio Activo – Alta') return 'Finalizado';
-          if (normalized === 'Pausa') return 'Esperando información';
+          if (normalized === 'En proceso de instalación' || normalized === 'Alta de Servicio en configuración') return 'En proceso';
+          if (normalized === 'Activo') return 'Finalizado';
+          if (normalized === 'Rechazado') return 'Rechazado';
           return 'Pendiente';
         }
 
         function getWorkflowDraftDefaults(service = {}) {
-          const currentStage = normalizeWorkflowStage(service.workflowStage) || 'Contrato Firmado';
+          const currentStage = normalizeWorkflowStage(service.workflowStage) || 'Pendiente de aprobación – Coordinación de Instalaciones';
           const nextOptions = GNS_WORKFLOW_TRANSITIONS[currentStage] || [];
+          const existingInstallTasks = service.workflowInstallTasks || {};
           return {
             nextStage: nextOptions[0] || '',
             note: '',
-            pauseReason: '',
-            pauseComment: '',
-            installChecklistComplete: false,
-            activationConfirmed: false,
-            fechaAgenda: '',
-            horarioAgenda: '',
-            tecnicoAsignado: '',
-            fechaAltaAgenda: '',
-            responsableAlta: '',
-            checklist: PENDING_TO_SCHEDULE_TASKS.reduce((acc, task) => ({ ...acc, [task.key]: false }), {}),
+            installTasks: INSTALLATION_REQUIRED_TASKS.reduce((acc, task) => ({ ...acc, [task.key]: !!existingInstallTasks[task.key] }), {}),
+            rejectionReason: String(service.workflowRejectionReason || '').trim(),
+            clientRecordCompleted: !!service.workflowClientRecordCompleted,
           };
         }
 
@@ -10221,7 +10343,7 @@
         async function handleWorkflowTransition(service) {
           if (!service?.id) return;
           const serviceId = String(service.id || '').trim();
-          const currentStage = normalizeWorkflowStage(service.workflowStage) || 'Contrato Firmado';
+          const currentStage = normalizeWorkflowStage(service.workflowStage) || 'Pendiente de aprobación – Coordinación de Instalaciones';
           const draft = workflowTransitionDrafts[serviceId] || getWorkflowDraftDefaults(service);
           const nextStage = normalizeWorkflowStage(draft.nextStage);
           if (!nextStage) {
@@ -10233,31 +10355,19 @@
             return;
           }
 
-          if (currentStage === 'Pendiente a Agendar' && nextStage === 'Agendado') {
-            const completed = PENDING_TO_SCHEDULE_TASKS.every((task) => !!draft.checklist?.[task.key]);
-            if (!completed) {
-              setNotificacion({ mensaje: 'Completá todas las tareas obligatorias antes de agendar.', tipo: 'warn' });
+          if (nextStage === 'Rechazado' && !String(draft.rejectionReason || '').trim()) {
+            setNotificacion({ mensaje: 'Para rechazar, el motivo de rechazo es obligatorio.', tipo: 'warn' });
+            return;
+          }
+          if (nextStage === 'Alta de Servicio en configuración') {
+            const allDone = INSTALLATION_REQUIRED_TASKS.every((task) => !!draft.installTasks?.[task.key]);
+            if (!allDone) {
+              setNotificacion({ mensaje: 'Completá todas las tareas de instalación antes de continuar.', tipo: 'warn' });
               return;
             }
           }
-          if (nextStage === 'Agendado' && (!draft.fechaAgenda || !draft.horarioAgenda || !draft.tecnicoAsignado)) {
-            setNotificacion({ mensaje: 'Para Agendado debés indicar fecha, horario y técnico asignado.', tipo: 'warn' });
-            return;
-          }
-          if (nextStage === 'Pausa' && (!draft.pauseReason || !String(draft.pauseComment || '').trim())) {
-            setNotificacion({ mensaje: 'En Pausa el motivo y comentario son obligatorios.', tipo: 'warn' });
-            return;
-          }
-          if (nextStage === 'Finalizado Instalación' && !draft.installChecklistComplete) {
-            setNotificacion({ mensaje: 'Confirmá el checklist de instalación para finalizar.', tipo: 'warn' });
-            return;
-          }
-          if (nextStage === 'Agendado Alta' && (!draft.fechaAltaAgenda || !String(draft.responsableAlta || '').trim())) {
-            setNotificacion({ mensaje: 'Para Agendado Alta completá fecha y responsable.', tipo: 'warn' });
-            return;
-          }
-          if (nextStage === 'Servicio Activo – Alta' && !draft.activationConfirmed) {
-            setNotificacion({ mensaje: 'Confirmá la activación técnica para cerrar el proceso.', tipo: 'warn' });
+          if (nextStage === 'Activo' && !draft.clientRecordCompleted) {
+            setNotificacion({ mensaje: 'Completá la ficha del cliente para activar el servicio.', tipo: 'warn' });
             return;
           }
 
@@ -10272,16 +10382,10 @@
             workflowStage: nextStage,
             workflowAvailableNextStages: GNS_WORKFLOW_TRANSITIONS[nextStage] || [],
             workflowTimeline: [...existingTimeline, workflowEvent],
-            workflowChecklistPendienteAgendar: draft.checklist || {},
-            workflowPauseReason: draft.pauseReason || '',
-            workflowPauseComment: draft.pauseComment || '',
-            workflowInstallChecklistComplete: !!draft.installChecklistComplete,
-            workflowActivationConfirmed: !!draft.activationConfirmed,
-            workflowFechaAgendaInstalacion: draft.fechaAgenda || '',
-            workflowHorarioAgendaInstalacion: draft.horarioAgenda || '',
-            workflowTecnicoAsignado: draft.tecnicoAsignado || '',
-            workflowFechaAltaAgenda: draft.fechaAltaAgenda || '',
-            workflowResponsableAlta: draft.responsableAlta || '',
+            workflowInstallTasks: draft.installTasks || {},
+            workflowRejectionReason: nextStage === 'Rechazado' ? String(draft.rejectionReason || '').trim() : (nextStage === 'Pendiente de aprobación – Coordinación de Instalaciones' ? '' : (service.workflowRejectionReason || '')),
+            workflowClientRecordCompleted: !!draft.clientRecordCompleted,
+            workflowCurrentOwner: nextStage === 'Rechazado' ? 'Comercial' : (nextStage === 'Pendiente de aprobación – Coordinación de Instalaciones' ? 'Coordinación de Instalaciones' : 'Operaciones'),
             status: stageToOperationalStatus(nextStage),
             estado: stageToOperationalStatus(nextStage),
             actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
@@ -10334,6 +10438,11 @@
               return alert('Completá al menos: Nombre del servicio, Dirección y Tipo de servicio.');
             }
             Object.assign(doc, { ...servicioForm, formulario: 'nuevo-servicio-optimizado', creadoPor: servicioForm.creadoPor || currentUserName, auditoriaApertura: formOpenAudit });
+            if (tipoAccion === 'Nuevo Servicio') {
+              doc.workflowStage = 'Pendiente de aprobación – Coordinación de Instalaciones';
+              doc.status = 'Pendiente';
+              doc.estado = 'Pendiente';
+            }
           }
           if (grupo === 'obra') {
             if (!obraForm.razonSocial || !obraForm.rut || !obraForm.mailFacturacion || !obraForm.nombreServicio || !obraForm.fechaAlta) {
@@ -10467,6 +10576,10 @@
               const shouldAppendWorkflowEvent = nextWorkflowStage !== currentWorkflowStage;
               payload.workflowStage = nextWorkflowStage;
               payload.workflowAvailableNextStages = GNS_WORKFLOW_TRANSITIONS[nextWorkflowStage] || [];
+              payload.workflowCurrentOwner = nextWorkflowStage === 'Rechazado' ? 'Comercial' : (nextWorkflowStage === 'Pendiente de aprobación – Coordinación de Instalaciones' ? 'Coordinación de Instalaciones' : 'Operaciones');
+              payload.workflowInstallTasks = payload.workflowInstallTasks || targetSource?.workflowInstallTasks || INSTALLATION_REQUIRED_TASKS.reduce((acc, task) => ({ ...acc, [task.key]: false }), {});
+              payload.workflowRejectionReason = payload.workflowRejectionReason || targetSource?.workflowRejectionReason || '';
+              payload.workflowClientRecordCompleted = !!(payload.workflowClientRecordCompleted || targetSource?.workflowClientRecordCompleted);
               payload.workflowTimeline = shouldAppendWorkflowEvent
                 ? [...existingWorkflowTimeline, createWorkflowEvent({
                   from: currentWorkflowStage,
@@ -10510,6 +10623,10 @@
             const initialWorkflowStage = normalizeWorkflowStage(doc.workflowStage) || getDefaultWorkflowStage(tipoAccion);
             createPayload.workflowStage = initialWorkflowStage;
             createPayload.workflowAvailableNextStages = GNS_WORKFLOW_TRANSITIONS[initialWorkflowStage] || [];
+            createPayload.workflowCurrentOwner = initialWorkflowStage === 'Pendiente de aprobación – Coordinación de Instalaciones' ? 'Coordinación de Instalaciones' : 'Operaciones';
+            createPayload.workflowInstallTasks = INSTALLATION_REQUIRED_TASKS.reduce((acc, task) => ({ ...acc, [task.key]: false }), {});
+            createPayload.workflowRejectionReason = '';
+            createPayload.workflowClientRecordCompleted = false;
             createPayload.workflowTimeline = [
               createWorkflowEvent({
                 from: '',
@@ -10988,6 +11105,295 @@
           return mapped.filter(Boolean);
         }
 
+        function cleanLine(line = '') {
+          return String(line || '').replace(/\s+/g, ' ').trim();
+        }
+
+        function normalizeLines(text = '') {
+          return String(text || '')
+            .split(/\r?\n/)
+            .map(cleanLine)
+            .filter(Boolean);
+        }
+
+        function escapeRegex(str = '') {
+          return String(str || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function isLikelyLabel(text = '') {
+          const labels = [
+            'Número:', 'Fecha:', 'Moneda:', 'Estado:', 'Nombre:',
+            'Dirección:', 'Localidad:', 'Vendedor:',
+          ];
+          return labels.some((label) => String(text || '').toLowerCase().startsWith(label.toLowerCase()));
+        }
+
+        function getTextAfterLabel(lines = [], label = '') {
+          const idx = lines.findIndex((line) => String(line || '').toLowerCase().startsWith(String(label || '').toLowerCase()));
+          if (idx === -1) return '';
+
+          const line = String(lines[idx] || '');
+          const sameLine = line.replace(new RegExp(`^${escapeRegex(label)}`, 'i'), '').trim();
+          if (sameLine) return sameLine;
+
+          for (let i = idx + 1; i < lines.length; i += 1) {
+            const candidate = cleanLine(lines[i]);
+            if (!candidate) continue;
+            if (isLikelyLabel(candidate)) continue;
+            return candidate;
+          }
+          return '';
+        }
+
+        function extractTotal(text = '') {
+          const totalBlock = String(text || '').match(/Total a Pagar\s+((?:\d{1,3}(?:\.\d{3})*,\d{2}\s+)+)/i);
+          if (totalBlock) {
+            const nums = String(totalBlock[1] || '').match(/\d{1,3}(?:\.\d{3})*,\d{2}/g);
+            if (nums && nums.length) return nums[nums.length - 1];
+          }
+          const allNums = String(text || '').match(/\d{1,3}(?:\.\d{3})*,\d{2}/g);
+          if (allNums && allNums.length) return allNums[allNums.length - 1];
+          return '';
+        }
+
+        function extractVendedor(text = '') {
+          const match = String(text || '').match(/Vendedor:\s*([A-Z0-9._ -]+)/i);
+          return match ? String(match[1] || '').trim() : '';
+        }
+
+        function extractConcepto(text = '') {
+          const match = String(text || '').match(/Vendedor:\s*[A-Z0-9._ -]+\s+(.+)$/i);
+          if (match) return String(match[1] || '').trim();
+          return '';
+        }
+
+        function extractGeneralFields(lines = [], rawText = '') {
+          let numero = getTextAfterLabel(lines, 'Número:');
+          let fecha = getTextAfterLabel(lines, 'Fecha:');
+          let moneda = getTextAfterLabel(lines, 'Moneda:');
+          let estado = getTextAfterLabel(lines, 'Estado:');
+          let cliente = getTextAfterLabel(lines, 'Nombre:');
+          let direccion = getTextAfterLabel(lines, 'Dirección:');
+          let localidad = getTextAfterLabel(lines, 'Localidad:');
+          let vendedor = getTextAfterLabel(lines, 'Vendedor:');
+          const total = extractTotal(rawText);
+          const concepto = extractConcepto(rawText);
+
+          if (!numero) {
+            const m = String(rawText || '').match(/Número:\s*([A-Z0-9-]+)/i);
+            if (m) numero = String(m[1] || '').trim();
+          }
+          if (!fecha) {
+            const m = String(rawText || '').match(/Fecha:\s*(\d{2}\/\d{2}\/\d{4})/i);
+            if (m) fecha = String(m[1] || '').trim();
+          }
+          if (!moneda) {
+            const m = String(rawText || '').match(/Moneda:\s*([A-Z]+)/i);
+            if (m) moneda = String(m[1] || '').trim();
+          }
+          if (!estado) {
+            const m = String(rawText || '').match(/Estado:\s*([A-Za-zÁÉÍÓÚáéíóúÑñ ]+)/i);
+            if (m) estado = String(m[1] || '').trim();
+          }
+          if (!cliente) {
+            const m = String(rawText || '').match(/Nombre:\s*(.*?)\s+Dirección:/i);
+            if (m) cliente = String(m[1] || '').trim();
+          }
+          if (!direccion) {
+            const m = String(rawText || '').match(/Dirección:\s*(.*?)\s+Localidad:/i);
+            if (m) direccion = String(m[1] || '').trim();
+          }
+          if (!localidad) {
+            const m = String(rawText || '').match(/Localidad:\s*(.*?)\s+Cant\s+C[oó]digo/i);
+            if (m) localidad = String(m[1] || '').trim();
+          }
+          if (!vendedor) vendedor = extractVendedor(rawText);
+          if (vendedor) vendedor = vendedor.replace(/^Vendedor:\s*/i, '').trim();
+
+          return {
+            numero: numero || '',
+            fecha: fecha || '',
+            moneda: moneda || '',
+            estado: estado || '',
+            cliente: cliente || '',
+            direccion: direccion || '',
+            localidad: localidad || '',
+            vendedor: vendedor || '',
+            concepto: concepto || '',
+            total: total || '',
+          };
+        }
+
+        function extractItemsFromText(text = '') {
+          const items = [];
+          const normalized = String(text || '').replace(/\s+/g, ' ').trim();
+          if (!normalized) return items;
+
+          const headerMatch = normalized.match(/Cant(?:idad)?\s+C[oó]digo(?:\s*-\s*Detalle)?[\s\S]*?Importe/i);
+          let workingText = normalized;
+          if (headerMatch) {
+            const startIndex = (headerMatch.index || 0) + String(headerMatch[0] || '').length;
+            workingText = normalized.slice(startIndex);
+          }
+
+          const endMarkers = [/Subtot/i, /Subtotal/i, /Total a Pagar/i, /Vendedor:/i, /Estado:/i];
+          let endIndex = workingText.length;
+          endMarkers.forEach((marker) => {
+            const match = workingText.match(marker);
+            if (match && typeof match.index === 'number' && match.index < endIndex) endIndex = match.index;
+          });
+          workingText = workingText.slice(0, endIndex).trim();
+
+          const regex = /(\d+)\s+([A-Z0-9][A-Z0-9-]*)\s+(.+?)\s+(\d{1,2})\s+(\d{1,3}(?:\.\d{3})*,\d{2})\s+(\d{1,3}(?:\.\d{3})*,\d{2})(?=\s+\d+\s+[A-Z0-9][A-Z0-9-]*\s+|$)/g;
+          let match;
+          while ((match = regex.exec(workingText)) !== null) {
+            items.push({
+              cantidad: parseInt(match[1], 10),
+              codigo: String(match[2] || '').trim(),
+              detalle: cleanLine(match[3] || ''),
+              iva: parseInt(match[4], 10),
+              precio: String(match[5] || '').trim(),
+              importe: String(match[6] || '').trim(),
+            });
+          }
+          return items;
+        }
+
+        function buildRecord(fields = {}, items = [], rawText = '') {
+          return {
+            numero: fields.numero || '',
+            fecha: fields.fecha || '',
+            moneda: fields.moneda || '',
+            estado: fields.estado || '',
+            cliente: fields.cliente || '',
+            direccion: fields.direccion || '',
+            localidad: fields.localidad || '',
+            vendedor: fields.vendedor || '',
+            concepto: fields.concepto || '',
+            total: fields.total || '',
+            items: Array.isArray(items) ? items : [],
+            rawText: rawText || '',
+            fechaCarga: new Date().toISOString(),
+          };
+        }
+
+        async function extractTextFromPDF(file) {
+          const arrayBuffer = await file.arrayBuffer();
+          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          let fullText = '';
+          for (let pageNum = 1; pageNum <= pdf.numPages; pageNum += 1) {
+            const page = await pdf.getPage(pageNum);
+            const textContent = await page.getTextContent();
+            const pageText = (textContent.items || []).map((item) => item.str).join(' ');
+            fullText += `${pageText}\n`;
+          }
+          return fullText;
+        }
+
+        async function handleProcessTicketPdf() {
+          if (!ticketPdfFile) {
+            setTicketPdfError('Seleccioná un PDF antes de procesar.');
+            setTicketPdfPreview(null);
+            setTicketPdfRecordPreview(null);
+            return;
+          }
+          setTicketPdfParsing(true);
+          setTicketPdfError('');
+          setTicketPdfPreview(null);
+          setTicketPdfRecordPreview(null);
+          try {
+            if (!String(ticketPdfFile.type || '').includes('pdf')) {
+              throw new Error('invalid_pdf');
+            }
+            const pdfjsLib = window?.pdfjsLib;
+            if (!pdfjsLib?.getDocument) {
+              throw new Error('pdf_lib_missing');
+            }
+            const fullText = await extractTextFromPDF(ticketPdfFile);
+            if (!String(fullText || '').trim()) {
+              throw new Error('pdf_without_text');
+            }
+            const lines = normalizeLines(fullText);
+            const fields = extractGeneralFields(lines, fullText);
+            const items = extractItemsFromText(fullText);
+            const record = buildRecord(fields, items, fullText);
+            const hasSomeData = [record.numero, record.fecha, record.cliente, record.total, record.concepto].some((v) => String(v || '').trim()) || record.items.length > 0;
+            if (!hasSomeData) {
+              setTicketPdfError('Se leyó el PDF, pero no se detectaron campos útiles. Revisá el formato del documento.');
+            }
+            setTicketPdfPreview(record);
+            setTicketPdfRecordPreview(record);
+          } catch (error) {
+            console.error('Error procesando PDF para ticket:', error);
+            if (String(error?.message || '') === 'pdf_without_text') {
+              setTicketPdfError('El PDF no contiene texto legible (parece escaneado o vacío).');
+            } else if (String(error?.message || '') === 'invalid_pdf') {
+              setTicketPdfError('El archivo seleccionado no es un PDF válido.');
+            } else if (String(error?.message || '') === 'pdf_lib_missing') {
+              setTicketPdfError('No se pudo procesar el PDF seleccionado. Verificá el archivo e intentá nuevamente.');
+            } else {
+              setTicketPdfError('No fue posible leer el PDF. Verificá el archivo e intentá nuevamente.');
+            }
+          } finally {
+            setTicketPdfParsing(false);
+          }
+        }
+
+        async function handleCreateTicketFromPdf() {
+          if (!ticketPdfPreview) {
+            setTicketPdfError('Primero procesá un PDF y revisá la vista previa.');
+            return;
+          }
+          setTicketPdfCreating(true);
+          try {
+            const ticketCodigo = generateTicketCode('PDF');
+            const comentarioBase = [
+              ticketPdfPreview.concepto ? `Concepto: ${ticketPdfPreview.concepto}` : '',
+              ticketPdfPreview.total ? `Total: ${ticketPdfPreview.total}` : '',
+              ticketPdfPreview.cliente ? `Cliente: ${ticketPdfPreview.cliente}` : '',
+              ticketPdfPreview.numero ? `Número: ${ticketPdfPreview.numero}` : '',
+            ].filter(Boolean).join(' · ');
+            await db.collection('tickets_app').add({
+              ticketCodigo,
+              origen: 'pdf-asistido',
+              creadoPorUid: user?.uid || '',
+              creadoPorEmail: user?.email || '',
+              creadoPorNombre: currentUserName,
+              fechaHoraLocal: formatUruguayDateTime(),
+              comentario: comentarioBase || 'Ticket creado desde PDF asistido',
+              prioridad: ticketPrioridad || 'Media',
+              estado: 'pendiente',
+              imagenesAdjuntas: [],
+              pdfAsistido: {
+                archivoNombre: ticketPdfFile?.name || '',
+                numero: ticketPdfPreview.numero || '',
+                fecha: ticketPdfPreview.fecha || '',
+                moneda: ticketPdfPreview.moneda || '',
+                estado: ticketPdfPreview.estado || '',
+                cliente: ticketPdfPreview.cliente || '',
+                direccion: ticketPdfPreview.direccion || '',
+                localidad: ticketPdfPreview.localidad || '',
+                vendedor: ticketPdfPreview.vendedor || '',
+                concepto: ticketPdfPreview.concepto || '',
+                total: ticketPdfPreview.total || '',
+                items: Array.isArray(ticketPdfPreview.items) ? ticketPdfPreview.items : [],
+                rawText: ticketPdfPreview.rawText || '',
+              },
+              creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+            setTicketPdfFile(null);
+            setTicketPdfPreview(null);
+            setTicketPdfRecordPreview(null);
+            setTicketPdfError('');
+            setNotificacion({ mensaje: `✔ Ticket creado desde PDF (${ticketCodigo})`, tipo: 'ok' });
+          } catch (error) {
+            console.error('Error creando ticket desde PDF:', error);
+            setTicketPdfError('No se pudo crear el ticket desde PDF.');
+          } finally {
+            setTicketPdfCreating(false);
+          }
+        }
+
         async function handleTicketFilesInput(fileList) {
           const parsed = await readImageFiles(fileList);
           if (parsed.length === 0) {
@@ -11052,6 +11458,11 @@
           const next = String(src || '').trim();
           if (!next) return;
           setImageViewerSrc(next);
+        }
+
+        function openTicketDetailModal(ticket) {
+          if (!ticket) return;
+          setTicketDetailModal({ open: true, ticket });
         }
 
         async function handleCreateTicket(e) {
@@ -11187,7 +11598,7 @@
             const matchesTo = !ticketFilterTo || (ticketDateIso && ticketDateIso <= ticketFilterTo);
             const statusLabel = getTicketStatusLabel(ticket);
             const matchesStatus = ticketFilterStatus === 'todos' || statusLabel === ticketFilterStatus;
-            const originLabel = ticket.origen === 'form-gestion' ? 'formulario' : 'manual';
+            const originLabel = ticket.origen === 'form-gestion' ? 'formulario' : (ticket.origen === 'pdf-asistido' ? 'pdf' : 'manual');
             const matchesOrigin = ticketFilterOrigen === 'todos' || originLabel === ticketFilterOrigen;
             return matchesFrom && matchesTo && matchesStatus && matchesOrigin;
           });
@@ -11869,9 +12280,9 @@
                           {ticketSearchResults.length === 0 ? (
                             <div className="kv">No se encontraron tickets para esa búsqueda.</div>
                           ) : ticketSearchResults.map((ticket) => (
-                            <article className="chat-search-result" key={`ticket-search-${ticket.id}`}>
+                            <article className="chat-search-result" key={`ticket-search-${ticket.id}`} role="button" tabIndex={0} onClick={() => openTicketDetailModal(ticket)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openTicketDetailModal(ticket); }}>
                               <strong>{ticket.ticketCodigo || `TICKET-${ticket.id}`}</strong>
-                              <div className="kv"><b>Tipo:</b> {ticket.origen === 'form-gestion' ? 'Ticket por gestión (form)' : 'Ticket manual'}</div>
+                              <div className="kv"><b>Tipo:</b> {ticket.origen === 'form-gestion' ? 'Ticket por gestión (form)' : ticket.origen === 'pdf-asistido' ? 'Ticket asistido por PDF' : 'Ticket manual'}</div>
                               <div className="kv"><b>Cliente ID:</b> {ticket.clienteId || '-'}</div>
                               <div className="kv"><b>Servicio:</b> {ticket.nombreServicio || '-'}</div>
                               <div className="kv"><b>Operación:</b> {ticket.operacionId || '-'}</div>
@@ -11928,6 +12339,88 @@
                             {ticketImagenes.map((img, idx) => (<img key={`ticket-img-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `img-${idx + 1}`} onClick={() => openImageViewer(img.dataUrl)} />))}
                           </div>
                         )}
+                        <div className="ticket-pdf-assistant">
+                          <h4 style={{ margin: '0 0 6px' }}>Prueba: asistente de ticket por PDF</h4>
+                          <div className="hint" style={{ marginBottom: 8 }}>Subí un PDF, procesalo y revisá los datos detectados antes de crear el ticket.</div>
+                          <div className="ticket-pdf-assistant-grid">
+                            <div className="field">
+                              <label>Archivo PDF</label>
+                              <input
+                                type="file"
+                                accept="application/pdf,.pdf"
+                                onChange={(e) => {
+                                  const nextFile = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+                                  setTicketPdfFile(nextFile);
+                                  setTicketPdfPreview(null);
+                                  setTicketPdfRecordPreview(null);
+                                  setTicketPdfError('');
+                                }}
+                              />
+                            </div>
+                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                              <button type="button" className="status-action-btn chat-action-btn" onClick={() => { void handleProcessTicketPdf(); }} disabled={!ticketPdfFile || ticketPdfParsing}>
+                                {ticketPdfParsing ? 'Procesando PDF...' : 'Procesar PDF'}
+                              </button>
+                              <button type="button" className="status-action-btn accept" onClick={() => { void handleCreateTicketFromPdf(); }} disabled={!ticketPdfPreview || ticketPdfCreating}>
+                                {ticketPdfCreating ? 'Creando ticket...' : 'Confirmar y crear ticket'}
+                              </button>
+                            </div>
+                          </div>
+                          {ticketPdfError && <div className="hint" style={{ color: '#fecaca', marginTop: 8 }}>{ticketPdfError}</div>}
+                          {ticketPdfPreview && (
+                            <div className="ticket-pdf-preview">
+                              <div className="ticket-pdf-preview-grid">
+                                <div className="ticket-pdf-preview-item"><small>Número</small><strong>{ticketPdfPreview.numero || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Fecha</small><strong>{ticketPdfPreview.fecha || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Moneda</small><strong>{ticketPdfPreview.moneda || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Estado</small><strong>{ticketPdfPreview.estado || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Nombre / Cliente</small><strong>{ticketPdfPreview.cliente || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Dirección</small><strong>{ticketPdfPreview.direccion || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Localidad</small><strong>{ticketPdfPreview.localidad || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Vendedor</small><strong>{ticketPdfPreview.vendedor || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Concepto</small><strong>{ticketPdfPreview.concepto || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Total</small><strong>{ticketPdfPreview.total || '-'}</strong></div>
+                              </div>
+                              <h5 style={{ margin: '10px 0 4px' }}>Ítems detectados ({ticketPdfPreview.items?.length || 0})</h5>
+                              {Array.isArray(ticketPdfPreview.items) && ticketPdfPreview.items.length > 0 ? (
+                                <div style={{ overflowX: 'auto' }}>
+                                  <table className="form-history-table" style={{ marginTop: 6 }}>
+                                    <thead>
+                                      <tr>
+                                        <th>Cantidad</th>
+                                        <th>Código</th>
+                                        <th>Detalle</th>
+                                        <th>IVA</th>
+                                        <th>Precio</th>
+                                        <th>Importe</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {ticketPdfPreview.items.map((item, idx) => (
+                                        <tr key={`pdf-item-${idx}`}>
+                                          <td>{item.cantidad ?? '-'}</td>
+                                          <td>{item.codigo || '-'}</td>
+                                          <td>{item.detalle || '-'}</td>
+                                          <td>{item.iva ?? '-'}</td>
+                                          <td>{item.precio || '-'}</td>
+                                          <td>{item.importe || '-'}</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              ) : (
+                                <div className="hint">No se detectaron ítems completos. Podés continuar y ajustar luego si hace falta.</div>
+                              )}
+                              {ticketPdfRecordPreview && (
+                                <details style={{ marginTop: 10 }}>
+                                  <summary style={{ cursor: 'pointer' }}>Ver objeto final generado (JSON)</summary>
+                                  <pre style={{ whiteSpace: 'pre-wrap', marginTop: 8, fontSize: 12 }}>{JSON.stringify(ticketPdfRecordPreview, null, 2)}</pre>
+                                </details>
+                              )}
+                            </div>
+                          )}
+                        </div>
                         <button className="ticket-create-btn" type="submit" disabled={ticketSaving}>
                           <span>➕</span>
                           <span>{ticketSaving ? 'Enviando...' : 'Crear ticket'}</span>
@@ -11965,6 +12458,7 @@
                                 <select value={ticketFilterOrigen} onChange={(e) => setTicketFilterOrigen(e.target.value)}>
                                   <option value="todos">Todos</option>
                                   <option value="manual">Creado manualmente</option>
+                                  <option value="pdf">Creado desde PDF asistido</option>
                                   <option value="formulario">Desde formulario</option>
                                 </select>
                               </div>
@@ -11981,7 +12475,7 @@
                                 {group.items.map((ticket) => {
                                   const ticketStatusLabel = getTicketStatusLabel(ticket);
                                   return (
-                                  <div key={ticket.id} className="ticket-item-card">
+                                  <div key={ticket.id} className="ticket-item-card clickable" role="button" tabIndex={0} onClick={() => openTicketDetailModal(ticket)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openTicketDetailModal(ticket); }}>
                                     <div className="ticket-card-header">
                                       <h5 className="ticket-card-title">{ticket.ticketCodigo || `TICKET-${ticket.id}`}</h5>
                                       <span className={`status-chip-inline ${
@@ -11999,7 +12493,7 @@
                                       <div className="kv"><b>Fecha:</b> {ticket.fechaHoraLocal || formatRequestDateTime(ticket.creadoEn)}</div>
                                       <div className="kv"><b>Prioridad:</b> {ticket.prioridad || '-'}</div>
                                       <div className="kv"><b>Asignado:</b> {ticket.asignadoANombre || ticket.asignadoAEmail || 'Sin asignar'}</div>
-                                      <div className="kv"><b>Origen:</b> {ticket.origen === 'form-gestion' ? 'Formulario' : 'Manual'}</div>
+                                      <div className="kv"><b>Origen:</b> {ticket.origen === 'form-gestion' ? 'Formulario' : ticket.origen === 'pdf-asistido' ? 'PDF asistido' : 'Manual'}</div>
                                       {ticket.origen === 'form-gestion' && <div className="kv"><b>Cliente ID:</b> {ticket.clienteId || '-'}</div>}
                                     </div>
                                     <div className="kv ticket-comment-block"><b>Comentario:</b> {ticket.comentario || '-'}</div>
@@ -12023,13 +12517,14 @@
                                       </div>
                                     )}
                                     <div className="ticket-card-actions">
-                                      <button type="button" className="status-action-btn chat-action-btn" onClick={() => openTicketReassignModal(ticket)}>Reasignar</button>
+                                      <button type="button" className="status-action-btn chat-action-btn" onClick={(e) => { e.stopPropagation(); openTicketReassignModal(ticket); }}>Reasignar</button>
                                       {ticket.estado !== 'resuelto' && (
                                         <>
-                                          <button type="button" className="status-action-btn chat-action-btn" onClick={() => toggleTicketResolutionEditor(ticket.id)}>
+                                          <button type="button" className="status-action-btn chat-action-btn" onClick={(e) => { e.stopPropagation(); toggleTicketResolutionEditor(ticket.id); }}>
                                             Resolver con comentario
                                           </button>
-                                          <button type="button" className="status-action-btn accept" onClick={() => {
+                                          <button type="button" className="status-action-btn accept" onClick={(e) => {
+                                            e.stopPropagation();
                                             const draft = ticketResolutionDrafts[ticket.id] || { comentario: '', imagenes: [] };
                                             handleResolveTicket(ticket, draft);
                                           }}>
@@ -12037,10 +12532,10 @@
                                           </button>
                                         </>
                                       )}
-                                      <button type="button" className="status-action-btn reject" onClick={() => handleDeleteTicket(ticket)}>Eliminar</button>
+                                      <button type="button" className="status-action-btn reject" onClick={(e) => { e.stopPropagation(); handleDeleteTicket(ticket); }}>Eliminar</button>
                                     </div>
                                     {ticket.estado !== 'resuelto' && ticketResolutionDrafts[ticket.id]?.open && (
-                                      <div className="ticket-resolution-editor">
+                                      <div className="ticket-resolution-editor" onClick={(e) => e.stopPropagation()}>
                                         <textarea
                                           value={ticketResolutionDrafts[ticket.id]?.comentario || ''}
                                           onChange={(e) => setTicketResolutionDraft(ticket.id, { comentario: e.target.value })}
@@ -12411,7 +12906,7 @@
                                 <div className="service-card-meta-item"><span>📍</span><span>{row.direccionServicio || row.direccion || '-'}</span></div>
                                 <div className="service-card-meta-item"><span>👤</span><span>{row.representanteComercial || 'Sin encargado'}</span></div>
                                 <div className="service-card-meta-item"><span>📅</span><span>{row.fechaAltaServicio || row.fechaAlta || row.fechaEspecificaInicio || '-'}</span></div>
-                                <div className="service-card-meta-item"><span>🧭</span><span>{normalizeWorkflowStage(row.workflowStage) || 'Contrato Firmado'}</span></div>
+                                <div className="service-card-meta-item"><span>🧭</span><span>{normalizeWorkflowStage(row.workflowStage) || 'Pendiente de aprobación – Coordinación de Instalaciones'}</span></div>
                               </div>
                               <div className="service-card-actions">
                                 <button type="button" className="service-card-action-btn primary" onClick={(event) => { event.stopPropagation(); startEditService(row); }}>Editar</button>
@@ -13253,7 +13748,7 @@
                       const serviceTickets = ticketsHistorial
                         .filter((ticket) => String(ticket.clienteId || '').trim() === detailServiceId)
                         .slice(0, 8);
-                      const detailWorkflowStage = normalizeWorkflowStage(detailService.workflowStage) || 'Contrato Firmado';
+                      const detailWorkflowStage = normalizeWorkflowStage(detailService.workflowStage) || 'Pendiente de aprobación – Coordinación de Instalaciones';
                       const detailWorkflowNextOptions = GNS_WORKFLOW_TRANSITIONS[detailWorkflowStage] || [];
                       const workflowDraft = workflowTransitionDrafts[detailService.id] || getWorkflowDraftDefaults(detailService);
                       return (
@@ -13300,52 +13795,61 @@
                                   </div>
                                 </div>
 
-                                {detailWorkflowStage === 'Pendiente a Agendar' && (workflowDraft.nextStage || '') === 'Agendado' && (
+                                {detailWorkflowStage === 'Rechazado' && (
                                   <div className="service-coord-detail-card" style={{ marginTop: 8 }}>
-                                    <h4 style={{ margin: '0 0 8px 0' }}>Checklist obligatorio · Pendiente a Agendar</h4>
-                                    {PENDING_TO_SCHEDULE_TASKS.map((task) => (
-                                      <label key={`workflow-check-${detailService.id}-${task.key}`} className="seller-filter-option" style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
-                                        <input type="checkbox" checked={!!workflowDraft.checklist?.[task.key]} onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ checklist: { ...(prev.checklist || {}), [task.key]: e.target.checked } }))} />
+                                    <h4 style={{ margin: '0 0 6px 0' }}>Motivo de rechazo informado a Comercial</h4>
+                                    <div className="hint">{detailService.workflowRejectionReason || 'Sin motivo cargado.'}</div>
+                                  </div>
+                                )}
+
+                                {detailWorkflowStage === 'En proceso de instalación' && (
+                                  <div className="service-coord-detail-card" style={{ marginTop: 8 }}>
+                                    <h4 style={{ margin: '0 0 8px 0' }}>Gestión de instalación</h4>
+                                    <div className="hint" style={{ marginBottom: 8 }}>Vista disponible para Coordinación: línea de tiempo, Gantt y listado de tareas.</div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 8, marginBottom: 8 }}>
+                                      <div className="service-detail-kpi"><small>📈 Línea de tiempo</small><strong>{INSTALLATION_REQUIRED_TASKS.filter((task) => !!workflowDraft.installTasks?.[task.key]).length} / {INSTALLATION_REQUIRED_TASKS.length} hitos</strong></div>
+                                      <div className="service-detail-kpi"><small>📊 Gantt</small><strong>{Math.round((INSTALLATION_REQUIRED_TASKS.filter((task) => !!workflowDraft.installTasks?.[task.key]).length / INSTALLATION_REQUIRED_TASKS.length) * 100)}% completado</strong></div>
+                                    </div>
+                                    {INSTALLATION_REQUIRED_TASKS.map((task) => (
+                                      <label key={`workflow-install-${detailService.id}-${task.key}`} className="seller-filter-option" style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+                                        <input type="checkbox" checked={!!workflowDraft.installTasks?.[task.key]} onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ installTasks: { ...(prev.installTasks || {}), [task.key]: e.target.checked } }))} />
                                         <span>{task.label}</span>
                                       </label>
                                     ))}
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+                                      <button type="button" className="save-btn" onClick={() => setWorkflowTransitionDraft(detailService.id, { nextStage: 'Alta de Servicio en configuración' })} disabled={!INSTALLATION_REQUIRED_TASKS.every((task) => !!workflowDraft.installTasks?.[task.key])}>Configurar ALTA de Servicio</button>
+                                    </div>
                                   </div>
                                 )}
 
-                                {(workflowDraft.nextStage || '') === 'Agendado' && (
+                                {(workflowDraft.nextStage || '') === 'Rechazado' && (
+                                  <div className="field" style={{ marginTop: 8 }}>
+                                    <label>Motivo de rechazo (obligatorio)</label>
+                                    <textarea value={workflowDraft.rejectionReason || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { rejectionReason: e.target.value })} placeholder="Detallar motivo de rechazo para que Comercial pueda corregir." />
+                                  </div>
+                                )}
+
+
+                                {detailWorkflowStage === 'Alta de Servicio en configuración' && (
+                                  <div className="service-coord-detail-card" style={{ marginTop: 8 }}>
+                                    <h4 style={{ margin: '0 0 8px 0' }}>Ficha del cliente para alta</h4>
+                                    <div className="service-coord-detail-grid">
+                                      <div className="field"><label>Contacto principal</label><input type="text" value={detailService.workflowClientContact || ''} onChange={(e) => handleAssignServiceField(detailService, 'workflowClientContact', e.target.value)} placeholder="Nombre y apellido" /></div>
+                                      <div className="field"><label>Email de activación</label><input type="email" value={detailService.workflowClientEmail || ''} onChange={(e) => handleAssignServiceField(detailService, 'workflowClientEmail', e.target.value)} placeholder="cliente@dominio.com" /></div>
+                                      <div className="field"><label>ID de integración</label><input type="text" value={detailService.workflowIntegrationId || ''} onChange={(e) => handleAssignServiceField(detailService, 'workflowIntegrationId', e.target.value)} placeholder="Ej: CRM-10291" /></div>
+                                    </div>
+                                    <div className="hint" style={{ marginTop: 6 }}>Completá esta ficha y luego pasá el flujo a <b>Activo</b> para cerrar el alta.</div>
+                                  </div>
+                                )}
+
+                                {(workflowDraft.nextStage || '') === 'Activo' && (
                                   <div className="service-coord-detail-grid" style={{ marginTop: 8 }}>
-                                    <div className="field"><label>Fecha agenda</label><input type="date" value={workflowDraft.fechaAgenda || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { fechaAgenda: e.target.value })} /></div>
-                                    <div className="field"><label>Horario</label><input type="time" value={workflowDraft.horarioAgenda || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { horarioAgenda: e.target.value })} /></div>
-                                    <div className="field"><label>Técnico asignado</label><input type="text" value={workflowDraft.tecnicoAsignado || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { tecnicoAsignado: e.target.value })} /></div>
+                                    <div className="field"><label>ID de integración / ficha cliente</label><input type="text" value={detailService.workflowIntegrationId || ''} onChange={(e) => handleAssignServiceField(detailService, 'workflowIntegrationId', e.target.value)} placeholder="Ej: CRM-10291" /></div>
+                                    <label className="seller-filter-option" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                      <input type="checkbox" checked={!!workflowDraft.clientRecordCompleted} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { clientRecordCompleted: e.target.checked })} />
+                                      <span>Ficha del cliente completa y lista para activar</span>
+                                    </label>
                                   </div>
-                                )}
-
-                                {(workflowDraft.nextStage || '') === 'Pausa' && (
-                                  <div className="service-coord-detail-grid" style={{ marginTop: 8 }}>
-                                    <div className="field"><label>Motivo de pausa</label><input type="text" value={workflowDraft.pauseReason || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { pauseReason: e.target.value })} /></div>
-                                    <div className="field" style={{ gridColumn: '1 / -1' }}><label>Comentario obligatorio</label><textarea value={workflowDraft.pauseComment || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { pauseComment: e.target.value })} /></div>
-                                  </div>
-                                )}
-
-                                {(workflowDraft.nextStage || '') === 'Finalizado Instalación' && (
-                                  <label className="seller-filter-option" style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                                    <input type="checkbox" checked={!!workflowDraft.installChecklistComplete} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { installChecklistComplete: e.target.checked })} />
-                                    <span>Checklist técnico de instalación validado</span>
-                                  </label>
-                                )}
-
-                                {(workflowDraft.nextStage || '') === 'Agendado Alta' && (
-                                  <div className="service-coord-detail-grid" style={{ marginTop: 8 }}>
-                                    <div className="field"><label>Fecha de alta</label><input type="date" value={workflowDraft.fechaAltaAgenda || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { fechaAltaAgenda: e.target.value })} /></div>
-                                    <div className="field"><label>Responsable del alta</label><input type="text" value={workflowDraft.responsableAlta || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { responsableAlta: e.target.value })} /></div>
-                                  </div>
-                                )}
-
-                                {(workflowDraft.nextStage || '') === 'Servicio Activo – Alta' && (
-                                  <label className="seller-filter-option" style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                                    <input type="checkbox" checked={!!workflowDraft.activationConfirmed} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { activationConfirmed: e.target.checked })} />
-                                    <span>Confirmo activación técnica en sistemas</span>
-                                  </label>
                                 )}
 
                                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
@@ -13376,6 +13880,83 @@
                                   <strong>{ticket.ticketCodigo || ticket.id || 'Ticket'}</strong> · {ticket.comentario || 'Sin comentario'}
                                 </div>
                               ))}
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              )}
+
+              {ticketDetailModal.open && ticketDetailModal.ticket && (
+                <div className="confirm-modal ticket-detail-overlay" onClick={() => setTicketDetailModal({ open: false, ticket: null })}>
+                  <div className="confirm-modal-card ticket-detail-modal" onClick={(e) => e.stopPropagation()}>
+                    {(() => {
+                      const ticket = ticketDetailModal.ticket;
+                      const pdfData = ticket.pdfAsistido || {};
+                      const hasPdfItems = Array.isArray(pdfData.items) && pdfData.items.length > 0;
+                      return (
+                        <>
+                          <div className="ticket-detail-header">
+                            <div>
+                              <h3 style={{ margin: 0 }}>Detalle de ticket</h3>
+                              <p className="ticket-detail-subtitle">{ticket.ticketCodigo || `TICKET-${ticket.id}`}</p>
+                            </div>
+                            <button type="button" className="edit-btn" onClick={() => setTicketDetailModal({ open: false, ticket: null })}>Cerrar</button>
+                          </div>
+
+                          <div className="ticket-detail-meta-grid">
+                            <div className="ticket-detail-meta-card"><small>ID Ticket</small><strong>{ticket.ticketCodigo || `TICKET-${ticket.id}`}</strong></div>
+                            <div className="ticket-detail-meta-card"><small>Estado</small><strong>{ticket.estado || 'pendiente'}</strong></div>
+                            <div className="ticket-detail-meta-card"><small>Prioridad</small><strong>{ticket.prioridad || '-'}</strong></div>
+                            <div className="ticket-detail-meta-card"><small>Origen</small><strong>{ticket.origen === 'form-gestion' ? 'Formulario' : ticket.origen === 'pdf-asistido' ? 'PDF asistido' : 'Manual'}</strong></div>
+                            <div className="ticket-detail-meta-card"><small>Fecha</small><strong>{ticket.fechaHoraLocal || formatRequestDateTime(ticket.creadoEn)}</strong></div>
+                            <div className="ticket-detail-meta-card"><small>Creado por</small><strong>{ticket.creadoPorNombre || ticket.creadoPorEmail || '-'}</strong></div>
+                          </div>
+
+                          <h4 className="ticket-detail-section-title">Comentario</h4>
+                          <div className="ticket-detail-comment">{ticket.comentario || '-'}</div>
+
+                          {!!String(ticket.resolucionComentario || '').trim() && (
+                            <>
+                              <h4 className="ticket-detail-section-title">Comentario de resolución</h4>
+                              <div className="ticket-detail-comment">{ticket.resolucionComentario}</div>
+                            </>
+                          )}
+
+                          {ticket.origen === 'pdf-asistido' && (
+                            <div className="ticket-pdf-preview" style={{ marginTop: 10 }}>
+                              <h4 style={{ margin: '0 0 8px' }}>Datos PDF detectados</h4>
+                              <div className="ticket-pdf-preview-grid">
+                                <div className="ticket-pdf-preview-item"><small>Número</small><strong>{pdfData.numero || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Fecha</small><strong>{pdfData.fecha || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Moneda</small><strong>{pdfData.moneda || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Estado</small><strong>{pdfData.estado || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Cliente</small><strong>{pdfData.cliente || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Dirección</small><strong>{pdfData.direccion || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Localidad</small><strong>{pdfData.localidad || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Vendedor</small><strong>{pdfData.vendedor || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Concepto</small><strong>{pdfData.concepto || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Total</small><strong>{pdfData.total || '-'}</strong></div>
+                              </div>
+                              <h5 style={{ margin: '10px 0 4px' }}>Ítems ({hasPdfItems ? pdfData.items.length : 0})</h5>
+                              {hasPdfItems ? (
+                                <div style={{ overflowX: 'auto' }}>
+                                  <table className="form-history-table" style={{ marginTop: 6 }}>
+                                    <thead><tr><th>Cantidad</th><th>Código</th><th>Detalle</th><th>IVA</th><th>Precio</th><th>Importe</th></tr></thead>
+                                    <tbody>
+                                      {pdfData.items.map((item, idx) => (
+                                        <tr key={`ticket-detail-pdf-item-${idx}`}>
+                                          <td>{item.cantidad ?? '-'}</td><td>{item.codigo || '-'}</td><td>{item.detalle || '-'}</td><td>{item.iva ?? '-'}</td><td>{item.precio || '-'}</td><td>{item.importe || '-'}</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              ) : (
+                                <div className="hint">No hay ítems PDF registrados en este ticket.</div>
+                              )}
                             </div>
                           )}
                         </>
