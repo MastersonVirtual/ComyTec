@@ -6147,32 +6147,26 @@
       const STATUS_OPTIONS = ['Pendiente', 'En proceso', 'Esperando información', 'Finalizado', 'Cancelado'];
       const SERVICE_TYPE_OPTIONS = ['Monitoreo', 'Portería virtual', 'Respuesta de alarma', 'Servicio Técnico', 'Control de acceso'];
       const GNS_WORKFLOW_STAGES = [
-        'Contrato Firmado',
-        'OS Cargada',
-        'Pendiente a Agendar',
-        'Agendado',
-        'Instalando – Ongoing',
-        'Pausa',
-        'Finalizado Instalación',
-        'Agendado Alta',
-        'Servicio Activo – Alta',
+        'Pendiente de aprobación – Coordinación de Instalaciones',
+        'Rechazado',
+        'En proceso de instalación',
+        'Alta de Servicio en configuración',
+        'Activo',
       ];
       const GNS_WORKFLOW_TRANSITIONS = Object.freeze({
-        'Contrato Firmado': ['OS Cargada'],
-        'OS Cargada': ['Pendiente a Agendar'],
-        'Pendiente a Agendar': ['Agendado'],
-        Agendado: ['Instalando – Ongoing', 'Pausa'],
-        'Instalando – Ongoing': ['Pausa', 'Finalizado Instalación'],
-        Pausa: ['Agendado', 'Instalando – Ongoing'],
-        'Finalizado Instalación': ['Agendado Alta'],
-        'Agendado Alta': ['Servicio Activo – Alta'],
-        'Servicio Activo – Alta': [],
+        'Pendiente de aprobación – Coordinación de Instalaciones': ['En proceso de instalación', 'Rechazado'],
+        Rechazado: ['Pendiente de aprobación – Coordinación de Instalaciones'],
+        'En proceso de instalación': ['Alta de Servicio en configuración'],
+        'Alta de Servicio en configuración': ['Activo'],
+        Activo: [],
       });
-      const PENDING_TO_SCHEDULE_TASKS = [
-        { key: 'comunicacionInicial', label: 'Comunicación inicial enviada al cliente' },
-        { key: 'pulsosVerificados', label: 'Pulsos solicitados/verificados (si aplica)' },
-        { key: 'proveedorElegido', label: 'Proveedor de instalación elegido' },
-        { key: 'tareasTecnicas', label: 'Tareas operativas técnicas completadas' },
+      const INSTALLATION_REQUIRED_TASKS = [
+        { key: 'mailInicioInstalacion', label: 'Mail de inicio de instalación' },
+        { key: 'diaMarcacion', label: 'Día de marcación' },
+        { key: 'equipoSvideoAsignado', label: 'Equipo de Svideo asignado' },
+        { key: 'pulsoPorton', label: 'Instalación de pulso de portón' },
+        { key: 'pulsoPortero', label: 'Instalación de pulso de portero' },
+        { key: 'agendaAlta', label: 'Agenda de alta' },
       ];
 
       function normalizeServiceType(value) {
@@ -8266,8 +8260,8 @@
 
         function getDefaultWorkflowStage(action = '') {
           const clean = String(action || '').trim();
-          if (clean === 'Nuevo Servicio') return 'Contrato Firmado';
-          return 'OS Cargada';
+          if (clean === 'Nuevo Servicio') return 'Pendiente de aprobación – Coordinación de Instalaciones';
+          return 'Pendiente de aprobación – Coordinación de Instalaciones';
         }
 
         function canTransitionWorkflowStage(fromStage, toStage) {
@@ -8291,28 +8285,22 @@
 
         function stageToOperationalStatus(stage = '') {
           const normalized = normalizeWorkflowStage(stage);
-          if (normalized === 'Instalando – Ongoing') return 'En proceso';
-          if (normalized === 'Finalizado Instalación' || normalized === 'Servicio Activo – Alta') return 'Finalizado';
-          if (normalized === 'Pausa') return 'Esperando información';
+          if (normalized === 'En proceso de instalación' || normalized === 'Alta de Servicio en configuración') return 'En proceso';
+          if (normalized === 'Activo') return 'Finalizado';
+          if (normalized === 'Rechazado') return 'Rechazado';
           return 'Pendiente';
         }
 
         function getWorkflowDraftDefaults(service = {}) {
-          const currentStage = normalizeWorkflowStage(service.workflowStage) || 'Contrato Firmado';
+          const currentStage = normalizeWorkflowStage(service.workflowStage) || 'Pendiente de aprobación – Coordinación de Instalaciones';
           const nextOptions = GNS_WORKFLOW_TRANSITIONS[currentStage] || [];
+          const existingInstallTasks = service.workflowInstallTasks || {};
           return {
             nextStage: nextOptions[0] || '',
             note: '',
-            pauseReason: '',
-            pauseComment: '',
-            installChecklistComplete: false,
-            activationConfirmed: false,
-            fechaAgenda: '',
-            horarioAgenda: '',
-            tecnicoAsignado: '',
-            fechaAltaAgenda: '',
-            responsableAlta: '',
-            checklist: PENDING_TO_SCHEDULE_TASKS.reduce((acc, task) => ({ ...acc, [task.key]: false }), {}),
+            installTasks: INSTALLATION_REQUIRED_TASKS.reduce((acc, task) => ({ ...acc, [task.key]: !!existingInstallTasks[task.key] }), {}),
+            rejectionReason: String(service.workflowRejectionReason || '').trim(),
+            clientRecordCompleted: !!service.workflowClientRecordCompleted,
           };
         }
 
@@ -10221,7 +10209,7 @@
         async function handleWorkflowTransition(service) {
           if (!service?.id) return;
           const serviceId = String(service.id || '').trim();
-          const currentStage = normalizeWorkflowStage(service.workflowStage) || 'Contrato Firmado';
+          const currentStage = normalizeWorkflowStage(service.workflowStage) || 'Pendiente de aprobación – Coordinación de Instalaciones';
           const draft = workflowTransitionDrafts[serviceId] || getWorkflowDraftDefaults(service);
           const nextStage = normalizeWorkflowStage(draft.nextStage);
           if (!nextStage) {
@@ -10233,31 +10221,19 @@
             return;
           }
 
-          if (currentStage === 'Pendiente a Agendar' && nextStage === 'Agendado') {
-            const completed = PENDING_TO_SCHEDULE_TASKS.every((task) => !!draft.checklist?.[task.key]);
-            if (!completed) {
-              setNotificacion({ mensaje: 'Completá todas las tareas obligatorias antes de agendar.', tipo: 'warn' });
+          if (nextStage === 'Rechazado' && !String(draft.rejectionReason || '').trim()) {
+            setNotificacion({ mensaje: 'Para rechazar, el motivo de rechazo es obligatorio.', tipo: 'warn' });
+            return;
+          }
+          if (nextStage === 'Alta de Servicio en configuración') {
+            const allDone = INSTALLATION_REQUIRED_TASKS.every((task) => !!draft.installTasks?.[task.key]);
+            if (!allDone) {
+              setNotificacion({ mensaje: 'Completá todas las tareas de instalación antes de continuar.', tipo: 'warn' });
               return;
             }
           }
-          if (nextStage === 'Agendado' && (!draft.fechaAgenda || !draft.horarioAgenda || !draft.tecnicoAsignado)) {
-            setNotificacion({ mensaje: 'Para Agendado debés indicar fecha, horario y técnico asignado.', tipo: 'warn' });
-            return;
-          }
-          if (nextStage === 'Pausa' && (!draft.pauseReason || !String(draft.pauseComment || '').trim())) {
-            setNotificacion({ mensaje: 'En Pausa el motivo y comentario son obligatorios.', tipo: 'warn' });
-            return;
-          }
-          if (nextStage === 'Finalizado Instalación' && !draft.installChecklistComplete) {
-            setNotificacion({ mensaje: 'Confirmá el checklist de instalación para finalizar.', tipo: 'warn' });
-            return;
-          }
-          if (nextStage === 'Agendado Alta' && (!draft.fechaAltaAgenda || !String(draft.responsableAlta || '').trim())) {
-            setNotificacion({ mensaje: 'Para Agendado Alta completá fecha y responsable.', tipo: 'warn' });
-            return;
-          }
-          if (nextStage === 'Servicio Activo – Alta' && !draft.activationConfirmed) {
-            setNotificacion({ mensaje: 'Confirmá la activación técnica para cerrar el proceso.', tipo: 'warn' });
+          if (nextStage === 'Activo' && !draft.clientRecordCompleted) {
+            setNotificacion({ mensaje: 'Completá la ficha del cliente para activar el servicio.', tipo: 'warn' });
             return;
           }
 
@@ -10272,16 +10248,10 @@
             workflowStage: nextStage,
             workflowAvailableNextStages: GNS_WORKFLOW_TRANSITIONS[nextStage] || [],
             workflowTimeline: [...existingTimeline, workflowEvent],
-            workflowChecklistPendienteAgendar: draft.checklist || {},
-            workflowPauseReason: draft.pauseReason || '',
-            workflowPauseComment: draft.pauseComment || '',
-            workflowInstallChecklistComplete: !!draft.installChecklistComplete,
-            workflowActivationConfirmed: !!draft.activationConfirmed,
-            workflowFechaAgendaInstalacion: draft.fechaAgenda || '',
-            workflowHorarioAgendaInstalacion: draft.horarioAgenda || '',
-            workflowTecnicoAsignado: draft.tecnicoAsignado || '',
-            workflowFechaAltaAgenda: draft.fechaAltaAgenda || '',
-            workflowResponsableAlta: draft.responsableAlta || '',
+            workflowInstallTasks: draft.installTasks || {},
+            workflowRejectionReason: nextStage === 'Rechazado' ? String(draft.rejectionReason || '').trim() : (nextStage === 'Pendiente de aprobación – Coordinación de Instalaciones' ? '' : (service.workflowRejectionReason || '')),
+            workflowClientRecordCompleted: !!draft.clientRecordCompleted,
+            workflowCurrentOwner: nextStage === 'Rechazado' ? 'Comercial' : (nextStage === 'Pendiente de aprobación – Coordinación de Instalaciones' ? 'Coordinación de Instalaciones' : 'Operaciones'),
             status: stageToOperationalStatus(nextStage),
             estado: stageToOperationalStatus(nextStage),
             actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
@@ -10334,6 +10304,11 @@
               return alert('Completá al menos: Nombre del servicio, Dirección y Tipo de servicio.');
             }
             Object.assign(doc, { ...servicioForm, formulario: 'nuevo-servicio-optimizado', creadoPor: servicioForm.creadoPor || currentUserName, auditoriaApertura: formOpenAudit });
+            if (tipoAccion === 'Nuevo Servicio') {
+              doc.workflowStage = 'Pendiente de aprobación – Coordinación de Instalaciones';
+              doc.status = 'Pendiente';
+              doc.estado = 'Pendiente';
+            }
           }
           if (grupo === 'obra') {
             if (!obraForm.razonSocial || !obraForm.rut || !obraForm.mailFacturacion || !obraForm.nombreServicio || !obraForm.fechaAlta) {
@@ -10467,6 +10442,10 @@
               const shouldAppendWorkflowEvent = nextWorkflowStage !== currentWorkflowStage;
               payload.workflowStage = nextWorkflowStage;
               payload.workflowAvailableNextStages = GNS_WORKFLOW_TRANSITIONS[nextWorkflowStage] || [];
+              payload.workflowCurrentOwner = nextWorkflowStage === 'Rechazado' ? 'Comercial' : (nextWorkflowStage === 'Pendiente de aprobación – Coordinación de Instalaciones' ? 'Coordinación de Instalaciones' : 'Operaciones');
+              payload.workflowInstallTasks = payload.workflowInstallTasks || targetSource?.workflowInstallTasks || INSTALLATION_REQUIRED_TASKS.reduce((acc, task) => ({ ...acc, [task.key]: false }), {});
+              payload.workflowRejectionReason = payload.workflowRejectionReason || targetSource?.workflowRejectionReason || '';
+              payload.workflowClientRecordCompleted = !!(payload.workflowClientRecordCompleted || targetSource?.workflowClientRecordCompleted);
               payload.workflowTimeline = shouldAppendWorkflowEvent
                 ? [...existingWorkflowTimeline, createWorkflowEvent({
                   from: currentWorkflowStage,
@@ -10510,6 +10489,10 @@
             const initialWorkflowStage = normalizeWorkflowStage(doc.workflowStage) || getDefaultWorkflowStage(tipoAccion);
             createPayload.workflowStage = initialWorkflowStage;
             createPayload.workflowAvailableNextStages = GNS_WORKFLOW_TRANSITIONS[initialWorkflowStage] || [];
+            createPayload.workflowCurrentOwner = initialWorkflowStage === 'Pendiente de aprobación – Coordinación de Instalaciones' ? 'Coordinación de Instalaciones' : 'Operaciones';
+            createPayload.workflowInstallTasks = INSTALLATION_REQUIRED_TASKS.reduce((acc, task) => ({ ...acc, [task.key]: false }), {});
+            createPayload.workflowRejectionReason = '';
+            createPayload.workflowClientRecordCompleted = false;
             createPayload.workflowTimeline = [
               createWorkflowEvent({
                 from: '',
@@ -12411,7 +12394,7 @@
                                 <div className="service-card-meta-item"><span>📍</span><span>{row.direccionServicio || row.direccion || '-'}</span></div>
                                 <div className="service-card-meta-item"><span>👤</span><span>{row.representanteComercial || 'Sin encargado'}</span></div>
                                 <div className="service-card-meta-item"><span>📅</span><span>{row.fechaAltaServicio || row.fechaAlta || row.fechaEspecificaInicio || '-'}</span></div>
-                                <div className="service-card-meta-item"><span>🧭</span><span>{normalizeWorkflowStage(row.workflowStage) || 'Contrato Firmado'}</span></div>
+                                <div className="service-card-meta-item"><span>🧭</span><span>{normalizeWorkflowStage(row.workflowStage) || 'Pendiente de aprobación – Coordinación de Instalaciones'}</span></div>
                               </div>
                               <div className="service-card-actions">
                                 <button type="button" className="service-card-action-btn primary" onClick={(event) => { event.stopPropagation(); startEditService(row); }}>Editar</button>
@@ -13253,7 +13236,7 @@
                       const serviceTickets = ticketsHistorial
                         .filter((ticket) => String(ticket.clienteId || '').trim() === detailServiceId)
                         .slice(0, 8);
-                      const detailWorkflowStage = normalizeWorkflowStage(detailService.workflowStage) || 'Contrato Firmado';
+                      const detailWorkflowStage = normalizeWorkflowStage(detailService.workflowStage) || 'Pendiente de aprobación – Coordinación de Instalaciones';
                       const detailWorkflowNextOptions = GNS_WORKFLOW_TRANSITIONS[detailWorkflowStage] || [];
                       const workflowDraft = workflowTransitionDrafts[detailService.id] || getWorkflowDraftDefaults(detailService);
                       return (
@@ -13300,52 +13283,61 @@
                                   </div>
                                 </div>
 
-                                {detailWorkflowStage === 'Pendiente a Agendar' && (workflowDraft.nextStage || '') === 'Agendado' && (
+                                {detailWorkflowStage === 'Rechazado' && (
                                   <div className="service-coord-detail-card" style={{ marginTop: 8 }}>
-                                    <h4 style={{ margin: '0 0 8px 0' }}>Checklist obligatorio · Pendiente a Agendar</h4>
-                                    {PENDING_TO_SCHEDULE_TASKS.map((task) => (
-                                      <label key={`workflow-check-${detailService.id}-${task.key}`} className="seller-filter-option" style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
-                                        <input type="checkbox" checked={!!workflowDraft.checklist?.[task.key]} onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ checklist: { ...(prev.checklist || {}), [task.key]: e.target.checked } }))} />
+                                    <h4 style={{ margin: '0 0 6px 0' }}>Motivo de rechazo informado a Comercial</h4>
+                                    <div className="hint">{detailService.workflowRejectionReason || 'Sin motivo cargado.'}</div>
+                                  </div>
+                                )}
+
+                                {detailWorkflowStage === 'En proceso de instalación' && (
+                                  <div className="service-coord-detail-card" style={{ marginTop: 8 }}>
+                                    <h4 style={{ margin: '0 0 8px 0' }}>Gestión de instalación</h4>
+                                    <div className="hint" style={{ marginBottom: 8 }}>Vista disponible para Coordinación: línea de tiempo, Gantt y listado de tareas.</div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 8, marginBottom: 8 }}>
+                                      <div className="service-detail-kpi"><small>📈 Línea de tiempo</small><strong>{INSTALLATION_REQUIRED_TASKS.filter((task) => !!workflowDraft.installTasks?.[task.key]).length} / {INSTALLATION_REQUIRED_TASKS.length} hitos</strong></div>
+                                      <div className="service-detail-kpi"><small>📊 Gantt</small><strong>{Math.round((INSTALLATION_REQUIRED_TASKS.filter((task) => !!workflowDraft.installTasks?.[task.key]).length / INSTALLATION_REQUIRED_TASKS.length) * 100)}% completado</strong></div>
+                                    </div>
+                                    {INSTALLATION_REQUIRED_TASKS.map((task) => (
+                                      <label key={`workflow-install-${detailService.id}-${task.key}`} className="seller-filter-option" style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
+                                        <input type="checkbox" checked={!!workflowDraft.installTasks?.[task.key]} onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ installTasks: { ...(prev.installTasks || {}), [task.key]: e.target.checked } }))} />
                                         <span>{task.label}</span>
                                       </label>
                                     ))}
+                                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+                                      <button type="button" className="save-btn" onClick={() => setWorkflowTransitionDraft(detailService.id, { nextStage: 'Alta de Servicio en configuración' })} disabled={!INSTALLATION_REQUIRED_TASKS.every((task) => !!workflowDraft.installTasks?.[task.key])}>Configurar ALTA de Servicio</button>
+                                    </div>
                                   </div>
                                 )}
 
-                                {(workflowDraft.nextStage || '') === 'Agendado' && (
+                                {(workflowDraft.nextStage || '') === 'Rechazado' && (
+                                  <div className="field" style={{ marginTop: 8 }}>
+                                    <label>Motivo de rechazo (obligatorio)</label>
+                                    <textarea value={workflowDraft.rejectionReason || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { rejectionReason: e.target.value })} placeholder="Detallar motivo de rechazo para que Comercial pueda corregir." />
+                                  </div>
+                                )}
+
+
+                                {detailWorkflowStage === 'Alta de Servicio en configuración' && (
+                                  <div className="service-coord-detail-card" style={{ marginTop: 8 }}>
+                                    <h4 style={{ margin: '0 0 8px 0' }}>Ficha del cliente para alta</h4>
+                                    <div className="service-coord-detail-grid">
+                                      <div className="field"><label>Contacto principal</label><input type="text" value={detailService.workflowClientContact || ''} onChange={(e) => handleAssignServiceField(detailService, 'workflowClientContact', e.target.value)} placeholder="Nombre y apellido" /></div>
+                                      <div className="field"><label>Email de activación</label><input type="email" value={detailService.workflowClientEmail || ''} onChange={(e) => handleAssignServiceField(detailService, 'workflowClientEmail', e.target.value)} placeholder="cliente@dominio.com" /></div>
+                                      <div className="field"><label>ID de integración</label><input type="text" value={detailService.workflowIntegrationId || ''} onChange={(e) => handleAssignServiceField(detailService, 'workflowIntegrationId', e.target.value)} placeholder="Ej: CRM-10291" /></div>
+                                    </div>
+                                    <div className="hint" style={{ marginTop: 6 }}>Completá esta ficha y luego pasá el flujo a <b>Activo</b> para cerrar el alta.</div>
+                                  </div>
+                                )}
+
+                                {(workflowDraft.nextStage || '') === 'Activo' && (
                                   <div className="service-coord-detail-grid" style={{ marginTop: 8 }}>
-                                    <div className="field"><label>Fecha agenda</label><input type="date" value={workflowDraft.fechaAgenda || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { fechaAgenda: e.target.value })} /></div>
-                                    <div className="field"><label>Horario</label><input type="time" value={workflowDraft.horarioAgenda || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { horarioAgenda: e.target.value })} /></div>
-                                    <div className="field"><label>Técnico asignado</label><input type="text" value={workflowDraft.tecnicoAsignado || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { tecnicoAsignado: e.target.value })} /></div>
+                                    <div className="field"><label>ID de integración / ficha cliente</label><input type="text" value={detailService.workflowIntegrationId || ''} onChange={(e) => handleAssignServiceField(detailService, 'workflowIntegrationId', e.target.value)} placeholder="Ej: CRM-10291" /></div>
+                                    <label className="seller-filter-option" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                      <input type="checkbox" checked={!!workflowDraft.clientRecordCompleted} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { clientRecordCompleted: e.target.checked })} />
+                                      <span>Ficha del cliente completa y lista para activar</span>
+                                    </label>
                                   </div>
-                                )}
-
-                                {(workflowDraft.nextStage || '') === 'Pausa' && (
-                                  <div className="service-coord-detail-grid" style={{ marginTop: 8 }}>
-                                    <div className="field"><label>Motivo de pausa</label><input type="text" value={workflowDraft.pauseReason || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { pauseReason: e.target.value })} /></div>
-                                    <div className="field" style={{ gridColumn: '1 / -1' }}><label>Comentario obligatorio</label><textarea value={workflowDraft.pauseComment || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { pauseComment: e.target.value })} /></div>
-                                  </div>
-                                )}
-
-                                {(workflowDraft.nextStage || '') === 'Finalizado Instalación' && (
-                                  <label className="seller-filter-option" style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                                    <input type="checkbox" checked={!!workflowDraft.installChecklistComplete} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { installChecklistComplete: e.target.checked })} />
-                                    <span>Checklist técnico de instalación validado</span>
-                                  </label>
-                                )}
-
-                                {(workflowDraft.nextStage || '') === 'Agendado Alta' && (
-                                  <div className="service-coord-detail-grid" style={{ marginTop: 8 }}>
-                                    <div className="field"><label>Fecha de alta</label><input type="date" value={workflowDraft.fechaAltaAgenda || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { fechaAltaAgenda: e.target.value })} /></div>
-                                    <div className="field"><label>Responsable del alta</label><input type="text" value={workflowDraft.responsableAlta || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { responsableAlta: e.target.value })} /></div>
-                                  </div>
-                                )}
-
-                                {(workflowDraft.nextStage || '') === 'Servicio Activo – Alta' && (
-                                  <label className="seller-filter-option" style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-                                    <input type="checkbox" checked={!!workflowDraft.activationConfirmed} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { activationConfirmed: e.target.checked })} />
-                                    <span>Confirmo activación técnica en sistemas</span>
-                                  </label>
                                 )}
 
                                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
