@@ -5316,6 +5316,43 @@
         border: 1px solid rgba(230,255,253,.35);
         cursor: zoom-in;
       }
+      .ticket-pdf-assistant {
+        margin-top: 14px;
+        border: 1px solid rgba(151,243,231,.28);
+        border-radius: 14px;
+        padding: 12px;
+        background: linear-gradient(145deg, rgba(9, 80, 85, .36), rgba(6, 38, 40, .26));
+      }
+      .ticket-pdf-assistant-grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .ticket-pdf-assistant-grid .field { grid-column: span 12; }
+      .ticket-pdf-preview {
+        margin-top: 10px;
+        border: 1px solid rgba(220,255,250,.2);
+        border-radius: 12px;
+        padding: 10px;
+        background: rgba(5, 29, 31, .46);
+      }
+      .ticket-pdf-preview-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 8px;
+      }
+      .ticket-pdf-preview-item {
+        border: 1px solid rgba(220,255,250,.14);
+        border-radius: 10px;
+        padding: 8px;
+        background: rgba(255,255,255,.03);
+      }
+      .ticket-pdf-preview-item small { display: block; opacity: .75; }
+      .ticket-pdf-items-list {
+        margin: 8px 0 0;
+        padding-left: 18px;
+      }
+      .ticket-pdf-items-list li { margin-bottom: 6px; }
       .image-viewer-modal {
         position: fixed;
         inset: 0;
@@ -6121,6 +6158,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
   </head>
   <body>
@@ -7974,6 +8012,11 @@
         const [ticketFilterOpen, setTicketFilterOpen] = useState(false);
         const [ticketReassignModal, setTicketReassignModal] = useState({ open: false, ticket: null, assigneeKey: '' });
         const [ticketResolutionDrafts, setTicketResolutionDrafts] = useState({});
+        const [ticketPdfFile, setTicketPdfFile] = useState(null);
+        const [ticketPdfParsing, setTicketPdfParsing] = useState(false);
+        const [ticketPdfPreview, setTicketPdfPreview] = useState(null);
+        const [ticketPdfError, setTicketPdfError] = useState('');
+        const [ticketPdfCreating, setTicketPdfCreating] = useState(false);
         const seenRowIdsRef = useRef(new Set());
         const seenOperationalAlertsRef = useRef(new Set());
         const topServicesLeaderRef = useRef('');
@@ -10971,6 +11014,187 @@
           return mapped.filter(Boolean);
         }
 
+        function parsePdfField(lines = [], labels = []) {
+          const normalizedLabels = labels.map((label) => String(label || '').trim().toLowerCase()).filter(Boolean);
+          if (!normalizedLabels.length) return '';
+          for (let i = 0; i < lines.length; i += 1) {
+            const line = String(lines[i] || '').trim();
+            if (!line) continue;
+            const lower = line.toLowerCase();
+            const found = normalizedLabels.find((label) => lower.startsWith(label));
+            if (!found) continue;
+            const afterColon = line.split(':').slice(1).join(':').trim();
+            if (afterColon) return afterColon;
+            const tail = line.slice(found.length).replace(/^[:\s-]+/, '').trim();
+            if (tail) return tail;
+            const nextLine = String(lines[i + 1] || '').trim();
+            if (nextLine) return nextLine;
+          }
+          return '';
+        }
+
+        function parsePdfItems(lines = []) {
+          const items = [];
+          const itemLineRegex = /^(\d+(?:[.,]\d+)?)\s+([A-Za-z0-9._-]{2,})\s+(.+?)\s+(\d{1,2}(?:[.,]\d+)?%?)\s+([$\d.,]+)\s+([$\d.,]+)$/;
+          lines.forEach((lineRaw) => {
+            const line = String(lineRaw || '').replace(/\s+/g, ' ').trim();
+            if (!line || line.length < 6) return;
+            const match = line.match(itemLineRegex);
+            if (match) {
+              items.push({
+                cantidad: match[1] || '',
+                codigo: match[2] || '',
+                detalle: match[3] || '',
+                iva: match[4] || '',
+                precio: match[5] || '',
+                importe: match[6] || '',
+              });
+              return;
+            }
+            const generic = line.match(/^(\d+(?:[.,]\d+)?)\s+(.+)$/);
+            if (!generic) return;
+            const detailText = String(generic[2] || '');
+            const hasMoneySignal = /\$\s*\d|(?:\d+[.,]\d{2})/.test(detailText);
+            if (!hasMoneySignal) return;
+            items.push({
+              cantidad: generic[1] || '',
+              codigo: '',
+              detalle: detailText,
+              iva: '',
+              precio: '',
+              importe: '',
+            });
+          });
+          return items;
+        }
+
+        function extractTicketDataFromPdfText(rawText = '') {
+          const normalizedText = String(rawText || '').replace(/\r/g, '\n');
+          const lines = normalizedText.split('\n').map((line) => String(line || '').trim()).filter(Boolean);
+          const parsed = {
+            numero: parsePdfField(lines, ['numero', 'número', 'nro', 'n°']),
+            fecha: parsePdfField(lines, ['fecha']),
+            moneda: parsePdfField(lines, ['moneda']),
+            estado: parsePdfField(lines, ['estado']),
+            cliente: parsePdfField(lines, ['nombre / cliente', 'nombre cliente', 'cliente', 'nombre']),
+            direccion: parsePdfField(lines, ['dirección', 'direccion']),
+            localidad: parsePdfField(lines, ['localidad']),
+            vendedor: parsePdfField(lines, ['vendedor']),
+            conceptoFinal: parsePdfField(lines, ['concepto final', 'concepto']),
+            total: parsePdfField(lines, ['total']),
+            items: parsePdfItems(lines),
+            rawText,
+          };
+          return parsed;
+        }
+
+        async function handleProcessTicketPdf() {
+          if (!ticketPdfFile) {
+            setTicketPdfError('Seleccioná un PDF antes de procesar.');
+            setTicketPdfPreview(null);
+            return;
+          }
+          setTicketPdfParsing(true);
+          setTicketPdfError('');
+          setTicketPdfPreview(null);
+          try {
+            if (!String(ticketPdfFile.type || '').includes('pdf')) {
+              throw new Error('invalid_pdf');
+            }
+            const pdfjsLib = window?.pdfjsLib;
+            if (!pdfjsLib?.getDocument) {
+              throw new Error('pdf_lib_missing');
+            }
+            if (pdfjsLib.GlobalWorkerOptions) {
+              pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.worker.min.js';
+            }
+            const buffer = await ticketPdfFile.arrayBuffer();
+            const doc = await pdfjsLib.getDocument({ data: buffer }).promise;
+            let fullText = '';
+            for (let pageNumber = 1; pageNumber <= doc.numPages; pageNumber += 1) {
+              const page = await doc.getPage(pageNumber);
+              const content = await page.getTextContent();
+              const pageText = (content.items || []).map((item) => String(item.str || '')).join(' ').trim();
+              fullText += `${pageText}\n`;
+            }
+            if (!String(fullText || '').trim()) {
+              throw new Error('pdf_without_text');
+            }
+            const parsed = extractTicketDataFromPdfText(fullText);
+            const hasSomeData = [parsed.numero, parsed.fecha, parsed.cliente, parsed.total, parsed.conceptoFinal].some((v) => String(v || '').trim()) || parsed.items.length > 0;
+            if (!hasSomeData) {
+              setTicketPdfError('Se leyó el PDF, pero no se detectaron campos útiles. Revisá el formato del documento.');
+            }
+            setTicketPdfPreview(parsed);
+          } catch (error) {
+            console.error('Error procesando PDF para ticket:', error);
+            if (String(error?.message || '') === 'pdf_without_text') {
+              setTicketPdfError('El PDF no contiene texto legible (parece escaneado o vacío).');
+            } else if (String(error?.message || '') === 'invalid_pdf') {
+              setTicketPdfError('El archivo seleccionado no es un PDF válido.');
+            } else if (String(error?.message || '') === 'pdf_lib_missing') {
+              setTicketPdfError('No se pudo cargar el lector de PDF en este momento. Reintentá.');
+            } else {
+              setTicketPdfError('No fue posible leer el PDF. Verificá el archivo e intentá nuevamente.');
+            }
+          } finally {
+            setTicketPdfParsing(false);
+          }
+        }
+
+        async function handleCreateTicketFromPdf() {
+          if (!ticketPdfPreview) {
+            setTicketPdfError('Primero procesá un PDF y revisá la vista previa.');
+            return;
+          }
+          setTicketPdfCreating(true);
+          try {
+            const ticketCodigo = generateTicketCode('PDF');
+            const comentarioBase = [
+              ticketPdfPreview.conceptoFinal ? `Concepto: ${ticketPdfPreview.conceptoFinal}` : '',
+              ticketPdfPreview.total ? `Total: ${ticketPdfPreview.total}` : '',
+              ticketPdfPreview.cliente ? `Cliente: ${ticketPdfPreview.cliente}` : '',
+              ticketPdfPreview.numero ? `Número: ${ticketPdfPreview.numero}` : '',
+            ].filter(Boolean).join(' · ');
+            await db.collection('tickets_app').add({
+              ticketCodigo,
+              origen: 'pdf-asistido',
+              creadoPorUid: user?.uid || '',
+              creadoPorEmail: user?.email || '',
+              creadoPorNombre: currentUserName,
+              fechaHoraLocal: formatUruguayDateTime(),
+              comentario: comentarioBase || 'Ticket creado desde PDF asistido',
+              prioridad: ticketPrioridad || 'Media',
+              estado: 'pendiente',
+              imagenesAdjuntas: [],
+              pdfAsistido: {
+                archivoNombre: ticketPdfFile?.name || '',
+                numero: ticketPdfPreview.numero || '',
+                fecha: ticketPdfPreview.fecha || '',
+                moneda: ticketPdfPreview.moneda || '',
+                estado: ticketPdfPreview.estado || '',
+                cliente: ticketPdfPreview.cliente || '',
+                direccion: ticketPdfPreview.direccion || '',
+                localidad: ticketPdfPreview.localidad || '',
+                vendedor: ticketPdfPreview.vendedor || '',
+                conceptoFinal: ticketPdfPreview.conceptoFinal || '',
+                total: ticketPdfPreview.total || '',
+                items: Array.isArray(ticketPdfPreview.items) ? ticketPdfPreview.items : [],
+              },
+              creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+            setTicketPdfFile(null);
+            setTicketPdfPreview(null);
+            setTicketPdfError('');
+            setNotificacion({ mensaje: `✔ Ticket creado desde PDF (${ticketCodigo})`, tipo: 'ok' });
+          } catch (error) {
+            console.error('Error creando ticket desde PDF:', error);
+            setTicketPdfError('No se pudo crear el ticket desde PDF.');
+          } finally {
+            setTicketPdfCreating(false);
+          }
+        }
+
         async function handleTicketFilesInput(fileList) {
           const parsed = await readImageFiles(fileList);
           if (parsed.length === 0) {
@@ -11170,7 +11394,7 @@
             const matchesTo = !ticketFilterTo || (ticketDateIso && ticketDateIso <= ticketFilterTo);
             const statusLabel = getTicketStatusLabel(ticket);
             const matchesStatus = ticketFilterStatus === 'todos' || statusLabel === ticketFilterStatus;
-            const originLabel = ticket.origen === 'form-gestion' ? 'formulario' : 'manual';
+            const originLabel = ticket.origen === 'form-gestion' ? 'formulario' : (ticket.origen === 'pdf-asistido' ? 'pdf' : 'manual');
             const matchesOrigin = ticketFilterOrigen === 'todos' || originLabel === ticketFilterOrigen;
             return matchesFrom && matchesTo && matchesStatus && matchesOrigin;
           });
@@ -11854,7 +12078,7 @@
                           ) : ticketSearchResults.map((ticket) => (
                             <article className="chat-search-result" key={`ticket-search-${ticket.id}`}>
                               <strong>{ticket.ticketCodigo || `TICKET-${ticket.id}`}</strong>
-                              <div className="kv"><b>Tipo:</b> {ticket.origen === 'form-gestion' ? 'Ticket por gestión (form)' : 'Ticket manual'}</div>
+                              <div className="kv"><b>Tipo:</b> {ticket.origen === 'form-gestion' ? 'Ticket por gestión (form)' : ticket.origen === 'pdf-asistido' ? 'Ticket asistido por PDF' : 'Ticket manual'}</div>
                               <div className="kv"><b>Cliente ID:</b> {ticket.clienteId || '-'}</div>
                               <div className="kv"><b>Servicio:</b> {ticket.nombreServicio || '-'}</div>
                               <div className="kv"><b>Operación:</b> {ticket.operacionId || '-'}</div>
@@ -11911,6 +12135,62 @@
                             {ticketImagenes.map((img, idx) => (<img key={`ticket-img-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `img-${idx + 1}`} onClick={() => openImageViewer(img.dataUrl)} />))}
                           </div>
                         )}
+                        <div className="ticket-pdf-assistant">
+                          <h4 style={{ margin: '0 0 6px' }}>Prueba: asistente de ticket por PDF</h4>
+                          <div className="hint" style={{ marginBottom: 8 }}>Subí un PDF, procesalo y revisá los datos detectados antes de crear el ticket.</div>
+                          <div className="ticket-pdf-assistant-grid">
+                            <div className="field">
+                              <label>Archivo PDF</label>
+                              <input
+                                type="file"
+                                accept="application/pdf,.pdf"
+                                onChange={(e) => {
+                                  const nextFile = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+                                  setTicketPdfFile(nextFile);
+                                  setTicketPdfPreview(null);
+                                  setTicketPdfError('');
+                                }}
+                              />
+                            </div>
+                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                              <button type="button" className="status-action-btn chat-action-btn" onClick={() => { void handleProcessTicketPdf(); }} disabled={!ticketPdfFile || ticketPdfParsing}>
+                                {ticketPdfParsing ? 'Procesando PDF...' : 'Procesar PDF'}
+                              </button>
+                              <button type="button" className="status-action-btn accept" onClick={() => { void handleCreateTicketFromPdf(); }} disabled={!ticketPdfPreview || ticketPdfCreating}>
+                                {ticketPdfCreating ? 'Creando ticket...' : 'Confirmar y crear ticket'}
+                              </button>
+                            </div>
+                          </div>
+                          {ticketPdfError && <div className="hint" style={{ color: '#fecaca', marginTop: 8 }}>{ticketPdfError}</div>}
+                          {ticketPdfPreview && (
+                            <div className="ticket-pdf-preview">
+                              <div className="ticket-pdf-preview-grid">
+                                <div className="ticket-pdf-preview-item"><small>Número</small><strong>{ticketPdfPreview.numero || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Fecha</small><strong>{ticketPdfPreview.fecha || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Moneda</small><strong>{ticketPdfPreview.moneda || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Estado</small><strong>{ticketPdfPreview.estado || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Nombre / Cliente</small><strong>{ticketPdfPreview.cliente || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Dirección</small><strong>{ticketPdfPreview.direccion || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Localidad</small><strong>{ticketPdfPreview.localidad || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Vendedor</small><strong>{ticketPdfPreview.vendedor || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Concepto final</small><strong>{ticketPdfPreview.conceptoFinal || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Total</small><strong>{ticketPdfPreview.total || '-'}</strong></div>
+                              </div>
+                              <h5 style={{ margin: '10px 0 4px' }}>Ítems detectados ({ticketPdfPreview.items?.length || 0})</h5>
+                              {Array.isArray(ticketPdfPreview.items) && ticketPdfPreview.items.length > 0 ? (
+                                <ul className="ticket-pdf-items-list">
+                                  {ticketPdfPreview.items.map((item, idx) => (
+                                    <li key={`pdf-item-${idx}`}>
+                                      <b>Cant:</b> {item.cantidad || '-'} · <b>Código:</b> {item.codigo || '-'} · <b>Detalle:</b> {item.detalle || '-'} · <b>IVA:</b> {item.iva || '-'} · <b>Precio:</b> {item.precio || '-'} · <b>Importe:</b> {item.importe || '-'}
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : (
+                                <div className="hint">No se detectaron ítems completos. Podés continuar y ajustar luego si hace falta.</div>
+                              )}
+                            </div>
+                          )}
+                        </div>
                         <button className="ticket-create-btn" type="submit" disabled={ticketSaving}>
                           <span>➕</span>
                           <span>{ticketSaving ? 'Enviando...' : 'Crear ticket'}</span>
@@ -11948,6 +12228,7 @@
                                 <select value={ticketFilterOrigen} onChange={(e) => setTicketFilterOrigen(e.target.value)}>
                                   <option value="todos">Todos</option>
                                   <option value="manual">Creado manualmente</option>
+                                  <option value="pdf">Creado desde PDF asistido</option>
                                   <option value="formulario">Desde formulario</option>
                                 </select>
                               </div>
@@ -11982,7 +12263,7 @@
                                       <div className="kv"><b>Fecha:</b> {ticket.fechaHoraLocal || formatRequestDateTime(ticket.creadoEn)}</div>
                                       <div className="kv"><b>Prioridad:</b> {ticket.prioridad || '-'}</div>
                                       <div className="kv"><b>Asignado:</b> {ticket.asignadoANombre || ticket.asignadoAEmail || 'Sin asignar'}</div>
-                                      <div className="kv"><b>Origen:</b> {ticket.origen === 'form-gestion' ? 'Formulario' : 'Manual'}</div>
+                                      <div className="kv"><b>Origen:</b> {ticket.origen === 'form-gestion' ? 'Formulario' : ticket.origen === 'pdf-asistido' ? 'PDF asistido' : 'Manual'}</div>
                                       {ticket.origen === 'form-gestion' && <div className="kv"><b>Cliente ID:</b> {ticket.clienteId || '-'}</div>}
                                     </div>
                                     <div className="kv ticket-comment-block"><b>Comentario:</b> {ticket.comentario || '-'}</div>
