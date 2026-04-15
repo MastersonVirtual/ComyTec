@@ -5210,6 +5210,15 @@
         background: linear-gradient(150deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
         box-shadow: 0 10px 26px rgba(0,0,0,.21);
       }
+      .ticket-item-card.clickable {
+        cursor: pointer;
+        transition: transform var(--motion-fast) ease, box-shadow var(--motion-fast) ease, border-color var(--motion-fast) ease;
+      }
+      .ticket-item-card.clickable:hover {
+        transform: translateY(-2px);
+        border-color: rgba(151,243,231,.65);
+        box-shadow: 0 16px 34px rgba(0,0,0,.24);
+      }
       .ticket-item-card .kv {
         overflow-wrap: anywhere;
         word-break: break-word;
@@ -5274,6 +5283,11 @@
         padding: 10px;
         color: #d7f4ef;
         background: rgba(0,0,0,.12);
+      }
+      .ticket-detail-modal {
+        width: min(900px, 96vw);
+        max-height: 88vh;
+        overflow: auto;
       }
       @media (max-width: 1024px) {
         .ticket-filter-field { grid-column: span 6; }
@@ -8026,6 +8040,7 @@
         const [ticketPdfError, setTicketPdfError] = useState('');
         const [ticketPdfCreating, setTicketPdfCreating] = useState(false);
         const [ticketPdfRecordPreview, setTicketPdfRecordPreview] = useState(null);
+        const [ticketDetailModal, setTicketDetailModal] = useState({ open: false, ticket: null });
         const seenRowIdsRef = useRef(new Set());
         const seenOperationalAlertsRef = useRef(new Set());
         const topServicesLeaderRef = useRef('');
@@ -11378,6 +11393,11 @@
           setImageViewerSrc(next);
         }
 
+        function openTicketDetailModal(ticket) {
+          if (!ticket) return;
+          setTicketDetailModal({ open: true, ticket });
+        }
+
         async function handleCreateTicket(e) {
           e.preventDefault();
           const comentario = String(ticketComentario || '').trim();
@@ -12193,7 +12213,7 @@
                           {ticketSearchResults.length === 0 ? (
                             <div className="kv">No se encontraron tickets para esa búsqueda.</div>
                           ) : ticketSearchResults.map((ticket) => (
-                            <article className="chat-search-result" key={`ticket-search-${ticket.id}`}>
+                            <article className="chat-search-result" key={`ticket-search-${ticket.id}`} role="button" tabIndex={0} onClick={() => openTicketDetailModal(ticket)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openTicketDetailModal(ticket); }}>
                               <strong>{ticket.ticketCodigo || `TICKET-${ticket.id}`}</strong>
                               <div className="kv"><b>Tipo:</b> {ticket.origen === 'form-gestion' ? 'Ticket por gestión (form)' : ticket.origen === 'pdf-asistido' ? 'Ticket asistido por PDF' : 'Ticket manual'}</div>
                               <div className="kv"><b>Cliente ID:</b> {ticket.clienteId || '-'}</div>
@@ -12388,7 +12408,7 @@
                                 {group.items.map((ticket) => {
                                   const ticketStatusLabel = getTicketStatusLabel(ticket);
                                   return (
-                                  <div key={ticket.id} className="ticket-item-card">
+                                  <div key={ticket.id} className="ticket-item-card clickable" role="button" tabIndex={0} onClick={() => openTicketDetailModal(ticket)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openTicketDetailModal(ticket); }}>
                                     <div className="ticket-card-header">
                                       <h5 className="ticket-card-title">{ticket.ticketCodigo || `TICKET-${ticket.id}`}</h5>
                                       <span className={`status-chip-inline ${
@@ -12430,13 +12450,14 @@
                                       </div>
                                     )}
                                     <div className="ticket-card-actions">
-                                      <button type="button" className="status-action-btn chat-action-btn" onClick={() => openTicketReassignModal(ticket)}>Reasignar</button>
+                                      <button type="button" className="status-action-btn chat-action-btn" onClick={(e) => { e.stopPropagation(); openTicketReassignModal(ticket); }}>Reasignar</button>
                                       {ticket.estado !== 'resuelto' && (
                                         <>
-                                          <button type="button" className="status-action-btn chat-action-btn" onClick={() => toggleTicketResolutionEditor(ticket.id)}>
+                                          <button type="button" className="status-action-btn chat-action-btn" onClick={(e) => { e.stopPropagation(); toggleTicketResolutionEditor(ticket.id); }}>
                                             Resolver con comentario
                                           </button>
-                                          <button type="button" className="status-action-btn accept" onClick={() => {
+                                          <button type="button" className="status-action-btn accept" onClick={(e) => {
+                                            e.stopPropagation();
                                             const draft = ticketResolutionDrafts[ticket.id] || { comentario: '', imagenes: [] };
                                             handleResolveTicket(ticket, draft);
                                           }}>
@@ -12444,10 +12465,10 @@
                                           </button>
                                         </>
                                       )}
-                                      <button type="button" className="status-action-btn reject" onClick={() => handleDeleteTicket(ticket)}>Eliminar</button>
+                                      <button type="button" className="status-action-btn reject" onClick={(e) => { e.stopPropagation(); handleDeleteTicket(ticket); }}>Eliminar</button>
                                     </div>
                                     {ticket.estado !== 'resuelto' && ticketResolutionDrafts[ticket.id]?.open && (
-                                      <div className="ticket-resolution-editor">
+                                      <div className="ticket-resolution-editor" onClick={(e) => e.stopPropagation()}>
                                         <textarea
                                           value={ticketResolutionDrafts[ticket.id]?.comentario || ''}
                                           onChange={(e) => setTicketResolutionDraft(ticket.id, { comentario: e.target.value })}
@@ -13792,6 +13813,68 @@
                                   <strong>{ticket.ticketCodigo || ticket.id || 'Ticket'}</strong> · {ticket.comentario || 'Sin comentario'}
                                 </div>
                               ))}
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              )}
+
+              {ticketDetailModal.open && ticketDetailModal.ticket && (
+                <div className="confirm-modal" onClick={() => setTicketDetailModal({ open: false, ticket: null })}>
+                  <div className="confirm-modal-card ticket-detail-modal" onClick={(e) => e.stopPropagation()}>
+                    {(() => {
+                      const ticket = ticketDetailModal.ticket;
+                      const pdfData = ticket.pdfAsistido || {};
+                      const hasPdfItems = Array.isArray(pdfData.items) && pdfData.items.length > 0;
+                      return (
+                        <>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
+                            <h3 style={{ margin: 0 }}>Detalle de ticket</h3>
+                            <button type="button" className="edit-btn" onClick={() => setTicketDetailModal({ open: false, ticket: null })}>Cerrar</button>
+                          </div>
+                          <div className="hint" style={{ margin: '6px 0 10px' }}>{ticket.ticketCodigo || `TICKET-${ticket.id}`}</div>
+                          <div className="service-coord-detail-grid">
+                            <div className="service-detail-kpi"><small>Estado</small><strong>{ticket.estado || 'pendiente'}</strong></div>
+                            <div className="service-detail-kpi"><small>Prioridad</small><strong>{ticket.prioridad || '-'}</strong></div>
+                            <div className="service-detail-kpi"><small>Origen</small><strong>{ticket.origen === 'form-gestion' ? 'Formulario' : ticket.origen === 'pdf-asistido' ? 'PDF asistido' : 'Manual'}</strong></div>
+                            <div className="service-detail-kpi"><small>Fecha</small><strong>{ticket.fechaHoraLocal || formatRequestDateTime(ticket.creadoEn)}</strong></div>
+                          </div>
+                          <div className="kv ticket-comment-block" style={{ marginTop: 10 }}><b>Comentario:</b> {ticket.comentario || '-'}</div>
+                          {ticket.origen === 'pdf-asistido' && (
+                            <div className="ticket-pdf-preview" style={{ marginTop: 10 }}>
+                              <h4 style={{ margin: '0 0 8px' }}>Datos PDF detectados</h4>
+                              <div className="ticket-pdf-preview-grid">
+                                <div className="ticket-pdf-preview-item"><small>Número</small><strong>{pdfData.numero || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Fecha</small><strong>{pdfData.fecha || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Moneda</small><strong>{pdfData.moneda || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Estado</small><strong>{pdfData.estado || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Cliente</small><strong>{pdfData.cliente || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Dirección</small><strong>{pdfData.direccion || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Localidad</small><strong>{pdfData.localidad || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Vendedor</small><strong>{pdfData.vendedor || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Concepto</small><strong>{pdfData.concepto || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Total</small><strong>{pdfData.total || '-'}</strong></div>
+                              </div>
+                              <h5 style={{ margin: '10px 0 4px' }}>Ítems ({hasPdfItems ? pdfData.items.length : 0})</h5>
+                              {hasPdfItems ? (
+                                <div style={{ overflowX: 'auto' }}>
+                                  <table className="form-history-table" style={{ marginTop: 6 }}>
+                                    <thead><tr><th>Cantidad</th><th>Código</th><th>Detalle</th><th>IVA</th><th>Precio</th><th>Importe</th></tr></thead>
+                                    <tbody>
+                                      {pdfData.items.map((item, idx) => (
+                                        <tr key={`ticket-detail-pdf-item-${idx}`}>
+                                          <td>{item.cantidad ?? '-'}</td><td>{item.codigo || '-'}</td><td>{item.detalle || '-'}</td><td>{item.iva ?? '-'}</td><td>{item.precio || '-'}</td><td>{item.importe || '-'}</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              ) : (
+                                <div className="hint">No hay ítems PDF registrados en este ticket.</div>
+                              )}
                             </div>
                           )}
                         </>
