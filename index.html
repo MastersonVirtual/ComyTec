@@ -8025,6 +8025,7 @@
         const [ticketPdfPreview, setTicketPdfPreview] = useState(null);
         const [ticketPdfError, setTicketPdfError] = useState('');
         const [ticketPdfCreating, setTicketPdfCreating] = useState(false);
+        const [ticketPdfRecordPreview, setTicketPdfRecordPreview] = useState(null);
         const seenRowIdsRef = useRef(new Set());
         const seenOperationalAlertsRef = useRef(new Set());
         const topServicesLeaderRef = useRef('');
@@ -11022,155 +11023,202 @@
           return mapped.filter(Boolean);
         }
 
-        function parsePdfField(lines = [], labels = []) {
-          const normalizedLabels = labels.map((label) => String(label || '').trim().toLowerCase()).filter(Boolean);
-          if (!normalizedLabels.length) return '';
-          for (let i = 0; i < lines.length; i += 1) {
-            const line = String(lines[i] || '').trim();
-            if (!line) continue;
-            const lower = line.toLowerCase();
-            const found = normalizedLabels.find((label) => lower.startsWith(label));
-            if (!found) continue;
-            const afterColon = line.split(':').slice(1).join(':').trim();
-            if (afterColon) return afterColon;
-            const tail = line.slice(found.length).replace(/^[:\s-]+/, '').trim();
-            if (tail) return tail;
-            const nextLine = String(lines[i + 1] || '').trim();
-            if (nextLine) return nextLine;
+        function cleanLine(line = '') {
+          return String(line || '').replace(/\s+/g, ' ').trim();
+        }
+
+        function normalizeLines(text = '') {
+          return String(text || '')
+            .split(/\r?\n/)
+            .map(cleanLine)
+            .filter(Boolean);
+        }
+
+        function escapeRegex(str = '') {
+          return String(str || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function isLikelyLabel(text = '') {
+          const labels = [
+            'Número:', 'Fecha:', 'Moneda:', 'Estado:', 'Nombre:',
+            'Dirección:', 'Localidad:', 'Vendedor:',
+          ];
+          return labels.some((label) => String(text || '').toLowerCase().startsWith(label.toLowerCase()));
+        }
+
+        function getTextAfterLabel(lines = [], label = '') {
+          const idx = lines.findIndex((line) => String(line || '').toLowerCase().startsWith(String(label || '').toLowerCase()));
+          if (idx === -1) return '';
+
+          const line = String(lines[idx] || '');
+          const sameLine = line.replace(new RegExp(`^${escapeRegex(label)}`, 'i'), '').trim();
+          if (sameLine) return sameLine;
+
+          for (let i = idx + 1; i < lines.length; i += 1) {
+            const candidate = cleanLine(lines[i]);
+            if (!candidate) continue;
+            if (isLikelyLabel(candidate)) continue;
+            return candidate;
           }
           return '';
         }
 
-        function parsePdfItems(lines = []) {
+        function extractTotal(text = '') {
+          const totalBlock = String(text || '').match(/Total a Pagar\s+((?:\d{1,3}(?:\.\d{3})*,\d{2}\s+)+)/i);
+          if (totalBlock) {
+            const nums = String(totalBlock[1] || '').match(/\d{1,3}(?:\.\d{3})*,\d{2}/g);
+            if (nums && nums.length) return nums[nums.length - 1];
+          }
+          const allNums = String(text || '').match(/\d{1,3}(?:\.\d{3})*,\d{2}/g);
+          if (allNums && allNums.length) return allNums[allNums.length - 1];
+          return '';
+        }
+
+        function extractVendedor(text = '') {
+          const match = String(text || '').match(/Vendedor:\s*([A-Z0-9._ -]+)/i);
+          return match ? String(match[1] || '').trim() : '';
+        }
+
+        function extractConcepto(text = '') {
+          const match = String(text || '').match(/Vendedor:\s*[A-Z0-9._ -]+\s+(.+)$/i);
+          if (match) return String(match[1] || '').trim();
+          return '';
+        }
+
+        function extractGeneralFields(lines = [], rawText = '') {
+          let numero = getTextAfterLabel(lines, 'Número:');
+          let fecha = getTextAfterLabel(lines, 'Fecha:');
+          let moneda = getTextAfterLabel(lines, 'Moneda:');
+          let estado = getTextAfterLabel(lines, 'Estado:');
+          let cliente = getTextAfterLabel(lines, 'Nombre:');
+          let direccion = getTextAfterLabel(lines, 'Dirección:');
+          let localidad = getTextAfterLabel(lines, 'Localidad:');
+          let vendedor = getTextAfterLabel(lines, 'Vendedor:');
+          const total = extractTotal(rawText);
+          const concepto = extractConcepto(rawText);
+
+          if (!numero) {
+            const m = String(rawText || '').match(/Número:\s*([A-Z0-9-]+)/i);
+            if (m) numero = String(m[1] || '').trim();
+          }
+          if (!fecha) {
+            const m = String(rawText || '').match(/Fecha:\s*(\d{2}\/\d{2}\/\d{4})/i);
+            if (m) fecha = String(m[1] || '').trim();
+          }
+          if (!moneda) {
+            const m = String(rawText || '').match(/Moneda:\s*([A-Z]+)/i);
+            if (m) moneda = String(m[1] || '').trim();
+          }
+          if (!estado) {
+            const m = String(rawText || '').match(/Estado:\s*([A-Za-zÁÉÍÓÚáéíóúÑñ ]+)/i);
+            if (m) estado = String(m[1] || '').trim();
+          }
+          if (!cliente) {
+            const m = String(rawText || '').match(/Nombre:\s*(.*?)\s+Dirección:/i);
+            if (m) cliente = String(m[1] || '').trim();
+          }
+          if (!direccion) {
+            const m = String(rawText || '').match(/Dirección:\s*(.*?)\s+Localidad:/i);
+            if (m) direccion = String(m[1] || '').trim();
+          }
+          if (!localidad) {
+            const m = String(rawText || '').match(/Localidad:\s*(.*?)\s+Cant\s+C[oó]digo/i);
+            if (m) localidad = String(m[1] || '').trim();
+          }
+          if (!vendedor) vendedor = extractVendedor(rawText);
+          if (vendedor) vendedor = vendedor.replace(/^Vendedor:\s*/i, '').trim();
+
+          return {
+            numero: numero || '',
+            fecha: fecha || '',
+            moneda: moneda || '',
+            estado: estado || '',
+            cliente: cliente || '',
+            direccion: direccion || '',
+            localidad: localidad || '',
+            vendedor: vendedor || '',
+            concepto: concepto || '',
+            total: total || '',
+          };
+        }
+
+        function extractItemsFromText(text = '') {
           const items = [];
-          const normalizedLines = Array.isArray(lines) ? lines.map((line) => String(line || '').replace(/\s+/g, ' ').trim()).filter(Boolean) : [];
-          if (!normalizedLines.length) return items;
+          const normalized = String(text || '').replace(/\s+/g, ' ').trim();
+          if (!normalized) return items;
 
-          const headerRegex = /(cant(?:idad)?|c[oó]digo|detalle|iva|precio|importe)/i;
-          const stopRegex = /^(subtot|subtotal|iva\b|total\b|total a pagar|vendedor\b|estado\b|moneda\b|fecha\b|concepto\b)/i;
-          const quantityRegex = /^\d+(?:[.,]\d+)?$/;
-          const moneyRegex = /^\$?\d{1,3}(?:[.\s]\d{3})*(?:,\d{2})$/;
-
-          function parseLineAsItem(line = '') {
-            const tokens = String(line || '').trim().split(/\s+/).filter(Boolean);
-            if (tokens.length < 6) return null;
-            if (!quantityRegex.test(tokens[0])) return null;
-            const codigo = tokens[1] || '';
-            if (!codigo || moneyRegex.test(codigo)) return null;
-
-            const moneyIndexes = [];
-            for (let i = tokens.length - 1; i >= 0; i -= 1) {
-              if (moneyRegex.test(tokens[i])) moneyIndexes.push(i);
-              if (moneyIndexes.length === 2) break;
-            }
-            if (moneyIndexes.length < 2) return null;
-
-            const importeIndex = moneyIndexes[0];
-            const precioIndex = moneyIndexes[1];
-            if (precioIndex >= importeIndex) return null;
-
-            const ivaIndex = precioIndex - 1;
-            const ivaToken = tokens[ivaIndex] || '';
-            if (!/^\d{1,2}$/.test(ivaToken)) return null;
-
-            const detailStart = 2;
-            const detailEnd = ivaIndex - 1;
-            if (detailEnd < detailStart) return null;
-            const detalle = tokens.slice(detailStart, detailEnd + 1).join(' ').trim();
-            if (!detalle) return null;
-
-            const cantidadRaw = tokens[0].replace(',', '.');
-            const cantidad = Number(cantidadRaw);
-            if (!Number.isFinite(cantidad)) return null;
-
-            return {
-              cantidad,
-              codigo,
-              detalle,
-              iva: Number(ivaToken),
-              precio: tokens[precioIndex],
-              importe: tokens[importeIndex],
-            };
+          const headerMatch = normalized.match(/Cant(?:idad)?\s+C[oó]digo(?:\s*-\s*Detalle)?[\s\S]*?Importe/i);
+          let workingText = normalized;
+          if (headerMatch) {
+            const startIndex = (headerMatch.index || 0) + String(headerMatch[0] || '').length;
+            workingText = normalized.slice(startIndex);
           }
 
-          let insideDetailBlock = false;
-          for (let i = 0; i < normalizedLines.length; i += 1) {
-            const line = normalizedLines[i];
-            if (!line) continue;
+          const endMarkers = [/Subtot/i, /Subtotal/i, /Total a Pagar/i, /Vendedor:/i, /Estado:/i];
+          let endIndex = workingText.length;
+          endMarkers.forEach((marker) => {
+            const match = workingText.match(marker);
+            if (match && typeof match.index === 'number' && match.index < endIndex) endIndex = match.index;
+          });
+          workingText = workingText.slice(0, endIndex).trim();
 
-            if (headerRegex.test(line) && /(cant|cantidad|c[oó]digo|detalle)/i.test(line)) {
-              insideDetailBlock = true;
-              continue;
-            }
-            if (insideDetailBlock && stopRegex.test(line)) break;
-            if (!insideDetailBlock && !/^\d+(?:[.,]\d+)?\s+\S+/.test(line)) continue;
-
-            const item = parseLineAsItem(line);
-            if (item) {
-              items.push(item);
-              insideDetailBlock = true;
-            }
+          const regex = /(\d+)\s+([A-Z0-9][A-Z0-9-]*)\s+(.+?)\s+(\d{1,2})\s+(\d{1,3}(?:\.\d{3})*,\d{2})\s+(\d{1,3}(?:\.\d{3})*,\d{2})(?=\s+\d+\s+[A-Z0-9][A-Z0-9-]*\s+|$)/g;
+          let match;
+          while ((match = regex.exec(workingText)) !== null) {
+            items.push({
+              cantidad: parseInt(match[1], 10),
+              codigo: String(match[2] || '').trim(),
+              detalle: cleanLine(match[3] || ''),
+              iva: parseInt(match[4], 10),
+              precio: String(match[5] || '').trim(),
+              importe: String(match[6] || '').trim(),
+            });
           }
           return items;
         }
 
-        function buildPdfLinesFromPageItems(items = []) {
-          const rowsMap = new Map();
-          const sorted = Array.isArray(items) ? [...items].sort((a, b) => (b?.transform?.[5] || 0) - (a?.transform?.[5] || 0)) : [];
-          sorted.forEach((item) => {
-            const text = String(item?.str || '').trim();
-            if (!text) return;
-            const y = Number(item?.transform?.[5] || 0);
-            const x = Number(item?.transform?.[4] || 0);
-            const rowKey = String(Math.round(y * 2) / 2);
-            if (!rowsMap.has(rowKey)) rowsMap.set(rowKey, []);
-            rowsMap.get(rowKey).push({ x, text });
-          });
-          const rowEntries = Array.from(rowsMap.entries())
-            .map(([rowKey, rowItems]) => ({
-              y: Number(rowKey),
-              text: rowItems
-                .sort((a, b) => a.x - b.x)
-                .map((entry) => entry.text)
-                .join(' ')
-                .replace(/\s+/g, ' ')
-                .trim(),
-            }))
-            .filter((entry) => entry.text);
-          return rowEntries
-            .sort((a, b) => b.y - a.y)
-            .map((entry) => entry.text);
+        function buildRecord(fields = {}, items = [], rawText = '') {
+          return {
+            numero: fields.numero || '',
+            fecha: fields.fecha || '',
+            moneda: fields.moneda || '',
+            estado: fields.estado || '',
+            cliente: fields.cliente || '',
+            direccion: fields.direccion || '',
+            localidad: fields.localidad || '',
+            vendedor: fields.vendedor || '',
+            concepto: fields.concepto || '',
+            total: fields.total || '',
+            items: Array.isArray(items) ? items : [],
+            rawText: rawText || '',
+            fechaCarga: new Date().toISOString(),
+          };
         }
 
-        function extractTicketDataFromPdfText(rawText = '') {
-          const normalizedText = String(rawText || '').replace(/\r/g, '\n');
-          const lines = normalizedText.split('\n').map((line) => String(line || '').trim()).filter(Boolean);
-          const parsed = {
-            numero: parsePdfField(lines, ['numero', 'número', 'nro', 'n°']),
-            fecha: parsePdfField(lines, ['fecha']),
-            moneda: parsePdfField(lines, ['moneda']),
-            estado: parsePdfField(lines, ['estado']),
-            cliente: parsePdfField(lines, ['nombre / cliente', 'nombre cliente', 'cliente', 'nombre']),
-            direccion: parsePdfField(lines, ['dirección', 'direccion']),
-            localidad: parsePdfField(lines, ['localidad']),
-            vendedor: parsePdfField(lines, ['vendedor']),
-            conceptoFinal: parsePdfField(lines, ['concepto final', 'concepto']),
-            total: parsePdfField(lines, ['total']),
-            items: parsePdfItems(lines),
-            rawText,
-          };
-          return parsed;
+        async function extractTextFromPDF(file) {
+          const arrayBuffer = await file.arrayBuffer();
+          const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+          let fullText = '';
+          for (let pageNum = 1; pageNum <= pdf.numPages; pageNum += 1) {
+            const page = await pdf.getPage(pageNum);
+            const textContent = await page.getTextContent();
+            const pageText = (textContent.items || []).map((item) => item.str).join(' ');
+            fullText += `${pageText}\n`;
+          }
+          return fullText;
         }
 
         async function handleProcessTicketPdf() {
           if (!ticketPdfFile) {
             setTicketPdfError('Seleccioná un PDF antes de procesar.');
             setTicketPdfPreview(null);
+            setTicketPdfRecordPreview(null);
             return;
           }
           setTicketPdfParsing(true);
           setTicketPdfError('');
           setTicketPdfPreview(null);
+          setTicketPdfRecordPreview(null);
           try {
             if (!String(ticketPdfFile.type || '').includes('pdf')) {
               throw new Error('invalid_pdf');
@@ -11179,24 +11227,20 @@
             if (!pdfjsLib?.getDocument) {
               throw new Error('pdf_lib_missing');
             }
-            const buffer = await ticketPdfFile.arrayBuffer();
-            const doc = await pdfjsLib.getDocument({ data: buffer }).promise;
-            let fullText = '';
-            for (let pageNumber = 1; pageNumber <= doc.numPages; pageNumber += 1) {
-              const page = await doc.getPage(pageNumber);
-              const content = await page.getTextContent();
-              const pageLines = buildPdfLinesFromPageItems(content.items || []);
-              fullText += `${pageLines.join('\n')}\n`;
-            }
+            const fullText = await extractTextFromPDF(ticketPdfFile);
             if (!String(fullText || '').trim()) {
               throw new Error('pdf_without_text');
             }
-            const parsed = extractTicketDataFromPdfText(fullText);
-            const hasSomeData = [parsed.numero, parsed.fecha, parsed.cliente, parsed.total, parsed.conceptoFinal].some((v) => String(v || '').trim()) || parsed.items.length > 0;
+            const lines = normalizeLines(fullText);
+            const fields = extractGeneralFields(lines, fullText);
+            const items = extractItemsFromText(fullText);
+            const record = buildRecord(fields, items, fullText);
+            const hasSomeData = [record.numero, record.fecha, record.cliente, record.total, record.concepto].some((v) => String(v || '').trim()) || record.items.length > 0;
             if (!hasSomeData) {
               setTicketPdfError('Se leyó el PDF, pero no se detectaron campos útiles. Revisá el formato del documento.');
             }
-            setTicketPdfPreview(parsed);
+            setTicketPdfPreview(record);
+            setTicketPdfRecordPreview(record);
           } catch (error) {
             console.error('Error procesando PDF para ticket:', error);
             if (String(error?.message || '') === 'pdf_without_text') {
@@ -11222,7 +11266,7 @@
           try {
             const ticketCodigo = generateTicketCode('PDF');
             const comentarioBase = [
-              ticketPdfPreview.conceptoFinal ? `Concepto: ${ticketPdfPreview.conceptoFinal}` : '',
+              ticketPdfPreview.concepto ? `Concepto: ${ticketPdfPreview.concepto}` : '',
               ticketPdfPreview.total ? `Total: ${ticketPdfPreview.total}` : '',
               ticketPdfPreview.cliente ? `Cliente: ${ticketPdfPreview.cliente}` : '',
               ticketPdfPreview.numero ? `Número: ${ticketPdfPreview.numero}` : '',
@@ -11248,14 +11292,16 @@
                 direccion: ticketPdfPreview.direccion || '',
                 localidad: ticketPdfPreview.localidad || '',
                 vendedor: ticketPdfPreview.vendedor || '',
-                conceptoFinal: ticketPdfPreview.conceptoFinal || '',
+                concepto: ticketPdfPreview.concepto || '',
                 total: ticketPdfPreview.total || '',
                 items: Array.isArray(ticketPdfPreview.items) ? ticketPdfPreview.items : [],
+                rawText: ticketPdfPreview.rawText || '',
               },
               creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
             });
             setTicketPdfFile(null);
             setTicketPdfPreview(null);
+            setTicketPdfRecordPreview(null);
             setTicketPdfError('');
             setNotificacion({ mensaje: `✔ Ticket creado desde PDF (${ticketCodigo})`, tipo: 'ok' });
           } catch (error) {
@@ -12219,6 +12265,7 @@
                                   const nextFile = e.target.files && e.target.files[0] ? e.target.files[0] : null;
                                   setTicketPdfFile(nextFile);
                                   setTicketPdfPreview(null);
+                                  setTicketPdfRecordPreview(null);
                                   setTicketPdfError('');
                                 }}
                               />
@@ -12244,20 +12291,45 @@
                                 <div className="ticket-pdf-preview-item"><small>Dirección</small><strong>{ticketPdfPreview.direccion || '-'}</strong></div>
                                 <div className="ticket-pdf-preview-item"><small>Localidad</small><strong>{ticketPdfPreview.localidad || '-'}</strong></div>
                                 <div className="ticket-pdf-preview-item"><small>Vendedor</small><strong>{ticketPdfPreview.vendedor || '-'}</strong></div>
-                                <div className="ticket-pdf-preview-item"><small>Concepto final</small><strong>{ticketPdfPreview.conceptoFinal || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Concepto</small><strong>{ticketPdfPreview.concepto || '-'}</strong></div>
                                 <div className="ticket-pdf-preview-item"><small>Total</small><strong>{ticketPdfPreview.total || '-'}</strong></div>
                               </div>
                               <h5 style={{ margin: '10px 0 4px' }}>Ítems detectados ({ticketPdfPreview.items?.length || 0})</h5>
                               {Array.isArray(ticketPdfPreview.items) && ticketPdfPreview.items.length > 0 ? (
-                                <ul className="ticket-pdf-items-list">
-                                  {ticketPdfPreview.items.map((item, idx) => (
-                                    <li key={`pdf-item-${idx}`}>
-                                      <b>Cant:</b> {item.cantidad || '-'} · <b>Código:</b> {item.codigo || '-'} · <b>Detalle:</b> {item.detalle || '-'} · <b>IVA:</b> {item.iva || '-'} · <b>Precio:</b> {item.precio || '-'} · <b>Importe:</b> {item.importe || '-'}
-                                    </li>
-                                  ))}
-                                </ul>
+                                <div style={{ overflowX: 'auto' }}>
+                                  <table className="form-history-table" style={{ marginTop: 6 }}>
+                                    <thead>
+                                      <tr>
+                                        <th>Cantidad</th>
+                                        <th>Código</th>
+                                        <th>Detalle</th>
+                                        <th>IVA</th>
+                                        <th>Precio</th>
+                                        <th>Importe</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {ticketPdfPreview.items.map((item, idx) => (
+                                        <tr key={`pdf-item-${idx}`}>
+                                          <td>{item.cantidad ?? '-'}</td>
+                                          <td>{item.codigo || '-'}</td>
+                                          <td>{item.detalle || '-'}</td>
+                                          <td>{item.iva ?? '-'}</td>
+                                          <td>{item.precio || '-'}</td>
+                                          <td>{item.importe || '-'}</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
                               ) : (
                                 <div className="hint">No se detectaron ítems completos. Podés continuar y ajustar luego si hace falta.</div>
+                              )}
+                              {ticketPdfRecordPreview && (
+                                <details style={{ marginTop: 10 }}>
+                                  <summary style={{ cursor: 'pointer' }}>Ver objeto final generado (JSON)</summary>
+                                  <pre style={{ whiteSpace: 'pre-wrap', marginTop: 8, fontSize: 12 }}>{JSON.stringify(ticketPdfRecordPreview, null, 2)}</pre>
+                                </details>
                               )}
                             </div>
                           )}
