@@ -5285,9 +5285,76 @@
         background: rgba(0,0,0,.12);
       }
       .ticket-detail-modal {
-        width: min(900px, 96vw);
-        max-height: 88vh;
+        width: min(980px, 96vw);
+        max-height: 90vh;
         overflow: auto;
+        padding: 18px;
+        border-radius: 18px;
+        border: 1px solid rgba(169, 223, 217, .35);
+        background: linear-gradient(165deg, #0f2a2b 0%, #143738 65%, #102829 100%);
+        box-shadow: 0 30px 70px rgba(0,0,0,.45);
+      }
+      .ticket-detail-overlay {
+        background: rgba(3, 10, 10, .72) !important;
+        backdrop-filter: blur(5px) saturate(110%);
+      }
+      .ticket-detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid rgba(220, 255, 250, .2);
+      }
+      .ticket-detail-subtitle {
+        color: #cfeeed;
+        font-size: 13px;
+        margin: 4px 0 0;
+      }
+      .ticket-detail-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+      }
+      .ticket-detail-meta-card {
+        border: 1px solid rgba(220, 255, 250, .2);
+        border-radius: 12px;
+        padding: 10px;
+        background: rgba(255, 255, 255, .04);
+      }
+      .ticket-detail-meta-card small {
+        display: block;
+        color: #b8dedd;
+        margin-bottom: 5px;
+      }
+      .ticket-detail-meta-card strong {
+        display: block;
+        color: #f1fffd;
+        font-size: 15px;
+      }
+      .ticket-detail-section-title {
+        margin: 14px 0 6px;
+        font-size: 14px;
+        letter-spacing: .03em;
+        color: #dffbf8;
+      }
+      .ticket-detail-comment {
+        border: 1px solid rgba(220, 255, 250, .24);
+        background: rgba(6, 20, 21, .74);
+        border-radius: 12px;
+        padding: 12px;
+        min-height: 120px;
+        max-height: 280px;
+        overflow: auto;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        line-height: 1.45;
+        color: #efffff;
+      }
+      @media (max-width: 740px) {
+        .ticket-detail-modal { width: 98vw; max-height: 92vh; padding: 14px; }
+        .ticket-detail-comment { max-height: 220px; }
       }
       @media (max-width: 1024px) {
         .ticket-filter-field { grid-column: span 6; }
@@ -13823,7 +13890,7 @@
               )}
 
               {ticketDetailModal.open && ticketDetailModal.ticket && (
-                <div className="confirm-modal" onClick={() => setTicketDetailModal({ open: false, ticket: null })}>
+                <div className="confirm-modal ticket-detail-overlay" onClick={() => setTicketDetailModal({ open: false, ticket: null })}>
                   <div className="confirm-modal-card ticket-detail-modal" onClick={(e) => e.stopPropagation()}>
                     {(() => {
                       const ticket = ticketDetailModal.ticket;
@@ -13831,18 +13898,33 @@
                       const hasPdfItems = Array.isArray(pdfData.items) && pdfData.items.length > 0;
                       return (
                         <>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10 }}>
-                            <h3 style={{ margin: 0 }}>Detalle de ticket</h3>
+                          <div className="ticket-detail-header">
+                            <div>
+                              <h3 style={{ margin: 0 }}>Detalle de ticket</h3>
+                              <p className="ticket-detail-subtitle">{ticket.ticketCodigo || `TICKET-${ticket.id}`}</p>
+                            </div>
                             <button type="button" className="edit-btn" onClick={() => setTicketDetailModal({ open: false, ticket: null })}>Cerrar</button>
                           </div>
-                          <div className="hint" style={{ margin: '6px 0 10px' }}>{ticket.ticketCodigo || `TICKET-${ticket.id}`}</div>
-                          <div className="service-coord-detail-grid">
-                            <div className="service-detail-kpi"><small>Estado</small><strong>{ticket.estado || 'pendiente'}</strong></div>
-                            <div className="service-detail-kpi"><small>Prioridad</small><strong>{ticket.prioridad || '-'}</strong></div>
-                            <div className="service-detail-kpi"><small>Origen</small><strong>{ticket.origen === 'form-gestion' ? 'Formulario' : ticket.origen === 'pdf-asistido' ? 'PDF asistido' : 'Manual'}</strong></div>
-                            <div className="service-detail-kpi"><small>Fecha</small><strong>{ticket.fechaHoraLocal || formatRequestDateTime(ticket.creadoEn)}</strong></div>
+
+                          <div className="ticket-detail-meta-grid">
+                            <div className="ticket-detail-meta-card"><small>ID Ticket</small><strong>{ticket.ticketCodigo || `TICKET-${ticket.id}`}</strong></div>
+                            <div className="ticket-detail-meta-card"><small>Estado</small><strong>{ticket.estado || 'pendiente'}</strong></div>
+                            <div className="ticket-detail-meta-card"><small>Prioridad</small><strong>{ticket.prioridad || '-'}</strong></div>
+                            <div className="ticket-detail-meta-card"><small>Origen</small><strong>{ticket.origen === 'form-gestion' ? 'Formulario' : ticket.origen === 'pdf-asistido' ? 'PDF asistido' : 'Manual'}</strong></div>
+                            <div className="ticket-detail-meta-card"><small>Fecha</small><strong>{ticket.fechaHoraLocal || formatRequestDateTime(ticket.creadoEn)}</strong></div>
+                            <div className="ticket-detail-meta-card"><small>Creado por</small><strong>{ticket.creadoPorNombre || ticket.creadoPorEmail || '-'}</strong></div>
                           </div>
-                          <div className="kv ticket-comment-block" style={{ marginTop: 10 }}><b>Comentario:</b> {ticket.comentario || '-'}</div>
+
+                          <h4 className="ticket-detail-section-title">Comentario</h4>
+                          <div className="ticket-detail-comment">{ticket.comentario || '-'}</div>
+
+                          {!!String(ticket.resolucionComentario || '').trim() && (
+                            <>
+                              <h4 className="ticket-detail-section-title">Comentario de resolución</h4>
+                              <div className="ticket-detail-comment">{ticket.resolucionComentario}</div>
+                            </>
+                          )}
+
                           {ticket.origen === 'pdf-asistido' && (
                             <div className="ticket-pdf-preview" style={{ marginTop: 10 }}>
                               <h4 style={{ margin: '0 0 8px' }}>Datos PDF detectados</h4>
