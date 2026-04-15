@@ -6158,7 +6158,15 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+      if (typeof pdfjsLib !== 'undefined' && pdfjsLib?.GlobalWorkerOptions) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      }
+      if (typeof pdfjsLib === 'undefined') {
+        console.error('PDF.js no se cargó correctamente');
+      }
+    </script>
     <script src="https://unpkg.com/lucide@latest"></script>
   </head>
   <body>
@@ -11105,9 +11113,6 @@
             if (!pdfjsLib?.getDocument) {
               throw new Error('pdf_lib_missing');
             }
-            if (pdfjsLib.GlobalWorkerOptions) {
-              pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.worker.min.js';
-            }
             const buffer = await ticketPdfFile.arrayBuffer();
             const doc = await pdfjsLib.getDocument({ data: buffer }).promise;
             let fullText = '';
@@ -11133,7 +11138,7 @@
             } else if (String(error?.message || '') === 'invalid_pdf') {
               setTicketPdfError('El archivo seleccionado no es un PDF válido.');
             } else if (String(error?.message || '') === 'pdf_lib_missing') {
-              setTicketPdfError('No se pudo cargar el lector de PDF en este momento. Reintentá.');
+              setTicketPdfError('No se pudo procesar el PDF seleccionado. Verificá el archivo e intentá nuevamente.');
             } else {
               setTicketPdfError('No fue posible leer el PDF. Verificá el archivo e intentá nuevamente.');
             }
