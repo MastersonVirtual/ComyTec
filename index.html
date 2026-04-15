@@ -11043,37 +11043,103 @@
 
         function parsePdfItems(lines = []) {
           const items = [];
-          const itemLineRegex = /^(\d+(?:[.,]\d+)?)\s+([A-Za-z0-9._-]{2,})\s+(.+?)\s+(\d{1,2}(?:[.,]\d+)?%?)\s+([$\d.,]+)\s+([$\d.,]+)$/;
-          lines.forEach((lineRaw) => {
-            const line = String(lineRaw || '').replace(/\s+/g, ' ').trim();
-            if (!line || line.length < 6) return;
-            const match = line.match(itemLineRegex);
-            if (match) {
-              items.push({
-                cantidad: match[1] || '',
-                codigo: match[2] || '',
-                detalle: match[3] || '',
-                iva: match[4] || '',
-                precio: match[5] || '',
-                importe: match[6] || '',
-              });
-              return;
+          const normalizedLines = Array.isArray(lines) ? lines.map((line) => String(line || '').replace(/\s+/g, ' ').trim()).filter(Boolean) : [];
+          if (!normalizedLines.length) return items;
+
+          const headerRegex = /(cant(?:idad)?|c[oó]digo|detalle|iva|precio|importe)/i;
+          const stopRegex = /^(subtot|subtotal|iva\b|total\b|total a pagar|vendedor\b|estado\b|moneda\b|fecha\b|concepto\b)/i;
+          const quantityRegex = /^\d+(?:[.,]\d+)?$/;
+          const moneyRegex = /^\$?\d{1,3}(?:[.\s]\d{3})*(?:,\d{2})$/;
+
+          function parseLineAsItem(line = '') {
+            const tokens = String(line || '').trim().split(/\s+/).filter(Boolean);
+            if (tokens.length < 6) return null;
+            if (!quantityRegex.test(tokens[0])) return null;
+            const codigo = tokens[1] || '';
+            if (!codigo || moneyRegex.test(codigo)) return null;
+
+            const moneyIndexes = [];
+            for (let i = tokens.length - 1; i >= 0; i -= 1) {
+              if (moneyRegex.test(tokens[i])) moneyIndexes.push(i);
+              if (moneyIndexes.length === 2) break;
             }
-            const generic = line.match(/^(\d+(?:[.,]\d+)?)\s+(.+)$/);
-            if (!generic) return;
-            const detailText = String(generic[2] || '');
-            const hasMoneySignal = /\$\s*\d|(?:\d+[.,]\d{2})/.test(detailText);
-            if (!hasMoneySignal) return;
-            items.push({
-              cantidad: generic[1] || '',
-              codigo: '',
-              detalle: detailText,
-              iva: '',
-              precio: '',
-              importe: '',
-            });
-          });
+            if (moneyIndexes.length < 2) return null;
+
+            const importeIndex = moneyIndexes[0];
+            const precioIndex = moneyIndexes[1];
+            if (precioIndex >= importeIndex) return null;
+
+            const ivaIndex = precioIndex - 1;
+            const ivaToken = tokens[ivaIndex] || '';
+            if (!/^\d{1,2}$/.test(ivaToken)) return null;
+
+            const detailStart = 2;
+            const detailEnd = ivaIndex - 1;
+            if (detailEnd < detailStart) return null;
+            const detalle = tokens.slice(detailStart, detailEnd + 1).join(' ').trim();
+            if (!detalle) return null;
+
+            const cantidadRaw = tokens[0].replace(',', '.');
+            const cantidad = Number(cantidadRaw);
+            if (!Number.isFinite(cantidad)) return null;
+
+            return {
+              cantidad,
+              codigo,
+              detalle,
+              iva: Number(ivaToken),
+              precio: tokens[precioIndex],
+              importe: tokens[importeIndex],
+            };
+          }
+
+          let insideDetailBlock = false;
+          for (let i = 0; i < normalizedLines.length; i += 1) {
+            const line = normalizedLines[i];
+            if (!line) continue;
+
+            if (headerRegex.test(line) && /(cant|cantidad|c[oó]digo|detalle)/i.test(line)) {
+              insideDetailBlock = true;
+              continue;
+            }
+            if (insideDetailBlock && stopRegex.test(line)) break;
+            if (!insideDetailBlock && !/^\d+(?:[.,]\d+)?\s+\S+/.test(line)) continue;
+
+            const item = parseLineAsItem(line);
+            if (item) {
+              items.push(item);
+              insideDetailBlock = true;
+            }
+          }
           return items;
+        }
+
+        function buildPdfLinesFromPageItems(items = []) {
+          const rowsMap = new Map();
+          const sorted = Array.isArray(items) ? [...items].sort((a, b) => (b?.transform?.[5] || 0) - (a?.transform?.[5] || 0)) : [];
+          sorted.forEach((item) => {
+            const text = String(item?.str || '').trim();
+            if (!text) return;
+            const y = Number(item?.transform?.[5] || 0);
+            const x = Number(item?.transform?.[4] || 0);
+            const rowKey = String(Math.round(y * 2) / 2);
+            if (!rowsMap.has(rowKey)) rowsMap.set(rowKey, []);
+            rowsMap.get(rowKey).push({ x, text });
+          });
+          const rowEntries = Array.from(rowsMap.entries())
+            .map(([rowKey, rowItems]) => ({
+              y: Number(rowKey),
+              text: rowItems
+                .sort((a, b) => a.x - b.x)
+                .map((entry) => entry.text)
+                .join(' ')
+                .replace(/\s+/g, ' ')
+                .trim(),
+            }))
+            .filter((entry) => entry.text);
+          return rowEntries
+            .sort((a, b) => b.y - a.y)
+            .map((entry) => entry.text);
         }
 
         function extractTicketDataFromPdfText(rawText = '') {
@@ -11119,8 +11185,8 @@
             for (let pageNumber = 1; pageNumber <= doc.numPages; pageNumber += 1) {
               const page = await doc.getPage(pageNumber);
               const content = await page.getTextContent();
-              const pageText = (content.items || []).map((item) => String(item.str || '')).join(' ').trim();
-              fullText += `${pageText}\n`;
+              const pageLines = buildPdfLinesFromPageItems(content.items || []);
+              fullText += `${pageLines.join('\n')}\n`;
             }
             if (!String(fullText || '').trim()) {
               throw new Error('pdf_without_text');
