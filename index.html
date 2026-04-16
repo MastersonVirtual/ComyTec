@@ -5288,13 +5288,15 @@
         width: min(980px, 96vw);
         max-height: 90vh;
         overflow: auto;
-        padding: 18px;
-        border-radius: 18px;
+        padding: 20px;
+        border-radius: 20px;
         border: 1px solid rgba(169, 223, 217, .35) !important;
-        background: linear-gradient(165deg, #0f2a2b 0%, #143738 65%, #102829 100%) !important;
+        background: linear-gradient(160deg, #0e2628 0%, #123133 58%, #10292b 100%) !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
         box-shadow: 0 30px 70px rgba(0,0,0,.45);
+        scrollbar-width: thin;
+        scrollbar-color: rgba(78, 227, 209, .72) rgba(4, 26, 27, .78);
       }
       .ticket-detail-overlay {
         background: rgba(3, 10, 10, .72) !important;
@@ -5321,9 +5323,10 @@
       }
       .ticket-detail-meta-card {
         border: 1px solid rgba(220, 255, 250, .2);
-        border-radius: 12px;
-        padding: 10px;
-        background: rgba(255, 255, 255, .04);
+        border-radius: 14px;
+        padding: 11px;
+        background: linear-gradient(145deg, rgba(255, 255, 255, .08), rgba(255, 255, 255, .03));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
       }
       .ticket-detail-meta-card small {
         display: block;
@@ -5343,7 +5346,7 @@
       }
       .ticket-detail-comment {
         border: 1px solid rgba(220, 255, 250, .24);
-        background: rgba(6, 20, 21, .74);
+        background: rgba(4, 17, 18, .88);
         border-radius: 12px;
         padding: 12px;
         min-height: 120px;
@@ -5352,11 +5355,13 @@
         white-space: pre-wrap;
         overflow-wrap: anywhere;
         line-height: 1.45;
-        color: #efffff;
+        color: #f2fffe;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(78, 227, 209, .65) rgba(4, 26, 27, .76);
       }
       .ticket-detail-block {
         border: 1px solid rgba(220, 255, 250, .2);
-        background: rgba(5, 18, 19, .84);
+        background: linear-gradient(145deg, rgba(6, 24, 25, .94), rgba(4, 18, 19, .9));
         border-radius: 12px;
         padding: 10px;
         margin-top: 10px;
@@ -5367,9 +5372,9 @@
       }
       .ticket-detail-extracted {
         border: 1px dashed rgba(151,243,231,.45);
-        background: rgba(2, 14, 15, .88);
+        background: rgba(2, 13, 14, .96);
         border-radius: 10px;
-        padding: 10px;
+        padding: 12px;
         min-height: 120px;
         max-height: 280px;
         overflow: auto;
@@ -5378,12 +5383,14 @@
         line-height: 1.45;
         color: #e7fffc;
         font-size: 13px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(78, 227, 209, .7) rgba(2, 18, 19, .9);
       }
       .ticket-detail-json {
         margin-top: 10px;
         border: 1px solid rgba(220,255,250,.18);
         border-radius: 10px;
-        background: rgba(3, 12, 13, .88);
+        background: rgba(3, 13, 14, .95);
         padding: 10px;
       }
       .ticket-detail-json summary {
@@ -5396,7 +5403,7 @@
         margin: 8px 0 0;
         max-height: 300px;
         overflow: auto;
-        background: rgba(0,0,0,.28);
+        background: rgba(1, 10, 11, .88);
         border: 1px dashed rgba(151,243,231,.4);
         border-radius: 8px;
         padding: 10px;
@@ -5404,6 +5411,8 @@
         overflow-wrap: anywhere;
         color: #dffdfa;
         font-size: 12px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(78, 227, 209, .68) rgba(1, 14, 15, .86);
       }
       .ticket-quote-modal {
         width: min(1080px, 96vw);
@@ -5414,6 +5423,8 @@
         border: 1px solid rgba(169, 223, 217, .35) !important;
         background: linear-gradient(165deg, #0d2627 0%, #123334 65%, #0f2526 100%) !important;
         box-shadow: 0 30px 70px rgba(0,0,0,.45);
+        scrollbar-width: thin;
+        scrollbar-color: rgba(78, 227, 209, .72) rgba(4, 26, 27, .78);
       }
       .ticket-quote-title {
         margin: 0;
@@ -5486,8 +5497,9 @@
         margin-top: 10px;
         border: 1px solid rgba(220,255,250,.2);
         border-radius: 12px;
-        padding: 10px;
-        background: rgba(5, 29, 31, .46);
+        padding: 12px;
+        background: linear-gradient(150deg, rgba(5, 31, 33, .72), rgba(2, 18, 19, .9));
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
       }
       .ticket-pdf-preview-grid {
         display: grid;
@@ -5497,15 +5509,84 @@
       .ticket-pdf-preview-item {
         border: 1px solid rgba(220,255,250,.14);
         border-radius: 10px;
-        padding: 8px;
-        background: rgba(255,255,255,.03);
+        padding: 10px;
+        background: linear-gradient(145deg, rgba(9, 41, 43, .8), rgba(4, 21, 23, .92));
       }
-      .ticket-pdf-preview-item small { display: block; opacity: .75; }
+      .ticket-pdf-preview-item small { display: block; opacity: 1; color: #c4ebe7; font-weight: 600; }
+      .ticket-pdf-preview-item strong { color: #f2fffd; font-weight: 800; line-height: 1.35; }
       .ticket-pdf-items-list {
         margin: 8px 0 0;
         padding-left: 18px;
       }
       .ticket-pdf-items-list li { margin-bottom: 6px; }
+      .ticket-pdf-preview .form-history-table {
+        background: rgba(2, 14, 15, .94);
+        border-radius: 10px;
+        overflow: hidden;
+      }
+      .ticket-pdf-preview .form-history-table thead th {
+        background: #daf3f1;
+        color: #032525;
+        border-bottom: 1px solid rgba(5, 41, 44, .35);
+        font-size: 12px;
+      }
+      .ticket-pdf-preview .form-history-table tbody td {
+        color: #e8fffc;
+        border-bottom: 1px solid rgba(160, 230, 223, .24);
+        background: transparent;
+      }
+      .ticket-detail-modal,
+      .ticket-quote-modal,
+      .ticket-detail-modal h3,
+      .ticket-detail-modal h4,
+      .ticket-detail-modal h5,
+      .ticket-detail-modal p,
+      .ticket-detail-modal small,
+      .ticket-detail-modal strong,
+      .ticket-detail-modal div,
+      .ticket-detail-modal span,
+      .ticket-quote-modal h3,
+      .ticket-quote-modal h4,
+      .ticket-quote-modal h5,
+      .ticket-quote-modal p,
+      .ticket-quote-modal small,
+      .ticket-quote-modal strong,
+      .ticket-quote-modal div,
+      .ticket-quote-modal span,
+      .ticket-quote-modal td,
+      .ticket-detail-modal td {
+        color: #ffffff !important;
+      }
+      .ticket-detail-modal .form-history-table thead th,
+      .ticket-quote-modal .form-history-table thead th {
+        color: #000000 !important;
+        background: #ffffff !important;
+      }
+      .ticket-detail-modal::-webkit-scrollbar,
+      .ticket-quote-modal::-webkit-scrollbar,
+      .ticket-detail-comment::-webkit-scrollbar,
+      .ticket-detail-extracted::-webkit-scrollbar,
+      .ticket-detail-json pre::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+      .ticket-detail-modal::-webkit-scrollbar-track,
+      .ticket-quote-modal::-webkit-scrollbar-track,
+      .ticket-detail-comment::-webkit-scrollbar-track,
+      .ticket-detail-extracted::-webkit-scrollbar-track,
+      .ticket-detail-json pre::-webkit-scrollbar-track {
+        background: rgba(3, 17, 18, .88);
+        border-radius: 999px;
+      }
+      .ticket-detail-modal::-webkit-scrollbar-thumb,
+      .ticket-quote-modal::-webkit-scrollbar-thumb,
+      .ticket-detail-comment::-webkit-scrollbar-thumb,
+      .ticket-detail-extracted::-webkit-scrollbar-thumb,
+      .ticket-detail-json pre::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, rgba(78, 227, 209, .92), rgba(27, 169, 155, .92));
+        border-radius: 999px;
+        border: 2px solid rgba(3, 17, 18, .88);
+      }
       .image-viewer-modal {
         position: fixed;
         inset: 0;
@@ -6341,6 +6422,43 @@
       const db = firebase.firestore();
       const auth = firebase.auth();
       const rtdb = typeof firebase.database === 'function' ? firebase.database() : null;
+      let modularFirestoreToolsPromise = null;
+
+      async function getModularFirestoreTools() {
+        if (!modularFirestoreToolsPromise) {
+          modularFirestoreToolsPromise = Promise.all([
+            import('https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js'),
+            import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js'),
+          ]).then(([appMod, firestoreMod]) => {
+            const appInstance = appMod.getApps().length ? appMod.getApp() : appMod.initializeApp(firebaseConfig);
+            const firestoreDb = firestoreMod.getFirestore(appInstance);
+            return {
+              firestoreDb,
+              addDoc: firestoreMod.addDoc,
+              collection: firestoreMod.collection,
+              serverTimestamp: firestoreMod.serverTimestamp,
+            };
+          });
+        }
+        return modularFirestoreToolsPromise;
+      }
+
+      async function guardarPdfEnFirestore(data = {}) {
+        try {
+          const firestoreTools = await getModularFirestoreTools();
+          await firestoreTools.addDoc(firestoreTools.collection(firestoreTools.firestoreDb, 'pdfreader'), {
+            fileName: String(data.fileName || ''),
+            processedText: String(data.processedText || ''),
+            uploadDate: firestoreTools.serverTimestamp(),
+            status: 'processed',
+            userId: data.userId ? String(data.userId) : null,
+            ticketId: data.ticketId ? String(data.ticketId) : null,
+          });
+          console.log('PDF guardado en Firestore (colección pdfreader)');
+        } catch (error) {
+          console.error('Error guardando PDF en colección pdfreader:', error);
+        }
+      }
 
       const ACCIONES = ['Nuevo Servicio', 'Adicionales', 'Solicitud de presupuesto', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa'];
       const STATUS_OPTIONS = ['Pendiente', 'En proceso', 'Esperando información', 'Finalizado', 'Cancelado'];
@@ -11426,7 +11544,7 @@
               ticketPdfPreview.cliente ? `Cliente: ${ticketPdfPreview.cliente}` : '',
               ticketPdfPreview.numero ? `Número: ${ticketPdfPreview.numero}` : '',
             ].filter(Boolean).join(' · ');
-            await db.collection('tickets_app').add({
+            const ticketRef = await db.collection('tickets_app').add({
               ticketCodigo,
               origen: 'pdf-asistido',
               creadoPorUid: user?.uid || '',
@@ -11453,6 +11571,12 @@
                 rawText: ticketPdfPreview.rawText || '',
               },
               creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+            await guardarPdfEnFirestore({
+              fileName: ticketPdfFile?.name || '',
+              processedText: ticketPdfPreview.rawText || '',
+              userId: user?.uid || null,
+              ticketId: ticketRef?.id || null,
             });
             setTicketPdfFile(null);
             setTicketPdfPreview(null);
