@@ -6439,6 +6439,25 @@
         }
       }
 
+      async function guardarLecturaUniversalPdfEnFirestore(data = {}) {
+        try {
+          const createdRef = await db.collection('pdfreader_universal').add({
+            fileName: String(data.fileName || ''),
+            processedText: String(data.processedText || ''),
+            fecha: String(data.fecha || ''),
+            costo: String(data.costo || ''),
+            items: Array.isArray(data.items) ? data.items : [],
+            moneda: String(data.moneda || ''),
+            status: 'processed',
+            userId: data.userId ? String(data.userId) : null,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+          console.log('Lectura PDF guardada en colección pdfreader_universal:', createdRef?.id || '');
+        } catch (error) {
+          console.error('Error guardando lectura universal en pdfreader_universal:', error);
+        }
+      }
+
       const ACCIONES = ['Nuevo Servicio', 'Adicionales', 'Solicitud de presupuesto', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa'];
       const STATUS_OPTIONS = ['Pendiente', 'En proceso', 'Esperando información', 'Finalizado', 'Cancelado'];
       const SERVICE_TYPE_OPTIONS = ['Monitoreo', 'Portería virtual', 'Respuesta de alarma', 'Servicio Técnico', 'Control de acceso'];
@@ -11316,12 +11335,13 @@
         }
 
         function extractTotal(text = '') {
-          const totalBlock = String(text || '').match(/Total a Pagar\s+((?:\d{1,3}(?:\.\d{3})*,\d{2}\s+)+)/i);
+          const source = String(text || '');
+          const totalBlock = source.match(/Total(?:\s+a\s+Pagar)?\s+((?:\d{1,3}(?:[.,]\d{3})*[.,]\d{2}\s+)+)/i);
           if (totalBlock) {
-            const nums = String(totalBlock[1] || '').match(/\d{1,3}(?:\.\d{3})*,\d{2}/g);
+            const nums = String(totalBlock[1] || '').match(/\d{1,3}(?:[.,]\d{3})*[.,]\d{2}/g);
             if (nums && nums.length) return nums[nums.length - 1];
           }
-          const allNums = String(text || '').match(/\d{1,3}(?:\.\d{3})*,\d{2}/g);
+          const allNums = source.match(/\d{1,3}(?:[.,]\d{3})*[.,]\d{2}/g);
           if (allNums && allNums.length) return allNums[allNums.length - 1];
           return '';
         }
@@ -11355,6 +11375,10 @@
           }
           if (!fecha) {
             const m = String(rawText || '').match(/Fecha:\s*(\d{2}\/\d{2}\/\d{4})/i);
+            if (m) fecha = String(m[1] || '').trim();
+          }
+          if (!fecha) {
+            const m = String(rawText || '').match(/Fecha:\s*(\d{4}-\d{2}-\d{2})/i);
             if (m) fecha = String(m[1] || '').trim();
           }
           if (!moneda) {
@@ -11493,6 +11517,15 @@
             }
             setTicketPdfPreview(record);
             setTicketPdfRecordPreview(record);
+            await guardarLecturaUniversalPdfEnFirestore({
+              fileName: ticketPdfFile?.name || '',
+              processedText: record.rawText || '',
+              fecha: record.fecha || '',
+              costo: record.total || '',
+              items: Array.isArray(record.items) ? record.items : [],
+              moneda: record.moneda || '',
+              userId: user?.uid || null,
+            });
           } catch (error) {
             console.error('Error procesando PDF para ticket:', error);
             if (String(error?.message || '') === 'pdf_without_text') {
