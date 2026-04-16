@@ -5405,9 +5405,28 @@
         color: #dffdfa;
         font-size: 12px;
       }
+      .ticket-quote-modal {
+        width: min(1080px, 96vw);
+        max-height: 92vh;
+        overflow: auto;
+        padding: 18px;
+        border-radius: 18px;
+        border: 1px solid rgba(169, 223, 217, .35) !important;
+        background: linear-gradient(165deg, #0d2627 0%, #123334 65%, #0f2526 100%) !important;
+        box-shadow: 0 30px 70px rgba(0,0,0,.45);
+      }
+      .ticket-quote-title {
+        margin: 0;
+      }
+      .ticket-quote-subtitle {
+        margin: 4px 0 0;
+        color: #cfeeed;
+        font-size: 13px;
+      }
       @media (max-width: 740px) {
         .ticket-detail-modal { width: 98vw; max-height: 92vh; padding: 14px; }
         .ticket-detail-comment { max-height: 220px; }
+        .ticket-quote-modal { width: 98vw; max-height: 92vh; padding: 14px; }
       }
       @media (max-width: 1024px) {
         .ticket-filter-field { grid-column: span 6; }
@@ -8161,6 +8180,7 @@
         const [ticketPdfCreating, setTicketPdfCreating] = useState(false);
         const [ticketPdfRecordPreview, setTicketPdfRecordPreview] = useState(null);
         const [ticketDetailModal, setTicketDetailModal] = useState({ open: false, ticket: null });
+        const [ticketQuoteModal, setTicketQuoteModal] = useState({ open: false, ticket: null });
         const seenRowIdsRef = useRef(new Set());
         const seenOperationalAlertsRef = useRef(new Set());
         const topServicesLeaderRef = useRef('');
@@ -11518,6 +11538,11 @@
           setTicketDetailModal({ open: true, ticket });
         }
 
+        function openTicketQuoteModal(ticket) {
+          if (!ticket) return;
+          setTicketQuoteModal({ open: true, ticket });
+        }
+
         async function handleCreateTicket(e) {
           e.preventDefault();
           const comentario = String(ticketComentario || '').trim();
@@ -12571,6 +12596,7 @@
                                     )}
                                     <div className="ticket-card-actions">
                                       <button type="button" className="status-action-btn chat-action-btn" onClick={(e) => { e.stopPropagation(); openTicketReassignModal(ticket); }}>Reasignar</button>
+                                      <button type="button" className="status-action-btn chat-action-btn" onClick={(e) => { e.stopPropagation(); openTicketQuoteModal(ticket); }}>Cotización</button>
                                       {ticket.estado !== 'resuelto' && (
                                         <>
                                           <button type="button" className="status-action-btn chat-action-btn" onClick={(e) => { e.stopPropagation(); toggleTicketResolutionEditor(ticket.id); }}>
@@ -14050,6 +14076,94 @@
                               <details className="ticket-detail-json">
                                 <summary>Ver objeto final generado (JSON)</summary>
                                 <pre>{JSON.stringify(pdfGeneratedObject, null, 2)}</pre>
+                              </details>
+                            </div>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              )}
+
+              {ticketQuoteModal.open && ticketQuoteModal.ticket && (
+                <div className="confirm-modal ticket-detail-overlay" onClick={() => setTicketQuoteModal({ open: false, ticket: null })}>
+                  <div className="confirm-modal-card ticket-quote-modal" onClick={(e) => e.stopPropagation()}>
+                    {(() => {
+                      const ticket = ticketQuoteModal.ticket;
+                      const pdfData = ticket.pdfAsistido || {};
+                      const hasPdfItems = Array.isArray(pdfData.items) && pdfData.items.length > 0;
+                      const quoteObject = {
+                        numero: pdfData.numero || '',
+                        fecha: pdfData.fecha || '',
+                        moneda: pdfData.moneda || '',
+                        estado: pdfData.estado || '',
+                        cliente: pdfData.cliente || '',
+                        direccion: pdfData.direccion || '',
+                        localidad: pdfData.localidad || '',
+                        vendedor: pdfData.vendedor || '',
+                        concepto: pdfData.concepto || '',
+                        total: pdfData.total || '',
+                        items: Array.isArray(pdfData.items) ? pdfData.items : [],
+                        rawText: pdfData.rawText || '',
+                      };
+                      const hasQuoteData = Object.values(quoteObject).some((value) => (
+                        Array.isArray(value) ? value.length > 0 : String(value || '').trim().length > 0
+                      ));
+                      return (
+                        <>
+                          <div className="ticket-detail-header">
+                            <div>
+                              <h3 className="ticket-quote-title">Cotización</h3>
+                              <p className="ticket-quote-subtitle">{ticket.ticketCodigo || `TICKET-${ticket.id}`}</p>
+                            </div>
+                            <button type="button" className="edit-btn" onClick={() => setTicketQuoteModal({ open: false, ticket: null })}>Cerrar</button>
+                          </div>
+
+                          {!hasQuoteData ? (
+                            <div className="ticket-empty-state">Este ticket no tiene información de cotización extraída del PDF.</div>
+                          ) : (
+                            <div className="ticket-pdf-preview">
+                              <h4 style={{ margin: '0 0 8px' }}>Datos guardados de lectura PDF</h4>
+                              <div className="ticket-pdf-preview-grid">
+                                <div className="ticket-pdf-preview-item"><small>Número</small><strong>{quoteObject.numero || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Fecha</small><strong>{quoteObject.fecha || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Moneda</small><strong>{quoteObject.moneda || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Estado</small><strong>{quoteObject.estado || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Cliente</small><strong>{quoteObject.cliente || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Dirección</small><strong>{quoteObject.direccion || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Localidad</small><strong>{quoteObject.localidad || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Vendedor</small><strong>{quoteObject.vendedor || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Concepto</small><strong>{quoteObject.concepto || '-'}</strong></div>
+                                <div className="ticket-pdf-preview-item"><small>Total</small><strong>{quoteObject.total || '-'}</strong></div>
+                              </div>
+
+                              <h5 style={{ margin: '10px 0 4px' }}>Ítems detectados ({hasPdfItems ? quoteObject.items.length : 0})</h5>
+                              {hasPdfItems ? (
+                                <div style={{ overflowX: 'auto' }}>
+                                  <table className="form-history-table" style={{ marginTop: 6 }}>
+                                    <thead><tr><th>Cantidad</th><th>Código</th><th>Detalle</th><th>IVA</th><th>Precio</th><th>Importe</th></tr></thead>
+                                    <tbody>
+                                      {quoteObject.items.map((item, idx) => (
+                                        <tr key={`ticket-quote-item-${idx}`}>
+                                          <td>{item.cantidad ?? '-'}</td><td>{item.codigo || '-'}</td><td>{item.detalle || '-'}</td><td>{item.iva ?? '-'}</td><td>{item.precio || '-'}</td><td>{item.importe || '-'}</td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              ) : (
+                                <div className="hint">No hay ítems guardados en la cotización.</div>
+                              )}
+
+                              <div className="ticket-detail-block">
+                                <h5>Texto extraído del PDF</h5>
+                                <div className="ticket-detail-extracted">{quoteObject.rawText || 'Sin texto extraído guardado.'}</div>
+                              </div>
+
+                              <details className="ticket-detail-json">
+                                <summary>Ver objeto final generado (JSON)</summary>
+                                <pre>{JSON.stringify(quoteObject, null, 2)}</pre>
                               </details>
                             </div>
                           )}
