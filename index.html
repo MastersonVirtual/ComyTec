@@ -9425,7 +9425,7 @@
             setRows([]);
             return () => {};
           }
-          const unsub = db.collection('operaciones').orderBy('creadoEn', 'desc').onSnapshot(
+          const unsub = db.collection('operaciones').orderBy('creadoEn', 'desc').limit(600).onSnapshot(
             (snap) => setRows(snap.docs.map((d) => applyServiceCatalogOverrides({ id: d.id, ...d.data() }))),
             (err) => console.error('Error onSnapshot:', err)
           );
@@ -9577,10 +9577,10 @@
             return () => {};
           }
           const sources = [
-            { key: 'dashboard_actividad', ref: rtdb.ref('dashboard/actividadReciente').limitToLast(300) },
-            { key: 'actividad', ref: rtdb.ref('actividadReciente').limitToLast(300) },
-            { key: 'timeline', ref: rtdb.ref('timelineAcciones').limitToLast(300) },
-            { key: 'auditoria', ref: rtdb.ref('auditoria/acciones').limitToLast(300) },
+            { key: 'dashboard_actividad', ref: rtdb.ref('dashboard/actividadReciente').limitToLast(120) },
+            { key: 'actividad', ref: rtdb.ref('actividadReciente').limitToLast(120) },
+            { key: 'timeline', ref: rtdb.ref('timelineAcciones').limitToLast(120) },
+            { key: 'auditoria', ref: rtdb.ref('auditoria/acciones').limitToLast(120) },
           ];
           const handlers = sources.map(({ key, ref }) => {
             const handler = (snap) => {
@@ -9614,9 +9614,9 @@
             return () => {};
           }
           const sources = [
-            { key: 'dashboard_inst', ref: rtdb.ref('dashboard/instalacionesProximas').limitToLast(300) },
-            { key: 'inst', ref: rtdb.ref('instalacionesProximas').limitToLast(300) },
-            { key: 'operaciones_inst', ref: rtdb.ref('operaciones').limitToLast(300) },
+            { key: 'dashboard_inst', ref: rtdb.ref('dashboard/instalacionesProximas').limitToLast(120) },
+            { key: 'inst', ref: rtdb.ref('instalacionesProximas').limitToLast(120) },
+            { key: 'operaciones_inst', ref: rtdb.ref('operaciones').limitToLast(120) },
           ];
           const handlers = sources.map(({ key, ref }) => {
             const handler = (snap) => {
@@ -9662,8 +9662,10 @@
         }, []);
 
         useEffect(() => {
-          if (window.lucide?.createIcons) window.lucide.createIcons();
-        }, [mobileTab, selectedForm, fabOpen, rows.length, adminCredentialRequests.length, desktopBellOpen, desktopSearchOpen]);
+          if (!window.lucide?.createIcons) return () => {};
+          const frame = window.requestAnimationFrame(() => window.lucide.createIcons());
+          return () => window.cancelAnimationFrame(frame);
+        }, [mobileTab, selectedForm, fabOpen, adminCredentialRequests.length, desktopBellOpen, desktopSearchOpen]);
 
         useEffect(() => {
           if (!user || userRole !== 'admin') {
@@ -9724,7 +9726,8 @@
 
 
         useEffect(() => {
-          if (!user) {
+          const needsStaffDirectory = selectedForm === 'funcionarios' || selectedForm === 'tickets' || ticketReassignModal.open;
+          if (!user || !needsStaffDirectory) {
             setStaffMembers([]);
             return () => {};
           }
@@ -9750,7 +9753,7 @@
             console.error('Error leyendo config_usuarios para funcionarios:', error);
           });
           return () => unsub();
-        }, [user]);
+        }, [user, selectedForm, ticketReassignModal.open]);
 
         useEffect(() => {
           if (!user?.uid && !user?.email) {
