@@ -5379,6 +5379,32 @@
         color: #e7fffc;
         font-size: 13px;
       }
+      .ticket-detail-json {
+        margin-top: 10px;
+        border: 1px solid rgba(220,255,250,.18);
+        border-radius: 10px;
+        background: rgba(3, 12, 13, .88);
+        padding: 10px;
+      }
+      .ticket-detail-json summary {
+        cursor: pointer;
+        color: #d8fbf7;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .ticket-detail-json pre {
+        margin: 8px 0 0;
+        max-height: 300px;
+        overflow: auto;
+        background: rgba(0,0,0,.28);
+        border: 1px dashed rgba(151,243,231,.4);
+        border-radius: 8px;
+        padding: 10px;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        color: #dffdfa;
+        font-size: 12px;
+      }
       @media (max-width: 740px) {
         .ticket-detail-modal { width: 98vw; max-height: 92vh; padding: 14px; }
         .ticket-detail-comment { max-height: 220px; }
@@ -13937,6 +13963,19 @@
                         || (Array.isArray(pdfData.items) && pdfData.items.length > 0)
                       );
                       const hasPdfItems = Array.isArray(pdfData.items) && pdfData.items.length > 0;
+                      const pdfGeneratedObject = {
+                        numero: pdfData.numero || '',
+                        fecha: pdfData.fecha || '',
+                        moneda: pdfData.moneda || '',
+                        estado: pdfData.estado || '',
+                        cliente: pdfData.cliente || '',
+                        direccion: pdfData.direccion || '',
+                        localidad: pdfData.localidad || '',
+                        vendedor: pdfData.vendedor || '',
+                        concepto: pdfData.concepto || '',
+                        total: pdfData.total || '',
+                        items: Array.isArray(pdfData.items) ? pdfData.items : [],
+                      };
                       return (
                         <>
                           <div className="ticket-detail-header">
@@ -14007,6 +14046,11 @@
                               ) : (
                                 <div className="hint">No hay ítems PDF registrados en este ticket.</div>
                               )}
+
+                              <details className="ticket-detail-json">
+                                <summary>Ver objeto final generado (JSON)</summary>
+                                <pre>{JSON.stringify(pdfGeneratedObject, null, 2)}</pre>
+                              </details>
                             </div>
                           )}
                         </>
