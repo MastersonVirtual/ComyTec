@@ -6341,6 +6341,43 @@
       const db = firebase.firestore();
       const auth = firebase.auth();
       const rtdb = typeof firebase.database === 'function' ? firebase.database() : null;
+      let modularFirestoreToolsPromise = null;
+
+      async function getModularFirestoreTools() {
+        if (!modularFirestoreToolsPromise) {
+          modularFirestoreToolsPromise = Promise.all([
+            import('https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js'),
+            import('https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js'),
+          ]).then(([appMod, firestoreMod]) => {
+            const appInstance = appMod.getApps().length ? appMod.getApp() : appMod.initializeApp(firebaseConfig);
+            const firestoreDb = firestoreMod.getFirestore(appInstance);
+            return {
+              firestoreDb,
+              addDoc: firestoreMod.addDoc,
+              collection: firestoreMod.collection,
+              serverTimestamp: firestoreMod.serverTimestamp,
+            };
+          });
+        }
+        return modularFirestoreToolsPromise;
+      }
+
+      async function guardarPdfEnFirestore(data = {}) {
+        try {
+          const firestoreTools = await getModularFirestoreTools();
+          await firestoreTools.addDoc(firestoreTools.collection(firestoreTools.firestoreDb, 'pdfreader'), {
+            fileName: String(data.fileName || ''),
+            processedText: String(data.processedText || ''),
+            uploadDate: firestoreTools.serverTimestamp(),
+            status: 'processed',
+            userId: data.userId ? String(data.userId) : null,
+            ticketId: data.ticketId ? String(data.ticketId) : null,
+          });
+          console.log('PDF guardado en Firestore (colección pdfreader)');
+        } catch (error) {
+          console.error('Error guardando PDF en colección pdfreader:', error);
+        }
+      }
 
       const ACCIONES = ['Nuevo Servicio', 'Adicionales', 'Solicitud de presupuesto', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa'];
       const STATUS_OPTIONS = ['Pendiente', 'En proceso', 'Esperando información', 'Finalizado', 'Cancelado'];
@@ -11426,7 +11463,7 @@
               ticketPdfPreview.cliente ? `Cliente: ${ticketPdfPreview.cliente}` : '',
               ticketPdfPreview.numero ? `Número: ${ticketPdfPreview.numero}` : '',
             ].filter(Boolean).join(' · ');
-            await db.collection('tickets_app').add({
+            const ticketRef = await db.collection('tickets_app').add({
               ticketCodigo,
               origen: 'pdf-asistido',
               creadoPorUid: user?.uid || '',
@@ -11453,6 +11490,12 @@
                 rawText: ticketPdfPreview.rawText || '',
               },
               creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+            });
+            await guardarPdfEnFirestore({
+              fileName: ticketPdfFile?.name || '',
+              processedText: ticketPdfPreview.rawText || '',
+              userId: user?.uid || null,
+              ticketId: ticketRef?.id || null,
             });
             setTicketPdfFile(null);
             setTicketPdfPreview(null);
