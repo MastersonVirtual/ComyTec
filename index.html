@@ -5290,8 +5290,10 @@
         overflow: auto;
         padding: 18px;
         border-radius: 18px;
-        border: 1px solid rgba(169, 223, 217, .35);
-        background: linear-gradient(165deg, #0f2a2b 0%, #143738 65%, #102829 100%);
+        border: 1px solid rgba(169, 223, 217, .35) !important;
+        background: linear-gradient(165deg, #0f2a2b 0%, #143738 65%, #102829 100%) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
         box-shadow: 0 30px 70px rgba(0,0,0,.45);
       }
       .ticket-detail-overlay {
@@ -5351,6 +5353,31 @@
         overflow-wrap: anywhere;
         line-height: 1.45;
         color: #efffff;
+      }
+      .ticket-detail-block {
+        border: 1px solid rgba(220, 255, 250, .2);
+        background: rgba(5, 18, 19, .84);
+        border-radius: 12px;
+        padding: 10px;
+        margin-top: 10px;
+      }
+      .ticket-detail-block h5 {
+        margin: 0 0 6px;
+        color: #dffbf8;
+      }
+      .ticket-detail-extracted {
+        border: 1px dashed rgba(151,243,231,.45);
+        background: rgba(2, 14, 15, .88);
+        border-radius: 10px;
+        padding: 10px;
+        min-height: 120px;
+        max-height: 280px;
+        overflow: auto;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        line-height: 1.45;
+        color: #e7fffc;
+        font-size: 13px;
       }
       @media (max-width: 740px) {
         .ticket-detail-modal { width: 98vw; max-height: 92vh; padding: 14px; }
@@ -13917,6 +13944,15 @@
 
                           <h4 className="ticket-detail-section-title">Comentario</h4>
                           <div className="ticket-detail-comment">{ticket.comentario || '-'}</div>
+
+                          {ticket.origen === 'pdf-asistido' && (
+                            <div className="ticket-detail-block">
+                              <h5>Comentarios / detalle extraído del PDF</h5>
+                              <div className="ticket-detail-extracted">
+                                {String(pdfData.rawText || '').trim() || 'No se encontró texto extraído del PDF para este ticket.'}
+                              </div>
+                            </div>
+                          )}
 
                           {!!String(ticket.resolucionComentario || '').trim() && (
                             <>
