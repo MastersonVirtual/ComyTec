@@ -13922,6 +13922,20 @@
                     {(() => {
                       const ticket = ticketDetailModal.ticket;
                       const pdfData = ticket.pdfAsistido || {};
+                      const hasPdfData = !!(
+                        String(pdfData.numero || '').trim()
+                        || String(pdfData.fecha || '').trim()
+                        || String(pdfData.moneda || '').trim()
+                        || String(pdfData.estado || '').trim()
+                        || String(pdfData.cliente || '').trim()
+                        || String(pdfData.direccion || '').trim()
+                        || String(pdfData.localidad || '').trim()
+                        || String(pdfData.vendedor || '').trim()
+                        || String(pdfData.concepto || '').trim()
+                        || String(pdfData.total || '').trim()
+                        || String(pdfData.rawText || '').trim()
+                        || (Array.isArray(pdfData.items) && pdfData.items.length > 0)
+                      );
                       const hasPdfItems = Array.isArray(pdfData.items) && pdfData.items.length > 0;
                       return (
                         <>
@@ -13945,7 +13959,7 @@
                           <h4 className="ticket-detail-section-title">Comentario</h4>
                           <div className="ticket-detail-comment">{ticket.comentario || '-'}</div>
 
-                          {ticket.origen === 'pdf-asistido' && (
+                          {hasPdfData && (
                             <div className="ticket-detail-block">
                               <h5>Comentarios / detalle extraído del PDF</h5>
                               <div className="ticket-detail-extracted">
@@ -13961,9 +13975,9 @@
                             </>
                           )}
 
-                          {ticket.origen === 'pdf-asistido' && (
+                          {hasPdfData && (
                             <div className="ticket-pdf-preview" style={{ marginTop: 10 }}>
-                              <h4 style={{ margin: '0 0 8px' }}>Datos PDF detectados</h4>
+                              <h4 style={{ margin: '0 0 8px' }}>Información extraída del PDF (automática)</h4>
                               <div className="ticket-pdf-preview-grid">
                                 <div className="ticket-pdf-preview-item"><small>Número</small><strong>{pdfData.numero || '-'}</strong></div>
                                 <div className="ticket-pdf-preview-item"><small>Fecha</small><strong>{pdfData.fecha || '-'}</strong></div>
