@@ -6602,6 +6602,20 @@
         if (normalized.includes('mantenimiento') || normalized.includes('servicio tecnico') || normalized.includes('soporte de video') || normalized.includes('soporte')) return 'Servicio Técnico';
         return 'Monitoreo';
       }
+      const SERVICE_ENTITY_TYPE_OPTIONS = ['Edificio', 'Obra', 'Empresa', 'Complejo'];
+      function normalizeServiceEntityType(value) {
+        const raw = String(value || '').trim();
+        if (!raw) return 'Edificio';
+        const normalized = raw
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase();
+        if (normalized.includes('obra')) return 'Obra';
+        if (normalized.includes('empresa')) return 'Empresa';
+        if (normalized.includes('complejo')) return 'Complejo';
+        if (normalized.includes('edificio')) return 'Edificio';
+        return 'Edificio';
+      }
       const PRELOADED_SERVICES_BASE = [
         { numero: '0001', nombreServicio: 'Tropicana', direccionServicio: 'Roque Graseras 936', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
         { numero: '0002', nombreServicio: 'Oficentro Lugano', direccionServicio: 'Plaza Independencia 822, esq. Florida', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
@@ -10224,7 +10238,14 @@
           setTipoAccion(action);
 
           const stamp = formatUruguayDateTime();
-          setServicioForm({ ...servicioInicial, ...service, representanteComercial: service.representanteComercial || currentUserName, creadoPor: service.creadoPor || currentUserName, fechaIngresoDatos: service.fechaIngresoDatos || stamp });
+          setServicioForm({
+            ...servicioInicial,
+            ...service,
+            tipoAltaServicio: normalizeServiceEntityType(service.tipoAltaServicio),
+            representanteComercial: service.representanteComercial || currentUserName,
+            creadoPor: service.creadoPor || currentUserName,
+            fechaIngresoDatos: service.fechaIngresoDatos || stamp,
+          });
           setObraForm({ ...obraInicial, ...service, representanteComercial: service.representanteComercial || currentUserName, creadoPor: service.creadoPor || currentUserName });
           setNovacionForm({ ...novacionInicial, ...service, representanteComercial: service.representanteComercial || currentUserName, creadoPor: service.creadoPor || currentUserName });
 
@@ -10716,7 +10737,8 @@
           const doc = { tipoAccion, clienteId: normalizedClientId, status: normalizedStatusToSave, estado: normalizedStatusToSave };
 
           if (grupo === 'servicio') {
-            if (servicioForm.tipoAltaServicio === 'Obra') {
+            const normalizedServiceEntityType = normalizeServiceEntityType(servicioForm.tipoAltaServicio);
+            if (normalizedServiceEntityType === 'Obra') {
               if (!servicioForm.nombreServicio || !servicioForm.direccionServicio || !servicioForm.tipoServicioBrindar) {
                 return alert('Completá al menos: Nombre del servicio, Dirección y Tipo de servicio.');
               }
@@ -10729,7 +10751,13 @@
             } else if (!servicioForm.nombreServicio || !servicioForm.direccionServicio || !servicioForm.tipoServicioBrindar) {
               return alert('Completá al menos: Nombre del servicio, Dirección y Tipo de servicio.');
             }
-            Object.assign(doc, { ...servicioForm, formulario: 'nuevo-servicio-optimizado', creadoPor: servicioForm.creadoPor || currentUserName, auditoriaApertura: formOpenAudit });
+            Object.assign(doc, {
+              ...servicioForm,
+              tipoAltaServicio: normalizedServiceEntityType,
+              formulario: 'nuevo-servicio-optimizado',
+              creadoPor: servicioForm.creadoPor || currentUserName,
+              auditoriaApertura: formOpenAudit,
+            });
             if (tipoAccion === 'Nuevo Servicio') {
               doc.workflowStage = 'Pendiente de aprobación – Coordinación de Instalaciones';
               doc.status = 'Pendiente';
@@ -13258,10 +13286,10 @@
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID</label><input value={clienteId} readOnly type="text" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
-                            <div className="field"><label>Tipo</label><select value={servicioForm.tipoAltaServicio || 'Edificio'} onChange={(e) => setServicioField('tipoAltaServicio', e.target.value)}><option value="Edificio">Edificio</option><option value="Obra">Obra</option></select></div>
+                            <div className="field"><label>Tipo</label><select value={normalizeServiceEntityType(servicioForm.tipoAltaServicio)} onChange={(e) => setServicioField('tipoAltaServicio', e.target.value)}>{SERVICE_ENTITY_TYPE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></div>
                           </div>
                         </div>
-                        {servicioForm.tipoAltaServicio === 'Obra' ? (
+                        {normalizeServiceEntityType(servicioForm.tipoAltaServicio) === 'Obra' ? (
                           <>
                             <div className="service-card">
                               <h3>2. Información General</h3>
