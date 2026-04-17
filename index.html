@@ -8307,11 +8307,13 @@
 
       function App() {
         const [menuOpen, setMenuOpen] = useState(false);
-        const [openMenus, setOpenMenus] = useState({ operaciones: false, nuevo: false, baseDatos: false });
+        const [openMenus, setOpenMenus] = useState({ operaciones: false, nuevo: false, baseDatos: false, rolePreview: false });
         const [user, setUser] = useState(null);
         const [authLoading, setAuthLoading] = useState(true);
         const [userRole, setUserRole] = useState('');
         const [userArea, setUserArea] = useState('');
+        const [baseRole, setBaseRole] = useState('');
+        const [baseArea, setBaseArea] = useState('');
         const [userData, setUserData] = useState({ nombre: '', rol: '', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
         const [roleLoading, setRoleLoading] = useState(true);
         const [notificacion, setNotificacion] = useState({ mensaje: '', tipo: '' });
@@ -9637,6 +9639,8 @@
             if (!currentUser) {
               setUserRole('');
               setUserArea('');
+              setBaseRole('');
+              setBaseArea('');
               setUserData({ nombre: '', rol: '', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
               setProfileAvatarId(DEFAULT_PROFILE_AVATAR_ID);
               setRoleLoading(false);
@@ -9658,12 +9662,16 @@
               const area = (profile?.area || '').toLowerCase();
               const nombre = String(profile?.nombre || currentUser.displayName || (currentUser.email || '').split('@')[0] || 'Usuario').trim();
               const avatarId = PROFILE_AVATAR_OPTIONS.some((avatar) => avatar.id === profile?.avatarId) ? profile.avatarId : DEFAULT_PROFILE_AVATAR_ID;
+              setBaseRole(rol);
+              setBaseArea(area);
               setUserRole(rol);
               setUserArea(area);
               setUserData({ nombre, rol, area, avatarId });
               setProfileAvatarId(avatarId);
             } catch (err) {
               console.error('Error leyendo config_usuarios:', err);
+              setBaseRole('admin');
+              setBaseArea('');
               setUserRole('admin');
               setUserArea('');
               setUserData({ nombre: (currentUser?.email || 'admin').split('@')[0], rol: 'admin', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
@@ -10196,6 +10204,30 @@
         const isTechnicalUser = /tecnic/.test(userRole) || /tecnic/.test(userArea);
         const isCommercialUser = userArea === 'comercial' || userRole.includes('vendedor');
         const isCoordinationUser = /coord/.test(userRole) || /coord/.test(userArea);
+        const canPreviewRoles = baseRole === 'admin';
+        const rolePreviewOptions = canPreviewRoles ? [
+          { key: 'admin', label: 'Vista Admin', role: 'admin', area: '' },
+          { key: 'instalaciones', label: 'Vista Instalaciones', role: 'coordinacion', area: 'coordinacion de instalaciones' },
+          { key: 'comercial', label: 'Vista Comercial', role: 'vendedor', area: 'comercial' },
+          { key: 'tecnica', label: 'Vista Técnica', role: 'tecnico', area: 'tecnica' },
+          { key: 'real', label: 'Volver a mi rol real', role: baseRole || 'admin', area: baseArea || '' },
+        ] : [];
+        const rolePreviewModeActive = canPreviewRoles && (userRole !== baseRole || userArea !== baseArea);
+
+        function applyRolePreview(option) {
+          if (!canPreviewRoles || !option) return;
+          const nextRole = String(option.role || baseRole || 'admin').toLowerCase();
+          const nextArea = String(option.area || '').toLowerCase();
+          setUserRole(nextRole);
+          setUserArea(nextArea);
+          setUserData((prev) => ({ ...prev, rol: nextRole, area: nextArea }));
+          setNotificacion({
+            mensaje: option.key === 'real'
+              ? 'Vista restaurada al rol real.'
+              : `Vista activa: ${option.label}.`,
+            tipo: 'ok',
+          });
+        }
 
         const ACTION_LABELS = {
           'Nuevo Servicio': 'Servicio',
@@ -12214,6 +12246,29 @@
                     </div>
                     {ENABLE_CLIENT_TRACKING_VIEW && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}><span className="menu-icon">👥</span><span>Vista Clientes</span></button>}
                     <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}><span className="menu-icon">📊</span><span>Dashboard</span></button>
+                  </>
+                )}
+                {canPreviewRoles && (
+                  <>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, rolePreview: !p.rolePreview, operaciones: false, nuevo: false, baseDatos: false }))}>
+                      <span className="menu-icon">🧭</span>
+                      <span>{rolePreviewModeActive ? 'Vista de rol (activa)' : 'Vista de rol'}</span>
+                      <span className="menu-arrow">{openMenus.rolePreview ? '▾' : '▸'}</span>
+                    </button>
+                    <div className={`submenu ${openMenus.rolePreview ? 'open' : ''}`}>
+                      {rolePreviewOptions.map((option) => {
+                        const isCurrent = userRole === option.role && userArea === option.area;
+                        return (
+                          <button
+                            key={`role-preview-${option.key}`}
+                            className="submenu-button"
+                            onClick={() => { applyRolePreview(option); closeSidebar(); }}
+                          >
+                            {option.label}{isCurrent ? ' ✓' : ''}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </>
                 )}
                 <div className="sidebar-divider" />
