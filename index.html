@@ -10195,6 +10195,7 @@
         const lockCommercialField = isSalesOrTechUser && !isAdminUser;
         const isTechnicalUser = /tecnic/.test(userRole) || /tecnic/.test(userArea);
         const isCommercialUser = userArea === 'comercial' || userRole.includes('vendedor');
+        const isCoordinationUser = /coord/.test(userRole) || /coord/.test(userArea);
 
         const ACTION_LABELS = {
           'Nuevo Servicio': 'Servicio',
@@ -10668,6 +10669,15 @@
             setNotificacion({ mensaje: `No se permite pasar de "${currentStage}" a "${nextStage}" sin cumplir el flujo.`, tipo: 'error' });
             return;
           }
+          if (
+            currentStage === 'Pendiente de aprobación – Coordinación de Instalaciones'
+            && (nextStage === 'En proceso de instalación' || nextStage === 'Rechazado')
+            && !isAdminUser
+            && !isCoordinationUser
+          ) {
+            setNotificacion({ mensaje: 'Solo Coordinación de Instalaciones puede aprobar o rechazar esta etapa.', tipo: 'warn' });
+            return;
+          }
 
           if (nextStage === 'Rechazado' && !String(draft.rejectionReason || '').trim()) {
             setNotificacion({ mensaje: 'Para rechazar, el motivo de rechazo es obligatorio.', tipo: 'warn' });
@@ -10683,6 +10693,15 @@
           if (nextStage === 'Activo' && !draft.clientRecordCompleted) {
             setNotificacion({ mensaje: 'Completá la ficha del cliente para activar el servicio.', tipo: 'warn' });
             return;
+          }
+          if (nextStage === 'Activo') {
+            const integrationId = String(service.workflowIntegrationId || '').trim();
+            const clientContact = String(service.workflowClientContact || '').trim();
+            const clientEmail = String(service.workflowClientEmail || '').trim();
+            if (!integrationId || !clientContact || !clientEmail) {
+              setNotificacion({ mensaje: 'Para activar, completá Contacto principal, Email de activación e ID de integración.', tipo: 'warn' });
+              return;
+            }
           }
 
           const workflowEvent = createWorkflowEvent({
@@ -14128,6 +14147,9 @@
                               </div>
                               <div className="service-coord-detail-card" style={{ marginTop: 10 }}>
                                 <h4 style={{ margin: '0 0 8px 0' }}>Workflow Operativo GNS</h4>
+                                <div className="hint" style={{ marginBottom: 10 }}>
+                                  Flujo: <b>Pendiente de aprobación</b> → <b>En proceso de instalación</b> → <b>Alta de Servicio en configuración</b> → <b>Activo</b>.
+                                </div>
                                 <div className="service-coord-detail-grid">
                                   <div className="field">
                                     <label>Siguiente etapa</label>
