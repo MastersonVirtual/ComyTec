@@ -12226,12 +12226,6 @@
                       <button className="submenu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}><span>Nuevo</span><span className="menu-arrow">{openMenus.nuevo ? '▾' : '▸'}</span></button>
                       <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
                         <button className="submenu-button" onClick={() => { selectAction('Nuevo Servicio'); closeSidebar(); }}>Servicio</button>
-                        <button className="submenu-button" onClick={() => { selectAction('Adicionales'); closeSidebar(); }}>Adicionales</button>
-                        <button className="submenu-button" onClick={() => { selectAction('Solicitud de presupuesto'); closeSidebar(); }}>Solicitud de presupuesto</button>
-                        <button className="submenu-button" onClick={() => { selectAction('Novación'); closeSidebar(); }}>Novación</button>
-                        <button className="submenu-button" onClick={() => { selectAction('Movimiento de obra'); closeSidebar(); }}>Movimiento de obra</button>
-                        <button className="submenu-button" onClick={() => { selectAction('Baja'); closeSidebar(); }}>Baja de servicio</button>
-                        <button className="submenu-button" onClick={() => { selectAction('Charla informativa'); closeSidebar(); }}>Charla informativa</button>
                       </div>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Gestión de servicios</button>
                     </div>
@@ -12239,7 +12233,6 @@
                     <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: false, nuevo: false, baseDatos: !p.baseDatos }))}><span className="menu-icon">📚</span><span>Base de datos</span><span className="menu-arrow">{openMenus.baseDatos ? '▾' : '▸'}</span></button>
                     <div className={`submenu ${openMenus.baseDatos ? 'open' : ''}`}>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
-                      <button className="submenu-button" onClick={() => { setSelectedForm('historial-charlas'); closeSidebar(); }}>Historial de Charlas</button>
                     </div>
                     {ENABLE_CLIENT_TRACKING_VIEW && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}><span className="menu-icon">👥</span><span>Vista Clientes</span></button>}
                     <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}><span className="menu-icon">📊</span><span>Dashboard</span></button>
@@ -12270,7 +12263,7 @@
                 )}
                 <div className="sidebar-divider" />
                 <button className="menu-button" onClick={openFuncionariosView}><span className="menu-icon">🧑‍💼</span><span>Funcionarios</span></button>
-                <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>
+                {!isCommercialUser && <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>}
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
                 <div className="sidebar-signature" aria-label="signature" tabIndex={0}><strong>v2.0 | Powered by Alfonso Carballo</strong><div className="sidebar-signature-tooltip">Actualización 2.0: workflow operativo GNS con transiciones validadas por etapa, checklist obligatorio para agendado, resolución de tickets con comentario + imágenes (pegar/arrastrar), y nuevos filtros de historial por administración y fecha de alta.</div></div>
               </div>
