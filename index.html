@@ -27,7 +27,7 @@
       }
 
       * { box-sizing: border-box; }
-      html, body { margin: 0; padding: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; overflow-x: hidden; }
+      html, body { margin: 0; padding: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; overflow-x: auto; max-width: 100%; }
       body {
         min-height: 100vh;
         color: var(--text);
@@ -48,7 +48,9 @@
         transform: translateX(-105%);
         transition: transform var(--motion-slow) cubic-bezier(.2,.8,.2,1);
         z-index: 1000;
-        overflow-y: auto;
+        overflow: auto;
+        max-width: min(92vw, 320px);
+        scrollbar-gutter: stable;
       }
       .sidebar.open { transform: translateX(0); }
       .sidebar-header {
@@ -6379,6 +6381,101 @@
       .topbar-notify-action:hover {
         background: #1e1e1e !important;
         color: #ff9a35 !important;
+      }
+
+      /* Ajustes responsivos globales para evitar cortes en pantallas pequeñas y muy grandes */
+      .app-shell,
+      .content,
+      .main,
+      .panel,
+      .service-card,
+      .history-list-shell,
+      .seller-services-shell,
+      .home-modern-shell,
+      .dashboard-info-grid,
+      .kpi-grid,
+      .ranking-grid,
+      .ops-main-layout {
+        min-width: 0;
+      }
+
+      .table-wrap,
+      .history-list-shell,
+      .service-coord-filters,
+      .ranking-grid,
+      .dashboard-info-grid,
+      .kpi-grid {
+        overflow-x: auto;
+        scrollbar-gutter: stable both-edges;
+      }
+
+      @media (min-width: 1700px) {
+        .main { max-width: min(1680px, 96vw); }
+        .hero,
+        .welcome-card,
+        .dashboard-info-grid,
+        .kpi-grid,
+        .home-modern-shell {
+          width: min(100%, 1520px);
+        }
+      }
+
+      @media (max-width: 1280px) {
+        .card-grid,
+        .compact-grid,
+        .history-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .ranking-grid,
+        .kpi-grid,
+        .dashboard-info-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 820px) {
+        .topbar {
+          flex-wrap: wrap;
+          align-items: flex-start;
+        }
+
+        .top-search {
+          margin-left: 0;
+          width: 100%;
+          max-width: 100%;
+        }
+
+        .top-search-panel {
+          width: 100%;
+          left: 0;
+          right: 0;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .main {
+          padding: 0 10px 18px;
+          margin-top: 12px;
+        }
+
+        .panel,
+        .service-card,
+        .history-list-shell,
+        .seller-services-shell {
+          padding: 12px;
+          border-radius: 14px;
+        }
+
+        .card-grid,
+        .compact-grid,
+        .history-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          max-width: 92vw;
+        }
       }
 
     </style>
