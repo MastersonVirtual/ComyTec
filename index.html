@@ -10207,7 +10207,6 @@
         const canPreviewRoles = baseRole === 'admin';
         const rolePreviewOptions = canPreviewRoles ? [
           { key: 'admin', label: 'Vista Admin', role: 'admin', area: '' },
-          { key: 'instalaciones', label: 'Vista Instalaciones', role: 'coordinacion', area: 'coordinacion de instalaciones' },
           { key: 'comercial', label: 'Vista Comercial', role: 'vendedor', area: 'comercial' },
           { key: 'tecnica', label: 'Vista Técnica', role: 'tecnico', area: 'tecnica' },
           { key: 'real', label: 'Volver a mi rol real', role: baseRole || 'admin', area: baseArea || '' },
@@ -12220,7 +12219,6 @@
               </div>
               <div className="menu">
                 <button className="menu-button" onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
-                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">📌</span><span>Coordinación de servicios</span></button>
                 {!isMobile && (
                   <>
                     <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: !p.operaciones, nuevo: false, baseDatos: false }))}><span className="menu-icon">🗂️</span><span>Operaciones</span><span className="menu-arrow">{openMenus.operaciones ? '▾' : '▸'}</span></button>
@@ -12235,7 +12233,6 @@
                         <button className="submenu-button" onClick={() => { selectAction('Baja'); closeSidebar(); }}>Baja de servicio</button>
                         <button className="submenu-button" onClick={() => { selectAction('Charla informativa'); closeSidebar(); }}>Charla informativa</button>
                       </div>
-                      <button className="submenu-button" onClick={() => { setSelectedForm('home'); closeSidebar(); }}>Instalaciones</button>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Gestión de servicios</button>
                     </div>
                     <div className="sidebar-divider" />
