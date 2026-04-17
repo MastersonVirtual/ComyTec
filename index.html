@@ -6603,6 +6603,7 @@
         return 'Monitoreo';
       }
       const SERVICE_ENTITY_TYPE_OPTIONS = ['Edificio', 'Obra', 'Empresa', 'Complejo'];
+      const SERVICE_CLIENT_TYPE_OPTIONS = ['Obra', 'Empresa', 'Complejo', 'Predio abandonado', 'Casa', 'Otro'];
       function normalizeServiceEntityType(value) {
         const raw = String(value || '').trim();
         if (!raw) return 'Edificio';
@@ -13364,7 +13365,7 @@
                             <div className="service-card">
                               <h3>9. Tipo de Cliente</h3>
                               <div className="card-grid">
-                                <div className="field"><label>Tipo de cliente</label><select value={servicioForm.tipoClienteServicio || 'Obra'} onChange={(e) => setServicioField('tipoClienteServicio', e.target.value)}><option value="Obra">Obra</option><option value="Predio abandonado">Predio abandonado</option><option value="Casa">Casa</option><option value="Otro">Otro</option></select></div>
+                                <div className="field"><label>Tipo de cliente</label><select value={servicioForm.tipoClienteServicio || 'Obra'} onChange={(e) => setServicioField('tipoClienteServicio', e.target.value)}>{SERVICE_CLIENT_TYPE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></div>
                               </div>
                             </div>
 
