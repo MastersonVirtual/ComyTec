@@ -27,7 +27,7 @@
       }
 
       * { box-sizing: border-box; }
-      html, body { margin: 0; padding: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; overflow-x: hidden; }
+      html, body { margin: 0; padding: 0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; overflow-x: auto; max-width: 100%; }
       body {
         min-height: 100vh;
         color: var(--text);
@@ -48,7 +48,9 @@
         transform: translateX(-105%);
         transition: transform var(--motion-slow) cubic-bezier(.2,.8,.2,1);
         z-index: 1000;
-        overflow-y: auto;
+        overflow: auto;
+        max-width: min(92vw, 320px);
+        scrollbar-gutter: stable;
       }
       .sidebar.open { transform: translateX(0); }
       .sidebar-header {
@@ -866,23 +868,74 @@
         background-size: auto, auto, auto 24px;
       }
       .home-chart-bars {
-        height: 110px;
+        min-height: 150px;
         display: grid;
-        grid-template-columns: repeat(6, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         align-items: end;
         gap: 8px;
       }
+      .home-chart-bar-item {
+        display: grid;
+        justify-items: center;
+        align-content: end;
+        gap: 6px;
+        min-height: 140px;
+      }
       .home-chart-bars span {
         display: block;
+        width: 100%;
         border-radius: 8px 8px 6px 6px;
-        background: #ffd8b3;
+        background: #006465;
       }
-      .home-chart-bars span:nth-child(1) { height: 40%; }
-      .home-chart-bars span:nth-child(2) { height: 65%; }
-      .home-chart-bars span:nth-child(3) { height: 58%; }
-      .home-chart-bars span:nth-child(4) { height: 82%; background: #ffb676; }
-      .home-chart-bars span:nth-child(5) { height: 48%; }
-      .home-chart-bars span:nth-child(6) { height: 72%; }
+      .home-chart-bar-item small {
+        font-size: 11px;
+        color: #6b7280;
+      }
+      .home-chart-bar-item b {
+        color: #111827;
+        font-size: 12px;
+      }
+      .activity-trend-chart {
+        border: 1px solid #eef1f5;
+        border-radius: 12px;
+        background: #ffffff;
+        padding: 8px;
+      }
+      .activity-trend-chart svg {
+        width: 100%;
+        height: 120px;
+        display: block;
+      }
+      .activity-trend-legend {
+        display: flex;
+        gap: 12px;
+        margin-top: 6px;
+        font-size: 11px;
+        color: #4b5563;
+      }
+      .activity-trend-legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .activity-trend-legend i {
+        width: 12px;
+        height: 3px;
+        border-radius: 999px;
+        display: inline-block;
+      }
+      .activity-trend-labels {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(38px, 1fr));
+        gap: 4px;
+        margin-top: 6px;
+      }
+      .activity-trend-labels small {
+        text-align: center;
+        color: #6b7280;
+        font-size: 10px;
+        text-transform: capitalize;
+      }
       .home-modern-timeline {
         position: relative;
         padding-left: 10px;
@@ -918,6 +971,7 @@
       }
       @media (max-width: 620px) {
         .home-modern-stats { grid-template-columns: 1fr; }
+        .home-chart-bars { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       }
 
       .kpi-grid {
@@ -3896,13 +3950,17 @@
         max-height: 0 !important;
         overflow: hidden !important;
         padding-left: 14px !important;
+        padding-right: 4px !important;
         opacity: 0 !important;
         margin-left: 10px !important;
         border-left: 1px solid rgba(255,255,255,.22) !important;
         transition: max-height .28s ease, opacity .2s ease, padding .2s ease !important;
       }
       .submenu.open {
-        max-height: 480px !important;
+        max-height: min(46vh, 340px) !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+        scrollbar-gutter: stable !important;
         opacity: 1 !important;
         padding-top: 4px !important;
         padding-bottom: 4px !important;
@@ -3913,6 +3971,8 @@
         border-radius: 10px !important;
         color: rgba(236,253,252,.9) !important;
         background: transparent !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere !important;
       }
       .submenu-button::before {
         content: '•';
@@ -6381,6 +6441,101 @@
         color: #ff9a35 !important;
       }
 
+      /* Ajustes responsivos globales para evitar cortes en pantallas pequeñas y muy grandes */
+      .app-shell,
+      .content,
+      .main,
+      .panel,
+      .service-card,
+      .history-list-shell,
+      .seller-services-shell,
+      .home-modern-shell,
+      .dashboard-info-grid,
+      .kpi-grid,
+      .ranking-grid,
+      .ops-main-layout {
+        min-width: 0;
+      }
+
+      .table-wrap,
+      .history-list-shell,
+      .service-coord-filters,
+      .ranking-grid,
+      .dashboard-info-grid,
+      .kpi-grid {
+        overflow-x: auto;
+        scrollbar-gutter: stable both-edges;
+      }
+
+      @media (min-width: 1700px) {
+        .main { max-width: min(1680px, 96vw); }
+        .hero,
+        .welcome-card,
+        .dashboard-info-grid,
+        .kpi-grid,
+        .home-modern-shell {
+          width: min(100%, 1520px);
+        }
+      }
+
+      @media (max-width: 1280px) {
+        .card-grid,
+        .compact-grid,
+        .history-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .ranking-grid,
+        .kpi-grid,
+        .dashboard-info-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (max-width: 820px) {
+        .topbar {
+          flex-wrap: wrap;
+          align-items: flex-start;
+        }
+
+        .top-search {
+          margin-left: 0;
+          width: 100%;
+          max-width: 100%;
+        }
+
+        .top-search-panel {
+          width: 100%;
+          left: 0;
+          right: 0;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .main {
+          padding: 0 10px 18px;
+          margin-top: 12px;
+        }
+
+        .panel,
+        .service-card,
+        .history-list-shell,
+        .seller-services-shell {
+          padding: 12px;
+          border-radius: 14px;
+        }
+
+        .card-grid,
+        .compact-grid,
+        .history-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .sidebar {
+          max-width: 92vw;
+        }
+      }
+
     </style>
 
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -6498,6 +6653,21 @@
         if (normalized.includes('control de acceso')) return 'Control de acceso';
         if (normalized.includes('mantenimiento') || normalized.includes('servicio tecnico') || normalized.includes('soporte de video') || normalized.includes('soporte')) return 'Servicio Técnico';
         return 'Monitoreo';
+      }
+      const SERVICE_ENTITY_TYPE_OPTIONS = ['Edificio', 'Obra', 'Empresa', 'Complejo'];
+      const SERVICE_CLIENT_TYPE_OPTIONS = ['Obra', 'Empresa', 'Complejo', 'Predio abandonado', 'Casa', 'Otro'];
+      function normalizeServiceEntityType(value) {
+        const raw = String(value || '').trim();
+        if (!raw) return 'Edificio';
+        const normalized = raw
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase();
+        if (normalized.includes('obra')) return 'Obra';
+        if (normalized.includes('empresa')) return 'Empresa';
+        if (normalized.includes('complejo')) return 'Complejo';
+        if (normalized.includes('edificio')) return 'Edificio';
+        return 'Edificio';
       }
       const PRELOADED_SERVICES_BASE = [
         { numero: '0001', nombreServicio: 'Tropicana', direccionServicio: 'Roque Graseras 936', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
@@ -8189,11 +8359,13 @@
 
       function App() {
         const [menuOpen, setMenuOpen] = useState(false);
-        const [openMenus, setOpenMenus] = useState({ operaciones: false, nuevo: false, baseDatos: false });
+        const [openMenus, setOpenMenus] = useState({ operaciones: false, nuevo: false, baseDatos: false, rolePreview: false });
         const [user, setUser] = useState(null);
         const [authLoading, setAuthLoading] = useState(true);
         const [userRole, setUserRole] = useState('');
         const [userArea, setUserArea] = useState('');
+        const [baseRole, setBaseRole] = useState('');
+        const [baseArea, setBaseArea] = useState('');
         const [userData, setUserData] = useState({ nombre: '', rol: '', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
         const [roleLoading, setRoleLoading] = useState(true);
         const [notificacion, setNotificacion] = useState({ mensaje: '', tipo: '' });
@@ -8763,6 +8935,53 @@
           inprogress: visibleRows.filter((r) => isInProgressStatus(getStatusLabel(r))).length,
           completed: visibleRows.filter((r) => isCompletedStatus(getStatusLabel(r))).length,
         }), [visibleRows]);
+
+        const activityTrend = useMemo(() => {
+          const monthMap = new Map();
+          const now = new Date();
+          const startMonth = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+          visibleRows.forEach((row) => {
+            const date = parseServiceDate(
+              row.fechaAltaServicio
+              || row.fechaAlta
+              || row.fechaEspecificaInicio
+              || row.creadoEn
+              || row.actualizadoEn
+            );
+            if (!(date instanceof Date) || Number.isNaN(date.getTime()) || date < startMonth) return;
+            const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+            const key = `${monthStart.getFullYear()}-${String(monthStart.getMonth() + 1).padStart(2, '0')}`;
+            if (!monthMap.has(key)) {
+              monthMap.set(key, {
+                key,
+                date: monthStart,
+                label: monthStart.toLocaleDateString('es-UY', { month: 'short' }),
+                altas: 0,
+                bajas: 0,
+              });
+            }
+            const slot = monthMap.get(key);
+            const action = String(row.tipoAccion || '').trim();
+            const isBaja = action === 'Baja' || isBajaRow(row);
+            if (isBaja) slot.bajas += 1;
+            else slot.altas += 1;
+          });
+
+          const sorted = Array.from(monthMap.values()).sort((a, b) => a.date - b.date);
+          const maxValue = sorted.reduce((acc, item) => Math.max(acc, item.altas, item.bajas), 1);
+          return { months: sorted, maxValue };
+        }, [visibleRows]);
+
+        const operationalDistribution = useMemo(() => {
+          const base = { Edificio: 0, Obra: 0, Empresa: 0, Complejo: 0 };
+          visibleRows.forEach((row) => {
+            const entity = normalizeServiceEntityType(row.tipoAltaServicio);
+            base[entity] = (base[entity] || 0) + 1;
+          });
+          const maxValue = Math.max(1, ...Object.values(base));
+          return { counts: base, maxValue };
+        }, [visibleRows]);
 
         const preloadedHistoryRows = useMemo(() => {
           const existingIds = new Set(visibleRows.map((r) => normalizeServiceId(r?.clienteId)).filter(Boolean));
@@ -9519,6 +9738,8 @@
             if (!currentUser) {
               setUserRole('');
               setUserArea('');
+              setBaseRole('');
+              setBaseArea('');
               setUserData({ nombre: '', rol: '', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
               setProfileAvatarId(DEFAULT_PROFILE_AVATAR_ID);
               setRoleLoading(false);
@@ -9540,12 +9761,16 @@
               const area = (profile?.area || '').toLowerCase();
               const nombre = String(profile?.nombre || currentUser.displayName || (currentUser.email || '').split('@')[0] || 'Usuario').trim();
               const avatarId = PROFILE_AVATAR_OPTIONS.some((avatar) => avatar.id === profile?.avatarId) ? profile.avatarId : DEFAULT_PROFILE_AVATAR_ID;
+              setBaseRole(rol);
+              setBaseArea(area);
               setUserRole(rol);
               setUserArea(area);
               setUserData({ nombre, rol, area, avatarId });
               setProfileAvatarId(avatarId);
             } catch (err) {
               console.error('Error leyendo config_usuarios:', err);
+              setBaseRole('admin');
+              setBaseArea('');
               setUserRole('admin');
               setUserArea('');
               setUserData({ nombre: (currentUser?.email || 'admin').split('@')[0], rol: 'admin', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
@@ -10077,6 +10302,30 @@
         const lockCommercialField = isSalesOrTechUser && !isAdminUser;
         const isTechnicalUser = /tecnic/.test(userRole) || /tecnic/.test(userArea);
         const isCommercialUser = userArea === 'comercial' || userRole.includes('vendedor');
+        const isCoordinationUser = /coord/.test(userRole) || /coord/.test(userArea);
+        const canPreviewRoles = baseRole === 'admin';
+        const rolePreviewOptions = canPreviewRoles ? [
+          { key: 'admin', label: 'Vista Admin', role: 'admin', area: '' },
+          { key: 'comercial', label: 'Vista Comercial', role: 'vendedor', area: 'comercial' },
+          { key: 'tecnica', label: 'Vista Técnica', role: 'tecnico', area: 'tecnica' },
+          { key: 'real', label: 'Volver a mi rol real', role: baseRole || 'admin', area: baseArea || '' },
+        ] : [];
+        const rolePreviewModeActive = canPreviewRoles && (userRole !== baseRole || userArea !== baseArea);
+
+        function applyRolePreview(option) {
+          if (!canPreviewRoles || !option) return;
+          const nextRole = String(option.role || baseRole || 'admin').toLowerCase();
+          const nextArea = String(option.area || '').toLowerCase();
+          setUserRole(nextRole);
+          setUserArea(nextArea);
+          setUserData((prev) => ({ ...prev, rol: nextRole, area: nextArea }));
+          setNotificacion({
+            mensaje: option.key === 'real'
+              ? 'Vista restaurada al rol real.'
+              : `Vista activa: ${option.label}.`,
+            tipo: 'ok',
+          });
+        }
 
         const ACTION_LABELS = {
           'Nuevo Servicio': 'Servicio',
@@ -10121,7 +10370,14 @@
           setTipoAccion(action);
 
           const stamp = formatUruguayDateTime();
-          setServicioForm({ ...servicioInicial, ...service, representanteComercial: service.representanteComercial || currentUserName, creadoPor: service.creadoPor || currentUserName, fechaIngresoDatos: service.fechaIngresoDatos || stamp });
+          setServicioForm({
+            ...servicioInicial,
+            ...service,
+            tipoAltaServicio: normalizeServiceEntityType(service.tipoAltaServicio),
+            representanteComercial: service.representanteComercial || currentUserName,
+            creadoPor: service.creadoPor || currentUserName,
+            fechaIngresoDatos: service.fechaIngresoDatos || stamp,
+          });
           setObraForm({ ...obraInicial, ...service, representanteComercial: service.representanteComercial || currentUserName, creadoPor: service.creadoPor || currentUserName });
           setNovacionForm({ ...novacionInicial, ...service, representanteComercial: service.representanteComercial || currentUserName, creadoPor: service.creadoPor || currentUserName });
 
@@ -10543,6 +10799,15 @@
             setNotificacion({ mensaje: `No se permite pasar de "${currentStage}" a "${nextStage}" sin cumplir el flujo.`, tipo: 'error' });
             return;
           }
+          if (
+            currentStage === 'Pendiente de aprobación – Coordinación de Instalaciones'
+            && (nextStage === 'En proceso de instalación' || nextStage === 'Rechazado')
+            && !isAdminUser
+            && !isCoordinationUser
+          ) {
+            setNotificacion({ mensaje: 'Solo Coordinación de Instalaciones puede aprobar o rechazar esta etapa.', tipo: 'warn' });
+            return;
+          }
 
           if (nextStage === 'Rechazado' && !String(draft.rejectionReason || '').trim()) {
             setNotificacion({ mensaje: 'Para rechazar, el motivo de rechazo es obligatorio.', tipo: 'warn' });
@@ -10558,6 +10823,15 @@
           if (nextStage === 'Activo' && !draft.clientRecordCompleted) {
             setNotificacion({ mensaje: 'Completá la ficha del cliente para activar el servicio.', tipo: 'warn' });
             return;
+          }
+          if (nextStage === 'Activo') {
+            const integrationId = String(service.workflowIntegrationId || '').trim();
+            const clientContact = String(service.workflowClientContact || '').trim();
+            const clientEmail = String(service.workflowClientEmail || '').trim();
+            if (!integrationId || !clientContact || !clientEmail) {
+              setNotificacion({ mensaje: 'Para activar, completá Contacto principal, Email de activación e ID de integración.', tipo: 'warn' });
+              return;
+            }
           }
 
           const workflowEvent = createWorkflowEvent({
@@ -10613,7 +10887,8 @@
           const doc = { tipoAccion, clienteId: normalizedClientId, status: normalizedStatusToSave, estado: normalizedStatusToSave };
 
           if (grupo === 'servicio') {
-            if (servicioForm.tipoAltaServicio === 'Obra') {
+            const normalizedServiceEntityType = normalizeServiceEntityType(servicioForm.tipoAltaServicio);
+            if (normalizedServiceEntityType === 'Obra') {
               if (!servicioForm.nombreServicio || !servicioForm.direccionServicio || !servicioForm.tipoServicioBrindar) {
                 return alert('Completá al menos: Nombre del servicio, Dirección y Tipo de servicio.');
               }
@@ -10626,7 +10901,13 @@
             } else if (!servicioForm.nombreServicio || !servicioForm.direccionServicio || !servicioForm.tipoServicioBrindar) {
               return alert('Completá al menos: Nombre del servicio, Dirección y Tipo de servicio.');
             }
-            Object.assign(doc, { ...servicioForm, formulario: 'nuevo-servicio-optimizado', creadoPor: servicioForm.creadoPor || currentUserName, auditoriaApertura: formOpenAudit });
+            Object.assign(doc, {
+              ...servicioForm,
+              tipoAltaServicio: normalizedServiceEntityType,
+              formulario: 'nuevo-servicio-optimizado',
+              creadoPor: servicioForm.creadoPor || currentUserName,
+              auditoriaApertura: formOpenAudit,
+            });
             if (tipoAccion === 'Nuevo Servicio') {
               doc.workflowStage = 'Pendiente de aprobación – Coordinación de Instalaciones';
               doc.status = 'Pendiente';
@@ -12037,7 +12318,6 @@
               </div>
               <div className="menu">
                 <button className="menu-button" onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
-                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">📌</span><span>Coordinación de servicios</span></button>
                 {!isMobile && (
                   <>
                     <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: !p.operaciones, nuevo: false, baseDatos: false }))}><span className="menu-icon">🗂️</span><span>Operaciones</span><span className="menu-arrow">{openMenus.operaciones ? '▾' : '▸'}</span></button>
@@ -12045,29 +12325,44 @@
                       <button className="submenu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}><span>Nuevo</span><span className="menu-arrow">{openMenus.nuevo ? '▾' : '▸'}</span></button>
                       <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
                         <button className="submenu-button" onClick={() => { selectAction('Nuevo Servicio'); closeSidebar(); }}>Servicio</button>
-                        <button className="submenu-button" onClick={() => { selectAction('Adicionales'); closeSidebar(); }}>Adicionales</button>
-                        <button className="submenu-button" onClick={() => { selectAction('Solicitud de presupuesto'); closeSidebar(); }}>Solicitud de presupuesto</button>
-                        <button className="submenu-button" onClick={() => { selectAction('Novación'); closeSidebar(); }}>Novación</button>
-                        <button className="submenu-button" onClick={() => { selectAction('Movimiento de obra'); closeSidebar(); }}>Movimiento de obra</button>
-                        <button className="submenu-button" onClick={() => { selectAction('Baja'); closeSidebar(); }}>Baja de servicio</button>
-                        <button className="submenu-button" onClick={() => { selectAction('Charla informativa'); closeSidebar(); }}>Charla informativa</button>
                       </div>
-                      <button className="submenu-button" onClick={() => { setSelectedForm('home'); closeSidebar(); }}>Instalaciones</button>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Gestión de servicios</button>
                     </div>
                     <div className="sidebar-divider" />
                     <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: false, nuevo: false, baseDatos: !p.baseDatos }))}><span className="menu-icon">📚</span><span>Base de datos</span><span className="menu-arrow">{openMenus.baseDatos ? '▾' : '▸'}</span></button>
                     <div className={`submenu ${openMenus.baseDatos ? 'open' : ''}`}>
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
-                      <button className="submenu-button" onClick={() => { setSelectedForm('historial-charlas'); closeSidebar(); }}>Historial de Charlas</button>
                     </div>
                     {ENABLE_CLIENT_TRACKING_VIEW && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}><span className="menu-icon">👥</span><span>Vista Clientes</span></button>}
                     <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}><span className="menu-icon">📊</span><span>Dashboard</span></button>
                   </>
                 )}
+                {canPreviewRoles && (
+                  <>
+                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, rolePreview: !p.rolePreview, operaciones: false, nuevo: false, baseDatos: false }))}>
+                      <span className="menu-icon">🧭</span>
+                      <span>{rolePreviewModeActive ? 'Vista de rol (activa)' : 'Vista de rol'}</span>
+                      <span className="menu-arrow">{openMenus.rolePreview ? '▾' : '▸'}</span>
+                    </button>
+                    <div className={`submenu ${openMenus.rolePreview ? 'open' : ''}`}>
+                      {rolePreviewOptions.map((option) => {
+                        const isCurrent = userRole === option.role && userArea === option.area;
+                        return (
+                          <button
+                            key={`role-preview-${option.key}`}
+                            className="submenu-button"
+                            onClick={() => { applyRolePreview(option); closeSidebar(); }}
+                          >
+                            {option.label}{isCurrent ? ' ✓' : ''}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
                 <div className="sidebar-divider" />
                 <button className="menu-button" onClick={openFuncionariosView}><span className="menu-icon">🧑‍💼</span><span>Funcionarios</span></button>
-                <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>
+                {!isCommercialUser && <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>}
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
                 <div className="sidebar-signature" aria-label="signature" tabIndex={0}><strong>v2.0 | Powered by Alfonso Carballo</strong><div className="sidebar-signature-tooltip">Actualización 2.0: workflow operativo GNS con transiciones validadas por etapa, checklist obligatorio para agendado, resolución de tickets con comentario + imágenes (pegar/arrastrar), y nuevos filtros de historial por administración y fecha de alta.</div></div>
               </div>
@@ -12935,12 +13230,57 @@
                       <div className="home-modern-bottom">
                         <article className="home-modern-chart">
                           <h3>Tendencia de actividad</h3>
-                          <div className="home-chart-line" />
+                          {activityTrend.months.length === 0 ? (
+                            <div className="dashboard-info-empty">Sin datos de meses recientes.</div>
+                          ) : (
+                            <div className="activity-trend-chart">
+                              <svg viewBox="0 0 100 52" preserveAspectRatio="none" aria-label="Tendencia mensual de altas y bajas">
+                                {activityTrend.months.map((item, idx) => (
+                                  <line key={`grid-${item.key}`} x1={(idx / Math.max(activityTrend.months.length - 1, 1)) * 100} y1="0" x2={(idx / Math.max(activityTrend.months.length - 1, 1)) * 100} y2="52" stroke="rgba(15,23,42,.08)" strokeWidth="0.4" />
+                                ))}
+                                <polyline
+                                  fill="none"
+                                  stroke="#006465"
+                                  strokeWidth="2"
+                                  points={activityTrend.months.map((item, idx) => {
+                                    const x = (idx / Math.max(activityTrend.months.length - 1, 1)) * 100;
+                                    const y = 50 - ((item.altas / activityTrend.maxValue) * 44);
+                                    return `${x},${y}`;
+                                  }).join(' ')}
+                                />
+                                <polyline
+                                  fill="none"
+                                  stroke="#ef4444"
+                                  strokeWidth="2"
+                                  points={activityTrend.months.map((item, idx) => {
+                                    const x = (idx / Math.max(activityTrend.months.length - 1, 1)) * 100;
+                                    const y = 50 - ((item.bajas / activityTrend.maxValue) * 44);
+                                    return `${x},${y}`;
+                                  }).join(' ')}
+                                />
+                              </svg>
+                              <div className="activity-trend-legend">
+                                <span><i style={{ background: '#006465' }} /> Altas</span>
+                                <span><i style={{ background: '#ef4444' }} /> Bajas</span>
+                              </div>
+                              <div className="activity-trend-labels">
+                                {activityTrend.months.map((item) => (
+                                  <small key={`label-${item.key}`}>{item.label}</small>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </article>
                         <article className="home-modern-chart">
                           <h3>Distribución operativa</h3>
                           <div className="home-chart-bars">
-                            <span /><span /><span /><span /><span /><span />
+                            {Object.entries(operationalDistribution.counts).map(([label, value]) => (
+                              <div key={`dist-${label}`} className="home-chart-bar-item">
+                                <span style={{ height: `${Math.max(10, (value / operationalDistribution.maxValue) * 100)}%` }} />
+                                <small>{label}</small>
+                                <b>{value}</b>
+                              </div>
+                            ))}
                           </div>
                         </article>
                       </div>
@@ -13155,10 +13495,10 @@
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID</label><input value={clienteId} readOnly type="text" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
-                            <div className="field"><label>Tipo</label><select value={servicioForm.tipoAltaServicio || 'Edificio'} onChange={(e) => setServicioField('tipoAltaServicio', e.target.value)}><option value="Edificio">Edificio</option><option value="Obra">Obra</option></select></div>
+                            <div className="field"><label>Tipo</label><select value={normalizeServiceEntityType(servicioForm.tipoAltaServicio)} onChange={(e) => setServicioField('tipoAltaServicio', e.target.value)}>{SERVICE_ENTITY_TYPE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></div>
                           </div>
                         </div>
-                        {servicioForm.tipoAltaServicio === 'Obra' ? (
+                        {normalizeServiceEntityType(servicioForm.tipoAltaServicio) === 'Obra' ? (
                           <>
                             <div className="service-card">
                               <h3>2. Información General</h3>
@@ -13233,7 +13573,7 @@
                             <div className="service-card">
                               <h3>9. Tipo de Cliente</h3>
                               <div className="card-grid">
-                                <div className="field"><label>Tipo de cliente</label><select value={servicioForm.tipoClienteServicio || 'Obra'} onChange={(e) => setServicioField('tipoClienteServicio', e.target.value)}><option value="Obra">Obra</option><option value="Predio abandonado">Predio abandonado</option><option value="Casa">Casa</option><option value="Otro">Otro</option></select></div>
+                                <div className="field"><label>Tipo de cliente</label><select value={servicioForm.tipoClienteServicio || 'Obra'} onChange={(e) => setServicioField('tipoClienteServicio', e.target.value)}>{SERVICE_CLIENT_TYPE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></div>
                               </div>
                             </div>
 
@@ -13996,6 +14336,9 @@
                               </div>
                               <div className="service-coord-detail-card" style={{ marginTop: 10 }}>
                                 <h4 style={{ margin: '0 0 8px 0' }}>Workflow Operativo GNS</h4>
+                                <div className="hint" style={{ marginBottom: 10 }}>
+                                  Flujo: <b>Pendiente de aprobación</b> → <b>En proceso de instalación</b> → <b>Alta de Servicio en configuración</b> → <b>Activo</b>.
+                                </div>
                                 <div className="service-coord-detail-grid">
                                   <div className="field">
                                     <label>Siguiente etapa</label>
