@@ -868,23 +868,74 @@
         background-size: auto, auto, auto 24px;
       }
       .home-chart-bars {
-        height: 110px;
+        min-height: 150px;
         display: grid;
-        grid-template-columns: repeat(6, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         align-items: end;
         gap: 8px;
       }
+      .home-chart-bar-item {
+        display: grid;
+        justify-items: center;
+        align-content: end;
+        gap: 6px;
+        min-height: 140px;
+      }
       .home-chart-bars span {
         display: block;
+        width: 100%;
         border-radius: 8px 8px 6px 6px;
-        background: #ffd8b3;
+        background: #006465;
       }
-      .home-chart-bars span:nth-child(1) { height: 40%; }
-      .home-chart-bars span:nth-child(2) { height: 65%; }
-      .home-chart-bars span:nth-child(3) { height: 58%; }
-      .home-chart-bars span:nth-child(4) { height: 82%; background: #ffb676; }
-      .home-chart-bars span:nth-child(5) { height: 48%; }
-      .home-chart-bars span:nth-child(6) { height: 72%; }
+      .home-chart-bar-item small {
+        font-size: 11px;
+        color: #6b7280;
+      }
+      .home-chart-bar-item b {
+        color: #111827;
+        font-size: 12px;
+      }
+      .activity-trend-chart {
+        border: 1px solid #eef1f5;
+        border-radius: 12px;
+        background: #ffffff;
+        padding: 8px;
+      }
+      .activity-trend-chart svg {
+        width: 100%;
+        height: 120px;
+        display: block;
+      }
+      .activity-trend-legend {
+        display: flex;
+        gap: 12px;
+        margin-top: 6px;
+        font-size: 11px;
+        color: #4b5563;
+      }
+      .activity-trend-legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .activity-trend-legend i {
+        width: 12px;
+        height: 3px;
+        border-radius: 999px;
+        display: inline-block;
+      }
+      .activity-trend-labels {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(38px, 1fr));
+        gap: 4px;
+        margin-top: 6px;
+      }
+      .activity-trend-labels small {
+        text-align: center;
+        color: #6b7280;
+        font-size: 10px;
+        text-transform: capitalize;
+      }
       .home-modern-timeline {
         position: relative;
         padding-left: 10px;
@@ -920,6 +971,7 @@
       }
       @media (max-width: 620px) {
         .home-modern-stats { grid-template-columns: 1fr; }
+        .home-chart-bars { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       }
 
       .kpi-grid {
@@ -8884,6 +8936,53 @@
           completed: visibleRows.filter((r) => isCompletedStatus(getStatusLabel(r))).length,
         }), [visibleRows]);
 
+        const activityTrend = useMemo(() => {
+          const monthMap = new Map();
+          const now = new Date();
+          const startMonth = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+
+          visibleRows.forEach((row) => {
+            const date = parseServiceDate(
+              row.fechaAltaServicio
+              || row.fechaAlta
+              || row.fechaEspecificaInicio
+              || row.creadoEn
+              || row.actualizadoEn
+            );
+            if (!(date instanceof Date) || Number.isNaN(date.getTime()) || date < startMonth) return;
+            const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+            const key = `${monthStart.getFullYear()}-${String(monthStart.getMonth() + 1).padStart(2, '0')}`;
+            if (!monthMap.has(key)) {
+              monthMap.set(key, {
+                key,
+                date: monthStart,
+                label: monthStart.toLocaleDateString('es-UY', { month: 'short' }),
+                altas: 0,
+                bajas: 0,
+              });
+            }
+            const slot = monthMap.get(key);
+            const action = String(row.tipoAccion || '').trim();
+            const isBaja = action === 'Baja' || isBajaRow(row);
+            if (isBaja) slot.bajas += 1;
+            else slot.altas += 1;
+          });
+
+          const sorted = Array.from(monthMap.values()).sort((a, b) => a.date - b.date);
+          const maxValue = sorted.reduce((acc, item) => Math.max(acc, item.altas, item.bajas), 1);
+          return { months: sorted, maxValue };
+        }, [visibleRows]);
+
+        const operationalDistribution = useMemo(() => {
+          const base = { Edificio: 0, Obra: 0, Empresa: 0, Complejo: 0 };
+          visibleRows.forEach((row) => {
+            const entity = normalizeServiceEntityType(row.tipoAltaServicio);
+            base[entity] = (base[entity] || 0) + 1;
+          });
+          const maxValue = Math.max(1, ...Object.values(base));
+          return { counts: base, maxValue };
+        }, [visibleRows]);
+
         const preloadedHistoryRows = useMemo(() => {
           const existingIds = new Set(visibleRows.map((r) => normalizeServiceId(r?.clienteId)).filter(Boolean));
           return PRELOADED_SERVICES
@@ -13131,12 +13230,57 @@
                       <div className="home-modern-bottom">
                         <article className="home-modern-chart">
                           <h3>Tendencia de actividad</h3>
-                          <div className="home-chart-line" />
+                          {activityTrend.months.length === 0 ? (
+                            <div className="dashboard-info-empty">Sin datos de meses recientes.</div>
+                          ) : (
+                            <div className="activity-trend-chart">
+                              <svg viewBox="0 0 100 52" preserveAspectRatio="none" aria-label="Tendencia mensual de altas y bajas">
+                                {activityTrend.months.map((item, idx) => (
+                                  <line key={`grid-${item.key}`} x1={(idx / Math.max(activityTrend.months.length - 1, 1)) * 100} y1="0" x2={(idx / Math.max(activityTrend.months.length - 1, 1)) * 100} y2="52" stroke="rgba(15,23,42,.08)" strokeWidth="0.4" />
+                                ))}
+                                <polyline
+                                  fill="none"
+                                  stroke="#006465"
+                                  strokeWidth="2"
+                                  points={activityTrend.months.map((item, idx) => {
+                                    const x = (idx / Math.max(activityTrend.months.length - 1, 1)) * 100;
+                                    const y = 50 - ((item.altas / activityTrend.maxValue) * 44);
+                                    return `${x},${y}`;
+                                  }).join(' ')}
+                                />
+                                <polyline
+                                  fill="none"
+                                  stroke="#ef4444"
+                                  strokeWidth="2"
+                                  points={activityTrend.months.map((item, idx) => {
+                                    const x = (idx / Math.max(activityTrend.months.length - 1, 1)) * 100;
+                                    const y = 50 - ((item.bajas / activityTrend.maxValue) * 44);
+                                    return `${x},${y}`;
+                                  }).join(' ')}
+                                />
+                              </svg>
+                              <div className="activity-trend-legend">
+                                <span><i style={{ background: '#006465' }} /> Altas</span>
+                                <span><i style={{ background: '#ef4444' }} /> Bajas</span>
+                              </div>
+                              <div className="activity-trend-labels">
+                                {activityTrend.months.map((item) => (
+                                  <small key={`label-${item.key}`}>{item.label}</small>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </article>
                         <article className="home-modern-chart">
                           <h3>Distribución operativa</h3>
                           <div className="home-chart-bars">
-                            <span /><span /><span /><span /><span /><span />
+                            {Object.entries(operationalDistribution.counts).map(([label, value]) => (
+                              <div key={`dist-${label}`} className="home-chart-bar-item">
+                                <span style={{ height: `${Math.max(10, (value / operationalDistribution.maxValue) * 100)}%` }} />
+                                <small>{label}</small>
+                                <b>{value}</b>
+                              </div>
+                            ))}
                           </div>
                         </article>
                       </div>
