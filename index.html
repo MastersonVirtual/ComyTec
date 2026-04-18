@@ -8614,6 +8614,7 @@
         const [workflowTaskChecks, setWorkflowTaskChecks] = useState({});
         const [workflowTransitionDrafts, setWorkflowTransitionDrafts] = useState({});
         const [approvalActionInProgress, setApprovalActionInProgress] = useState('');
+        const [installationSaveInProgress, setInstallationSaveInProgress] = useState('');
         const [opsSideTab, setOpsSideTab] = useState('activity');
         const [opsCommentDraft, setOpsCommentDraft] = useState('');
         const [opsObservationsOpen, setOpsObservationsOpen] = useState(false);
@@ -8791,10 +8792,25 @@
           const currentStage = normalizeWorkflowStage(service.workflowStage) || 'Pendiente de aprobación – Coordinación de Instalaciones';
           const nextOptions = GNS_WORKFLOW_TRANSITIONS[currentStage] || [];
           const existingInstallTasks = service.workflowInstallTasks || {};
+          const existingTaskMeta = service.workflowInstallTaskMeta || {};
+          const existingPlan = service.workflowInstallationPlan || {};
           return {
             nextStage: nextOptions[0] || '',
             note: '',
             installTasks: INSTALLATION_REQUIRED_TASKS.reduce((acc, task) => ({ ...acc, [task.key]: !!existingInstallTasks[task.key] }), {}),
+            installTaskMeta: INSTALLATION_REQUIRED_TASKS.reduce((acc, task) => ({
+              ...acc,
+              [task.key]: {
+                responsable: String(existingTaskMeta?.[task.key]?.responsable || '').trim(),
+                fechaObjetivo: String(existingTaskMeta?.[task.key]?.fechaObjetivo || '').trim(),
+                comentario: String(existingTaskMeta?.[task.key]?.comentario || '').trim(),
+              },
+            }), {}),
+            installationPlan: {
+              fechaInicioObjetivo: String(existingPlan?.fechaInicioObjetivo || '').trim(),
+              fechaAltaObjetivo: String(existingPlan?.fechaAltaObjetivo || '').trim(),
+              tecnicoLider: String(existingPlan?.tecnicoLider || '').trim(),
+            },
             rejectionReason: String(service.workflowRejectionReason || '').trim(),
             clientRecordCompleted: !!service.workflowClientRecordCompleted,
           };
@@ -10945,6 +10961,39 @@
             setNotificacion({ mensaje: '✖ No se pudo registrar la aprobación/rechazo inicial.', tipo: 'error' });
           } finally {
             setApprovalActionInProgress('');
+          }
+        }
+
+        async function handleSaveInstallationManagement(service) {
+          if (!service?.id) return;
+          const currentStage = normalizeWorkflowStage(service.workflowStage) || '';
+          if (currentStage !== 'En proceso de instalación') {
+            setNotificacion({ mensaje: 'La gestión técnica de instalación solo está disponible en la etapa "En proceso de instalación".', tipo: 'warn' });
+            return;
+          }
+          if (!(isAdminUser || isTechnicalUser || isCoordinationUser)) {
+            setNotificacion({ mensaje: 'Solo Técnica, Coordinación o Admin pueden gestionar la instalación.', tipo: 'warn' });
+            return;
+          }
+          const draft = workflowTransitionDrafts[service.id] || getWorkflowDraftDefaults(service);
+          const payload = {
+            workflowInstallTasks: draft.installTasks || {},
+            workflowInstallTaskMeta: draft.installTaskMeta || {},
+            workflowInstallationPlan: draft.installationPlan || {},
+            actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+            editadoPor: currentUserName,
+          };
+          try {
+            setInstallationSaveInProgress(service.id);
+            await db.collection('operaciones').doc(service.id).set(payload, { merge: true });
+            setRows((prev) => prev.map((row) => row.id === service.id ? { ...row, ...payload, actualizadoEn: new Date() } : row));
+            setSelectedService((prev) => (prev?.id === service.id ? { ...prev, ...payload, actualizadoEn: new Date() } : prev));
+            setNotificacion({ mensaje: '✔ Gestión técnica de instalación guardada.', tipo: 'ok' });
+          } catch (error) {
+            console.error('Error guardando gestión técnica de instalación:', error);
+            setNotificacion({ mensaje: '✖ No se pudo guardar la gestión técnica.', tipo: 'error' });
+          } finally {
+            setInstallationSaveInProgress('');
           }
         }
 
@@ -14418,6 +14467,20 @@
                                       <div className="hint" style={{ marginBottom: 10 }}>
                                         Revisá los datos cargados por Comercial y luego definí la aprobación inicial del servicio.
                                       </div>
+                                      <div className="service-coord-detail-card" style={{ marginBottom: 10 }}>
+                                        <h4 style={{ margin: '0 0 8px 0' }}>Resumen del alta cargada por Comercial</h4>
+                                        <div className="service-coord-detail-grid">
+                                          <div className="service-detail-kpi"><small>🏢 Razón social</small><strong>{detailService.razonSocial || '-'}</strong></div>
+                                          <div className="service-detail-kpi"><small>🧾 RUT</small><strong>{detailService.rut || '-'}</strong></div>
+                                          <div className="service-detail-kpi"><small>📧 Mail facturación</small><strong>{detailService.mailFacturacion || '-'}</strong></div>
+                                          <div className="service-detail-kpi"><small>🔑 Estado de llaves</small><strong>{detailService.llavesServicio || '-'}</strong></div>
+                                          <div className="service-detail-kpi"><small>🧑‍💼 Atención cliente</small><strong>{detailService.atencionCliente || '-'}</strong></div>
+                                          <div className="service-detail-kpi"><small>🧷 Tipo alta</small><strong>{normalizeServiceEntityType(detailService.tipoAltaServicio)}</strong></div>
+                                          <div className="service-detail-kpi"><small>📆 Fecha alta negociada</small><strong>{detailService.fechaAltaServicio || '-'}</strong></div>
+                                          <div className="service-detail-kpi"><small>🛠️ Días instalación</small><strong>{detailService.diasInstalacion || '-'}</strong></div>
+                                          <div className="service-detail-kpi" style={{ gridColumn: '1 / -1' }}><small>📝 Observaciones comercial</small><strong>{detailService.observacionesComentarios || '-'}</strong></div>
+                                        </div>
+                                      </div>
                                       <div className="field" style={{ marginBottom: 10 }}>
                                         <label>Observación de revisión (opcional)</label>
                                         <input
@@ -14479,19 +14542,94 @@
 
                                 {detailWorkflowStage === 'En proceso de instalación' && (
                                   <div className="service-coord-detail-card" style={{ marginTop: 8 }}>
-                                    <h4 style={{ margin: '0 0 8px 0' }}>Gestión de instalación</h4>
-                                    <div className="hint" style={{ marginBottom: 8 }}>Vista disponible para Coordinación: línea de tiempo, Gantt y listado de tareas.</div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 8, marginBottom: 8 }}>
-                                      <div className="service-detail-kpi"><small>📈 Línea de tiempo</small><strong>{INSTALLATION_REQUIRED_TASKS.filter((task) => !!workflowDraft.installTasks?.[task.key]).length} / {INSTALLATION_REQUIRED_TASKS.length} hitos</strong></div>
-                                      <div className="service-detail-kpi"><small>📊 Gantt</small><strong>{Math.round((INSTALLATION_REQUIRED_TASKS.filter((task) => !!workflowDraft.installTasks?.[task.key]).length / INSTALLATION_REQUIRED_TASKS.length) * 100)}% completado</strong></div>
+                                    <h4 style={{ margin: '0 0 8px 0' }}>Gestión técnica de instalación</h4>
+                                    <div className="hint" style={{ marginBottom: 8 }}>
+                                      Vista técnica profesional: planificación, responsables y seguimiento por hito. Guardá avances antes de mover de etapa.
                                     </div>
-                                    {INSTALLATION_REQUIRED_TASKS.map((task) => (
-                                      <label key={`workflow-install-${detailService.id}-${task.key}`} className="seller-filter-option" style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
-                                        <input type="checkbox" checked={!!workflowDraft.installTasks?.[task.key]} onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ installTasks: { ...(prev.installTasks || {}), [task.key]: e.target.checked } }))} />
-                                        <span>{task.label}</span>
-                                      </label>
-                                    ))}
-                                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 8, marginBottom: 8 }}>
+                                      <div className="service-detail-kpi"><small>📈 Hitos completados</small><strong>{INSTALLATION_REQUIRED_TASKS.filter((task) => !!workflowDraft.installTasks?.[task.key]).length} / {INSTALLATION_REQUIRED_TASKS.length}</strong></div>
+                                      <div className="service-detail-kpi"><small>📊 Progreso</small><strong>{Math.round((INSTALLATION_REQUIRED_TASKS.filter((task) => !!workflowDraft.installTasks?.[task.key]).length / INSTALLATION_REQUIRED_TASKS.length) * 100)}%</strong></div>
+                                      <div className="service-detail-kpi"><small>🧑‍🔧 Técnico líder</small><strong>{workflowDraft.installationPlan?.tecnicoLider || '-'}</strong></div>
+                                    </div>
+                                    <div style={{ marginBottom: 12 }}>
+                                      <div style={{ height: 10, borderRadius: 999, border: '1px solid rgba(255,255,255,.2)', background: 'rgba(0,0,0,.25)', overflow: 'hidden' }}>
+                                        <div style={{ width: `${Math.round((INSTALLATION_REQUIRED_TASKS.filter((task) => !!workflowDraft.installTasks?.[task.key]).length / INSTALLATION_REQUIRED_TASKS.length) * 100)}%`, height: '100%', background: 'linear-gradient(90deg, #0ea5e9, #22c55e)', transition: 'width 180ms ease' }} />
+                                      </div>
+                                    </div>
+                                    <div className="service-coord-detail-grid" style={{ marginBottom: 8 }}>
+                                      <div className="field">
+                                        <label>Fecha objetivo inicio instalación</label>
+                                        <input
+                                          type="date"
+                                          value={workflowDraft.installationPlan?.fechaInicioObjetivo || ''}
+                                          onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ installationPlan: { ...(prev.installationPlan || {}), fechaInicioObjetivo: e.target.value } }))}
+                                        />
+                                      </div>
+                                      <div className="field">
+                                        <label>Fecha objetivo alta</label>
+                                        <input
+                                          type="date"
+                                          value={workflowDraft.installationPlan?.fechaAltaObjetivo || ''}
+                                          onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ installationPlan: { ...(prev.installationPlan || {}), fechaAltaObjetivo: e.target.value } }))}
+                                        />
+                                      </div>
+                                      <div className="field">
+                                        <label>Técnico líder</label>
+                                        <input
+                                          type="text"
+                                          value={workflowDraft.installationPlan?.tecnicoLider || ''}
+                                          onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ installationPlan: { ...(prev.installationPlan || {}), tecnicoLider: e.target.value } }))}
+                                          placeholder="Nombre del responsable técnico"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="service-coord-detail-list" style={{ marginBottom: 10 }}>
+                                      {INSTALLATION_REQUIRED_TASKS.map((task) => (
+                                        <div key={`workflow-install-${detailService.id}-${task.key}`} className="service-coord-detail-list-item" style={{ display: 'grid', gap: 8 }}>
+                                          <label className="seller-filter-option" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                            <input type="checkbox" checked={!!workflowDraft.installTasks?.[task.key]} onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ installTasks: { ...(prev.installTasks || {}), [task.key]: e.target.checked } }))} />
+                                            <strong>{task.label}</strong>
+                                          </label>
+                                          <div className="service-coord-detail-grid">
+                                            <div className="field">
+                                              <label>Responsable</label>
+                                              <input
+                                                type="text"
+                                                value={workflowDraft.installTaskMeta?.[task.key]?.responsable || ''}
+                                                onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ installTaskMeta: { ...(prev.installTaskMeta || {}), [task.key]: { ...((prev.installTaskMeta || {})[task.key] || {}), responsable: e.target.value } } }))}
+                                                placeholder="Técnico asignado"
+                                              />
+                                            </div>
+                                            <div className="field">
+                                              <label>Fecha objetivo</label>
+                                              <input
+                                                type="date"
+                                                value={workflowDraft.installTaskMeta?.[task.key]?.fechaObjetivo || ''}
+                                                onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ installTaskMeta: { ...(prev.installTaskMeta || {}), [task.key]: { ...((prev.installTaskMeta || {})[task.key] || {}), fechaObjetivo: e.target.value } } }))}
+                                              />
+                                            </div>
+                                            <div className="field">
+                                              <label>Comentario técnico</label>
+                                              <input
+                                                type="text"
+                                                value={workflowDraft.installTaskMeta?.[task.key]?.comentario || ''}
+                                                onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ installTaskMeta: { ...(prev.installTaskMeta || {}), [task.key]: { ...((prev.installTaskMeta || {})[task.key] || {}), comentario: e.target.value } } }))}
+                                                placeholder="Notas de avance o bloqueo"
+                                              />
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
+                                      <button
+                                        type="button"
+                                        className="save-btn"
+                                        onClick={() => handleSaveInstallationManagement(detailService)}
+                                        disabled={installationSaveInProgress === detailService.id}
+                                      >
+                                        {installationSaveInProgress === detailService.id ? 'Guardando gestión...' : 'Guardar gestión técnica'}
+                                      </button>
                                       <button type="button" className="save-btn" onClick={() => setWorkflowTransitionDraft(detailService.id, { nextStage: 'Alta de Servicio en configuración' })} disabled={!INSTALLATION_REQUIRED_TASKS.every((task) => !!workflowDraft.installTasks?.[task.key])}>Configurar ALTA de Servicio</button>
                                     </div>
                                   </div>
