@@ -10125,8 +10125,8 @@
           const internalItems = internalNotifications.map((item) => ({
             id: `internal-${item.id}`,
             source: 'interna',
-            title: getChatTitleForMessage(item, staffMembers),
-            status: item.mensaje || '',
+            title: getInternalNotificationSummary(item).title,
+            status: getInternalNotificationSummary(item).status,
             createdAt: item.creadoEn,
             raw: item,
             read: !!item.leida,
@@ -11239,6 +11239,9 @@
               asignadoAEmail: createPayload.atencionCliente || '',
               asignadoANombre: createPayload.atencionCliente || '',
             });
+            if (tipoAccion === 'Nuevo Servicio') {
+              await notifyNewServiceApprovalRequest(createdRef.id, createPayload);
+            }
             resetFields();
             setNotificacion({ mensaje: `✔ Datos guardados correctamente (ticket ${createTicket})`, tipo: 'ok' });
             void logRealtimeActivityEvent({
@@ -11553,8 +11556,88 @@
           }) || null;
         }
 
+        function getInternalNotificationSummary(item = {}) {
+          const type = String(item?.tipo || '').trim().toLowerCase();
+          if (type === 'nuevo_servicio_aprobacion') {
+            const serviceName = String(item?.servicioNombre || item?.nombreServicio || '').trim();
+            const serviceId = String(item?.clienteId || '').trim();
+            return {
+              title: 'Nuevo servicio pendiente de aprobación',
+              status: `${serviceName || 'Servicio sin nombre'}${serviceId ? ` · ID ${serviceId}` : ''}`,
+            };
+          }
+          return {
+            title: getChatTitleForMessage(item, staffMembers),
+            status: item?.mensaje || '',
+          };
+        }
+
+        function openServiceFromNotification(raw = {}) {
+          const docId = String(raw?.servicioDocId || '').trim();
+          const clientId = normalizeServiceId(raw?.clienteId || '');
+          const target = rows.find((row) => {
+            if (!row) return false;
+            if (docId && String(row.id || '').trim() === docId) return true;
+            if (clientId && normalizeServiceId(row.clienteId || '') === clientId) return true;
+            return false;
+          });
+          if (!target) {
+            setNotificacion({ mensaje: 'No se encontró el servicio asociado a la notificación.', tipo: 'warn' });
+            setSelectedForm('historial');
+            return;
+          }
+          openServiceDetailModal(target, 'informacion');
+        }
+
+        async function notifyNewServiceApprovalRequest(serviceDocId, servicePayload = {}) {
+          const normalizedServiceId = normalizeServiceId(servicePayload.clienteId || '');
+          const serviceName = String(servicePayload.nombreServicio || servicePayload.razonSocial || '').trim() || 'Servicio sin nombre';
+          const recipients = staffMembers.filter((member) => {
+            const area = String(member.area || '').trim().toLowerCase();
+            const cargo = String(member.cargo || '').trim().toLowerCase();
+            return area === 'tecnica'
+              || area === 'técnica'
+              || /admin/.test(cargo)
+              || /tecnic|coord/.test(cargo);
+          }).filter((member) => {
+            const memberEmail = String(member.email || '').trim().toLowerCase();
+            const memberUid = String(member.uid || '').trim();
+            const currentEmail = String(user?.email || '').trim().toLowerCase();
+            const currentUid = String(user?.uid || '').trim();
+            if (currentEmail && memberEmail && memberEmail === currentEmail) return false;
+            if (currentUid && memberUid && memberUid === currentUid) return false;
+            return !!(memberEmail || memberUid);
+          });
+          if (recipients.length === 0) return;
+          await Promise.all(recipients.map((member) => db.collection('notificaciones_internas').add({
+            tipo: 'nuevo_servicio_aprobacion',
+            titulo: 'Nuevo servicio pendiente de aprobación',
+            mensaje: `Comercial cargó un nuevo servicio: ${serviceName}${normalizedServiceId ? ` (ID ${normalizedServiceId})` : ''}.`,
+            servicioDocId: serviceDocId,
+            servicioNombre: serviceName,
+            clienteId: normalizedServiceId || '',
+            destinatarioUid: member.uid || '',
+            destinatarioEmail: String(member.email || '').trim().toLowerCase(),
+            remitenteUid: user?.uid || '',
+            remitenteEmail: user?.email || '',
+            remitenteNombre: currentUserName,
+            leida: false,
+            creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+          })));
+        }
+
         async function openNotificationsView(target = null) {
           const targetRaw = target?.raw || target || null;
+          if (String(targetRaw?.tipo || '').trim().toLowerCase() === 'nuevo_servicio_aprobacion') {
+            setDesktopBellOpen(false);
+            setMobileBellOpen(false);
+            closeSidebar();
+            setMobileTab('servicios');
+            setHistoryDetailTab('informacion');
+            openServiceFromNotification(targetRaw);
+            await Promise.all([markAdminNotificationsAsRead(), markInternalNotificationsAsRead()]);
+            return;
+          }
           const relatedStaff = targetRaw ? getStaffMemberFromMessage(targetRaw) : null;
           setSelectedForm('notificaciones');
           setMobileTab('perfil');
@@ -12605,7 +12688,10 @@
                                   <small>{item.status}</small>
                                   <small>{formatRequestDateTime(item.createdAt)}</small>
                                   <div className="topbar-notify-actions">
-                                    {item.source === 'interna' && <button type="button" className="topbar-notify-action" aria-label="Abrir chat" onClick={(e) => { e.stopPropagation(); openNotificationsView(item); openChatFromNotification(item); }}><i data-lucide="messages-square" /></button>}
+                                    {item.source === 'interna' && String(item.raw?.tipo || '').trim().toLowerCase() === 'nuevo_servicio_aprobacion' && (
+                                      <button type="button" className="topbar-notify-action" aria-label="Abrir servicio" onClick={(e) => { e.stopPropagation(); openNotificationsView(item); }}><i data-lucide="square-arrow-out-up-right" /></button>
+                                    )}
+                                    {item.source === 'interna' && String(item.raw?.tipo || '').trim().toLowerCase() !== 'nuevo_servicio_aprobacion' && <button type="button" className="topbar-notify-action" aria-label="Abrir chat" onClick={(e) => { e.stopPropagation(); openNotificationsView(item); openChatFromNotification(item); }}><i data-lucide="messages-square" /></button>}
                                     {item.source === 'credencial' && <button type="button" className="topbar-notify-action" aria-label="Eliminar notificación" onClick={(e) => { e.stopPropagation(); deleteNotificationRequest(item.raw); }}><i data-lucide="trash-2" /></button>}
                                   </div>
                                 </article>
@@ -12725,11 +12811,15 @@
                         </article>
                       ) : (
                         <article className="profile-option" key={item.id}>
-                          <h3>{getChatTitleForMessage(item.raw, staffMembers)}</h3>
+                          <h3>{getInternalNotificationSummary(item.raw).title}</h3>
                           <div className="kv"><b>De:</b> {item.raw.remitenteNombre || item.raw.remitenteEmail || 'Usuario'}</div>
-                          <div className="kv"><b>Mensaje:</b> {item.raw.mensaje || '-'}</div>
+                          <div className="kv"><b>Mensaje:</b> {getInternalNotificationSummary(item.raw).status || item.raw.mensaje || '-'}</div>
                           <div className="kv"><b>Recibido:</b> {formatRequestDateTime(item.raw.creadoEn)}</div>
-                          {getStaffMemberFromMessage(item.raw) && (
+                          {String(item.raw?.tipo || '').trim().toLowerCase() === 'nuevo_servicio_aprobacion' ? (
+                            <div className="request-status-row">
+                              <button type="button" className="status-action-btn chat-action-btn" onClick={() => openServiceFromNotification(item.raw)}>Ver servicio</button>
+                            </div>
+                          ) : getStaffMemberFromMessage(item.raw) && (
                             <div className="request-status-row">
                               <button type="button" className="status-action-btn chat-action-btn" onClick={() => openChatFromNotification(item)}>Ver chat</button>
                             </div>
