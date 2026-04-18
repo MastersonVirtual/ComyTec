@@ -8411,6 +8411,7 @@
         const [deleteTargetService, setDeleteTargetService] = useState(null);
         const [deletingService, setDeletingService] = useState(false);
         const [deletingAllServices, setDeletingAllServices] = useState(false);
+        const [hidePreloadedCatalog, setHidePreloadedCatalog] = useState(false);
         const [showClientViewModal, setShowClientViewModal] = useState(false);
         const [clientOperationId, setClientOperationId] = useState('');
         const [profileUserRequest, setProfileUserRequest] = useState('');
@@ -9002,6 +9003,7 @@
         }, [visibleRows]);
 
         const preloadedHistoryRows = useMemo(() => {
+          if (hidePreloadedCatalog) return [];
           const existingIds = new Set(visibleRows.map((r) => normalizeServiceId(r?.clienteId)).filter(Boolean));
           return PRELOADED_SERVICES
             .filter((s) => !existingIds.has(normalizeServiceId(s.numero)))
@@ -9019,7 +9021,7 @@
               origenCatalogo: true,
               fechaAltaServicio: SERVICE_DATE_OVERRIDES.get(normalizeServiceId(s.numero)) || '',
             }));
-        }, [visibleRows]);
+        }, [visibleRows, hidePreloadedCatalog]);
 
         const historySourceRows = useMemo(() => ([...visibleRows, ...preloadedHistoryRows]), [visibleRows, preloadedHistoryRows]);
 
@@ -9265,6 +9267,12 @@
               }, { merge: true });
             });
             await batch.commit();
+            await db.collection('configuracion_sistema').doc('catalogo_preload').set({
+              ocultarEnHistorial: false,
+              actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+              actualizadoPor: currentUserName,
+            }, { merge: true });
+            setHidePreloadedCatalog(false);
             setNotificacion({ mensaje: `Se sincronizaron ${pending.length} servicios precargados en Firebase.`, tipo: 'ok' });
           } catch (error) {
             console.error('Error sincronizando catálogo precargado:', error);
@@ -9991,6 +9999,21 @@
             setStaffMembers(next);
           }, (error) => {
             console.error('Error leyendo config_usuarios para funcionarios:', error);
+          });
+          return () => unsub();
+        }, [user]);
+
+        useEffect(() => {
+          if (!user) {
+            setHidePreloadedCatalog(false);
+            return () => {};
+          }
+          const ref = db.collection('configuracion_sistema').doc('catalogo_preload');
+          const unsub = ref.onSnapshot((doc) => {
+            const data = doc.data() || {};
+            setHidePreloadedCatalog(!!data.ocultarEnHistorial);
+          }, (error) => {
+            console.error('Error leyendo configuración de catálogo preload:', error);
           });
           return () => unsub();
         }, [user]);
@@ -10828,6 +10851,12 @@
               chunk.forEach((doc) => batch.delete(doc.ref));
               await batch.commit();
             }
+            await db.collection('configuracion_sistema').doc('catalogo_preload').set({
+              ocultarEnHistorial: true,
+              actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+              actualizadoPor: currentUserName,
+            }, { merge: true });
+            setHidePreloadedCatalog(true);
             setRows([]);
             setSelectedService(null);
             setHistoryDetailModalOpen(false);
