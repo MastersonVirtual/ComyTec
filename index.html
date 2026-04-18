@@ -1661,6 +1661,11 @@
       .service-card-action-btn.primary {
         background: rgba(13, 122, 124, .2);
       }
+      .service-card-action-btn.danger {
+        border-color: rgba(185, 28, 28, .38);
+        background: rgba(185, 28, 28, .1);
+        color: #991b1b;
+      }
       .service-coord-empty {
         text-align: center;
         color: #6a7f82;
@@ -2439,10 +2444,6 @@
       }
 
       .login-shell {
-        --login-bg-1: url('https://i.postimg.cc/K8T7cTQ9/Gemini-Generated-Image-h5k8zvh5k8zvh5k8.png');
-        --login-bg-2: url('https://i.postimg.cc/yNzmDNbz/Gemini-Generated-Image-irrsw0irrsw0irrs.png');
-        --login-bg-3: url('https://i.postimg.cc/zf1CyfPs/Gemini-Generated-Image-4ynkgo4ynkgo4ynk.png');
-        --login-bg-4: url('https://i.postimg.cc/FKQyYKB4/Gemini-Generated-Image-ojn49gojn49gojn4.png');
         min-height: 100vh;
         position: relative;
         isolation: isolate;
@@ -2454,39 +2455,24 @@
       }
       .login-bg {
         position: absolute;
-        inset: -18px;
+        inset: 0;
         z-index: 0;
-        background: #006465;
-        filter: blur(9px);
-        transform: scale(1.06);
+        background: #2b2b2b;
       }
-      .login-bg-layer {
+      .login-particles-canvas {
         position: absolute;
         inset: 0;
-        opacity: 0;
-        background-color: #006465;
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        animation: login-bg-fade 40s linear infinite;
-      }
-      .login-bg-layer:nth-child(1) { background-image: var(--login-bg-1); animation-delay: 0s; }
-      .login-bg-layer:nth-child(2) { background-image: var(--login-bg-2); animation-delay: 10s; }
-      .login-bg-layer:nth-child(3) { background-image: var(--login-bg-3); animation-delay: 20s; }
-      .login-bg-layer:nth-child(4) { background-image: var(--login-bg-4); animation-delay: 30s; }
-      @keyframes login-bg-fade {
-        0% { opacity: 0; }
-        5% { opacity: 1; }
-        20% { opacity: 1; }
-        25% { opacity: 0; }
-        100% { opacity: 0; }
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        opacity: .82;
       }
       .login-shell::after {
         content: '';
         position: absolute;
         inset: 0;
         z-index: 1;
-        background: linear-gradient(180deg, rgba(0, 100, 101, .28), rgba(0, 70, 71, .52));
+        background: linear-gradient(180deg, rgba(17, 24, 39, .36), rgba(15, 23, 42, .54));
       }
       .login-stack {
         width: min(460px, 100%);
@@ -6844,7 +6830,7 @@
         return merged;
       }
 
-      const PRELOADED_SERVICES = mergePreloadedServices(PRELOADED_SERVICES_BASE, parseExtraPreloadedServices(EXTRA_PRELOADED_SERVICES_RAW));
+      const PRELOADED_SERVICES = [];
 
       const PROFILE_AVATAR_PRESETS = [
         { id: 'portrait-01', label: 'Avatar 1', silhouette: 'feminine', skin: '#f1c7a5', palette: { bg: '#fff1eb', body: '#d97706', hair: '#4a2c2a', accent: '#f59e0b', shirt: '#c2410c', shadow: '#7c2d12' }, hairStyle: 'waves', accessory: 'earrings' },
@@ -7667,10 +7653,7 @@
         return (
           <div className="login-shell">
             <div className="login-bg" aria-hidden="true">
-              <span className="login-bg-layer" />
-              <span className="login-bg-layer" />
-              <span className="login-bg-layer" />
-              <span className="login-bg-layer" />
+              <LoginParticleLayer />
             </div>
             <div className="login-stack">
               <div className="login-logo" aria-hidden="true" />
@@ -7694,14 +7677,133 @@
         );
       }
 
+      function LoginParticleLayer() {
+        const canvasRef = useRef(null);
+        const particlesRef = useRef([]);
+        const pointerRef = useRef({ x: -9999, y: -9999, active: false });
+        const animationRef = useRef(null);
+        const resizeRef = useRef(null);
+
+        useEffect(() => {
+          const canvas = canvasRef.current;
+          if (!canvas) return () => {};
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return () => {};
+
+          const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          const root = canvas.parentElement || canvas;
+          const DPR_MAX = 2;
+          const particleSpacing = 34;
+          const interactionRadius = 110;
+          const forceFactor = 6.2;
+          const easing = 0.14;
+          const damping = 0.8;
+          const maxOffset = 8;
+
+          function rebuildParticles() {
+            const rect = root.getBoundingClientRect();
+            const dpr = Math.min(window.devicePixelRatio || 1, DPR_MAX);
+            canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+            canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+            canvas.style.width = `${rect.width}px`;
+            canvas.style.height = `${rect.height}px`;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            const cols = Math.ceil(rect.width / particleSpacing);
+            const rows = Math.ceil(rect.height / particleSpacing);
+            const jitter = 6;
+            const list = [];
+            for (let row = 0; row <= rows; row += 1) {
+              for (let col = 0; col <= cols; col += 1) {
+                const bx = col * particleSpacing + 16 + (Math.random() - 0.5) * jitter;
+                const by = row * particleSpacing + 16 + (Math.random() - 0.5) * jitter;
+                list.push({
+                  bx,
+                  by,
+                  x: bx,
+                  y: by,
+                  vx: 0,
+                  vy: 0,
+                  r: 0.9 + Math.random() * 0.85,
+                  alpha: 0.2 + Math.random() * 0.32
+                });
+              }
+            }
+            particlesRef.current = list;
+          }
+
+          function draw() {
+            const rect = root.getBoundingClientRect();
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            const pointer = pointerRef.current;
+            const particles = particlesRef.current;
+            const hasPointer = pointer.active && !prefersReducedMotion;
+            for (let i = 0; i < particles.length; i += 1) {
+              const p = particles[i];
+              let tx = p.bx;
+              let ty = p.by;
+              if (hasPointer) {
+                const dx = p.bx - pointer.x;
+                const dy = p.by - pointer.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist < interactionRadius) {
+                  const influence = 1 - (dist / interactionRadius);
+                  const nx = dist > 0.0001 ? dx / dist : 0;
+                  const ny = dist > 0.0001 ? dy / dist : 0;
+                  tx += nx * influence * forceFactor;
+                  ty += ny * influence * forceFactor;
+                }
+              }
+
+              p.vx = (p.vx + (tx - p.x) * easing) * damping;
+              p.vy = (p.vy + (ty - p.y) * easing) * damping;
+              p.x += p.vx;
+              p.y += p.vy;
+              p.x = Math.max(p.bx - maxOffset, Math.min(p.bx + maxOffset, p.x));
+              p.y = Math.max(p.by - maxOffset, Math.min(p.by + maxOffset, p.y));
+
+              ctx.beginPath();
+              ctx.fillStyle = `rgba(179, 179, 179, ${p.alpha})`;
+              ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+              ctx.fill();
+            }
+            animationRef.current = window.requestAnimationFrame(draw);
+          }
+
+          function handlePointerMove(event) {
+            const rect = root.getBoundingClientRect();
+            pointerRef.current.x = event.clientX - rect.left;
+            pointerRef.current.y = event.clientY - rect.top;
+            pointerRef.current.active = true;
+          }
+
+          function handlePointerLeave() {
+            pointerRef.current.active = false;
+          }
+
+          rebuildParticles();
+          draw();
+          root.addEventListener('mousemove', handlePointerMove);
+          root.addEventListener('mouseleave', handlePointerLeave);
+          resizeRef.current = () => rebuildParticles();
+          window.addEventListener('resize', resizeRef.current);
+
+          return () => {
+            if (animationRef.current) window.cancelAnimationFrame(animationRef.current);
+            if (resizeRef.current) window.removeEventListener('resize', resizeRef.current);
+            root.removeEventListener('mousemove', handlePointerMove);
+            root.removeEventListener('mouseleave', handlePointerLeave);
+          };
+        }, []);
+
+        return <canvas className="login-particles-canvas" ref={canvasRef} aria-hidden="true" />;
+      }
+
       function LoadingScreen() {
         return (
           <div className="login-shell">
             <div className="login-bg" aria-hidden="true">
-              <span className="login-bg-layer" />
-              <span className="login-bg-layer" />
-              <span className="login-bg-layer" />
-              <span className="login-bg-layer" />
+              <LoginParticleLayer />
             </div>
             <div className="login-stack">
               <div className="login-logo" aria-hidden="true" />
@@ -8588,8 +8690,21 @@
         }
 
         const deferredSearchTerm = useDeferredValue(searchTerm);
+        const automaticCleanupRanRef = useRef(false);
 
-        const visibleRows = useMemo(() => rows.filter((r) => !r.estado_borrado), [rows]);
+        function shouldRemoveOperationalService(row = {}, docId = '') {
+          const normalizedStatus = normalizeLegacyStatusName(String(row?.status || row?.estado || '').trim()).toLowerCase();
+          const isFinalizado = normalizedStatus === 'finalizado' || normalizedStatus === 'completado';
+          const isCatalogRecord = Boolean(row?.origenCatalogo || row?.origenCatalogoMasivo || row?.origenCatalogoManual);
+          const isCatalogDocId = /^catalogo_/i.test(String(docId || row?.id || ''));
+          const isPrecargado = String(row?.estado || row?.status || '').trim().toLowerCase() === 'precargado';
+          return isFinalizado || isCatalogRecord || isCatalogDocId || isPrecargado;
+        }
+
+        const visibleRows = useMemo(
+          () => rows.filter((r) => !r.estado_borrado && !shouldRemoveOperationalService(r, r?.id)),
+          [rows]
+        );
 
         const filteredRows = useMemo(() => {
           const q = deferredSearchTerm.trim().toLowerCase();
@@ -8669,7 +8784,7 @@
         const [showManualCatalogForm, setShowManualCatalogForm] = useState(false);
         const [savingManualCatalogService, setSavingManualCatalogService] = useState(false);
         const [manualCatalogForm, setManualCatalogForm] = useState({ numero: '', nombreServicio: '', direccionServicio: '', tipoServicioBrindar: 'Monitoreo', representanteComercial: '', atencionCliente: '' });
-        const [bulkCatalogRawInput, setBulkCatalogRawInput] = useState(EXTRA_PRELOADED_SERVICES_RAW);
+        const [bulkCatalogRawInput, setBulkCatalogRawInput] = useState('');
         const [bulkCatalogSyncing, setBulkCatalogSyncing] = useState(false);
 
         function getStatusLabel(row) {
@@ -9650,6 +9765,40 @@
           );
           return () => unsub();
         }, [user]);
+
+        useEffect(() => {
+          if (!user || userRole !== 'admin' || automaticCleanupRanRef.current) return () => {};
+          automaticCleanupRanRef.current = true;
+          let cancelled = false;
+
+          async function cleanupServices() {
+            try {
+              const snap = await db.collection('operaciones').limit(2000).get();
+              const targets = snap.docs.filter((docSnap) => shouldRemoveOperationalService(docSnap.data() || {}, docSnap.id));
+              if (targets.length === 0) return;
+              const chunkSize = 400;
+              for (let i = 0; i < targets.length; i += chunkSize) {
+                const chunk = targets.slice(i, i + chunkSize);
+                const batch = db.batch();
+                chunk.forEach((docSnap) => batch.delete(docSnap.ref));
+                await batch.commit();
+              }
+              if (!cancelled) {
+                setNotificacion({ mensaje: `Limpieza automática aplicada: ${targets.length} servicios finalizados/precargados eliminados.`, tipo: 'ok' });
+              }
+            } catch (error) {
+              console.error('Error limpiando servicios finalizados/precargados:', error);
+              if (!cancelled) {
+                setNotificacion({ mensaje: 'No se pudo completar la limpieza automática de servicios finalizados/precargados.', tipo: 'error' });
+              }
+            }
+          }
+
+          void cleanupServices();
+          return () => {
+            cancelled = true;
+          };
+        }, [user, userRole]);
 
         useEffect(() => {
           const technicalScope = ((/tecnic/.test(userRole) || userArea === 'tecnica') && !String(userRole || '').includes('vendedor') && userRole !== 'admin');
@@ -13468,6 +13617,18 @@
                                 <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); openServiceDetailModal(row, 'informacion'); }}>Ver detalles</button>
                                 <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); openServiceDetailModal(row, 'historial'); }}>Ver historial</button>
                                 <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); openServiceDetailModal(row, 'tickets'); }}>Ver tickets</button>
+                                {isAdminUser && row?.id && (
+                                  <button
+                                    type="button"
+                                    className="service-card-action-btn danger"
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      setDeleteTargetService(row);
+                                    }}
+                                  >
+                                    Eliminar
+                                  </button>
+                                )}
                               </div>
                             </article>
                           );
