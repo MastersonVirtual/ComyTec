@@ -919,6 +919,56 @@
       @media (max-width: 620px) {
         .home-modern-stats { grid-template-columns: 1fr; }
       }
+      .tech-board-shell {
+        border-radius: 18px;
+        padding: 12px;
+        border: 1px solid rgba(230,255,253,.26);
+        background: linear-gradient(160deg, rgba(9, 37, 35, .9), rgba(9, 58, 54, .82));
+        box-shadow: 0 16px 34px rgba(0,0,0,.28);
+      }
+      .tech-board-scroll {
+        overflow-x: auto;
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: minmax(290px, 1fr);
+        gap: 10px;
+        padding-bottom: 4px;
+      }
+      .tech-lane {
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,.2);
+        background: rgba(8, 24, 23, .82);
+        min-height: 520px;
+        display: flex;
+        flex-direction: column;
+      }
+      .tech-lane-head {
+        padding: 8px 10px;
+        font-weight: 700;
+        font-size: 12px;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+        color: #fff;
+        border-bottom: 1px solid rgba(255,255,255,.2);
+      }
+      .tech-lane-head.green { background: linear-gradient(90deg, #2f7c2a, #2f9b36); }
+      .tech-lane-head.blue { background: linear-gradient(90deg, #1f4aa5, #2b69d3); }
+      .tech-lane-head.gold { background: linear-gradient(90deg, #98610e, #c28212); }
+      .tech-lane-head.cyan { background: linear-gradient(90deg, #146f80, #1d8ca0); }
+      .tech-lane-head.red { background: linear-gradient(90deg, #8d2020, #bc2b2b); }
+      .tech-lane-body { padding: 8px; overflow: auto; }
+      .tech-service-row {
+        border: 1px solid rgba(222,255,250,.2);
+        background: rgba(255,255,255,.04);
+        border-radius: 10px;
+        padding: 8px;
+        margin-bottom: 8px;
+        cursor: pointer;
+      }
+      .tech-service-row:hover { border-color: rgba(151,243,231,.7); background: rgba(255,255,255,.08); }
+      .tech-service-main { font-size: 12px; font-weight: 700; color: #f3fffd; margin-bottom: 6px; }
+      .tech-service-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px; font-size: 11px; color: #d3f0ec; }
+      .tech-service-meta b { color: #fff; font-weight: 600; }
 
       .kpi-grid {
         margin-top: 8px;
@@ -8240,6 +8290,23 @@
           );
         }, [visibleRows, deferredSearchTerm]);
 
+        const technicalBoardLanes = useMemo(() => {
+          const lanes = [
+            { key: 'nuevo', title: 'Nuevo Servicios', color: 'green', match: (row) => String(row?.tipoAccion || '').toLowerCase().includes('nuevo servicio') },
+            { key: 'novacion', title: 'Novación', color: 'blue', match: (row) => String(row?.tipoAccion || '').toLowerCase().includes('novación') || String(row?.tipoAccion || '').toLowerCase().includes('novacion') },
+            { key: 'obra', title: 'Obra', color: 'gold', match: (row) => String(row?.tipoAccion || '').toLowerCase() === 'obra' },
+            { key: 'agregado', title: 'Agregado', color: 'gold', match: (row) => String(row?.tipoAccion || '').toLowerCase().includes('adicional') },
+            { key: 'movimiento', title: 'Movimiento de Obra', color: 'cyan', match: (row) => String(row?.tipoAccion || '').toLowerCase().includes('movimiento') },
+            { key: 'baja', title: 'Baja de Servicio', color: 'red', match: (row) => String(row?.tipoAccion || '').toLowerCase().includes('baja') },
+          ];
+          return lanes.map((lane) => ({
+            ...lane,
+            items: visibleRows
+              .filter((row) => lane.match(row))
+              .sort((a, b) => String(a.nombreServicio || '').localeCompare(String(b.nombreServicio || ''))),
+          }));
+        }, [visibleRows]);
+
         const [activeKpi, setActiveKpi] = useState(null);
         const [selectedCommercial, setSelectedCommercial] = useState('');
         const [historySearchTerm, setHistorySearchTerm] = useState('');
@@ -12656,80 +12723,108 @@
                   <DashboardTecnica rows={visibleRows} onGoToDetalle={() => setSelectedForm('historial')} />
                 ) : effectiveSelectedForm === 'home' ? (
                   <>
-                    <section className="home-modern-shell">
-                      <article className="home-modern-hero">
-                        <div>
-                          <div className="home-modern-badge">Plataforma operativa · Masterson Seguridad</div>
-                          <h2>Centro de control técnico y comercial</h2>
-                          <p>Gestioná servicios, seguimientos y tickets desde una única pantalla más clara, moderna y rápida de operar.</p>
-                          <div className="home-modern-actions">
-                            <button type="button" className="home-modern-action-btn primary" onClick={() => selectAction('Nuevo Servicio')}>+ Nuevo servicio</button>
-                            <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('historial')}>Ver historial</button>
-                            <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('tickets')}>Abrir tickets</button>
-                          </div>
-                        </div>
-                        <div className="home-modern-user">
-                          <img className="home-modern-avatar" src={selectedProfileAvatar.src} alt={`Ícono de perfil ${selectedProfileAvatar.label}`} />
-                          <div>
-                            <strong>{currentUserName || 'Usuario'}</strong>
-                            <small>{topbarSubtitle || 'Área operativa'}</small>
-                            <small>{resolveWelcomeTasksCount(upcomingInstallations)} tareas programadas para hoy</small>
-                          </div>
-                        </div>
-                      </article>
-
-                      <div className="home-modern-stats">
-                        <article className="home-modern-stat-card"><small>Servicios activos</small><strong>{kpiStats.active}</strong></article>
-                        <article className="home-modern-stat-card"><small>Servicios de baja</small><strong>{kpiStats.baja}</strong></article>
-                        <article className="home-modern-stat-card"><small>Actividad reciente</small><strong>{recentActivity.length}</strong></article>
-                        <article className="home-modern-stat-card"><small>Instalaciones próximas</small><strong>{upcomingInstallations.length}</strong></article>
-                      </div>
-
-                      <div className="home-modern-panels">
-                        <article className="home-modern-panel">
-                          <h3>Actividad reciente</h3>
-                          <div className="home-modern-list home-modern-timeline">
-                            {recentActivity.length === 0 ? (
-                              <div className="dashboard-info-empty">Sin actividad reciente disponible.</div>
-                            ) : recentActivity.slice(0, 8).map((item) => (
-                              <div key={`activity-${item.id}`} className="home-modern-list-item">
-                                <small>{item.dateLabel}</small>
-                                <b>{item.message}</b>
+                    {isTechnicalOnly ? (
+                      <section className="tech-board-shell">
+                        <div className="home-modern-badge" style={{ marginBottom: 8 }}>Logística · Vista técnica de servicios</div>
+                        <div className="tech-board-scroll">
+                          {technicalBoardLanes.map((lane) => (
+                            <article key={`tech-lane-${lane.key}`} className="tech-lane">
+                              <header className={`tech-lane-head ${lane.color}`}>{lane.title}</header>
+                              <div className="tech-lane-body">
+                                {lane.items.length === 0 ? (
+                                  <div className="hint">Sin servicios en esta columna.</div>
+                                ) : lane.items.map((row) => (
+                                  <div key={`tech-row-${lane.key}-${row.id}`} className="tech-service-row" onClick={() => openServiceDetailModal(row, 'informacion')}>
+                                    <div className="tech-service-main">{row.nombreServicio || row.cliente || 'Servicio sin nombre'}</div>
+                                    <div className="tech-service-meta">
+                                      <div><b>Fecha de cargo:</b> {row.fechaIngresoDatos || row.fechaCarga || '-'}</div>
+                                      <div><b>Tiempo instalación:</b> {row.tiempoInstalacion || row.cantidadDiasInstalacion || row.plazoInstalacionDiasFecha || '-'}</div>
+                                      <div><b>Status:</b> <span className={statusClass(row.status || row.estado)}>{row.status || row.estado || 'Pendiente'}</span></div>
+                                      <div><b>Fecha de alta:</b> {row.fechaAltaServicio || row.fechaAlta || row.fechaEspecificaInicio || '-'}</div>
+                                    </div>
+                                  </div>
+                                ))}
                               </div>
-                            ))}
-                          </div>
-                        </article>
-                        <article className="home-modern-panel">
-                          <h3>Panel operativo</h3>
-                          <div className="home-modern-widget-col">
-                            <div className="home-modern-widget">
-                              <strong>Instalaciones próximas</strong>
-                              <small>{upcomingInstallations.length} programadas para seguimiento.</small>
-                            </div>
-                            <div className="home-modern-widget">
-                              <strong>Alertas</strong>
-                              <small>{recentActivity.length} eventos recientes para revisar.</small>
-                            </div>
-                            <div className="home-modern-widget">
-                              <strong>Tareas pendientes</strong>
-                              <small className="ok">{kpiStats.pending} tareas en cola operativa.</small>
+                            </article>
+                          ))}
+                        </div>
+                      </section>
+                    ) : (
+                      <section className="home-modern-shell">
+                        <article className="home-modern-hero">
+                          <div>
+                            <div className="home-modern-badge">Plataforma operativa · Masterson Seguridad</div>
+                            <h2>Centro de control técnico y comercial</h2>
+                            <p>Gestioná servicios, seguimientos y tickets desde una única pantalla más clara, moderna y rápida de operar.</p>
+                            <div className="home-modern-actions">
+                              <button type="button" className="home-modern-action-btn primary" onClick={() => selectAction('Nuevo Servicio')}>+ Nuevo servicio</button>
+                              <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('historial')}>Ver historial</button>
+                              <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('tickets')}>Abrir tickets</button>
                             </div>
                           </div>
-                        </article>
-                      </div>
-                      <div className="home-modern-bottom">
-                        <article className="home-modern-chart">
-                          <h3>Tendencia de actividad</h3>
-                          <div className="home-chart-line" />
-                        </article>
-                        <article className="home-modern-chart">
-                          <h3>Distribución operativa</h3>
-                          <div className="home-chart-bars">
-                            <span /><span /><span /><span /><span /><span />
+                          <div className="home-modern-user">
+                            <img className="home-modern-avatar" src={selectedProfileAvatar.src} alt={`Ícono de perfil ${selectedProfileAvatar.label}`} />
+                            <div>
+                              <strong>{currentUserName || 'Usuario'}</strong>
+                              <small>{topbarSubtitle || 'Área operativa'}</small>
+                              <small>{resolveWelcomeTasksCount(upcomingInstallations)} tareas programadas para hoy</small>
+                            </div>
                           </div>
                         </article>
-                      </div>
-                    </section>
+
+                        <div className="home-modern-stats">
+                          <article className="home-modern-stat-card"><small>Servicios activos</small><strong>{kpiStats.active}</strong></article>
+                          <article className="home-modern-stat-card"><small>Servicios de baja</small><strong>{kpiStats.baja}</strong></article>
+                          <article className="home-modern-stat-card"><small>Actividad reciente</small><strong>{recentActivity.length}</strong></article>
+                          <article className="home-modern-stat-card"><small>Instalaciones próximas</small><strong>{upcomingInstallations.length}</strong></article>
+                        </div>
+
+                        <div className="home-modern-panels">
+                          <article className="home-modern-panel">
+                            <h3>Actividad reciente</h3>
+                            <div className="home-modern-list home-modern-timeline">
+                              {recentActivity.length === 0 ? (
+                                <div className="dashboard-info-empty">Sin actividad reciente disponible.</div>
+                              ) : recentActivity.slice(0, 8).map((item) => (
+                                <div key={`activity-${item.id}`} className="home-modern-list-item">
+                                  <small>{item.dateLabel}</small>
+                                  <b>{item.message}</b>
+                                </div>
+                              ))}
+                            </div>
+                          </article>
+                          <article className="home-modern-panel">
+                            <h3>Panel operativo</h3>
+                            <div className="home-modern-widget-col">
+                              <div className="home-modern-widget">
+                                <strong>Instalaciones próximas</strong>
+                                <small>{upcomingInstallations.length} programadas para seguimiento.</small>
+                              </div>
+                              <div className="home-modern-widget">
+                                <strong>Alertas</strong>
+                                <small>{recentActivity.length} eventos recientes para revisar.</small>
+                              </div>
+                              <div className="home-modern-widget">
+                                <strong>Tareas pendientes</strong>
+                                <small className="ok">{kpiStats.pending} tareas en cola operativa.</small>
+                              </div>
+                            </div>
+                          </article>
+                        </div>
+                        <div className="home-modern-bottom">
+                          <article className="home-modern-chart">
+                            <h3>Tendencia de actividad</h3>
+                            <div className="home-chart-line" />
+                          </article>
+                          <article className="home-modern-chart">
+                            <h3>Distribución operativa</h3>
+                            <div className="home-chart-bars">
+                              <span /><span /><span /><span /><span /><span />
+                            </div>
+                          </article>
+                        </div>
+                      </section>
+                    )}
                   </>
 
                 ) : effectiveSelectedForm === 'ranking-comercial' ? (
