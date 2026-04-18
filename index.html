@@ -8410,6 +8410,8 @@
         const [fabOpen, setFabOpen] = useState(false);
         const [deleteTargetService, setDeleteTargetService] = useState(null);
         const [deletingService, setDeletingService] = useState(false);
+        const [deletingAllServices, setDeletingAllServices] = useState(false);
+        const [hidePreloadedCatalog, setHidePreloadedCatalog] = useState(false);
         const [showClientViewModal, setShowClientViewModal] = useState(false);
         const [clientOperationId, setClientOperationId] = useState('');
         const [profileUserRequest, setProfileUserRequest] = useState('');
@@ -8613,6 +8615,8 @@
         const [historyDetailModalOpen, setHistoryDetailModalOpen] = useState(false);
         const [workflowTaskChecks, setWorkflowTaskChecks] = useState({});
         const [workflowTransitionDrafts, setWorkflowTransitionDrafts] = useState({});
+        const [approvalActionInProgress, setApprovalActionInProgress] = useState('');
+        const [installationSaveInProgress, setInstallationSaveInProgress] = useState('');
         const [opsSideTab, setOpsSideTab] = useState('activity');
         const [opsCommentDraft, setOpsCommentDraft] = useState('');
         const [opsObservationsOpen, setOpsObservationsOpen] = useState(false);
@@ -8790,10 +8794,25 @@
           const currentStage = normalizeWorkflowStage(service.workflowStage) || 'Pendiente de aprobación – Coordinación de Instalaciones';
           const nextOptions = GNS_WORKFLOW_TRANSITIONS[currentStage] || [];
           const existingInstallTasks = service.workflowInstallTasks || {};
+          const existingTaskMeta = service.workflowInstallTaskMeta || {};
+          const existingPlan = service.workflowInstallationPlan || {};
           return {
             nextStage: nextOptions[0] || '',
             note: '',
             installTasks: INSTALLATION_REQUIRED_TASKS.reduce((acc, task) => ({ ...acc, [task.key]: !!existingInstallTasks[task.key] }), {}),
+            installTaskMeta: INSTALLATION_REQUIRED_TASKS.reduce((acc, task) => ({
+              ...acc,
+              [task.key]: {
+                responsable: String(existingTaskMeta?.[task.key]?.responsable || '').trim(),
+                fechaObjetivo: String(existingTaskMeta?.[task.key]?.fechaObjetivo || '').trim(),
+                comentario: String(existingTaskMeta?.[task.key]?.comentario || '').trim(),
+              },
+            }), {}),
+            installationPlan: {
+              fechaInicioObjetivo: String(existingPlan?.fechaInicioObjetivo || '').trim(),
+              fechaAltaObjetivo: String(existingPlan?.fechaAltaObjetivo || '').trim(),
+              tecnicoLider: String(existingPlan?.tecnicoLider || '').trim(),
+            },
             rejectionReason: String(service.workflowRejectionReason || '').trim(),
             clientRecordCompleted: !!service.workflowClientRecordCompleted,
           };
@@ -8984,6 +9003,7 @@
         }, [visibleRows]);
 
         const preloadedHistoryRows = useMemo(() => {
+          if (hidePreloadedCatalog) return [];
           const existingIds = new Set(visibleRows.map((r) => normalizeServiceId(r?.clienteId)).filter(Boolean));
           return PRELOADED_SERVICES
             .filter((s) => !existingIds.has(normalizeServiceId(s.numero)))
@@ -9001,7 +9021,7 @@
               origenCatalogo: true,
               fechaAltaServicio: SERVICE_DATE_OVERRIDES.get(normalizeServiceId(s.numero)) || '',
             }));
-        }, [visibleRows]);
+        }, [visibleRows, hidePreloadedCatalog]);
 
         const historySourceRows = useMemo(() => ([...visibleRows, ...preloadedHistoryRows]), [visibleRows, preloadedHistoryRows]);
 
@@ -9247,6 +9267,12 @@
               }, { merge: true });
             });
             await batch.commit();
+            await db.collection('configuracion_sistema').doc('catalogo_preload').set({
+              ocultarEnHistorial: false,
+              actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+              actualizadoPor: currentUserName,
+            }, { merge: true });
+            setHidePreloadedCatalog(false);
             setNotificacion({ mensaje: `Se sincronizaron ${pending.length} servicios precargados en Firebase.`, tipo: 'ok' });
           } catch (error) {
             console.error('Error sincronizando catálogo precargado:', error);
@@ -9978,6 +10004,21 @@
         }, [user]);
 
         useEffect(() => {
+          if (!user) {
+            setHidePreloadedCatalog(false);
+            return () => {};
+          }
+          const ref = db.collection('configuracion_sistema').doc('catalogo_preload');
+          const unsub = ref.onSnapshot((doc) => {
+            const data = doc.data() || {};
+            setHidePreloadedCatalog(!!data.ocultarEnHistorial);
+          }, (error) => {
+            console.error('Error leyendo configuración de catálogo preload:', error);
+          });
+          return () => unsub();
+        }, [user]);
+
+        useEffect(() => {
           if (!user?.uid && !user?.email) {
             setInternalMessages([]);
             setInternalNotifications([]);
@@ -10094,6 +10135,36 @@
         ), [pendingProfileAvatarId, selectedProfileAvatar]);
 
         const allNotifications = useMemo(() => {
+          const contractExpiryItems = isAdminUser ? rows
+            .filter((service) => {
+              const stage = normalizeWorkflowStage(service?.workflowStage || '');
+              if (stage !== 'Activo') return false;
+              const durationMonths = Number(service?.duracionContratoMeses || service?.duracionNuevoContratoMeses || 0);
+              if (!Number.isFinite(durationMonths) || durationMonths <= 0) return false;
+              const startDate = parseServiceDate(service?.fechaAltaServicio || service?.fechaAlta || service?.fechaEspecificaInicio || '');
+              if (!startDate) return false;
+              const expiryDate = new Date(startDate);
+              expiryDate.setMonth(expiryDate.getMonth() + durationMonths);
+              const daysLeft = Math.ceil((expiryDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+              return daysLeft >= 0 && daysLeft <= 45;
+            })
+            .map((service) => {
+              const durationMonths = Number(service?.duracionContratoMeses || service?.duracionNuevoContratoMeses || 0);
+              const startDate = parseServiceDate(service?.fechaAltaServicio || service?.fechaAlta || service?.fechaEspecificaInicio || '');
+              const expiryDate = new Date(startDate);
+              expiryDate.setMonth(expiryDate.getMonth() + durationMonths);
+              const daysLeft = Math.max(0, Math.ceil((expiryDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000)));
+              return {
+                id: `contract-expiry-${service.id}`,
+                source: 'vencimiento',
+                title: 'Contrato por caducar',
+                status: `${service.nombreServicio || service.razonSocial || service.clienteId || 'Servicio'} vence en ${daysLeft} día${daysLeft === 1 ? '' : 's'}.`,
+                createdAt: { seconds: Math.floor(expiryDate.getTime() / 1000) },
+                raw: { ...service, contractDaysLeft: daysLeft, contractExpiryDate: expiryDate.toISOString() },
+                read: false,
+              };
+            })
+            : [];
           const credentialItems = userRole === 'admin'
             ? adminCredentialRequests.map((req) => ({
                 id: `cred-${req.id}`,
@@ -10108,18 +10179,18 @@
           const internalItems = internalNotifications.map((item) => ({
             id: `internal-${item.id}`,
             source: 'interna',
-            title: getChatTitleForMessage(item, staffMembers),
-            status: item.mensaje || '',
+            title: getInternalNotificationSummary(item).title,
+            status: getInternalNotificationSummary(item).status,
             createdAt: item.creadoEn,
             raw: item,
-            read: !!item.leida,
-          }));
-          return [...credentialItems, ...internalItems].sort((a, b) => {
+              read: !!item.leida,
+            }));
+          return [...contractExpiryItems, ...credentialItems, ...internalItems].sort((a, b) => {
             const av = a?.createdAt?.seconds || 0;
             const bv = b?.createdAt?.seconds || 0;
             return bv - av;
           });
-        }, [adminCredentialRequests, internalNotifications, userRole, staffMembers]);
+        }, [adminCredentialRequests, internalNotifications, userRole, staffMembers, isAdminUser, rows]);
         const staffAreaOptions = useMemo(() => {
           const labels = Array.from(new Set(staffMembers.map((member) => normalizeAreaLabel(member.area || 'Sin área'))));
           return ['todas', ...labels];
@@ -10221,6 +10292,7 @@
         const CHAT_EMOJIS = ['😀', '😄', '😁', '😅', '😂', '😊', '😍', '🤩', '😎', '🤔', '😮', '😴', '👍', '👏', '🙌', '🙏', '🔥', '💡', '📌', '✅', '❗', '🎉', '💬', '🤝'];
         const isTicketManager = String(user?.email || '').trim().toLowerCase() === 'alfonso332estigarribia@gmail.com';
         const isAdminUser = userRole === 'admin';
+        const unreadBellCount = useMemo(() => allNotifications.filter((item) => !item?.read).length, [allNotifications]);
         const mobileUnreadAlerts = useMemo(() => mobileAlerts.filter((a) => !a.read).length, [mobileAlerts]);
         const adminPendingRequests = useMemo(() => adminCredentialRequests.filter((r) => r?.estado === 'pendiente'), [adminCredentialRequests]);
         const adminUnreadCount = useMemo(() => adminPendingRequests.filter((r) => !r?.leidaPorAdmin).length, [adminPendingRequests]);
@@ -10736,36 +10808,73 @@
           }
           setDeletingService(true);
           try {
-            const nowLabel = formatUruguayDateTime();
-            const logsActuales = Array.isArray(deleteTargetService.logs_cambios) ? deleteTargetService.logs_cambios : [];
-            const nuevoLog = {
-              fecha: new Date().toISOString(),
-              usuario: currentUserName,
-              accion: `Eliminación solicitada por ${currentUserName} el ${nowLabel}`,
-            };
-
-            await db.collection('operaciones').doc(deleteTargetService.id).set({
-              estado_borrado: true,
-              fecha_solicitud_borrado: firebase.firestore.FieldValue.serverTimestamp(),
-              logs_cambios: [...logsActuales, nuevoLog],
-              editadoPor: currentUserName,
-              actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
-            }, { merge: true });
-
-            setNotificacion({ mensaje: '✔ Servicio ocultado y marcado para eliminación diferida', tipo: 'ok' });
+            await db.collection('operaciones').doc(deleteTargetService.id).delete();
+            setRows((prev) => prev.filter((row) => row.id !== deleteTargetService.id));
+            setNotificacion({ mensaje: '✔ Servicio eliminado definitivamente', tipo: 'ok' });
             void logRealtimeActivityEvent({
               usuario: currentUserName,
-              accion: 'registró baja del servicio',
+              accion: 'eliminó servicio',
               clienteId: deleteTargetService?.clienteId || '',
             });
             if (selectedService?.id === deleteTargetService.id) setSelectedService(null);
             if (editingServiceId === deleteTargetService.id) resetFields();
           } catch (error) {
-            console.error('Error solicitando borrado:', error);
-            setNotificacion({ mensaje: '✖ Error al solicitar borrado', tipo: 'error' });
+            console.error('Error eliminando servicio:', error);
+            setNotificacion({ mensaje: '✖ Error al eliminar servicio', tipo: 'error' });
           } finally {
             setDeletingService(false);
             setDeleteTargetService(null);
+          }
+        }
+
+        async function handleDeleteAllServicesConfirm() {
+          if (!isAdminUser || deletingAllServices) return;
+          const password = window.prompt('Para eliminar TODO el historial de servicios, ingresá la clave de seguridad:');
+          if (password === null) return;
+          if (String(password).trim() !== '332112') {
+            setNotificacion({ mensaje: '✖ Clave incorrecta. No se eliminó ningún servicio.', tipo: 'error' });
+            return;
+          }
+          const confirmed = window.confirm('¿Confirmás la eliminación TOTAL de servicios? Esta acción es irreversible.');
+          if (!confirmed) return;
+          setDeletingAllServices(true);
+          try {
+            const snapshot = await db.collection('operaciones').get();
+            const docs = snapshot.docs || [];
+            if (docs.length > 0) {
+              for (let i = 0; i < docs.length; i += 400) {
+                const chunk = docs.slice(i, i + 400);
+                const batch = db.batch();
+                chunk.forEach((doc) => batch.delete(doc.ref));
+                await batch.commit();
+              }
+            }
+            await db.collection('configuracion_sistema').doc('catalogo_preload').set({
+              ocultarEnHistorial: true,
+              actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+              actualizadoPor: currentUserName,
+            }, { merge: true });
+            setHidePreloadedCatalog(true);
+            setRows([]);
+            setSelectedService(null);
+            setHistoryDetailModalOpen(false);
+            const preloadedCount = preloadedHistoryRows.length;
+            const totalRemoved = docs.length + preloadedCount;
+            if (totalRemoved > 0) {
+              setNotificacion({ mensaje: `✔ Se eliminaron/ocultaron ${totalRemoved} servicios del historial.`, tipo: 'ok' });
+            } else {
+              setNotificacion({ mensaje: 'No hay servicios para eliminar.', tipo: 'warn' });
+            }
+            void logRealtimeActivityEvent({
+              usuario: currentUserName,
+              accion: `eliminó todo el historial de servicios (${totalRemoved})`,
+              clienteId: '',
+            });
+          } catch (error) {
+            console.error('Error eliminando todo el historial de servicios:', error);
+            setNotificacion({ mensaje: '✖ No se pudo eliminar todo el historial.', tipo: 'error' });
+          } finally {
+            setDeletingAllServices(false);
           }
         }
 
@@ -10872,6 +10981,116 @@
           } catch (error) {
             console.error('Error actualizando workflow:', error);
             setNotificacion({ mensaje: '✖ No se pudo actualizar la etapa del workflow.', tipo: 'error' });
+          }
+        }
+
+        async function handleCommercialServiceApproval(service, action) {
+          if (!service?.id) return;
+          const normalizedAction = action === 'approve' ? 'approve' : 'reject';
+          const canApproveOrReject = isAdminUser || isTechnicalUser || isCoordinationUser;
+          if (!canApproveOrReject) {
+            setNotificacion({ mensaje: 'Solo Técnica, Coordinación o Admin pueden aprobar/rechazar nuevos servicios.', tipo: 'warn' });
+            return;
+          }
+          const currentStage = normalizeWorkflowStage(service.workflowStage) || 'Pendiente de aprobación – Coordinación de Instalaciones';
+          if (currentStage !== 'Pendiente de aprobación – Coordinación de Instalaciones') {
+            setNotificacion({ mensaje: 'Este servicio ya fue procesado en la instancia de aprobación inicial.', tipo: 'warn' });
+            return;
+          }
+          const isNewService = String(service.tipoAccion || '').trim() === 'Nuevo Servicio'
+            || String(service.formulario || '').trim() === 'nuevo-servicio-optimizado';
+          if (!isNewService) {
+            setNotificacion({ mensaje: 'La aprobación manual aplica solo para nuevos servicios.', tipo: 'warn' });
+            return;
+          }
+          const draft = workflowTransitionDrafts[service.id] || getWorkflowDraftDefaults(service);
+          const rejectionReason = String(draft.rejectionReason || '').trim();
+          if (normalizedAction === 'reject' && !rejectionReason) {
+            setNotificacion({ mensaje: 'Para rechazar, indicá un motivo para Comercial.', tipo: 'warn' });
+            return;
+          }
+          const nextStage = normalizedAction === 'approve' ? 'En proceso de instalación' : 'Rechazado';
+          const note = normalizedAction === 'approve'
+            ? (draft.note || 'Aprobación inicial de nuevo servicio')
+            : (draft.note || `Rechazo inicial: ${rejectionReason}`);
+          const workflowEvent = createWorkflowEvent({
+            from: currentStage,
+            to: nextStage,
+            note,
+            actor: currentUserName,
+          });
+          const existingTimeline = Array.isArray(service.workflowTimeline) ? service.workflowTimeline : [];
+          const payload = {
+            workflowStage: nextStage,
+            workflowAvailableNextStages: GNS_WORKFLOW_TRANSITIONS[nextStage] || [],
+            workflowTimeline: [...existingTimeline, workflowEvent],
+            workflowRejectionReason: normalizedAction === 'reject' ? rejectionReason : '',
+            workflowCurrentOwner: normalizedAction === 'reject' ? 'Comercial' : 'Operaciones',
+            status: stageToOperationalStatus(nextStage),
+            estado: stageToOperationalStatus(nextStage),
+            actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+            editadoPor: currentUserName,
+          };
+          try {
+            setApprovalActionInProgress(`${service.id}:${normalizedAction}`);
+            await db.collection('operaciones').doc(service.id).set(payload, { merge: true });
+            setRows((prev) => prev.map((row) => row.id === service.id ? { ...row, ...payload, actualizadoEn: new Date() } : row));
+            setSelectedService((prev) => (prev?.id === service.id ? { ...prev, ...payload, actualizadoEn: new Date() } : prev));
+            setNotificacion({
+              mensaje: normalizedAction === 'approve'
+                ? '✔ Servicio aprobado y derivado a Operaciones.'
+                : '✔ Servicio rechazado y devuelto a Comercial.',
+              tipo: 'ok',
+            });
+            try {
+              await notifyCommercialDecision(service, normalizedAction === 'approve', rejectionReason);
+            } catch (notificationError) {
+              console.error('No se pudo notificar a Comercial sobre la decisión:', notificationError);
+            }
+            void logRealtimeActivityEvent({
+              usuario: currentUserName,
+              accion: normalizedAction === 'approve' ? 'aprobó nuevo servicio' : 'rechazó nuevo servicio',
+              clienteId: service.clienteId || '',
+              detalle: normalizedAction === 'reject' ? rejectionReason : (draft.note || ''),
+            });
+          } catch (error) {
+            console.error('Error aplicando aprobación inicial:', error);
+            setNotificacion({ mensaje: '✖ No se pudo registrar la aprobación/rechazo inicial.', tipo: 'error' });
+          } finally {
+            setApprovalActionInProgress('');
+          }
+        }
+
+        async function handleSaveInstallationManagement(service) {
+          if (!service?.id) return;
+          const currentStage = normalizeWorkflowStage(service.workflowStage) || '';
+          if (currentStage !== 'En proceso de instalación') {
+            setNotificacion({ mensaje: 'La gestión técnica de instalación solo está disponible en la etapa "En proceso de instalación".', tipo: 'warn' });
+            return;
+          }
+          if (!(isAdminUser || isTechnicalUser || isCoordinationUser)) {
+            setNotificacion({ mensaje: 'Solo Técnica, Coordinación o Admin pueden gestionar la instalación.', tipo: 'warn' });
+            return;
+          }
+          const draft = workflowTransitionDrafts[service.id] || getWorkflowDraftDefaults(service);
+          const payload = {
+            workflowInstallTasks: draft.installTasks || {},
+            workflowInstallTaskMeta: draft.installTaskMeta || {},
+            workflowInstallationPlan: draft.installationPlan || {},
+            actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+            editadoPor: currentUserName,
+          };
+          try {
+            setInstallationSaveInProgress(service.id);
+            await db.collection('operaciones').doc(service.id).set(payload, { merge: true });
+            setRows((prev) => prev.map((row) => row.id === service.id ? { ...row, ...payload, actualizadoEn: new Date() } : row));
+            setSelectedService((prev) => (prev?.id === service.id ? { ...prev, ...payload, actualizadoEn: new Date() } : prev));
+            setNotificacion({ mensaje: '✔ Gestión técnica de instalación guardada.', tipo: 'ok' });
+          } catch (error) {
+            console.error('Error guardando gestión técnica de instalación:', error);
+            setNotificacion({ mensaje: '✖ No se pudo guardar la gestión técnica.', tipo: 'error' });
+          } finally {
+            setInstallationSaveInProgress('');
           }
         }
 
@@ -11117,6 +11336,13 @@
               asignadoAEmail: createPayload.atencionCliente || '',
               asignadoANombre: createPayload.atencionCliente || '',
             });
+            if (tipoAccion === 'Nuevo Servicio') {
+              try {
+                await notifyNewServiceApprovalRequest(createdRef.id, createPayload);
+              } catch (notificationError) {
+                console.error('No se pudo enviar la notificación de aprobación inicial:', notificationError);
+              }
+            }
             resetFields();
             setNotificacion({ mensaje: `✔ Datos guardados correctamente (ticket ${createTicket})`, tipo: 'ok' });
             void logRealtimeActivityEvent({
@@ -11431,8 +11657,154 @@
           }) || null;
         }
 
+        function getInternalNotificationSummary(item = {}) {
+          const type = String(item?.tipo || '').trim().toLowerCase();
+          if (type === 'nuevo_servicio_aprobacion') {
+            const serviceName = String(item?.servicioNombre || item?.nombreServicio || '').trim();
+            const serviceId = String(item?.clienteId || '').trim();
+            return {
+              title: 'Nuevo servicio pendiente de aprobación',
+              status: `${serviceName || 'Servicio sin nombre'}${serviceId ? ` · ID ${serviceId}` : ''}`,
+            };
+          }
+          if (type === 'servicio_aprobado_comercial') {
+            const serviceName = String(item?.servicioNombre || item?.nombreServicio || '').trim();
+            return {
+              title: 'Servicio aprobado por Técnica/Admin',
+              status: `${serviceName || 'Servicio'} quedó aprobado y pasó a instalación.`,
+            };
+          }
+          if (type === 'servicio_rechazado_comercial') {
+            const serviceName = String(item?.servicioNombre || item?.nombreServicio || '').trim();
+            const reason = String(item?.motivoRechazo || item?.mensaje || '').trim();
+            return {
+              title: 'Servicio rechazado para corrección',
+              status: `${serviceName || 'Servicio'} requiere edición${reason ? ` · ${reason}` : ''}.`,
+            };
+          }
+          return {
+            title: getChatTitleForMessage(item, staffMembers),
+            status: item?.mensaje || '',
+          };
+        }
+
+        function openServiceFromNotification(raw = {}) {
+          const docId = String(raw?.servicioDocId || '').trim();
+          const clientId = normalizeServiceId(raw?.clienteId || '');
+          const target = rows.find((row) => {
+            if (!row) return false;
+            if (docId && String(row.id || '').trim() === docId) return true;
+            if (clientId && normalizeServiceId(row.clienteId || '') === clientId) return true;
+            return false;
+          });
+          if (!target) {
+            setNotificacion({ mensaje: 'No se encontró el servicio asociado a la notificación.', tipo: 'warn' });
+            setSelectedForm('historial');
+            return;
+          }
+          openServiceDetailModal(target, 'informacion');
+        }
+
+        async function notifyNewServiceApprovalRequest(serviceDocId, servicePayload = {}) {
+          const normalizedServiceId = normalizeServiceId(servicePayload.clienteId || '');
+          const serviceName = String(servicePayload.nombreServicio || servicePayload.razonSocial || '').trim() || 'Servicio sin nombre';
+          const usersSnap = await db.collection('config_usuarios').get();
+          const recipients = usersSnap.docs.map((doc) => ({ id: doc.id, ...(doc.data() || {}) }))
+            .filter((member) => {
+              const area = String(member.area || '').trim().toLowerCase();
+              const role = String(member.rol || member.role || '').trim().toLowerCase();
+              const cargo = String(member.cargo || '').trim().toLowerCase();
+              return area === 'tecnica'
+                || area === 'técnica'
+                || /admin/.test(role)
+                || /admin/.test(cargo)
+                || /tecnic|coord/.test(role)
+                || /tecnic|coord/.test(cargo);
+            }).filter((member) => {
+              const memberEmail = String(member.email || member.id || '').trim().toLowerCase();
+              const memberUid = String(member.uid || '').trim();
+              return !!(memberEmail || memberUid);
+            });
+          if (recipients.length === 0) return;
+          await Promise.all(recipients.map((member) => db.collection('notificaciones_internas').add({
+            tipo: 'nuevo_servicio_aprobacion',
+            titulo: 'Nuevo servicio pendiente de aprobación',
+            mensaje: `Comercial cargó un nuevo servicio: ${serviceName}${normalizedServiceId ? ` (ID ${normalizedServiceId})` : ''}.`,
+            servicioDocId: serviceDocId,
+            servicioNombre: serviceName,
+            clienteId: normalizedServiceId || '',
+            destinatarioUid: String(member.uid || '').trim(),
+            destinatarioEmail: String(member.email || member.id || '').trim().toLowerCase(),
+            remitenteUid: user?.uid || '',
+            remitenteEmail: user?.email || '',
+            remitenteNombre: currentUserName,
+            leida: false,
+            creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+          })));
+        }
+
+        async function notifyCommercialDecision(service = {}, approved = true, rejectionReason = '') {
+          const serviceDocId = String(service.id || '').trim();
+          const clientId = normalizeServiceId(service.clienteId || '');
+          const serviceName = String(service.nombreServicio || service.razonSocial || '').trim() || 'Servicio';
+          const usersSnap = await db.collection('config_usuarios').get();
+          const recipients = usersSnap.docs.map((doc) => ({ id: doc.id, ...(doc.data() || {}) }))
+            .filter((member) => {
+              const area = String(member.area || '').trim().toLowerCase();
+              const role = String(member.rol || member.role || '').trim().toLowerCase();
+              const cargo = String(member.cargo || '').trim().toLowerCase();
+              return area === 'comercial'
+                || /vendedor|comercial/.test(role)
+                || /vendedor|comercial/.test(cargo);
+            }).filter((member) => {
+              const memberEmail = String(member.email || member.id || '').trim().toLowerCase();
+              return !!memberEmail;
+            });
+          if (recipients.length === 0) return;
+          const type = approved ? 'servicio_aprobado_comercial' : 'servicio_rechazado_comercial';
+          const message = approved
+            ? `El nuevo servicio ${serviceName}${clientId ? ` (ID ${clientId})` : ''} fue aprobado por Técnica/Admin.`
+            : `El nuevo servicio ${serviceName}${clientId ? ` (ID ${clientId})` : ''} fue rechazado. Revisar y editar: ${String(rejectionReason || '').trim() || 'sin motivo detallado'}.`;
+          await Promise.all(recipients.map((member) => db.collection('notificaciones_internas').add({
+            tipo: type,
+            titulo: approved ? 'Servicio aprobado' : 'Servicio rechazado para edición',
+            mensaje: message,
+            motivoRechazo: approved ? '' : String(rejectionReason || '').trim(),
+            servicioDocId: serviceDocId,
+            servicioNombre: serviceName,
+            clienteId: clientId || '',
+            destinatarioUid: String(member.uid || '').trim(),
+            destinatarioEmail: String(member.email || member.id || '').trim().toLowerCase(),
+            remitenteUid: user?.uid || '',
+            remitenteEmail: user?.email || '',
+            remitenteNombre: currentUserName,
+            leida: false,
+            creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+          })));
+        }
+
         async function openNotificationsView(target = null) {
+          if (target?.source === 'vencimiento' && target?.raw) {
+            setDesktopBellOpen(false);
+            setMobileBellOpen(false);
+            closeSidebar();
+            setMobileTab('servicios');
+            setHistoryDetailTab('informacion');
+            openServiceDetailModal(target.raw, 'informacion');
+            return;
+          }
           const targetRaw = target?.raw || target || null;
+          const targetType = String(targetRaw?.tipo || '').trim().toLowerCase();
+          if (['nuevo_servicio_aprobacion', 'servicio_aprobado_comercial', 'servicio_rechazado_comercial'].includes(targetType)) {
+            setDesktopBellOpen(false);
+            setMobileBellOpen(false);
+            closeSidebar();
+            setMobileTab('servicios');
+            setHistoryDetailTab('informacion');
+            openServiceFromNotification(targetRaw);
+            await Promise.all([markAdminNotificationsAsRead(), markInternalNotificationsAsRead()]);
+            return;
+          }
           const relatedStaff = targetRaw ? getStaffMemberFromMessage(targetRaw) : null;
           setSelectedForm('notificaciones');
           setMobileTab('perfil');
@@ -12471,7 +12843,7 @@
                         <button className="topbar-action-btn" type="button" aria-label="Notificaciones" onClick={toggleDesktopNotifications}>
                           <span className="topbar-action-icon"><i data-lucide="bell" /></span>
                         </button>
-                        {(adminUnreadCount + internalNotifications.filter((item) => !item?.leida).length) > 0 && <span className="notify-badge">{(adminUnreadCount + internalNotifications.filter((item) => !item?.leida).length) > 99 ? '99+' : (adminUnreadCount + internalNotifications.filter((item) => !item?.leida).length)}</span>}
+                        {unreadBellCount > 0 && <span className="notify-badge">{unreadBellCount > 99 ? '99+' : unreadBellCount}</span>}
                         {desktopBellOpen && (
                           <div className="topbar-notify-popover" role="dialog" aria-label="Panel de notificaciones">
                             <div className="topbar-notify-arrow" aria-hidden="true" />
@@ -12483,7 +12855,13 @@
                                   <small>{item.status}</small>
                                   <small>{formatRequestDateTime(item.createdAt)}</small>
                                   <div className="topbar-notify-actions">
-                                    {item.source === 'interna' && <button type="button" className="topbar-notify-action" aria-label="Abrir chat" onClick={(e) => { e.stopPropagation(); openNotificationsView(item); openChatFromNotification(item); }}><i data-lucide="messages-square" /></button>}
+                                    {item.source === 'vencimiento' && (
+                                      <button type="button" className="topbar-notify-action" aria-label="Abrir servicio" onClick={(e) => { e.stopPropagation(); openNotificationsView(item); }}><i data-lucide="square-arrow-out-up-right" /></button>
+                                    )}
+                                    {item.source === 'interna' && ['nuevo_servicio_aprobacion', 'servicio_aprobado_comercial', 'servicio_rechazado_comercial'].includes(String(item.raw?.tipo || '').trim().toLowerCase()) && (
+                                      <button type="button" className="topbar-notify-action" aria-label="Abrir servicio" onClick={(e) => { e.stopPropagation(); openNotificationsView(item); }}><i data-lucide="square-arrow-out-up-right" /></button>
+                                    )}
+                                    {item.source === 'interna' && !['nuevo_servicio_aprobacion', 'servicio_aprobado_comercial', 'servicio_rechazado_comercial'].includes(String(item.raw?.tipo || '').trim().toLowerCase()) && <button type="button" className="topbar-notify-action" aria-label="Abrir chat" onClick={(e) => { e.stopPropagation(); openNotificationsView(item); openChatFromNotification(item); }}><i data-lucide="messages-square" /></button>}
                                     {item.source === 'credencial' && <button type="button" className="topbar-notify-action" aria-label="Eliminar notificación" onClick={(e) => { e.stopPropagation(); deleteNotificationRequest(item.raw); }}><i data-lucide="trash-2" /></button>}
                                   </div>
                                 </article>
@@ -12601,13 +12979,27 @@
                             </div>
                           )}
                         </article>
+                      ) : item.source === 'vencimiento' ? (
+                        <article className="profile-option" key={item.id}>
+                          <h3>{item.title}</h3>
+                          <div className="kv"><b>Servicio:</b> {item.raw?.nombreServicio || item.raw?.razonSocial || item.raw?.clienteId || '-'}</div>
+                          <div className="kv"><b>Alerta:</b> {item.status}</div>
+                          <div className="kv"><b>Vencimiento estimado:</b> {item.raw?.contractExpiryDate ? new Date(item.raw.contractExpiryDate).toLocaleDateString('es-UY') : '-'}</div>
+                          <div className="request-status-row">
+                            <button type="button" className="status-action-btn chat-action-btn" onClick={() => openNotificationsView(item)}>Ver servicio</button>
+                          </div>
+                        </article>
                       ) : (
                         <article className="profile-option" key={item.id}>
-                          <h3>{getChatTitleForMessage(item.raw, staffMembers)}</h3>
+                          <h3>{getInternalNotificationSummary(item.raw).title}</h3>
                           <div className="kv"><b>De:</b> {item.raw.remitenteNombre || item.raw.remitenteEmail || 'Usuario'}</div>
-                          <div className="kv"><b>Mensaje:</b> {item.raw.mensaje || '-'}</div>
+                          <div className="kv"><b>Mensaje:</b> {getInternalNotificationSummary(item.raw).status || item.raw.mensaje || '-'}</div>
                           <div className="kv"><b>Recibido:</b> {formatRequestDateTime(item.raw.creadoEn)}</div>
-                          {getStaffMemberFromMessage(item.raw) && (
+                          {['nuevo_servicio_aprobacion', 'servicio_aprobado_comercial', 'servicio_rechazado_comercial'].includes(String(item.raw?.tipo || '').trim().toLowerCase()) ? (
+                            <div className="request-status-row">
+                              <button type="button" className="status-action-btn chat-action-btn" onClick={() => openServiceFromNotification(item.raw)}>Ver servicio</button>
+                            </div>
+                          ) : getStaffMemberFromMessage(item.raw) && (
                             <div className="request-status-row">
                               <button type="button" className="status-action-btn chat-action-btn" onClick={() => openChatFromNotification(item)}>Ver chat</button>
                             </div>
@@ -13421,7 +13813,19 @@
                         <h2 className="service-coord-title">Historial y base de datos de servicios</h2>
                         <p className="service-coord-subtitle">Vista visual por cards para coordinar más rápido estado, responsables y seguimiento.</p>
                       </div>
-                      <button type="button" className="service-coord-new-btn" onClick={() => selectAction('Nuevo Servicio')}>+ Nuevo servicio</button>
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                        {isAdminUser && (
+                          <button
+                            type="button"
+                            className="danger-btn"
+                            onClick={handleDeleteAllServicesConfirm}
+                            disabled={deletingAllServices}
+                          >
+                            {deletingAllServices ? 'Eliminando todo...' : 'Eliminar todo'}
+                          </button>
+                        )}
+                        <button type="button" className="service-coord-new-btn" onClick={() => selectAction('Nuevo Servicio')}>+ Nuevo servicio</button>
+                      </div>
                     </div>
 
                     <div className="service-coord-filters">
@@ -13468,6 +13872,7 @@
                                 <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); openServiceDetailModal(row, 'informacion'); }}>Ver detalles</button>
                                 <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); openServiceDetailModal(row, 'historial'); }}>Ver historial</button>
                                 <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); openServiceDetailModal(row, 'tickets'); }}>Ver tickets</button>
+                                {isAdminUser && <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); setDeleteTargetService(row); }}>Eliminar</button>}
                               </div>
                             </article>
                           );
@@ -14339,19 +14744,77 @@
                                 <div className="hint" style={{ marginBottom: 10 }}>
                                   Flujo: <b>Pendiente de aprobación</b> → <b>En proceso de instalación</b> → <b>Alta de Servicio en configuración</b> → <b>Activo</b>.
                                 </div>
-                                <div className="service-coord-detail-grid">
-                                  <div className="field">
-                                    <label>Siguiente etapa</label>
-                                    <select value={workflowDraft.nextStage || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { nextStage: e.target.value })}>
-                                      <option value="">Seleccionar...</option>
-                                      {detailWorkflowNextOptions.map((stage) => <option key={`wf-next-${detailService.id}-${stage}`} value={stage}>{stage}</option>)}
-                                    </select>
-                                  </div>
-                                  <div className="field">
-                                    <label>Nota de transición</label>
-                                    <input value={workflowDraft.note || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { note: e.target.value })} type="text" placeholder="Observación (opcional)" />
-                                  </div>
-                                </div>
+                                {detailWorkflowStage === 'Pendiente de aprobación – Coordinación de Instalaciones'
+                                  && (String(detailService.tipoAccion || '').trim() === 'Nuevo Servicio' || String(detailService.formulario || '').trim() === 'nuevo-servicio-optimizado') ? (
+                                    <>
+                                      <div className="hint" style={{ marginBottom: 10 }}>
+                                        Revisá los datos cargados por Comercial y luego definí la aprobación inicial del servicio.
+                                      </div>
+                                      <div className="service-coord-detail-card" style={{ marginBottom: 10 }}>
+                                        <h4 style={{ margin: '0 0 8px 0' }}>Resumen del alta cargada por Comercial</h4>
+                                        <div className="service-coord-detail-grid">
+                                          <div className="service-detail-kpi"><small>🏢 Razón social</small><strong>{detailService.razonSocial || '-'}</strong></div>
+                                          <div className="service-detail-kpi"><small>🧾 RUT</small><strong>{detailService.rut || '-'}</strong></div>
+                                          <div className="service-detail-kpi"><small>📧 Mail facturación</small><strong>{detailService.mailFacturacion || '-'}</strong></div>
+                                          <div className="service-detail-kpi"><small>🔑 Estado de llaves</small><strong>{detailService.llavesServicio || '-'}</strong></div>
+                                          <div className="service-detail-kpi"><small>🧑‍💼 Atención cliente</small><strong>{detailService.atencionCliente || '-'}</strong></div>
+                                          <div className="service-detail-kpi"><small>🧷 Tipo alta</small><strong>{normalizeServiceEntityType(detailService.tipoAltaServicio)}</strong></div>
+                                          <div className="service-detail-kpi"><small>📆 Fecha alta negociada</small><strong>{detailService.fechaAltaServicio || '-'}</strong></div>
+                                          <div className="service-detail-kpi"><small>🛠️ Días instalación</small><strong>{detailService.diasInstalacion || '-'}</strong></div>
+                                          <div className="service-detail-kpi" style={{ gridColumn: '1 / -1' }}><small>📝 Observaciones comercial</small><strong>{detailService.observacionesComentarios || '-'}</strong></div>
+                                        </div>
+                                      </div>
+                                      <div className="field" style={{ marginBottom: 10 }}>
+                                        <label>Observación de revisión (opcional)</label>
+                                        <input
+                                          value={workflowDraft.note || ''}
+                                          onChange={(e) => setWorkflowTransitionDraft(detailService.id, { note: e.target.value })}
+                                          type="text"
+                                          placeholder="Ej: datos completos, listo para instalación."
+                                        />
+                                      </div>
+                                      <div className="field" style={{ marginBottom: 10 }}>
+                                        <label>Motivo de rechazo (obligatorio para rechazar)</label>
+                                        <textarea
+                                          value={workflowDraft.rejectionReason || ''}
+                                          onChange={(e) => setWorkflowTransitionDraft(detailService.id, { rejectionReason: e.target.value })}
+                                          placeholder="Detallar qué debe corregir Comercial."
+                                        />
+                                      </div>
+                                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, flexWrap: 'wrap' }}>
+                                        <button
+                                          type="button"
+                                          className="danger-btn"
+                                          onClick={() => handleCommercialServiceApproval(detailService, 'reject')}
+                                          disabled={approvalActionInProgress === `${detailService.id}:approve` || approvalActionInProgress === `${detailService.id}:reject`}
+                                        >
+                                          {approvalActionInProgress === `${detailService.id}:reject` ? 'Rechazando...' : 'Rechazar servicio'}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="save-btn"
+                                          onClick={() => handleCommercialServiceApproval(detailService, 'approve')}
+                                          disabled={approvalActionInProgress === `${detailService.id}:approve` || approvalActionInProgress === `${detailService.id}:reject`}
+                                        >
+                                          {approvalActionInProgress === `${detailService.id}:approve` ? 'Aprobando...' : 'Aprobar servicio'}
+                                        </button>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <div className="service-coord-detail-grid">
+                                      <div className="field">
+                                        <label>Siguiente etapa</label>
+                                        <select value={workflowDraft.nextStage || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { nextStage: e.target.value })}>
+                                          <option value="">Seleccionar...</option>
+                                          {detailWorkflowNextOptions.map((stage) => <option key={`wf-next-${detailService.id}-${stage}`} value={stage}>{stage}</option>)}
+                                        </select>
+                                      </div>
+                                      <div className="field">
+                                        <label>Nota de transición</label>
+                                        <input value={workflowDraft.note || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { note: e.target.value })} type="text" placeholder="Observación (opcional)" />
+                                      </div>
+                                    </div>
+                                  )}
 
                                 {detailWorkflowStage === 'Rechazado' && (
                                   <div className="service-coord-detail-card" style={{ marginTop: 8 }}>
@@ -14362,19 +14825,94 @@
 
                                 {detailWorkflowStage === 'En proceso de instalación' && (
                                   <div className="service-coord-detail-card" style={{ marginTop: 8 }}>
-                                    <h4 style={{ margin: '0 0 8px 0' }}>Gestión de instalación</h4>
-                                    <div className="hint" style={{ marginBottom: 8 }}>Vista disponible para Coordinación: línea de tiempo, Gantt y listado de tareas.</div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 8, marginBottom: 8 }}>
-                                      <div className="service-detail-kpi"><small>📈 Línea de tiempo</small><strong>{INSTALLATION_REQUIRED_TASKS.filter((task) => !!workflowDraft.installTasks?.[task.key]).length} / {INSTALLATION_REQUIRED_TASKS.length} hitos</strong></div>
-                                      <div className="service-detail-kpi"><small>📊 Gantt</small><strong>{Math.round((INSTALLATION_REQUIRED_TASKS.filter((task) => !!workflowDraft.installTasks?.[task.key]).length / INSTALLATION_REQUIRED_TASKS.length) * 100)}% completado</strong></div>
+                                    <h4 style={{ margin: '0 0 8px 0' }}>Gestión técnica de instalación</h4>
+                                    <div className="hint" style={{ marginBottom: 8 }}>
+                                      Vista técnica profesional: planificación, responsables y seguimiento por hito. Guardá avances antes de mover de etapa.
                                     </div>
-                                    {INSTALLATION_REQUIRED_TASKS.map((task) => (
-                                      <label key={`workflow-install-${detailService.id}-${task.key}`} className="seller-filter-option" style={{ display: 'flex', gap: 8, marginBottom: 6 }}>
-                                        <input type="checkbox" checked={!!workflowDraft.installTasks?.[task.key]} onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ installTasks: { ...(prev.installTasks || {}), [task.key]: e.target.checked } }))} />
-                                        <span>{task.label}</span>
-                                      </label>
-                                    ))}
-                                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: 8, marginBottom: 8 }}>
+                                      <div className="service-detail-kpi"><small>📈 Hitos completados</small><strong>{INSTALLATION_REQUIRED_TASKS.filter((task) => !!workflowDraft.installTasks?.[task.key]).length} / {INSTALLATION_REQUIRED_TASKS.length}</strong></div>
+                                      <div className="service-detail-kpi"><small>📊 Progreso</small><strong>{Math.round((INSTALLATION_REQUIRED_TASKS.filter((task) => !!workflowDraft.installTasks?.[task.key]).length / INSTALLATION_REQUIRED_TASKS.length) * 100)}%</strong></div>
+                                      <div className="service-detail-kpi"><small>🧑‍🔧 Técnico líder</small><strong>{workflowDraft.installationPlan?.tecnicoLider || '-'}</strong></div>
+                                    </div>
+                                    <div style={{ marginBottom: 12 }}>
+                                      <div style={{ height: 10, borderRadius: 999, border: '1px solid rgba(255,255,255,.2)', background: 'rgba(0,0,0,.25)', overflow: 'hidden' }}>
+                                        <div style={{ width: `${Math.round((INSTALLATION_REQUIRED_TASKS.filter((task) => !!workflowDraft.installTasks?.[task.key]).length / INSTALLATION_REQUIRED_TASKS.length) * 100)}%`, height: '100%', background: 'linear-gradient(90deg, #0ea5e9, #22c55e)', transition: 'width 180ms ease' }} />
+                                      </div>
+                                    </div>
+                                    <div className="service-coord-detail-grid" style={{ marginBottom: 8 }}>
+                                      <div className="field">
+                                        <label>Fecha objetivo inicio instalación</label>
+                                        <input
+                                          type="date"
+                                          value={workflowDraft.installationPlan?.fechaInicioObjetivo || ''}
+                                          onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ installationPlan: { ...(prev.installationPlan || {}), fechaInicioObjetivo: e.target.value } }))}
+                                        />
+                                      </div>
+                                      <div className="field">
+                                        <label>Fecha objetivo alta</label>
+                                        <input
+                                          type="date"
+                                          value={workflowDraft.installationPlan?.fechaAltaObjetivo || ''}
+                                          onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ installationPlan: { ...(prev.installationPlan || {}), fechaAltaObjetivo: e.target.value } }))}
+                                        />
+                                      </div>
+                                      <div className="field">
+                                        <label>Técnico líder</label>
+                                        <input
+                                          type="text"
+                                          value={workflowDraft.installationPlan?.tecnicoLider || ''}
+                                          onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ installationPlan: { ...(prev.installationPlan || {}), tecnicoLider: e.target.value } }))}
+                                          placeholder="Nombre del responsable técnico"
+                                        />
+                                      </div>
+                                    </div>
+                                    <div className="service-coord-detail-list" style={{ marginBottom: 10 }}>
+                                      {INSTALLATION_REQUIRED_TASKS.map((task) => (
+                                        <div key={`workflow-install-${detailService.id}-${task.key}`} className="service-coord-detail-list-item" style={{ display: 'grid', gap: 8 }}>
+                                          <label className="seller-filter-option" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                                            <input type="checkbox" checked={!!workflowDraft.installTasks?.[task.key]} onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ installTasks: { ...(prev.installTasks || {}), [task.key]: e.target.checked } }))} />
+                                            <strong>{task.label}</strong>
+                                          </label>
+                                          <div className="service-coord-detail-grid">
+                                            <div className="field">
+                                              <label>Responsable</label>
+                                              <input
+                                                type="text"
+                                                value={workflowDraft.installTaskMeta?.[task.key]?.responsable || ''}
+                                                onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ installTaskMeta: { ...(prev.installTaskMeta || {}), [task.key]: { ...((prev.installTaskMeta || {})[task.key] || {}), responsable: e.target.value } } }))}
+                                                placeholder="Técnico asignado"
+                                              />
+                                            </div>
+                                            <div className="field">
+                                              <label>Fecha objetivo</label>
+                                              <input
+                                                type="date"
+                                                value={workflowDraft.installTaskMeta?.[task.key]?.fechaObjetivo || ''}
+                                                onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ installTaskMeta: { ...(prev.installTaskMeta || {}), [task.key]: { ...((prev.installTaskMeta || {})[task.key] || {}), fechaObjetivo: e.target.value } } }))}
+                                              />
+                                            </div>
+                                            <div className="field">
+                                              <label>Comentario técnico</label>
+                                              <input
+                                                type="text"
+                                                value={workflowDraft.installTaskMeta?.[task.key]?.comentario || ''}
+                                                onChange={(e) => setWorkflowTransitionDraft(detailService.id, (prev) => ({ installTaskMeta: { ...(prev.installTaskMeta || {}), [task.key]: { ...((prev.installTaskMeta || {})[task.key] || {}), comentario: e.target.value } } }))}
+                                                placeholder="Notas de avance o bloqueo"
+                                              />
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
+                                      <button
+                                        type="button"
+                                        className="save-btn"
+                                        onClick={() => handleSaveInstallationManagement(detailService)}
+                                        disabled={installationSaveInProgress === detailService.id}
+                                      >
+                                        {installationSaveInProgress === detailService.id ? 'Guardando gestión...' : 'Guardar gestión técnica'}
+                                      </button>
                                       <button type="button" className="save-btn" onClick={() => setWorkflowTransitionDraft(detailService.id, { nextStage: 'Alta de Servicio en configuración' })} disabled={!INSTALLATION_REQUIRED_TASKS.every((task) => !!workflowDraft.installTasks?.[task.key])}>Configurar ALTA de Servicio</button>
                                     </div>
                                   </div>
@@ -14410,9 +14948,12 @@
                                   </div>
                                 )}
 
-                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
-                                  <button type="button" className="save-btn" onClick={() => handleWorkflowTransition(detailService)} disabled={!detailWorkflowNextOptions.length}>Aplicar transición</button>
-                                </div>
+                                {(detailWorkflowStage !== 'Pendiente de aprobación – Coordinación de Instalaciones'
+                                  || (String(detailService.tipoAccion || '').trim() !== 'Nuevo Servicio' && String(detailService.formulario || '').trim() !== 'nuevo-servicio-optimizado')) && (
+                                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+                                    <button type="button" className="save-btn" onClick={() => handleWorkflowTransition(detailService)} disabled={!detailWorkflowNextOptions.length}>Aplicar transición</button>
+                                  </div>
+                                )}
                               </div>
                             </>
                           )}
@@ -14825,9 +15366,9 @@
               {deleteTargetService && isAdminUser && (
                 <div className="confirm-modal" onClick={() => { if (!deletingService) setDeleteTargetService(null); }}>
                   <div className="confirm-modal-card" onClick={(e) => e.stopPropagation()}>
-                    <h3 style={{ marginTop: 0 }}>Confirmar eliminación segura</h3>
+                    <h3 style={{ marginTop: 0 }}>Confirmar eliminación</h3>
                     <p style={{ margin: '6px 0 0', color: '#d7f4ef' }}>
-                      ¿Estás seguro de eliminar este servicio? Se generará un registro de esta acción. El servicio permanecerá oculto pero recuperable por 24 horas antes de su eliminación definitiva.
+                      ¿Estás seguro de eliminar este servicio? Esta acción es inmediata y definitiva.
                     </p>
                     <div className="confirm-modal-actions">
                       <button type="button" className="edit-btn" onClick={() => setDeleteTargetService(null)} disabled={deletingService}>Cancelar</button>
