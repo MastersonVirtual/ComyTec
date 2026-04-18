@@ -10841,15 +10841,13 @@
           try {
             const snapshot = await db.collection('operaciones').get();
             const docs = snapshot.docs || [];
-            if (docs.length === 0) {
-              setNotificacion({ mensaje: 'No hay servicios para eliminar.', tipo: 'warn' });
-              return;
-            }
-            for (let i = 0; i < docs.length; i += 400) {
-              const chunk = docs.slice(i, i + 400);
-              const batch = db.batch();
-              chunk.forEach((doc) => batch.delete(doc.ref));
-              await batch.commit();
+            if (docs.length > 0) {
+              for (let i = 0; i < docs.length; i += 400) {
+                const chunk = docs.slice(i, i + 400);
+                const batch = db.batch();
+                chunk.forEach((doc) => batch.delete(doc.ref));
+                await batch.commit();
+              }
             }
             await db.collection('configuracion_sistema').doc('catalogo_preload').set({
               ocultarEnHistorial: true,
@@ -10860,10 +10858,16 @@
             setRows([]);
             setSelectedService(null);
             setHistoryDetailModalOpen(false);
-            setNotificacion({ mensaje: `✔ Se eliminaron ${docs.length} servicios del historial.`, tipo: 'ok' });
+            const preloadedCount = preloadedHistoryRows.length;
+            const totalRemoved = docs.length + preloadedCount;
+            if (totalRemoved > 0) {
+              setNotificacion({ mensaje: `✔ Se eliminaron/ocultaron ${totalRemoved} servicios del historial.`, tipo: 'ok' });
+            } else {
+              setNotificacion({ mensaje: 'No hay servicios para eliminar.', tipo: 'warn' });
+            }
             void logRealtimeActivityEvent({
               usuario: currentUserName,
-              accion: `eliminó todo el historial de servicios (${docs.length})`,
+              accion: `eliminó todo el historial de servicios (${totalRemoved})`,
               clienteId: '',
             });
           } catch (error) {
