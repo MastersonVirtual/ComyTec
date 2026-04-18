@@ -10784,33 +10784,19 @@
           }
           setDeletingService(true);
           try {
-            const nowLabel = formatUruguayDateTime();
-            const logsActuales = Array.isArray(deleteTargetService.logs_cambios) ? deleteTargetService.logs_cambios : [];
-            const nuevoLog = {
-              fecha: new Date().toISOString(),
-              usuario: currentUserName,
-              accion: `Eliminación solicitada por ${currentUserName} el ${nowLabel}`,
-            };
-
-            await db.collection('operaciones').doc(deleteTargetService.id).set({
-              estado_borrado: true,
-              fecha_solicitud_borrado: firebase.firestore.FieldValue.serverTimestamp(),
-              logs_cambios: [...logsActuales, nuevoLog],
-              editadoPor: currentUserName,
-              actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
-            }, { merge: true });
-
-            setNotificacion({ mensaje: '✔ Servicio ocultado y marcado para eliminación diferida', tipo: 'ok' });
+            await db.collection('operaciones').doc(deleteTargetService.id).delete();
+            setRows((prev) => prev.filter((row) => row.id !== deleteTargetService.id));
+            setNotificacion({ mensaje: '✔ Servicio eliminado definitivamente', tipo: 'ok' });
             void logRealtimeActivityEvent({
               usuario: currentUserName,
-              accion: 'registró baja del servicio',
+              accion: 'eliminó servicio',
               clienteId: deleteTargetService?.clienteId || '',
             });
             if (selectedService?.id === deleteTargetService.id) setSelectedService(null);
             if (editingServiceId === deleteTargetService.id) resetFields();
           } catch (error) {
-            console.error('Error solicitando borrado:', error);
-            setNotificacion({ mensaje: '✖ Error al solicitar borrado', tipo: 'error' });
+            console.error('Error eliminando servicio:', error);
+            setNotificacion({ mensaje: '✖ Error al eliminar servicio', tipo: 'error' });
           } finally {
             setDeletingService(false);
             setDeleteTargetService(null);
@@ -13799,6 +13785,7 @@
                                 <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); openServiceDetailModal(row, 'informacion'); }}>Ver detalles</button>
                                 <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); openServiceDetailModal(row, 'historial'); }}>Ver historial</button>
                                 <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); openServiceDetailModal(row, 'tickets'); }}>Ver tickets</button>
+                                {isAdminUser && <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); setDeleteTargetService(row); }}>Eliminar</button>}
                               </div>
                             </article>
                           );
@@ -15292,9 +15279,9 @@
               {deleteTargetService && isAdminUser && (
                 <div className="confirm-modal" onClick={() => { if (!deletingService) setDeleteTargetService(null); }}>
                   <div className="confirm-modal-card" onClick={(e) => e.stopPropagation()}>
-                    <h3 style={{ marginTop: 0 }}>Confirmar eliminación segura</h3>
+                    <h3 style={{ marginTop: 0 }}>Confirmar eliminación</h3>
                     <p style={{ margin: '6px 0 0', color: '#d7f4ef' }}>
-                      ¿Estás seguro de eliminar este servicio? Se generará un registro de esta acción. El servicio permanecerá oculto pero recuperable por 24 horas antes de su eliminación definitiva.
+                      ¿Estás seguro de eliminar este servicio? Esta acción es inmediata y definitiva.
                     </p>
                     <div className="confirm-modal-actions">
                       <button type="button" className="edit-btn" onClick={() => setDeleteTargetService(null)} disabled={deletingService}>Cancelar</button>
