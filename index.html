@@ -8613,6 +8613,7 @@
         const [historyDetailModalOpen, setHistoryDetailModalOpen] = useState(false);
         const [workflowTaskChecks, setWorkflowTaskChecks] = useState({});
         const [workflowTransitionDrafts, setWorkflowTransitionDrafts] = useState({});
+        const [approvalActionInProgress, setApprovalActionInProgress] = useState('');
         const [opsSideTab, setOpsSideTab] = useState('activity');
         const [opsCommentDraft, setOpsCommentDraft] = useState('');
         const [opsObservationsOpen, setOpsObservationsOpen] = useState(false);
@@ -10872,6 +10873,78 @@
           } catch (error) {
             console.error('Error actualizando workflow:', error);
             setNotificacion({ mensaje: '✖ No se pudo actualizar la etapa del workflow.', tipo: 'error' });
+          }
+        }
+
+        async function handleCommercialServiceApproval(service, action) {
+          if (!service?.id) return;
+          const normalizedAction = action === 'approve' ? 'approve' : 'reject';
+          const canApproveOrReject = isAdminUser || isTechnicalUser || isCoordinationUser;
+          if (!canApproveOrReject) {
+            setNotificacion({ mensaje: 'Solo Técnica, Coordinación o Admin pueden aprobar/rechazar nuevos servicios.', tipo: 'warn' });
+            return;
+          }
+          const currentStage = normalizeWorkflowStage(service.workflowStage) || 'Pendiente de aprobación – Coordinación de Instalaciones';
+          if (currentStage !== 'Pendiente de aprobación – Coordinación de Instalaciones') {
+            setNotificacion({ mensaje: 'Este servicio ya fue procesado en la instancia de aprobación inicial.', tipo: 'warn' });
+            return;
+          }
+          const isNewService = String(service.tipoAccion || '').trim() === 'Nuevo Servicio'
+            || String(service.formulario || '').trim() === 'nuevo-servicio-optimizado';
+          if (!isNewService) {
+            setNotificacion({ mensaje: 'La aprobación manual aplica solo para nuevos servicios.', tipo: 'warn' });
+            return;
+          }
+          const draft = workflowTransitionDrafts[service.id] || getWorkflowDraftDefaults(service);
+          const rejectionReason = String(draft.rejectionReason || '').trim();
+          if (normalizedAction === 'reject' && !rejectionReason) {
+            setNotificacion({ mensaje: 'Para rechazar, indicá un motivo para Comercial.', tipo: 'warn' });
+            return;
+          }
+          const nextStage = normalizedAction === 'approve' ? 'En proceso de instalación' : 'Rechazado';
+          const note = normalizedAction === 'approve'
+            ? (draft.note || 'Aprobación inicial de nuevo servicio')
+            : (draft.note || `Rechazo inicial: ${rejectionReason}`);
+          const workflowEvent = createWorkflowEvent({
+            from: currentStage,
+            to: nextStage,
+            note,
+            actor: currentUserName,
+          });
+          const existingTimeline = Array.isArray(service.workflowTimeline) ? service.workflowTimeline : [];
+          const payload = {
+            workflowStage: nextStage,
+            workflowAvailableNextStages: GNS_WORKFLOW_TRANSITIONS[nextStage] || [],
+            workflowTimeline: [...existingTimeline, workflowEvent],
+            workflowRejectionReason: normalizedAction === 'reject' ? rejectionReason : '',
+            workflowCurrentOwner: normalizedAction === 'reject' ? 'Comercial' : 'Operaciones',
+            status: stageToOperationalStatus(nextStage),
+            estado: stageToOperationalStatus(nextStage),
+            actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+            editadoPor: currentUserName,
+          };
+          try {
+            setApprovalActionInProgress(`${service.id}:${normalizedAction}`);
+            await db.collection('operaciones').doc(service.id).set(payload, { merge: true });
+            setRows((prev) => prev.map((row) => row.id === service.id ? { ...row, ...payload, actualizadoEn: new Date() } : row));
+            setSelectedService((prev) => (prev?.id === service.id ? { ...prev, ...payload, actualizadoEn: new Date() } : prev));
+            setNotificacion({
+              mensaje: normalizedAction === 'approve'
+                ? '✔ Servicio aprobado y derivado a Operaciones.'
+                : '✔ Servicio rechazado y devuelto a Comercial.',
+              tipo: 'ok',
+            });
+            void logRealtimeActivityEvent({
+              usuario: currentUserName,
+              accion: normalizedAction === 'approve' ? 'aprobó nuevo servicio' : 'rechazó nuevo servicio',
+              clienteId: service.clienteId || '',
+              detalle: normalizedAction === 'reject' ? rejectionReason : (draft.note || ''),
+            });
+          } catch (error) {
+            console.error('Error aplicando aprobación inicial:', error);
+            setNotificacion({ mensaje: '✖ No se pudo registrar la aprobación/rechazo inicial.', tipo: 'error' });
+          } finally {
+            setApprovalActionInProgress('');
           }
         }
 
@@ -14339,19 +14412,63 @@
                                 <div className="hint" style={{ marginBottom: 10 }}>
                                   Flujo: <b>Pendiente de aprobación</b> → <b>En proceso de instalación</b> → <b>Alta de Servicio en configuración</b> → <b>Activo</b>.
                                 </div>
-                                <div className="service-coord-detail-grid">
-                                  <div className="field">
-                                    <label>Siguiente etapa</label>
-                                    <select value={workflowDraft.nextStage || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { nextStage: e.target.value })}>
-                                      <option value="">Seleccionar...</option>
-                                      {detailWorkflowNextOptions.map((stage) => <option key={`wf-next-${detailService.id}-${stage}`} value={stage}>{stage}</option>)}
-                                    </select>
-                                  </div>
-                                  <div className="field">
-                                    <label>Nota de transición</label>
-                                    <input value={workflowDraft.note || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { note: e.target.value })} type="text" placeholder="Observación (opcional)" />
-                                  </div>
-                                </div>
+                                {detailWorkflowStage === 'Pendiente de aprobación – Coordinación de Instalaciones'
+                                  && (String(detailService.tipoAccion || '').trim() === 'Nuevo Servicio' || String(detailService.formulario || '').trim() === 'nuevo-servicio-optimizado') ? (
+                                    <>
+                                      <div className="hint" style={{ marginBottom: 10 }}>
+                                        Revisá los datos cargados por Comercial y luego definí la aprobación inicial del servicio.
+                                      </div>
+                                      <div className="field" style={{ marginBottom: 10 }}>
+                                        <label>Observación de revisión (opcional)</label>
+                                        <input
+                                          value={workflowDraft.note || ''}
+                                          onChange={(e) => setWorkflowTransitionDraft(detailService.id, { note: e.target.value })}
+                                          type="text"
+                                          placeholder="Ej: datos completos, listo para instalación."
+                                        />
+                                      </div>
+                                      <div className="field" style={{ marginBottom: 10 }}>
+                                        <label>Motivo de rechazo (obligatorio para rechazar)</label>
+                                        <textarea
+                                          value={workflowDraft.rejectionReason || ''}
+                                          onChange={(e) => setWorkflowTransitionDraft(detailService.id, { rejectionReason: e.target.value })}
+                                          placeholder="Detallar qué debe corregir Comercial."
+                                        />
+                                      </div>
+                                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, flexWrap: 'wrap' }}>
+                                        <button
+                                          type="button"
+                                          className="danger-btn"
+                                          onClick={() => handleCommercialServiceApproval(detailService, 'reject')}
+                                          disabled={approvalActionInProgress === `${detailService.id}:approve` || approvalActionInProgress === `${detailService.id}:reject`}
+                                        >
+                                          {approvalActionInProgress === `${detailService.id}:reject` ? 'Rechazando...' : 'Rechazar servicio'}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="save-btn"
+                                          onClick={() => handleCommercialServiceApproval(detailService, 'approve')}
+                                          disabled={approvalActionInProgress === `${detailService.id}:approve` || approvalActionInProgress === `${detailService.id}:reject`}
+                                        >
+                                          {approvalActionInProgress === `${detailService.id}:approve` ? 'Aprobando...' : 'Aprobar servicio'}
+                                        </button>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <div className="service-coord-detail-grid">
+                                      <div className="field">
+                                        <label>Siguiente etapa</label>
+                                        <select value={workflowDraft.nextStage || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { nextStage: e.target.value })}>
+                                          <option value="">Seleccionar...</option>
+                                          {detailWorkflowNextOptions.map((stage) => <option key={`wf-next-${detailService.id}-${stage}`} value={stage}>{stage}</option>)}
+                                        </select>
+                                      </div>
+                                      <div className="field">
+                                        <label>Nota de transición</label>
+                                        <input value={workflowDraft.note || ''} onChange={(e) => setWorkflowTransitionDraft(detailService.id, { note: e.target.value })} type="text" placeholder="Observación (opcional)" />
+                                      </div>
+                                    </div>
+                                  )}
 
                                 {detailWorkflowStage === 'Rechazado' && (
                                   <div className="service-coord-detail-card" style={{ marginTop: 8 }}>
@@ -14410,9 +14527,12 @@
                                   </div>
                                 )}
 
-                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
-                                  <button type="button" className="save-btn" onClick={() => handleWorkflowTransition(detailService)} disabled={!detailWorkflowNextOptions.length}>Aplicar transición</button>
-                                </div>
+                                {(detailWorkflowStage !== 'Pendiente de aprobación – Coordinación de Instalaciones'
+                                  || (String(detailService.tipoAccion || '').trim() !== 'Nuevo Servicio' && String(detailService.formulario || '').trim() !== 'nuevo-servicio-optimizado')) && (
+                                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+                                    <button type="button" className="save-btn" onClick={() => handleWorkflowTransition(detailService)} disabled={!detailWorkflowNextOptions.length}>Aplicar transición</button>
+                                  </div>
+                                )}
                               </div>
                             </>
                           )}
