@@ -2439,10 +2439,6 @@
       }
 
       .login-shell {
-        --login-bg-1: url('https://i.postimg.cc/K8T7cTQ9/Gemini-Generated-Image-h5k8zvh5k8zvh5k8.png');
-        --login-bg-2: url('https://i.postimg.cc/yNzmDNbz/Gemini-Generated-Image-irrsw0irrsw0irrs.png');
-        --login-bg-3: url('https://i.postimg.cc/zf1CyfPs/Gemini-Generated-Image-4ynkgo4ynkgo4ynk.png');
-        --login-bg-4: url('https://i.postimg.cc/FKQyYKB4/Gemini-Generated-Image-ojn49gojn49gojn4.png');
         min-height: 100vh;
         position: relative;
         isolation: isolate;
@@ -2454,39 +2450,37 @@
       }
       .login-bg {
         position: absolute;
-        inset: -18px;
-        z-index: 0;
-        background: #006465;
-        filter: blur(9px);
-        transform: scale(1.06);
-      }
-      .login-bg-layer {
-        position: absolute;
         inset: 0;
-        opacity: 0;
-        background-color: #006465;
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        animation: login-bg-fade 40s linear infinite;
+        z-index: 0;
+        background: #23272f;
       }
-      .login-bg-layer:nth-child(1) { background-image: var(--login-bg-1); animation-delay: 0s; }
-      .login-bg-layer:nth-child(2) { background-image: var(--login-bg-2); animation-delay: 10s; }
-      .login-bg-layer:nth-child(3) { background-image: var(--login-bg-3); animation-delay: 20s; }
-      .login-bg-layer:nth-child(4) { background-image: var(--login-bg-4); animation-delay: 30s; }
-      @keyframes login-bg-fade {
-        0% { opacity: 0; }
-        5% { opacity: 1; }
-        20% { opacity: 1; }
-        25% { opacity: 0; }
-        100% { opacity: 0; }
+      .login-bg::before {
+        content: '';
+        position: absolute;
+        inset: -24px;
+        background-image: radial-gradient(circle, rgba(156, 163, 175, .55) 1.2px, transparent 1.2px);
+        background-size: 28px 28px;
+        opacity: .65;
+        transform: translate3d(0, 0, 0);
+        transition: transform .45s ease, opacity .35s ease;
+      }
+      .login-shell:hover .login-bg::before {
+        opacity: .92;
+        animation: login-dots-drift 2.6s linear infinite;
+      }
+      @keyframes login-dots-drift {
+        0% { transform: translate3d(0, 0, 0); }
+        25% { transform: translate3d(-6px, -4px, 0); }
+        50% { transform: translate3d(4px, -8px, 0); }
+        75% { transform: translate3d(-3px, 5px, 0); }
+        100% { transform: translate3d(0, 0, 0); }
       }
       .login-shell::after {
         content: '';
         position: absolute;
         inset: 0;
         z-index: 1;
-        background: linear-gradient(180deg, rgba(0, 100, 101, .28), rgba(0, 70, 71, .52));
+        background: linear-gradient(180deg, rgba(17, 24, 39, .36), rgba(15, 23, 42, .54));
       }
       .login-stack {
         width: min(460px, 100%);
@@ -7666,12 +7660,7 @@
 
         return (
           <div className="login-shell">
-            <div className="login-bg" aria-hidden="true">
-              <span className="login-bg-layer" />
-              <span className="login-bg-layer" />
-              <span className="login-bg-layer" />
-              <span className="login-bg-layer" />
-            </div>
+            <div className="login-bg" aria-hidden="true" />
             <div className="login-stack">
               <div className="login-logo" aria-hidden="true" />
               <form className="login-panel" onSubmit={handleLogin}>
@@ -7697,12 +7686,7 @@
       function LoadingScreen() {
         return (
           <div className="login-shell">
-            <div className="login-bg" aria-hidden="true">
-              <span className="login-bg-layer" />
-              <span className="login-bg-layer" />
-              <span className="login-bg-layer" />
-              <span className="login-bg-layer" />
-            </div>
+            <div className="login-bg" aria-hidden="true" />
             <div className="login-stack">
               <div className="login-logo" aria-hidden="true" />
               <section className="login-panel" aria-live="polite">
