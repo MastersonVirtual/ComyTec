@@ -11631,10 +11631,6 @@
             }).filter((member) => {
               const memberEmail = String(member.email || member.id || '').trim().toLowerCase();
               const memberUid = String(member.uid || '').trim();
-              const currentEmail = String(user?.email || '').trim().toLowerCase();
-              const currentUid = String(user?.uid || '').trim();
-              if (currentEmail && memberEmail && memberEmail === currentEmail) return false;
-              if (currentUid && memberUid && memberUid === currentUid) return false;
               return !!(memberEmail || memberUid);
             });
           if (recipients.length === 0) return;
@@ -11670,8 +11666,7 @@
                 || /vendedor|comercial/.test(cargo);
             }).filter((member) => {
               const memberEmail = String(member.email || member.id || '').trim().toLowerCase();
-              const currentEmail = String(user?.email || '').trim().toLowerCase();
-              return memberEmail && memberEmail !== currentEmail;
+              return !!memberEmail;
             });
           if (recipients.length === 0) return;
           const type = approved ? 'servicio_aprobado_comercial' : 'servicio_rechazado_comercial';
