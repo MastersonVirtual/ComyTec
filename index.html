@@ -10111,6 +10111,36 @@
         ), [pendingProfileAvatarId, selectedProfileAvatar]);
 
         const allNotifications = useMemo(() => {
+          const contractExpiryItems = isAdminUser ? rows
+            .filter((service) => {
+              const stage = normalizeWorkflowStage(service?.workflowStage || '');
+              if (stage !== 'Activo') return false;
+              const durationMonths = Number(service?.duracionContratoMeses || service?.duracionNuevoContratoMeses || 0);
+              if (!Number.isFinite(durationMonths) || durationMonths <= 0) return false;
+              const startDate = parseServiceDate(service?.fechaAltaServicio || service?.fechaAlta || service?.fechaEspecificaInicio || '');
+              if (!startDate) return false;
+              const expiryDate = new Date(startDate);
+              expiryDate.setMonth(expiryDate.getMonth() + durationMonths);
+              const daysLeft = Math.ceil((expiryDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+              return daysLeft >= 0 && daysLeft <= 45;
+            })
+            .map((service) => {
+              const durationMonths = Number(service?.duracionContratoMeses || service?.duracionNuevoContratoMeses || 0);
+              const startDate = parseServiceDate(service?.fechaAltaServicio || service?.fechaAlta || service?.fechaEspecificaInicio || '');
+              const expiryDate = new Date(startDate);
+              expiryDate.setMonth(expiryDate.getMonth() + durationMonths);
+              const daysLeft = Math.max(0, Math.ceil((expiryDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000)));
+              return {
+                id: `contract-expiry-${service.id}`,
+                source: 'vencimiento',
+                title: 'Contrato por caducar',
+                status: `${service.nombreServicio || service.razonSocial || service.clienteId || 'Servicio'} vence en ${daysLeft} día${daysLeft === 1 ? '' : 's'}.`,
+                createdAt: { seconds: Math.floor(expiryDate.getTime() / 1000) },
+                raw: { ...service, contractDaysLeft: daysLeft, contractExpiryDate: expiryDate.toISOString() },
+                read: false,
+              };
+            })
+            : [];
           const credentialItems = userRole === 'admin'
             ? adminCredentialRequests.map((req) => ({
                 id: `cred-${req.id}`,
@@ -10129,14 +10159,14 @@
             status: getInternalNotificationSummary(item).status,
             createdAt: item.creadoEn,
             raw: item,
-            read: !!item.leida,
-          }));
-          return [...credentialItems, ...internalItems].sort((a, b) => {
+              read: !!item.leida,
+            }));
+          return [...contractExpiryItems, ...credentialItems, ...internalItems].sort((a, b) => {
             const av = a?.createdAt?.seconds || 0;
             const bv = b?.createdAt?.seconds || 0;
             return bv - av;
           });
-        }, [adminCredentialRequests, internalNotifications, userRole, staffMembers]);
+        }, [adminCredentialRequests, internalNotifications, userRole, staffMembers, isAdminUser, rows]);
         const staffAreaOptions = useMemo(() => {
           const labels = Array.from(new Set(staffMembers.map((member) => normalizeAreaLabel(member.area || 'Sin área'))));
           return ['todas', ...labels];
@@ -10238,6 +10268,7 @@
         const CHAT_EMOJIS = ['😀', '😄', '😁', '😅', '😂', '😊', '😍', '🤩', '😎', '🤔', '😮', '😴', '👍', '👏', '🙌', '🙏', '🔥', '💡', '📌', '✅', '❗', '🎉', '💬', '🤝'];
         const isTicketManager = String(user?.email || '').trim().toLowerCase() === 'alfonso332estigarribia@gmail.com';
         const isAdminUser = userRole === 'admin';
+        const unreadBellCount = useMemo(() => allNotifications.filter((item) => !item?.read).length, [allNotifications]);
         const mobileUnreadAlerts = useMemo(() => mobileAlerts.filter((a) => !a.read).length, [mobileAlerts]);
         const adminPendingRequests = useMemo(() => adminCredentialRequests.filter((r) => r?.estado === 'pendiente'), [adminCredentialRequests]);
         const adminUnreadCount = useMemo(() => adminPendingRequests.filter((r) => !r?.leidaPorAdmin).length, [adminPendingRequests]);
@@ -11692,6 +11723,15 @@
         }
 
         async function openNotificationsView(target = null) {
+          if (target?.source === 'vencimiento' && target?.raw) {
+            setDesktopBellOpen(false);
+            setMobileBellOpen(false);
+            closeSidebar();
+            setMobileTab('servicios');
+            setHistoryDetailTab('informacion');
+            openServiceDetailModal(target.raw, 'informacion');
+            return;
+          }
           const targetRaw = target?.raw || target || null;
           const targetType = String(targetRaw?.tipo || '').trim().toLowerCase();
           if (['nuevo_servicio_aprobacion', 'servicio_aprobado_comercial', 'servicio_rechazado_comercial'].includes(targetType)) {
@@ -12742,7 +12782,7 @@
                         <button className="topbar-action-btn" type="button" aria-label="Notificaciones" onClick={toggleDesktopNotifications}>
                           <span className="topbar-action-icon"><i data-lucide="bell" /></span>
                         </button>
-                        {(adminUnreadCount + internalNotifications.filter((item) => !item?.leida).length) > 0 && <span className="notify-badge">{(adminUnreadCount + internalNotifications.filter((item) => !item?.leida).length) > 99 ? '99+' : (adminUnreadCount + internalNotifications.filter((item) => !item?.leida).length)}</span>}
+                        {unreadBellCount > 0 && <span className="notify-badge">{unreadBellCount > 99 ? '99+' : unreadBellCount}</span>}
                         {desktopBellOpen && (
                           <div className="topbar-notify-popover" role="dialog" aria-label="Panel de notificaciones">
                             <div className="topbar-notify-arrow" aria-hidden="true" />
@@ -12754,6 +12794,9 @@
                                   <small>{item.status}</small>
                                   <small>{formatRequestDateTime(item.createdAt)}</small>
                                   <div className="topbar-notify-actions">
+                                    {item.source === 'vencimiento' && (
+                                      <button type="button" className="topbar-notify-action" aria-label="Abrir servicio" onClick={(e) => { e.stopPropagation(); openNotificationsView(item); }}><i data-lucide="square-arrow-out-up-right" /></button>
+                                    )}
                                     {item.source === 'interna' && ['nuevo_servicio_aprobacion', 'servicio_aprobado_comercial', 'servicio_rechazado_comercial'].includes(String(item.raw?.tipo || '').trim().toLowerCase()) && (
                                       <button type="button" className="topbar-notify-action" aria-label="Abrir servicio" onClick={(e) => { e.stopPropagation(); openNotificationsView(item); }}><i data-lucide="square-arrow-out-up-right" /></button>
                                     )}
@@ -12874,6 +12917,16 @@
                               </button>
                             </div>
                           )}
+                        </article>
+                      ) : item.source === 'vencimiento' ? (
+                        <article className="profile-option" key={item.id}>
+                          <h3>{item.title}</h3>
+                          <div className="kv"><b>Servicio:</b> {item.raw?.nombreServicio || item.raw?.razonSocial || item.raw?.clienteId || '-'}</div>
+                          <div className="kv"><b>Alerta:</b> {item.status}</div>
+                          <div className="kv"><b>Vencimiento estimado:</b> {item.raw?.contractExpiryDate ? new Date(item.raw.contractExpiryDate).toLocaleDateString('es-UY') : '-'}</div>
+                          <div className="request-status-row">
+                            <button type="button" className="status-action-btn chat-action-btn" onClick={() => openNotificationsView(item)}>Ver servicio</button>
+                          </div>
                         </article>
                       ) : (
                         <article className="profile-option" key={item.id}>
