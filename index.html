@@ -2452,28 +2452,15 @@
         position: absolute;
         inset: 0;
         z-index: 0;
-        background: #23272f;
+        background: #2b2b2b;
       }
-      .login-bg::before {
-        content: '';
+      .login-particles-canvas {
         position: absolute;
-        inset: -24px;
-        background-image: radial-gradient(circle, rgba(156, 163, 175, .55) 1.2px, transparent 1.2px);
-        background-size: 28px 28px;
-        opacity: .65;
-        transform: translate3d(0, 0, 0);
-        transition: transform .45s ease, opacity .35s ease;
-      }
-      .login-shell:hover .login-bg::before {
-        opacity: .92;
-        animation: login-dots-drift 2.6s linear infinite;
-      }
-      @keyframes login-dots-drift {
-        0% { transform: translate3d(0, 0, 0); }
-        25% { transform: translate3d(-6px, -4px, 0); }
-        50% { transform: translate3d(4px, -8px, 0); }
-        75% { transform: translate3d(-3px, 5px, 0); }
-        100% { transform: translate3d(0, 0, 0); }
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        opacity: .82;
       }
       .login-shell::after {
         content: '';
@@ -7660,7 +7647,9 @@
 
         return (
           <div className="login-shell">
-            <div className="login-bg" aria-hidden="true" />
+            <div className="login-bg" aria-hidden="true">
+              <LoginParticleLayer />
+            </div>
             <div className="login-stack">
               <div className="login-logo" aria-hidden="true" />
               <form className="login-panel" onSubmit={handleLogin}>
@@ -7683,10 +7672,134 @@
         );
       }
 
+      function LoginParticleLayer() {
+        const canvasRef = useRef(null);
+        const particlesRef = useRef([]);
+        const pointerRef = useRef({ x: -9999, y: -9999, active: false });
+        const animationRef = useRef(null);
+        const resizeRef = useRef(null);
+
+        useEffect(() => {
+          const canvas = canvasRef.current;
+          if (!canvas) return () => {};
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return () => {};
+
+          const prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          const root = canvas.parentElement || canvas;
+          const DPR_MAX = 2;
+          const particleSpacing = 34;
+          const interactionRadius = 110;
+          const forceFactor = 6.2;
+          const easing = 0.14;
+          const damping = 0.8;
+          const maxOffset = 8;
+
+          function rebuildParticles() {
+            const rect = root.getBoundingClientRect();
+            const dpr = Math.min(window.devicePixelRatio || 1, DPR_MAX);
+            canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+            canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+            canvas.style.width = `${rect.width}px`;
+            canvas.style.height = `${rect.height}px`;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+            const cols = Math.ceil(rect.width / particleSpacing);
+            const rows = Math.ceil(rect.height / particleSpacing);
+            const jitter = 6;
+            const list = [];
+            for (let row = 0; row <= rows; row += 1) {
+              for (let col = 0; col <= cols; col += 1) {
+                const bx = col * particleSpacing + 16 + (Math.random() - 0.5) * jitter;
+                const by = row * particleSpacing + 16 + (Math.random() - 0.5) * jitter;
+                list.push({
+                  bx,
+                  by,
+                  x: bx,
+                  y: by,
+                  vx: 0,
+                  vy: 0,
+                  r: 0.9 + Math.random() * 0.85,
+                  alpha: 0.2 + Math.random() * 0.32
+                });
+              }
+            }
+            particlesRef.current = list;
+          }
+
+          function draw() {
+            const rect = root.getBoundingClientRect();
+            ctx.clearRect(0, 0, rect.width, rect.height);
+            const pointer = pointerRef.current;
+            const particles = particlesRef.current;
+            const hasPointer = pointer.active && !prefersReducedMotion;
+            for (let i = 0; i < particles.length; i += 1) {
+              const p = particles[i];
+              let tx = p.bx;
+              let ty = p.by;
+              if (hasPointer) {
+                const dx = p.bx - pointer.x;
+                const dy = p.by - pointer.y;
+                const dist = Math.hypot(dx, dy);
+                if (dist < interactionRadius) {
+                  const influence = 1 - (dist / interactionRadius);
+                  const nx = dist > 0.0001 ? dx / dist : 0;
+                  const ny = dist > 0.0001 ? dy / dist : 0;
+                  tx += nx * influence * forceFactor;
+                  ty += ny * influence * forceFactor;
+                }
+              }
+
+              p.vx = (p.vx + (tx - p.x) * easing) * damping;
+              p.vy = (p.vy + (ty - p.y) * easing) * damping;
+              p.x += p.vx;
+              p.y += p.vy;
+              p.x = Math.max(p.bx - maxOffset, Math.min(p.bx + maxOffset, p.x));
+              p.y = Math.max(p.by - maxOffset, Math.min(p.by + maxOffset, p.y));
+
+              ctx.beginPath();
+              ctx.fillStyle = `rgba(179, 179, 179, ${p.alpha})`;
+              ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+              ctx.fill();
+            }
+            animationRef.current = window.requestAnimationFrame(draw);
+          }
+
+          function handlePointerMove(event) {
+            const rect = root.getBoundingClientRect();
+            pointerRef.current.x = event.clientX - rect.left;
+            pointerRef.current.y = event.clientY - rect.top;
+            pointerRef.current.active = true;
+          }
+
+          function handlePointerLeave() {
+            pointerRef.current.active = false;
+          }
+
+          rebuildParticles();
+          draw();
+          root.addEventListener('mousemove', handlePointerMove);
+          root.addEventListener('mouseleave', handlePointerLeave);
+          resizeRef.current = () => rebuildParticles();
+          window.addEventListener('resize', resizeRef.current);
+
+          return () => {
+            if (animationRef.current) window.cancelAnimationFrame(animationRef.current);
+            if (resizeRef.current) window.removeEventListener('resize', resizeRef.current);
+            root.removeEventListener('mousemove', handlePointerMove);
+            root.removeEventListener('mouseleave', handlePointerLeave);
+          };
+        }, []);
+
+        return <canvas className="login-particles-canvas" ref={canvasRef} aria-hidden="true" />;
+      }
+
       function LoadingScreen() {
         return (
           <div className="login-shell">
-            <div className="login-bg" aria-hidden="true" />
+            <div className="login-bg" aria-hidden="true">
+              <LoginParticleLayer />
+            </div>
             <div className="login-stack">
               <div className="login-logo" aria-hidden="true" />
               <section className="login-panel" aria-live="polite">
