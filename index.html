@@ -5526,6 +5526,32 @@
         border-color: #4ee3d1;
         background: rgba(78,227,209,.2);
       }
+      .ticket-audio-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-top: 8px;
+      }
+      .ticket-audio-status {
+        font-size: 13px;
+        color: #1f4c52;
+        font-weight: 600;
+      }
+      .ticket-audio-status.recording {
+        color: #b91c1c;
+      }
+      .ticket-audio-player {
+        margin-top: 8px;
+        border: 1px solid rgba(151,243,231,.45);
+        border-radius: 10px;
+        background: rgba(255,255,255,.55);
+        padding: 8px;
+      }
+      .ticket-audio-player audio {
+        width: 100%;
+        min-width: 220px;
+      }
       .ticket-image-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(78px, 1fr));
@@ -8445,6 +8471,9 @@
         const [ticketComentario, setTicketComentario] = useState('');
         const [ticketPrioridad, setTicketPrioridad] = useState('Media');
         const [ticketImagenes, setTicketImagenes] = useState([]);
+        const [ticketAudioDraft, setTicketAudioDraft] = useState(null);
+        const [ticketAudioRecording, setTicketAudioRecording] = useState(false);
+        const [ticketAudioError, setTicketAudioError] = useState('');
         const [ticketDragOver, setTicketDragOver] = useState(false);
         const [technicalDocDragOver, setTechnicalDocDragOver] = useState(false);
         const [serviceBudgetDragOver, setServiceBudgetDragOver] = useState(false);
@@ -8476,6 +8505,9 @@
         const topServicesLeaderRef = useRef('');
         const topSalesLeaderRef = useRef('');
         const desktopBellRef = useRef(null);
+        const ticketAudioRecorderRef = useRef(null);
+        const ticketAudioChunksRef = useRef([]);
+        const ticketAudioStreamRef = useRef(null);
         const chatFileInputsRef = useRef({});
         const chatMenuRef = useRef(null);
         const chatEmojiPickerRef = useRef(null);
@@ -11947,6 +11979,15 @@
           return mapped.filter(Boolean);
         }
 
+        async function readBlobAsDataUrl(blob) {
+          return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(String(reader.result || ''));
+            reader.onerror = () => reject(new Error('No se pudo leer el audio grabado.'));
+            reader.readAsDataURL(blob);
+          });
+        }
+
         function cleanLine(line = '') {
           return String(line || '').replace(/\s+/g, ' ').trim();
         }
@@ -12220,6 +12261,7 @@
               prioridad: ticketPrioridad || 'Media',
               estado: 'pendiente',
               imagenesAdjuntas: [],
+              audioAdjunto: null,
               pdfAsistido: {
                 archivoNombre: ticketPdfFile?.name || '',
                 numero: ticketPdfPreview.numero || '',
@@ -12270,6 +12312,72 @@
           setTicketDragOver(false);
           await handleTicketFilesInput(e.dataTransfer?.files || []);
         }
+
+        async function handleStartTicketAudioRecording() {
+          if (ticketAudioRecording) return;
+          if (!navigator.mediaDevices?.getUserMedia) {
+            setTicketAudioError('Tu navegador no permite grabar audio desde esta página.');
+            return;
+          }
+          try {
+            setTicketAudioError('');
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+            ticketAudioStreamRef.current = stream;
+            ticketAudioRecorderRef.current = recorder;
+            ticketAudioChunksRef.current = [];
+            recorder.ondataavailable = (event) => {
+              if (event?.data?.size > 0) ticketAudioChunksRef.current.push(event.data);
+            };
+            recorder.onstop = async () => {
+              try {
+                const blob = new Blob(ticketAudioChunksRef.current, { type: recorder.mimeType || 'audio/webm' });
+                const dataUrl = await readBlobAsDataUrl(blob);
+                setTicketAudioDraft({
+                  nombre: `ticket-audio-${Date.now()}.webm`,
+                  tipo: blob.type || 'audio/webm',
+                  dataUrl,
+                  size: blob.size || 0,
+                });
+              } catch (error) {
+                console.error('Error procesando audio del ticket:', error);
+                setTicketAudioError('No se pudo guardar el audio grabado.');
+              }
+            };
+            recorder.start();
+            setTicketAudioRecording(true);
+          } catch (error) {
+            console.error('Error al iniciar grabación de ticket:', error);
+            setTicketAudioError('Permiso de micrófono denegado o no disponible.');
+          }
+        }
+
+        function handleStopTicketAudioRecording() {
+          const recorder = ticketAudioRecorderRef.current;
+          if (recorder && recorder.state !== 'inactive') recorder.stop();
+          if (ticketAudioStreamRef.current) {
+            ticketAudioStreamRef.current.getTracks().forEach((track) => track.stop());
+            ticketAudioStreamRef.current = null;
+          }
+          ticketAudioRecorderRef.current = null;
+          setTicketAudioRecording(false);
+        }
+
+        function handleClearTicketAudio() {
+          if (ticketAudioRecording) handleStopTicketAudioRecording();
+          setTicketAudioDraft(null);
+          setTicketAudioError('');
+        }
+
+        useEffect(() => () => {
+          if (ticketAudioRecorderRef.current && ticketAudioRecorderRef.current.state !== 'inactive') {
+            ticketAudioRecorderRef.current.stop();
+          }
+          if (ticketAudioStreamRef.current) {
+            ticketAudioStreamRef.current.getTracks().forEach((track) => track.stop());
+            ticketAudioStreamRef.current = null;
+          }
+        }, []);
 
         function setTicketResolutionDraft(ticketId, nextValue) {
           if (!ticketId) return;
@@ -12334,6 +12442,10 @@
 
         async function handleCreateTicket(e) {
           e.preventDefault();
+          if (ticketAudioRecording) {
+            setNotificacion({ mensaje: 'Detené la grabación de audio antes de crear el ticket.', tipo: 'warn' });
+            return;
+          }
           const comentario = String(ticketComentario || '').trim();
           if (!comentario) {
             setNotificacion({ mensaje: 'Completa el comentario del ticket', tipo: 'error' });
@@ -12352,11 +12464,14 @@
               prioridad: ticketPrioridad,
               estado: 'pendiente',
               imagenesAdjuntas: ticketImagenes,
+              audioAdjunto: ticketAudioDraft || null,
               creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
             });
             setTicketComentario('');
             setTicketPrioridad('Media');
             setTicketImagenes([]);
+            setTicketAudioDraft(null);
+            setTicketAudioError('');
             setNotificacion({ mensaje: `✔ Ticket enviado (${ticketCodigo})`, tipo: 'ok' });
           } catch (error) {
             console.error('Error creando ticket:', error);
@@ -12389,6 +12504,7 @@
             prioridad: 'Media',
             estado: 'pendiente',
             imagenesAdjuntas: [],
+            audioAdjunto: null,
             creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
           });
           return ticketCodigo;
@@ -13232,6 +13348,31 @@
                               >
                                 Arrastrá imágenes aquí o seleccioná archivos.
                               </div>
+                              <div className="ticket-audio-controls">
+                                {!ticketAudioRecording ? (
+                                  <button type="button" className="status-action-btn chat-action-btn" onClick={() => { void handleStartTicketAudioRecording(); }}>
+                                    🎙️ Grabar audio
+                                  </button>
+                                ) : (
+                                  <button type="button" className="status-action-btn reject" onClick={handleStopTicketAudioRecording}>
+                                    ⏹️ Detener grabación
+                                  </button>
+                                )}
+                                {ticketAudioDraft && (
+                                  <button type="button" className="status-action-btn" onClick={handleClearTicketAudio}>
+                                    Quitar audio
+                                  </button>
+                                )}
+                                <span className={`ticket-audio-status ${ticketAudioRecording ? 'recording' : ''}`}>
+                                  {ticketAudioRecording ? 'Grabando... permití el micrófono en Chrome.' : (ticketAudioDraft ? 'Audio listo para guardar en Firebase.' : 'Podés enviar un audio opcional con el ticket.')}
+                                </span>
+                              </div>
+                              {ticketAudioError && <div className="hint" style={{ color: '#b91c1c', marginTop: 6 }}>{ticketAudioError}</div>}
+                              {ticketAudioDraft?.dataUrl && (
+                                <div className="ticket-audio-player">
+                                  <audio controls preload="metadata" src={ticketAudioDraft.dataUrl} />
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -13398,6 +13539,12 @@
                                       {ticket.origen === 'form-gestion' && <div className="kv"><b>Cliente ID:</b> {ticket.clienteId || '-'}</div>}
                                     </div>
                                     <div className="kv ticket-comment-block"><b>Comentario:</b> {ticket.comentario || '-'}</div>
+                                    {ticket.audioAdjunto?.dataUrl && (
+                                      <div className="ticket-audio-player" onClick={(e) => e.stopPropagation()}>
+                                        <div className="kv" style={{ marginBottom: 4 }}><b>Audio:</b> {ticket.audioAdjunto.nombre || 'Adjunto de voz'}</div>
+                                        <audio controls preload="metadata" src={ticket.audioAdjunto.dataUrl} />
+                                      </div>
+                                    )}
                                     {!!String(ticket.resolucionComentario || '').trim() && (
                                       <div className="kv ticket-comment-block ticket-resolution-summary"><b>Resolución:</b> {ticket.resolucionComentario}</div>
                                     )}
@@ -15043,6 +15190,14 @@
 
                           <h4 className="ticket-detail-section-title">Comentario</h4>
                           <div className="ticket-detail-comment">{ticket.comentario || '-'}</div>
+                          {ticket.audioAdjunto?.dataUrl && (
+                            <>
+                              <h4 className="ticket-detail-section-title">Audio adjunto</h4>
+                              <div className="ticket-audio-player">
+                                <audio controls preload="metadata" src={ticket.audioAdjunto.dataUrl} />
+                              </div>
+                            </>
+                          )}
 
                           {hasPdfData && (
                             <div className="ticket-detail-block">
