@@ -15806,45 +15806,8 @@
         if (window.__weatherWidgetInit) return;
         window.__weatherWidgetInit = true;
 
-        const API_URL = 'https://api.open-meteo.com/v1/forecast?latitude=-34.9&longitude=-56.2&current=temperature_2m,weathercode&timezone=America/Montevideo';
-        const MONTEVIDEO_TZ = 'America/Montevideo';
-        let lastWeatherData = null;
-
-        // Traducción y categorías para weathercode de Open-Meteo.
-        function mapWeatherCode(code) {
-          const value = Number(code);
-          if (value === 0) return { desc: 'Despejado', type: 'clear' };
-          if (value >= 1 && value <= 3) return { desc: 'Parcialmente nublado', type: 'cloud' };
-          if (value >= 45 && value <= 48) return { desc: 'Niebla', type: 'cloud' };
-          if (value >= 51 && value <= 67) return { desc: 'Lluvia', type: 'rain' };
-          if (value >= 71 && value <= 77) return { desc: 'Nieve', type: 'cloud' };
-          if (value >= 80 && value <= 99) return { desc: 'Tormenta', type: 'storm' };
-          return { desc: 'Clima variable', type: 'cloud' };
-        }
-
-        function getMontevideoHour(date) {
-          const parts = new Intl.DateTimeFormat('es-UY', {
-            timeZone: MONTEVIDEO_TZ,
-            hour: '2-digit',
-            hour12: false,
-          }).formatToParts(date);
-          const hourPart = parts.find((part) => part.type === 'hour');
-          return Number(hourPart ? hourPart.value : 12);
-        }
-
-        function isNightNow() {
-          const hour = getMontevideoHour(new Date());
-          return hour < 6 || hour >= 20;
-        }
-
-        function getIconFromWeather(type) {
-          const night = isNightNow();
-          if (type === 'storm') return '⛈️';
-          if (type === 'rain') return '🌧️';
-          if (type === 'cloud') return '☁️';
-          if (type === 'clear') return night ? '🌙' : '☀️';
-          return night ? '🌙' : '☀️';
-        }
+        const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast?latitude=-34.9&longitude=-56.2&current=temperature_2m,weathercode&timezone=America/Montevideo';
+        let lastWeatherCode = null;
 
         function getWidgetNodes() {
           return {
@@ -15856,56 +15819,103 @@
           };
         }
 
-        function renderWeather(data) {
-          const nodes = getWidgetNodes();
-          if (!nodes.root || !nodes.icon || !nodes.temp || !nodes.desc) return;
-          const { desc, type } = mapWeatherCode(data.weathercode);
-          nodes.icon.textContent = getIconFromWeather(type);
-          nodes.temp.textContent = `${Math.round(Number(data.temperature_2m))}°C`;
-          nodes.desc.textContent = desc;
-          nodes.desc.classList.remove('weather-error');
+        // Si el widget no existe, lo crea debajo de la tarjeta de perfil sin duplicar.
+        function ensureWidgetExists() {
+          const existing = document.getElementById('weather-widget');
+          if (existing) return existing;
+          const anchor = document.querySelector('.home-side-stack, .home-modern-hero, .home-modern-user');
+          if (!anchor) return null;
+          const widget = document.createElement('div');
+          widget.id = 'weather-widget';
+          widget.innerHTML = `
+            <div id="weather-icon">☁️</div>
+            <div id="weather-temp">--°C</div>
+            <div id="weather-desc">Cargando clima...</div>
+            <div id="weather-time"></div>
+          `;
+          if (anchor.classList && anchor.classList.contains('home-side-stack')) anchor.appendChild(widget);
+          else anchor.insertAdjacentElement('afterend', widget);
+          return widget;
         }
 
-        function renderError(message) {
-          const nodes = getWidgetNodes();
-          if (!nodes.root || !nodes.desc) return;
-          nodes.desc.textContent = message || 'No se pudo cargar el clima.';
-          nodes.desc.classList.add('weather-error');
+        function esNoche() {
+          const hora = new Date().getHours();
+          return hora < 6 || hora > 20;
         }
 
-        function updateClock() {
-          const nodes = getWidgetNodes();
-          if (!nodes.root || !nodes.time || !nodes.icon) return;
-          nodes.time.textContent = new Intl.DateTimeFormat('es-UY', {
-            timeZone: MONTEVIDEO_TZ,
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false,
-          }).format(new Date());
-          if (lastWeatherData) {
-            nodes.icon.textContent = getIconFromWeather(mapWeatherCode(lastWeatherData.weathercode).type);
+        function mapearClima(weathercode) {
+          const code = Number(weathercode);
+          if (code === 0) return { descripcion: 'Despejado', icono: esNoche() ? '🌙' : '☀️' };
+          if (code >= 1 && code <= 3) return { descripcion: 'Parcialmente nublado', icono: '☁️' };
+          if (code >= 45 && code <= 48) return { descripcion: 'Niebla', icono: '🌫️' };
+          if (code >= 51 && code <= 67) return { descripcion: 'Lluvia', icono: '🌧️' };
+          if (code >= 71 && code <= 77) return { descripcion: 'Nieve', icono: '❄️' };
+          if (code >= 80 && code <= 99) return { descripcion: 'Tormenta', icono: '⛈️' };
+          return { descripcion: 'Clima variable', icono: esNoche() ? '🌙' : '☀️' };
+        }
+
+        function actualizarHora() {
+          ensureWidgetExists();
+          const { time, icon } = getWidgetNodes();
+          if (!time) return;
+          time.textContent = new Date().toLocaleTimeString('es-UY');
+          if (icon && lastWeatherCode === 0) {
+            icon.textContent = esNoche() ? '🌙' : '☀️';
           }
         }
 
-        async function fetchWeather() {
+        function mostrarError(mensaje) {
+          ensureWidgetExists();
+          const { desc } = getWidgetNodes();
+          if (!desc) return;
+          desc.textContent = mensaje || 'Error al obtener clima.';
+          desc.classList.add('weather-error');
+        }
+
+        async function obtenerClima() {
           try {
-            const response = await fetch(API_URL, { cache: 'no-store' });
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const payload = await response.json();
-            if (!payload || !payload.current) throw new Error('Sin datos actuales');
-            lastWeatherData = payload.current;
-            renderWeather(payload.current);
+            ensureWidgetExists();
+            const response = await fetch(WEATHER_API_URL, { cache: 'no-store' });
+            if (!response.ok) {
+              throw new Error(`Error HTTP al consultar Open-Meteo: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const current = data && data.current ? data.current : null;
+            const temperatura = current ? current.temperature_2m : null;
+            const weathercode = current ? (current.weathercode ?? current.weather_code) : null;
+
+            if (temperatura === null || weathercode === null) {
+              console.error('Open-Meteo sin campos esperados:', data);
+              throw new Error('Respuesta sin current.temperature_2m o current.weathercode');
+            }
+
+            const { icon, temp, desc } = getWidgetNodes();
+            if (!icon || !temp || !desc) {
+              console.error('No se encontraron nodos del widget para pintar datos.');
+              return;
+            }
+
+            const mapped = mapearClima(weathercode);
+            lastWeatherCode = Number(weathercode);
+            icon.textContent = mapped.icono;
+            temp.textContent = `${Math.round(Number(temperatura))}°C`;
+            desc.textContent = mapped.descripcion;
+            desc.classList.remove('weather-error');
           } catch (error) {
-            console.error('Weather widget error:', error);
-            renderError('Error al obtener clima.');
+            console.error('Error en obtenerClima():', error);
+            mostrarError('No se pudo actualizar el clima.');
           }
         }
 
-        updateClock();
-        fetchWeather();
-        setInterval(updateClock, 1000);
-        setInterval(fetchWeather, 10 * 60 * 1000);
+        // Exponer para debug/manual desde consola.
+        window.obtenerClima = obtenerClima;
+
+        ensureWidgetExists();
+        actualizarHora();
+        obtenerClima();
+        setInterval(actualizarHora, 1000);
+        setInterval(obtenerClima, 10 * 60 * 1000);
       })();
     </script>
   </body>
