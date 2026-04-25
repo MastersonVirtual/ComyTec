@@ -4572,7 +4572,11 @@
         background: rgba(255,255,255,.9);
         border: 1px solid #e2e8f0;
         box-shadow: 0 10px 24px rgba(15, 23, 42, .10);
+        transition: transform 360ms ease, box-shadow 220ms ease;
+        transform: translateX(var(--capsule-shift, 0px));
       }
+      .content { --capsule-shift: 0px; }
+      .content.shift { --capsule-shift: 310px; }
       .main {
         max-width: 100% !important;
         width: 100%;
@@ -4711,6 +4715,16 @@
         gap: 12px;
         margin-bottom: 12px;
       }
+      .home-card-detail-actions {
+        display: inline-flex;
+        gap: 8px;
+      }
+      .home-card-status-menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
       .home-card-detail-head h2 {
         margin: 0;
         color: #0f172a;
@@ -4726,10 +4740,185 @@
         background: #f8fafc;
         padding: 12px;
       }
+      .sidebar {
+        background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(248,253,252,.9)) !important;
+        border-right: 1px solid rgba(0, 100, 101, .18) !important;
+        border-radius: 0 24px 24px 0;
+        box-shadow: 0 18px 34px rgba(15,23,42,.12) !important;
+        backdrop-filter: blur(10px) saturate(130%);
+      }
+      .sidebar-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: rgba(255,255,255,.75) !important;
+        border-bottom: 1px solid rgba(0, 100, 101, .15) !important;
+        border-radius: 0 18px 18px 0;
+      }
+      .sidebar-profile-avatar-wrap {
+        position: relative;
+        width: 52px;
+        height: 52px;
+        flex: 0 0 52px;
+      }
+      .sidebar-profile-avatar {
+        width: 100%;
+        height: 100%;
+        border-radius: 999px;
+        object-fit: cover;
+        border: 2px solid rgba(0,100,101,.2);
+        background: #fff;
+      }
+      .sidebar-online-dot {
+        position: absolute;
+        right: 2px;
+        bottom: 2px;
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        background: #22c55e;
+        border: 2px solid #fff;
+      }
+      .sidebar-header-title {
+        color: #ff8a2a !important;
+        font-weight: 800;
+        text-shadow: 0 1px 0 rgba(0,0,0,.18);
+      }
+      .sidebar-header-sub {
+        color: #ffffff !important;
+        font-weight: 700;
+        letter-spacing: .04em;
+      }
+      .menu-button, .submenu-button {
+        background: linear-gradient(180deg, rgba(0,100,101,.88), rgba(0,100,101,.76)) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(180,245,236,.35) !important;
+        border-radius: 999px !important;
+        box-shadow: 0 6px 14px rgba(15,23,42,.16) !important;
+      }
+      .menu-icon {
+        border-radius: 999px !important;
+        background: #e6f4f3 !important;
+        color: #006465 !important;
+        border: 1px solid rgba(0,100,101,.15);
+      }
+      .menu-button.active {
+        border-color: rgba(251,146,60,.75) !important;
+        box-shadow: 0 8px 18px rgba(251,146,60,.22) !important;
+      }
+      .menu-button:hover, .submenu-button:hover {
+        transform: translateX(3px);
+        background: linear-gradient(180deg, rgba(0,115,116,.92), rgba(0,98,99,.82)) !important;
+      }
+      .sidebar .menu-button span,
+      .sidebar .submenu-button span {
+        color: #ffffff !important;
+      }
+      .sidebar .menu-button .menu-icon,
+      .sidebar .submenu-button .menu-icon {
+        color: #006465 !important;
+      }
+      .sidebar .menu-arrow {
+        color: #d6fffa !important;
+        font-weight: 800;
+      }
+      .logout-btn {
+        border-radius: 999px !important;
+        background: #ffffff !important;
+        border: 1px solid rgba(0,100,101,.45) !important;
+        color: #006465 !important;
+        font-weight: 800 !important;
+      }
+      .logout-btn:hover {
+        color: #006465 !important;
+        border-color: rgba(0,100,101,.65) !important;
+        box-shadow: 0 8px 14px rgba(0,100,101,.16);
+      }
+      .sidebar-support-card {
+        background: #ffffff !important;
+        border: 1px solid rgba(0,100,101,.15) !important;
+        color: #0f172a !important;
+        box-shadow: 0 8px 16px rgba(15,23,42,.08) !important;
+        border-radius: 18px !important;
+        padding: 16px !important;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .sidebar-support-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .sidebar-support-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #ecf8f6;
+        color: #006465;
+        border: 1px solid rgba(0,100,101,.2);
+      }
+      .sidebar-support-icon i,
+      .sidebar-support-icon svg {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+      }
+      .sidebar-support-card h4 {
+        margin: 0;
+        color: #006465 !important;
+        font-size: .95rem;
+      }
+      .sidebar-support-card p {
+        margin: 0;
+        color: #3b5b64 !important;
+        font-size: .82rem;
+        line-height: 1.35;
+      }
+      .sidebar-support-links {
+        display: grid;
+        gap: 8px;
+        margin-top: auto;
+        padding-top: 12px;
+        border-top: 1px dashed rgba(0,100,101,.22);
+      }
+      .sidebar-support-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #0b6b69 !important;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: .82rem;
+        transition: transform .24s ease, color .24s ease;
+      }
+      .sidebar-support-link:hover {
+        color: #fb923c !important;
+        transform: translateX(3px);
+      }
+      .sidebar-support-link i,
+      .sidebar-support-link svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+      }
+      .sidebar-signature strong {
+        display: inline-flex;
+        border: 1px solid rgba(0,100,101,.2);
+        border-radius: 999px;
+        padding: 4px 10px;
+        background: rgba(255,255,255,.95);
+        color: #006465 !important;
+        font-weight: 700;
+      }
       @media (max-width: 980px) {
         .top-actions {
           left: 14px;
         }
+        .content.shift { --capsule-shift: 0px; }
         .main {
           padding-top: 70px !important;
         }
@@ -9223,6 +9412,7 @@
         const [bulkCatalogRawInput, setBulkCatalogRawInput] = useState(EXTRA_PRELOADED_SERVICES_RAW);
         const [bulkCatalogSyncing, setBulkCatalogSyncing] = useState(false);
         const [homeCardView, setHomeCardView] = useState({ title: '', items: [], charla: false });
+        const [homeCardStatusMenuOpen, setHomeCardStatusMenuOpen] = useState(false);
 
         function getStatusLabel(row) {
           return String(row?.status || row?.estado || '').trim().toLowerCase();
@@ -9642,6 +9832,17 @@
             return { ...card, items };
           });
         }, [visibleRows]);
+
+        function switchHomeCardStatus(cardTitle) {
+          const target = homeServiceCards.find((card) => card.title === cardTitle);
+          if (!target) return;
+          setHomeCardView({
+            title: target.title,
+            items: Array.isArray(target.items) ? target.items : [],
+            charla: !!target.charla,
+          });
+          setHomeCardStatusMenuOpen(false);
+        }
 
         const preloadedHistoryRows = useMemo(() => {
           if (hidePreloadedCatalog) return [];
@@ -10091,6 +10292,7 @@
             items: Array.isArray(card?.items) ? card.items : [],
             charla: !!card?.charla,
           });
+          setHomeCardStatusMenuOpen(false);
           setSelectedForm('home-card-view');
         }
 
@@ -13429,10 +13631,13 @@
           <div className="app-shell">
             <aside className={`sidebar ${menuOpen ? 'open' : ''}`}>
               <div className="sidebar-header">
-                <div className="sidebar-header-logo" aria-hidden="true" />
+                <div className="sidebar-profile-avatar-wrap">
+                  <img className="sidebar-profile-avatar" src={selectedProfileAvatar.src} alt={`Perfil ${selectedProfileAvatar.label}`} />
+                  <span className="sidebar-online-dot" aria-hidden="true" />
+                </div>
                 <div className="sidebar-header-text">
-                  <div className="sidebar-header-title">Masterson Seguridad</div>
-                  <div className="sidebar-header-sub">Administrador</div>
+                  <div className="sidebar-header-title">Masterson Segura</div>
+                  <div className="sidebar-header-sub">ADMINISTRADOR</div>
                 </div>
               </div>
               <div className="menu">
@@ -13486,8 +13691,31 @@
                 {!isCommercialUser && <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>}
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
                 <div className="sidebar-support-card">
-                  <h4>¿Necesitas ayuda?</h4>
-                  <p>Contactá al equipo de soporte interno desde Tickets para asistencia inmediata.</p>
+                  <div className="sidebar-support-head">
+                    <span className="sidebar-support-icon"><i data-lucide="headset" /></span>
+                    <h4>¿Necesitas ayuda?</h4>
+                  </div>
+                  <p>Contactá al equipo de soporte técnico y comercial por los siguientes canales.</p>
+                  <div className="sidebar-support-links">
+                    <a className="sidebar-support-link" href="mailto:mastersoncomercialytecnica@gmail.com">
+                      <i data-lucide="mail" />
+                      <span>mastersoncomercialytecnica@gmail.com</span>
+                    </a>
+                    <a
+                      className="sidebar-support-link"
+                      href="https://wa.me/59891909182"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(event) => {
+                        const popup = window.open('https://wa.me/59891909182', '_blank', 'noopener,noreferrer');
+                        if (!popup) window.location.href = 'tel:+59891909182';
+                        event.preventDefault();
+                      }}
+                    >
+                      <i data-lucide="phone-call" />
+                      <span>+598 91 909 182</span>
+                    </a>
+                  </div>
                 </div>
                 <div className="sidebar-signature" aria-label="signature" tabIndex={0}><strong>v2.0 | Powered by Alfonso Carballo</strong><div className="sidebar-signature-tooltip">Actualización 2.0: Orden de trabajo operativa GNS con transiciones validadas por etapa, checklist obligatorio para agendado, resolución de tickets con comentario + imágenes (pegar/arrastrar), y nuevos filtros de historial por administración y fecha de alta.</div></div>
               </div>
@@ -14286,15 +14514,11 @@
                                       <ul>
                                         {card.items.slice(0, 8).map((item) => (
                                           <li key={item.id}>
-                                            <button
-                                              type="button"
-                                              className="home-service-item-btn"
-                                              onClick={() => {
-                                                setSelectedForm('historial');
-                                                setSelectedService(item.sourceRow || null);
-                                                if (item.sourceRow) openHistoryRecord(item.sourceRow, { forceAction: card.charla ? 'Charla informativa' : null });
-                                              }}
-                                            >
+                                              <button
+                                                type="button"
+                                                className="home-service-item-btn"
+                                                onClick={() => openHomeCardView(card)}
+                                              >
                                               <small>{item.name}</small>
                                               {card.charla ? (
                                                 <div className="home-service-card-row-grid">
@@ -14371,8 +14595,20 @@
                   <section className="home-card-detail-shell">
                     <div className="home-card-detail-head">
                       <h2>{homeCardView.title || 'Detalle de cargas'}</h2>
-                      <button type="button" className="home-modern-action-btn" onClick={goToHomeView}>← Volver al inicio</button>
+                      <div className="home-card-detail-actions">
+                        <button type="button" className="home-modern-action-btn" onClick={() => setHomeCardStatusMenuOpen((prev) => !prev)}>Status ▾</button>
+                        <button type="button" className="home-modern-action-btn" onClick={goToHomeView}>← Volver al inicio</button>
+                      </div>
                     </div>
+                    {homeCardStatusMenuOpen && (
+                      <div className="home-card-status-menu">
+                        {homeServiceCards.map((card) => (
+                          <button key={`status-${card.title}`} type="button" className="home-modern-action-btn" onClick={() => switchHomeCardStatus(card.title)}>
+                            {card.title} ({card.items.length})
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <div className="home-card-detail-list">
                       {homeCardView.items.length === 0 ? (
                         <div className="home-service-empty">Sin registros para este módulo.</div>
@@ -14386,19 +14622,7 @@
                               <span>{homeCardView.charla ? 'Lugar de Reunión' : 'Tiempo de Instalación'}: <b>{homeCardView.charla ? (item.lugarReunion || '-') : (item.tiempoInstalacion || '-')}</b></span>
                               <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
                             </div>
-                            <div style={{ marginTop: 8 }}>
-                              <button
-                                type="button"
-                                className="home-service-footer-btn"
-                                onClick={() => {
-                                  setSelectedForm('historial');
-                                  setSelectedService(item.sourceRow || null);
-                                  if (item.sourceRow) openHistoryRecord(item.sourceRow, { forceAction: homeCardView.charla ? 'Charla informativa' : null });
-                                }}
-                              >
-                                Abrir detalle
-                              </button>
-                            </div>
+                            <div className="kv" style={{ marginTop: 8 }}><b>ID:</b> {item?.sourceRow?.clienteId || '-'}</div>
                           </article>
                         ))
                       )}
@@ -16157,7 +16381,7 @@
         if (window.__weatherWidgetInit) return;
         window.__weatherWidgetInit = true;
 
-        const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.419998&daily=sunrise,sunset&hourly=temperature_2m,precipitation,rain,cloud_cover_high,temperature_80m,temperature_120m,is_day&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain&timezone=America/Montevideo&past_days=0&forecast_days=7';
+        const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast?latitude=-34.90334&longitude=-56.1929&current=temperature_2m,relative_humidity_2m,is_day,precipitation,rain,showers,snowfall&hourly=temperature_2m,weather_code,cloud_cover_low,cloud_cover_mid,cloud_cover_high,visibility,wind_speed_10m,wind_speed_80m,soil_temperature_0cm,soil_temperature_6cm,rain,precipitation,precipitation_probability,apparent_temperature,relative_humidity_2m,dew_point_2m,temperature_1000hPa,relative_humidity_1000hPa,cloud_cover_1000hPa,cloud_cover_975hPa&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,rain_sum,showers_sum,precipitation_hours&timezone=America/Montevideo&forecast_days=7';
         let lastWeatherCode = null;
         let lastIsDay = null;
         let weatherFetchInProgress = false;
@@ -16223,12 +16447,16 @@
           const currentTime = String(current.time || '');
           const hourlyTime = Array.isArray(data?.hourly?.time) ? data.hourly.time : [];
           const hourlyCloud = Array.isArray(data?.hourly?.cloud_cover_high) ? data.hourly.cloud_cover_high : [];
+          const hourlyWeatherCode = Array.isArray(data?.hourly?.weather_code) ? data.hourly.weather_code : [];
           const hourlyIsDay = Array.isArray(data?.hourly?.is_day) ? data.hourly.is_day : [];
           if (currentTime && hourlyTime.length && hourlyCloud.length) {
             let idx = hourlyTime.indexOf(currentTime);
             if (idx < 0) {
               const hourKey = currentTime.slice(0, 13);
               idx = hourlyTime.findIndex((entry) => String(entry || '').slice(0, 13) === hourKey);
+            }
+            if (idx >= 0 && hourlyWeatherCode[idx] !== undefined) {
+              return mapearPorWeatherCode(hourlyWeatherCode[idx]);
             }
             if (idx >= 0 && hourlyCloud[idx] !== undefined) nubeAlta = Number(hourlyCloud[idx]) || 0;
             if (idx >= 0 && Number.isNaN(isDayCurrent) && hourlyIsDay[idx] !== undefined) {
