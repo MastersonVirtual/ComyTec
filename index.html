@@ -4561,7 +4561,7 @@
         position: sticky;
         top: 12px;
         z-index: 1200;
-        margin: 0 0 14px auto;
+        margin: 0 auto 14px 0;
         width: max-content;
         display: flex;
         align-items: center;
@@ -13381,13 +13381,8 @@
               </div>
               <div className="menu">
                 <button className={`menu-button ${effectiveSelectedForm === 'home' ? 'active' : ''}`} onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
-                <button className={`menu-button ${effectiveSelectedForm !== 'home' && effectiveSelectedForm !== 'tickets' ? 'active' : ''}`} onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">🧾</span><span>Órdenes de Servicio</span></button>
-                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">📌</span><span>Seguimientos</span></button>
                 <button className={`menu-button ${effectiveSelectedForm === 'tickets' ? 'active' : ''}`} onClick={() => { openTicketsView(); closeSidebar(); }}><span className="menu-icon">🎫</span><span>Tickets</span></button>
                 <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">🗃️</span><span>Base de datos</span></button>
-                <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}><span className="menu-icon">📊</span><span>Reportes</span></button>
-                <button className="menu-button" onClick={() => { setSelectedForm('historial-charlas'); closeSidebar(); }}><span className="menu-icon">📅</span><span>Calendario</span></button>
-                <button className="menu-button" onClick={() => { openProfileView(); closeSidebar(); }}><span className="menu-icon">⚙️</span><span>Configuración</span></button>
                 <div className="sidebar-divider" />
                 {!isMobile && (
                   <>
@@ -13405,7 +13400,6 @@
                       <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
                     </div>
                     {ENABLE_CLIENT_TRACKING_VIEW && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}><span className="menu-icon">👥</span><span>Vista Clientes</span></button>}
-                    <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}><span className="menu-icon">📊</span><span>Dashboard</span></button>
                   </>
                 )}
                 {canPreviewRoles && (
@@ -13452,6 +13446,9 @@
                 )}
                 <button className="topbar-action-btn menu-pill-btn" type="button" aria-label="Abrir menú lateral" onClick={toggleSidebar}>
                   <span className="topbar-action-icon"><i data-lucide="menu" /></span>
+                </button>
+                <button className="topbar-action-btn" type="button" aria-label="Volver al inicio" onClick={goToHomeView}>
+                  <span className="topbar-action-icon"><i data-lucide="house" /></span>
                 </button>
                 <div className="top-search" ref={desktopSearchRef}>
                   <button className="topbar-action-btn top-search-toggle" type="button" aria-label="Buscar" onClick={() => setDesktopSearchOpen((prev) => !prev)}>
