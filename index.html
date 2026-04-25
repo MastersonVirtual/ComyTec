@@ -4572,7 +4572,11 @@
         background: rgba(255,255,255,.9);
         border: 1px solid #e2e8f0;
         box-shadow: 0 10px 24px rgba(15, 23, 42, .10);
+        transition: transform 360ms ease, box-shadow 220ms ease;
+        transform: translateX(var(--capsule-shift, 0px));
       }
+      .content { --capsule-shift: 0px; }
+      .content.shift { --capsule-shift: 310px; }
       .main {
         max-width: 100% !important;
         width: 100%;
@@ -4736,10 +4740,98 @@
         background: #f8fafc;
         padding: 12px;
       }
+      .sidebar {
+        background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(248,253,252,.9)) !important;
+        border-right: 1px solid rgba(0, 100, 101, .18) !important;
+        border-radius: 0 24px 24px 0;
+        box-shadow: 0 18px 34px rgba(15,23,42,.12) !important;
+        backdrop-filter: blur(10px) saturate(130%);
+      }
+      .sidebar-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: rgba(255,255,255,.75) !important;
+        border-bottom: 1px solid rgba(0, 100, 101, .15) !important;
+        border-radius: 0 18px 18px 0;
+      }
+      .sidebar-profile-avatar-wrap {
+        position: relative;
+        width: 52px;
+        height: 52px;
+        flex: 0 0 52px;
+      }
+      .sidebar-profile-avatar {
+        width: 100%;
+        height: 100%;
+        border-radius: 999px;
+        object-fit: cover;
+        border: 2px solid rgba(0,100,101,.2);
+        background: #fff;
+      }
+      .sidebar-online-dot {
+        position: absolute;
+        right: 2px;
+        bottom: 2px;
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        background: #22c55e;
+        border: 2px solid #fff;
+      }
+      .sidebar-header-title {
+        color: #006465 !important;
+      }
+      .sidebar-header-sub {
+        color: #fb923c !important;
+      }
+      .menu-button, .submenu-button {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        border: 1px solid rgba(0,100,101,.15) !important;
+        border-radius: 999px !important;
+        box-shadow: 0 6px 14px rgba(15,23,42,.08) !important;
+      }
+      .menu-icon {
+        border-radius: 999px !important;
+        background: #e6f4f3 !important;
+        color: #006465 !important;
+        border: 1px solid rgba(0,100,101,.15);
+      }
+      .menu-button.active {
+        border-color: rgba(251,146,60,.55) !important;
+        box-shadow: 0 8px 18px rgba(251,146,60,.16) !important;
+      }
+      .menu-button:hover, .submenu-button:hover {
+        transform: translateX(3px);
+        background: #f8fffe !important;
+      }
+      .logout-btn {
+        border-radius: 999px !important;
+        background: #ffffff !important;
+        border: 1px solid rgba(0,100,101,.45) !important;
+        color: #006465 !important;
+      }
+      .sidebar-support-card {
+        background: #ffffff !important;
+        border: 1px solid rgba(0,100,101,.15) !important;
+        color: #0f172a !important;
+        box-shadow: 0 8px 16px rgba(15,23,42,.08) !important;
+      }
+      .sidebar-support-card p { color: #3b5b64 !important; }
+      .sidebar-signature strong {
+        display: inline-flex;
+        border: 1px solid rgba(0,100,101,.2);
+        border-radius: 999px;
+        padding: 4px 10px;
+        background: #ffffff;
+        color: #006465;
+      }
       @media (max-width: 980px) {
         .top-actions {
           left: 14px;
         }
+        .content.shift { --capsule-shift: 0px; }
         .main {
           padding-top: 70px !important;
         }
@@ -13452,10 +13544,13 @@
           <div className="app-shell">
             <aside className={`sidebar ${menuOpen ? 'open' : ''}`}>
               <div className="sidebar-header">
-                <div className="sidebar-header-logo" aria-hidden="true" />
+                <div className="sidebar-profile-avatar-wrap">
+                  <img className="sidebar-profile-avatar" src={selectedProfileAvatar.src} alt={`Perfil ${selectedProfileAvatar.label}`} />
+                  <span className="sidebar-online-dot" aria-hidden="true" />
+                </div>
                 <div className="sidebar-header-text">
-                  <div className="sidebar-header-title">Masterson Seguridad</div>
-                  <div className="sidebar-header-sub">Administrador</div>
+                  <div className="sidebar-header-title">Masterson Segura</div>
+                  <div className="sidebar-header-sub">ADMINISTRADOR</div>
                 </div>
               </div>
               <div className="menu">
