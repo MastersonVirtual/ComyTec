@@ -15806,8 +15806,9 @@
         if (window.__weatherWidgetInit) return;
         window.__weatherWidgetInit = true;
 
-        const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast?latitude=-34.9&longitude=-56.2&current=temperature_2m,weathercode&timezone=America/Montevideo';
+        const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&daily=sunrise,sunset&hourly=temperature_2m,precipitation,rain,cloud_cover_high,temperature_80m,temperature_120m,is_day&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain&timezone=America%2FSao_Paulo&past_days=0&forecast_days=7';
         let lastWeatherCode = null;
+        let lastIsDay = null;
 
         function getWidgetNodes() {
           return {
@@ -15839,11 +15840,12 @@
         }
 
         function esNoche() {
+          if (typeof lastIsDay === 'number') return lastIsDay !== 1;
           const hora = new Date().getHours();
           return hora < 6 || hora > 20;
         }
 
-        function mapearClima(weathercode) {
+        function mapearPorWeatherCode(weathercode) {
           const code = Number(weathercode);
           if (code === 0) return { descripcion: 'Despejado', icono: esNoche() ? '🌙' : '☀️' };
           if (code >= 1 && code <= 3) return { descripcion: 'Parcialmente nublado', icono: '☁️' };
@@ -15852,6 +15854,31 @@
           if (code >= 71 && code <= 77) return { descripcion: 'Nieve', icono: '❄️' };
           if (code >= 80 && code <= 99) return { descripcion: 'Tormenta', icono: '⛈️' };
           return { descripcion: 'Clima variable', icono: esNoche() ? '🌙' : '☀️' };
+        }
+
+        function mapearClima(data) {
+          const current = data && data.current ? data.current : {};
+          const weathercode = current.weathercode ?? current.weather_code;
+          if (weathercode !== undefined && weathercode !== null) return mapearPorWeatherCode(weathercode);
+
+          const lluvia = Number(current.rain || 0);
+          const precipitacion = Number(current.precipitation || 0);
+          const isDayCurrent = Number(current.is_day);
+          if (!Number.isNaN(isDayCurrent)) lastIsDay = isDayCurrent;
+
+          let nubeAlta = 0;
+          const currentTime = String(current.time || '');
+          const hourlyTime = Array.isArray(data?.hourly?.time) ? data.hourly.time : [];
+          const hourlyCloud = Array.isArray(data?.hourly?.cloud_cover_high) ? data.hourly.cloud_cover_high : [];
+          if (currentTime && hourlyTime.length && hourlyCloud.length) {
+            const idx = hourlyTime.indexOf(currentTime);
+            if (idx >= 0 && hourlyCloud[idx] !== undefined) nubeAlta = Number(hourlyCloud[idx]) || 0;
+          }
+
+          if (lluvia >= 4 || precipitacion >= 4) return { descripcion: 'Tormenta', icono: '⛈️' };
+          if (lluvia > 0 || precipitacion > 0) return { descripcion: 'Lluvia', icono: '🌧️' };
+          if (nubeAlta >= 50) return { descripcion: 'Parcialmente nublado', icono: '☁️' };
+          return { descripcion: 'Despejado', icono: esNoche() ? '🌙' : '☀️' };
         }
 
         function actualizarHora() {
@@ -15884,11 +15911,13 @@
             const current = data && data.current ? data.current : null;
             const temperatura = current ? current.temperature_2m : null;
             const weathercode = current ? (current.weathercode ?? current.weather_code) : null;
+            const isDayCurrent = current ? Number(current.is_day) : NaN;
 
-            if (temperatura === null || weathercode === null) {
-              console.error('Open-Meteo sin campos esperados:', data);
-              throw new Error('Respuesta sin current.temperature_2m o current.weathercode');
+            if (temperatura === null) {
+              console.error('Open-Meteo sin current.temperature_2m:', data);
+              throw new Error('Respuesta sin current.temperature_2m');
             }
+            if (!Number.isNaN(isDayCurrent)) lastIsDay = isDayCurrent;
 
             const { icon, temp, desc } = getWidgetNodes();
             if (!icon || !temp || !desc) {
@@ -15896,8 +15925,8 @@
               return;
             }
 
-            const mapped = mapearClima(weathercode);
-            lastWeatherCode = Number(weathercode);
+            const mapped = mapearClima(data);
+            lastWeatherCode = weathercode !== null && weathercode !== undefined ? Number(weathercode) : null;
             icon.textContent = mapped.icono;
             temp.textContent = `${Math.round(Number(temperatura))}°C`;
             desc.textContent = mapped.descripcion;
