@@ -748,6 +748,7 @@
         gap: 10px;
         width: min(220px, 100%);
         min-height: 120px;
+        justify-self: end;
       }
       .home-modern-avatar {
         width: 62px;
@@ -887,8 +888,20 @@
       .home-service-card li {
         border: 1px solid #e2ecea;
         border-radius: 10px;
-        padding: 8px 10px;
+        padding: 0;
         background: #f9fbfb;
+      }
+      .home-service-item-btn {
+        width: 100%;
+        border: 0;
+        background: transparent;
+        text-align: left;
+        padding: 8px 10px;
+        cursor: pointer;
+        border-radius: 10px;
+      }
+      .home-service-item-btn:hover {
+        background: #eef7f5;
       }
       .home-service-card li small {
         display: block;
@@ -6757,9 +6770,9 @@
       const GNS_WORKFLOW_TRANSITIONS = Object.freeze({
         'Pendiente de aprobación – Coordinación de Instalaciones': ['En proceso de instalación', 'Rechazado'],
         Rechazado: ['Pendiente de aprobación – Coordinación de Instalaciones'],
-        'En proceso de instalación': ['Alta de Servicio en configuración'],
-        'Alta de Servicio en configuración': ['Activo'],
-        Activo: [],
+        'En proceso de instalación': ['Alta de Servicio en configuración', 'Pendiente de aprobación – Coordinación de Instalaciones'],
+        'Alta de Servicio en configuración': ['Activo', 'En proceso de instalación'],
+        Activo: ['En proceso de instalación'],
       });
       const INSTALLATION_REQUIRED_TASKS = [
         { key: 'mailInicioInstalacion', label: 'Mail de inicio de instalación' },
@@ -6769,6 +6782,14 @@
         { key: 'pulsoPortero', label: 'Instalación de pulso de portero' },
         { key: 'agendaAlta', label: 'Agenda de alta' },
       ];
+      function resolveWorkflowOwner(stage) {
+        const current = String(stage || '').trim();
+        if (current === 'Rechazado' || current === 'Pendiente de aprobación – Coordinación de Instalaciones') return 'Comercial';
+        if (current === 'En proceso de instalación') return 'Instalaciones';
+        if (current === 'Alta de Servicio en configuración') return 'Atención al cliente';
+        if (current === 'Activo') return 'Operaciones';
+        return 'Operaciones';
+      }
 
       function normalizeServiceType(value) {
         const raw = String(value || '').trim();
@@ -9228,6 +9249,7 @@
               .map((row, idx) => ({
                 id: row.id || `${card.title}-${row.clienteId || 'sin-id'}-${idx}`,
                 name: resolveServiceName(row),
+                sourceRow: row,
                 status: getStatusLabel(row),
                 fechaCarga: resolveDateLabel(row),
                 tiempoInstalacion: resolveInstallationTime(row),
@@ -11139,7 +11161,7 @@
           const draft = workflowTransitionDrafts[serviceId] || getWorkflowDraftDefaults(service);
           const nextStage = normalizeWorkflowStage(draft.nextStage);
           if (!nextStage) {
-            setNotificacion({ mensaje: 'Seleccioná la siguiente etapa del workflow.', tipo: 'warn' });
+            setNotificacion({ mensaje: 'Seleccioná la siguiente etapa de la Orden de trabajo.', tipo: 'warn' });
             return;
           }
           if (!canTransitionWorkflowStage(currentStage, nextStage)) {
@@ -11195,7 +11217,7 @@
             workflowInstallTasks: draft.installTasks || {},
             workflowRejectionReason: nextStage === 'Rechazado' ? String(draft.rejectionReason || '').trim() : (nextStage === 'Pendiente de aprobación – Coordinación de Instalaciones' ? '' : (service.workflowRejectionReason || '')),
             workflowClientRecordCompleted: !!draft.clientRecordCompleted,
-            workflowCurrentOwner: nextStage === 'Rechazado' ? 'Comercial' : (nextStage === 'Pendiente de aprobación – Coordinación de Instalaciones' ? 'Coordinación de Instalaciones' : 'Operaciones'),
+            workflowCurrentOwner: resolveWorkflowOwner(nextStage),
             status: stageToOperationalStatus(nextStage),
             estado: stageToOperationalStatus(nextStage),
             actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
@@ -11212,13 +11234,13 @@
             }));
             void logRealtimeActivityEvent({
               usuario: currentUserName,
-              accion: `movió workflow a ${nextStage}`,
+              accion: `movió la Orden de trabajo a ${nextStage}`,
               clienteId: service.clienteId || '',
               detalle: draft.note || '',
             });
           } catch (error) {
-            console.error('Error actualizando workflow:', error);
-            setNotificacion({ mensaje: '✖ No se pudo actualizar la etapa del workflow.', tipo: 'error' });
+            console.error('Error actualizando orden de trabajo:', error);
+            setNotificacion({ mensaje: '✖ No se pudo actualizar la etapa de la Orden de trabajo.', tipo: 'error' });
           }
         }
 
@@ -11263,7 +11285,7 @@
             workflowAvailableNextStages: GNS_WORKFLOW_TRANSITIONS[nextStage] || [],
             workflowTimeline: [...existingTimeline, workflowEvent],
             workflowRejectionReason: normalizedAction === 'reject' ? rejectionReason : '',
-            workflowCurrentOwner: normalizedAction === 'reject' ? 'Comercial' : 'Operaciones',
+            workflowCurrentOwner: resolveWorkflowOwner(normalizedAction === 'reject' ? 'Rechazado' : 'En proceso de instalación'),
             status: stageToOperationalStatus(nextStage),
             estado: stageToOperationalStatus(nextStage),
             actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
@@ -11503,7 +11525,7 @@
               const shouldAppendWorkflowEvent = nextWorkflowStage !== currentWorkflowStage;
               payload.workflowStage = nextWorkflowStage;
               payload.workflowAvailableNextStages = GNS_WORKFLOW_TRANSITIONS[nextWorkflowStage] || [];
-              payload.workflowCurrentOwner = nextWorkflowStage === 'Rechazado' ? 'Comercial' : (nextWorkflowStage === 'Pendiente de aprobación – Coordinación de Instalaciones' ? 'Coordinación de Instalaciones' : 'Operaciones');
+              payload.workflowCurrentOwner = resolveWorkflowOwner(nextWorkflowStage);
               payload.workflowInstallTasks = payload.workflowInstallTasks || targetSource?.workflowInstallTasks || INSTALLATION_REQUIRED_TASKS.reduce((acc, task) => ({ ...acc, [task.key]: false }), {});
               payload.workflowRejectionReason = payload.workflowRejectionReason || targetSource?.workflowRejectionReason || '';
               payload.workflowClientRecordCompleted = !!(payload.workflowClientRecordCompleted || targetSource?.workflowClientRecordCompleted);
@@ -11550,7 +11572,7 @@
             const initialWorkflowStage = normalizeWorkflowStage(doc.workflowStage) || getDefaultWorkflowStage(tipoAccion);
             createPayload.workflowStage = initialWorkflowStage;
             createPayload.workflowAvailableNextStages = GNS_WORKFLOW_TRANSITIONS[initialWorkflowStage] || [];
-            createPayload.workflowCurrentOwner = initialWorkflowStage === 'Pendiente de aprobación – Coordinación de Instalaciones' ? 'Coordinación de Instalaciones' : 'Operaciones';
+            createPayload.workflowCurrentOwner = resolveWorkflowOwner(initialWorkflowStage);
             createPayload.workflowInstallTasks = INSTALLATION_REQUIRED_TASKS.reduce((acc, task) => ({ ...acc, [task.key]: false }), {});
             createPayload.workflowRejectionReason = '';
             createPayload.workflowClientRecordCompleted = false;
@@ -13058,7 +13080,7 @@
                 <button className="menu-button" onClick={openFuncionariosView}><span className="menu-icon">🧑‍💼</span><span>Funcionarios</span></button>
                 {!isCommercialUser && <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>}
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
-                <div className="sidebar-signature" aria-label="signature" tabIndex={0}><strong>v2.0 | Powered by Alfonso Carballo</strong><div className="sidebar-signature-tooltip">Actualización 2.0: workflow operativo GNS con transiciones validadas por etapa, checklist obligatorio para agendado, resolución de tickets con comentario + imágenes (pegar/arrastrar), y nuevos filtros de historial por administración y fecha de alta.</div></div>
+                <div className="sidebar-signature" aria-label="signature" tabIndex={0}><strong>v2.0 | Powered by Alfonso Carballo</strong><div className="sidebar-signature-tooltip">Actualización 2.0: Orden de trabajo operativa GNS con transiciones validadas por etapa, checklist obligatorio para agendado, resolución de tickets con comentario + imágenes (pegar/arrastrar), y nuevos filtros de historial por administración y fecha de alta.</div></div>
               </div>
             </aside>
 
@@ -13920,7 +13942,7 @@
                           <div className="home-modern-actions">
                             <button type="button" className="home-modern-action-btn primary" onClick={() => selectAction('Nuevo Servicio')}>+ Nuevo servicio</button>
                             <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('historial')}>Base de datos</button>
-                            <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('tickets')}>Abrir tickets</button>
+                            <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('tickets')}>Tickets</button>
                           </div>
                         </div>
                         <div className="home-modern-user">
@@ -13945,22 +13967,32 @@
                               <ul>
                                 {card.items.slice(0, 8).map((item) => (
                                   <li key={item.id}>
-                                    <small>{item.name}</small>
-                                    {card.charla ? (
-                                      <div className="home-service-card-row-grid">
-                                        <span>Fecha de Charla: <b>{item.fechaCharla}</b></span>
-                                        <span>Hora: <b>{item.horaCharla}</b></span>
-                                        <span>Lugar de Reunión: <b>{item.lugarReunion}</b></span>
-                                        <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
-                                      </div>
-                                    ) : (
-                                      <div className="home-service-card-row-grid">
-                                        <span>Fecha de Carga: <b>{item.fechaCarga}</b></span>
-                                        <span>Tiempo de Instalación: <b>{item.tiempoInstalacion}</b></span>
-                                        <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
-                                        <span>Fecha de Alta: <b>{item.fechaAlta}</b></span>
-                                      </div>
-                                    )}
+                                    <button
+                                      type="button"
+                                      className="home-service-item-btn"
+                                      onClick={() => {
+                                        setSelectedForm('historial');
+                                        setSelectedService(item.sourceRow || null);
+                                        if (item.sourceRow) openHistoryRecord(item.sourceRow, { forceAction: card.charla ? 'Charla informativa' : null });
+                                      }}
+                                    >
+                                      <small>{item.name}</small>
+                                      {card.charla ? (
+                                        <div className="home-service-card-row-grid">
+                                          <span>Fecha de Charla: <b>{item.fechaCharla}</b></span>
+                                          <span>Hora: <b>{item.horaCharla}</b></span>
+                                          <span>Lugar de Reunión: <b>{item.lugarReunion}</b></span>
+                                          <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
+                                        </div>
+                                      ) : (
+                                        <div className="home-service-card-row-grid">
+                                          <span>Fecha de Carga: <b>{item.fechaCarga}</b></span>
+                                          <span>Tiempo de Instalación: <b>{item.tiempoInstalacion}</b></span>
+                                          <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
+                                          <span>Fecha de Alta: <b>{item.fechaAlta}</b></span>
+                                        </div>
+                                      )}
+                                    </button>
                                   </li>
                                 ))}
                               </ul>
@@ -15032,9 +15064,9 @@
                                 <div className="service-detail-kpi" style={{ gridColumn: '1 / -1' }}><small>📍 Dirección</small><strong>{detailService.direccionServicio || detailService.direccion || '-'}</strong></div>
                               </div>
                               <div className="service-coord-detail-card" style={{ marginTop: 10 }}>
-                                <h4 style={{ margin: '0 0 8px 0' }}>Workflow Operativo GNS</h4>
+                                <h4 style={{ margin: '0 0 8px 0' }}>Orden de trabajo (flujo operativo)</h4>
                                 <div className="hint" style={{ marginBottom: 10 }}>
-                                  Flujo: <b>Pendiente de aprobación</b> → <b>En proceso de instalación</b> → <b>Alta de Servicio en configuración</b> → <b>Activo</b>.
+                                  Recorrido sugerido del equipo: <b>Comercial</b> → <b>Instalaciones</b> → <b>Atención al cliente</b> → <b>Operaciones</b>. También se puede devolver etapas para correcciones.
                                 </div>
                                 {detailWorkflowStage === 'Pendiente de aprobación – Coordinación de Instalaciones'
                                   && (String(detailService.tipoAccion || '').trim() === 'Nuevo Servicio' || String(detailService.formulario || '').trim() === 'nuevo-servicio-optimizado') ? (
