@@ -772,6 +772,8 @@
       }
       #weather-widget .weather-icon {
         font-size: 1.4rem;
+        display: inline-flex;
+        will-change: transform;
       }
       #weather-widget .weather-temp {
         font-size: 1.35rem;
@@ -785,7 +787,44 @@
         margin-top: 7px;
         font-weight: 700;
         color: #0b4e49;
-        font-size: .86rem;
+        font-size: 1rem;
+      }
+      #weather-widget .weather-icon.weather-anim-sun {
+        animation: weatherSpin 8s linear infinite;
+      }
+      #weather-widget .weather-icon.weather-anim-cloud {
+        animation: weatherFloatCloud 3.8s ease-in-out infinite;
+      }
+      #weather-widget .weather-icon.weather-anim-rain,
+      #weather-widget .weather-icon.weather-anim-storm,
+      #weather-widget .weather-icon.weather-anim-snow {
+        animation: weatherRainBob 1.9s ease-in-out infinite;
+      }
+      #weather-widget .weather-icon.weather-anim-moon {
+        animation: weatherMoonGlow 2.8s ease-in-out infinite;
+      }
+      #weather-widget .weather-icon.weather-anim-fog {
+        animation: weatherFogDrift 4.4s ease-in-out infinite;
+      }
+      @keyframes weatherSpin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @keyframes weatherFloatCloud {
+        0%, 100% { transform: translateX(0); }
+        50% { transform: translateX(5px); }
+      }
+      @keyframes weatherRainBob {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(3px); }
+      }
+      @keyframes weatherMoonGlow {
+        0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(59,130,246,0)); }
+        50% { transform: scale(1.08); filter: drop-shadow(0 0 5px rgba(59,130,246,.35)); }
+      }
+      @keyframes weatherFogDrift {
+        0%, 100% { transform: translateX(0); opacity: 1; }
+        50% { transform: translateX(4px); opacity: .75; }
       }
       #weather-widget .weather-error {
         color: #b91c1c;
@@ -16489,9 +16528,10 @@
           ensureWidgetExists();
           const { time, icon, temp, desc } = getWidgetNodes();
           if (!time) return;
-          time.textContent = new Date().toLocaleTimeString('es-UY');
+          time.textContent = new Date().toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
           if (icon && lastWeatherCode === 0) {
             icon.textContent = esNoche() ? '🌙' : '☀️';
+            applyWeatherAnimation(icon, icon.textContent);
           }
           const stillLoading = String(temp?.textContent || '').includes('--') || /cargando clima/i.test(String(desc?.textContent || ''));
           if (stillLoading && !weatherFetchInProgress && (Date.now() - lastWeatherFetchAt) > 15000) {
@@ -16505,6 +16545,27 @@
           if (!desc) return;
           desc.textContent = mensaje || 'Error al obtener clima.';
           desc.classList.add('weather-error');
+        }
+
+        function applyWeatherAnimation(iconNode, iconEmoji) {
+          if (!iconNode) return;
+          iconNode.classList.remove(
+            'weather-anim-sun',
+            'weather-anim-cloud',
+            'weather-anim-rain',
+            'weather-anim-storm',
+            'weather-anim-snow',
+            'weather-anim-moon',
+            'weather-anim-fog'
+          );
+          const emoji = String(iconEmoji || '').trim();
+          if (emoji === '☀️') iconNode.classList.add('weather-anim-sun');
+          else if (emoji === '☁️') iconNode.classList.add('weather-anim-cloud');
+          else if (emoji === '🌧️') iconNode.classList.add('weather-anim-rain');
+          else if (emoji === '⛈️') iconNode.classList.add('weather-anim-storm');
+          else if (emoji === '❄️') iconNode.classList.add('weather-anim-snow');
+          else if (emoji === '🌙') iconNode.classList.add('weather-anim-moon');
+          else if (emoji === '🌫️') iconNode.classList.add('weather-anim-fog');
         }
 
         async function obtenerClima() {
@@ -16539,6 +16600,7 @@
             const mapped = mapearClima(data);
             lastWeatherCode = weathercode !== null && weathercode !== undefined ? Number(weathercode) : null;
             icon.textContent = mapped.icono;
+            applyWeatherAnimation(icon, mapped.icono);
             temp.textContent = `${Math.round(Number(temperatura))}°C`;
             desc.textContent = mapped.descripcion;
             desc.classList.remove('weather-error');
