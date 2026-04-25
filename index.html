@@ -893,12 +893,20 @@
         font-size: .78rem;
         font-weight: 600;
       }
-      .home-service-card li b {
-        margin-top: 4px;
-        display: inline-flex;
-        color: #6b7280;
+      .home-service-card-row-grid {
+        margin-top: 6px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 5px 8px;
+      }
+      .home-service-card-row-grid span {
+        font-size: .68rem;
+        color: #4b5563;
+      }
+      .home-service-card-row-grid b {
+        color: #111827;
         font-size: .7rem;
-        font-weight: 500;
+        font-weight: 700;
       }
       .home-service-empty {
         color: #6b7280;
@@ -9104,7 +9112,7 @@
             { title: 'Agregado', actions: ['Adicionales'] },
             { title: 'Movimiento de Obra', actions: ['Movimiento de obra'] },
             { title: 'Baja de Servicio', actions: ['Baja'] },
-            { title: 'Charlar', actions: ['Charla informativa'] },
+            { title: 'Charlas Informativas', actions: ['Charla informativa'], charla: true },
           ];
 
           const resolveTime = (row) => {
@@ -9131,6 +9139,32 @@
             );
             return candidate ? candidate.toLocaleDateString('es-UY') : 'Sin fecha';
           };
+          const resolveTimeLabel = (row) => {
+            const timeRaw = row.horario || row.horaCharla || row.hora || '';
+            if (timeRaw) return String(timeRaw);
+            const candidate = parseServiceDate(row.fechaHoraCharla || row.creadoEn || row.actualizadoEn);
+            return candidate ? candidate.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '-';
+          };
+          const resolveInstallationTime = (row) => String(
+            row.plazoInstalacion
+            || row.tiempoInstalacion
+            || row.tiempoInstalación
+            || row.tiempoDeInstalacion
+            || row.duracionInstalacion
+            || row.duracionNuevoContratoMeses
+            || row.fechaTrabajoRealizado
+            || '-'
+          ).trim() || '-';
+          const resolveFechaAlta = (row) => {
+            const candidate = parseServiceDate(
+              row.fechaAltaServicio
+              || row.fechaAltaAdicional
+              || row.fechaAlta
+              || row.fechaEspecificaInicio
+              || row.fechaTrabajoRealizado
+            );
+            return candidate ? candidate.toLocaleDateString('es-UY') : 'Sin fecha';
+          };
 
           const resolveServiceName = (row) => String(
             row.nombreServicio
@@ -9151,7 +9185,12 @@
                 id: row.id || `${card.title}-${row.clienteId || 'sin-id'}-${idx}`,
                 name: resolveServiceName(row),
                 status: getStatusLabel(row),
-                date: resolveDateLabel(row),
+                fechaCarga: resolveDateLabel(row),
+                tiempoInstalacion: resolveInstallationTime(row),
+                fechaAlta: resolveFechaAlta(row),
+                fechaCharla: resolveDateLabel(row),
+                horaCharla: resolveTimeLabel(row),
+                lugarReunion: String(row.lugarReunion || row.lugar || row.ubicacion || row.ubicación || '-').trim() || '-',
               }));
             return { ...card, items };
           });
@@ -13863,7 +13902,21 @@
                                 {card.items.slice(0, 8).map((item) => (
                                   <li key={item.id}>
                                     <small>{item.name}</small>
-                                    <b>{item.status || 'Pendiente'} · {item.date}</b>
+                                    {card.charla ? (
+                                      <div className="home-service-card-row-grid">
+                                        <span>Fecha de Charla: <b>{item.fechaCharla}</b></span>
+                                        <span>Hora: <b>{item.horaCharla}</b></span>
+                                        <span>Lugar de Reunión: <b>{item.lugarReunion}</b></span>
+                                        <span>Status: <b>{item.status || 'Pendiente'}</b></span>
+                                      </div>
+                                    ) : (
+                                      <div className="home-service-card-row-grid">
+                                        <span>Fecha de Carga: <b>{item.fechaCarga}</b></span>
+                                        <span>Tiempo de Instalación: <b>{item.tiempoInstalacion}</b></span>
+                                        <span>Status: <b>{item.status || 'Pendiente'}</b></span>
+                                        <span>Fecha de Alta: <b>{item.fechaAlta}</b></span>
+                                      </div>
+                                    )}
                                   </li>
                                 ))}
                               </ul>
