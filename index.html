@@ -738,13 +738,58 @@
         color: #fff;
       }
       .home-modern-user {
-        border-radius: 16px;
+        border-radius: 20px;
         border: 1px solid #e5e7eb;
         background: #f9fafb;
-        padding: 12px;
+        padding: 14px;
+        display: flex;
+        align-items: flex-start;
+        align-self: flex-start;
+        gap: 10px;
+        width: min(220px, 100%);
+        min-height: 120px;
+        justify-self: end;
+      }
+      .home-side-stack {
+        display: grid;
+        gap: 10px;
+        justify-items: end;
+      }
+      #weather-widget {
+        width: min(220px, 100%);
+        border-radius: 16px;
+        border: 1px solid #d9ece9;
+        background: linear-gradient(160deg, #ffffff, #f3fbf9);
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+        padding: 10px 12px;
+        color: #0f172a;
+      }
+      #weather-widget .weather-head {
         display: flex;
         align-items: center;
-        gap: 10px;
+        justify-content: space-between;
+        margin-bottom: 6px;
+      }
+      #weather-widget .weather-icon {
+        font-size: 1.4rem;
+      }
+      #weather-widget .weather-temp {
+        font-size: 1.35rem;
+        font-weight: 800;
+      }
+      #weather-widget .weather-desc {
+        color: #475569;
+        font-size: .8rem;
+      }
+      #weather-widget .weather-time {
+        margin-top: 7px;
+        font-weight: 700;
+        color: #0b4e49;
+        font-size: .86rem;
+      }
+      #weather-widget .weather-error {
+        color: #b91c1c;
+        font-size: .78rem;
       }
       .home-modern-avatar {
         width: 62px;
@@ -846,12 +891,259 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
       }
+      .home-service-cards-board {
+        margin-top: 18px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(220px, 1fr));
+        gap: 14px;
+      }
+      .home-service-card {
+        background: #ffffff;
+        border: 1px solid #d6e6e4;
+        border-radius: 18px;
+        box-shadow: 0 16px 30px rgba(15, 23, 42, .08);
+        padding: 14px 14px 12px;
+        color: #1f2937;
+        display: flex;
+        flex-direction: column;
+        min-height: 190px;
+      }
+      .home-service-card-content {
+        flex: 1;
+      }
+      .home-service-footer-btn {
+        margin-top: 10px;
+        width: 100%;
+        border: 1px solid #d7e7e5;
+        background: #fff;
+        border-radius: 11px;
+        min-height: 36px;
+        color: #0b6b69;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .home-service-footer-btn:hover { background: #f0fbf8; }
+      .home-service-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        margin-bottom: 12px;
+      }
+      .home-service-card-head strong {
+        font-size: 1rem;
+        color: #0f172a;
+      }
+      .home-service-card ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .home-service-card li {
+        border: 1px solid #e2ecea;
+        border-radius: 10px;
+        padding: 0;
+        background: #f9fbfb;
+      }
+      .home-service-item-btn {
+        width: 100%;
+        border: 0;
+        background: transparent;
+        text-align: left;
+        padding: 8px 10px;
+        cursor: pointer;
+        border-radius: 10px;
+      }
+      .home-service-item-btn:hover {
+        background: #eef7f5;
+      }
+      .home-service-card li small {
+        display: block;
+        color: #111827;
+        font-size: .78rem;
+        font-weight: 600;
+      }
+      .home-service-card-row-grid {
+        margin-top: 6px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 5px 8px;
+      }
+      .home-service-card-row-grid span {
+        font-size: .68rem;
+        color: #4b5563;
+      }
+      .home-service-card-row-grid b {
+        color: #111827;
+        font-size: .7rem;
+        font-weight: 700;
+      }
+      .home-status {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 1px 8px;
+        border: 1px solid transparent;
+      }
+      .home-status.pending {
+        color: #b91c1c;
+        background: #fee2e2;
+        border-color: #fecaca;
+      }
+      .home-status.progress {
+        color: #1d4ed8;
+        background: #dbeafe;
+        border-color: #bfdbfe;
+      }
+      .home-status.done {
+        color: #047857;
+        background: #d1fae5;
+        border-color: #a7f3d0;
+      }
+      .home-status.waiting {
+        color: #a16207;
+        background: #fef3c7;
+        border-color: #fde68a;
+      }
+      .home-status.neutral {
+        color: #374151;
+        background: #e5e7eb;
+        border-color: #d1d5db;
+      }
+      .home-service-empty {
+        color: #6b7280;
+        font-size: .8rem;
+        border: 1px dashed #d5e5e3;
+        border-radius: 10px;
+        padding: 9px 10px;
+        background: #fbfdfc;
+      }
+      .dashboard-main-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 300px;
+        gap: 14px;
+        align-items: start;
+      }
+      .dashboard-main-column {
+        display: grid;
+        gap: 14px;
+      }
+      .dashboard-right-panel {
+        display: grid;
+        gap: 12px;
+        position: sticky;
+        top: 86px;
+      }
+      .dash-side-card {
+        border-radius: 16px;
+        border: 1px solid #deece9;
+        background: #fff;
+        padding: 12px;
+        box-shadow: 0 10px 22px rgba(15, 23, 42, .08);
+      }
+      .dash-side-card h4 {
+        margin: 0 0 8px;
+        color: #0f172a;
+      }
+      .dash-kpi-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: .85rem;
+        margin-bottom: 6px;
+        color: #334155;
+      }
+      .dash-activity-mini {
+        display: grid;
+        gap: 7px;
+      }
+      .dash-activity-mini-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: .78rem;
+        color: #334155;
+        border-bottom: 1px dashed #e2ecea;
+        padding-bottom: 6px;
+      }
+      .dash-activity-mini-item:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+      .home-hero-illustration {
+        display: grid;
+        place-items: center;
+        min-height: 148px;
+        border-radius: 18px;
+        background: radial-gradient(circle at 20% 20%, rgba(78, 227, 209, .35), transparent 58%), linear-gradient(145deg, #eef8f7, #f8fbfb);
+        border: 1px solid #d8ebe7;
+        color: #0b6b69;
+      }
+      .home-hero-illustration i {
+        width: 72px;
+        height: 72px;
+      }
+      @media (max-width: 1280px) {
+        .home-service-cards-board { grid-template-columns: repeat(2, minmax(220px, 1fr)); }
+        .dashboard-main-layout { grid-template-columns: 1fr; }
+        .dashboard-right-panel { position: static; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+      }
+      @media (max-width: 760px) {
+        .home-service-cards-board { grid-template-columns: 1fr; }
+      }
+      .menu-button.active {
+        background: linear-gradient(180deg, rgba(78,227,209,.34), rgba(78,227,209,.17));
+        border-color: rgba(78,227,209,.55);
+      }
+      .sidebar-support-card {
+        margin-top: 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,.22);
+        background: rgba(255,255,255,.08);
+        padding: 11px;
+        color: #e6fffb;
+      }
+      .sidebar-support-card h4 {
+        margin: 0 0 6px;
+        font-size: .9rem;
+      }
+      .sidebar-support-card p {
+        margin: 0;
+        font-size: .78rem;
+        color: #c7ece7;
+      }
       .home-modern-chart {
         border: 1px solid #e5e7eb;
         border-radius: 18px;
         background: #ffffff;
         box-shadow: 0 10px 24px rgba(17, 24, 39, 0.06);
         padding: 14px;
+      }
+      @media (min-width: 1024px) {
+        body { background: #f5f7f9; }
+        .sidebar {
+          transform: translateX(-105%);
+          width: 300px;
+        }
+        .sidebar.open { transform: translateX(0); }
+        .content { margin-left: 0; width: 100%; }
+        .topbar {
+          background: transparent;
+          border-bottom: 0;
+          box-shadow: none;
+          border-radius: 0;
+          padding: 12px 18px;
+        }
+        .top-titles { display: none !important; }
+        .topbar-actions {
+          margin-left: auto;
+          background: #fff;
+          border-radius: 18px;
+          border: 1px solid #e5ecf0;
+          box-shadow: 0 10px 24px rgba(15, 23, 42, .08);
+          padding: 6px;
+        }
       }
       .home-modern-chart h3 {
         margin: 0 0 10px;
@@ -6652,9 +6944,9 @@
       const GNS_WORKFLOW_TRANSITIONS = Object.freeze({
         'Pendiente de aprobación – Coordinación de Instalaciones': ['En proceso de instalación', 'Rechazado'],
         Rechazado: ['Pendiente de aprobación – Coordinación de Instalaciones'],
-        'En proceso de instalación': ['Alta de Servicio en configuración'],
-        'Alta de Servicio en configuración': ['Activo'],
-        Activo: [],
+        'En proceso de instalación': ['Alta de Servicio en configuración', 'Pendiente de aprobación – Coordinación de Instalaciones'],
+        'Alta de Servicio en configuración': ['Activo', 'En proceso de instalación'],
+        Activo: ['En proceso de instalación'],
       });
       const INSTALLATION_REQUIRED_TASKS = [
         { key: 'mailInicioInstalacion', label: 'Mail de inicio de instalación' },
@@ -6664,6 +6956,14 @@
         { key: 'pulsoPortero', label: 'Instalación de pulso de portero' },
         { key: 'agendaAlta', label: 'Agenda de alta' },
       ];
+      function resolveWorkflowOwner(stage) {
+        const current = String(stage || '').trim();
+        if (current === 'Rechazado' || current === 'Pendiente de aprobación – Coordinación de Instalaciones') return 'Comercial';
+        if (current === 'En proceso de instalación') return 'Instalaciones';
+        if (current === 'Alta de Servicio en configuración') return 'Atención al cliente';
+        if (current === 'Activo') return 'Operaciones';
+        return 'Operaciones';
+      }
 
       function normalizeServiceType(value) {
         const raw = String(value || '').trim();
@@ -7669,6 +7969,15 @@
         if (v.includes('curso') || v.includes('proceso') || v.includes('ongoing') || v.includes('complet') || v.includes('finaliz')) return 'chip status-ongoing';
         if (v.includes('pausa') || v.includes('cancel') || v.includes('espera') || v.includes('pend')) return 'chip status-pausa';
         return 'chip status-default';
+      }
+
+      function homeStatusClass(value) {
+        const raw = String(value || '').toLowerCase();
+        if (raw.includes('pend')) return 'home-status pending';
+        if (raw.includes('proceso') || raw.includes('instal') || raw.includes('curso')) return 'home-status progress';
+        if (raw.includes('esper')) return 'home-status waiting';
+        if (raw.includes('finaliz') || raw.includes('complet') || raw.includes('activ') || raw.includes('realiz')) return 'home-status done';
+        return 'home-status neutral';
       }
 
       function LoginScreen() {
@@ -9032,6 +9341,99 @@
           });
           const maxValue = Math.max(1, ...Object.values(base));
           return { counts: base, maxValue };
+        }, [visibleRows]);
+
+        const homeServiceCards = useMemo(() => {
+          const cardDefs = [
+            { title: 'Nuevo Servicios', actions: ['Nuevo Servicio'] },
+            { title: 'Novación', actions: ['Novación'] },
+            { title: 'Obra', actions: ['Obra'] },
+            { title: 'Agregado', actions: ['Adicionales'] },
+            { title: 'Movimiento de Obra', actions: ['Movimiento de obra'] },
+            { title: 'Baja de Servicio', actions: ['Baja'] },
+            { title: 'Charlas Informativas', actions: ['Charla informativa'], charla: true },
+          ];
+
+          const resolveTime = (row) => {
+            const candidate = parseServiceDate(
+              row.creadoEn
+              || row.actualizadoEn
+              || row.fechaIngresoDatos
+              || row.fechaIngresoAuto
+              || row.fechaAltaServicio
+              || row.fechaAlta
+              || row.fechaEspecificaInicio
+            );
+            return candidate instanceof Date && !Number.isNaN(candidate.getTime()) ? candidate.getTime() : 0;
+          };
+
+          const resolveDateLabel = (row) => {
+            const candidate = parseServiceDate(
+              row.fechaIngresoDatos
+              || row.fechaIngresoAuto
+              || row.fechaAltaServicio
+              || row.fechaAlta
+              || row.fechaEspecificaInicio
+              || row.creadoEn
+            );
+            return candidate ? candidate.toLocaleDateString('es-UY') : 'Sin fecha';
+          };
+          const resolveTimeLabel = (row) => {
+            const timeRaw = row.horario || row.horaCharla || row.hora || '';
+            if (timeRaw) return String(timeRaw);
+            const candidate = parseServiceDate(row.fechaHoraCharla || row.creadoEn || row.actualizadoEn);
+            return candidate ? candidate.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '-';
+          };
+          const resolveInstallationTime = (row) => String(
+            row.plazoInstalacion
+            || row.tiempoInstalacion
+            || row.tiempoInstalación
+            || row.tiempoDeInstalacion
+            || row.duracionInstalacion
+            || row.duracionNuevoContratoMeses
+            || row.fechaTrabajoRealizado
+            || '-'
+          ).trim() || '-';
+          const resolveFechaAlta = (row) => {
+            const candidate = parseServiceDate(
+              row.fechaAltaServicio
+              || row.fechaAltaAdicional
+              || row.fechaAlta
+              || row.fechaEspecificaInicio
+              || row.fechaTrabajoRealizado
+            );
+            return candidate ? candidate.toLocaleDateString('es-UY') : 'Sin fecha';
+          };
+
+          const resolveServiceName = (row) => String(
+            row.nombreServicio
+            || row.razonSocial
+            || row.nombreEdificio
+            || row.nombre
+            || row.cliente
+            || row.clienteId
+            || 'Servicio sin nombre'
+          ).trim();
+
+          return cardDefs.map((card) => {
+            const items = visibleRows
+              .filter((row) => card.actions.includes(String(row.tipoAccion || '').trim()))
+              .slice()
+              .sort((a, b) => resolveTime(b) - resolveTime(a))
+              .map((row, idx) => ({
+                id: row.id || `${card.title}-${row.clienteId || 'sin-id'}-${idx}`,
+                name: resolveServiceName(row),
+                sourceRow: row,
+                status: getStatusLabel(row),
+                fechaCarga: resolveDateLabel(row),
+                tiempoInstalacion: resolveInstallationTime(row),
+                fechaAlta: resolveFechaAlta(row),
+                fechaCharla: resolveDateLabel(row),
+                horaCharla: resolveTimeLabel(row),
+                lugarReunion: String(row.lugarReunion || row.lugar || row.ubicacion || row.ubicación || '-').trim() || '-',
+              }));
+            return { ...card, items };
+          });
         }, [visibleRows]);
 
         const preloadedHistoryRows = useMemo(() => {
@@ -10933,7 +11335,7 @@
           const draft = workflowTransitionDrafts[serviceId] || getWorkflowDraftDefaults(service);
           const nextStage = normalizeWorkflowStage(draft.nextStage);
           if (!nextStage) {
-            setNotificacion({ mensaje: 'Seleccioná la siguiente etapa del workflow.', tipo: 'warn' });
+            setNotificacion({ mensaje: 'Seleccioná la siguiente etapa de la Orden de trabajo.', tipo: 'warn' });
             return;
           }
           if (!canTransitionWorkflowStage(currentStage, nextStage)) {
@@ -10989,7 +11391,7 @@
             workflowInstallTasks: draft.installTasks || {},
             workflowRejectionReason: nextStage === 'Rechazado' ? String(draft.rejectionReason || '').trim() : (nextStage === 'Pendiente de aprobación – Coordinación de Instalaciones' ? '' : (service.workflowRejectionReason || '')),
             workflowClientRecordCompleted: !!draft.clientRecordCompleted,
-            workflowCurrentOwner: nextStage === 'Rechazado' ? 'Comercial' : (nextStage === 'Pendiente de aprobación – Coordinación de Instalaciones' ? 'Coordinación de Instalaciones' : 'Operaciones'),
+            workflowCurrentOwner: resolveWorkflowOwner(nextStage),
             status: stageToOperationalStatus(nextStage),
             estado: stageToOperationalStatus(nextStage),
             actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
@@ -11006,13 +11408,13 @@
             }));
             void logRealtimeActivityEvent({
               usuario: currentUserName,
-              accion: `movió workflow a ${nextStage}`,
+              accion: `movió la Orden de trabajo a ${nextStage}`,
               clienteId: service.clienteId || '',
               detalle: draft.note || '',
             });
           } catch (error) {
-            console.error('Error actualizando workflow:', error);
-            setNotificacion({ mensaje: '✖ No se pudo actualizar la etapa del workflow.', tipo: 'error' });
+            console.error('Error actualizando orden de trabajo:', error);
+            setNotificacion({ mensaje: '✖ No se pudo actualizar la etapa de la Orden de trabajo.', tipo: 'error' });
           }
         }
 
@@ -11057,7 +11459,7 @@
             workflowAvailableNextStages: GNS_WORKFLOW_TRANSITIONS[nextStage] || [],
             workflowTimeline: [...existingTimeline, workflowEvent],
             workflowRejectionReason: normalizedAction === 'reject' ? rejectionReason : '',
-            workflowCurrentOwner: normalizedAction === 'reject' ? 'Comercial' : 'Operaciones',
+            workflowCurrentOwner: resolveWorkflowOwner(normalizedAction === 'reject' ? 'Rechazado' : 'En proceso de instalación'),
             status: stageToOperationalStatus(nextStage),
             estado: stageToOperationalStatus(nextStage),
             actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
@@ -11297,7 +11699,7 @@
               const shouldAppendWorkflowEvent = nextWorkflowStage !== currentWorkflowStage;
               payload.workflowStage = nextWorkflowStage;
               payload.workflowAvailableNextStages = GNS_WORKFLOW_TRANSITIONS[nextWorkflowStage] || [];
-              payload.workflowCurrentOwner = nextWorkflowStage === 'Rechazado' ? 'Comercial' : (nextWorkflowStage === 'Pendiente de aprobación – Coordinación de Instalaciones' ? 'Coordinación de Instalaciones' : 'Operaciones');
+              payload.workflowCurrentOwner = resolveWorkflowOwner(nextWorkflowStage);
               payload.workflowInstallTasks = payload.workflowInstallTasks || targetSource?.workflowInstallTasks || INSTALLATION_REQUIRED_TASKS.reduce((acc, task) => ({ ...acc, [task.key]: false }), {});
               payload.workflowRejectionReason = payload.workflowRejectionReason || targetSource?.workflowRejectionReason || '';
               payload.workflowClientRecordCompleted = !!(payload.workflowClientRecordCompleted || targetSource?.workflowClientRecordCompleted);
@@ -11344,7 +11746,7 @@
             const initialWorkflowStage = normalizeWorkflowStage(doc.workflowStage) || getDefaultWorkflowStage(tipoAccion);
             createPayload.workflowStage = initialWorkflowStage;
             createPayload.workflowAvailableNextStages = GNS_WORKFLOW_TRANSITIONS[initialWorkflowStage] || [];
-            createPayload.workflowCurrentOwner = initialWorkflowStage === 'Pendiente de aprobación – Coordinación de Instalaciones' ? 'Coordinación de Instalaciones' : 'Operaciones';
+            createPayload.workflowCurrentOwner = resolveWorkflowOwner(initialWorkflowStage);
             createPayload.workflowInstallTasks = INSTALLATION_REQUIRED_TASKS.reduce((acc, task) => ({ ...acc, [task.key]: false }), {});
             createPayload.workflowRejectionReason = '';
             createPayload.workflowClientRecordCompleted = false;
@@ -12805,7 +13207,15 @@
                 </div>
               </div>
               <div className="menu">
-                <button className="menu-button" onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
+                <button className={`menu-button ${effectiveSelectedForm === 'home' ? 'active' : ''}`} onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
+                <button className={`menu-button ${effectiveSelectedForm !== 'home' && effectiveSelectedForm !== 'tickets' ? 'active' : ''}`} onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">🧾</span><span>Órdenes de Servicio</span></button>
+                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">📌</span><span>Seguimientos</span></button>
+                <button className={`menu-button ${effectiveSelectedForm === 'tickets' ? 'active' : ''}`} onClick={() => { openTicketsView(); closeSidebar(); }}><span className="menu-icon">🎫</span><span>Tickets</span></button>
+                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">🗃️</span><span>Base de datos</span></button>
+                <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}><span className="menu-icon">📊</span><span>Reportes</span></button>
+                <button className="menu-button" onClick={() => { setSelectedForm('historial-charlas'); closeSidebar(); }}><span className="menu-icon">📅</span><span>Calendario</span></button>
+                <button className="menu-button" onClick={() => { openProfileView(); closeSidebar(); }}><span className="menu-icon">⚙️</span><span>Configuración</span></button>
+                <div className="sidebar-divider" />
                 {!isMobile && (
                   <>
                     <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: !p.operaciones, nuevo: false, baseDatos: false }))}><span className="menu-icon">🗂️</span><span>Operaciones</span><span className="menu-arrow">{openMenus.operaciones ? '▾' : '▸'}</span></button>
@@ -12852,7 +13262,11 @@
                 <button className="menu-button" onClick={openFuncionariosView}><span className="menu-icon">🧑‍💼</span><span>Funcionarios</span></button>
                 {!isCommercialUser && <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>}
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
-                <div className="sidebar-signature" aria-label="signature" tabIndex={0}><strong>v2.0 | Powered by Alfonso Carballo</strong><div className="sidebar-signature-tooltip">Actualización 2.0: workflow operativo GNS con transiciones validadas por etapa, checklist obligatorio para agendado, resolución de tickets con comentario + imágenes (pegar/arrastrar), y nuevos filtros de historial por administración y fecha de alta.</div></div>
+                <div className="sidebar-support-card">
+                  <h4>¿Necesitas ayuda?</h4>
+                  <p>Contactá al equipo de soporte interno desde Tickets para asistencia inmediata.</p>
+                </div>
+                <div className="sidebar-signature" aria-label="signature" tabIndex={0}><strong>v2.0 | Powered by Alfonso Carballo</strong><div className="sidebar-signature-tooltip">Actualización 2.0: Orden de trabajo operativa GNS con transiciones validadas por etapa, checklist obligatorio para agendado, resolución de tickets con comentario + imágenes (pegar/arrastrar), y nuevos filtros de historial por administración y fecha de alta.</div></div>
               </div>
             </aside>
 
@@ -13706,122 +14120,108 @@
                 ) : effectiveSelectedForm === 'home' ? (
                   <>
                     <section className="home-modern-shell">
-                      <article className="home-modern-hero">
-                        <div>
-                          <div className="home-modern-badge">Plataforma operativa · Masterson Seguridad</div>
-                          <h2>Centro de control técnico y comercial</h2>
-                          <p>Gestioná servicios, seguimientos y tickets desde una única pantalla más clara, moderna y rápida de operar.</p>
-                          <div className="home-modern-actions">
-                            <button type="button" className="home-modern-action-btn primary" onClick={() => selectAction('Nuevo Servicio')}>+ Nuevo servicio</button>
-                            <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('historial')}>Ver historial</button>
-                            <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('tickets')}>Abrir tickets</button>
-                          </div>
-                        </div>
-                        <div className="home-modern-user">
-                          <img className="home-modern-avatar" src={selectedProfileAvatar.src} alt={`Ícono de perfil ${selectedProfileAvatar.label}`} />
-                          <div>
-                            <strong>{currentUserName || 'Usuario'}</strong>
-                            <small>{topbarSubtitle || 'Área operativa'}</small>
-                            <small>{resolveWelcomeTasksCount(upcomingInstallations)} tareas programadas para hoy</small>
-                          </div>
-                        </div>
-                      </article>
-
-                      <div className="home-modern-stats">
-                        <article className="home-modern-stat-card"><small>Servicios activos</small><strong>{kpiStats.active}</strong></article>
-                        <article className="home-modern-stat-card"><small>Servicios de baja</small><strong>{kpiStats.baja}</strong></article>
-                        <article className="home-modern-stat-card"><small>Actividad reciente</small><strong>{recentActivity.length}</strong></article>
-                        <article className="home-modern-stat-card"><small>Instalaciones próximas</small><strong>{upcomingInstallations.length}</strong></article>
-                      </div>
-
-                      <div className="home-modern-panels">
-                        <article className="home-modern-panel">
-                          <h3>Actividad reciente</h3>
-                          <div className="home-modern-list home-modern-timeline">
-                            {recentActivity.length === 0 ? (
-                              <div className="dashboard-info-empty">Sin actividad reciente disponible.</div>
-                            ) : recentActivity.slice(0, 8).map((item) => (
-                              <div key={`activity-${item.id}`} className="home-modern-list-item">
-                                <small>{item.dateLabel}</small>
-                                <b>{item.message}</b>
+                      <div className="dashboard-main-layout">
+                        <div className="dashboard-main-column">
+                          <article className="home-modern-hero">
+                            <div>
+                              <div className="home-modern-badge">Plataforma operativa · Masterson Seguridad</div>
+                              <h2>¡Bienvenido, {currentUserName || 'Alfonso'}!</h2>
+                              <p>Gestioná órdenes, seguimientos y tickets con un flujo más claro, moderno y profesional para todo tu equipo.</p>
+                              <div className="home-modern-actions">
+                                <button type="button" className="home-modern-action-btn primary" onClick={() => selectAction('Nuevo Servicio')}>+ Nuevo servicio</button>
+                                <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('historial')}>Base de datos</button>
+                                <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('tickets')}>Tickets</button>
                               </div>
+                            </div>
+                            <div className="home-hero-illustration"><i data-lucide="layout-dashboard" /></div>
+                          </article>
+
+                          <div className="home-service-cards-board">
+                            {homeServiceCards.map((card) => (
+                              <article key={card.title} className="home-service-card">
+                                <header className="home-service-card-head">
+                                  <strong>{card.title}</strong>
+                                </header>
+                                <div className="home-service-card-content">
+                                  {card.items.length === 0 ? (
+                                    <div className="home-service-empty">Sin registros todavía.</div>
+                                  ) : (
+                                    <ul>
+                                      {card.items.slice(0, 8).map((item) => (
+                                        <li key={item.id}>
+                                          <button
+                                            type="button"
+                                            className="home-service-item-btn"
+                                            onClick={() => {
+                                              setSelectedForm('historial');
+                                              setSelectedService(item.sourceRow || null);
+                                              if (item.sourceRow) openHistoryRecord(item.sourceRow, { forceAction: card.charla ? 'Charla informativa' : null });
+                                            }}
+                                          >
+                                            <small>{item.name}</small>
+                                            {card.charla ? (
+                                              <div className="home-service-card-row-grid">
+                                                <span>Fecha de Charla: <b>{item.fechaCharla}</b></span>
+                                                <span>Hora: <b>{item.horaCharla}</b></span>
+                                                <span>Lugar de Reunión: <b>{item.lugarReunion}</b></span>
+                                                <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
+                                              </div>
+                                            ) : (
+                                              <div className="home-service-card-row-grid">
+                                                <span>Fecha de Carga: <b>{item.fechaCarga}</b></span>
+                                                <span>Tiempo de Instalación: <b>{item.tiempoInstalacion}</b></span>
+                                                <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
+                                                <span>Fecha de Alta: <b>{item.fechaAlta}</b></span>
+                                              </div>
+                                            )}
+                                          </button>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  )}
+                                </div>
+                                <button type="button" className="home-service-footer-btn" onClick={() => { setSelectedForm('historial'); setSelectedService(null); }}>Ver todos →</button>
+                              </article>
                             ))}
                           </div>
-                        </article>
-                        <article className="home-modern-panel">
-                          <h3>Panel operativo</h3>
-                          <div className="home-modern-widget-col">
-                            <div className="home-modern-widget">
-                              <strong>Instalaciones próximas</strong>
-                              <small>{upcomingInstallations.length} programadas para seguimiento.</small>
+                        </div>
+
+                        <aside className="dashboard-right-panel">
+                          <article className="dash-side-card home-modern-user" style={{ width: '100%', minHeight: 0 }}>
+                            <img className="home-modern-avatar" src={selectedProfileAvatar.src} alt={`Ícono de perfil ${selectedProfileAvatar.label}`} />
+                            <div>
+                              <strong>{currentUserName || 'Usuario'}</strong>
+                              <small>{topbarSubtitle || 'Área operativa'}</small>
+                              <small>{resolveWelcomeTasksCount(upcomingInstallations)} tareas programadas para hoy</small>
                             </div>
-                            <div className="home-modern-widget">
-                              <strong>Alertas</strong>
-                              <small>{recentActivity.length} eventos recientes para revisar.</small>
+                          </article>
+                          <section id="weather-widget" className="dash-side-card" aria-live="polite">
+                            <div className="weather-head">
+                              <span className="weather-icon" id="weather-icon">☀️</span>
+                              <span className="weather-temp" id="weather-temp">--°C</span>
                             </div>
-                            <div className="home-modern-widget">
-                              <strong>Tareas pendientes</strong>
-                              <small className="ok">{kpiStats.pending} tareas en cola operativa.</small>
+                            <div className="weather-desc" id="weather-desc">Cargando clima…</div>
+                            <div className="weather-time" id="weather-time">--:--:--</div>
+                          </section>
+                          <article className="dash-side-card">
+                            <h4>Resumen del día</h4>
+                            <div className="dash-kpi-row"><span>Servicios activos</span><b>{kpiStats.active}</b></div>
+                            <div className="dash-kpi-row"><span>Tickets abiertos</span><b>{ticketsHistorial.filter((t) => (t.estado || '').toLowerCase() !== 'resuelto').length}</b></div>
+                            <div className="dash-kpi-row"><span>Seguimientos</span><b>{recentActivity.length}</b></div>
+                          </article>
+                          <article className="dash-side-card">
+                            <h4>Actividades recientes</h4>
+                            <div className="dash-activity-mini">
+                              {recentActivity.slice(0, 4).map((item) => (
+                                <div key={`mini-act-${item.id}`} className="dash-activity-mini-item">
+                                  <span>{item.message}</span>
+                                  <small>{item.dateLabel}</small>
+                                </div>
+                              ))}
+                              {recentActivity.length === 0 && <small>Sin actividad por el momento.</small>}
                             </div>
-                          </div>
-                        </article>
-                      </div>
-                      <div className="home-modern-bottom">
-                        <article className="home-modern-chart">
-                          <h3>Tendencia de actividad</h3>
-                          {activityTrend.months.length === 0 ? (
-                            <div className="dashboard-info-empty">Sin datos de meses recientes.</div>
-                          ) : (
-                            <div className="activity-trend-chart">
-                              <svg viewBox="0 0 100 52" preserveAspectRatio="none" aria-label="Tendencia mensual de altas y bajas">
-                                {activityTrend.months.map((item, idx) => (
-                                  <line key={`grid-${item.key}`} x1={(idx / Math.max(activityTrend.months.length - 1, 1)) * 100} y1="0" x2={(idx / Math.max(activityTrend.months.length - 1, 1)) * 100} y2="52" stroke="rgba(15,23,42,.08)" strokeWidth="0.4" />
-                                ))}
-                                <polyline
-                                  fill="none"
-                                  stroke="#006465"
-                                  strokeWidth="2"
-                                  points={activityTrend.months.map((item, idx) => {
-                                    const x = (idx / Math.max(activityTrend.months.length - 1, 1)) * 100;
-                                    const y = 50 - ((item.altas / activityTrend.maxValue) * 44);
-                                    return `${x},${y}`;
-                                  }).join(' ')}
-                                />
-                                <polyline
-                                  fill="none"
-                                  stroke="#ef4444"
-                                  strokeWidth="2"
-                                  points={activityTrend.months.map((item, idx) => {
-                                    const x = (idx / Math.max(activityTrend.months.length - 1, 1)) * 100;
-                                    const y = 50 - ((item.bajas / activityTrend.maxValue) * 44);
-                                    return `${x},${y}`;
-                                  }).join(' ')}
-                                />
-                              </svg>
-                              <div className="activity-trend-legend">
-                                <span><i style={{ background: '#006465' }} /> Altas</span>
-                                <span><i style={{ background: '#ef4444' }} /> Bajas</span>
-                              </div>
-                              <div className="activity-trend-labels">
-                                {activityTrend.months.map((item) => (
-                                  <small key={`label-${item.key}`}>{item.label}</small>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </article>
-                        <article className="home-modern-chart">
-                          <h3>Distribución operativa</h3>
-                          <div className="home-chart-bars">
-                            {Object.entries(operationalDistribution.counts).map(([label, value]) => (
-                              <div key={`dist-${label}`} className="home-chart-bar-item">
-                                <span style={{ height: `${Math.max(10, (value / operationalDistribution.maxValue) * 100)}%` }} />
-                                <small>{label}</small>
-                                <b>{value}</b>
-                              </div>
-                            ))}
-                          </div>
-                        </article>
+                          </article>
+                        </aside>
                       </div>
                     </section>
                   </>
@@ -14887,9 +15287,9 @@
                                 <div className="service-detail-kpi" style={{ gridColumn: '1 / -1' }}><small>📍 Dirección</small><strong>{detailService.direccionServicio || detailService.direccion || '-'}</strong></div>
                               </div>
                               <div className="service-coord-detail-card" style={{ marginTop: 10 }}>
-                                <h4 style={{ margin: '0 0 8px 0' }}>Workflow Operativo GNS</h4>
+                                <h4 style={{ margin: '0 0 8px 0' }}>Orden de trabajo (flujo operativo)</h4>
                                 <div className="hint" style={{ marginBottom: 10 }}>
-                                  Flujo: <b>Pendiente de aprobación</b> → <b>En proceso de instalación</b> → <b>Alta de Servicio en configuración</b> → <b>Activo</b>.
+                                  Recorrido sugerido del equipo: <b>Comercial</b> → <b>Instalaciones</b> → <b>Atención al cliente</b> → <b>Operaciones</b>. También se puede devolver etapas para correcciones.
                                 </div>
                                 {detailWorkflowStage === 'Pendiente de aprobación – Coordinación de Instalaciones'
                                   && (String(detailService.tipoAccion || '').trim() === 'Nuevo Servicio' || String(detailService.formulario || '').trim() === 'nuevo-servicio-optimizado') ? (
@@ -15572,6 +15972,172 @@
       }
 
       ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+    <script>
+      (function initWeatherWidget() {
+        if (window.__weatherWidgetInit) return;
+        window.__weatherWidgetInit = true;
+
+        const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.419998&daily=sunrise,sunset&hourly=temperature_2m,precipitation,rain,cloud_cover_high,temperature_80m,temperature_120m,is_day&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain&timezone=America/Montevideo&past_days=0&forecast_days=7';
+        let lastWeatherCode = null;
+        let lastIsDay = null;
+        let weatherFetchInProgress = false;
+        let lastWeatherFetchAt = 0;
+
+        function getWidgetNodes() {
+          return {
+            root: document.getElementById('weather-widget'),
+            icon: document.getElementById('weather-icon'),
+            temp: document.getElementById('weather-temp'),
+            desc: document.getElementById('weather-desc'),
+            time: document.getElementById('weather-time'),
+          };
+        }
+
+        // Si el widget no existe, lo crea debajo de la tarjeta de perfil sin duplicar.
+        function ensureWidgetExists() {
+          const existing = document.getElementById('weather-widget');
+          if (existing) return existing;
+          const anchor = document.querySelector('.home-side-stack, .home-modern-hero, .home-modern-user');
+          if (!anchor) return null;
+          const widget = document.createElement('div');
+          widget.id = 'weather-widget';
+          widget.innerHTML = `
+            <div id="weather-icon">☁️</div>
+            <div id="weather-temp">--°C</div>
+            <div id="weather-desc">Cargando clima...</div>
+            <div id="weather-time"></div>
+          `;
+          if (anchor.classList && anchor.classList.contains('home-side-stack')) anchor.appendChild(widget);
+          else anchor.insertAdjacentElement('afterend', widget);
+          return widget;
+        }
+
+        function esNoche() {
+          if (typeof lastIsDay === 'number') return lastIsDay !== 1;
+          const hora = new Date().getHours();
+          return hora < 6 || hora > 20;
+        }
+
+        function mapearPorWeatherCode(weathercode) {
+          const code = Number(weathercode);
+          if (code === 0) return { descripcion: 'Despejado', icono: esNoche() ? '🌙' : '☀️' };
+          if (code >= 1 && code <= 3) return { descripcion: 'Parcialmente nublado', icono: '☁️' };
+          if (code >= 45 && code <= 48) return { descripcion: 'Niebla', icono: '🌫️' };
+          if (code >= 51 && code <= 67) return { descripcion: 'Lluvia', icono: '🌧️' };
+          if (code >= 71 && code <= 77) return { descripcion: 'Nieve', icono: '❄️' };
+          if (code >= 80 && code <= 99) return { descripcion: 'Tormenta', icono: '⛈️' };
+          return { descripcion: 'Clima variable', icono: esNoche() ? '🌙' : '☀️' };
+        }
+
+        function mapearClima(data) {
+          const current = data && data.current ? data.current : {};
+          const weathercode = current.weathercode ?? current.weather_code;
+          if (weathercode !== undefined && weathercode !== null) return mapearPorWeatherCode(weathercode);
+
+          const lluvia = Number(current.rain || 0);
+          const precipitacion = Number(current.precipitation || 0);
+          let isDayCurrent = Number(current.is_day);
+          if (!Number.isNaN(isDayCurrent)) lastIsDay = isDayCurrent;
+
+          let nubeAlta = 0;
+          const currentTime = String(current.time || '');
+          const hourlyTime = Array.isArray(data?.hourly?.time) ? data.hourly.time : [];
+          const hourlyCloud = Array.isArray(data?.hourly?.cloud_cover_high) ? data.hourly.cloud_cover_high : [];
+          const hourlyIsDay = Array.isArray(data?.hourly?.is_day) ? data.hourly.is_day : [];
+          if (currentTime && hourlyTime.length && hourlyCloud.length) {
+            let idx = hourlyTime.indexOf(currentTime);
+            if (idx < 0) {
+              const hourKey = currentTime.slice(0, 13);
+              idx = hourlyTime.findIndex((entry) => String(entry || '').slice(0, 13) === hourKey);
+            }
+            if (idx >= 0 && hourlyCloud[idx] !== undefined) nubeAlta = Number(hourlyCloud[idx]) || 0;
+            if (idx >= 0 && Number.isNaN(isDayCurrent) && hourlyIsDay[idx] !== undefined) {
+              isDayCurrent = Number(hourlyIsDay[idx]);
+              if (!Number.isNaN(isDayCurrent)) lastIsDay = isDayCurrent;
+            }
+          }
+
+          if (lluvia >= 4 || precipitacion >= 4) return { descripcion: 'Tormenta', icono: '⛈️' };
+          if (lluvia > 0 || precipitacion > 0) return { descripcion: 'Lluvia', icono: '🌧️' };
+          if (nubeAlta >= 50) return { descripcion: 'Parcialmente nublado', icono: '☁️' };
+          return { descripcion: 'Despejado', icono: esNoche() ? '🌙' : '☀️' };
+        }
+
+        function actualizarHora() {
+          ensureWidgetExists();
+          const { time, icon, temp, desc } = getWidgetNodes();
+          if (!time) return;
+          time.textContent = new Date().toLocaleTimeString('es-UY');
+          if (icon && lastWeatherCode === 0) {
+            icon.textContent = esNoche() ? '🌙' : '☀️';
+          }
+          const stillLoading = String(temp?.textContent || '').includes('--') || /cargando clima/i.test(String(desc?.textContent || ''));
+          if (stillLoading && !weatherFetchInProgress && (Date.now() - lastWeatherFetchAt) > 15000) {
+            obtenerClima();
+          }
+        }
+
+        function mostrarError(mensaje) {
+          ensureWidgetExists();
+          const { desc } = getWidgetNodes();
+          if (!desc) return;
+          desc.textContent = mensaje || 'Error al obtener clima.';
+          desc.classList.add('weather-error');
+        }
+
+        async function obtenerClima() {
+          if (weatherFetchInProgress) return;
+          weatherFetchInProgress = true;
+          lastWeatherFetchAt = Date.now();
+          try {
+            ensureWidgetExists();
+            const response = await fetch(WEATHER_API_URL, { cache: 'no-store' });
+            if (!response.ok) {
+              throw new Error(`Error HTTP al consultar Open-Meteo: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const current = data && data.current ? data.current : null;
+            const temperatura = current ? current.temperature_2m : null;
+            const weathercode = current ? (current.weathercode ?? current.weather_code) : null;
+            const isDayCurrent = current ? Number(current.is_day) : NaN;
+
+            if (temperatura === null) {
+              console.error('Open-Meteo sin current.temperature_2m:', data);
+              throw new Error('Respuesta sin current.temperature_2m');
+            }
+            if (!Number.isNaN(isDayCurrent)) lastIsDay = isDayCurrent;
+
+            const { icon, temp, desc } = getWidgetNodes();
+            if (!icon || !temp || !desc) {
+              console.error('No se encontraron nodos del widget para pintar datos.');
+              return;
+            }
+
+            const mapped = mapearClima(data);
+            lastWeatherCode = weathercode !== null && weathercode !== undefined ? Number(weathercode) : null;
+            icon.textContent = mapped.icono;
+            temp.textContent = `${Math.round(Number(temperatura))}°C`;
+            desc.textContent = mapped.descripcion;
+            desc.classList.remove('weather-error');
+          } catch (error) {
+            console.error('Error en obtenerClima():', error);
+            mostrarError('No se pudo actualizar el clima.');
+          } finally {
+            weatherFetchInProgress = false;
+          }
+        }
+
+        // Exponer para debug/manual desde consola.
+        window.obtenerClima = obtenerClima;
+
+        ensureWidgetExists();
+        actualizarHora();
+        obtenerClima();
+        setInterval(actualizarHora, 1000);
+        setInterval(obtenerClima, 10 * 60 * 1000);
+      })();
     </script>
   </body>
 </html>
