@@ -750,6 +750,47 @@
         min-height: 120px;
         justify-self: end;
       }
+      .home-side-stack {
+        display: grid;
+        gap: 10px;
+        justify-items: end;
+      }
+      #weather-widget {
+        width: min(220px, 100%);
+        border-radius: 16px;
+        border: 1px solid #d9ece9;
+        background: linear-gradient(160deg, #ffffff, #f3fbf9);
+        box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
+        padding: 10px 12px;
+        color: #0f172a;
+      }
+      #weather-widget .weather-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 6px;
+      }
+      #weather-widget .weather-icon {
+        font-size: 1.4rem;
+      }
+      #weather-widget .weather-temp {
+        font-size: 1.35rem;
+        font-weight: 800;
+      }
+      #weather-widget .weather-desc {
+        color: #475569;
+        font-size: .8rem;
+      }
+      #weather-widget .weather-time {
+        margin-top: 7px;
+        font-weight: 700;
+        color: #0b4e49;
+        font-size: .86rem;
+      }
+      #weather-widget .weather-error {
+        color: #b91c1c;
+        font-size: .78rem;
+      }
       .home-modern-avatar {
         width: 62px;
         height: 62px;
@@ -13945,13 +13986,23 @@
                             <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('tickets')}>Tickets</button>
                           </div>
                         </div>
-                        <div className="home-modern-user">
-                          <img className="home-modern-avatar" src={selectedProfileAvatar.src} alt={`Ícono de perfil ${selectedProfileAvatar.label}`} />
-                          <div>
-                            <strong>{currentUserName || 'Usuario'}</strong>
-                            <small>{topbarSubtitle || 'Área operativa'}</small>
-                            <small>{resolveWelcomeTasksCount(upcomingInstallations)} tareas programadas para hoy</small>
+                        <div className="home-side-stack">
+                          <div className="home-modern-user">
+                            <img className="home-modern-avatar" src={selectedProfileAvatar.src} alt={`Ícono de perfil ${selectedProfileAvatar.label}`} />
+                            <div>
+                              <strong>{currentUserName || 'Usuario'}</strong>
+                              <small>{topbarSubtitle || 'Área operativa'}</small>
+                              <small>{resolveWelcomeTasksCount(upcomingInstallations)} tareas programadas para hoy</small>
+                            </div>
                           </div>
+                          <section id="weather-widget" aria-live="polite">
+                            <div className="weather-head">
+                              <span className="weather-icon" id="weather-icon">☀️</span>
+                              <span className="weather-temp" id="weather-temp">--°C</span>
+                            </div>
+                            <div className="weather-desc" id="weather-desc">Cargando clima…</div>
+                            <div className="weather-time" id="weather-time">--:--:--</div>
+                          </section>
                         </div>
                       </article>
 
@@ -15749,6 +15800,113 @@
       }
 
       ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+    <script>
+      (function initWeatherWidget() {
+        if (window.__weatherWidgetInit) return;
+        window.__weatherWidgetInit = true;
+
+        const API_URL = 'https://api.open-meteo.com/v1/forecast?latitude=-34.9&longitude=-56.2&current=temperature_2m,weathercode&timezone=America/Montevideo';
+        const MONTEVIDEO_TZ = 'America/Montevideo';
+        let lastWeatherData = null;
+
+        // Traducción y categorías para weathercode de Open-Meteo.
+        function mapWeatherCode(code) {
+          const value = Number(code);
+          if (value === 0) return { desc: 'Despejado', type: 'clear' };
+          if (value >= 1 && value <= 3) return { desc: 'Parcialmente nublado', type: 'cloud' };
+          if (value >= 45 && value <= 48) return { desc: 'Niebla', type: 'cloud' };
+          if (value >= 51 && value <= 67) return { desc: 'Lluvia', type: 'rain' };
+          if (value >= 71 && value <= 77) return { desc: 'Nieve', type: 'cloud' };
+          if (value >= 80 && value <= 99) return { desc: 'Tormenta', type: 'storm' };
+          return { desc: 'Clima variable', type: 'cloud' };
+        }
+
+        function getMontevideoHour(date) {
+          const parts = new Intl.DateTimeFormat('es-UY', {
+            timeZone: MONTEVIDEO_TZ,
+            hour: '2-digit',
+            hour12: false,
+          }).formatToParts(date);
+          const hourPart = parts.find((part) => part.type === 'hour');
+          return Number(hourPart ? hourPart.value : 12);
+        }
+
+        function isNightNow() {
+          const hour = getMontevideoHour(new Date());
+          return hour < 6 || hour >= 20;
+        }
+
+        function getIconFromWeather(type) {
+          const night = isNightNow();
+          if (type === 'storm') return '⛈️';
+          if (type === 'rain') return '🌧️';
+          if (type === 'cloud') return '☁️';
+          if (type === 'clear') return night ? '🌙' : '☀️';
+          return night ? '🌙' : '☀️';
+        }
+
+        function getWidgetNodes() {
+          return {
+            root: document.getElementById('weather-widget'),
+            icon: document.getElementById('weather-icon'),
+            temp: document.getElementById('weather-temp'),
+            desc: document.getElementById('weather-desc'),
+            time: document.getElementById('weather-time'),
+          };
+        }
+
+        function renderWeather(data) {
+          const nodes = getWidgetNodes();
+          if (!nodes.root || !nodes.icon || !nodes.temp || !nodes.desc) return;
+          const { desc, type } = mapWeatherCode(data.weathercode);
+          nodes.icon.textContent = getIconFromWeather(type);
+          nodes.temp.textContent = `${Math.round(Number(data.temperature_2m))}°C`;
+          nodes.desc.textContent = desc;
+          nodes.desc.classList.remove('weather-error');
+        }
+
+        function renderError(message) {
+          const nodes = getWidgetNodes();
+          if (!nodes.root || !nodes.desc) return;
+          nodes.desc.textContent = message || 'No se pudo cargar el clima.';
+          nodes.desc.classList.add('weather-error');
+        }
+
+        function updateClock() {
+          const nodes = getWidgetNodes();
+          if (!nodes.root || !nodes.time || !nodes.icon) return;
+          nodes.time.textContent = new Intl.DateTimeFormat('es-UY', {
+            timeZone: MONTEVIDEO_TZ,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false,
+          }).format(new Date());
+          if (lastWeatherData) {
+            nodes.icon.textContent = getIconFromWeather(mapWeatherCode(lastWeatherData.weathercode).type);
+          }
+        }
+
+        async function fetchWeather() {
+          try {
+            const response = await fetch(API_URL, { cache: 'no-store' });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const payload = await response.json();
+            if (!payload || !payload.current) throw new Error('Sin datos actuales');
+            lastWeatherData = payload.current;
+            renderWeather(payload.current);
+          } catch (error) {
+            console.error('Weather widget error:', error);
+            renderError('Error al obtener clima.');
+          }
+        }
+
+        updateClock();
+        fetchWeather();
+        setInterval(updateClock, 1000);
+        setInterval(fetchWeather, 10 * 60 * 1000);
+      })();
     </script>
   </body>
 </html>
