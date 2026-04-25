@@ -1005,12 +1005,122 @@
         padding: 9px 10px;
         background: #fbfdfc;
       }
+      .dashboard-main-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 300px;
+        gap: 14px;
+        align-items: start;
+      }
+      .dashboard-main-column {
+        display: grid;
+        gap: 14px;
+      }
+      .dashboard-right-panel {
+        display: grid;
+        gap: 12px;
+        position: sticky;
+        top: 86px;
+      }
+      .dash-side-card {
+        border-radius: 16px;
+        border: 1px solid #deece9;
+        background: #fff;
+        padding: 12px;
+        box-shadow: 0 10px 22px rgba(15, 23, 42, .08);
+      }
+      .dash-side-card h4 {
+        margin: 0 0 8px;
+        color: #0f172a;
+      }
+      .dash-kpi-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: .85rem;
+        margin-bottom: 6px;
+        color: #334155;
+      }
+      .dash-activity-mini {
+        display: grid;
+        gap: 7px;
+      }
+      .dash-activity-mini-item {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: .78rem;
+        color: #334155;
+        border-bottom: 1px dashed #e2ecea;
+        padding-bottom: 6px;
+      }
+      .dash-activity-mini-item:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+      }
+      .home-hero-illustration {
+        display: grid;
+        place-items: center;
+        min-height: 148px;
+        border-radius: 18px;
+        background: radial-gradient(circle at 20% 20%, rgba(78, 227, 209, .35), transparent 58%), linear-gradient(145deg, #eef8f7, #f8fbfb);
+        border: 1px solid #d8ebe7;
+        color: #0b6b69;
+      }
+      .home-hero-illustration i {
+        width: 72px;
+        height: 72px;
+      }
+      @media (max-width: 1280px) {
+        .dashboard-main-layout { grid-template-columns: 1fr; }
+        .dashboard-right-panel { position: static; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+      }
+      .menu-button.active {
+        background: linear-gradient(180deg, rgba(78,227,209,.34), rgba(78,227,209,.17));
+        border-color: rgba(78,227,209,.55);
+      }
+      .sidebar-support-card {
+        margin-top: 12px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,.22);
+        background: rgba(255,255,255,.08);
+        padding: 11px;
+        color: #e6fffb;
+      }
+      .sidebar-support-card h4 {
+        margin: 0 0 6px;
+        font-size: .9rem;
+      }
+      .sidebar-support-card p {
+        margin: 0;
+        font-size: .78rem;
+        color: #c7ece7;
+      }
       .home-modern-chart {
         border: 1px solid #e5e7eb;
         border-radius: 18px;
         background: #ffffff;
         box-shadow: 0 10px 24px rgba(17, 24, 39, 0.06);
         padding: 14px;
+      }
+      @media (min-width: 1024px) {
+        body { background: #f5f7f9; }
+        .sidebar {
+          transform: translateX(0) !important;
+          width: 260px;
+          position: fixed;
+          inset: 0 auto 0 0;
+        }
+        .overlay { display: none !important; }
+        .content {
+          margin-left: 260px;
+          width: calc(100% - 260px);
+        }
+        .topbar {
+          background: #ffffff;
+          border-bottom: 1px solid #e7ecef;
+          border-radius: 0 0 14px 14px;
+          box-shadow: 0 8px 24px rgba(15, 23, 42, .08);
+        }
+        .burger { display: none; }
       }
       .home-modern-chart h3 {
         margin: 0 0 10px;
@@ -13074,7 +13184,15 @@
                 </div>
               </div>
               <div className="menu">
-                <button className="menu-button" onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
+                <button className={`menu-button ${effectiveSelectedForm === 'home' ? 'active' : ''}`} onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
+                <button className={`menu-button ${effectiveSelectedForm !== 'home' && effectiveSelectedForm !== 'tickets' ? 'active' : ''}`} onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">🧾</span><span>Órdenes de Servicio</span></button>
+                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">📌</span><span>Seguimientos</span></button>
+                <button className={`menu-button ${effectiveSelectedForm === 'tickets' ? 'active' : ''}`} onClick={() => { openTicketsView(); closeSidebar(); }}><span className="menu-icon">🎫</span><span>Tickets</span></button>
+                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">🗃️</span><span>Base de datos</span></button>
+                <button className="menu-button" onClick={() => { setSelectedForm('dashboard-gerencia'); closeSidebar(); }}><span className="menu-icon">📊</span><span>Reportes</span></button>
+                <button className="menu-button" onClick={() => { setSelectedForm('historial-charlas'); closeSidebar(); }}><span className="menu-icon">📅</span><span>Calendario</span></button>
+                <button className="menu-button" onClick={() => { openProfileView(); closeSidebar(); }}><span className="menu-icon">⚙️</span><span>Configuración</span></button>
+                <div className="sidebar-divider" />
                 {!isMobile && (
                   <>
                     <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: !p.operaciones, nuevo: false, baseDatos: false }))}><span className="menu-icon">🗂️</span><span>Operaciones</span><span className="menu-arrow">{openMenus.operaciones ? '▾' : '▸'}</span></button>
@@ -13121,6 +13239,10 @@
                 <button className="menu-button" onClick={openFuncionariosView}><span className="menu-icon">🧑‍💼</span><span>Funcionarios</span></button>
                 {!isCommercialUser && <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>}
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
+                <div className="sidebar-support-card">
+                  <h4>¿Necesitas ayuda?</h4>
+                  <p>Contactá al equipo de soporte interno desde Tickets para asistencia inmediata.</p>
+                </div>
                 <div className="sidebar-signature" aria-label="signature" tabIndex={0}><strong>v2.0 | Powered by Alfonso Carballo</strong><div className="sidebar-signature-tooltip">Actualización 2.0: Orden de trabajo operativa GNS con transiciones validadas por etapa, checklist obligatorio para agendado, resolución de tickets con comentario + imágenes (pegar/arrastrar), y nuevos filtros de historial por administración y fecha de alta.</div></div>
               </div>
             </aside>
@@ -13975,27 +14097,79 @@
                 ) : effectiveSelectedForm === 'home' ? (
                   <>
                     <section className="home-modern-shell">
-                      <article className="home-modern-hero">
-                        <div>
-                          <div className="home-modern-badge">Plataforma operativa · Masterson Seguridad</div>
-                          <h2>Control de ordenes de Servicio.</h2>
-                          <p>Gestioná servicios, seguimientos y tickets desde una única pantalla más clara, moderna y rápida de operar.</p>
-                          <div className="home-modern-actions">
-                            <button type="button" className="home-modern-action-btn primary" onClick={() => selectAction('Nuevo Servicio')}>+ Nuevo servicio</button>
-                            <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('historial')}>Base de datos</button>
-                            <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('tickets')}>Tickets</button>
+                      <div className="dashboard-main-layout">
+                        <div className="dashboard-main-column">
+                          <article className="home-modern-hero">
+                            <div>
+                              <div className="home-modern-badge">Plataforma operativa · Masterson Seguridad</div>
+                              <h2>¡Bienvenido, {currentUserName || 'Alfonso'}!</h2>
+                              <p>Gestioná órdenes, seguimientos y tickets con un flujo más claro, moderno y profesional para todo tu equipo.</p>
+                              <div className="home-modern-actions">
+                                <button type="button" className="home-modern-action-btn primary" onClick={() => selectAction('Nuevo Servicio')}>+ Nuevo servicio</button>
+                                <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('historial')}>Base de datos</button>
+                                <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('tickets')}>Tickets</button>
+                              </div>
+                            </div>
+                            <div className="home-hero-illustration"><i data-lucide="layout-dashboard" /></div>
+                          </article>
+
+                          <div className="home-service-cards-board">
+                            {homeServiceCards.map((card) => (
+                              <article key={card.title} className="home-service-card">
+                                <header className="home-service-card-head">
+                                  <strong>{card.title}</strong>
+                                </header>
+                                {card.items.length === 0 ? (
+                                  <div className="home-service-empty">Sin registros todavía.</div>
+                                ) : (
+                                  <ul>
+                                    {card.items.slice(0, 8).map((item) => (
+                                      <li key={item.id}>
+                                        <button
+                                          type="button"
+                                          className="home-service-item-btn"
+                                          onClick={() => {
+                                            setSelectedForm('historial');
+                                            setSelectedService(item.sourceRow || null);
+                                            if (item.sourceRow) openHistoryRecord(item.sourceRow, { forceAction: card.charla ? 'Charla informativa' : null });
+                                          }}
+                                        >
+                                          <small>{item.name}</small>
+                                          {card.charla ? (
+                                            <div className="home-service-card-row-grid">
+                                              <span>Fecha de Charla: <b>{item.fechaCharla}</b></span>
+                                              <span>Hora: <b>{item.horaCharla}</b></span>
+                                              <span>Lugar de Reunión: <b>{item.lugarReunion}</b></span>
+                                              <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
+                                            </div>
+                                          ) : (
+                                            <div className="home-service-card-row-grid">
+                                              <span>Fecha de Carga: <b>{item.fechaCarga}</b></span>
+                                              <span>Tiempo de Instalación: <b>{item.tiempoInstalacion}</b></span>
+                                              <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
+                                              <span>Fecha de Alta: <b>{item.fechaAlta}</b></span>
+                                            </div>
+                                          )}
+                                        </button>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </article>
+                            ))}
                           </div>
                         </div>
-                        <div className="home-side-stack">
-                          <div className="home-modern-user">
+
+                        <aside className="dashboard-right-panel">
+                          <article className="dash-side-card home-modern-user" style={{ width: '100%', minHeight: 0 }}>
                             <img className="home-modern-avatar" src={selectedProfileAvatar.src} alt={`Ícono de perfil ${selectedProfileAvatar.label}`} />
                             <div>
                               <strong>{currentUserName || 'Usuario'}</strong>
                               <small>{topbarSubtitle || 'Área operativa'}</small>
                               <small>{resolveWelcomeTasksCount(upcomingInstallations)} tareas programadas para hoy</small>
                             </div>
-                          </div>
-                          <section id="weather-widget" aria-live="polite">
+                          </article>
+                          <section id="weather-widget" className="dash-side-card" aria-live="polite">
                             <div className="weather-head">
                               <span className="weather-icon" id="weather-icon">☀️</span>
                               <span className="weather-temp" id="weather-temp">--°C</span>
@@ -14003,53 +14177,25 @@
                             <div className="weather-desc" id="weather-desc">Cargando clima…</div>
                             <div className="weather-time" id="weather-time">--:--:--</div>
                           </section>
-                        </div>
-                      </article>
-
-                      <div className="home-service-cards-board">
-                        {homeServiceCards.map((card) => (
-                          <article key={card.title} className="home-service-card">
-                            <header className="home-service-card-head">
-                              <strong>{card.title}</strong>
-                            </header>
-                            {card.items.length === 0 ? (
-                              <div className="home-service-empty">Sin registros todavía.</div>
-                            ) : (
-                              <ul>
-                                {card.items.slice(0, 8).map((item) => (
-                                  <li key={item.id}>
-                                    <button
-                                      type="button"
-                                      className="home-service-item-btn"
-                                      onClick={() => {
-                                        setSelectedForm('historial');
-                                        setSelectedService(item.sourceRow || null);
-                                        if (item.sourceRow) openHistoryRecord(item.sourceRow, { forceAction: card.charla ? 'Charla informativa' : null });
-                                      }}
-                                    >
-                                      <small>{item.name}</small>
-                                      {card.charla ? (
-                                        <div className="home-service-card-row-grid">
-                                          <span>Fecha de Charla: <b>{item.fechaCharla}</b></span>
-                                          <span>Hora: <b>{item.horaCharla}</b></span>
-                                          <span>Lugar de Reunión: <b>{item.lugarReunion}</b></span>
-                                          <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
-                                        </div>
-                                      ) : (
-                                        <div className="home-service-card-row-grid">
-                                          <span>Fecha de Carga: <b>{item.fechaCarga}</b></span>
-                                          <span>Tiempo de Instalación: <b>{item.tiempoInstalacion}</b></span>
-                                          <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
-                                          <span>Fecha de Alta: <b>{item.fechaAlta}</b></span>
-                                        </div>
-                                      )}
-                                    </button>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
+                          <article className="dash-side-card">
+                            <h4>Resumen del día</h4>
+                            <div className="dash-kpi-row"><span>Servicios activos</span><b>{kpiStats.active}</b></div>
+                            <div className="dash-kpi-row"><span>Tickets abiertos</span><b>{ticketsHistorial.filter((t) => (t.estado || '').toLowerCase() !== 'resuelto').length}</b></div>
+                            <div className="dash-kpi-row"><span>Seguimientos</span><b>{recentActivity.length}</b></div>
                           </article>
-                        ))}
+                          <article className="dash-side-card">
+                            <h4>Actividades recientes</h4>
+                            <div className="dash-activity-mini">
+                              {recentActivity.slice(0, 4).map((item) => (
+                                <div key={`mini-act-${item.id}`} className="dash-activity-mini-item">
+                                  <span>{item.message}</span>
+                                  <small>{item.dateLabel}</small>
+                                </div>
+                              ))}
+                              {recentActivity.length === 0 && <small>Sin actividad por el momento.</small>}
+                            </div>
+                          </article>
+                        </aside>
                       </div>
                     </section>
                   </>
