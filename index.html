@@ -4572,6 +4572,12 @@
         border: 1px solid #e2e8f0;
         box-shadow: 0 10px 24px rgba(15, 23, 42, .10);
       }
+      .main {
+        max-width: 100% !important;
+        width: 100%;
+        margin: 10px 0 0 !important;
+        padding: 0 10px 24px !important;
+      }
       .topbar-actions {
         display: contents;
       }
@@ -4594,6 +4600,12 @@
       .burger:hover {
         transform: translateY(-1px);
         box-shadow: 0 10px 18px rgba(15,23,42,.14) !important;
+      }
+      .menu-pill-btn {
+        width: 54px !important;
+        height: 54px !important;
+        min-width: 54px !important;
+        min-height: 54px !important;
       }
 
       .dashboard-right-panel {
@@ -4623,7 +4635,7 @@
 
       .home-modern-shell,
       .dashboard-main-layout {
-        width: min(100%, 1360px);
+        width: 100%;
       }
       .dashboard-main-layout {
         grid-template-columns: minmax(0, 1fr) minmax(300px, .38fr);
@@ -4701,20 +4713,6 @@
           grid-template-columns: 1fr !important;
         }
       }
-      @media (min-width: 1024px) {
-        .sidebar {
-          transform: translateX(0) !important;
-        }
-        .content {
-          margin-left: 300px;
-          width: calc(100% - 300px);
-        }
-        .overlay {
-          display: none !important;
-        }
-      }
-
-
       .profile-view {
         display: grid;
         gap: 16px;
@@ -13452,6 +13450,9 @@
                 {notificacion.mensaje && (
                   <div className={`toast ${notificacion.tipo === 'error' ? 'error' : ''}`}>{`${currentUserName || 'Usuario'}: ${notificacion.mensaje}`}</div>
                 )}
+                <button className="topbar-action-btn menu-pill-btn" type="button" aria-label="Abrir menú lateral" onClick={toggleSidebar}>
+                  <span className="topbar-action-icon"><i data-lucide="menu" /></span>
+                </button>
                 <div className="top-search" ref={desktopSearchRef}>
                   <button className="topbar-action-btn top-search-toggle" type="button" aria-label="Buscar" onClick={() => setDesktopSearchOpen((prev) => !prev)}>
                     <span className="topbar-action-icon"><i data-lucide="search" /></span>
