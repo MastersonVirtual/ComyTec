@@ -4597,7 +4597,7 @@
       }
 
       .dashboard-right-panel {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         align-items: stretch;
         position: static;
         top: auto;
@@ -4638,6 +4638,9 @@
         position: sticky;
         top: 84px;
       }
+      .home-side-widget-shell {
+        padding: 12px;
+      }
       .home-service-cards-board {
         grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
         margin-top: 14px;
@@ -4657,7 +4660,7 @@
         box-shadow: 0 8px 18px rgba(15, 23, 42, .07);
       }
       .home-service-card-primary {
-        min-height: 240px;
+        min-height: 290px;
       }
       .home-service-card-head {
         justify-content: space-between;
@@ -14214,64 +14217,10 @@
                           </article>
 
                           <section className="home-widget-shell">
-                            <div className="home-card-group">
-                              <h3 className="home-card-group-title">Servicios principales</h3>
-                              <div className="home-service-cards-board">
-                                {homeServiceCards.filter((card) => ['Nuevo Servicios', 'Novación', 'Obra', 'Agregado'].includes(card.title)).map((card) => (
-                                  <article key={card.title} className="home-service-card home-service-card-primary">
-                                    <header className="home-service-card-head">
-                                      <strong>{card.title}</strong>
-                                      <span className="home-service-badge">{card.items.length}</span>
-                                    </header>
-                                    <div className="home-service-card-content">
-                                      {card.items.length === 0 ? (
-                                        <div className="home-service-empty">Sin registros todavía.</div>
-                                      ) : (
-                                        <ul>
-                                          {card.items.slice(0, 8).map((item) => (
-                                            <li key={item.id}>
-                                              <button
-                                                type="button"
-                                                className="home-service-item-btn"
-                                                onClick={() => {
-                                                  setSelectedForm('historial');
-                                                  setSelectedService(item.sourceRow || null);
-                                                  if (item.sourceRow) openHistoryRecord(item.sourceRow, { forceAction: card.charla ? 'Charla informativa' : null });
-                                                }}
-                                              >
-                                                <small>{item.name}</small>
-                                                {card.charla ? (
-                                                  <div className="home-service-card-row-grid">
-                                                    <span>Fecha de Charla: <b>{item.fechaCharla}</b></span>
-                                                    <span>Hora: <b>{item.horaCharla}</b></span>
-                                                    <span>Lugar de Reunión: <b>{item.lugarReunion}</b></span>
-                                                    <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
-                                                  </div>
-                                                ) : (
-                                                  <div className="home-service-card-row-grid">
-                                                    <span>Fecha de Carga: <b>{item.fechaCarga}</b></span>
-                                                    <span>Tiempo de Instalación: <b>{item.tiempoInstalacion}</b></span>
-                                                    <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
-                                                    <span>Fecha de Alta: <b>{item.fechaAlta}</b></span>
-                                                  </div>
-                                                )}
-                                              </button>
-                                            </li>
-                                          ))}
-                                        </ul>
-                                      )}
-                                    </div>
-                                    <button type="button" className="home-service-footer-btn" onClick={() => { setSelectedForm('historial'); setSelectedService(null); }}>Ver todos →</button>
-                                  </article>
-                                ))}
-                              </div>
-                            </div>
-
-                            <div className="home-card-group">
-                              <h3 className="home-card-group-title">Otros módulos</h3>
-                              <div className="home-service-cards-board">
-                                {homeServiceCards.filter((card) => !['Nuevo Servicios', 'Novación', 'Obra', 'Agregado'].includes(card.title)).map((card) => (
-                                <article key={card.title} className="home-service-card">
+                            <h3 className="home-card-group-title">Control de ordenes de Servicio</h3>
+                            <div className="home-service-cards-board">
+                              {homeServiceCards.map((card) => (
+                                <article key={card.title} className="home-service-card home-service-card-primary">
                                   <header className="home-service-card-head">
                                     <strong>{card.title}</strong>
                                     <span className="home-service-badge">{card.items.length}</span>
@@ -14317,45 +14266,48 @@
                                   <button type="button" className="home-service-footer-btn" onClick={() => { setSelectedForm('historial'); setSelectedService(null); }}>Ver todos →</button>
                                 </article>
                               ))}
-                              </div>
                             </div>
                           </section>
                         </div>
                         <aside className="dashboard-side-column">
-                          <article className="dash-side-card home-modern-user dashboard-equal-card" style={{ width: '100%', minHeight: 0 }}>
-                            <img className="home-modern-avatar" src={selectedProfileAvatar.src} alt={`Ícono de perfil ${selectedProfileAvatar.label}`} />
-                            <div>
-                              <strong>{currentUserName || 'Usuario'}</strong>
-                              <small>{topbarSubtitle || 'Área operativa'}</small>
-                              <small>{resolveWelcomeTasksCount(upcomingInstallations)} tareas programadas para hoy</small>
-                            </div>
-                          </article>
-                          <section id="weather-widget" className="dash-side-card dashboard-equal-card" aria-live="polite">
-                            <div className="weather-head">
-                              <span className="weather-icon" id="weather-icon">☀️</span>
-                              <span className="weather-temp" id="weather-temp">--°C</span>
-                            </div>
-                            <div className="weather-desc" id="weather-desc">Cargando clima…</div>
-                            <div className="weather-time" id="weather-time">--:--:--</div>
-                          </section>
-                          <article className="dash-side-card dashboard-equal-card">
-                            <h4>Resumen del día</h4>
-                            <div className="dash-kpi-row"><span>Servicios activos</span><b>{kpiStats.active}</b></div>
-                            <div className="dash-kpi-row"><span>Tickets abiertos</span><b>{ticketsHistorial.filter((t) => (t.estado || '').toLowerCase() !== 'resuelto').length}</b></div>
-                            <div className="dash-kpi-row"><span>Seguimientos</span><b>{recentActivity.length}</b></div>
-                          </article>
-                          <article className="dash-side-card dashboard-equal-card">
-                            <h4>Actividades recientes</h4>
-                            <div className="dash-activity-mini">
-                              {recentActivity.slice(0, 4).map((item) => (
-                                <div key={`mini-act-${item.id}`} className="dash-activity-mini-item">
-                                  <span>{item.message}</span>
-                                  <small>{item.dateLabel}</small>
+                          <section className="home-widget-shell home-side-widget-shell">
+                            <div className="dashboard-right-panel">
+                              <article className="dash-side-card home-modern-user dashboard-equal-card" style={{ width: '100%', minHeight: 0 }}>
+                                <img className="home-modern-avatar" src={selectedProfileAvatar.src} alt={`Ícono de perfil ${selectedProfileAvatar.label}`} />
+                                <div>
+                                  <strong>{currentUserName || 'Usuario'}</strong>
+                                  <small>{topbarSubtitle || 'Área operativa'}</small>
+                                  <small>{resolveWelcomeTasksCount(upcomingInstallations)} tareas programadas para hoy</small>
                                 </div>
-                              ))}
-                              {recentActivity.length === 0 && <small>Sin actividad por el momento.</small>}
+                              </article>
+                              <section id="weather-widget" className="dash-side-card dashboard-equal-card" aria-live="polite">
+                                <div className="weather-head">
+                                  <span className="weather-icon" id="weather-icon">☀️</span>
+                                  <span className="weather-temp" id="weather-temp">--°C</span>
+                                </div>
+                                <div className="weather-desc" id="weather-desc">Cargando clima…</div>
+                                <div className="weather-time" id="weather-time">--:--:--</div>
+                              </section>
+                              <article className="dash-side-card dashboard-equal-card">
+                                <h4>Resumen del día</h4>
+                                <div className="dash-kpi-row"><span>Servicios activos</span><b>{kpiStats.active}</b></div>
+                                <div className="dash-kpi-row"><span>Tickets abiertos</span><b>{ticketsHistorial.filter((t) => (t.estado || '').toLowerCase() !== 'resuelto').length}</b></div>
+                                <div className="dash-kpi-row"><span>Seguimientos</span><b>{recentActivity.length}</b></div>
+                              </article>
+                              <article className="dash-side-card dashboard-equal-card">
+                                <h4>Actividades recientes</h4>
+                                <div className="dash-activity-mini">
+                                  {recentActivity.slice(0, 4).map((item) => (
+                                    <div key={`mini-act-${item.id}`} className="dash-activity-mini-item">
+                                      <span>{item.message}</span>
+                                      <small>{item.dateLabel}</small>
+                                    </div>
+                                  ))}
+                                  {recentActivity.length === 0 && <small>Sin actividad por el momento.</small>}
+                                </div>
+                              </article>
                             </div>
-                          </article>
+                          </section>
                         </aside>
                       </div>
                     </section>
