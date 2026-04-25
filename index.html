@@ -866,50 +866,47 @@
       .home-service-card-head {
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-        margin-bottom: 10px;
+        justify-content: flex-start;
+        margin-bottom: 12px;
       }
       .home-service-card-head strong {
-        font-size: .94rem;
+        font-size: 1rem;
         color: #0f172a;
-      }
-      .home-service-card-head span {
-        font-size: .76rem;
-        color: #4b5563;
-        background: #eef5f4;
-        border: 1px solid #d5e7e4;
-        border-radius: 999px;
-        padding: 4px 8px;
       }
       .home-service-card ul {
         list-style: none;
         margin: 0;
         padding: 0;
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        display: flex;
+        flex-direction: column;
         gap: 8px;
       }
       .home-service-card li {
-        border: 1px dashed #d4e7e4;
+        border: 1px solid #e2ecea;
         border-radius: 10px;
-        padding: 7px 8px;
-        min-height: 52px;
+        padding: 8px 10px;
         background: #f9fbfb;
       }
       .home-service-card li small {
         display: block;
-        color: #6b7280;
-        font-size: .69rem;
-        text-transform: uppercase;
-        letter-spacing: .04em;
+        color: #111827;
+        font-size: .78rem;
+        font-weight: 600;
       }
       .home-service-card li b {
-        display: block;
-        margin-top: 3px;
-        color: #9ca3af;
+        margin-top: 4px;
+        display: inline-flex;
+        color: #6b7280;
+        font-size: .7rem;
+        font-weight: 500;
+      }
+      .home-service-empty {
+        color: #6b7280;
         font-size: .8rem;
-        font-weight: 600;
+        border: 1px dashed #d5e5e3;
+        border-radius: 10px;
+        padding: 9px 10px;
+        background: #fbfdfc;
       }
       .home-modern-chart {
         border: 1px solid #e5e7eb;
@@ -9099,6 +9096,67 @@
           return { counts: base, maxValue };
         }, [visibleRows]);
 
+        const homeServiceCards = useMemo(() => {
+          const cardDefs = [
+            { title: 'Nuevo Servicios', actions: ['Nuevo Servicio'] },
+            { title: 'Novación', actions: ['Novación'] },
+            { title: 'Obra', actions: ['Obra'] },
+            { title: 'Agregado', actions: ['Adicionales'] },
+            { title: 'Movimiento de Obra', actions: ['Movimiento de obra'] },
+            { title: 'Baja de Servicio', actions: ['Baja'] },
+            { title: 'Charlar', actions: ['Charla informativa'] },
+          ];
+
+          const resolveTime = (row) => {
+            const candidate = parseServiceDate(
+              row.creadoEn
+              || row.actualizadoEn
+              || row.fechaIngresoDatos
+              || row.fechaIngresoAuto
+              || row.fechaAltaServicio
+              || row.fechaAlta
+              || row.fechaEspecificaInicio
+            );
+            return candidate instanceof Date && !Number.isNaN(candidate.getTime()) ? candidate.getTime() : 0;
+          };
+
+          const resolveDateLabel = (row) => {
+            const candidate = parseServiceDate(
+              row.fechaIngresoDatos
+              || row.fechaIngresoAuto
+              || row.fechaAltaServicio
+              || row.fechaAlta
+              || row.fechaEspecificaInicio
+              || row.creadoEn
+            );
+            return candidate ? candidate.toLocaleDateString('es-UY') : 'Sin fecha';
+          };
+
+          const resolveServiceName = (row) => String(
+            row.nombreServicio
+            || row.razonSocial
+            || row.nombreEdificio
+            || row.nombre
+            || row.cliente
+            || row.clienteId
+            || 'Servicio sin nombre'
+          ).trim();
+
+          return cardDefs.map((card) => {
+            const items = visibleRows
+              .filter((row) => card.actions.includes(String(row.tipoAccion || '').trim()))
+              .slice()
+              .sort((a, b) => resolveTime(b) - resolveTime(a))
+              .map((row, idx) => ({
+                id: row.id || `${card.title}-${row.clienteId || 'sin-id'}-${idx}`,
+                name: resolveServiceName(row),
+                status: getStatusLabel(row),
+                date: resolveDateLabel(row),
+              }));
+            return { ...card, items };
+          });
+        }, [visibleRows]);
+
         const preloadedHistoryRows = useMemo(() => {
           if (hidePreloadedCatalog) return [];
           const existingIds = new Set(visibleRows.map((r) => normalizeServiceId(r?.clienteId)).filter(Boolean));
@@ -13793,28 +13851,23 @@
                       </article>
 
                       <div className="home-service-cards-board">
-                        {[
-                          { title: 'Nuevo Servicios', owner: 'Logística', advisor: 'Juan', fields: ['Fecha de Carga', 'Tiempo de Instalación', 'Status', 'Fecha de Alta', 'Cobro'] },
-                          { title: 'Novación', owner: 'Logística', advisor: 'Juan', fields: ['Fecha de Carga', 'Tiempo de Instalación', 'Status', 'Fecha de Alta', 'Cobro'] },
-                          { title: 'Obra', owner: 'Ayrton', advisor: 'Juan', fields: ['Fecha de Carga', 'Tiempo de Instalación', 'Status', 'Fecha de Alta', 'Cobro'] },
-                          { title: 'Agregado', owner: 'Logística', advisor: 'Juan', fields: ['Fecha de Carga', 'Tiempo de Instalación', 'Status', 'Fecha de Alta', 'Comentarios', 'Cobro'] },
-                          { title: 'Movimiento de Obra', owner: 'Logística', advisor: 'Juan', fields: ['Fecha de Carga', 'Costo', 'Status', 'Fecha de Alta', 'Cobro'] },
-                          { title: 'Baja de Servicio', owner: 'Logística', advisor: 'Juan', fields: ['Fecha de Carga', 'Status', 'Fecha trabajo realizado', 'Verificado'] },
-                          { title: 'Charlar', owner: 'Logística', advisor: 'Juan', fields: ['Fecha de Charla', 'Hora', 'Lugar de Reunión', 'Status'] }
-                        ].map((card) => (
+                        {homeServiceCards.map((card) => (
                           <article key={card.title} className="home-service-card">
                             <header className="home-service-card-head">
                               <strong>{card.title}</strong>
-                              <span>{card.owner} · {card.advisor}</span>
                             </header>
-                            <ul>
-                              {card.fields.map((field) => (
-                                <li key={`${card.title}-${field}`}>
-                                  <small>{field}</small>
-                                  <b>—</b>
-                                </li>
-                              ))}
-                            </ul>
+                            {card.items.length === 0 ? (
+                              <div className="home-service-empty">Sin registros todavía.</div>
+                            ) : (
+                              <ul>
+                                {card.items.slice(0, 8).map((item) => (
+                                  <li key={item.id}>
+                                    <small>{item.name}</small>
+                                    <b>{item.status || 'Pendiente'} · {item.date}</b>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
                           </article>
                         ))}
                       </div>
