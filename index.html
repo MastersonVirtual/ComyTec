@@ -772,6 +772,8 @@
       }
       #weather-widget .weather-icon {
         font-size: 1.4rem;
+        display: inline-flex;
+        will-change: transform;
       }
       #weather-widget .weather-temp {
         font-size: 1.35rem;
@@ -785,7 +787,44 @@
         margin-top: 7px;
         font-weight: 700;
         color: #0b4e49;
-        font-size: .86rem;
+        font-size: 1rem;
+      }
+      #weather-widget .weather-icon.weather-anim-sun {
+        animation: weatherSpin 8s linear infinite;
+      }
+      #weather-widget .weather-icon.weather-anim-cloud {
+        animation: weatherFloatCloud 3.8s ease-in-out infinite;
+      }
+      #weather-widget .weather-icon.weather-anim-rain,
+      #weather-widget .weather-icon.weather-anim-storm,
+      #weather-widget .weather-icon.weather-anim-snow {
+        animation: weatherRainBob 1.9s ease-in-out infinite;
+      }
+      #weather-widget .weather-icon.weather-anim-moon {
+        animation: weatherMoonGlow 2.8s ease-in-out infinite;
+      }
+      #weather-widget .weather-icon.weather-anim-fog {
+        animation: weatherFogDrift 4.4s ease-in-out infinite;
+      }
+      @keyframes weatherSpin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @keyframes weatherFloatCloud {
+        0%, 100% { transform: translateX(0); }
+        50% { transform: translateX(5px); }
+      }
+      @keyframes weatherRainBob {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(3px); }
+      }
+      @keyframes weatherMoonGlow {
+        0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(59,130,246,0)); }
+        50% { transform: scale(1.08); filter: drop-shadow(0 0 5px rgba(59,130,246,.35)); }
+      }
+      @keyframes weatherFogDrift {
+        0%, 100% { transform: translateX(0); opacity: 1; }
+        50% { transform: translateX(4px); opacity: .75; }
       }
       #weather-widget .weather-error {
         color: #b91c1c;
@@ -1887,53 +1926,127 @@
       .service-coord-search-icon i { width: 16px; height: 16px; }
       .service-coord-cards-grid {
         margin-top: 14px;
-        display: grid;
-        gap: 12px;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      }
-      .service-coord-service-card {
-        border-radius: 16px;
+        border-radius: 14px;
         border: 1px solid rgba(170, 196, 201, .75);
         background: #ffffff;
         box-shadow: 0 10px 24px rgba(8, 25, 33, .1);
-        padding: 14px;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        cursor: pointer;
-        transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+        overflow: hidden;
       }
-      .service-coord-service-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 16px 28px rgba(8, 25, 33, .14);
-        border-color: rgba(13, 122, 124, .45);
-      }
-      .service-coord-service-card.active {
-        border-color: rgba(13, 122, 124, .65);
-        box-shadow: 0 18px 32px rgba(10, 95, 97, .2);
-      }
-      .service-card-top {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 10px;
-      }
-      .service-card-top strong {
-        color: #0f3435;
-        font-size: 15px;
-      }
-      .service-card-meta {
+      .service-coord-table-head,
+      .service-coord-table-row {
         display: grid;
-        gap: 8px;
-      }
-      .service-card-meta-item {
-        display: flex;
+        grid-template-columns: minmax(230px, 2.1fr) minmax(140px, 1fr) minmax(130px, .9fr) minmax(140px, 1fr) minmax(120px, .85fr) minmax(115px, .7fr) 42px;
         align-items: center;
-        gap: 8px;
-        color: #38565a;
+        gap: 12px;
+        padding: 12px 14px;
+      }
+      .service-coord-table-head {
+        background: #f6f9fa;
+        border-bottom: 1px solid rgba(188, 207, 213, .75);
+        color: #6a7d81;
+        font-size: 11px;
+        text-transform: uppercase;
+        font-weight: 700;
+        letter-spacing: .03em;
+      }
+      .service-coord-table-row {
+        border-bottom: 1px solid rgba(226, 236, 239, .95);
+        cursor: pointer;
+      }
+      .service-coord-table-row:hover { background: #f8fcfb; }
+      .service-coord-table-row.active { background: #eff8f7; }
+      .service-coord-main-service {
+        display: grid;
+        gap: 2px;
+      }
+      .service-coord-main-service strong {
+        color: #173f44;
         font-size: 13px;
       }
-      .service-card-meta-item span:first-child { font-size: 14px; }
+      .service-coord-main-service small {
+        color: #648085;
+        font-size: 11px;
+      }
+      .service-coord-inline-id {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        min-height: 30px;
+        border-radius: 10px;
+        background: #e9f4f3;
+        color: #0f6d6c;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .02em;
+        margin-right: 10px;
+      }
+      .service-coord-actions-trigger {
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        border: 1px solid rgba(187, 208, 214, .95);
+        background: #fff;
+        color: #4d6a6f;
+        cursor: pointer;
+        font-weight: 900;
+      }
+      .service-coord-expanded-row {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        background: #fbfefe;
+        border-top: 1px dashed rgba(188, 207, 213, .75);
+        padding: 12px 14px;
+      }
+      .service-coord-expanded-card {
+        border: 1px solid rgba(219, 231, 235, .95);
+        border-radius: 12px;
+        padding: 10px;
+        background: #fff;
+      }
+      .service-coord-expanded-card h5 {
+        margin: 0 0 6px;
+        font-size: 12px;
+        color: #36575c;
+      }
+      .service-coord-expanded-card p,
+      .service-coord-expanded-card small {
+        margin: 0;
+        color: #5a767b;
+        font-size: 12px;
+      }
+      .service-coord-quick-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .service-coord-context-menu {
+        position: fixed;
+        z-index: 1400;
+        min-width: 190px;
+        border-radius: 12px;
+        border: 1px solid rgba(181, 203, 208, .95);
+        background: #ffffff;
+        box-shadow: 0 18px 34px rgba(15, 23, 42, .18);
+        padding: 6px;
+      }
+      .service-coord-context-menu button {
+        width: 100%;
+        border: 0;
+        background: transparent;
+        text-align: left;
+        border-radius: 8px;
+        min-height: 34px;
+        padding: 0 10px;
+        color: #35565b;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .service-coord-context-menu button:hover {
+        background: #f1f8f7;
+        color: #0e6664;
+      }
       .service-card-actions {
         display: flex;
         gap: 8px;
@@ -2125,9 +2238,31 @@
       @media (max-width: 1180px) {
         .service-coord-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .service-coord-detail-grid { grid-template-columns: 1fr; }
+        .service-coord-table-head,
+        .service-coord-table-row { grid-template-columns: minmax(220px, 1.8fr) minmax(120px, .9fr) minmax(120px, .85fr) minmax(120px, .9fr) minmax(100px, .8fr) minmax(95px, .7fr) 38px; }
       }
       @media (max-width: 760px) {
         .service-coord-filters { grid-template-columns: 1fr; }
+        .service-coord-table-head { display: none; }
+        .service-coord-table-row {
+          grid-template-columns: 1fr;
+          gap: 8px;
+          align-items: flex-start;
+          position: relative;
+          padding-right: 50px;
+        }
+        .service-coord-table-row > :not(:first-child):not(:last-child) {
+          display: inline-flex;
+          font-size: 12px;
+          color: #5a767b;
+          gap: 6px;
+        }
+        .service-coord-table-row .service-coord-actions-trigger {
+          position: absolute;
+          top: 10px;
+          right: 10px;
+        }
+        .service-coord-expanded-row { grid-template-columns: 1fr; }
       }
       .form-history-shell {
         margin-top: 18px;
@@ -9361,8 +9496,11 @@
         const [historyTypeFilter, setHistoryTypeFilter] = useState('todos');
         const [historyAdministrationFilter, setHistoryAdministrationFilter] = useState('todos');
         const [historyDateFilter, setHistoryDateFilter] = useState('');
+        const [historySortBy, setHistorySortBy] = useState('recent');
         const [historyDetailTab, setHistoryDetailTab] = useState('informacion');
         const [historyDetailModalOpen, setHistoryDetailModalOpen] = useState(false);
+        const [historyExpandedRowId, setHistoryExpandedRowId] = useState('');
+        const [historyContextMenu, setHistoryContextMenu] = useState({ open: false, x: 0, y: 0, row: null });
         const [workflowTaskChecks, setWorkflowTaskChecks] = useState({});
         const [workflowTransitionDrafts, setWorkflowTransitionDrafts] = useState({});
         const [approvalActionInProgress, setApprovalActionInProgress] = useState('');
@@ -9430,6 +9568,14 @@
 
         function getStatusLabel(row) {
           return String(row?.status || row?.estado || '').trim().toLowerCase();
+        }
+
+        function getHistoryRowTypeLabel(row) {
+          const raw = String(row?.tipoAccion || '').trim();
+          if (!raw || raw === 'Nuevo Servicio') return 'Servicio';
+          if (raw === 'Adicionales') return 'Adicional';
+          if (raw === 'Solicitud de presupuesto') return 'Presupuesto';
+          return raw;
         }
 
         function isPendingStatus(label) {
@@ -9961,9 +10107,15 @@
           return filtered.sort((a, b) => {
             const aTs = a.actualizadoEn?.seconds || a.creadoEn?.seconds || 0;
             const bTs = b.actualizadoEn?.seconds || b.creadoEn?.seconds || 0;
+            if (historySortBy === 'oldest') return aTs - bTs;
+            if (historySortBy === 'status') {
+              const aStatus = normalizeLegacyStatusName(String(a.status || a.estado || 'Pendiente'));
+              const bStatus = normalizeLegacyStatusName(String(b.status || b.estado || 'Pendiente'));
+              return aStatus.localeCompare(bStatus, 'es', { sensitivity: 'base' });
+            }
             return bTs - aTs;
           });
-        }, [historySourceRows, historySearchTerm, historyStatusFilter, historyCommercialFilter, historyTypeFilter, historyAdministrationFilter, historyDateFilter]);
+        }, [historySourceRows, historySearchTerm, historyStatusFilter, historyCommercialFilter, historyTypeFilter, historyAdministrationFilter, historyDateFilter, historySortBy]);
 
         const HISTORY_PAGE_SIZE = 18;
         const totalHistoryPages = Math.max(1, Math.ceil(historyFilteredRows.length / HISTORY_PAGE_SIZE));
@@ -11416,7 +11568,20 @@
 
         useEffect(() => {
           setHistoryPage(1);
-        }, [historySearchTerm, historyStatusFilter, historyCommercialFilter, historyTypeFilter, historyAdministrationFilter, historyDateFilter]);
+        }, [historySearchTerm, historyStatusFilter, historyCommercialFilter, historyTypeFilter, historyAdministrationFilter, historyDateFilter, historySortBy]);
+
+        useEffect(() => {
+          if (!historyContextMenu.open) return undefined;
+          const closeMenu = () => setHistoryContextMenu({ open: false, x: 0, y: 0, row: null });
+          window.addEventListener('click', closeMenu);
+          window.addEventListener('scroll', closeMenu, true);
+          window.addEventListener('resize', closeMenu);
+          return () => {
+            window.removeEventListener('click', closeMenu);
+            window.removeEventListener('scroll', closeMenu, true);
+            window.removeEventListener('resize', closeMenu);
+          };
+        }, [historyContextMenu.open]);
 
         useEffect(() => {
           if (historyPage > totalHistoryPages) {
@@ -14794,7 +14959,7 @@
 
                     <div className="service-coord-filters">
                       <div className="field service-coord-search-field">
-                        <label>Buscador</label>
+                        <label>Buscar por cliente, ID o dato</label>
                         <div className="service-coord-search-wrap">
                           <span className="service-coord-search-icon"><i data-lucide="search"></i></span>
                           <input type="search" value={historySearchTerm} onChange={(e) => setHistorySearchTerm(e.target.value)} placeholder="Buscar por cliente, ID o dirección" />
@@ -14805,12 +14970,34 @@
                       <div className="field"><label>Administración</label><select value={historyAdministrationFilter} onChange={(e) => setHistoryAdministrationFilter(e.target.value)}><option value="todos">Todas</option>{historyAdministrationOptions.map((opt) => <option key={`history-administration-${opt}`} value={opt}>{opt}</option>)}</select></div>
                       <div className="field"><label>Fecha de alta</label><input type="date" value={historyDateFilter} onChange={(e) => setHistoryDateFilter(e.target.value)} /></div>
                       <div className="field"><label>Tipo</label><select value={historyTypeFilter} onChange={(e) => setHistoryTypeFilter(e.target.value)}><option value="todos">Todos</option>{historyTypeOptions.map((opt) => <option key={`history-type-${opt}`} value={opt}>{opt}</option>)}</select></div>
+                      <div className="field"><label>Ordenar por</label><select value={historySortBy} onChange={(e) => setHistorySortBy(e.target.value)}><option value="recent">Más recientes</option><option value="oldest">Más antiguos</option><option value="status">Estado (A-Z)</option></select></div>
+                      <div className="field" style={{ alignSelf: 'end' }}>
+                        <button type="button" className="service-card-action-btn" onClick={() => { setHistorySearchTerm(''); setHistoryStatusFilter('Pendiente'); setHistoryCommercialFilter('todos'); setHistoryAdministrationFilter('todos'); setHistoryDateFilter(''); setHistoryTypeFilter('todos'); setHistorySortBy('recent'); }}>
+                          Limpiar filtros
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="service-card-actions" style={{ marginTop: 12 }}>
+                      <div className="service-detail-kpi"><small>Total servicios</small><strong>{historyFilteredRows.length}</strong></div>
+                      <div className="service-detail-kpi"><small>Pendientes</small><strong>{historyFilteredRows.filter((r) => normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente')) === 'Pendiente').length}</strong></div>
+                      <div className="service-detail-kpi"><small>En proceso</small><strong>{historyFilteredRows.filter((r) => normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente')) === 'En proceso').length}</strong></div>
+                      <div className="service-detail-kpi"><small>Completados</small><strong>{historyFilteredRows.filter((r) => ['Finalizado', 'Completado'].includes(normalizeLegacyStatusName(String(r.status || r.estado || 'Pendiente')))).length}</strong></div>
                     </div>
 
                     {historyRowsPage.length === 0 ? (
                       <div className="service-coord-empty">No hay servicios para los filtros seleccionados.</div>
                     ) : (
                       <div className="service-coord-cards-grid">
+                        <div className="service-coord-table-head">
+                          <span>Servicio</span>
+                          <span>Cliente</span>
+                          <span>Encargado</span>
+                          <span>Fecha alta</span>
+                          <span>Tipo</span>
+                          <span>Estado</span>
+                          <span>Acc.</span>
+                        </div>
                         {historyRowsPage.map((row) => {
                           const rawStatus = normalizeLegacyStatusName(String(row.status || row.estado || 'Pendiente'));
                           const cardStatus = rawStatus === 'Finalizado' || rawStatus === 'Completado'
@@ -14818,29 +15005,80 @@
                             : rawStatus === 'En proceso' || rawStatus === 'Esperando información'
                               ? 'Activo'
                               : 'Pendiente';
+                          const isExpanded = historyExpandedRowId === row.id;
                           return (
-                            <article key={`history-row-${row.id}`} className={`service-coord-service-card ${selectedService?.id === row.id ? 'active' : ''}`} onClick={() => openServiceDetailModal(row, 'informacion')}>
-                              <div className="service-card-top">
-                                <strong>{row.nombreServicio || row.cliente || 'Servicio sin nombre'}</strong>
+                            <React.Fragment key={`history-row-${row.id}`}>
+                              <div
+                                className={`service-coord-table-row ${selectedService?.id === row.id ? 'active' : ''}`}
+                                role="button"
+                                tabIndex={0}
+                                onClick={() => { setHistoryExpandedRowId(isExpanded ? '' : row.id); setSelectedService(row); }}
+                                onContextMenu={(event) => {
+                                  event.preventDefault();
+                                  setSelectedService(row);
+                                  setHistoryContextMenu({ open: true, x: event.clientX, y: event.clientY, row });
+                                }}
+                                onKeyDown={(event) => {
+                                  if (event.key === 'Enter' || event.key === ' ') {
+                                    event.preventDefault();
+                                    setHistoryExpandedRowId(isExpanded ? '' : row.id);
+                                  }
+                                }}
+                              >
+                                <span className="service-coord-main-service">
+                                  <strong><span className="service-coord-inline-id">ID {row.clienteId || '-'}</span>{row.nombreServicio || row.cliente || 'Servicio sin nombre'}</strong>
+                                  <small>{normalizeWorkflowStage(row.workflowStage) || 'Pendiente de aprobación – Coordinación de Instalaciones'}</small>
+                                </span>
+                                <span>{row.cliente || row.razonSocial || '-'}</span>
+                                <span>{row.representanteComercial || 'Sin encargado'}</span>
+                                <span>{row.fechaAltaServicio || row.fechaAlta || row.fechaEspecificaInicio || '-'}</span>
+                                <span>{getHistoryRowTypeLabel(row) || '-'}</span>
                                 <span className={`service-coord-status service-coord-status-${cardStatus.toLowerCase()}`}>{cardStatus}</span>
+                                <button type="button" className="service-coord-actions-trigger" onClick={(event) => {
+                                  event.stopPropagation();
+                                  const rect = event.currentTarget.getBoundingClientRect();
+                                  setSelectedService(row);
+                                  setHistoryContextMenu({ open: true, x: rect.left, y: rect.bottom + 6, row });
+                                }}>⋮</button>
                               </div>
-                              <div className="service-card-meta">
-                                <div className="service-card-meta-item"><span>🪪</span><span>ID {row.clienteId || '-'}</span></div>
-                                <div className="service-card-meta-item"><span>📍</span><span>{row.direccionServicio || row.direccion || '-'}</span></div>
-                                <div className="service-card-meta-item"><span>👤</span><span>{row.representanteComercial || 'Sin encargado'}</span></div>
-                                <div className="service-card-meta-item"><span>📅</span><span>{row.fechaAltaServicio || row.fechaAlta || row.fechaEspecificaInicio || '-'}</span></div>
-                                <div className="service-card-meta-item"><span>🧭</span><span>{normalizeWorkflowStage(row.workflowStage) || 'Pendiente de aprobación – Coordinación de Instalaciones'}</span></div>
-                              </div>
-                              <div className="service-card-actions">
-                                <button type="button" className="service-card-action-btn primary" onClick={(event) => { event.stopPropagation(); startEditService(row); }}>Editar</button>
-                                <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); openServiceDetailModal(row, 'informacion'); }}>Ver detalles</button>
-                                <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); openServiceDetailModal(row, 'historial'); }}>Ver historial</button>
-                                <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); openServiceDetailModal(row, 'tickets'); }}>Ver tickets</button>
-                                {isAdminUser && <button type="button" className="service-card-action-btn" onClick={(event) => { event.stopPropagation(); setDeleteTargetService(row); }}>Eliminar</button>}
-                              </div>
-                            </article>
+                              {isExpanded && (
+                                <div className="service-coord-expanded-row">
+                                  <div className="service-coord-expanded-card">
+                                    <h5>Información adicional</h5>
+                                    <p><b>ID:</b> {row.clienteId || '-'}</p>
+                                    <p><b>Dirección:</b> {row.direccionServicio || row.direccion || '-'}</p>
+                                    <small>{row.notas || 'Sin notas agregadas.'}</small>
+                                  </div>
+                                  <div className="service-coord-expanded-card">
+                                    <h5>Seguimiento</h5>
+                                    <p><b>Estado:</b> {rawStatus}</p>
+                                    <p><b>Responsable:</b> {row.representanteComercial || 'Sin encargado'}</p>
+                                    <small>Última actualización: {formatDateTime(row.actualizadoEn || row.creadoEn)}</small>
+                                  </div>
+                                  <div className="service-coord-expanded-card">
+                                    <h5>Acciones rápidas</h5>
+                                    <div className="service-coord-quick-actions">
+                                      <button type="button" className="service-card-action-btn" onClick={() => openServiceDetailModal(row, 'informacion')}>Ver detalles</button>
+                                      <button type="button" className="service-card-action-btn primary" onClick={() => startEditService(row)}>Editar</button>
+                                      <button type="button" className="service-card-action-btn" onClick={() => openServiceDetailModal(row, 'tickets')}>Ver tickets</button>
+                                      {isAdminUser && <button type="button" className="service-card-action-btn" onClick={() => setDeleteTargetService(row)}>Eliminar</button>}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </React.Fragment>
                           );
                         })}
+                      </div>
+                    )}
+
+                    {historyContextMenu.open && historyContextMenu.row && (
+                      <div className="service-coord-context-menu" style={{ left: historyContextMenu.x, top: historyContextMenu.y }} onClick={(event) => event.stopPropagation()}>
+                        <button type="button" onClick={() => { openServiceDetailModal(historyContextMenu.row, 'informacion'); setHistoryContextMenu({ open: false, x: 0, y: 0, row: null }); }}>👁 Ver detalles</button>
+                        <button type="button" onClick={() => { startEditService(historyContextMenu.row); setHistoryContextMenu({ open: false, x: 0, y: 0, row: null }); }}>✏️ Editar</button>
+                        <button type="button" onClick={() => { openServiceDetailModal(historyContextMenu.row, 'historial'); setHistoryContextMenu({ open: false, x: 0, y: 0, row: null }); }}>🕘 Ver historial</button>
+                        <button type="button" onClick={() => { openServiceDetailModal(historyContextMenu.row, 'tickets'); setHistoryContextMenu({ open: false, x: 0, y: 0, row: null }); }}>🎫 Ver tickets</button>
+                        {isAdminUser && <button type="button" onClick={() => { setDeleteTargetService(historyContextMenu.row); setHistoryContextMenu({ open: false, x: 0, y: 0, row: null }); }}>🗑 Eliminar</button>}
                       </div>
                     )}
 
@@ -16489,9 +16727,10 @@
           ensureWidgetExists();
           const { time, icon, temp, desc } = getWidgetNodes();
           if (!time) return;
-          time.textContent = new Date().toLocaleTimeString('es-UY');
+          time.textContent = new Date().toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
           if (icon && lastWeatherCode === 0) {
             icon.textContent = esNoche() ? '🌙' : '☀️';
+            applyWeatherAnimation(icon, icon.textContent);
           }
           const stillLoading = String(temp?.textContent || '').includes('--') || /cargando clima/i.test(String(desc?.textContent || ''));
           if (stillLoading && !weatherFetchInProgress && (Date.now() - lastWeatherFetchAt) > 15000) {
@@ -16505,6 +16744,27 @@
           if (!desc) return;
           desc.textContent = mensaje || 'Error al obtener clima.';
           desc.classList.add('weather-error');
+        }
+
+        function applyWeatherAnimation(iconNode, iconEmoji) {
+          if (!iconNode) return;
+          iconNode.classList.remove(
+            'weather-anim-sun',
+            'weather-anim-cloud',
+            'weather-anim-rain',
+            'weather-anim-storm',
+            'weather-anim-snow',
+            'weather-anim-moon',
+            'weather-anim-fog'
+          );
+          const emoji = String(iconEmoji || '').trim();
+          if (emoji === '☀️') iconNode.classList.add('weather-anim-sun');
+          else if (emoji === '☁️') iconNode.classList.add('weather-anim-cloud');
+          else if (emoji === '🌧️') iconNode.classList.add('weather-anim-rain');
+          else if (emoji === '⛈️') iconNode.classList.add('weather-anim-storm');
+          else if (emoji === '❄️') iconNode.classList.add('weather-anim-snow');
+          else if (emoji === '🌙') iconNode.classList.add('weather-anim-moon');
+          else if (emoji === '🌫️') iconNode.classList.add('weather-anim-fog');
         }
 
         async function obtenerClima() {
@@ -16539,6 +16799,7 @@
             const mapped = mapearClima(data);
             lastWeatherCode = weathercode !== null && weathercode !== undefined ? Number(weathercode) : null;
             icon.textContent = mapped.icono;
+            applyWeatherAnimation(icon, mapped.icono);
             temp.textContent = `${Math.round(Number(temperatura))}°C`;
             desc.textContent = mapped.descripcion;
             desc.classList.remove('weather-error');
