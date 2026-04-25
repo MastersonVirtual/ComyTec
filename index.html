@@ -4544,8 +4544,8 @@
         width: auto;
         transform: none;
       }
-      .content { padding-top: 72px !important; }
-      @media (max-width: 768px) { .content { padding-top: 70px !important; } }
+      .content { padding-top: 14px !important; }
+      @media (max-width: 768px) { .content { padding-top: 10px !important; } }
       @media (min-width: 769px) {
         .sidebar {
           inset: 8px auto 0 0;
@@ -4553,7 +4553,166 @@
         }
       }
 
+      /* Ajustes de layout solicitados */
+      body {
+        background: #f5f7f9 !important;
+      }
+      .top-actions {
+        position: sticky;
+        top: 12px;
+        z-index: 1200;
+        margin: 0 0 14px auto;
+        width: max-content;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px;
+        border-radius: 999px;
+        background: rgba(255,255,255,.9);
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, .10);
+      }
+      .main {
+        max-width: 100% !important;
+        width: 100%;
+        margin: 10px 0 0 !important;
+        padding: 0 10px 24px !important;
+      }
+      .topbar-actions {
+        display: contents;
+      }
+      .top-search {
+        margin-left: 0;
+      }
+      .topbar-action-btn,
+      .topbar-back-btn,
+      .topbar-home-btn,
+      .burger {
+        border-radius: 999px !important;
+        background: #f8fafc !important;
+        border: 1px solid #dbe3ec !important;
+        box-shadow: 0 6px 14px rgba(15,23,42,.10) !important;
+        color: #0f172a !important;
+      }
+      .topbar-action-btn:hover,
+      .topbar-back-btn:hover,
+      .topbar-home-btn:hover,
+      .burger:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 18px rgba(15,23,42,.14) !important;
+      }
+      .menu-pill-btn {
+        width: 54px !important;
+        height: 54px !important;
+        min-width: 54px !important;
+        min-height: 54px !important;
+      }
 
+      .dashboard-right-panel {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: stretch;
+        position: static;
+        top: auto;
+      }
+      .dashboard-equal-card {
+        min-height: 170px;
+        height: 100%;
+      }
+      .home-widget-shell {
+        border-radius: 18px;
+        border: 1px solid #dfe9e8;
+        background: #ffffff;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, .06);
+        padding: 14px;
+      }
+      .home-modern-hero {
+        padding: clamp(24px, 4vw, 36px);
+        border-radius: 22px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 14px 28px rgba(15, 23, 42, .08);
+        background: #ffffff;
+      }
+
+      .home-modern-shell,
+      .dashboard-main-layout {
+        width: 100%;
+      }
+      .dashboard-main-layout {
+        grid-template-columns: minmax(0, 1fr) minmax(300px, .38fr);
+        align-items: start;
+      }
+      .dashboard-main-column {
+        gap: 16px;
+      }
+      .dashboard-side-column {
+        display: grid;
+        gap: 14px;
+        position: sticky;
+        top: 84px;
+      }
+      .home-side-widget-shell {
+        padding: 12px;
+      }
+      .home-service-cards-board {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        margin-top: 14px;
+      }
+      .home-card-group + .home-card-group {
+        margin-top: 14px;
+      }
+      .home-card-group-title {
+        margin: 0 0 8px;
+        font-size: 1rem;
+        color: #0f172a;
+      }
+      .home-service-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 8px 18px rgba(15, 23, 42, .07);
+      }
+      .home-service-card-primary {
+        min-height: 290px;
+      }
+      .home-service-card-head {
+        justify-content: space-between;
+      }
+      .home-service-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: .75rem;
+        font-weight: 700;
+      }
+      @media (max-width: 980px) {
+        .dashboard-main-layout {
+          grid-template-columns: 1fr;
+        }
+        .dashboard-side-column {
+          position: static;
+        }
+        .dashboard-right-panel {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      @media (max-width: 760px) {
+        .dashboard-right-panel {
+          grid-template-columns: 1fr;
+        }
+        .home-service-cards-board {
+          grid-template-columns: 1fr 1fr !important;
+        }
+      }
+      @media (max-width: 540px) {
+        .home-service-cards-board {
+          grid-template-columns: 1fr !important;
+        }
+      }
       .profile-view {
         display: grid;
         gap: 16px;
@@ -8814,6 +8973,7 @@
         const topServicesLeaderRef = useRef('');
         const topSalesLeaderRef = useRef('');
         const desktopBellRef = useRef(null);
+        const desktopSearchRef = useRef(null);
         const ticketAudioRecorderRef = useRef(null);
         const ticketAudioChunksRef = useRef([]);
         const ticketAudioStreamRef = useRef(null);
@@ -10087,6 +10247,19 @@
           document.addEventListener('mousedown', handleDocClick);
           return () => document.removeEventListener('mousedown', handleDocClick);
         }, [desktopBellOpen]);
+
+        useEffect(() => {
+          if (!desktopSearchOpen && searchTerm.trim() === '') return () => {};
+          function handleSearchOutside(event) {
+            if (desktopSearchRef.current && !desktopSearchRef.current.contains(event.target)) {
+              setDesktopSearchOpen(false);
+              setSearchTerm('');
+              setExpandedId(null);
+            }
+          }
+          document.addEventListener('mousedown', handleSearchOutside);
+          return () => document.removeEventListener('mousedown', handleSearchOutside);
+        }, [desktopSearchOpen, searchTerm]);
 
         useEffect(() => {
           if (!sellerFilterOpen) return () => {};
@@ -13273,179 +13446,87 @@
             <div className={`overlay ${(menuOpen || fabOpen) ? 'show' : ''}`} onClick={() => { closeSidebar(); setFabOpen(false); }} />
 
             <div className={`content ${menuOpen ? 'shift' : ''}`}>
-              <header className="topbar">
+              <div className="top-actions">
                 {notificacion.mensaje && (
                   <div className={`toast ${notificacion.tipo === 'error' ? 'error' : ''}`}>{`${currentUserName || 'Usuario'}: ${notificacion.mensaje}`}</div>
                 )}
-                {!isMobile && <button className="burger" aria-label="Abrir menú" onClick={toggleSidebar}><span className="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>}
-                {!isMobile && (effectiveSelectedForm !== 'home' || !!selectedService) && (
-                  <div className="topbar-nav-controls">
-                    <button
-                      className="topbar-home-btn"
-                      type="button"
-                      aria-label="Inicio"
-                      onClick={goToHomeView}
-                    >
-                      <i data-lucide="house" />
-                    </button>
-                    <button className="topbar-back-btn" type="button" aria-label="Volver" onClick={goBackOneStep}><i data-lucide="arrow-left" /></button>
-                  </div>
-                )}
-                {isMobile && <div className="mobile-brand-icon" aria-hidden="true" />}
-                <div className="top-titles">
-                  <h1>Masterson Seguridad</h1>
-                  <p className="subtitle-voga">{isMobile ? `${topbarSubtitle || 'Área Técnica'} ▾` : topbarSubtitle}</p>
-                </div>
-                {!isMobile && (
-                  <div className="top-search">
-                    <button className="topbar-action-btn top-search-toggle" type="button" aria-label="Buscar" onClick={() => setDesktopSearchOpen((prev) => !prev)}>
-                      <span className="topbar-action-icon"><i data-lucide="search" /></span>
-                    </button>
-                    {(desktopSearchOpen || searchTerm.trim() !== '') && (
-                      <div className="top-search-panel">
-                        <div className="search-wrap">
-                          <span className="search-icon"><i data-lucide="search" /></span>
-                          <input
-                            type="text"
-                            placeholder="Buscar cliente, ID, razón social o dirección..."
-                            value={searchTerm}
-                            onChange={(e) => { setSearchTerm(e.target.value); setExpandedId(null); }}
-                          />
-                          {searchTerm.trim() !== '' && (
-                            <div className="search-preview">
-                              {filteredRows.length === 0 ? (
-                                <div className="search-item"><small>Sin resultados.</small></div>
-                              ) : (
-                                filteredRows.slice(0, 8).map((r) => (
-                                  <div key={r.id}>
-                                    <div className="search-item" onClick={() => { setSelectedService(r); setSelectedForm('historial'); setExpandedId(null); setSearchTerm(''); setDesktopSearchOpen(false); }}>
-                                      <strong>{r.clienteId || '-'} · {r.nombreServicio || 'Servicio sin nombre'}</strong>
-                                      <small>Fecha de alta: {r.fechaAlta || '-'}</small>
+                <button className="topbar-action-btn menu-pill-btn" type="button" aria-label="Abrir menú lateral" onClick={toggleSidebar}>
+                  <span className="topbar-action-icon"><i data-lucide="menu" /></span>
+                </button>
+                <div className="top-search" ref={desktopSearchRef}>
+                  <button className="topbar-action-btn top-search-toggle" type="button" aria-label="Buscar" onClick={() => setDesktopSearchOpen((prev) => !prev)}>
+                    <span className="topbar-action-icon"><i data-lucide="search" /></span>
+                  </button>
+                  {(desktopSearchOpen || searchTerm.trim() !== '') && (
+                    <div className="top-search-panel">
+                      <div className="search-wrap">
+                        <span className="search-icon"><i data-lucide="search" /></span>
+                        <input
+                          type="text"
+                          placeholder="Buscar cliente, ID, razón social o dirección..."
+                          value={searchTerm}
+                          onChange={(e) => { setSearchTerm(e.target.value); setExpandedId(null); }}
+                        />
+                        {searchTerm.trim() !== '' && (
+                          <div className="search-preview">
+                            {filteredRows.length === 0 ? (
+                              <div className="search-item"><small>Sin resultados.</small></div>
+                            ) : (
+                              filteredRows.slice(0, 8).map((r) => (
+                                <div key={r.id}>
+                                  <div className="search-item" onClick={() => { setSelectedService(r); setSelectedForm('historial'); setExpandedId(null); setSearchTerm(''); setDesktopSearchOpen(false); }}>
+                                    <strong>{r.clienteId || '-'} · {r.nombreServicio || 'Servicio sin nombre'}</strong>
+                                    <small>Fecha de alta: {r.fechaAlta || '-'}</small>
+                                  </div>
+                                  {expandedId === r.id && (
+                                    <div className="search-detail">
+                                      <div className="detail-box">{buildServiceDetailText(r)}</div>
                                     </div>
-                                    {expandedId === r.id && (
-                                      <div className="search-detail">
-                                        <div className="detail-box">{buildServiceDetailText(r)}</div>
-                                      </div>
-                                    )}
-                                  </div>
-                                ))
-                              )}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-                {isMobile && (
-                  <>
-                    <div className="mobile-topbar-actions">
-                      <button
-                        type="button"
-                        className="mobile-icon-btn"
-                        aria-label="Buscar servicios"
-                        onClick={() => {
-                          setMobileSearchOpen((prev) => !prev);
-                          setMobileBellOpen(false);
-                        }}
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" strokeWidth="1.8"/><path d="M16 16l4.2 4.2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
-                      </button>
-                      <button
-                        type="button"
-                        className="mobile-icon-btn"
-                        aria-label="Notificaciones"
-                        onClick={() => {
-                          setMobileBellOpen((prev) => !prev);
-                          setMobileAlerts((prev) => prev.map((a) => ({ ...a, read: true })));
-                          markInternalNotificationsAsRead();
-                        }}
-                      >
-                        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 10a6 6 0 1 1 12 0v4l1.5 2h-15L6 14v-4Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/><path d="M10 18a2 2 0 0 0 4 0" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>
-                        {mobileUnreadAlerts > 0 && <span className="topbar-mini-badge">{mobileUnreadAlerts > 9 ? '9+' : mobileUnreadAlerts}</span>}
-                      </button>
-                    </div>
-                  </>
-                )}
-                {!isMobile && (
-                  <div className="topbar-actions">
-                    <div className="topbar-notify-wrap" ref={desktopBellRef}>
-                        <button className="topbar-action-btn" type="button" aria-label="Notificaciones" onClick={toggleDesktopNotifications}>
-                          <span className="topbar-action-icon"><i data-lucide="bell" /></span>
-                        </button>
-                        {unreadBellCount > 0 && <span className="notify-badge">{unreadBellCount > 99 ? '99+' : unreadBellCount}</span>}
-                        {desktopBellOpen && (
-                          <div className="topbar-notify-popover" role="dialog" aria-label="Panel de notificaciones">
-                            <div className="topbar-notify-arrow" aria-hidden="true" />
-                            <div className="topbar-notify-head">Notificaciones</div>
-                            <div className="topbar-notify-list">
-                              {allNotifications.length === 0 ? <div className="topbar-notify-empty">Sin notificaciones nuevas.</div> : allNotifications.slice(0, 8).map((item) => (
-                                <article className="topbar-notify-item" key={`popover-${item.id}`} onClick={() => openNotificationsView(item)}>
-                                  <strong>{item.title}</strong>
-                                  <small>{item.status}</small>
-                                  <small>{formatRequestDateTime(item.createdAt)}</small>
-                                  <div className="topbar-notify-actions">
-                                    {item.source === 'vencimiento' && (
-                                      <button type="button" className="topbar-notify-action" aria-label="Abrir servicio" onClick={(e) => { e.stopPropagation(); openNotificationsView(item); }}><i data-lucide="square-arrow-out-up-right" /></button>
-                                    )}
-                                    {item.source === 'interna' && ['nuevo_servicio_aprobacion', 'servicio_aprobado_comercial', 'servicio_rechazado_comercial'].includes(String(item.raw?.tipo || '').trim().toLowerCase()) && (
-                                      <button type="button" className="topbar-notify-action" aria-label="Abrir servicio" onClick={(e) => { e.stopPropagation(); openNotificationsView(item); }}><i data-lucide="square-arrow-out-up-right" /></button>
-                                    )}
-                                    {item.source === 'interna' && !['nuevo_servicio_aprobacion', 'servicio_aprobado_comercial', 'servicio_rechazado_comercial'].includes(String(item.raw?.tipo || '').trim().toLowerCase()) && <button type="button" className="topbar-notify-action" aria-label="Abrir chat" onClick={(e) => { e.stopPropagation(); openNotificationsView(item); openChatFromNotification(item); }}><i data-lucide="messages-square" /></button>}
-                                    {item.source === 'credencial' && <button type="button" className="topbar-notify-action" aria-label="Eliminar notificación" onClick={(e) => { e.stopPropagation(); deleteNotificationRequest(item.raw); }}><i data-lucide="trash-2" /></button>}
-                                  </div>
-                                </article>
-                              ))}
-                            </div>
+                                  )}
+                                </div>
+                              ))
+                            )}
                           </div>
                         )}
                       </div>
-                    <button className="topbar-action-btn" type="button" aria-label="Perfil" onClick={openProfileView}>
-                      <span className="topbar-action-icon"><i data-lucide="user-round" /></span>
-                    </button>
-                  </div>
-                )}
-              </header>
-
-              {isMobile && mobileSearchOpen && (
-                <>
-                  <div className="mobile-alert-backdrop" onClick={() => setMobileSearchOpen(false)} />
-                  <div className="mobile-search-panel" onClick={(e) => e.stopPropagation()}>
-                    <input
-                      autoFocus
-                      className="mobile-search-input"
-                      type="text"
-                      placeholder="Buscar por nombre o ID del servicio..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                    <div className="mobile-search-results">
-                      {searchTerm.trim() === '' ? (
-                        <div className="mobile-search-item"><small>Escribí un nombre o ID para buscar.</small></div>
-                      ) : filteredRows.length === 0 ? (
-                        <div className="mobile-search-item"><small>Sin resultados.</small></div>
-                      ) : filteredRows.slice(0, 10).map((r) => (
-                        <div key={`mobile-search-${r.id}`} className="mobile-search-item" onClick={() => { setSelectedService(r); setSelectedForm('historial'); setMobileTab('servicios'); setSearchTerm(''); setMobileSearchOpen(false); }}>
-                          <strong>{r.clienteId || '-'} · {r.nombreServicio || 'Servicio sin nombre'}</strong>
-                          <small>{r.direccionServicio || r.cliente || 'Sin dirección'}</small>
-                        </div>
-                      ))}
                     </div>
-                  </div>
-                </>
-              )}
-
-              {isMobile && mobileBellOpen && (
-                <>
-                  <div className="mobile-alert-backdrop" onClick={() => setMobileBellOpen(false)} />
-                  <div className="mobile-alert-panel" onClick={(e) => e.stopPropagation()}>
-                    {mobileAlerts.length === 0 ? <div className="mobile-alert-item">Sin notificaciones nuevas.</div> : mobileAlerts.map((a) => {
-                      const related = internalNotifications.find((item) => `internal-alert-${item.id}` === a.id);
-                      return <div key={a.id} className="mobile-alert-item" onClick={() => related ? openNotificationsView(related) : null}>{a.message}</div>;
-                    })}
-                  </div>
-                </>
-              )}
+                  )}
+                </div>
+                <div className="topbar-notify-wrap" ref={desktopBellRef}>
+                  <button className="topbar-action-btn" type="button" aria-label="Notificaciones" onClick={toggleDesktopNotifications}>
+                    <span className="topbar-action-icon"><i data-lucide="bell" /></span>
+                  </button>
+                  {unreadBellCount > 0 && <span className="notify-badge">{unreadBellCount > 99 ? '99+' : unreadBellCount}</span>}
+                  {desktopBellOpen && (
+                    <div className="topbar-notify-popover" role="dialog" aria-label="Panel de notificaciones">
+                      <div className="topbar-notify-arrow" aria-hidden="true" />
+                      <div className="topbar-notify-head">Notificaciones</div>
+                      <div className="topbar-notify-list">
+                        {allNotifications.length === 0 ? <div className="topbar-notify-empty">Sin notificaciones nuevas.</div> : allNotifications.slice(0, 8).map((item) => (
+                          <article className="topbar-notify-item" key={`popover-${item.id}`} onClick={() => openNotificationsView(item)}>
+                            <strong>{item.title}</strong>
+                            <small>{item.status}</small>
+                            <small>{formatRequestDateTime(item.createdAt)}</small>
+                            <div className="topbar-notify-actions">
+                              {item.source === 'vencimiento' && (
+                                <button type="button" className="topbar-notify-action" aria-label="Abrir servicio" onClick={(e) => { e.stopPropagation(); openNotificationsView(item); }}><i data-lucide="square-arrow-out-up-right" /></button>
+                              )}
+                              {item.source === 'interna' && ['nuevo_servicio_aprobacion', 'servicio_aprobado_comercial', 'servicio_rechazado_comercial'].includes(String(item.raw?.tipo || '').trim().toLowerCase()) && (
+                                <button type="button" className="topbar-notify-action" aria-label="Abrir servicio" onClick={(e) => { e.stopPropagation(); openNotificationsView(item); }}><i data-lucide="square-arrow-out-up-right" /></button>
+                              )}
+                              {item.source === 'interna' && !['nuevo_servicio_aprobacion', 'servicio_aprobado_comercial', 'servicio_rechazado_comercial'].includes(String(item.raw?.tipo || '').trim().toLowerCase()) && <button type="button" className="topbar-notify-action" aria-label="Abrir chat" onClick={(e) => { e.stopPropagation(); openNotificationsView(item); openChatFromNotification(item); }}><i data-lucide="messages-square" /></button>}
+                              {item.source === 'credencial' && <button type="button" className="topbar-notify-action" aria-label="Eliminar notificación" onClick={(e) => { e.stopPropagation(); deleteNotificationRequest(item.raw); }}><i data-lucide="trash-2" /></button>}
+                            </div>
+                          </article>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <button className="topbar-action-btn" type="button" aria-label="Perfil" onClick={openProfileView}>
+                  <span className="topbar-action-icon"><i data-lucide="user-round" /></span>
+                </button>
+              </div>
 
               <main className={`main ${grupo === 'charla-detalle' ? 'charla-main-wide' : ''} ${effectiveSelectedForm === 'funcionarios' ? 'main-chat-expanded' : ''} ${effectiveSelectedForm === 'historial' ? 'main-ops-expanded' : ''}`}>
                 {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'acciones' && effectiveSelectedForm === 'home' ? renderMobileActions() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : isMobile && mobileTab === 'actividad' ? (
@@ -14136,91 +14217,98 @@
                             <div className="home-hero-illustration"><i data-lucide="layout-dashboard" /></div>
                           </article>
 
-                          <div className="home-service-cards-board">
-                            {homeServiceCards.map((card) => (
-                              <article key={card.title} className="home-service-card">
-                                <header className="home-service-card-head">
-                                  <strong>{card.title}</strong>
-                                </header>
-                                <div className="home-service-card-content">
-                                  {card.items.length === 0 ? (
-                                    <div className="home-service-empty">Sin registros todavía.</div>
-                                  ) : (
-                                    <ul>
-                                      {card.items.slice(0, 8).map((item) => (
-                                        <li key={item.id}>
-                                          <button
-                                            type="button"
-                                            className="home-service-item-btn"
-                                            onClick={() => {
-                                              setSelectedForm('historial');
-                                              setSelectedService(item.sourceRow || null);
-                                              if (item.sourceRow) openHistoryRecord(item.sourceRow, { forceAction: card.charla ? 'Charla informativa' : null });
-                                            }}
-                                          >
-                                            <small>{item.name}</small>
-                                            {card.charla ? (
-                                              <div className="home-service-card-row-grid">
-                                                <span>Fecha de Charla: <b>{item.fechaCharla}</b></span>
-                                                <span>Hora: <b>{item.horaCharla}</b></span>
-                                                <span>Lugar de Reunión: <b>{item.lugarReunion}</b></span>
-                                                <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
-                                              </div>
-                                            ) : (
-                                              <div className="home-service-card-row-grid">
-                                                <span>Fecha de Carga: <b>{item.fechaCarga}</b></span>
-                                                <span>Tiempo de Instalación: <b>{item.tiempoInstalacion}</b></span>
-                                                <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
-                                                <span>Fecha de Alta: <b>{item.fechaAlta}</b></span>
-                                              </div>
-                                            )}
-                                          </button>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  )}
-                                </div>
-                                <button type="button" className="home-service-footer-btn" onClick={() => { setSelectedForm('historial'); setSelectedService(null); }}>Ver todos →</button>
-                              </article>
-                            ))}
-                          </div>
-                        </div>
-
-                        <aside className="dashboard-right-panel">
-                          <article className="dash-side-card home-modern-user" style={{ width: '100%', minHeight: 0 }}>
-                            <img className="home-modern-avatar" src={selectedProfileAvatar.src} alt={`Ícono de perfil ${selectedProfileAvatar.label}`} />
-                            <div>
-                              <strong>{currentUserName || 'Usuario'}</strong>
-                              <small>{topbarSubtitle || 'Área operativa'}</small>
-                              <small>{resolveWelcomeTasksCount(upcomingInstallations)} tareas programadas para hoy</small>
-                            </div>
-                          </article>
-                          <section id="weather-widget" className="dash-side-card" aria-live="polite">
-                            <div className="weather-head">
-                              <span className="weather-icon" id="weather-icon">☀️</span>
-                              <span className="weather-temp" id="weather-temp">--°C</span>
-                            </div>
-                            <div className="weather-desc" id="weather-desc">Cargando clima…</div>
-                            <div className="weather-time" id="weather-time">--:--:--</div>
-                          </section>
-                          <article className="dash-side-card">
-                            <h4>Resumen del día</h4>
-                            <div className="dash-kpi-row"><span>Servicios activos</span><b>{kpiStats.active}</b></div>
-                            <div className="dash-kpi-row"><span>Tickets abiertos</span><b>{ticketsHistorial.filter((t) => (t.estado || '').toLowerCase() !== 'resuelto').length}</b></div>
-                            <div className="dash-kpi-row"><span>Seguimientos</span><b>{recentActivity.length}</b></div>
-                          </article>
-                          <article className="dash-side-card">
-                            <h4>Actividades recientes</h4>
-                            <div className="dash-activity-mini">
-                              {recentActivity.slice(0, 4).map((item) => (
-                                <div key={`mini-act-${item.id}`} className="dash-activity-mini-item">
-                                  <span>{item.message}</span>
-                                  <small>{item.dateLabel}</small>
-                                </div>
+                          <section className="home-widget-shell">
+                            <h3 className="home-card-group-title">Control de ordenes de Servicio</h3>
+                            <div className="home-service-cards-board">
+                              {homeServiceCards.map((card) => (
+                                <article key={card.title} className="home-service-card home-service-card-primary">
+                                  <header className="home-service-card-head">
+                                    <strong>{card.title}</strong>
+                                    <span className="home-service-badge">{card.items.length}</span>
+                                  </header>
+                                  <div className="home-service-card-content">
+                                    {card.items.length === 0 ? (
+                                      <div className="home-service-empty">Sin registros todavía.</div>
+                                    ) : (
+                                      <ul>
+                                        {card.items.slice(0, 8).map((item) => (
+                                          <li key={item.id}>
+                                            <button
+                                              type="button"
+                                              className="home-service-item-btn"
+                                              onClick={() => {
+                                                setSelectedForm('historial');
+                                                setSelectedService(item.sourceRow || null);
+                                                if (item.sourceRow) openHistoryRecord(item.sourceRow, { forceAction: card.charla ? 'Charla informativa' : null });
+                                              }}
+                                            >
+                                              <small>{item.name}</small>
+                                              {card.charla ? (
+                                                <div className="home-service-card-row-grid">
+                                                  <span>Fecha de Charla: <b>{item.fechaCharla}</b></span>
+                                                  <span>Hora: <b>{item.horaCharla}</b></span>
+                                                  <span>Lugar de Reunión: <b>{item.lugarReunion}</b></span>
+                                                  <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
+                                                </div>
+                                              ) : (
+                                                <div className="home-service-card-row-grid">
+                                                  <span>Fecha de Carga: <b>{item.fechaCarga}</b></span>
+                                                  <span>Tiempo de Instalación: <b>{item.tiempoInstalacion}</b></span>
+                                                  <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
+                                                  <span>Fecha de Alta: <b>{item.fechaAlta}</b></span>
+                                                </div>
+                                              )}
+                                            </button>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    )}
+                                  </div>
+                                  <button type="button" className="home-service-footer-btn" onClick={() => { setSelectedForm('historial'); setSelectedService(null); }}>Ver todos →</button>
+                                </article>
                               ))}
-                              {recentActivity.length === 0 && <small>Sin actividad por el momento.</small>}
                             </div>
-                          </article>
+                          </section>
+                        </div>
+                        <aside className="dashboard-side-column">
+                          <section className="home-widget-shell home-side-widget-shell">
+                            <div className="dashboard-right-panel">
+                              <article className="dash-side-card home-modern-user dashboard-equal-card" style={{ width: '100%', minHeight: 0 }}>
+                                <img className="home-modern-avatar" src={selectedProfileAvatar.src} alt={`Ícono de perfil ${selectedProfileAvatar.label}`} />
+                                <div>
+                                  <strong>{currentUserName || 'Usuario'}</strong>
+                                  <small>{topbarSubtitle || 'Área operativa'}</small>
+                                  <small>{resolveWelcomeTasksCount(upcomingInstallations)} tareas programadas para hoy</small>
+                                </div>
+                              </article>
+                              <section id="weather-widget" className="dash-side-card dashboard-equal-card" aria-live="polite">
+                                <div className="weather-head">
+                                  <span className="weather-icon" id="weather-icon">☀️</span>
+                                  <span className="weather-temp" id="weather-temp">--°C</span>
+                                </div>
+                                <div className="weather-desc" id="weather-desc">Cargando clima…</div>
+                                <div className="weather-time" id="weather-time">--:--:--</div>
+                              </section>
+                              <article className="dash-side-card dashboard-equal-card">
+                                <h4>Resumen del día</h4>
+                                <div className="dash-kpi-row"><span>Servicios activos</span><b>{kpiStats.active}</b></div>
+                                <div className="dash-kpi-row"><span>Tickets abiertos</span><b>{ticketsHistorial.filter((t) => (t.estado || '').toLowerCase() !== 'resuelto').length}</b></div>
+                                <div className="dash-kpi-row"><span>Seguimientos</span><b>{recentActivity.length}</b></div>
+                              </article>
+                              <article className="dash-side-card dashboard-equal-card">
+                                <h4>Actividades recientes</h4>
+                                <div className="dash-activity-mini">
+                                  {recentActivity.slice(0, 4).map((item) => (
+                                    <div key={`mini-act-${item.id}`} className="dash-activity-mini-item">
+                                      <span>{item.message}</span>
+                                      <small>{item.dateLabel}</small>
+                                    </div>
+                                  ))}
+                                  {recentActivity.length === 0 && <small>Sin actividad por el momento.</small>}
+                                </div>
+                              </article>
+                            </div>
+                          </section>
                         </aside>
                       </div>
                     </section>
