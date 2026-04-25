@@ -4817,8 +4817,68 @@
         border: 1px solid rgba(0,100,101,.15) !important;
         color: #0f172a !important;
         box-shadow: 0 8px 16px rgba(15,23,42,.08) !important;
+        border-radius: 18px !important;
+        padding: 16px !important;
+        display: grid;
+        gap: 10px;
       }
-      .sidebar-support-card p { color: #3b5b64 !important; }
+      .sidebar-support-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .sidebar-support-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #ecf8f6;
+        color: #006465;
+        border: 1px solid rgba(0,100,101,.2);
+      }
+      .sidebar-support-icon i,
+      .sidebar-support-icon svg {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+      }
+      .sidebar-support-card h4 {
+        margin: 0;
+        color: #006465 !important;
+        font-size: .95rem;
+      }
+      .sidebar-support-card p {
+        margin: 0;
+        color: #3b5b64 !important;
+        font-size: .82rem;
+        line-height: 1.35;
+      }
+      .sidebar-support-links {
+        display: grid;
+        gap: 8px;
+      }
+      .sidebar-support-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #0b6b69 !important;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: .82rem;
+        transition: transform .24s ease, color .24s ease;
+      }
+      .sidebar-support-link:hover {
+        color: #fb923c !important;
+        transform: translateX(3px);
+      }
+      .sidebar-support-link i,
+      .sidebar-support-link svg {
+        width: 14px;
+        height: 14px;
+        stroke: currentColor;
+      }
       .sidebar-signature strong {
         display: inline-flex;
         border: 1px solid rgba(0,100,101,.2);
@@ -13604,8 +13664,31 @@
                 {!isCommercialUser && <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>}
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
                 <div className="sidebar-support-card">
-                  <h4>¿Necesitas ayuda?</h4>
-                  <p>Contactá al equipo de soporte interno desde Tickets para asistencia inmediata.</p>
+                  <div className="sidebar-support-head">
+                    <span className="sidebar-support-icon"><i data-lucide="headset" /></span>
+                    <h4>¿Necesitas ayuda?</h4>
+                  </div>
+                  <p>Contactá al equipo de soporte técnico y comercial por los siguientes canales.</p>
+                  <div className="sidebar-support-links">
+                    <a className="sidebar-support-link" href="mailto:mastersoncomercialytecnica@gmail.com">
+                      <i data-lucide="mail" />
+                      <span>mastersoncomercialytecnica@gmail.com</span>
+                    </a>
+                    <a
+                      className="sidebar-support-link"
+                      href="https://wa.me/59891909182"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(event) => {
+                        const popup = window.open('https://wa.me/59891909182', '_blank', 'noopener,noreferrer');
+                        if (!popup) window.location.href = 'tel:+59891909182';
+                        event.preventDefault();
+                      }}
+                    >
+                      <i data-lucide="phone-call" />
+                      <span>+598 91 909 182</span>
+                    </a>
+                  </div>
                 </div>
                 <div className="sidebar-signature" aria-label="signature" tabIndex={0}><strong>v2.0 | Powered by Alfonso Carballo</strong><div className="sidebar-signature-tooltip">Actualización 2.0: Orden de trabajo operativa GNS con transiciones validadas por etapa, checklist obligatorio para agendado, resolución de tickets con comentario + imágenes (pegar/arrastrar), y nuevos filtros de historial por administración y fecha de alta.</div></div>
               </div>
