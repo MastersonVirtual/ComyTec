@@ -4711,6 +4711,16 @@
         gap: 12px;
         margin-bottom: 12px;
       }
+      .home-card-detail-actions {
+        display: inline-flex;
+        gap: 8px;
+      }
+      .home-card-status-menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
       .home-card-detail-head h2 {
         margin: 0;
         color: #0f172a;
@@ -9223,6 +9233,7 @@
         const [bulkCatalogRawInput, setBulkCatalogRawInput] = useState(EXTRA_PRELOADED_SERVICES_RAW);
         const [bulkCatalogSyncing, setBulkCatalogSyncing] = useState(false);
         const [homeCardView, setHomeCardView] = useState({ title: '', items: [], charla: false });
+        const [homeCardStatusMenuOpen, setHomeCardStatusMenuOpen] = useState(false);
 
         function getStatusLabel(row) {
           return String(row?.status || row?.estado || '').trim().toLowerCase();
@@ -9642,6 +9653,17 @@
             return { ...card, items };
           });
         }, [visibleRows]);
+
+        function switchHomeCardStatus(cardTitle) {
+          const target = homeServiceCards.find((card) => card.title === cardTitle);
+          if (!target) return;
+          setHomeCardView({
+            title: target.title,
+            items: Array.isArray(target.items) ? target.items : [],
+            charla: !!target.charla,
+          });
+          setHomeCardStatusMenuOpen(false);
+        }
 
         const preloadedHistoryRows = useMemo(() => {
           if (hidePreloadedCatalog) return [];
@@ -10091,6 +10113,7 @@
             items: Array.isArray(card?.items) ? card.items : [],
             charla: !!card?.charla,
           });
+          setHomeCardStatusMenuOpen(false);
           setSelectedForm('home-card-view');
         }
 
@@ -14286,15 +14309,11 @@
                                       <ul>
                                         {card.items.slice(0, 8).map((item) => (
                                           <li key={item.id}>
-                                            <button
-                                              type="button"
-                                              className="home-service-item-btn"
-                                              onClick={() => {
-                                                setSelectedForm('historial');
-                                                setSelectedService(item.sourceRow || null);
-                                                if (item.sourceRow) openHistoryRecord(item.sourceRow, { forceAction: card.charla ? 'Charla informativa' : null });
-                                              }}
-                                            >
+                                              <button
+                                                type="button"
+                                                className="home-service-item-btn"
+                                                onClick={() => openHomeCardView(card)}
+                                              >
                                               <small>{item.name}</small>
                                               {card.charla ? (
                                                 <div className="home-service-card-row-grid">
@@ -14371,8 +14390,20 @@
                   <section className="home-card-detail-shell">
                     <div className="home-card-detail-head">
                       <h2>{homeCardView.title || 'Detalle de cargas'}</h2>
-                      <button type="button" className="home-modern-action-btn" onClick={goToHomeView}>← Volver al inicio</button>
+                      <div className="home-card-detail-actions">
+                        <button type="button" className="home-modern-action-btn" onClick={() => setHomeCardStatusMenuOpen((prev) => !prev)}>Status ▾</button>
+                        <button type="button" className="home-modern-action-btn" onClick={goToHomeView}>← Volver al inicio</button>
+                      </div>
                     </div>
+                    {homeCardStatusMenuOpen && (
+                      <div className="home-card-status-menu">
+                        {homeServiceCards.map((card) => (
+                          <button key={`status-${card.title}`} type="button" className="home-modern-action-btn" onClick={() => switchHomeCardStatus(card.title)}>
+                            {card.title} ({card.items.length})
+                          </button>
+                        ))}
+                      </div>
+                    )}
                     <div className="home-card-detail-list">
                       {homeCardView.items.length === 0 ? (
                         <div className="home-service-empty">Sin registros para este módulo.</div>
@@ -14386,19 +14417,7 @@
                               <span>{homeCardView.charla ? 'Lugar de Reunión' : 'Tiempo de Instalación'}: <b>{homeCardView.charla ? (item.lugarReunion || '-') : (item.tiempoInstalacion || '-')}</b></span>
                               <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
                             </div>
-                            <div style={{ marginTop: 8 }}>
-                              <button
-                                type="button"
-                                className="home-service-footer-btn"
-                                onClick={() => {
-                                  setSelectedForm('historial');
-                                  setSelectedService(item.sourceRow || null);
-                                  if (item.sourceRow) openHistoryRecord(item.sourceRow, { forceAction: homeCardView.charla ? 'Charla informativa' : null });
-                                }}
-                              >
-                                Abrir detalle
-                              </button>
-                            </div>
+                            <div className="kv" style={{ marginTop: 8 }}><b>ID:</b> {item?.sourceRow?.clienteId || '-'}</div>
                           </article>
                         ))
                       )}
