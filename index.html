@@ -738,13 +738,16 @@
         color: #fff;
       }
       .home-modern-user {
-        border-radius: 16px;
+        border-radius: 20px;
         border: 1px solid #e5e7eb;
         background: #f9fafb;
-        padding: 12px;
+        padding: 14px;
         display: flex;
-        align-items: center;
+        align-items: flex-start;
+        align-self: flex-start;
         gap: 10px;
+        width: min(220px, 100%);
+        min-height: 120px;
       }
       .home-modern-avatar {
         width: 62px;
@@ -907,6 +910,38 @@
         color: #111827;
         font-size: .7rem;
         font-weight: 700;
+      }
+      .home-status {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 1px 8px;
+        border: 1px solid transparent;
+      }
+      .home-status.pending {
+        color: #b91c1c;
+        background: #fee2e2;
+        border-color: #fecaca;
+      }
+      .home-status.progress {
+        color: #1d4ed8;
+        background: #dbeafe;
+        border-color: #bfdbfe;
+      }
+      .home-status.done {
+        color: #047857;
+        background: #d1fae5;
+        border-color: #a7f3d0;
+      }
+      .home-status.waiting {
+        color: #a16207;
+        background: #fef3c7;
+        border-color: #fde68a;
+      }
+      .home-status.neutral {
+        color: #374151;
+        background: #e5e7eb;
+        border-color: #d1d5db;
       }
       .home-service-empty {
         color: #6b7280;
@@ -7741,6 +7776,15 @@
         return 'chip status-default';
       }
 
+      function homeStatusClass(value) {
+        const raw = String(value || '').toLowerCase();
+        if (raw.includes('pend')) return 'home-status pending';
+        if (raw.includes('proceso') || raw.includes('instal') || raw.includes('curso')) return 'home-status progress';
+        if (raw.includes('esper')) return 'home-status waiting';
+        if (raw.includes('finaliz') || raw.includes('complet') || raw.includes('activ') || raw.includes('realiz')) return 'home-status done';
+        return 'home-status neutral';
+      }
+
       function LoginScreen() {
         const [email, setEmail] = useState('');
         const [password, setPassword] = useState('');
@@ -13871,11 +13915,11 @@
                       <article className="home-modern-hero">
                         <div>
                           <div className="home-modern-badge">Plataforma operativa · Masterson Seguridad</div>
-                          <h2>Centro de control técnico y comercial</h2>
+                          <h2>Control de ordenes de Servicio.</h2>
                           <p>Gestioná servicios, seguimientos y tickets desde una única pantalla más clara, moderna y rápida de operar.</p>
                           <div className="home-modern-actions">
                             <button type="button" className="home-modern-action-btn primary" onClick={() => selectAction('Nuevo Servicio')}>+ Nuevo servicio</button>
-                            <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('historial')}>Ver historial</button>
+                            <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('historial')}>Base de datos</button>
                             <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('tickets')}>Abrir tickets</button>
                           </div>
                         </div>
@@ -13907,13 +13951,13 @@
                                         <span>Fecha de Charla: <b>{item.fechaCharla}</b></span>
                                         <span>Hora: <b>{item.horaCharla}</b></span>
                                         <span>Lugar de Reunión: <b>{item.lugarReunion}</b></span>
-                                        <span>Status: <b>{item.status || 'Pendiente'}</b></span>
+                                        <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
                                       </div>
                                     ) : (
                                       <div className="home-service-card-row-grid">
                                         <span>Fecha de Carga: <b>{item.fechaCarga}</b></span>
                                         <span>Tiempo de Instalación: <b>{item.tiempoInstalacion}</b></span>
-                                        <span>Status: <b>{item.status || 'Pendiente'}</b></span>
+                                        <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
                                         <span>Fecha de Alta: <b>{item.fechaAlta}</b></span>
                                       </div>
                                     )}
