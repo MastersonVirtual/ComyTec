@@ -846,6 +846,71 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px;
       }
+      .home-service-cards-board {
+        margin-top: 18px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 14px;
+      }
+      .home-service-card {
+        background: #ffffff;
+        border: 1px solid #d6e6e4;
+        border-radius: 18px;
+        box-shadow: 0 16px 30px rgba(15, 23, 42, .08);
+        padding: 14px 14px 12px;
+        color: #1f2937;
+        display: flex;
+        flex-direction: column;
+        min-height: 190px;
+      }
+      .home-service-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+      .home-service-card-head strong {
+        font-size: .94rem;
+        color: #0f172a;
+      }
+      .home-service-card-head span {
+        font-size: .76rem;
+        color: #4b5563;
+        background: #eef5f4;
+        border: 1px solid #d5e7e4;
+        border-radius: 999px;
+        padding: 4px 8px;
+      }
+      .home-service-card ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .home-service-card li {
+        border: 1px dashed #d4e7e4;
+        border-radius: 10px;
+        padding: 7px 8px;
+        min-height: 52px;
+        background: #f9fbfb;
+      }
+      .home-service-card li small {
+        display: block;
+        color: #6b7280;
+        font-size: .69rem;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+      }
+      .home-service-card li b {
+        display: block;
+        margin-top: 3px;
+        color: #9ca3af;
+        font-size: .8rem;
+        font-weight: 600;
+      }
       .home-modern-chart {
         border: 1px solid #e5e7eb;
         border-radius: 18px;
@@ -13727,101 +13792,31 @@
                         </div>
                       </article>
 
-                      <div className="home-modern-stats">
-                        <article className="home-modern-stat-card"><small>Servicios activos</small><strong>{kpiStats.active}</strong></article>
-                        <article className="home-modern-stat-card"><small>Servicios de baja</small><strong>{kpiStats.baja}</strong></article>
-                        <article className="home-modern-stat-card"><small>Actividad reciente</small><strong>{recentActivity.length}</strong></article>
-                        <article className="home-modern-stat-card"><small>Instalaciones próximas</small><strong>{upcomingInstallations.length}</strong></article>
-                      </div>
-
-                      <div className="home-modern-panels">
-                        <article className="home-modern-panel">
-                          <h3>Actividad reciente</h3>
-                          <div className="home-modern-list home-modern-timeline">
-                            {recentActivity.length === 0 ? (
-                              <div className="dashboard-info-empty">Sin actividad reciente disponible.</div>
-                            ) : recentActivity.slice(0, 8).map((item) => (
-                              <div key={`activity-${item.id}`} className="home-modern-list-item">
-                                <small>{item.dateLabel}</small>
-                                <b>{item.message}</b>
-                              </div>
-                            ))}
-                          </div>
-                        </article>
-                        <article className="home-modern-panel">
-                          <h3>Panel operativo</h3>
-                          <div className="home-modern-widget-col">
-                            <div className="home-modern-widget">
-                              <strong>Instalaciones próximas</strong>
-                              <small>{upcomingInstallations.length} programadas para seguimiento.</small>
-                            </div>
-                            <div className="home-modern-widget">
-                              <strong>Alertas</strong>
-                              <small>{recentActivity.length} eventos recientes para revisar.</small>
-                            </div>
-                            <div className="home-modern-widget">
-                              <strong>Tareas pendientes</strong>
-                              <small className="ok">{kpiStats.pending} tareas en cola operativa.</small>
-                            </div>
-                          </div>
-                        </article>
-                      </div>
-                      <div className="home-modern-bottom">
-                        <article className="home-modern-chart">
-                          <h3>Tendencia de actividad</h3>
-                          {activityTrend.months.length === 0 ? (
-                            <div className="dashboard-info-empty">Sin datos de meses recientes.</div>
-                          ) : (
-                            <div className="activity-trend-chart">
-                              <svg viewBox="0 0 100 52" preserveAspectRatio="none" aria-label="Tendencia mensual de altas y bajas">
-                                {activityTrend.months.map((item, idx) => (
-                                  <line key={`grid-${item.key}`} x1={(idx / Math.max(activityTrend.months.length - 1, 1)) * 100} y1="0" x2={(idx / Math.max(activityTrend.months.length - 1, 1)) * 100} y2="52" stroke="rgba(15,23,42,.08)" strokeWidth="0.4" />
-                                ))}
-                                <polyline
-                                  fill="none"
-                                  stroke="#006465"
-                                  strokeWidth="2"
-                                  points={activityTrend.months.map((item, idx) => {
-                                    const x = (idx / Math.max(activityTrend.months.length - 1, 1)) * 100;
-                                    const y = 50 - ((item.altas / activityTrend.maxValue) * 44);
-                                    return `${x},${y}`;
-                                  }).join(' ')}
-                                />
-                                <polyline
-                                  fill="none"
-                                  stroke="#ef4444"
-                                  strokeWidth="2"
-                                  points={activityTrend.months.map((item, idx) => {
-                                    const x = (idx / Math.max(activityTrend.months.length - 1, 1)) * 100;
-                                    const y = 50 - ((item.bajas / activityTrend.maxValue) * 44);
-                                    return `${x},${y}`;
-                                  }).join(' ')}
-                                />
-                              </svg>
-                              <div className="activity-trend-legend">
-                                <span><i style={{ background: '#006465' }} /> Altas</span>
-                                <span><i style={{ background: '#ef4444' }} /> Bajas</span>
-                              </div>
-                              <div className="activity-trend-labels">
-                                {activityTrend.months.map((item) => (
-                                  <small key={`label-${item.key}`}>{item.label}</small>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </article>
-                        <article className="home-modern-chart">
-                          <h3>Distribución operativa</h3>
-                          <div className="home-chart-bars">
-                            {Object.entries(operationalDistribution.counts).map(([label, value]) => (
-                              <div key={`dist-${label}`} className="home-chart-bar-item">
-                                <span style={{ height: `${Math.max(10, (value / operationalDistribution.maxValue) * 100)}%` }} />
-                                <small>{label}</small>
-                                <b>{value}</b>
-                              </div>
-                            ))}
-                          </div>
-                        </article>
+                      <div className="home-service-cards-board">
+                        {[
+                          { title: 'Nuevo Servicios', owner: 'Logística', advisor: 'Juan', fields: ['Fecha de Carga', 'Tiempo de Instalación', 'Status', 'Fecha de Alta', 'Cobro'] },
+                          { title: 'Novación', owner: 'Logística', advisor: 'Juan', fields: ['Fecha de Carga', 'Tiempo de Instalación', 'Status', 'Fecha de Alta', 'Cobro'] },
+                          { title: 'Obra', owner: 'Ayrton', advisor: 'Juan', fields: ['Fecha de Carga', 'Tiempo de Instalación', 'Status', 'Fecha de Alta', 'Cobro'] },
+                          { title: 'Agregado', owner: 'Logística', advisor: 'Juan', fields: ['Fecha de Carga', 'Tiempo de Instalación', 'Status', 'Fecha de Alta', 'Comentarios', 'Cobro'] },
+                          { title: 'Movimiento de Obra', owner: 'Logística', advisor: 'Juan', fields: ['Fecha de Carga', 'Costo', 'Status', 'Fecha de Alta', 'Cobro'] },
+                          { title: 'Baja de Servicio', owner: 'Logística', advisor: 'Juan', fields: ['Fecha de Carga', 'Status', 'Fecha trabajo realizado', 'Verificado'] },
+                          { title: 'Charlar', owner: 'Logística', advisor: 'Juan', fields: ['Fecha de Charla', 'Hora', 'Lugar de Reunión', 'Status'] }
+                        ].map((card) => (
+                          <article key={card.title} className="home-service-card">
+                            <header className="home-service-card-head">
+                              <strong>{card.title}</strong>
+                              <span>{card.owner} · {card.advisor}</span>
+                            </header>
+                            <ul>
+                              {card.fields.map((field) => (
+                                <li key={`${card.title}-${field}`}>
+                                  <small>{field}</small>
+                                  <b>—</b>
+                                </li>
+                              ))}
+                            </ul>
+                          </article>
+                        ))}
                       </div>
                     </section>
                   </>
