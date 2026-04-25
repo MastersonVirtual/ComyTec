@@ -4560,7 +4560,7 @@
       .top-actions {
         position: fixed;
         top: 12px;
-        left: 208px;
+        left: 190px;
         z-index: 1200;
         margin: 0;
         width: max-content;
@@ -4612,8 +4612,8 @@
       }
       .menu-pill-btn .topbar-action-icon i,
       .menu-pill-btn .topbar-action-icon svg {
-        color: #ffffff !important;
-        stroke: #ffffff !important;
+        color: #fb923c !important;
+        stroke: #fb923c !important;
       }
 
       .dashboard-right-panel {
@@ -4697,6 +4697,35 @@
         font-size: .75rem;
         font-weight: 700;
       }
+      .home-card-detail-shell {
+        border-radius: 18px;
+        border: 1px solid #dfe9e8;
+        background: #ffffff;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, .06);
+        padding: 16px;
+      }
+      .home-card-detail-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .home-card-detail-head h2 {
+        margin: 0;
+        color: #0f172a;
+      }
+      .home-card-detail-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .home-card-detail-item {
+        border: 1px solid #dbe3ec;
+        border-radius: 14px;
+        background: #f8fafc;
+        padding: 12px;
+      }
       @media (max-width: 980px) {
         .top-actions {
           left: 14px;
@@ -4712,6 +4741,9 @@
         }
         .dashboard-right-panel {
           grid-template-columns: 1fr 1fr;
+        }
+        .home-card-detail-list {
+          grid-template-columns: 1fr;
         }
       }
       @media (max-width: 760px) {
@@ -9190,6 +9222,7 @@
         const [manualCatalogForm, setManualCatalogForm] = useState({ numero: '', nombreServicio: '', direccionServicio: '', tipoServicioBrindar: 'Monitoreo', representanteComercial: '', atencionCliente: '' });
         const [bulkCatalogRawInput, setBulkCatalogRawInput] = useState(EXTRA_PRELOADED_SERVICES_RAW);
         const [bulkCatalogSyncing, setBulkCatalogSyncing] = useState(false);
+        const [homeCardView, setHomeCardView] = useState({ title: '', items: [], charla: false });
 
         function getStatusLabel(row) {
           return String(row?.status || row?.estado || '').trim().toLowerCase();
@@ -10052,62 +10085,13 @@
           return lines.join('\n');
         }
 
-        function openHomeCardWindow(card) {
-          const title = String(card?.title || 'Servicios');
-          const items = Array.isArray(card?.items) ? card.items : [];
-          const popup = window.open('', '_blank', 'noopener,noreferrer,width=1200,height=760');
-          if (!popup) return;
-
-          const rowsHtml = items.length === 0
-            ? `<tr><td colspan="5" style="padding:14px;text-align:center;color:#64748b;">Sin registros para ${title}.</td></tr>`
-            : items.map((item) => {
-              const status = String(item?.status || 'Pendiente');
-              return `
-                <tr>
-                  <td>${item?.name || '-'}</td>
-                  <td>${item?.fechaCarga || item?.fechaCharla || '-'}</td>
-                  <td>${item?.fechaAlta || item?.horaCharla || '-'}</td>
-                  <td>${item?.tiempoInstalacion || item?.lugarReunion || '-'}</td>
-                  <td>${status}</td>
-                </tr>
-              `;
-            }).join('');
-
-          popup.document.write(`
-            <!doctype html>
-            <html lang="es">
-              <head>
-                <meta charset="utf-8" />
-                <title>${title} · Control de órdenes</title>
-                <style>
-                  body { font-family: Inter, Arial, sans-serif; margin: 0; padding: 20px; background: #f5f7f9; color: #0f172a; }
-                  .card { background: #fff; border: 1px solid #dbe3ec; border-radius: 16px; box-shadow: 0 10px 20px rgba(15,23,42,.08); padding: 18px; }
-                  h1 { margin: 0 0 12px; font-size: 1.2rem; color: #006465; }
-                  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; }
-                  th, td { border-bottom: 1px solid #e2e8f0; padding: 10px; text-align: left; font-size: 13px; }
-                  th { background: #eff6ff; color: #0f172a; }
-                </style>
-              </head>
-              <body>
-                <div class="card">
-                  <h1>${title} · Cargas registradas (${items.length})</h1>
-                  <table>
-                    <thead>
-                      <tr>
-                        <th>Servicio</th>
-                        <th>Fecha de carga/charla</th>
-                        <th>Fecha alta/hora</th>
-                        <th>Tiempo/Lugar</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>${rowsHtml}</tbody>
-                  </table>
-                </div>
-              </body>
-            </html>
-          `);
-          popup.document.close();
+        function openHomeCardView(card) {
+          setHomeCardView({
+            title: String(card?.title || 'Servicios'),
+            items: Array.isArray(card?.items) ? card.items : [],
+            charla: !!card?.charla,
+          });
+          setSelectedForm('home-card-view');
         }
 
         function formatNow() {
@@ -14333,7 +14317,7 @@
                                       </ul>
                                     )}
                                   </div>
-                                  <button type="button" className="home-service-footer-btn" onClick={() => openHomeCardWindow(card)}>Ver todos →</button>
+                                  <button type="button" className="home-service-footer-btn" onClick={() => openHomeCardView(card)}>Ver todos →</button>
                                 </article>
                               ))}
                             </div>
@@ -14382,6 +14366,44 @@
                       </div>
                     </section>
                   </>
+
+                ) : effectiveSelectedForm === 'home-card-view' ? (
+                  <section className="home-card-detail-shell">
+                    <div className="home-card-detail-head">
+                      <h2>{homeCardView.title || 'Detalle de cargas'}</h2>
+                      <button type="button" className="home-modern-action-btn" onClick={goToHomeView}>← Volver al inicio</button>
+                    </div>
+                    <div className="home-card-detail-list">
+                      {homeCardView.items.length === 0 ? (
+                        <div className="home-service-empty">Sin registros para este módulo.</div>
+                      ) : (
+                        homeCardView.items.map((item) => (
+                          <article key={`detail-${item.id}`} className="home-card-detail-item">
+                            <strong>{item.name || 'Servicio sin nombre'}</strong>
+                            <div className="home-service-card-row-grid">
+                              <span>Fecha de Carga: <b>{item.fechaCarga || item.fechaCharla || '-'}</b></span>
+                              <span>{homeCardView.charla ? 'Hora' : 'Fecha de Alta'}: <b>{homeCardView.charla ? (item.horaCharla || '-') : (item.fechaAlta || '-')}</b></span>
+                              <span>{homeCardView.charla ? 'Lugar de Reunión' : 'Tiempo de Instalación'}: <b>{homeCardView.charla ? (item.lugarReunion || '-') : (item.tiempoInstalacion || '-')}</b></span>
+                              <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
+                            </div>
+                            <div style={{ marginTop: 8 }}>
+                              <button
+                                type="button"
+                                className="home-service-footer-btn"
+                                onClick={() => {
+                                  setSelectedForm('historial');
+                                  setSelectedService(item.sourceRow || null);
+                                  if (item.sourceRow) openHistoryRecord(item.sourceRow, { forceAction: homeCardView.charla ? 'Charla informativa' : null });
+                                }}
+                              >
+                                Abrir detalle
+                              </button>
+                            </div>
+                          </article>
+                        ))
+                      )}
+                    </div>
+                  </section>
 
                 ) : effectiveSelectedForm === 'ranking-comercial' ? (
                   <section className="panel">
