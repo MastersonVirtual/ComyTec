@@ -4822,15 +4822,18 @@
         color: #d6fffa !important;
         font-weight: 800;
       }
-      .logout-btn {
+      .sidebar .logout-btn {
         border-radius: 999px !important;
         background: #ffffff !important;
         border: 1px solid rgba(0,100,101,.45) !important;
         color: #006465 !important;
         font-weight: 800 !important;
+        -webkit-text-fill-color: #006465 !important;
+        text-shadow: none !important;
       }
-      .logout-btn:hover {
+      .sidebar .logout-btn:hover {
         color: #006465 !important;
+        -webkit-text-fill-color: #006465 !important;
         border-color: rgba(0,100,101,.65) !important;
         box-shadow: 0 8px 14px rgba(0,100,101,.16);
       }
@@ -4844,6 +4847,7 @@
         display: flex;
         flex-direction: column;
         gap: 10px;
+        overflow: hidden;
       }
       .sidebar-support-head {
         display: flex;
@@ -4881,28 +4885,38 @@
       .sidebar-support-links {
         display: grid;
         gap: 8px;
-        margin-top: auto;
+        margin-top: 8px;
         padding-top: 12px;
         border-top: 1px dashed rgba(0,100,101,.22);
       }
       .sidebar-support-link {
         display: inline-flex;
-        align-items: center;
+        align-items: flex-start;
         gap: 8px;
         color: #0b6b69 !important;
         text-decoration: none;
         font-weight: 600;
         font-size: .82rem;
         transition: transform .24s ease, color .24s ease;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+      .sidebar-support-link span {
+        color: #0b6b69 !important;
       }
       .sidebar-support-link:hover {
         color: #fb923c !important;
         transform: translateX(3px);
       }
+      .sidebar-support-link:hover span {
+        color: #fb923c !important;
+      }
       .sidebar-support-link i,
       .sidebar-support-link svg {
         width: 14px;
         height: 14px;
+        color: #0b6b69 !important;
         stroke: currentColor;
       }
       .sidebar-signature strong {
@@ -13692,7 +13706,7 @@
                 <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
                 <div className="sidebar-support-card">
                   <div className="sidebar-support-head">
-                    <span className="sidebar-support-icon"><i data-lucide="headset" /></span>
+                    <span className="sidebar-support-icon"><i data-lucide="headphones" /></span>
                     <h4>¿Necesitas ayuda?</h4>
                   </div>
                   <p>Contactá al equipo de soporte técnico y comercial por los siguientes canales.</p>
