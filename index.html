@@ -15809,6 +15809,8 @@
         const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.419998&daily=sunrise,sunset&hourly=temperature_2m,precipitation,rain,cloud_cover_high,temperature_80m,temperature_120m,is_day&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain&timezone=America/Montevideo&past_days=0&forecast_days=7';
         let lastWeatherCode = null;
         let lastIsDay = null;
+        let weatherFetchInProgress = false;
+        let lastWeatherFetchAt = 0;
 
         function getWidgetNodes() {
           return {
@@ -15892,11 +15894,15 @@
 
         function actualizarHora() {
           ensureWidgetExists();
-          const { time, icon } = getWidgetNodes();
+          const { time, icon, temp, desc } = getWidgetNodes();
           if (!time) return;
           time.textContent = new Date().toLocaleTimeString('es-UY');
           if (icon && lastWeatherCode === 0) {
             icon.textContent = esNoche() ? '🌙' : '☀️';
+          }
+          const stillLoading = String(temp?.textContent || '').includes('--') || /cargando clima/i.test(String(desc?.textContent || ''));
+          if (stillLoading && !weatherFetchInProgress && (Date.now() - lastWeatherFetchAt) > 15000) {
+            obtenerClima();
           }
         }
 
@@ -15909,6 +15915,9 @@
         }
 
         async function obtenerClima() {
+          if (weatherFetchInProgress) return;
+          weatherFetchInProgress = true;
+          lastWeatherFetchAt = Date.now();
           try {
             ensureWidgetExists();
             const response = await fetch(WEATHER_API_URL, { cache: 'no-store' });
@@ -15943,6 +15952,8 @@
           } catch (error) {
             console.error('Error en obtenerClima():', error);
             mostrarError('No se pudo actualizar el clima.');
+          } finally {
+            weatherFetchInProgress = false;
           }
         }
 
