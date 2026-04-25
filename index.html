@@ -16176,7 +16176,7 @@
         if (window.__weatherWidgetInit) return;
         window.__weatherWidgetInit = true;
 
-        const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.419998&daily=sunrise,sunset&hourly=temperature_2m,precipitation,rain,cloud_cover_high,temperature_80m,temperature_120m,is_day&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain&timezone=America/Montevideo&past_days=0&forecast_days=7';
+        const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast?latitude=-34.90334&longitude=-56.1929&current=temperature_2m,relative_humidity_2m,is_day,precipitation,rain,showers,snowfall&hourly=temperature_2m,weather_code,cloud_cover_low,cloud_cover_mid,cloud_cover_high,visibility,wind_speed_10m,wind_speed_80m,soil_temperature_0cm,soil_temperature_6cm,rain,precipitation,precipitation_probability,apparent_temperature,relative_humidity_2m,dew_point_2m,temperature_1000hPa,relative_humidity_1000hPa,cloud_cover_1000hPa,cloud_cover_975hPa&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,daylight_duration,sunshine_duration,rain_sum,showers_sum,precipitation_hours&timezone=America/Montevideo&forecast_days=7';
         let lastWeatherCode = null;
         let lastIsDay = null;
         let weatherFetchInProgress = false;
@@ -16242,12 +16242,16 @@
           const currentTime = String(current.time || '');
           const hourlyTime = Array.isArray(data?.hourly?.time) ? data.hourly.time : [];
           const hourlyCloud = Array.isArray(data?.hourly?.cloud_cover_high) ? data.hourly.cloud_cover_high : [];
+          const hourlyWeatherCode = Array.isArray(data?.hourly?.weather_code) ? data.hourly.weather_code : [];
           const hourlyIsDay = Array.isArray(data?.hourly?.is_day) ? data.hourly.is_day : [];
           if (currentTime && hourlyTime.length && hourlyCloud.length) {
             let idx = hourlyTime.indexOf(currentTime);
             if (idx < 0) {
               const hourKey = currentTime.slice(0, 13);
               idx = hourlyTime.findIndex((entry) => String(entry || '').slice(0, 13) === hourKey);
+            }
+            if (idx >= 0 && hourlyWeatherCode[idx] !== undefined) {
+              return mapearPorWeatherCode(hourlyWeatherCode[idx]);
             }
             if (idx >= 0 && hourlyCloud[idx] !== undefined) nubeAlta = Number(hourlyCloud[idx]) || 0;
             if (idx >= 0 && Number.isNaN(isDayCurrent) && hourlyIsDay[idx] !== undefined) {
