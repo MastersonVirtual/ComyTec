@@ -4553,6 +4553,63 @@
         }
       }
 
+      /* Ajustes de layout solicitados */
+      .topbar {
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        justify-content: space-between;
+        padding: 4px 6px !important;
+        width: calc(100% - 24px) !important;
+      }
+      .topbar-nav-controls {
+        margin-right: auto;
+      }
+      .topbar-actions {
+        margin-left: auto !important;
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        border-radius: 0 !important;
+      }
+      .top-search {
+        margin-left: 0;
+      }
+      .topbar-action-btn,
+      .topbar-back-btn,
+      .topbar-home-btn,
+      .burger {
+        border-radius: 999px !important;
+      }
+
+      .dashboard-right-panel {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: stretch;
+      }
+      .dashboard-equal-card {
+        min-height: 170px;
+        height: 100%;
+      }
+
+      .home-modern-shell,
+      .dashboard-main-layout {
+        width: min(100%, 1360px);
+      }
+      .home-service-cards-board {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+      }
+      @media (max-width: 980px) {
+        .dashboard-right-panel {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      @media (max-width: 760px) {
+        .dashboard-right-panel {
+          grid-template-columns: 1fr;
+        }
+      }
+
 
       .profile-view {
         display: grid;
@@ -8814,6 +8871,7 @@
         const topServicesLeaderRef = useRef('');
         const topSalesLeaderRef = useRef('');
         const desktopBellRef = useRef(null);
+        const desktopSearchRef = useRef(null);
         const ticketAudioRecorderRef = useRef(null);
         const ticketAudioChunksRef = useRef([]);
         const ticketAudioStreamRef = useRef(null);
@@ -10087,6 +10145,19 @@
           document.addEventListener('mousedown', handleDocClick);
           return () => document.removeEventListener('mousedown', handleDocClick);
         }, [desktopBellOpen]);
+
+        useEffect(() => {
+          if (!desktopSearchOpen && searchTerm.trim() === '') return () => {};
+          function handleSearchOutside(event) {
+            if (desktopSearchRef.current && !desktopSearchRef.current.contains(event.target)) {
+              setDesktopSearchOpen(false);
+              setSearchTerm('');
+              setExpandedId(null);
+            }
+          }
+          document.addEventListener('mousedown', handleSearchOutside);
+          return () => document.removeEventListener('mousedown', handleSearchOutside);
+        }, [desktopSearchOpen, searchTerm]);
 
         useEffect(() => {
           if (!sellerFilterOpen) return () => {};
@@ -13297,7 +13368,7 @@
                   <p className="subtitle-voga">{isMobile ? `${topbarSubtitle || 'Área Técnica'} ▾` : topbarSubtitle}</p>
                 </div>
                 {!isMobile && (
-                  <div className="top-search">
+                  <div className="top-search" ref={desktopSearchRef}>
                     <button className="topbar-action-btn top-search-toggle" type="button" aria-label="Buscar" onClick={() => setDesktopSearchOpen((prev) => !prev)}>
                       <span className="topbar-action-icon"><i data-lucide="search" /></span>
                     </button>
@@ -14187,7 +14258,7 @@
                         </div>
 
                         <aside className="dashboard-right-panel">
-                          <article className="dash-side-card home-modern-user" style={{ width: '100%', minHeight: 0 }}>
+                          <article className="dash-side-card home-modern-user dashboard-equal-card" style={{ width: '100%', minHeight: 0 }}>
                             <img className="home-modern-avatar" src={selectedProfileAvatar.src} alt={`Ícono de perfil ${selectedProfileAvatar.label}`} />
                             <div>
                               <strong>{currentUserName || 'Usuario'}</strong>
@@ -14195,7 +14266,7 @@
                               <small>{resolveWelcomeTasksCount(upcomingInstallations)} tareas programadas para hoy</small>
                             </div>
                           </article>
-                          <section id="weather-widget" className="dash-side-card" aria-live="polite">
+                          <section id="weather-widget" className="dash-side-card dashboard-equal-card" aria-live="polite">
                             <div className="weather-head">
                               <span className="weather-icon" id="weather-icon">☀️</span>
                               <span className="weather-temp" id="weather-temp">--°C</span>
@@ -14203,13 +14274,13 @@
                             <div className="weather-desc" id="weather-desc">Cargando clima…</div>
                             <div className="weather-time" id="weather-time">--:--:--</div>
                           </section>
-                          <article className="dash-side-card">
+                          <article className="dash-side-card dashboard-equal-card">
                             <h4>Resumen del día</h4>
                             <div className="dash-kpi-row"><span>Servicios activos</span><b>{kpiStats.active}</b></div>
                             <div className="dash-kpi-row"><span>Tickets abiertos</span><b>{ticketsHistorial.filter((t) => (t.estado || '').toLowerCase() !== 'resuelto').length}</b></div>
                             <div className="dash-kpi-row"><span>Seguimientos</span><b>{recentActivity.length}</b></div>
                           </article>
-                          <article className="dash-side-card">
+                          <article className="dash-side-card dashboard-equal-card">
                             <h4>Actividades recientes</h4>
                             <div className="dash-activity-mini">
                               {recentActivity.slice(0, 4).map((item) => (
