@@ -4558,12 +4558,10 @@
         background: transparent !important;
         border: 0 !important;
         box-shadow: none !important;
+        backdrop-filter: none !important;
         justify-content: space-between;
         padding: 4px 6px !important;
         width: calc(100% - 24px) !important;
-      }
-      .topbar-nav-controls {
-        margin-right: auto;
       }
       .topbar-actions {
         margin-left: auto !important;
@@ -4584,20 +4582,36 @@
       }
 
       .dashboard-right-panel {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         align-items: stretch;
+        position: static;
+        top: auto;
       }
       .dashboard-equal-card {
         min-height: 170px;
         height: 100%;
+      }
+      .home-widget-shell {
+        border-radius: 18px;
+        border: 1px solid #dfe9e8;
+        background: #f9fbfb;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, .06);
+        padding: 14px;
       }
 
       .home-modern-shell,
       .dashboard-main-layout {
         width: min(100%, 1360px);
       }
+      .dashboard-main-layout {
+        grid-template-columns: 1fr;
+      }
+      .dashboard-main-column {
+        gap: 16px;
+      }
       .home-service-cards-board {
         grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        margin-top: 14px;
       }
       @media (max-width: 980px) {
         .dashboard-right-panel {
@@ -4607,6 +4621,14 @@
       @media (max-width: 760px) {
         .dashboard-right-panel {
           grid-template-columns: 1fr;
+        }
+        .home-service-cards-board {
+          grid-template-columns: 1fr 1fr !important;
+        }
+      }
+      @media (max-width: 540px) {
+        .home-service-cards-board {
+          grid-template-columns: 1fr !important;
         }
       }
 
@@ -13349,19 +13371,6 @@
                   <div className={`toast ${notificacion.tipo === 'error' ? 'error' : ''}`}>{`${currentUserName || 'Usuario'}: ${notificacion.mensaje}`}</div>
                 )}
                 {!isMobile && <button className="burger" aria-label="Abrir menú" onClick={toggleSidebar}><span className="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>}
-                {!isMobile && (effectiveSelectedForm !== 'home' || !!selectedService) && (
-                  <div className="topbar-nav-controls">
-                    <button
-                      className="topbar-home-btn"
-                      type="button"
-                      aria-label="Inicio"
-                      onClick={goToHomeView}
-                    >
-                      <i data-lucide="house" />
-                    </button>
-                    <button className="topbar-back-btn" type="button" aria-label="Volver" onClick={goBackOneStep}><i data-lucide="arrow-left" /></button>
-                  </div>
-                )}
                 {isMobile && <div className="mobile-brand-icon" aria-hidden="true" />}
                 <div className="top-titles">
                   <h1>Masterson Seguridad</h1>
@@ -14207,92 +14216,94 @@
                             <div className="home-hero-illustration"><i data-lucide="layout-dashboard" /></div>
                           </article>
 
-                          <div className="home-service-cards-board">
-                            {homeServiceCards.map((card) => (
-                              <article key={card.title} className="home-service-card">
-                                <header className="home-service-card-head">
-                                  <strong>{card.title}</strong>
-                                </header>
-                                <div className="home-service-card-content">
-                                  {card.items.length === 0 ? (
-                                    <div className="home-service-empty">Sin registros todavía.</div>
-                                  ) : (
-                                    <ul>
-                                      {card.items.slice(0, 8).map((item) => (
-                                        <li key={item.id}>
-                                          <button
-                                            type="button"
-                                            className="home-service-item-btn"
-                                            onClick={() => {
-                                              setSelectedForm('historial');
-                                              setSelectedService(item.sourceRow || null);
-                                              if (item.sourceRow) openHistoryRecord(item.sourceRow, { forceAction: card.charla ? 'Charla informativa' : null });
-                                            }}
-                                          >
-                                            <small>{item.name}</small>
-                                            {card.charla ? (
-                                              <div className="home-service-card-row-grid">
-                                                <span>Fecha de Charla: <b>{item.fechaCharla}</b></span>
-                                                <span>Hora: <b>{item.horaCharla}</b></span>
-                                                <span>Lugar de Reunión: <b>{item.lugarReunion}</b></span>
-                                                <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
-                                              </div>
-                                            ) : (
-                                              <div className="home-service-card-row-grid">
-                                                <span>Fecha de Carga: <b>{item.fechaCarga}</b></span>
-                                                <span>Tiempo de Instalación: <b>{item.tiempoInstalacion}</b></span>
-                                                <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
-                                                <span>Fecha de Alta: <b>{item.fechaAlta}</b></span>
-                                              </div>
-                                            )}
-                                          </button>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  )}
+                          <section className="home-widget-shell">
+                            <div className="dashboard-right-panel">
+                              <article className="dash-side-card home-modern-user dashboard-equal-card" style={{ width: '100%', minHeight: 0 }}>
+                                <img className="home-modern-avatar" src={selectedProfileAvatar.src} alt={`Ícono de perfil ${selectedProfileAvatar.label}`} />
+                                <div>
+                                  <strong>{currentUserName || 'Usuario'}</strong>
+                                  <small>{topbarSubtitle || 'Área operativa'}</small>
+                                  <small>{resolveWelcomeTasksCount(upcomingInstallations)} tareas programadas para hoy</small>
                                 </div>
-                                <button type="button" className="home-service-footer-btn" onClick={() => { setSelectedForm('historial'); setSelectedService(null); }}>Ver todos →</button>
                               </article>
-                            ))}
-                          </div>
-                        </div>
-
-                        <aside className="dashboard-right-panel">
-                          <article className="dash-side-card home-modern-user dashboard-equal-card" style={{ width: '100%', minHeight: 0 }}>
-                            <img className="home-modern-avatar" src={selectedProfileAvatar.src} alt={`Ícono de perfil ${selectedProfileAvatar.label}`} />
-                            <div>
-                              <strong>{currentUserName || 'Usuario'}</strong>
-                              <small>{topbarSubtitle || 'Área operativa'}</small>
-                              <small>{resolveWelcomeTasksCount(upcomingInstallations)} tareas programadas para hoy</small>
-                            </div>
-                          </article>
-                          <section id="weather-widget" className="dash-side-card dashboard-equal-card" aria-live="polite">
-                            <div className="weather-head">
-                              <span className="weather-icon" id="weather-icon">☀️</span>
-                              <span className="weather-temp" id="weather-temp">--°C</span>
-                            </div>
-                            <div className="weather-desc" id="weather-desc">Cargando clima…</div>
-                            <div className="weather-time" id="weather-time">--:--:--</div>
-                          </section>
-                          <article className="dash-side-card dashboard-equal-card">
-                            <h4>Resumen del día</h4>
-                            <div className="dash-kpi-row"><span>Servicios activos</span><b>{kpiStats.active}</b></div>
-                            <div className="dash-kpi-row"><span>Tickets abiertos</span><b>{ticketsHistorial.filter((t) => (t.estado || '').toLowerCase() !== 'resuelto').length}</b></div>
-                            <div className="dash-kpi-row"><span>Seguimientos</span><b>{recentActivity.length}</b></div>
-                          </article>
-                          <article className="dash-side-card dashboard-equal-card">
-                            <h4>Actividades recientes</h4>
-                            <div className="dash-activity-mini">
-                              {recentActivity.slice(0, 4).map((item) => (
-                                <div key={`mini-act-${item.id}`} className="dash-activity-mini-item">
-                                  <span>{item.message}</span>
-                                  <small>{item.dateLabel}</small>
+                              <section id="weather-widget" className="dash-side-card dashboard-equal-card" aria-live="polite">
+                                <div className="weather-head">
+                                  <span className="weather-icon" id="weather-icon">☀️</span>
+                                  <span className="weather-temp" id="weather-temp">--°C</span>
                                 </div>
-                              ))}
-                              {recentActivity.length === 0 && <small>Sin actividad por el momento.</small>}
+                                <div className="weather-desc" id="weather-desc">Cargando clima…</div>
+                                <div className="weather-time" id="weather-time">--:--:--</div>
+                              </section>
+                              <article className="dash-side-card dashboard-equal-card">
+                                <h4>Resumen del día</h4>
+                                <div className="dash-kpi-row"><span>Servicios activos</span><b>{kpiStats.active}</b></div>
+                                <div className="dash-kpi-row"><span>Tickets abiertos</span><b>{ticketsHistorial.filter((t) => (t.estado || '').toLowerCase() !== 'resuelto').length}</b></div>
+                                <div className="dash-kpi-row"><span>Seguimientos</span><b>{recentActivity.length}</b></div>
+                              </article>
+                              <article className="dash-side-card dashboard-equal-card">
+                                <h4>Actividades recientes</h4>
+                                <div className="dash-activity-mini">
+                                  {recentActivity.slice(0, 4).map((item) => (
+                                    <div key={`mini-act-${item.id}`} className="dash-activity-mini-item">
+                                      <span>{item.message}</span>
+                                      <small>{item.dateLabel}</small>
+                                    </div>
+                                  ))}
+                                  {recentActivity.length === 0 && <small>Sin actividad por el momento.</small>}
+                                </div>
+                              </article>
                             </div>
-                          </article>
-                        </aside>
+
+                            <div className="home-service-cards-board">
+                              {homeServiceCards.map((card) => (
+                                <article key={card.title} className="home-service-card">
+                                  <header className="home-service-card-head">
+                                    <strong>{card.title}</strong>
+                                  </header>
+                                  <div className="home-service-card-content">
+                                    {card.items.length === 0 ? (
+                                      <div className="home-service-empty">Sin registros todavía.</div>
+                                    ) : (
+                                      <ul>
+                                        {card.items.slice(0, 8).map((item) => (
+                                          <li key={item.id}>
+                                            <button
+                                              type="button"
+                                              className="home-service-item-btn"
+                                              onClick={() => {
+                                                setSelectedForm('historial');
+                                                setSelectedService(item.sourceRow || null);
+                                                if (item.sourceRow) openHistoryRecord(item.sourceRow, { forceAction: card.charla ? 'Charla informativa' : null });
+                                              }}
+                                            >
+                                              <small>{item.name}</small>
+                                              {card.charla ? (
+                                                <div className="home-service-card-row-grid">
+                                                  <span>Fecha de Charla: <b>{item.fechaCharla}</b></span>
+                                                  <span>Hora: <b>{item.horaCharla}</b></span>
+                                                  <span>Lugar de Reunión: <b>{item.lugarReunion}</b></span>
+                                                  <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
+                                                </div>
+                                              ) : (
+                                                <div className="home-service-card-row-grid">
+                                                  <span>Fecha de Carga: <b>{item.fechaCarga}</b></span>
+                                                  <span>Tiempo de Instalación: <b>{item.tiempoInstalacion}</b></span>
+                                                  <span>Status: <b className={homeStatusClass(item.status || 'Pendiente')}>{item.status || 'Pendiente'}</b></span>
+                                                  <span>Fecha de Alta: <b>{item.fechaAlta}</b></span>
+                                                </div>
+                                              )}
+                                            </button>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    )}
+                                  </div>
+                                  <button type="button" className="home-service-footer-btn" onClick={() => { setSelectedForm('historial'); setSelectedService(null); }}>Ver todos →</button>
+                                </article>
+                              ))}
+                            </div>
+                          </section>
+                        </div>
                       </div>
                     </section>
                   </>
