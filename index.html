@@ -15806,7 +15806,7 @@
         if (window.__weatherWidgetInit) return;
         window.__weatherWidgetInit = true;
 
-        const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&daily=sunrise,sunset&hourly=temperature_2m,precipitation,rain,cloud_cover_high,temperature_80m,temperature_120m,is_day&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain&timezone=America%2FSao_Paulo&past_days=0&forecast_days=7';
+        const WEATHER_API_URL = 'https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.419998&daily=sunrise,sunset&hourly=temperature_2m,precipitation,rain,cloud_cover_high,temperature_80m,temperature_120m,is_day&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain&timezone=America/Montevideo&past_days=0&forecast_days=7';
         let lastWeatherCode = null;
         let lastIsDay = null;
 
@@ -15863,16 +15863,25 @@
 
           const lluvia = Number(current.rain || 0);
           const precipitacion = Number(current.precipitation || 0);
-          const isDayCurrent = Number(current.is_day);
+          let isDayCurrent = Number(current.is_day);
           if (!Number.isNaN(isDayCurrent)) lastIsDay = isDayCurrent;
 
           let nubeAlta = 0;
           const currentTime = String(current.time || '');
           const hourlyTime = Array.isArray(data?.hourly?.time) ? data.hourly.time : [];
           const hourlyCloud = Array.isArray(data?.hourly?.cloud_cover_high) ? data.hourly.cloud_cover_high : [];
+          const hourlyIsDay = Array.isArray(data?.hourly?.is_day) ? data.hourly.is_day : [];
           if (currentTime && hourlyTime.length && hourlyCloud.length) {
-            const idx = hourlyTime.indexOf(currentTime);
+            let idx = hourlyTime.indexOf(currentTime);
+            if (idx < 0) {
+              const hourKey = currentTime.slice(0, 13);
+              idx = hourlyTime.findIndex((entry) => String(entry || '').slice(0, 13) === hourKey);
+            }
             if (idx >= 0 && hourlyCloud[idx] !== undefined) nubeAlta = Number(hourlyCloud[idx]) || 0;
+            if (idx >= 0 && Number.isNaN(isDayCurrent) && hourlyIsDay[idx] !== undefined) {
+              isDayCurrent = Number(hourlyIsDay[idx]);
+              if (!Number.isNaN(isDayCurrent)) lastIsDay = isDayCurrent;
+            }
           }
 
           if (lluvia >= 4 || precipitacion >= 4) return { descripcion: 'Tormenta', icono: '⛈️' };
