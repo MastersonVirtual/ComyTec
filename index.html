@@ -11695,7 +11695,7 @@
           }
         }
 
-        async function refrescarInboxGmail() {
+        async function refrescarMailsGmail() {
           mostrarEstadoGmail('Actualizando...');
           const currentUser = auth.currentUser;
           if (!currentUser?.uid) return;
@@ -11752,8 +11752,9 @@
             mostrarEstadoGmail('Reconectá Gmail para actualizar correos.');
             return;
           }
-          void refrescarInboxGmail();
-          gmailRefreshIntervalRef.current = window.setInterval(() => { if (document.visibilityState === 'visible') void refrescarInboxGmail(); }, 60000);
+          void refrescarMailsGmail();
+          // Emergencia: desactivar auto-refresh Gmail hasta validar estabilidad.
+          // gmailRefreshIntervalRef.current = window.setInterval(() => { if (document.visibilityState === 'visible') void refrescarMailsGmail(); }, 60000);
           return () => {
             if (gmailRefreshIntervalRef.current) {
               window.clearInterval(gmailRefreshIntervalRef.current);
@@ -15662,9 +15663,14 @@
                                 </div>
                               ) : gmailApiEmails.length > 0 ? (
                                 <div className="home-hero-mail-list" id="gmail-list">
-                                  <small style={{ color: '#4b6b73' }}>
-                                    {gmailApiLoading ? 'Actualizando...' : (gmailStatusText || getGmailUpdatedAgoLabel() || 'Sin actualizar')}
-                                  </small>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+                                    <small style={{ color: '#4b6b73' }}>
+                                      {gmailApiLoading ? 'Actualizando...' : (gmailStatusText || getGmailUpdatedAgoLabel() || 'Sin actualizar')}
+                                    </small>
+                                    <button type="button" className="home-modern-action-btn" onClick={() => { void refrescarMailsGmail(); }}>
+                                      Actualizar mails
+                                    </button>
+                                  </div>
                                   {gmailApiEmails.map((mail) => (
                                     <article key={`mail-api-preview-${mail.id}`} className="home-hero-mail-item clickable" role="button" tabIndex={0} onClick={() => { void handleOpenGmailDetail(mail); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') void handleOpenGmailDetail(mail); }}>
                                       <div className="home-hero-mail-top">
@@ -15679,6 +15685,9 @@
                                 <div className="home-hero-mail-empty">
                                   <i data-lucide="mail"></i>
                                   <div className="hint" style={{ margin: 0 }}>Tus últimos mails van a aparecer acá.</div>
+                                  <button type="button" className="home-modern-action-btn" onClick={() => { void refrescarMailsGmail(); }}>
+                                    Actualizar mails
+                                  </button>
                                   <button type="button" className="home-modern-action-btn" onClick={() => { void reconectarGmailAccess(); }}>
                                     Conectar Gmail
                                   </button>
@@ -18002,6 +18011,12 @@
 
         // Exponer para debug/manual desde consola.
         window.obtenerClima = obtenerClima;
+        window.addEventListener('error', (event) => {
+          console.error('ERROR GLOBAL:', event.error || event.message);
+        });
+        window.addEventListener('unhandledrejection', (event) => {
+          console.error('PROMESA RECHAZADA:', event.reason);
+        });
 
         ensureWidgetExists();
         actualizarHora();
