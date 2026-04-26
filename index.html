@@ -9021,13 +9021,17 @@
           try {
             setLoading(true);
             const provider = new firebase.auth.GoogleAuthProvider();
-            provider.setCustomParameters({ prompt: 'select_account' });
+            provider.addScope(GMAIL_READONLY_SCOPE);
+            provider.setCustomParameters({ prompt: 'consent select_account', include_granted_scopes: 'false' });
+            console.info('[AUTH] Inicio de sesión Google (popup) con prompt de consentimiento forzado.');
             await auth.signInWithPopup(provider);
           } catch (err) {
             if (String(err?.code || '').includes('popup')) {
               try {
                 const provider = new firebase.auth.GoogleAuthProvider();
-                provider.setCustomParameters({ prompt: 'select_account' });
+                provider.addScope(GMAIL_READONLY_SCOPE);
+                provider.setCustomParameters({ prompt: 'consent select_account', include_granted_scopes: 'false' });
+                console.info('[AUTH] Fallback a redirect con prompt de consentimiento forzado.');
                 await auth.signInWithRedirect(provider);
                 return;
               } catch (redirectErr) {
@@ -9053,6 +9057,36 @@
                   <span>{loading ? 'Conectando...' : 'Continuar con Google'}</span>
                 </button>
                 <div className="microcopy">Si es tu primera vez, tu cuenta se creará automáticamente.</div>
+              </section>
+            </div>
+          </div>
+        );
+      }
+
+      function AccessApprovalScreen() {
+        return (
+          <div className="login-shell">
+            <div className="login-stack">
+              <section className="login-panel google-login-panel">
+                <h2>Acceso pendiente de autorización</h2>
+                <div className="hint">
+                  Detectamos tu cuenta <b>{user?.email || 'sin email'}</b>, pero todavía no está autorizada en el sistema.
+                </div>
+                {accessPendingRequest ? (
+                  <div className="login-error" style={{ background: '#eef6ff', color: '#003f77', borderColor: '#b8dcff' }}>
+                    Ya existe una solicitud en estado <b>{requestStatusLabel(accessPendingRequest.estado)}</b>.
+                  </div>
+                ) : (
+                  <div className="hint">Podés enviar ahora una solicitud de credenciales para que administración la apruebe.</div>
+                )}
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 10 }}>
+                  <button className="google-login-btn" type="button" onClick={(e) => handleProfileCredentialsRequest(e)}>
+                    <span>Solicitar autorización</span>
+                  </button>
+                  <button className="ghost-btn" type="button" onClick={() => auth.signOut()}>
+                    Cerrar sesión
+                  </button>
+                </div>
               </section>
             </div>
           </div>
@@ -9726,6 +9760,8 @@
         const [baseArea, setBaseArea] = useState('');
         const [userData, setUserData] = useState({ nombre: '', rol: '', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
         const [roleLoading, setRoleLoading] = useState(true);
+        const [accessApprovalRequired, setAccessApprovalRequired] = useState(false);
+        const [accessPendingRequest, setAccessPendingRequest] = useState(null);
         const [notificacion, setNotificacion] = useState({ mensaje: '', tipo: '' });
 
         const [tipoAccion, setTipoAccion] = useState('');
@@ -11313,6 +11349,8 @@
             setAuthLoading(false);
 
             if (!currentUser) {
+              setAccessApprovalRequired(false);
+              setAccessPendingRequest(null);
               setGmailAccessToken('');
               setGmailApiEmails([]);
               setGmailApiError('');
@@ -11332,11 +11370,21 @@
               const modernProfile = await upsertAuthenticatedUserProfile(currentUser);
               let profile = modernProfile || null;
               const byUid = await db.collection('config_usuarios').doc(currentUser.uid).get();
+              let emailProfileFound = false;
               if (byUid.exists) profile = { ...(profile || {}), ...byUid.data() };
 
               if (!byUid.exists && currentUser.email) {
                 const snap = await db.collection('config_usuarios').where('email', '==', currentUser.email).limit(1).get();
-                if (!snap.empty) profile = { ...(profile || {}), ...snap.docs[0].data() };
+                if (!snap.empty) {
+                  emailProfileFound = true;
+                  profile = { ...(profile || {}), ...snap.docs[0].data() };
+                }
+              }
+
+              const hasRegisteredAccess = byUid.exists || emailProfileFound;
+              setAccessApprovalRequired(!hasRegisteredAccess);
+              if (!hasRegisteredAccess) {
+                console.warn('[AUTH] Usuario sin autorización en config_usuarios:', currentUser.email || currentUser.uid || 'sin-identificador');
               }
 
               const rol = String(profile?.rol || 'usuario').toLowerCase();
@@ -11351,6 +11399,7 @@
               setProfileAvatarId(avatarId);
             } catch (err) {
               console.error('Error leyendo config_usuarios:', err);
+              setAccessApprovalRequired(false);
               setBaseRole('usuario');
               setBaseArea('');
               setUserRole('usuario');
@@ -11539,6 +11588,25 @@
             });
           return () => unsub();
         }, [user?.uid]);
+
+        useEffect(() => {
+          if (!accessApprovalRequired || !user?.uid) {
+            setAccessPendingRequest(null);
+            return;
+          }
+          const unsub = db.collection('solicitudes_credenciales')
+            .where('solicitanteUid', '==', user.uid)
+            .limit(20)
+            .onSnapshot((snapshot) => {
+              const requests = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+              requests.sort((a, b) => (b?.creadoEn?.seconds || 0) - (a?.creadoEn?.seconds || 0));
+              const activeRequest = requests.find((req) => ['pendiente', 'aprobada'].includes(String(req?.estado || '').toLowerCase())) || null;
+              setAccessPendingRequest(activeRequest);
+            }, (error) => {
+              console.error('Error leyendo solicitud pendiente de autorización:', error);
+            });
+          return () => unsub();
+        }, [accessApprovalRequired, user?.uid]);
 
         async function testGmailConnection(token, uid) {
           const testUrl = 'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=5&q=in:inbox';
@@ -14565,16 +14633,17 @@
         }
 
         async function handleProfileCredentialsRequest(e) {
-          e.preventDefault();
+          if (e?.preventDefault) e.preventDefault();
           const nextUser = profileUserRequest.trim();
           const nextPass = profilePasswordRequest.trim();
-          if (!nextUser || !nextPass) {
+          const fromAccessPendingScreen = accessApprovalRequired && !nextUser && !nextPass;
+          if (!fromAccessPendingScreen && (!nextUser || !nextPass)) {
             setNotificacion({ mensaje: 'Ingresá usuario y contraseña para solicitar el cambio', tipo: 'error' });
             return;
           }
           try {
             await db.collection('solicitudes_credenciales').add({
-              tipo: 'cambio_usuario_password',
+              tipo: fromAccessPendingScreen ? 'solicitud_acceso_google' : 'cambio_usuario_password',
               solicitanteUid: user?.uid || '',
               solicitanteEmail: user?.email || '',
               solicitanteNombre: currentUserName,
@@ -14587,6 +14656,9 @@
             setNotificacion({ mensaje: '✔ Solicitud enviada al administrador', tipo: 'ok' });
             setProfileUserRequest('');
             setProfilePasswordRequest('');
+            if (fromAccessPendingScreen) {
+              setAccessPendingRequest({ estado: 'pendiente' });
+            }
           } catch (error) {
             console.error('Error enviando solicitud de credenciales:', error);
             setNotificacion({ mensaje: '✖ No se pudo enviar la solicitud', tipo: 'error' });
@@ -14603,6 +14675,10 @@
 
         if (!user) {
           return <LoginScreen />;
+        }
+
+        if (accessApprovalRequired) {
+          return <AccessApprovalScreen />;
         }
 
         return (
