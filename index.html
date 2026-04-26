@@ -11519,6 +11519,32 @@
           return () => unsub();
         }, [user?.uid]);
 
+        async function testGmailConnection(token, uid) {
+          const testUrl = 'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=3&q=in:inbox';
+          const res = await fetch(testUrl, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await res.json();
+          console.log('GMAIL RESPONSE:', data);
+          if (!res.ok || data?.error) {
+            console.log('GMAIL ERROR:', data);
+            throw new Error(`Gmail API error: ${JSON.stringify(data?.error || data)}`);
+          }
+          const hasMessages = Array.isArray(data?.messages) && data.messages.length > 0;
+          if (hasMessages && uid) {
+            await db.collection('users').doc(uid).set({
+              gmail: {
+                connected: true,
+                lastSyncAt: new Date(),
+                scope: GMAIL_READONLY_SCOPE,
+                tokenStoredServerSide: false,
+              },
+            }, { merge: true });
+            console.log('GMAIL OK');
+          }
+          return data;
+        }
+
         async function obtenerUltimosEmails(token) {
           const listUrl = 'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=5&q=in:inbox';
           const listResponse = await fetch(listUrl, {
@@ -11593,6 +11619,7 @@
             try {
               setGmailApiLoading(true);
               setGmailApiError('');
+              await testGmailConnection(gmailAccessToken, user.uid);
               const latestEmails = await obtenerUltimosEmails(gmailAccessToken);
               if (!active) return;
               setGmailApiEmails(latestEmails);
