@@ -9017,8 +9017,12 @@
             provider.setCustomParameters({ prompt: 'consent' });
             const result = await auth.signInWithPopup(provider);
             const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
-            const accessToken = credential?.accessToken || '';
+            const accessToken = credential?.accessToken
+              || result?.credential?.accessToken
+              || result?._tokenResponse?.oauthAccessToken
+              || '';
             console.log('ACCESS TOKEN:', accessToken);
+            console.log('TOKEN RESPONSE:', result?._tokenResponse || null);
             if (!accessToken) throw new Error('No se recibió accessToken de Google con scope Gmail.');
             if (accessToken && typeof onGoogleToken === 'function') onGoogleToken(accessToken);
           } catch (err) {
@@ -11363,8 +11367,12 @@
           auth.getRedirectResult().then((result) => {
             if (!active || !result) return;
             const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
-            const token = credential?.accessToken || '';
+            const token = credential?.accessToken
+              || result?.credential?.accessToken
+              || result?._tokenResponse?.oauthAccessToken
+              || '';
             console.log('ACCESS TOKEN:', token);
+            console.log('TOKEN RESPONSE:', result?._tokenResponse || null);
             if (token) setGmailAccessToken(token);
           }).catch((error) => {
             console.log(error);
@@ -11596,8 +11604,12 @@
             provider.setCustomParameters({ prompt: 'consent' });
             const result = await auth.signInWithPopup(provider);
             const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
-            const token = credential?.accessToken || '';
+            const token = credential?.accessToken
+              || result?.credential?.accessToken
+              || result?._tokenResponse?.oauthAccessToken
+              || '';
             console.log('ACCESS TOKEN:', token);
+            console.log('TOKEN RESPONSE:', result?._tokenResponse || null);
             if (!token) throw new Error('No se recibió accessToken al reconectar Gmail.');
             setGmailAccessToken(token);
           } catch (error) {
