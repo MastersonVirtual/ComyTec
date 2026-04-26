@@ -11553,7 +11553,7 @@
         }, [user?.uid]);
 
         async function obtenerUltimosEmails(token) {
-          const listUrl = 'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=5&q=in:inbox';
+          const listUrl = 'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=6&q=in:inbox';
           const listResponse = await fetch(listUrl, {
             headers: { Authorization: `Bearer ${token}` },
           });
@@ -11587,7 +11587,13 @@
               receivedAt: Number.isNaN(parsedDate.getTime()) ? null : parsedDate,
             };
           }));
-          return detailResults;
+          return detailResults
+            .slice()
+            .sort((a, b) => {
+              const av = a?.receivedAt instanceof Date ? a.receivedAt.getTime() : 0;
+              const bv = b?.receivedAt instanceof Date ? b.receivedAt.getTime() : 0;
+              return bv - av;
+            });
         }
 
         useEffect(() => {
@@ -11808,6 +11814,36 @@
 
         const [formOpenAudit, setFormOpenAudit] = useState(null);
         const currentUserName = useMemo(() => (userData.nombre || (user?.email || '').split('@')[0] || 'Usuario').trim(), [userData, user]);
+        const latestMailView = useMemo(() => {
+          const parseStamp = (item) => {
+            const value = item?.receivedAt;
+            if (!value) return 0;
+            if (value instanceof Date) return value.getTime();
+            if (typeof value?.toDate === 'function') {
+              const dt = value.toDate();
+              return dt instanceof Date ? dt.getTime() : 0;
+            }
+            if (typeof value?.seconds === 'number') return value.seconds * 1000;
+            const asDate = new Date(value);
+            return Number.isNaN(asDate.getTime()) ? 0 : asDate.getTime();
+          };
+          const merged = [...(gmailApiEmails || []), ...(gmailInboxPreview || [])]
+            .map((item, index) => ({
+              ...item,
+              __stamp: parseStamp(item),
+              __id: String(item?.id || `${item?.from || 'mail'}-${item?.subject || 'sin-asunto'}-${index}`),
+            }))
+            .sort((a, b) => b.__stamp - a.__stamp);
+          const dedup = [];
+          const seen = new Set();
+          merged.forEach((item) => {
+            const key = item.__id || `${item.from || ''}|${item.subject || ''}|${item.__stamp || 0}`;
+            if (seen.has(key)) return;
+            seen.add(key);
+            dedup.push(item);
+          });
+          return dedup.slice(0, 6);
+        }, [gmailApiEmails, gmailInboxPreview]);
         const selectedProfileAvatar = useMemo(() => (
           PROFILE_AVATAR_OPTIONS.find((avatar) => avatar.id === profileAvatarId) || PROFILE_AVATAR_OPTIONS[0]
         ), [profileAvatarId]);
@@ -15499,45 +15535,28 @@
                               </div>
                             </div>
                             <div className="home-hero-illustration" id="gmail-list">
-                              {gmailApiError ? (
-                                <div className="home-hero-mail-empty">
-                                  <i data-lucide="mail-warning"></i>
-                                  <div className="hint" style={{ margin: 0 }}>{gmailApiError}</div>
-                                  <button type="button" className="home-modern-action-btn" onClick={() => auth.signOut()}>Cerrar sesión y volver a conectar</button>
-                                </div>
-                              ) : gmailApiLoading ? (
+                              {gmailApiLoading ? (
                                 <div className="home-hero-mail-empty">
                                   <i data-lucide="loader-circle"></i>
                                   <div className="hint" style={{ margin: 0 }}>Cargando correos...</div>
                                 </div>
-                              ) : gmailApiEmails.length > 0 ? (
+                              ) : latestMailView.length > 0 ? (
                                 <div className="home-hero-mail-list">
-                                  {gmailApiEmails.map((mail) => (
-                                    <article key={`mail-api-preview-${mail.id}`} className="home-hero-mail-item">
+                                  {latestMailView.map((mail, index) => (
+                                    <article key={`mail-preview-unified-${mail.id || index}`} className="home-hero-mail-item">
                                       <div className="home-hero-mail-top">
-                                        <span>{mail.receivedAt ? mail.receivedAt.toLocaleString('es-UY', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : (mail.dateRaw || '-')}</span>
+                                        <span>{mail.receivedAt ? formatRequestDateTime(mail.receivedAt) : (mail.dateRaw || '-')}</span>
                                       </div>
                                       <div className="home-hero-mail-from">{mail.from || 'Sin remitente'}</div>
                                       <div className="home-hero-mail-subject">{mail.subject || 'Sin asunto'}</div>
                                     </article>
                                   ))}
-                                </div>
-                              ) : gmailInboxPreview.length === 0 ? (
-                                <div className="home-hero-mail-empty">
-                                  <i data-lucide="mail"></i>
-                                  <div className="hint" style={{ margin: 0 }}>Tus últimos mails van a aparecer acá.</div>
                                 </div>
                               ) : (
-                                <div className="home-hero-mail-list">
-                                  {gmailInboxPreview.map((mail) => (
-                                    <article key={`mail-preview-${mail.id}`} className="home-hero-mail-item">
-                                      <div className="home-hero-mail-top">
-                                        <span>{mail.receivedAt ? formatRequestDateTime(mail.receivedAt) : '-'}</span>
-                                      </div>
-                                      <div className="home-hero-mail-from">{mail.from || 'Sin remitente'}</div>
-                                      <div className="home-hero-mail-subject">{mail.subject || 'Sin asunto'}</div>
-                                    </article>
-                                  ))}
+                                <div className="home-hero-mail-empty">
+                                  <i data-lucide={gmailApiError ? 'mail-warning' : 'mail'}></i>
+                                  <div className="hint" style={{ margin: 0 }}>{gmailApiError || 'Tus últimos mails van a aparecer acá.'}</div>
+                                  {gmailApiError && <button type="button" className="home-modern-action-btn" onClick={() => auth.signOut()}>Cerrar sesión y volver a conectar</button>}
                                 </div>
                               )}
                             </div>
