@@ -9783,8 +9783,6 @@
         const [gmailLastRefreshAt, setGmailLastRefreshAt] = useState(null);
         const [gmailDetailModal, setGmailDetailModal] = useState({ open: false, mail: null, body: '' });
         const [gmailDetailLoading, setGmailDetailLoading] = useState(false);
-        const gmailRefreshIntervalRef = useRef(null);
-        const [gmailNowMs, setGmailNowMs] = useState(Date.now());
         const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
         const [userCredentialRequests, setUserCredentialRequests] = useState([]);
         const [staffMembers, setStaffMembers] = useState([]);
@@ -11315,10 +11313,6 @@
             setAuthLoading(false);
 
             if (!currentUser) {
-              if (gmailRefreshIntervalRef.current) {
-                window.clearInterval(gmailRefreshIntervalRef.current);
-                gmailRefreshIntervalRef.current = null;
-              }
               setGmailAccessToken('');
               setGmailApiEmails([]);
               setGmailApiError('');
@@ -11691,15 +11685,11 @@
 
         function getGmailUpdatedAgoLabel() {
           if (!gmailLastRefreshAt) return '';
-          const deltaSec = Math.max(0, Math.floor((gmailNowMs - gmailLastRefreshAt.getTime()) / 1000));
+          const deltaSec = Math.max(0, Math.floor((Date.now() - gmailLastRefreshAt.getTime()) / 1000));
           return `Actualizado hace ${deltaSec} segundos`;
         }
 
         useEffect(() => {
-          if (gmailRefreshIntervalRef.current) {
-            window.clearInterval(gmailRefreshIntervalRef.current);
-            gmailRefreshIntervalRef.current = null;
-          }
           if (!user?.uid) {
             setGmailApiError('');
             setGmailApiLoading(false);
@@ -11709,11 +11699,6 @@
           mostrarEstadoGmail('Actualizado desde Firestore.');
           return () => {};
         }, [user?.uid]);
-
-        useEffect(() => {
-          const tickId = window.setInterval(() => setGmailNowMs(Date.now()), 1000);
-          return () => window.clearInterval(tickId);
-        }, []);
 
         useEffect(() => {
           if (!user?.uid) {
