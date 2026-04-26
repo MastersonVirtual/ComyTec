@@ -9022,16 +9022,17 @@
             setLoading(true);
             const provider = new firebase.auth.GoogleAuthProvider();
             provider.addScope(GMAIL_READONLY_SCOPE);
-            provider.setCustomParameters({ prompt: 'consent select_account', include_granted_scopes: 'false' });
-            console.info('[AUTH] Inicio de sesión Google (popup) con prompt de consentimiento forzado.');
-            await auth.signInWithPopup(provider);
+            provider.setCustomParameters({ prompt: 'consent' });
+            const result = await auth.signInWithPopup(provider);
+            const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
+            const token = credential?.accessToken || '';
+            if (token) window.sessionStorage.setItem('gmail_access_token', token);
           } catch (err) {
             if (String(err?.code || '').includes('popup')) {
               try {
                 const provider = new firebase.auth.GoogleAuthProvider();
                 provider.addScope(GMAIL_READONLY_SCOPE);
-                provider.setCustomParameters({ prompt: 'consent select_account', include_granted_scopes: 'false' });
-                console.info('[AUTH] Fallback a redirect con prompt de consentimiento forzado.');
+                provider.setCustomParameters({ prompt: 'consent' });
                 await auth.signInWithRedirect(provider);
                 return;
               } catch (redirectErr) {
@@ -9810,13 +9811,10 @@
         const [clientOperationId, setClientOperationId] = useState('');
         const [profileUserRequest, setProfileUserRequest] = useState('');
         const [profilePasswordRequest, setProfilePasswordRequest] = useState('');
-        const [gmailInboxPreview, setGmailInboxPreview] = useState([]);
         const [gmailAccessToken, setGmailAccessToken] = useState('');
         const [gmailApiEmails, setGmailApiEmails] = useState([]);
         const [gmailApiLoading, setGmailApiLoading] = useState(false);
         const [gmailApiError, setGmailApiError] = useState('');
-        const [gmailStatusText, setGmailStatusText] = useState('');
-        const [gmailLastRefreshAt, setGmailLastRefreshAt] = useState(null);
         const [gmailDetailModal, setGmailDetailModal] = useState({ open: false, mail: null, body: '' });
         const [gmailDetailLoading, setGmailDetailLoading] = useState(false);
         const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
@@ -11330,7 +11328,6 @@
             gmail: {
               connected: false,
               scope: GMAIL_READONLY_SCOPE,
-              tokenStoredServerSide: false,
               lastSyncAt: null,
             },
           };
@@ -11354,7 +11351,6 @@
               setGmailAccessToken('');
               setGmailApiEmails([]);
               setGmailApiError('');
-              setGmailStatusText('');
               setUserRole('');
               setUserArea('');
               setBaseRole('');
@@ -11412,25 +11408,6 @@
           });
           return () => unsub();
         }, []);
-
-        useEffect(() => {
-          let active = true;
-          auth.getRedirectResult().then((result) => {
-            if (!active || !result) return;
-            const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
-            const token = credential?.accessToken
-              || result?.credential?.accessToken
-              || result?._tokenResponse?.oauthAccessToken
-              || '';
-            console.log('ACCESS TOKEN:', token);
-            console.log('TOKEN RESPONSE:', result?._tokenResponse || null);
-            if (token) setGmailAccessToken(token);
-          }).catch((error) => {
-            console.log(error);
-          });
-          return () => { active = false; };
-        }, []);
-
 
         useEffect(() => {
           if (!selectedService?.id) return;
@@ -11608,73 +11585,63 @@
           return () => unsub();
         }, [accessApprovalRequired, user?.uid]);
 
-        async function testGmailConnection(token, uid) {
-          const testUrl = 'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=5&q=in:inbox';
-          const res = await fetch(testUrl, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          const data = await res.json();
-          console.log('GMAIL RESPONSE:', data);
-          if (!res.ok || data?.error) {
-            console.log('GMAIL ERROR:', data);
-            throw new Error(`Gmail API error: ${JSON.stringify(data?.error || data)}`);
-          }
-          const hasMessages = Array.isArray(data?.messages) && data.messages.length > 0;
-          if (hasMessages && uid) {
-            await db.collection('users').doc(uid).set({
-              gmail: {
-                connected: true,
-                lastSyncAt: new Date(),
-                scope: GMAIL_READONLY_SCOPE,
-                tokenStoredServerSide: false,
-              },
-            }, { merge: true });
-            console.log('GMAIL OK');
-          }
-          return data;
-        }
-
-        async function obtenerUltimosEmails(token) {
+        async function cargarUltimosMails(token) {
+          setGmailApiLoading(true);
+          setGmailApiError('');
           const listUrl = 'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=5&q=in:inbox';
-          const listResponse = await fetch(listUrl, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (!listResponse.ok) {
-            const errorBody = await listResponse.text();
-            throw new Error(`Gmail list error ${listResponse.status}: ${errorBody}`);
-          }
-          const listData = await listResponse.json();
-          console.log('GMAIL RESPONSE:', listData);
-          if (listData?.error) {
-            throw new Error(`Gmail API error: ${JSON.stringify(listData.error)}`);
-          }
-          const messageItems = Array.isArray(listData.messages) ? listData.messages : [];
-          const detailResults = await Promise.all(messageItems.map(async (item) => {
-            const detailUrl = `https://gmail.googleapis.com/gmail/v1/users/me/messages/${item.id}`;
-            const detailResponse = await fetch(detailUrl, {
+          try {
+            const listResponse = await fetch(listUrl, {
               headers: { Authorization: `Bearer ${token}` },
             });
-            if (!detailResponse.ok) {
-              const detailBody = await detailResponse.text();
-              throw new Error(`Gmail detail error ${detailResponse.status}: ${detailBody}`);
+            if (!listResponse.ok) {
+              const errorBody = await listResponse.text();
+              throw new Error(`Gmail list error ${listResponse.status}: ${errorBody}`);
             }
-            const detailData = await detailResponse.json();
-            const headers = Array.isArray(detailData?.payload?.headers) ? detailData.payload.headers : [];
-            const getHeader = (name) => (headers.find((h) => String(h?.name || '').toLowerCase() === name.toLowerCase())?.value || '').trim();
-            const from = getHeader('From');
-            const subject = getHeader('Subject');
-            const dateValue = getHeader('Date');
-            const parsedDate = new Date(dateValue);
-            return {
-              id: item.id,
-              from: from || 'Sin remitente',
-              subject: subject || 'Sin asunto',
-              snippet: String(detailData?.snippet || '').trim(),
-              dateRaw: dateValue || '',
-              receivedAt: Number.isNaN(parsedDate.getTime()) ? null : parsedDate,
-            };
-          }));
-          return detailResults;
+            const listData = await listResponse.json();
+            if (listData?.error) throw new Error(`Gmail API error: ${JSON.stringify(listData.error)}`);
+            const messageItems = Array.isArray(listData.messages) ? listData.messages : [];
+            const detailResults = await Promise.all(messageItems.map(async (item) => {
+              const detailUrl = `https://gmail.googleapis.com/gmail/v1/users/me/messages/${item.id}`;
+              const detailResponse = await fetch(detailUrl, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              if (!detailResponse.ok) {
+                const detailBody = await detailResponse.text();
+                throw new Error(`Gmail detail error ${detailResponse.status}: ${detailBody}`);
+              }
+              const detailData = await detailResponse.json();
+              const headers = Array.isArray(detailData?.payload?.headers) ? detailData.payload.headers : [];
+              const getHeader = (name) => (headers.find((h) => String(h?.name || '').toLowerCase() === name.toLowerCase())?.value || '').trim();
+              const from = getHeader('From');
+              const subject = getHeader('Subject');
+              const dateValue = getHeader('Date');
+              const parsedDate = new Date(dateValue);
+              return {
+                id: item.id,
+                from: from || 'Sin remitente',
+                subject: subject || 'Sin asunto',
+                snippet: String(detailData?.snippet || '').trim(),
+                dateRaw: dateValue || '',
+                receivedAt: Number.isNaN(parsedDate.getTime()) ? null : parsedDate,
+              };
+            }));
+            detailResults.sort((a, b) => (b?.receivedAt?.getTime?.() || 0) - (a?.receivedAt?.getTime?.() || 0));
+            setGmailApiEmails(detailResults.slice(0, 5));
+            if (user?.uid) {
+              await db.collection('users').doc(user.uid).set({
+                gmail: {
+                  connected: true,
+                  lastSyncAt: new Date(),
+                  scope: GMAIL_READONLY_SCOPE,
+                },
+              }, { merge: true });
+            }
+          } catch (error) {
+            console.error('Error Gmail:', error);
+            setGmailApiError('No se pudieron cargar los correos.');
+          } finally {
+            setGmailApiLoading(false);
+          }
         }
 
         function decodeBase64Url(value = '') {
@@ -11720,85 +11687,42 @@
           }
         }
 
-        async function reconectarGmailAccess() {
-          mostrarEstadoGmail('Sincronización Gmail pendiente de Firebase Functions.');
-        }
-
-        async function refrescarMailsGmail() {
-          try {
-            mostrarEstadoGmail('Actualizando...');
-            const currentUser = auth.currentUser;
-            if (!currentUser?.uid) return;
-            // Frontend estable: lectura solo desde Firestore mientras migramos a backend.
-            mostrarEstadoGmail('Actualizado desde Firestore.');
-          } catch (error) {
-            console.error('Error Gmail:', error);
-            mostrarEstadoGmail('No se pudieron actualizar los correos.');
-          }
-        }
-
-        function mostrarEstadoGmail(message) {
-          setGmailStatusText(String(message || ''));
-        }
-
-        function renderizarMails(mails = []) {
-          const normalized = Array.isArray(mails) ? mails.slice() : [];
-          normalized.sort((a, b) => {
-            const av = a?.receivedAt instanceof Date ? a.receivedAt.getTime() : 0;
-            const bv = b?.receivedAt instanceof Date ? b.receivedAt.getTime() : 0;
-            return bv - av;
+        useEffect(() => {
+          let active = true;
+          auth.getRedirectResult().then((result) => {
+            if (!active || !result) return;
+            const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
+            const token = credential?.accessToken || '';
+            if (token) {
+              window.sessionStorage.setItem('gmail_access_token', token);
+              setGmailAccessToken(token);
+            }
+          }).catch((error) => {
+            console.error('Error leyendo redirect de Google:', error);
           });
-          setGmailApiEmails(normalized.slice(0, 5));
-        }
-
-        function getGmailUpdatedAgoLabel() {
-          if (!gmailLastRefreshAt) return '';
-          const deltaSec = Math.max(0, Math.floor((Date.now() - gmailLastRefreshAt.getTime()) / 1000));
-          return `Actualizado hace ${deltaSec} segundos`;
-        }
+          return () => { active = false; };
+        }, []);
 
         useEffect(() => {
           if (!user?.uid) {
+            setGmailAccessToken('');
+            setGmailApiEmails([]);
             setGmailApiError('');
             setGmailApiLoading(false);
-            mostrarEstadoGmail('');
             return;
           }
-          mostrarEstadoGmail('Actualizado desde Firestore.');
-          return () => {};
+          const token = window.sessionStorage.getItem('gmail_access_token') || '';
+          if (token) setGmailAccessToken(token);
         }, [user?.uid]);
 
+        const gmailLoadedTokenRef = useRef('');
         useEffect(() => {
-          if (!user?.uid) {
-            setGmailInboxPreview([]);
-            return () => {};
-          }
-          const unsub = db.collection('users')
-            .doc(user.uid)
-            .collection('gmail_inbox')
-            .orderBy('receivedAt', 'desc')
-            .limit(8)
-            .onSnapshot((snapshot) => {
-              const next = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-              setGmailInboxPreview(next);
-              const normalized = next.map((mail) => {
-                const rawDate = mail?.receivedAt;
-                const dt = rawDate && typeof rawDate?.toDate === 'function'
-                  ? rawDate.toDate()
-                  : (rawDate instanceof Date ? rawDate : null);
-                return {
-                  ...mail,
-                  receivedAt: dt,
-                };
-              });
-              renderizarMails(normalized);
-              if (normalized[0]?.receivedAt instanceof Date) setGmailLastRefreshAt(normalized[0].receivedAt);
-            }, (error) => {
-              console.error('Error leyendo vista previa de Gmail:', error);
-              setGmailApiError('No se pudieron leer correos desde Firestore.');
-            });
-          return () => unsub();
-        }, [user?.uid]);
+          if (!user?.uid || !gmailAccessToken) return;
+          const marker = `${user.uid}:${gmailAccessToken}`;
+          if (gmailLoadedTokenRef.current === marker) return;
+          gmailLoadedTokenRef.current = marker;
+          void cargarUltimosMails(gmailAccessToken);
+        }, [user?.uid, gmailAccessToken]);
 
         useEffect(() => {
           if (!user?.uid) {
@@ -15675,7 +15599,7 @@
                                 <div className="home-hero-mail-empty">
                                   <i data-lucide="mail-warning"></i>
                                   <div className="hint" style={{ margin: 0 }}>{gmailApiError}</div>
-                                  <button type="button" className="home-modern-action-btn" onClick={() => auth.signOut()}>Cerrar sesión y volver a conectar</button>
+                                  <button type="button" className="home-modern-action-btn" onClick={() => auth.signOut()}>Cerrar sesión y volver a iniciar</button>
                                 </div>
                               ) : gmailApiLoading ? (
                                 <div className="home-hero-mail-empty">
@@ -15684,14 +15608,6 @@
                                 </div>
                               ) : gmailApiEmails.length > 0 ? (
                                 <div className="home-hero-mail-list" id="gmail-list">
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
-                                    <small style={{ color: '#4b6b73' }}>
-                                      {gmailApiLoading ? 'Actualizando...' : (gmailStatusText || getGmailUpdatedAgoLabel() || 'Sin actualizar')}
-                                    </small>
-                                    <button type="button" className="home-modern-action-btn" onClick={() => { void refrescarMailsGmail(); }}>
-                                      Actualizar mails
-                                    </button>
-                                  </div>
                                   {gmailApiEmails.map((mail) => (
                                     <article key={`mail-api-preview-${mail.id}`} className="home-hero-mail-item clickable" role="button" tabIndex={0} onClick={() => { void handleOpenGmailDetail(mail); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') void handleOpenGmailDetail(mail); }}>
                                       <div className="home-hero-mail-top">
@@ -15702,28 +15618,10 @@
                                     </article>
                                   ))}
                                 </div>
-                              ) : gmailInboxPreview.length === 0 ? (
+                              ) : (
                                 <div className="home-hero-mail-empty">
                                   <i data-lucide="mail"></i>
-                                  <div className="hint" style={{ margin: 0 }}>Tus últimos mails van a aparecer acá.</div>
-                                  <button type="button" className="home-modern-action-btn" onClick={() => { void refrescarMailsGmail(); }}>
-                                    Actualizar mails
-                                  </button>
-                                  <button type="button" className="home-modern-action-btn" onClick={() => { void reconectarGmailAccess(); }}>
-                                    Conectar Gmail
-                                  </button>
-                                </div>
-                              ) : (
-                                <div className="home-hero-mail-list">
-                                  {gmailInboxPreview.map((mail) => (
-                                    <article key={`mail-preview-${mail.id}`} className="home-hero-mail-item">
-                                      <div className="home-hero-mail-top">
-                                        <span>{mail.receivedAt ? formatRequestDateTime(mail.receivedAt) : '-'}</span>
-                                      </div>
-                                      <div className="home-hero-mail-from">{mail.from || 'Sin remitente'}</div>
-                                      <div className="home-hero-mail-subject">{mail.subject || 'Sin asunto'}</div>
-                                    </article>
-                                  ))}
+                                  <div className="hint" style={{ margin: 0 }}>No hay correos cargados. Cerrá sesión y volvé a iniciar para actualizar.</div>
                                 </div>
                               )}
                             </div>
