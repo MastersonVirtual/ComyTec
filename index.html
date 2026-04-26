@@ -4978,6 +4978,8 @@
         justify-content: center;
         gap: 8px;
         margin-top: auto;
+        padding: 0 14px !important;
+        text-align: center;
       }
       .sidebar .logout-btn:hover {
         color: #006465 !important;
@@ -5064,6 +5066,7 @@
         white-space: normal;
         overflow-wrap: anywhere;
         word-break: break-word;
+        min-width: 0;
       }
       .sidebar-support-link i {
         width: 24px !important;
@@ -5079,15 +5082,20 @@
         border: 1px solid rgba(66, 122, 142, .46);
         background: linear-gradient(145deg, rgba(6,45,61,.76), rgba(2,26,36,.8));
         color: #18dcc5;
+        font-size: 15px;
       }
       .sidebar-support-link-text {
         display: grid;
         gap: 1px;
+        min-width: 0;
       }
       .sidebar-support-link-title {
         color: #f1f8ff !important;
-        font-size: .83rem;
+        font-size: .78rem;
         font-weight: 700;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+        word-break: break-word;
       }
       .sidebar-support-link:hover {
         color: #36e2ce !important;
@@ -5138,6 +5146,15 @@
       .sidebar-support-assurance-copy {
         color: #c6d8e3;
         font-size: .74rem;
+      }
+      .sidebar-support-ticket-btn {
+        border: 1px solid rgba(122, 216, 203, .45);
+        border-radius: 10px;
+        min-height: 34px;
+        background: rgba(13, 94, 97, .35);
+        color: #d8fffa;
+        font-weight: 700;
+        cursor: pointer;
       }
       @media (max-width: 980px) {
         .top-actions {
@@ -13997,7 +14014,7 @@
                   {sidebarSupportOpen && (
                     <div className="sidebar-support-dropdown">
                       <a className="sidebar-support-link" href="mailto:mastersoncomercialytecnica@gmail.com">
-                        <span className="sidebar-support-link-icon"><i data-lucide="mail" /></span>
+                        <span className="sidebar-support-link-icon" aria-hidden="true">✉️</span>
                         <span className="sidebar-support-link-text">
                           <span className="sidebar-support-link-title">mastersoncomercialytecnica@gmail.com</span>
                         </span>
@@ -14013,11 +14030,14 @@
                           event.preventDefault();
                         }}
                       >
-                        <span className="sidebar-support-link-icon"><i data-lucide="phone-call" /></span>
+                        <span className="sidebar-support-link-icon" aria-hidden="true">📞</span>
                         <span className="sidebar-support-link-text">
                           <span className="sidebar-support-link-title">+598 91 909 182</span>
                         </span>
                       </a>
+                      <button type="button" className="sidebar-support-ticket-btn" onClick={() => { setSelectedForm('tickets'); closeSidebar(); }}>
+                        🎫 Tickets desarrollador
+                      </button>
                       <div className="sidebar-support-assurance">
                         <span className="sidebar-support-assurance-icon"><i data-lucide="shield-check" /></span>
                         <div>
@@ -14027,7 +14047,7 @@
                       </div>
                     </div>
                   )}
-                  <button className="logout-btn" type="button" onClick={() => auth.signOut()}><i data-lucide="log-out" /> Cerrar Sesión</button>
+                  <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
                 </div>
               </div>
             </aside>
