@@ -2887,7 +2887,7 @@
       .login-stack {
         width: min(460px, 100%);
         display: grid;
-        gap: 14px;
+        gap: 0;
         position: relative;
         z-index: 2;
       }
@@ -2943,23 +2943,6 @@
         margin-top: 8px;
         min-height: 46px;
         font-size: 15px;
-      }
-      .login-logo {
-        width: min(42vw, 160px);
-        aspect-ratio: 1 / 1;
-        margin: 0 auto;
-        border-radius: 22px;
-        background: rgba(10, 27, 41, .72);
-        border: 1px solid rgba(100, 141, 163, .35);
-        box-shadow: 0 14px 26px rgba(0,0,0,.25);
-        display: grid;
-        place-items: center;
-        color: #29ccb7;
-        font-weight: 900;
-        font-size: clamp(34px, 8vw, 52px);
-      }
-      .login-logo::before {
-        content: 'M';
       }
       @media (max-width: 520px) {
         .login-stack { width: 100%; }
@@ -4957,86 +4940,162 @@
         box-shadow: 0 8px 14px rgba(0,100,101,.16);
       }
       .sidebar-support-card {
-        background: #ffffff !important;
-        border: 1px solid rgba(0,100,101,.15) !important;
-        color: #0f172a !important;
-        box-shadow: 0 8px 16px rgba(15,23,42,.08) !important;
-        border-radius: 18px !important;
+        background: linear-gradient(160deg, rgba(2,16,27,.9), rgba(3,25,35,.94)) !important;
+        border: 1px solid rgba(62, 111, 132, .42) !important;
+        color: #d9e6ef !important;
+        box-shadow: 0 16px 28px rgba(0,8,18,.35) !important;
+        border-radius: 22px !important;
         padding: 16px !important;
         display: flex;
         flex-direction: column;
-        gap: 10px;
+        gap: 12px;
         overflow: hidden;
       }
       .sidebar-support-head {
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
       }
       .sidebar-support-icon {
-        width: 34px;
-        height: 34px;
+        width: 56px;
+        height: 56px;
         border-radius: 999px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: #ecf8f6;
-        color: #006465;
-        border: 1px solid rgba(0,100,101,.2);
+        background: radial-gradient(circle at 20% 20%, rgba(9,233,209,.24), rgba(4,35,50,.8));
+        color: #16dbc4;
+        border: 1px solid rgba(58, 123, 142, .48);
+        box-shadow: inset 0 0 12px rgba(13, 196, 174, .24);
       }
       .sidebar-support-icon i,
       .sidebar-support-icon svg {
-        width: 18px;
-        height: 18px;
+        width: 28px;
+        height: 28px;
         stroke: currentColor;
       }
       .sidebar-support-card h4 {
         margin: 0;
-        color: #006465 !important;
-        font-size: .95rem;
+        color: #f2f8fd !important;
+        font-size: 1.35rem;
+        letter-spacing: .01em;
       }
       .sidebar-support-card p {
         margin: 0;
-        color: #3b5b64 !important;
-        font-size: .82rem;
+        color: #a6b9c6 !important;
+        font-size: 1.02rem;
         line-height: 1.35;
+      }
+      .sidebar-support-version {
+        margin-left: auto;
+        border-radius: 999px;
+        padding: 6px 14px;
+        border: 1px solid rgba(14, 196, 176, .28);
+        background: rgba(8, 78, 84, .35);
+        color: #19dcc6;
+        font-weight: 800;
+        font-size: 1.5rem;
+        line-height: 1;
       }
       .sidebar-support-links {
         display: grid;
-        gap: 8px;
+        gap: 14px;
         margin-top: 8px;
-        padding-top: 12px;
-        border-top: 1px dashed rgba(0,100,101,.22);
+        padding-top: 14px;
+        border-top: 1px solid rgba(86, 122, 139, .32);
       }
       .sidebar-support-link {
-        display: inline-flex;
-        align-items: flex-start;
-        gap: 8px;
-        color: #0b6b69 !important;
+        display: grid;
+        grid-template-columns: 58px 1fr;
+        align-items: center;
+        gap: 10px;
+        color: #f2f8fd !important;
         text-decoration: none;
-        font-weight: 600;
-        font-size: .82rem;
+        font-weight: 700;
+        font-size: 1rem;
         transition: transform .24s ease, color .24s ease;
         white-space: normal;
         overflow-wrap: anywhere;
         word-break: break-word;
       }
-      .sidebar-support-link span {
-        color: #0b6b69 !important;
+      .sidebar-support-link i {
+        width: 24px !important;
+        height: 24px !important;
+      }
+      .sidebar-support-link-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(66, 122, 142, .46);
+        background: linear-gradient(145deg, rgba(6,45,61,.76), rgba(2,26,36,.8));
+        color: #18dcc5;
+      }
+      .sidebar-support-link-text {
+        display: grid;
+        gap: 3px;
+      }
+      .sidebar-support-link-title {
+        color: #f1f8ff !important;
+        font-size: 1.02rem;
+        font-weight: 800;
+      }
+      .sidebar-support-link-note {
+        color: #9eb5c4 !important;
+        font-size: .92rem;
+        font-weight: 500;
       }
       .sidebar-support-link:hover {
-        color: #fb923c !important;
+        color: #36e2ce !important;
         transform: translateX(3px);
       }
-      .sidebar-support-link:hover span {
-        color: #fb923c !important;
+      .sidebar-support-link:hover .sidebar-support-link-title {
+        color: #36e2ce !important;
       }
       .sidebar-support-link i,
       .sidebar-support-link svg {
         width: 14px;
         height: 14px;
-        color: #0b6b69 !important;
+        color: #18dcc5 !important;
         stroke: currentColor;
+      }
+      .sidebar-support-assurance {
+        margin-top: 2px;
+        border-radius: 18px;
+        border: 1px solid rgba(60, 133, 116, .44);
+        background: linear-gradient(135deg, rgba(8, 74, 62, .44), rgba(4, 43, 47, .64));
+        padding: 12px;
+        display: grid;
+        grid-template-columns: 52px 1fr;
+        gap: 10px;
+        align-items: center;
+      }
+      .sidebar-support-assurance-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #2df4c2;
+        border: 1px solid rgba(71, 183, 145, .42);
+        background: rgba(3, 52, 47, .4);
+      }
+      .sidebar-support-assurance-icon i,
+      .sidebar-support-assurance-icon svg {
+        width: 24px;
+        height: 24px;
+      }
+      .sidebar-support-assurance-title {
+        color: #2df4c2;
+        font-weight: 800;
+        font-size: 1.02rem;
+      }
+      .sidebar-support-assurance-copy {
+        color: #c6d8e3;
+        font-size: .92rem;
       }
       .sidebar-signature strong {
         display: inline-flex;
@@ -8529,7 +8588,6 @@
         return (
           <div className="login-shell">
             <div className="login-stack">
-              <div className="login-logo" aria-hidden="true" />
               <form className="login-panel" onSubmit={handleLogin}>
                 <h2>Masterson Seguridad</h2>
                 <div className="hint">Área técnica y Comercial</div>
@@ -8554,7 +8612,6 @@
         return (
           <div className="login-shell">
             <div className="login-stack">
-              <div className="login-logo" aria-hidden="true" />
               <section className="login-panel" aria-live="polite">
                 <h2>Masterson Seguridad</h2>
                 <div className="hint">Cargando plataforma...</div>
@@ -13844,13 +13901,19 @@
                 <div className="sidebar-support-card">
                   <div className="sidebar-support-head">
                     <span className="sidebar-support-icon"><i data-lucide="headphones" /></span>
-                    <h4>¿Necesitas ayuda?</h4>
+                    <div>
+                      <h4>¿Necesitas ayuda?</h4>
+                      <p>Contactá al desarrollador por los siguientes canales.</p>
+                    </div>
+                    <span className="sidebar-support-version">v2.0</span>
                   </div>
-                  <p>Contactá al equipo de soporte técnico y comercial por los siguientes canales.</p>
                   <div className="sidebar-support-links">
                     <a className="sidebar-support-link" href="mailto:mastersoncomercialytecnica@gmail.com">
-                      <i data-lucide="mail" />
-                      <span>mastersoncomercialytecnica@gmail.com</span>
+                      <span className="sidebar-support-link-icon"><i data-lucide="mail" /></span>
+                      <span className="sidebar-support-link-text">
+                        <span className="sidebar-support-link-title">mastersoncomercialytecnica@gmail.com</span>
+                        <span className="sidebar-support-link-note">Respuesta por email</span>
+                      </span>
                     </a>
                     <a
                       className="sidebar-support-link"
@@ -13863,9 +13926,19 @@
                         event.preventDefault();
                       }}
                     >
-                      <i data-lucide="phone-call" />
-                      <span>+598 91 909 182</span>
+                      <span className="sidebar-support-link-icon"><i data-lucide="phone-call" /></span>
+                      <span className="sidebar-support-link-text">
+                        <span className="sidebar-support-link-title">+598 91 909 182</span>
+                        <span className="sidebar-support-link-note">Lunes a viernes de 8:00 a 18:00 hs</span>
+                      </span>
                     </a>
+                  </div>
+                  <div className="sidebar-support-assurance">
+                    <span className="sidebar-support-assurance-icon"><i data-lucide="shield-check" /></span>
+                    <div>
+                      <div className="sidebar-support-assurance-title">Estamos para ayudarte</div>
+                      <div className="sidebar-support-assurance-copy">Tu consulta es importante para nosotros.</div>
+                    </div>
                   </div>
                 </div>
                 <div className="sidebar-signature" aria-label="signature" tabIndex={0}><strong>v2.0 | Powered by Alfonso Carballo</strong><div className="sidebar-signature-tooltip">Actualización 2.0: Orden de trabajo operativa GNS con transiciones validadas por etapa, checklist obligatorio para agendado, resolución de tickets con comentario + imágenes (pegar/arrastrar), y nuevos filtros de historial por administración y fecha de alta.</div></div>
