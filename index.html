@@ -9012,7 +9012,7 @@
         return 'home-status neutral';
       }
 
-      function LoginScreen({ onGoogleToken }) {
+      function LoginScreen() {
         const [loading, setLoading] = useState(false);
         const [error, setError] = useState('');
 
@@ -9021,24 +9021,13 @@
           try {
             setLoading(true);
             const provider = new firebase.auth.GoogleAuthProvider();
-            provider.addScope(GMAIL_READONLY_SCOPE);
-            provider.setCustomParameters({ prompt: 'consent' });
-            const result = await auth.signInWithPopup(provider);
-            const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
-            const accessToken = credential?.accessToken
-              || result?.credential?.accessToken
-              || result?._tokenResponse?.oauthAccessToken
-              || '';
-            console.log('ACCESS TOKEN:', accessToken);
-            console.log('TOKEN RESPONSE:', result?._tokenResponse || null);
-            if (!accessToken) throw new Error('No se recibió accessToken de Google con scope Gmail.');
-            if (accessToken && typeof onGoogleToken === 'function') onGoogleToken(accessToken);
+            provider.setCustomParameters({ prompt: 'select_account' });
+            await auth.signInWithPopup(provider);
           } catch (err) {
             if (String(err?.code || '').includes('popup')) {
               try {
                 const provider = new firebase.auth.GoogleAuthProvider();
-                provider.addScope(GMAIL_READONLY_SCOPE);
-                provider.setCustomParameters({ prompt: 'consent' });
+                provider.setCustomParameters({ prompt: 'select_account' });
                 await auth.signInWithRedirect(provider);
                 return;
               } catch (redirectErr) {
@@ -11670,54 +11659,19 @@
         }
 
         async function reconectarGmailAccess() {
-          try {
-            setGmailApiLoading(true);
-            setGmailApiError('');
-            const provider = new firebase.auth.GoogleAuthProvider();
-            provider.addScope(GMAIL_READONLY_SCOPE);
-            provider.setCustomParameters({ prompt: 'consent' });
-            const result = (auth.currentUser && typeof auth.currentUser.reauthenticateWithPopup === 'function')
-              ? await auth.currentUser.reauthenticateWithPopup(provider)
-              : await auth.signInWithPopup(provider);
-            const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
-            const token = credential?.accessToken
-              || result?.credential?.accessToken
-              || result?._tokenResponse?.oauthAccessToken
-              || '';
-            console.log('ACCESS TOKEN:', token);
-            console.log('TOKEN RESPONSE:', result?._tokenResponse || null);
-            if (!token) throw new Error('No se recibió accessToken al reconectar Gmail.');
-            setGmailAccessToken(token);
-          } catch (error) {
-            console.log(error);
-            setGmailApiError(String(error?.message || 'No se pudieron cargar los correos'));
-            setGmailApiLoading(false);
-          }
+          mostrarEstadoGmail('Sincronización Gmail pendiente de Firebase Functions.');
         }
 
         async function refrescarMailsGmail() {
-          mostrarEstadoGmail('Actualizando...');
-          const currentUser = auth.currentUser;
-          if (!currentUser?.uid) return;
-          const token = gmailAccessToken;
-          if (!token) {
-            mostrarEstadoGmail('Reconectá Gmail para actualizar correos.');
-            return;
-          }
           try {
-            setGmailApiLoading(true);
-            setGmailApiError('');
-            await testGmailConnection(token, currentUser.uid);
-            const latestEmails = await obtenerUltimosEmails(token);
-            renderizarMails(latestEmails);
-            setGmailLastRefreshAt(new Date());
-            mostrarEstadoGmail('Actualizado hace unos segundos');
+            mostrarEstadoGmail('Actualizando...');
+            const currentUser = auth.currentUser;
+            if (!currentUser?.uid) return;
+            // Frontend estable: lectura solo desde Firestore mientras migramos a backend.
+            mostrarEstadoGmail('Actualizado desde Firestore.');
           } catch (error) {
-            console.log(error);
-            setGmailApiError(String(error?.message || 'No se pudieron cargar los correos'));
+            console.error('Error Gmail:', error);
             mostrarEstadoGmail('No se pudieron actualizar los correos.');
-          } finally {
-            setGmailApiLoading(false);
           }
         }
 
@@ -11746,22 +11700,15 @@
             window.clearInterval(gmailRefreshIntervalRef.current);
             gmailRefreshIntervalRef.current = null;
           }
-          if (!user?.uid || !gmailAccessToken) {
+          if (!user?.uid) {
             setGmailApiError('');
             setGmailApiLoading(false);
-            mostrarEstadoGmail('Reconectá Gmail para actualizar correos.');
+            mostrarEstadoGmail('');
             return;
           }
-          void refrescarMailsGmail();
-          // Emergencia: desactivar auto-refresh Gmail hasta validar estabilidad.
-          // gmailRefreshIntervalRef.current = window.setInterval(() => { if (document.visibilityState === 'visible') void refrescarMailsGmail(); }, 60000);
-          return () => {
-            if (gmailRefreshIntervalRef.current) {
-              window.clearInterval(gmailRefreshIntervalRef.current);
-              gmailRefreshIntervalRef.current = null;
-            }
-          };
-        }, [user?.uid, gmailAccessToken]);
+          mostrarEstadoGmail('Actualizado desde Firestore.');
+          return () => {};
+        }, [user?.uid]);
 
         useEffect(() => {
           const tickId = window.setInterval(() => setGmailNowMs(Date.now()), 1000);
@@ -11777,12 +11724,25 @@
             .doc(user.uid)
             .collection('gmail_inbox')
             .orderBy('receivedAt', 'desc')
-            .limit(6)
+            .limit(8)
             .onSnapshot((snapshot) => {
               const next = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
               setGmailInboxPreview(next);
+              const normalized = next.map((mail) => {
+                const rawDate = mail?.receivedAt;
+                const dt = rawDate && typeof rawDate?.toDate === 'function'
+                  ? rawDate.toDate()
+                  : (rawDate instanceof Date ? rawDate : null);
+                return {
+                  ...mail,
+                  receivedAt: dt,
+                };
+              });
+              renderizarMails(normalized);
+              if (normalized[0]?.receivedAt instanceof Date) setGmailLastRefreshAt(normalized[0].receivedAt);
             }, (error) => {
               console.error('Error leyendo vista previa de Gmail:', error);
+              setGmailApiError('No se pudieron leer correos desde Firestore.');
             });
           return () => unsub();
         }, [user?.uid]);
@@ -14657,7 +14617,7 @@
         }
 
         if (!user) {
-          return <LoginScreen onGoogleToken={setGmailAccessToken} />;
+          return <LoginScreen />;
         }
 
         return (
