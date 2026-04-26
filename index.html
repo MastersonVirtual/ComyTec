@@ -1142,6 +1142,14 @@
         background: rgba(255,255,255,.72);
         padding: 7px 9px;
       }
+      .home-hero-mail-item.clickable {
+        cursor: pointer;
+        transition: transform var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+      }
+      .home-hero-mail-item.clickable:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 14px rgba(15, 56, 61, .12);
+      }
       .home-hero-mail-top {
         display: flex;
         justify-content: space-between;
@@ -9782,6 +9790,10 @@
         const [gmailApiEmails, setGmailApiEmails] = useState([]);
         const [gmailApiLoading, setGmailApiLoading] = useState(false);
         const [gmailApiError, setGmailApiError] = useState('');
+        const [gmailLastRefreshAt, setGmailLastRefreshAt] = useState(null);
+        const [gmailRefreshTick, setGmailRefreshTick] = useState(0);
+        const [gmailDetailModal, setGmailDetailModal] = useState({ open: false, mail: null, body: '' });
+        const [gmailDetailLoading, setGmailDetailLoading] = useState(false);
         const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
         const [userCredentialRequests, setUserCredentialRequests] = useState([]);
         const [staffMembers, setStaffMembers] = useState([]);
@@ -11485,8 +11497,19 @@
         }, []);
 
         useEffect(() => {
-          if (window.lucide?.createIcons) window.lucide.createIcons();
-        }, [mobileTab, selectedForm, fabOpen, rows.length, adminCredentialRequests.length, desktopBellOpen, desktopSearchOpen]);
+          let attempts = 0;
+          let timer = null;
+          const runIcons = () => {
+            attempts += 1;
+            if (window.lucide?.createIcons) {
+              window.lucide.createIcons();
+              return;
+            }
+            if (attempts < 8) timer = window.setTimeout(runIcons, 180);
+          };
+          runIcons();
+          return () => { if (timer) window.clearTimeout(timer); };
+        }, [mobileTab, selectedForm, fabOpen, rows.length, adminCredentialRequests.length, desktopBellOpen, desktopSearchOpen, gmailApiEmails.length, gmailApiLoading, gmailApiError]);
 
         useEffect(() => {
           if (!user || userRole !== 'admin') {
@@ -11588,11 +11611,55 @@
               id: item.id,
               from: from || 'Sin remitente',
               subject: subject || 'Sin asunto',
+              snippet: String(detailData?.snippet || '').trim(),
               dateRaw: dateValue || '',
               receivedAt: Number.isNaN(parsedDate.getTime()) ? null : parsedDate,
             };
           }));
           return detailResults;
+        }
+
+        function decodeBase64Url(value = '') {
+          if (!value) return '';
+          try {
+            const normalized = String(value).replace(/-/g, '+').replace(/_/g, '/');
+            const padded = normalized + '='.repeat((4 - (normalized.length % 4 || 4)) % 4);
+            return decodeURIComponent(escape(window.atob(padded)));
+          } catch (error) {
+            console.log(error);
+            return '';
+          }
+        }
+
+        function findPlainTextPart(payload) {
+          if (!payload) return '';
+          if (payload.mimeType === 'text/plain' && payload.body?.data) return decodeBase64Url(payload.body.data);
+          const parts = Array.isArray(payload.parts) ? payload.parts : [];
+          for (const part of parts) {
+            const text = findPlainTextPart(part);
+            if (text) return text;
+          }
+          if (payload.body?.data) return decodeBase64Url(payload.body.data);
+          return '';
+        }
+
+        async function handleOpenGmailDetail(mail) {
+          if (!mail?.id || !gmailAccessToken) return;
+          setGmailDetailLoading(true);
+          setGmailDetailModal({ open: true, mail, body: '' });
+          try {
+            const detailUrl = `https://gmail.googleapis.com/gmail/v1/users/me/messages/${mail.id}?format=full`;
+            const res = await fetch(detailUrl, { headers: { Authorization: `Bearer ${gmailAccessToken}` } });
+            const data = await res.json();
+            if (!res.ok || data?.error) throw new Error(`Gmail detail error: ${JSON.stringify(data?.error || data)}`);
+            const bodyText = findPlainTextPart(data?.payload) || String(data?.snippet || '').trim() || 'Sin contenido para mostrar.';
+            setGmailDetailModal({ open: true, mail, body: bodyText });
+          } catch (error) {
+            console.log(error);
+            setGmailDetailModal({ open: true, mail, body: 'No se pudo cargar el contenido del correo.' });
+          } finally {
+            setGmailDetailLoading(false);
+          }
         }
 
         async function reconectarGmailAccess() {
@@ -11627,7 +11694,7 @@
             return;
           }
           let active = true;
-          (async () => {
+          const refrescar = async () => {
             try {
               setGmailApiLoading(true);
               setGmailApiError('');
@@ -11635,6 +11702,7 @@
               const latestEmails = await obtenerUltimosEmails(gmailAccessToken);
               if (!active) return;
               setGmailApiEmails(latestEmails);
+              setGmailLastRefreshAt(new Date());
             } catch (error) {
               console.log(error);
               if (!active) return;
@@ -11643,9 +11711,11 @@
             } finally {
               if (active) setGmailApiLoading(false);
             }
-          })();
-          return () => { active = false; };
-        }, [user?.uid, gmailAccessToken]);
+          };
+          void refrescar();
+          const intervalId = window.setInterval(() => { void refrescar(); }, 180000);
+          return () => { active = false; window.clearInterval(intervalId); };
+        }, [user?.uid, gmailAccessToken, gmailRefreshTick]);
 
         useEffect(() => {
           if (!user?.uid) {
@@ -15541,14 +15611,21 @@
                                   <div className="hint" style={{ margin: 0 }}>Cargando correos...</div>
                                 </div>
                               ) : gmailApiEmails.length > 0 ? (
-                                <div className="home-hero-mail-list">
+                                <div className="home-hero-mail-list" id="gmail-list">
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
+                                    <small style={{ color: '#4b6b73' }}>Actualizado: {gmailLastRefreshAt ? gmailLastRefreshAt.toLocaleTimeString('es-UY') : '-'}</small>
+                                    <button type="button" className="home-modern-action-btn" onClick={() => setGmailRefreshTick((prev) => prev + 1)}>
+                                      Actualizar ahora
+                                    </button>
+                                  </div>
                                   {gmailApiEmails.map((mail) => (
-                                    <article key={`mail-api-preview-${mail.id}`} className="home-hero-mail-item">
+                                    <article key={`mail-api-preview-${mail.id}`} className="home-hero-mail-item clickable" role="button" tabIndex={0} onClick={() => { void handleOpenGmailDetail(mail); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') void handleOpenGmailDetail(mail); }}>
                                       <div className="home-hero-mail-top">
                                         <span>{mail.receivedAt ? mail.receivedAt.toLocaleString('es-UY', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : (mail.dateRaw || '-')}</span>
                                       </div>
                                       <div className="home-hero-mail-from">{mail.from || 'Sin remitente'}</div>
                                       <div className="home-hero-mail-subject">{mail.subject || 'Sin asunto'}</div>
+                                      {!!mail.snippet && <div className="hint" style={{ margin: '4px 0 0', color: '#375861' }}>{mail.snippet}</div>}
                                     </article>
                                   ))}
                                 </div>
@@ -17497,6 +17574,23 @@
                       <button type="button" className="save-btn" onClick={applyProfileAvatarSelection} disabled={savingProfileAvatar}>
                         {savingProfileAvatar ? 'Guardando...' : 'Aceptar'}
                       </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {gmailDetailModal.open && (
+                <div className="confirm-modal" onClick={() => setGmailDetailModal({ open: false, mail: null, body: '' })}>
+                  <div className="confirm-modal-card" style={{ width: 'min(760px, 96vw)', maxHeight: '86vh', overflow: 'auto' }} onClick={(e) => e.stopPropagation()}>
+                    <h3 style={{ marginTop: 0 }}>Detalle de correo</h3>
+                    <div className="kv"><b>Fecha:</b> {gmailDetailModal.mail?.receivedAt ? gmailDetailModal.mail.receivedAt.toLocaleString('es-UY') : (gmailDetailModal.mail?.dateRaw || '-')}</div>
+                    <div className="kv"><b>Remitente:</b> {gmailDetailModal.mail?.from || '-'}</div>
+                    <div className="kv"><b>Asunto:</b> {gmailDetailModal.mail?.subject || '-'}</div>
+                    <div className="ticket-detail-comment" style={{ marginTop: 10, color: '#e6fffd' }}>
+                      {gmailDetailLoading ? 'Cargando contenido...' : (gmailDetailModal.body || 'Sin contenido para mostrar.')}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+                      <button type="button" className="edit-btn" onClick={() => setGmailDetailModal({ open: false, mail: null, body: '' })}>Cerrar</button>
                     </div>
                   </div>
                 </div>
