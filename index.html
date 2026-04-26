@@ -5352,6 +5352,531 @@
         object-fit: cover;
         box-shadow: 0 6px 14px rgba(15,23,42,.12);
       }
+      .menu-pill-btn .topbar-action-icon i,
+      .menu-pill-btn .topbar-action-icon svg {
+        color: #fb923c !important;
+        stroke: #fb923c !important;
+      }
+
+      .dashboard-right-panel {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: stretch;
+        position: static;
+        top: auto;
+      }
+      .dashboard-equal-card {
+        min-height: 170px;
+        height: 100%;
+      }
+      .home-widget-shell {
+        border-radius: 18px;
+        border: 1px solid #dfe9e8;
+        background: #ffffff;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, .06);
+        padding: 14px;
+      }
+      .home-modern-hero {
+        padding: clamp(24px, 4vw, 36px);
+        border-radius: 22px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 14px 28px rgba(15, 23, 42, .08);
+        background: #ffffff;
+      }
+
+      .home-modern-shell,
+      .dashboard-main-layout {
+        width: 100%;
+      }
+      .dashboard-main-layout {
+        grid-template-columns: minmax(0, 1fr) minmax(300px, .38fr);
+        align-items: start;
+      }
+      .dashboard-main-column {
+        gap: 16px;
+      }
+      .dashboard-side-column {
+        display: grid;
+        gap: 14px;
+        position: sticky;
+        top: 84px;
+      }
+      .home-side-widget-shell {
+        padding: 12px;
+      }
+      .home-service-cards-board {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+        margin-top: 14px;
+      }
+      .home-card-group + .home-card-group {
+        margin-top: 14px;
+      }
+      .home-card-group-title {
+        margin: 0 0 8px;
+        font-size: 1rem;
+        color: #0f172a;
+      }
+      .home-service-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 8px 18px rgba(15, 23, 42, .07);
+      }
+      .home-service-card-primary {
+        min-height: 290px;
+      }
+      .home-service-card-head {
+        justify-content: space-between;
+      }
+      .home-service-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: .75rem;
+        font-weight: 700;
+      }
+      .home-card-detail-shell {
+        border-radius: 18px;
+        border: 1px solid #dfe9e8;
+        background: #ffffff;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, .06);
+        padding: 16px;
+      }
+      .home-card-detail-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .home-card-detail-actions {
+        display: inline-flex;
+        gap: 8px;
+      }
+      .home-card-status-menu {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .home-card-detail-head h2 {
+        margin: 0;
+        color: #0f172a;
+      }
+      .home-card-detail-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+      .home-card-detail-item {
+        border: 1px solid #dbe3ec;
+        border-radius: 14px;
+        background: #f8fafc;
+        padding: 12px;
+      }
+      .sidebar {
+        background: linear-gradient(180deg, rgba(0,100,101,.96), rgba(0,86,87,.95)) !important;
+        border-right: 1px solid rgba(180,245,236,.26) !important;
+        border-radius: 0 24px 24px 0;
+        box-shadow: 0 18px 34px rgba(2,22,27,.38) !important;
+        backdrop-filter: blur(10px) saturate(130%);
+        display: flex;
+        flex-direction: column;
+      }
+      .sidebar-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: rgba(0, 84, 85, .34) !important;
+        border-bottom: 1px solid rgba(180,245,236,.2) !important;
+        border-radius: 0 18px 18px 0;
+      }
+      .sidebar-profile-avatar-wrap {
+        position: relative;
+        width: 52px;
+        height: 52px;
+        flex: 0 0 52px;
+      }
+      .sidebar-profile-avatar {
+        width: 100%;
+        height: 100%;
+        border-radius: 999px;
+        object-fit: cover;
+        border: 2px solid rgba(0,100,101,.2);
+        background: #fff;
+      }
+      .sidebar-online-dot {
+        position: absolute;
+        right: 2px;
+        bottom: 2px;
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        background: #22c55e;
+        border: 2px solid #fff;
+      }
+      .sidebar-header-title {
+        color: #ff8a2a !important;
+        font-weight: 800;
+        text-shadow: 0 1px 0 rgba(0,0,0,.18);
+      }
+      .sidebar-header-sub {
+        color: #d8fffa !important;
+        font-weight: 700;
+        letter-spacing: .04em;
+      }
+      .menu {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        padding-top: 18px !important;
+      }
+      .sidebar-menu-scroll {
+        display: grid;
+        gap: 9px;
+        overflow-y: auto;
+        padding-right: 6px;
+        min-height: 0;
+      }
+      .sidebar-menu-scroll::-webkit-scrollbar { width: 8px; }
+      .sidebar-menu-scroll::-webkit-scrollbar-thumb {
+        background: rgba(196, 252, 244, .35);
+        border-radius: 999px;
+      }
+      .menu-button, .submenu-button {
+        background: linear-gradient(180deg, rgba(0,100,101,.88), rgba(0,100,101,.76)) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(180,245,236,.35) !important;
+        border-radius: 999px !important;
+        box-shadow: 0 6px 14px rgba(15,23,42,.16) !important;
+      }
+      .menu-icon {
+        border-radius: 999px !important;
+        background: #e6f4f3 !important;
+        color: #006465 !important;
+        border: 1px solid rgba(0,100,101,.15);
+      }
+      .menu-button.active {
+        border-color: rgba(251,146,60,.75) !important;
+        box-shadow: 0 8px 18px rgba(251,146,60,.22) !important;
+      }
+      .menu-button:hover, .submenu-button:hover {
+        transform: translateX(3px);
+        background: linear-gradient(180deg, rgba(0,115,116,.92), rgba(0,98,99,.82)) !important;
+      }
+      .sidebar .menu-button span,
+      .sidebar .submenu-button span {
+        color: #ffffff !important;
+      }
+      .sidebar .menu-button .menu-icon,
+      .sidebar .submenu-button .menu-icon {
+        color: #006465 !important;
+      }
+      .sidebar .menu-arrow {
+        color: #d6fffa !important;
+        font-weight: 800;
+      }
+      .sidebar-bottom-stack {
+        margin-top: 12px;
+        display: grid;
+        gap: 10px;
+        padding-top: 8px;
+      }
+      .sidebar .logout-btn {
+        border-radius: 999px !important;
+        background: #ffffff !important;
+        border: 1px solid rgba(0,100,101,.45) !important;
+        color: #006465 !important;
+        font-weight: 800 !important;
+        -webkit-text-fill-color: #006465 !important;
+        text-shadow: none !important;
+        min-height: 46px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: auto;
+        padding: 0 14px !important;
+        text-align: center;
+      }
+      .sidebar .logout-btn:hover {
+        color: #006465 !important;
+        -webkit-text-fill-color: #006465 !important;
+        border-color: rgba(0,100,101,.65) !important;
+        box-shadow: 0 8px 14px rgba(0,100,101,.16);
+      }
+      .sidebar-support-toggle {
+        width: 100%;
+        border-radius: 16px;
+        border: 1px solid rgba(180,245,236,.3);
+        background: linear-gradient(160deg, rgba(0,88,90,.86), rgba(0,74,75,.9));
+        color: #e9fffd;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-align: left;
+        cursor: pointer;
+      }
+      .sidebar-support-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at 20% 20%, rgba(9,233,209,.24), rgba(4,35,50,.8));
+        color: #16dbc4;
+        border: 1px solid rgba(58, 123, 142, .48);
+        box-shadow: inset 0 0 12px rgba(13, 196, 174, .24);
+      }
+      .sidebar-support-icon i,
+      .sidebar-support-icon svg {
+        width: 18px;
+        height: 18px;
+        stroke: currentColor;
+      }
+      .sidebar-support-toggle-text {
+        display: grid;
+        gap: 2px;
+        flex: 1;
+      }
+      .sidebar-support-toggle-text strong {
+        color: #f2f8fd;
+        font-size: .95rem;
+      }
+      .sidebar-support-toggle-text small {
+        color: #b8d1de;
+        font-size: .73rem;
+      }
+      .sidebar-support-version {
+        border-radius: 999px;
+        padding: 4px 10px;
+        border: 1px solid rgba(14, 196, 176, .28);
+        background: rgba(8, 78, 84, .35);
+        color: #19dcc6;
+        font-weight: 800;
+        font-size: 1rem;
+        line-height: 1;
+      }
+      .sidebar-support-arrow {
+        color: #bcfff7;
+        font-size: .95rem;
+      }
+      .sidebar-support-dropdown {
+        background: rgba(1, 42, 54, .86);
+        border: 1px solid rgba(133, 212, 223, .28);
+        border-radius: 14px;
+        padding: 10px;
+        display: grid;
+        gap: 10px;
+      }
+      .sidebar-support-link {
+        display: grid;
+        grid-template-columns: 36px 1fr;
+        align-items: center;
+        gap: 8px;
+        color: #f2f8fd !important;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: .85rem;
+        transition: transform .24s ease, color .24s ease;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        min-width: 0;
+      }
+      .sidebar-support-link i {
+        width: 24px !important;
+        height: 24px !important;
+      }
+      .sidebar-support-link-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(66, 122, 142, .46);
+        background: linear-gradient(145deg, rgba(6,45,61,.76), rgba(2,26,36,.8));
+        color: #18dcc5;
+        font-size: 15px;
+      }
+      .sidebar-support-link-text {
+        display: grid;
+        gap: 1px;
+        min-width: 0;
+      }
+      .sidebar-support-link-title {
+        color: #f1f8ff !important;
+        font-size: .78rem;
+        font-weight: 700;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+      .sidebar-support-link:hover {
+        color: #36e2ce !important;
+        transform: translateX(3px);
+      }
+      .sidebar-support-link:hover .sidebar-support-link-title {
+        color: #36e2ce !important;
+      }
+      .sidebar-support-link i,
+      .sidebar-support-link svg {
+        width: 14px;
+        height: 14px;
+        color: #18dcc5 !important;
+        stroke: currentColor;
+      }
+      .sidebar-support-assurance {
+        margin-top: 1px;
+        border-radius: 12px;
+        border: 1px solid rgba(60, 133, 116, .44);
+        background: linear-gradient(135deg, rgba(8, 74, 62, .44), rgba(4, 43, 47, .64));
+        padding: 8px;
+        display: grid;
+        grid-template-columns: 36px 1fr;
+        gap: 8px;
+        align-items: center;
+      }
+      .sidebar-support-assurance-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #2df4c2;
+        border: 1px solid rgba(71, 183, 145, .42);
+        background: rgba(3, 52, 47, .4);
+      }
+      .sidebar-support-assurance-icon i,
+      .sidebar-support-assurance-icon svg {
+        width: 16px;
+        height: 16px;
+      }
+      .sidebar-support-assurance-title {
+        color: #2df4c2;
+        font-weight: 800;
+        font-size: .82rem;
+      }
+      .sidebar-support-assurance-copy {
+        color: #c6d8e3;
+        font-size: .74rem;
+      }
+      .sidebar-support-ticket-btn {
+        border: 1px solid rgba(122, 216, 203, .45);
+        border-radius: 10px;
+        min-height: 34px;
+        background: rgba(13, 94, 97, .35);
+        color: #d8fffa;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      @media (max-width: 980px) {
+        .top-actions {
+          left: 14px;
+        }
+        .content.shift { --capsule-shift: 0px; }
+        .main {
+          padding-top: 70px !important;
+        }
+        .dashboard-main-layout {
+          grid-template-columns: 1fr;
+        }
+        .dashboard-side-column {
+          position: static;
+        }
+        .dashboard-right-panel {
+          grid-template-columns: 1fr 1fr;
+        }
+        .home-card-detail-list {
+          grid-template-columns: 1fr;
+        }
+      }
+      @media (max-width: 760px) {
+        .dashboard-right-panel {
+          grid-template-columns: 1fr;
+        }
+        .home-service-cards-board {
+          grid-template-columns: 1fr 1fr !important;
+        }
+      }
+      @media (max-width: 540px) {
+        .home-service-cards-board {
+          grid-template-columns: 1fr !important;
+        }
+      }
+      .profile-view {
+        display: grid;
+        gap: 16px;
+      }
+      .profile-main-card {
+        border: 1px solid rgba(11, 78, 73, .18);
+        border-radius: 20px;
+        padding: 18px;
+        background: linear-gradient(180deg, #f6f9f9 0%, #eef3f3 100%);
+        box-shadow: 0 12px 24px rgba(12, 45, 44, .12);
+      }
+      .profile-main-row {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+      .profile-avatar-wrap {
+        position: relative;
+        width: 108px;
+        height: 108px;
+        border-radius: 999px;
+        overflow: hidden;
+        flex: 0 0 auto;
+        border: 3px solid rgba(0, 100, 101, .24);
+        box-shadow: 0 8px 16px rgba(11, 78, 73, .18);
+      }
+      .profile-avatar-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        background: #dfe8e8;
+      }
+      .profile-avatar-picker {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
+        gap: 12px;
+      }
+      .profile-avatar-option {
+        border: 1px solid rgba(0,100,101,.18);
+        border-radius: 18px;
+        padding: 10px;
+        background: #ffffff;
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      }
+      .profile-avatar-option:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 20px rgba(11,78,73,.12);
+      }
+      .profile-avatar-option.active {
+        border-color: rgba(0,100,101,.78);
+        box-shadow: 0 0 0 2px rgba(0,100,101,.12);
+        background: linear-gradient(180deg, #f6fbfb 0%, #eef8f8 100%);
+      }
+      .profile-avatar-option img {
+        width: 60px;
+        height: 60px;
+        border-radius: 999px;
+        object-fit: cover;
+        box-shadow: 0 6px 14px rgba(15,23,42,.12);
+      }
       .profile-avatar-modal {
         width: min(720px, calc(100vw - 24px));
         max-height: min(80vh, 760px);
@@ -6388,6 +6913,78 @@
       .ticket-create-btn:disabled {
         opacity: .7;
         cursor: not-allowed;
+      }
+      .ticket-create-btn-main {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .ticket-create-btn-main i,
+      .ticket-create-btn-main svg,
+      .ticket-create-btn-end i,
+      .ticket-create-btn-end svg {
+        width: 22px;
+        height: 22px;
+      }
+      .ticket-create-btn-sub {
+        display: block;
+        font-size: 12px;
+        font-weight: 500;
+        opacity: .88;
+        margin-top: 2px;
+      }
+      .ticket-file-picker-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+      .ticket-file-picker-btn {
+        border: 1px solid #0f766e;
+        color: #0f766e;
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .ticket-file-picker-meta {
+        color: #5b7480;
+        font-size: 13px;
+      }
+      .ticket-audio-visual-wrap {
+        display: grid;
+        place-items: center;
+        border: 1px solid #dcebed;
+        border-radius: 16px;
+        padding: 18px;
+        min-height: 208px;
+        background: #f9fcfc;
+      }
+      .ticket-audio-circle {
+        width: 96px;
+        height: 96px;
+        border-radius: 999px;
+        border: 8px solid rgba(45, 212, 191, .22);
+        background: linear-gradient(180deg, #0f766e, #115e59);
+        color: #ecfeff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 12px 24px rgba(15, 118, 110, .26);
+      }
+      .ticket-audio-circle i,
+      .ticket-audio-circle svg {
+        width: 28px;
+        height: 28px;
+      }
+      .ticket-audio-caption {
+        margin-top: 12px;
+        text-align: center;
+        color: #4e6d75;
+        font-size: 13px;
       }
       .ticket-create-btn-main {
         display: inline-flex;
@@ -11566,6 +12163,145 @@
           return () => unsub();
         }, [user?.uid]);
 
+        async function testGmailConnection(token, uid) {
+          const testUrl = 'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=3&q=in:inbox';
+          const res = await fetch(testUrl, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await res.json();
+          console.log('GMAIL RESPONSE:', data);
+          if (!res.ok || data?.error) {
+            console.log('GMAIL ERROR:', data);
+            throw new Error(`Gmail API error: ${JSON.stringify(data?.error || data)}`);
+          }
+          const hasMessages = Array.isArray(data?.messages) && data.messages.length > 0;
+          if (hasMessages && uid) {
+            await db.collection('users').doc(uid).set({
+              gmail: {
+                connected: true,
+                lastSyncAt: new Date(),
+                scope: GMAIL_READONLY_SCOPE,
+                tokenStoredServerSide: false,
+              },
+            }, { merge: true });
+            console.log('GMAIL OK');
+          }
+          return data;
+        }
+
+        async function obtenerUltimosEmails(token) {
+          const listUrl = 'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=5&q=in:inbox';
+          const listResponse = await fetch(listUrl, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (!listResponse.ok) {
+            const errorBody = await listResponse.text();
+            throw new Error(`Gmail list error ${listResponse.status}: ${errorBody}`);
+          }
+          const listData = await listResponse.json();
+          console.log('GMAIL RESPONSE:', listData);
+          if (listData?.error) {
+            throw new Error(`Gmail API error: ${JSON.stringify(listData.error)}`);
+          }
+          const messageItems = Array.isArray(listData.messages) ? listData.messages : [];
+          const detailResults = await Promise.all(messageItems.map(async (item) => {
+            const detailUrl = `https://gmail.googleapis.com/gmail/v1/users/me/messages/${item.id}`;
+            const detailResponse = await fetch(detailUrl, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (!detailResponse.ok) {
+              const detailBody = await detailResponse.text();
+              throw new Error(`Gmail detail error ${detailResponse.status}: ${detailBody}`);
+            }
+            const detailData = await detailResponse.json();
+            const headers = Array.isArray(detailData?.payload?.headers) ? detailData.payload.headers : [];
+            const getHeader = (name) => (headers.find((h) => String(h?.name || '').toLowerCase() === name.toLowerCase())?.value || '').trim();
+            const from = getHeader('From');
+            const subject = getHeader('Subject');
+            const dateValue = getHeader('Date');
+            const parsedDate = new Date(dateValue);
+            return {
+              id: item.id,
+              from: from || 'Sin remitente',
+              subject: subject || 'Sin asunto',
+              dateRaw: dateValue || '',
+              receivedAt: Number.isNaN(parsedDate.getTime()) ? null : parsedDate,
+            };
+          }));
+          return detailResults;
+        }
+
+        async function reconectarGmailAccess() {
+          try {
+            setGmailApiLoading(true);
+            setGmailApiError('');
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.addScope(GMAIL_READONLY_SCOPE);
+            provider.setCustomParameters({ prompt: 'consent' });
+            const result = await auth.signInWithPopup(provider);
+            const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
+            const token = credential?.accessToken
+              || result?.credential?.accessToken
+              || result?._tokenResponse?.oauthAccessToken
+              || '';
+            console.log('ACCESS TOKEN:', token);
+            console.log('TOKEN RESPONSE:', result?._tokenResponse || null);
+            if (!token) throw new Error('No se recibió accessToken al reconectar Gmail.');
+            setGmailAccessToken(token);
+          } catch (error) {
+            console.log(error);
+            setGmailApiError(String(error?.message || 'No se pudieron cargar los correos'));
+            setGmailApiLoading(false);
+          }
+        }
+
+        useEffect(() => {
+          if (!user?.uid || !gmailAccessToken) {
+            setGmailApiEmails([]);
+            setGmailApiError('');
+            setGmailApiLoading(false);
+            return;
+          }
+          let active = true;
+          (async () => {
+            try {
+              setGmailApiLoading(true);
+              setGmailApiError('');
+              await testGmailConnection(gmailAccessToken, user.uid);
+              const latestEmails = await obtenerUltimosEmails(gmailAccessToken);
+              if (!active) return;
+              setGmailApiEmails(latestEmails);
+            } catch (error) {
+              console.log(error);
+              if (!active) return;
+              setGmailApiError(String(error?.message || 'No se pudieron cargar los correos'));
+              setGmailApiEmails([]);
+            } finally {
+              if (active) setGmailApiLoading(false);
+            }
+          })();
+          return () => { active = false; };
+        }, [user?.uid, gmailAccessToken]);
+
+        useEffect(() => {
+          if (!user?.uid) {
+            setGmailInboxPreview([]);
+            return () => {};
+          }
+          const unsub = db.collection('users')
+            .doc(user.uid)
+            .collection('gmail_inbox')
+            .orderBy('receivedAt', 'desc')
+            .limit(6)
+            .onSnapshot((snapshot) => {
+              const next = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+              setGmailInboxPreview(next);
+            }, (error) => {
+              console.error('Error leyendo vista previa de Gmail:', error);
+            });
+          return () => unsub();
+        }, [user?.uid]);
+
         useEffect(() => {
           if (!accessApprovalRequired || !user?.uid) {
             setAccessPendingRequest(null);
@@ -14598,7 +15334,7 @@
         }
 
         if (!user) {
-          return <LoginScreen />;
+          return <LoginScreen onGoogleToken={setGmailAccessToken} />;
         }
 
         if (accessApprovalRequired) {
