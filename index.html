@@ -1110,6 +1110,19 @@
         border-bottom: 0;
         padding-bottom: 0;
       }
+      .home-staff-chat-card .staff-chat-workspace {
+        margin-top: 10px;
+        min-height: 440px;
+      }
+      .home-staff-chat-card .staff-chat-list-pane {
+        max-width: 280px;
+      }
+      .home-staff-chat-card .staff-chat-conversation-thread {
+        max-height: 210px;
+      }
+      .home-staff-chat-card .staff-message-box {
+        min-height: 72px;
+      }
       .home-hero-illustration {
         display: grid;
         place-items: center;
@@ -2866,10 +2879,6 @@
       }
 
       .login-shell {
-        --login-bg-1: url('https://i.postimg.cc/K8T7cTQ9/Gemini-Generated-Image-h5k8zvh5k8zvh5k8.png');
-        --login-bg-2: url('https://i.postimg.cc/yNzmDNbz/Gemini-Generated-Image-irrsw0irrsw0irrs.png');
-        --login-bg-3: url('https://i.postimg.cc/zf1CyfPs/Gemini-Generated-Image-4ynkgo4ynkgo4ynk.png');
-        --login-bg-4: url('https://i.postimg.cc/FKQyYKB4/Gemini-Generated-Image-ojn49gojn49gojn4.png');
         min-height: 100vh;
         position: relative;
         isolation: isolate;
@@ -2877,48 +2886,21 @@
         display: grid;
         place-items: center;
         padding: clamp(16px, 3vw, 28px);
-        background: transparent !important;
-      }
-      .login-bg {
-        position: absolute;
-        inset: -18px;
-        z-index: 0;
-        background: #006465;
-        filter: blur(9px);
-        transform: scale(1.06);
-      }
-      .login-bg-layer {
-        position: absolute;
-        inset: 0;
-        opacity: 0;
-        background-color: #006465;
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        animation: login-bg-fade 40s linear infinite;
-      }
-      .login-bg-layer:nth-child(1) { background-image: var(--login-bg-1); animation-delay: 0s; }
-      .login-bg-layer:nth-child(2) { background-image: var(--login-bg-2); animation-delay: 10s; }
-      .login-bg-layer:nth-child(3) { background-image: var(--login-bg-3); animation-delay: 20s; }
-      .login-bg-layer:nth-child(4) { background-image: var(--login-bg-4); animation-delay: 30s; }
-      @keyframes login-bg-fade {
-        0% { opacity: 0; }
-        5% { opacity: 1; }
-        20% { opacity: 1; }
-        25% { opacity: 0; }
-        100% { opacity: 0; }
+        background:
+          radial-gradient(ellipse at 18% 28%, rgba(35, 161, 143, .3), transparent 56%),
+          linear-gradient(110deg, #052326 0%, #02111f 45%, #010b16 100%) !important;
       }
       .login-shell::after {
         content: '';
         position: absolute;
         inset: 0;
         z-index: 1;
-        background: linear-gradient(180deg, rgba(0, 100, 101, .28), rgba(0, 70, 71, .52));
+        background: linear-gradient(180deg, rgba(0, 15, 26, .35), rgba(0, 10, 20, .65));
       }
       .login-stack {
         width: min(460px, 100%);
         display: grid;
-        gap: 14px;
+        gap: 0;
         position: relative;
         z-index: 2;
       }
@@ -2929,6 +2911,9 @@
         box-shadow: 0 22px 44px rgba(0,0,0,.24);
         padding: clamp(20px, 4vw, 30px);
         overflow: hidden;
+        background: rgba(10, 20, 31, .86) !important;
+        border: 1px solid rgba(110, 137, 155, .25) !important;
+        backdrop-filter: blur(10px);
       }
       .login-panel::before {
         content: '';
@@ -2945,8 +2930,9 @@
         text-align: center;
         font-size: clamp(1.3rem, 4vw, 1.6rem);
         letter-spacing: .02em;
+        color: #f8fcff !important;
       }
-      .login-panel .hint { text-align: center; margin-bottom: 14px; }
+      .login-panel .hint { text-align: center; margin-bottom: 14px; color: #9eb5c4 !important; }
       .login-error {
         color: #ffd4d4;
         font-size: 13px;
@@ -2962,20 +2948,14 @@
         width: 100%;
         min-height: 46px;
         border-radius: 12px;
+        background: rgba(5, 15, 26, .72) !important;
+        border: 1px solid rgba(81, 106, 123, .45) !important;
+        color: #ecf4fb !important;
       }
       .login-panel .save-btn {
         margin-top: 8px;
         min-height: 46px;
         font-size: 15px;
-      }
-      .login-logo {
-        width: min(42vw, 160px);
-        aspect-ratio: 1 / 1;
-        margin: 0 auto;
-        border-radius: 22px;
-        background: rgba(230,255,253,.12) url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png') center/cover no-repeat;
-        border: 1px solid rgba(230,255,253,.36);
-        box-shadow: 0 14px 26px rgba(0,0,0,.25);
       }
       @media (max-width: 520px) {
         .login-stack { width: 100%; }
@@ -4876,18 +4856,20 @@
         padding: 12px;
       }
       .sidebar {
-        background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(248,253,252,.9)) !important;
-        border-right: 1px solid rgba(0, 100, 101, .18) !important;
+        background: linear-gradient(180deg, rgba(0,100,101,.96), rgba(0,86,87,.95)) !important;
+        border-right: 1px solid rgba(180,245,236,.26) !important;
         border-radius: 0 24px 24px 0;
-        box-shadow: 0 18px 34px rgba(15,23,42,.12) !important;
+        box-shadow: 0 18px 34px rgba(2,22,27,.38) !important;
         backdrop-filter: blur(10px) saturate(130%);
+        display: flex;
+        flex-direction: column;
       }
       .sidebar-header {
         display: flex;
         align-items: center;
         gap: 12px;
-        background: rgba(255,255,255,.75) !important;
-        border-bottom: 1px solid rgba(0, 100, 101, .15) !important;
+        background: rgba(0, 84, 85, .34) !important;
+        border-bottom: 1px solid rgba(180,245,236,.2) !important;
         border-radius: 0 18px 18px 0;
       }
       .sidebar-profile-avatar-wrap {
@@ -4920,9 +4902,28 @@
         text-shadow: 0 1px 0 rgba(0,0,0,.18);
       }
       .sidebar-header-sub {
-        color: #ffffff !important;
+        color: #d8fffa !important;
         font-weight: 700;
         letter-spacing: .04em;
+      }
+      .menu {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        padding-top: 18px !important;
+      }
+      .sidebar-menu-scroll {
+        display: grid;
+        gap: 9px;
+        overflow-y: auto;
+        padding-right: 6px;
+        min-height: 0;
+      }
+      .sidebar-menu-scroll::-webkit-scrollbar { width: 8px; }
+      .sidebar-menu-scroll::-webkit-scrollbar-thumb {
+        background: rgba(196, 252, 244, .35);
+        border-radius: 999px;
       }
       .menu-button, .submenu-button {
         background: linear-gradient(180deg, rgba(0,100,101,.88), rgba(0,100,101,.76)) !important;
@@ -4957,6 +4958,12 @@
         color: #d6fffa !important;
         font-weight: 800;
       }
+      .sidebar-bottom-stack {
+        margin-top: 12px;
+        display: grid;
+        gap: 10px;
+        padding-top: 8px;
+      }
       .sidebar .logout-btn {
         border-radius: 999px !important;
         background: #ffffff !important;
@@ -4965,6 +4972,12 @@
         font-weight: 800 !important;
         -webkit-text-fill-color: #006465 !important;
         text-shadow: none !important;
+        min-height: 46px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: auto;
       }
       .sidebar .logout-btn:hover {
         color: #006465 !important;
@@ -4972,33 +4985,30 @@
         border-color: rgba(0,100,101,.65) !important;
         box-shadow: 0 8px 14px rgba(0,100,101,.16);
       }
-      .sidebar-support-card {
-        background: #ffffff !important;
-        border: 1px solid rgba(0,100,101,.15) !important;
-        color: #0f172a !important;
-        box-shadow: 0 8px 16px rgba(15,23,42,.08) !important;
-        border-radius: 18px !important;
-        padding: 16px !important;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        overflow: hidden;
-      }
-      .sidebar-support-head {
+      .sidebar-support-toggle {
+        width: 100%;
+        border-radius: 16px;
+        border: 1px solid rgba(180,245,236,.3);
+        background: linear-gradient(160deg, rgba(0,88,90,.86), rgba(0,74,75,.9));
+        color: #e9fffd;
+        padding: 10px;
         display: flex;
         align-items: center;
         gap: 10px;
+        text-align: left;
+        cursor: pointer;
       }
       .sidebar-support-icon {
-        width: 34px;
-        height: 34px;
+        width: 36px;
+        height: 36px;
         border-radius: 999px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: #ecf8f6;
-        color: #006465;
-        border: 1px solid rgba(0,100,101,.2);
+        background: radial-gradient(circle at 20% 20%, rgba(9,233,209,.24), rgba(4,35,50,.8));
+        color: #16dbc4;
+        border: 1px solid rgba(58, 123, 142, .48);
+        box-shadow: inset 0 0 12px rgba(13, 196, 174, .24);
       }
       .sidebar-support-icon i,
       .sidebar-support-icon svg {
@@ -5006,62 +5016,128 @@
         height: 18px;
         stroke: currentColor;
       }
-      .sidebar-support-card h4 {
-        margin: 0;
-        color: #006465 !important;
+      .sidebar-support-toggle-text {
+        display: grid;
+        gap: 2px;
+        flex: 1;
+      }
+      .sidebar-support-toggle-text strong {
+        color: #f2f8fd;
         font-size: .95rem;
       }
-      .sidebar-support-card p {
-        margin: 0;
-        color: #3b5b64 !important;
-        font-size: .82rem;
-        line-height: 1.35;
+      .sidebar-support-toggle-text small {
+        color: #b8d1de;
+        font-size: .73rem;
       }
-      .sidebar-support-links {
+      .sidebar-support-version {
+        border-radius: 999px;
+        padding: 4px 10px;
+        border: 1px solid rgba(14, 196, 176, .28);
+        background: rgba(8, 78, 84, .35);
+        color: #19dcc6;
+        font-weight: 800;
+        font-size: 1rem;
+        line-height: 1;
+      }
+      .sidebar-support-arrow {
+        color: #bcfff7;
+        font-size: .95rem;
+      }
+      .sidebar-support-dropdown {
+        background: rgba(1, 42, 54, .86);
+        border: 1px solid rgba(133, 212, 223, .28);
+        border-radius: 14px;
+        padding: 10px;
         display: grid;
-        gap: 8px;
-        margin-top: 8px;
-        padding-top: 12px;
-        border-top: 1px dashed rgba(0,100,101,.22);
+        gap: 10px;
       }
       .sidebar-support-link {
-        display: inline-flex;
-        align-items: flex-start;
+        display: grid;
+        grid-template-columns: 36px 1fr;
+        align-items: center;
         gap: 8px;
-        color: #0b6b69 !important;
+        color: #f2f8fd !important;
         text-decoration: none;
         font-weight: 600;
-        font-size: .82rem;
+        font-size: .85rem;
         transition: transform .24s ease, color .24s ease;
         white-space: normal;
         overflow-wrap: anywhere;
         word-break: break-word;
       }
-      .sidebar-support-link span {
-        color: #0b6b69 !important;
+      .sidebar-support-link i {
+        width: 24px !important;
+        height: 24px !important;
+      }
+      .sidebar-support-link-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(66, 122, 142, .46);
+        background: linear-gradient(145deg, rgba(6,45,61,.76), rgba(2,26,36,.8));
+        color: #18dcc5;
+      }
+      .sidebar-support-link-text {
+        display: grid;
+        gap: 1px;
+      }
+      .sidebar-support-link-title {
+        color: #f1f8ff !important;
+        font-size: .83rem;
+        font-weight: 700;
       }
       .sidebar-support-link:hover {
-        color: #fb923c !important;
+        color: #36e2ce !important;
         transform: translateX(3px);
       }
-      .sidebar-support-link:hover span {
-        color: #fb923c !important;
+      .sidebar-support-link:hover .sidebar-support-link-title {
+        color: #36e2ce !important;
       }
       .sidebar-support-link i,
       .sidebar-support-link svg {
         width: 14px;
         height: 14px;
-        color: #0b6b69 !important;
+        color: #18dcc5 !important;
         stroke: currentColor;
       }
-      .sidebar-signature strong {
+      .sidebar-support-assurance {
+        margin-top: 1px;
+        border-radius: 12px;
+        border: 1px solid rgba(60, 133, 116, .44);
+        background: linear-gradient(135deg, rgba(8, 74, 62, .44), rgba(4, 43, 47, .64));
+        padding: 8px;
+        display: grid;
+        grid-template-columns: 36px 1fr;
+        gap: 8px;
+        align-items: center;
+      }
+      .sidebar-support-assurance-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
         display: inline-flex;
-        border: 1px solid rgba(0,100,101,.2);
-        border-radius: 999px;
-        padding: 4px 10px;
-        background: rgba(255,255,255,.95);
-        color: #006465 !important;
-        font-weight: 700;
+        align-items: center;
+        justify-content: center;
+        color: #2df4c2;
+        border: 1px solid rgba(71, 183, 145, .42);
+        background: rgba(3, 52, 47, .4);
+      }
+      .sidebar-support-assurance-icon i,
+      .sidebar-support-assurance-icon svg {
+        width: 16px;
+        height: 16px;
+      }
+      .sidebar-support-assurance-title {
+        color: #2df4c2;
+        font-weight: 800;
+        font-size: .82rem;
+      }
+      .sidebar-support-assurance-copy {
+        color: #c6d8e3;
+        font-size: .74rem;
       }
       @media (max-width: 980px) {
         .top-actions {
@@ -5697,6 +5773,25 @@
         align-self: flex-start;
         background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.09));
         color: #111111;
+      }
+      .chat-service-link {
+        border: 0;
+        padding: 0;
+        margin: 0 2px;
+        background: transparent;
+        color: #1de9c5;
+        font-weight: 800;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+      .chat-service-link:hover {
+        color: #7df7e0;
+      }
+      .staff-chat-bubble.incoming .chat-service-link {
+        color: #0d6b67;
+      }
+      .staff-chat-bubble.incoming .chat-service-link:hover {
+        color: #0a8a83;
       }
       .staff-chat-meta {
         display: flex;
@@ -8544,14 +8639,7 @@
 
         return (
           <div className="login-shell">
-            <div className="login-bg" aria-hidden="true">
-              <span className="login-bg-layer" />
-              <span className="login-bg-layer" />
-              <span className="login-bg-layer" />
-              <span className="login-bg-layer" />
-            </div>
             <div className="login-stack">
-              <div className="login-logo" aria-hidden="true" />
               <form className="login-panel" onSubmit={handleLogin}>
                 <h2>Masterson Seguridad</h2>
                 <div className="hint">Área técnica y Comercial</div>
@@ -8575,14 +8663,7 @@
       function LoadingScreen() {
         return (
           <div className="login-shell">
-            <div className="login-bg" aria-hidden="true">
-              <span className="login-bg-layer" />
-              <span className="login-bg-layer" />
-              <span className="login-bg-layer" />
-              <span className="login-bg-layer" />
-            </div>
             <div className="login-stack">
-              <div className="login-logo" aria-hidden="true" />
               <section className="login-panel" aria-live="polite">
                 <h2>Masterson Seguridad</h2>
                 <div className="hint">Cargando plataforma...</div>
@@ -9565,6 +9646,7 @@
         const [bulkCatalogSyncing, setBulkCatalogSyncing] = useState(false);
         const [homeCardView, setHomeCardView] = useState({ title: '', items: [], charla: false });
         const [homeCardStatusMenuOpen, setHomeCardStatusMenuOpen] = useState(false);
+        const [sidebarSupportOpen, setSidebarSupportOpen] = useState(false);
 
         function getStatusLabel(row) {
           return String(row?.status || row?.estado || '').trim().toLowerCase();
@@ -12749,6 +12831,38 @@
           openServiceDetailModal(target, 'informacion');
         }
 
+        function openServiceFromChatTag(tag = '') {
+          const normalizedId = normalizeServiceId(String(tag || '').replace(/^ID/, ''));
+          if (!normalizedId) return;
+          const target = historySourceRows.find((row) => normalizeServiceId(row?.clienteId || '') === normalizedId);
+          if (!target) {
+            setNotificacion({ mensaje: `No se encontró el servicio ${tag} en la base de datos.`, tipo: 'warn' });
+            setSelectedForm('historial');
+            return;
+          }
+          openServiceDetailModal(target, 'informacion');
+        }
+
+        function renderChatMessageWithServiceLinks(text = '') {
+          const raw = String(text || '');
+          const parts = raw.split(/(ID\d+)/g);
+          return parts.map((part, index) => {
+            if (/^ID\d+$/.test(part)) {
+              return (
+                <button
+                  key={`chat-service-ref-${part}-${index}`}
+                  type="button"
+                  className="chat-service-link"
+                  onClick={() => openServiceFromChatTag(part)}
+                >
+                  {part}
+                </button>
+              );
+            }
+            return <React.Fragment key={`chat-text-${index}`}>{part}</React.Fragment>;
+          });
+        }
+
         async function notifyNewServiceApprovalRequest(serviceDocId, servicePayload = {}) {
           const normalizedServiceId = normalizeServiceId(servicePayload.clienteId || '');
           const serviceName = String(servicePayload.nombreServicio || servicePayload.razonSocial || '').trim() || 'Servicio sin nombre';
@@ -13820,83 +13934,101 @@
                 </div>
               </div>
               <div className="menu">
-                <button className={`menu-button ${effectiveSelectedForm === 'home' ? 'active' : ''}`} onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
-                <button className={`menu-button ${effectiveSelectedForm === 'tickets' ? 'active' : ''}`} onClick={() => { openTicketsView(); closeSidebar(); }}><span className="menu-icon">🎫</span><span>Tickets</span></button>
-                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">🗃️</span><span>Base de datos</span></button>
-                <div className="sidebar-divider" />
-                {!isMobile && (
-                  <>
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: !p.operaciones, nuevo: false, baseDatos: false }))}><span className="menu-icon">🗂️</span><span>Operaciones</span><span className="menu-arrow">{openMenus.operaciones ? '▾' : '▸'}</span></button>
-                    <div className={`submenu ${openMenus.operaciones ? 'open' : ''}`}>
-                      <button className="submenu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}><span>Nuevo</span><span className="menu-arrow">{openMenus.nuevo ? '▾' : '▸'}</span></button>
-                      <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
-                        <button className="submenu-button" onClick={() => { selectAction('Nuevo Servicio'); closeSidebar(); }}>Servicio</button>
+                <div className="sidebar-menu-scroll">
+                  <button className={`menu-button ${effectiveSelectedForm === 'home' ? 'active' : ''}`} onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
+                  <button className={`menu-button ${effectiveSelectedForm === 'tickets' ? 'active' : ''}`} onClick={() => { openTicketsView(); closeSidebar(); }}><span className="menu-icon">🎫</span><span>Tickets</span></button>
+                  <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">🗃️</span><span>Base de datos</span></button>
+                  <div className="sidebar-divider" />
+                  {!isMobile && (
+                    <>
+                      <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: !p.operaciones, nuevo: false, baseDatos: false }))}><span className="menu-icon">🗂️</span><span>Operaciones</span><span className="menu-arrow">{openMenus.operaciones ? '▾' : '▸'}</span></button>
+                      <div className={`submenu ${openMenus.operaciones ? 'open' : ''}`}>
+                        <button className="submenu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}><span>Nuevo</span><span className="menu-arrow">{openMenus.nuevo ? '▾' : '▸'}</span></button>
+                        <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
+                          <button className="submenu-button" onClick={() => { selectAction('Nuevo Servicio'); closeSidebar(); }}>Servicio</button>
+                        </div>
+                        <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Gestión de servicios</button>
                       </div>
-                      <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Gestión de servicios</button>
-                    </div>
-                    <div className="sidebar-divider" />
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: false, nuevo: false, baseDatos: !p.baseDatos }))}><span className="menu-icon">📚</span><span>Base de datos</span><span className="menu-arrow">{openMenus.baseDatos ? '▾' : '▸'}</span></button>
-                    <div className={`submenu ${openMenus.baseDatos ? 'open' : ''}`}>
-                      <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
-                    </div>
-                    {ENABLE_CLIENT_TRACKING_VIEW && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}><span className="menu-icon">👥</span><span>Vista Clientes</span></button>}
-                  </>
-                )}
-                {canPreviewRoles && (
-                  <>
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, rolePreview: !p.rolePreview, operaciones: false, nuevo: false, baseDatos: false }))}>
-                      <span className="menu-icon">🧭</span>
-                      <span>{rolePreviewModeActive ? 'Vista de rol (activa)' : 'Vista de rol'}</span>
-                      <span className="menu-arrow">{openMenus.rolePreview ? '▾' : '▸'}</span>
-                    </button>
-                    <div className={`submenu ${openMenus.rolePreview ? 'open' : ''}`}>
-                      {rolePreviewOptions.map((option) => {
-                        const isCurrent = userRole === option.role && userArea === option.area;
-                        return (
-                          <button
-                            key={`role-preview-${option.key}`}
-                            className="submenu-button"
-                            onClick={() => { applyRolePreview(option); closeSidebar(); }}
-                          >
-                            {option.label}{isCurrent ? ' ✓' : ''}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </>
-                )}
-                <div className="sidebar-divider" />
-                <button className="menu-button" onClick={openFuncionariosView}><span className="menu-icon">🧑‍💼</span><span>Funcionarios</span></button>
-                {!isCommercialUser && <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>}
-                <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
-                <div className="sidebar-support-card">
-                  <div className="sidebar-support-head">
-                    <span className="sidebar-support-icon"><i data-lucide="headphones" /></span>
-                    <h4>¿Necesitas ayuda?</h4>
-                  </div>
-                  <p>Contactá al equipo de soporte técnico y comercial por los siguientes canales.</p>
-                  <div className="sidebar-support-links">
-                    <a className="sidebar-support-link" href="mailto:mastersoncomercialytecnica@gmail.com">
-                      <i data-lucide="mail" />
-                      <span>mastersoncomercialytecnica@gmail.com</span>
-                    </a>
-                    <a
-                      className="sidebar-support-link"
-                      href="https://wa.me/59891909182"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(event) => {
-                        const popup = window.open('https://wa.me/59891909182', '_blank', 'noopener,noreferrer');
-                        if (!popup) window.location.href = 'tel:+59891909182';
-                        event.preventDefault();
-                      }}
-                    >
-                      <i data-lucide="phone-call" />
-                      <span>+598 91 909 182</span>
-                    </a>
-                  </div>
+                      <div className="sidebar-divider" />
+                      <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: false, nuevo: false, baseDatos: !p.baseDatos }))}><span className="menu-icon">📚</span><span>Base de datos</span><span className="menu-arrow">{openMenus.baseDatos ? '▾' : '▸'}</span></button>
+                      <div className={`submenu ${openMenus.baseDatos ? 'open' : ''}`}>
+                        <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
+                      </div>
+                      {ENABLE_CLIENT_TRACKING_VIEW && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}><span className="menu-icon">👥</span><span>Vista Clientes</span></button>}
+                    </>
+                  )}
+                  {canPreviewRoles && (
+                    <>
+                      <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, rolePreview: !p.rolePreview, operaciones: false, nuevo: false, baseDatos: false }))}>
+                        <span className="menu-icon">🧭</span>
+                        <span>{rolePreviewModeActive ? 'Vista de rol (activa)' : 'Vista de rol'}</span>
+                        <span className="menu-arrow">{openMenus.rolePreview ? '▾' : '▸'}</span>
+                      </button>
+                      <div className={`submenu ${openMenus.rolePreview ? 'open' : ''}`}>
+                        {rolePreviewOptions.map((option) => {
+                          const isCurrent = userRole === option.role && userArea === option.area;
+                          return (
+                            <button
+                              key={`role-preview-${option.key}`}
+                              className="submenu-button"
+                              onClick={() => { applyRolePreview(option); closeSidebar(); }}
+                            >
+                              {option.label}{isCurrent ? ' ✓' : ''}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+                  <div className="sidebar-divider" />
+                  <button className="menu-button" onClick={openFuncionariosView}><span className="menu-icon">🧑‍💼</span><span>Funcionarios</span></button>
+                  {!isCommercialUser && <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>}
                 </div>
-                <div className="sidebar-signature" aria-label="signature" tabIndex={0}><strong>v2.0 | Powered by Alfonso Carballo</strong><div className="sidebar-signature-tooltip">Actualización 2.0: Orden de trabajo operativa GNS con transiciones validadas por etapa, checklist obligatorio para agendado, resolución de tickets con comentario + imágenes (pegar/arrastrar), y nuevos filtros de historial por administración y fecha de alta.</div></div>
+                <div className="sidebar-bottom-stack">
+                  <button type="button" className={`sidebar-support-toggle ${sidebarSupportOpen ? 'open' : ''}`} onClick={() => setSidebarSupportOpen((prev) => !prev)}>
+                    <span className="sidebar-support-icon"><i data-lucide="headphones" /></span>
+                    <span className="sidebar-support-toggle-text">
+                      <strong>¿Necesitas ayuda?</strong>
+                      <small>Contactá al desarrollador por los siguientes canales.</small>
+                    </span>
+                    <span className="sidebar-support-version">v2.0</span>
+                    <span className="sidebar-support-arrow">{sidebarSupportOpen ? '▴' : '▾'}</span>
+                  </button>
+                  {sidebarSupportOpen && (
+                    <div className="sidebar-support-dropdown">
+                      <a className="sidebar-support-link" href="mailto:mastersoncomercialytecnica@gmail.com">
+                        <span className="sidebar-support-link-icon"><i data-lucide="mail" /></span>
+                        <span className="sidebar-support-link-text">
+                          <span className="sidebar-support-link-title">mastersoncomercialytecnica@gmail.com</span>
+                        </span>
+                      </a>
+                      <a
+                        className="sidebar-support-link"
+                        href="https://wa.me/59891909182"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(event) => {
+                          const popup = window.open('https://wa.me/59891909182', '_blank', 'noopener,noreferrer');
+                          if (!popup) window.location.href = 'tel:+59891909182';
+                          event.preventDefault();
+                        }}
+                      >
+                        <span className="sidebar-support-link-icon"><i data-lucide="phone-call" /></span>
+                        <span className="sidebar-support-link-text">
+                          <span className="sidebar-support-link-title">+598 91 909 182</span>
+                        </span>
+                      </a>
+                      <div className="sidebar-support-assurance">
+                        <span className="sidebar-support-assurance-icon"><i data-lucide="shield-check" /></span>
+                        <div>
+                          <div className="sidebar-support-assurance-title">Estamos para ayudarte</div>
+                          <div className="sidebar-support-assurance-copy">Tu consulta es importante para nosotros.</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <button className="logout-btn" type="button" onClick={() => auth.signOut()}><i data-lucide="log-out" /> Cerrar Sesión</button>
+                </div>
               </div>
             </aside>
 
@@ -14170,7 +14302,7 @@
                                         <span>{isOutgoing ? 'Vos' : (activeChatMember.nombre || 'Funcionario')}</span>
                                         <span>{formatChatTimestamp(message.creadoEn)} · {isOutgoing ? (message?.leida ? 'Leído' : 'Enviado') : 'Recibido'}</span>
                                       </div>
-                                      <div>{message.mensaje || '-'}</div>
+                                      <div>{renderChatMessageWithServiceLinks(message.mensaje || '-')}</div>
                                       {Array.isArray(message.adjuntos) && message.adjuntos.map((adjunto) => {
                                         const mime = String(adjunto?.mimeType || '');
                                         if (mime.startsWith('image/')) return <img key={adjunto.id || adjunto.nombre} className="staff-chat-media" src={adjunto.dataUrl} alt={adjunto.nombre || 'Imagen adjunta'} onClick={() => openImageViewer(adjunto.dataUrl)} />;
@@ -14723,6 +14855,156 @@
                                   <button type="button" className="home-service-footer-btn" onClick={() => openHomeCardView(card)}>Ver todos →</button>
                                 </article>
                               ))}
+                            </div>
+                          </section>
+                          <section className="home-widget-shell home-staff-chat-card">
+                            <h3 className="home-card-group-title">Funcionarios · Chat interno</h3>
+                            <div className="staff-chat-workspace">
+                              <aside className="staff-chat-list-pane">
+                                <div className="staff-chat-list-head">
+                                  <h3>Conversaciones</h3>
+                                  <small>{staffChatList.length} chats disponibles</small>
+                                </div>
+                                <input
+                                  className="staff-chat-search"
+                                  type="text"
+                                  placeholder="Buscar funcionario..."
+                                  value={staffSearchTerm}
+                                  onChange={(e) => setStaffSearchTerm(e.target.value)}
+                                />
+                                <div className="staff-chat-list">
+                                  {staffChatList.length === 0 ? (
+                                    <article className="staff-chat-list-item"><div className="hint">Sin resultados.</div></article>
+                                  ) : (
+                                    staffChatList.map((chatItem) => {
+                                      const member = chatItem.member;
+                                      const avatar = PROFILE_AVATAR_OPTIONS.find((option) => option.id === member.avatarId) || PROFILE_AVATAR_OPTIONS[0];
+                                      return (
+                                        <article key={`home-chat-list-${member.id}`} className={`staff-chat-list-item ${activeChatMemberId === member.id ? 'active' : ''}`} onClick={() => openStaffChat(member)} onContextMenu={(event) => openChatContextMenu(member, event)}>
+                                          <img src={avatar.src} alt={`Perfil de ${member.nombre || 'Funcionario'}`} />
+                                          <div className="staff-chat-list-meta">
+                                            <strong>{chatItem.pinned ? '📍 ' : ''}{member.nombre || 'Funcionario'}</strong>
+                                            <small>{chatItem.lastMessage}</small>
+                                          </div>
+                                          <div className="staff-chat-list-trail">
+                                            <span className="staff-chat-list-time">{formatChatTimestamp(chatItem.lastTime)}</span>
+                                            {chatItem.unread > 0 && <span className="staff-chat-list-unread">{chatItem.unread > 9 ? '9+' : chatItem.unread}</span>}
+                                          </div>
+                                        </article>
+                                      );
+                                    })
+                                  )}
+                                </div>
+                                {chatContextMenu.open && (
+                                  <div className="staff-chat-menu" style={{ position: 'fixed', top: chatContextMenu.y, left: chatContextMenu.x, right: 'auto', zIndex: 2200 }}>
+                                    <button type="button" onClick={() => { updateChatPendingFlag(chatContextMenu.memberId, true); setChatContextMenu({ open: false, x: 0, y: 0, memberId: '' }); }}>📌 Marcar como no leído</button>
+                                    <button type="button" onClick={() => { setReminderForChat(chatContextMenu.memberId); setChatContextMenu({ open: false, x: 0, y: 0, memberId: '' }); }}>⏰ Recordar más tarde</button>
+                                    <button type="button" onClick={() => { togglePinChat(chatContextMenu.memberId); setChatContextMenu({ open: false, x: 0, y: 0, memberId: '' }); }}>
+                                      {chatPinnedFlags[chatContextMenu.memberId] ? '📍 Desfijar chat' : '📍 Fijar chat'}
+                                    </button>
+                                  </div>
+                                )}
+                              </aside>
+
+                              <section className="staff-chat-conversation-pane">
+                                {activeChatMember ? (
+                                  <>
+                                    <div className="staff-chat-conversation-head">
+                                      <img className="staff-chat-modal-avatar" src={(PROFILE_AVATAR_OPTIONS.find((option) => option.id === activeChatMember.avatarId) || PROFILE_AVATAR_OPTIONS[0]).src} alt={`Perfil de ${activeChatMember.nombre || 'Funcionario'}`} />
+                                      <div className="staff-chat-modal-meta">
+                                        <strong>{activeChatMember.nombre || 'Funcionario'}</strong>
+                                        <small>{getStaffPresenceLabel(activeChatMember)}</small>
+                                      </div>
+                                      <div className="staff-chat-head-actions" ref={chatMenuRef}>
+                                        <button type="button" className="staff-chat-tool-btn" onClick={() => setChatMenuOpen((prev) => !prev)} aria-label="Opciones del chat">⋮</button>
+                                        {chatMenuOpen && (
+                                          <div className="staff-chat-menu">
+                                            <button type="button" onClick={() => { updateChatPendingFlag(activeChatMember.id, true); setChatMenuOpen(false); }}>📌 Marcar como no leído</button>
+                                            <button type="button" onClick={() => { setReminderForChat(activeChatMember.id); setChatMenuOpen(false); }}>⏰ Recordar más tarde</button>
+                                            <button type="button" onClick={() => { togglePinChat(activeChatMember.id); setChatMenuOpen(false); }}>
+                                              {chatPinnedFlags[activeChatMember.id] ? '📍 Desfijar chat' : '📍 Fijar chat'}
+                                            </button>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    <div className="staff-chat-conversation-thread" ref={chatThreadRef}>
+                                      {activeChatMessages.length === 0 ? (
+                                        <div className="staff-chat-empty">Todavía no hay mensajes en esta conversación.</div>
+                                      ) : (
+                                        activeChatMessages.map((message) => {
+                                          const isOutgoing = ((user?.uid && message?.remitenteUid === user.uid) || (user?.email && String(message?.remitenteEmail || '').trim().toLowerCase() === String(user.email).trim().toLowerCase()));
+                                          return (
+                                            <div key={`home-bubble-${message.id}`} className={`staff-chat-bubble ${isOutgoing ? 'outgoing' : 'incoming'}`}>
+                                              <div className="staff-chat-meta">
+                                                <span>{isOutgoing ? 'Vos' : (activeChatMember.nombre || 'Funcionario')}</span>
+                                                <span>{formatChatTimestamp(message.creadoEn)} · {isOutgoing ? (message?.leida ? 'Leído' : 'Enviado') : 'Recibido'}</span>
+                                              </div>
+                                              <div>{renderChatMessageWithServiceLinks(message.mensaje || '-')}</div>
+                                              {Array.isArray(message.adjuntos) && message.adjuntos.map((adjunto) => {
+                                                const mime = String(adjunto?.mimeType || '');
+                                                if (mime.startsWith('image/')) return <img key={`home-media-${adjunto.id || adjunto.nombre}`} className="staff-chat-media" src={adjunto.dataUrl} alt={adjunto.nombre || 'Imagen adjunta'} onClick={() => openImageViewer(adjunto.dataUrl)} />;
+                                                if (mime.startsWith('video/')) return <video key={`home-video-${adjunto.id || adjunto.nombre}`} className="staff-chat-media" src={adjunto.dataUrl} controls />;
+                                                return <a key={`home-file-${adjunto.id || adjunto.nombre}`} className="staff-chat-file-link" href={adjunto.dataUrl} download={adjunto.nombre || 'archivo'}>📎 {adjunto.nombre || 'archivo adjunto'}</a>;
+                                              })}
+                                            </div>
+                                          );
+                                        })
+                                      )}
+                                    </div>
+
+                                    <div className="staff-chat-compose-embedded">
+                                      {(chatAttachmentDraft[activeChatMember.id] || []).length > 0 && (
+                                        <div className="staff-chat-attachments">
+                                          {(chatAttachmentDraft[activeChatMember.id] || []).map((attachment) => (
+                                            <div key={`home-attachment-${attachment.id}`} className="staff-chat-attachment-chip">
+                                              <span>{attachment.mimeType.startsWith('image/') ? '🖼️' : attachment.mimeType.startsWith('video/') ? '🎬' : '📄'} {attachment.nombre}</span>
+                                              <button type="button" onClick={() => removeChatAttachment(activeChatMember.id, attachment.id)} aria-label="Quitar adjunto">✕</button>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      )}
+                                      <div className="staff-chat-compose-row">
+                                        <div className="staff-chat-compose-tools">
+                                          <button type="button" className="staff-chat-tool-btn" onClick={() => chatFileInputsRef.current[activeChatMember.id]?.click()} aria-label="Adjuntar archivo">📎</button>
+                                          <input ref={(node) => { chatFileInputsRef.current[activeChatMember.id] = node; }} type="file" style={{ display: 'none' }} multiple onChange={(e) => handleChatFileInput(activeChatMember, e)} />
+                                          <div style={{ position: 'relative' }} ref={chatEmojiPickerRef}>
+                                            <button type="button" className="staff-chat-tool-btn" onClick={() => setChatEmojiPickerOpen((prev) => !prev)} aria-label="Abrir selector de emojis">
+                                              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                <circle cx="12" cy="12" r="9" strokeWidth="2" />
+                                                <circle cx="9" cy="10" r="1" fill="currentColor" stroke="none" />
+                                                <circle cx="15" cy="10" r="1" fill="currentColor" stroke="none" />
+                                                <path d="M8 14c1 1.2 2.2 1.8 4 1.8s3-.6 4-1.8" strokeWidth="2" strokeLinecap="round" />
+                                              </svg>
+                                            </button>
+                                            {chatEmojiPickerOpen && (
+                                              <div className="staff-chat-emoji-picker">
+                                                {CHAT_EMOJIS.map((emoji) => (
+                                                  <button key={`emoji-home-inline-${emoji}`} type="button" onClick={() => { addEmojiToDraft(activeChatMember, emoji); setChatEmojiPickerOpen(false); }}>{emoji}</button>
+                                                ))}
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+                                        <textarea className="staff-message-box" placeholder="Escribí tu mensaje..." value={staffMessageDraft[activeChatMember.id] || ''} onPaste={(e) => handleChatPaste(activeChatMember, e)} onChange={(e) => updateStaffMessageDraft(activeChatMember.id, e.target.value)} />
+                                        <button type="button" className="staff-chat-send-btn" disabled={sendingStaffMessageId === activeChatMember.id || chatUploadingFiles} onClick={() => handleSendStaffMessage(activeChatMember)} aria-label={sendingStaffMessageId === activeChatMember.id ? 'Enviando mensaje' : 'Enviar mensaje'} title={sendingStaffMessageId === activeChatMember.id ? 'Enviando...' : 'Enviar mensaje'}>
+                                          {sendingStaffMessageId === activeChatMember.id || chatUploadingFiles ? (
+                                            <span style={{ fontSize: 11, fontWeight: 800 }}>{chatUploadingFiles ? '↥' : '...'}</span>
+                                          ) : (
+                                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                              <path d="M5 12h11" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                              <path d="m12 5 7 7-7 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                          )}
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <div className="staff-chat-empty" style={{ padding: 22 }}>Seleccioná un funcionario para iniciar el chat.</div>
+                                )}
+                              </section>
                             </div>
                           </section>
                         </div>
@@ -16476,7 +16758,7 @@
                 </div>
               )}
 
-              {activeChatMember && effectiveSelectedForm !== 'funcionarios' && (
+              {activeChatMember && effectiveSelectedForm !== 'funcionarios' && effectiveSelectedForm !== 'home' && (
                 <div className="staff-chat-modal-overlay" onClick={closeStaffChatModal}>
                   <div className="staff-chat-modal" onClick={(e) => e.stopPropagation()}>
                     <div className="staff-chat-modal-head">
@@ -16511,7 +16793,7 @@
                                 <span>{isOutgoing ? 'Vos' : (activeChatMember.nombre || 'Funcionario')}</span>
                                 <span>{formatChatTimestamp(message.creadoEn)}</span>
                               </div>
-                              <div>{message.mensaje || '-'}</div>
+                              <div>{renderChatMessageWithServiceLinks(message.mensaje || '-')}</div>
                               {Array.isArray(message.adjuntos) && message.adjuntos.map((adjunto) => {
                                 const mime = String(adjunto?.mimeType || '');
                                 if (mime.startsWith('image/')) return <img key={adjunto.id || adjunto.nombre} className="staff-chat-media" src={adjunto.dataUrl} alt={adjunto.nombre || 'Imagen adjunta'} onClick={() => openImageViewer(adjunto.dataUrl)} />;
