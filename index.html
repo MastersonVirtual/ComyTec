@@ -11472,8 +11472,35 @@
           return () => window.removeEventListener('resize', onResize);
         }, []);
 
+        function refreshLucideIcons() {
+          if (!window.lucide?.createIcons) return false;
+          window.requestAnimationFrame(() => {
+            window.lucide.createIcons();
+          });
+          return true;
+        }
+
         useEffect(() => {
-          if (window.lucide?.createIcons) window.lucide.createIcons();
+          if (refreshLucideIcons()) return () => {};
+          let cancelled = false;
+          let attempts = 0;
+          const maxAttempts = 40;
+          const retryTimer = window.setInterval(() => {
+            if (cancelled) return;
+            attempts += 1;
+            const loaded = refreshLucideIcons();
+            if (loaded || attempts >= maxAttempts) {
+              window.clearInterval(retryTimer);
+            }
+          }, 120);
+          return () => {
+            cancelled = true;
+            window.clearInterval(retryTimer);
+          };
+        }, []);
+
+        useEffect(() => {
+          refreshLucideIcons();
         }, [mobileTab, selectedForm, fabOpen, rows.length, adminCredentialRequests.length, desktopBellOpen, desktopSearchOpen]);
 
         useEffect(() => {
