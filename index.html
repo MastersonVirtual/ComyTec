@@ -11561,6 +11561,26 @@
           return detailResults;
         }
 
+        async function reconectarGmailAccess() {
+          try {
+            setGmailApiLoading(true);
+            setGmailApiError('');
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.addScope(GMAIL_READONLY_SCOPE);
+            provider.setCustomParameters({ prompt: 'consent' });
+            const result = await auth.signInWithPopup(provider);
+            const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
+            const token = credential?.accessToken || '';
+            console.log('ACCESS TOKEN:', token);
+            if (!token) throw new Error('No se recibió accessToken al reconectar Gmail.');
+            setGmailAccessToken(token);
+          } catch (error) {
+            console.log(error);
+            setGmailApiError(String(error?.message || 'No se pudieron cargar los correos'));
+            setGmailApiLoading(false);
+          }
+        }
+
         useEffect(() => {
           if (!user?.uid || !gmailAccessToken) {
             setGmailApiEmails([]);
@@ -15497,6 +15517,9 @@
                                 <div className="home-hero-mail-empty">
                                   <i data-lucide="mail"></i>
                                   <div className="hint" style={{ margin: 0 }}>Tus últimos mails van a aparecer acá.</div>
+                                  <button type="button" className="home-modern-action-btn" onClick={() => { void reconectarGmailAccess(); }}>
+                                    Conectar Gmail
+                                  </button>
                                 </div>
                               ) : (
                                 <div className="home-hero-mail-list">
