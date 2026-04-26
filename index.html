@@ -1110,45 +1110,18 @@
         border-bottom: 0;
         padding-bottom: 0;
       }
-      .home-chat-card-head {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 8px;
-      }
-      .home-chat-card-head b {
-        color: #0b5b5b;
-        font-size: .78rem;
-      }
-      .home-chat-list {
-        display: grid;
-        gap: 8px;
-      }
-      .home-chat-list-item {
-        border: 1px solid #dbe8e6;
-        border-radius: 12px;
-        padding: 8px;
-        background: #f8fcfb;
-      }
-      .home-chat-list-item strong {
-        display: block;
-        font-size: .82rem;
-        color: #0f172a;
-      }
-      .home-chat-list-item small {
-        color: #64748b;
-        font-size: .74rem;
-      }
-      .home-chat-open-btn {
+      .home-staff-chat-card .staff-chat-workspace {
         margin-top: 10px;
-        width: 100%;
-        border-radius: 10px;
-        border: 1px solid rgba(0,100,101,.28);
-        background: rgba(0,100,101,.08);
-        color: #0b5b5b;
-        min-height: 34px;
-        font-weight: 700;
-        cursor: pointer;
+        min-height: 440px;
+      }
+      .home-staff-chat-card .staff-chat-list-pane {
+        max-width: 280px;
+      }
+      .home-staff-chat-card .staff-chat-conversation-thread {
+        max-height: 210px;
+      }
+      .home-staff-chat-card .staff-message-box {
+        min-height: 72px;
       }
       .home-hero-illustration {
         display: grid;
@@ -14861,6 +14834,156 @@
                               ))}
                             </div>
                           </section>
+                          <section className="home-widget-shell home-staff-chat-card">
+                            <h3 className="home-card-group-title">Funcionarios · Chat interno</h3>
+                            <div className="staff-chat-workspace">
+                              <aside className="staff-chat-list-pane">
+                                <div className="staff-chat-list-head">
+                                  <h3>Conversaciones</h3>
+                                  <small>{staffChatList.length} chats disponibles</small>
+                                </div>
+                                <input
+                                  className="staff-chat-search"
+                                  type="text"
+                                  placeholder="Buscar funcionario..."
+                                  value={staffSearchTerm}
+                                  onChange={(e) => setStaffSearchTerm(e.target.value)}
+                                />
+                                <div className="staff-chat-list">
+                                  {staffChatList.length === 0 ? (
+                                    <article className="staff-chat-list-item"><div className="hint">Sin resultados.</div></article>
+                                  ) : (
+                                    staffChatList.map((chatItem) => {
+                                      const member = chatItem.member;
+                                      const avatar = PROFILE_AVATAR_OPTIONS.find((option) => option.id === member.avatarId) || PROFILE_AVATAR_OPTIONS[0];
+                                      return (
+                                        <article key={`home-chat-list-${member.id}`} className={`staff-chat-list-item ${activeChatMemberId === member.id ? 'active' : ''}`} onClick={() => openStaffChat(member)} onContextMenu={(event) => openChatContextMenu(member, event)}>
+                                          <img src={avatar.src} alt={`Perfil de ${member.nombre || 'Funcionario'}`} />
+                                          <div className="staff-chat-list-meta">
+                                            <strong>{chatItem.pinned ? '📍 ' : ''}{member.nombre || 'Funcionario'}</strong>
+                                            <small>{chatItem.lastMessage}</small>
+                                          </div>
+                                          <div className="staff-chat-list-trail">
+                                            <span className="staff-chat-list-time">{formatChatTimestamp(chatItem.lastTime)}</span>
+                                            {chatItem.unread > 0 && <span className="staff-chat-list-unread">{chatItem.unread > 9 ? '9+' : chatItem.unread}</span>}
+                                          </div>
+                                        </article>
+                                      );
+                                    })
+                                  )}
+                                </div>
+                                {chatContextMenu.open && (
+                                  <div className="staff-chat-menu" style={{ position: 'fixed', top: chatContextMenu.y, left: chatContextMenu.x, right: 'auto', zIndex: 2200 }}>
+                                    <button type="button" onClick={() => { updateChatPendingFlag(chatContextMenu.memberId, true); setChatContextMenu({ open: false, x: 0, y: 0, memberId: '' }); }}>📌 Marcar como no leído</button>
+                                    <button type="button" onClick={() => { setReminderForChat(chatContextMenu.memberId); setChatContextMenu({ open: false, x: 0, y: 0, memberId: '' }); }}>⏰ Recordar más tarde</button>
+                                    <button type="button" onClick={() => { togglePinChat(chatContextMenu.memberId); setChatContextMenu({ open: false, x: 0, y: 0, memberId: '' }); }}>
+                                      {chatPinnedFlags[chatContextMenu.memberId] ? '📍 Desfijar chat' : '📍 Fijar chat'}
+                                    </button>
+                                  </div>
+                                )}
+                              </aside>
+
+                              <section className="staff-chat-conversation-pane">
+                                {activeChatMember ? (
+                                  <>
+                                    <div className="staff-chat-conversation-head">
+                                      <img className="staff-chat-modal-avatar" src={(PROFILE_AVATAR_OPTIONS.find((option) => option.id === activeChatMember.avatarId) || PROFILE_AVATAR_OPTIONS[0]).src} alt={`Perfil de ${activeChatMember.nombre || 'Funcionario'}`} />
+                                      <div className="staff-chat-modal-meta">
+                                        <strong>{activeChatMember.nombre || 'Funcionario'}</strong>
+                                        <small>{getStaffPresenceLabel(activeChatMember)}</small>
+                                      </div>
+                                      <div className="staff-chat-head-actions" ref={chatMenuRef}>
+                                        <button type="button" className="staff-chat-tool-btn" onClick={() => setChatMenuOpen((prev) => !prev)} aria-label="Opciones del chat">⋮</button>
+                                        {chatMenuOpen && (
+                                          <div className="staff-chat-menu">
+                                            <button type="button" onClick={() => { updateChatPendingFlag(activeChatMember.id, true); setChatMenuOpen(false); }}>📌 Marcar como no leído</button>
+                                            <button type="button" onClick={() => { setReminderForChat(activeChatMember.id); setChatMenuOpen(false); }}>⏰ Recordar más tarde</button>
+                                            <button type="button" onClick={() => { togglePinChat(activeChatMember.id); setChatMenuOpen(false); }}>
+                                              {chatPinnedFlags[activeChatMember.id] ? '📍 Desfijar chat' : '📍 Fijar chat'}
+                                            </button>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    <div className="staff-chat-conversation-thread" ref={chatThreadRef}>
+                                      {activeChatMessages.length === 0 ? (
+                                        <div className="staff-chat-empty">Todavía no hay mensajes en esta conversación.</div>
+                                      ) : (
+                                        activeChatMessages.map((message) => {
+                                          const isOutgoing = ((user?.uid && message?.remitenteUid === user.uid) || (user?.email && String(message?.remitenteEmail || '').trim().toLowerCase() === String(user.email).trim().toLowerCase()));
+                                          return (
+                                            <div key={`home-bubble-${message.id}`} className={`staff-chat-bubble ${isOutgoing ? 'outgoing' : 'incoming'}`}>
+                                              <div className="staff-chat-meta">
+                                                <span>{isOutgoing ? 'Vos' : (activeChatMember.nombre || 'Funcionario')}</span>
+                                                <span>{formatChatTimestamp(message.creadoEn)} · {isOutgoing ? (message?.leida ? 'Leído' : 'Enviado') : 'Recibido'}</span>
+                                              </div>
+                                              <div>{renderChatMessageWithServiceLinks(message.mensaje || '-')}</div>
+                                              {Array.isArray(message.adjuntos) && message.adjuntos.map((adjunto) => {
+                                                const mime = String(adjunto?.mimeType || '');
+                                                if (mime.startsWith('image/')) return <img key={`home-media-${adjunto.id || adjunto.nombre}`} className="staff-chat-media" src={adjunto.dataUrl} alt={adjunto.nombre || 'Imagen adjunta'} onClick={() => openImageViewer(adjunto.dataUrl)} />;
+                                                if (mime.startsWith('video/')) return <video key={`home-video-${adjunto.id || adjunto.nombre}`} className="staff-chat-media" src={adjunto.dataUrl} controls />;
+                                                return <a key={`home-file-${adjunto.id || adjunto.nombre}`} className="staff-chat-file-link" href={adjunto.dataUrl} download={adjunto.nombre || 'archivo'}>📎 {adjunto.nombre || 'archivo adjunto'}</a>;
+                                              })}
+                                            </div>
+                                          );
+                                        })
+                                      )}
+                                    </div>
+
+                                    <div className="staff-chat-compose-embedded">
+                                      {(chatAttachmentDraft[activeChatMember.id] || []).length > 0 && (
+                                        <div className="staff-chat-attachments">
+                                          {(chatAttachmentDraft[activeChatMember.id] || []).map((attachment) => (
+                                            <div key={`home-attachment-${attachment.id}`} className="staff-chat-attachment-chip">
+                                              <span>{attachment.mimeType.startsWith('image/') ? '🖼️' : attachment.mimeType.startsWith('video/') ? '🎬' : '📄'} {attachment.nombre}</span>
+                                              <button type="button" onClick={() => removeChatAttachment(activeChatMember.id, attachment.id)} aria-label="Quitar adjunto">✕</button>
+                                            </div>
+                                          ))}
+                                        </div>
+                                      )}
+                                      <div className="staff-chat-compose-row">
+                                        <div className="staff-chat-compose-tools">
+                                          <button type="button" className="staff-chat-tool-btn" onClick={() => chatFileInputsRef.current[activeChatMember.id]?.click()} aria-label="Adjuntar archivo">📎</button>
+                                          <input ref={(node) => { chatFileInputsRef.current[activeChatMember.id] = node; }} type="file" style={{ display: 'none' }} multiple onChange={(e) => handleChatFileInput(activeChatMember, e)} />
+                                          <div style={{ position: 'relative' }} ref={chatEmojiPickerRef}>
+                                            <button type="button" className="staff-chat-tool-btn" onClick={() => setChatEmojiPickerOpen((prev) => !prev)} aria-label="Abrir selector de emojis">
+                                              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                <circle cx="12" cy="12" r="9" strokeWidth="2" />
+                                                <circle cx="9" cy="10" r="1" fill="currentColor" stroke="none" />
+                                                <circle cx="15" cy="10" r="1" fill="currentColor" stroke="none" />
+                                                <path d="M8 14c1 1.2 2.2 1.8 4 1.8s3-.6 4-1.8" strokeWidth="2" strokeLinecap="round" />
+                                              </svg>
+                                            </button>
+                                            {chatEmojiPickerOpen && (
+                                              <div className="staff-chat-emoji-picker">
+                                                {CHAT_EMOJIS.map((emoji) => (
+                                                  <button key={`emoji-home-inline-${emoji}`} type="button" onClick={() => { addEmojiToDraft(activeChatMember, emoji); setChatEmojiPickerOpen(false); }}>{emoji}</button>
+                                                ))}
+                                              </div>
+                                            )}
+                                          </div>
+                                        </div>
+                                        <textarea className="staff-message-box" placeholder="Escribí tu mensaje..." value={staffMessageDraft[activeChatMember.id] || ''} onPaste={(e) => handleChatPaste(activeChatMember, e)} onChange={(e) => updateStaffMessageDraft(activeChatMember.id, e.target.value)} />
+                                        <button type="button" className="staff-chat-send-btn" disabled={sendingStaffMessageId === activeChatMember.id || chatUploadingFiles} onClick={() => handleSendStaffMessage(activeChatMember)} aria-label={sendingStaffMessageId === activeChatMember.id ? 'Enviando mensaje' : 'Enviar mensaje'} title={sendingStaffMessageId === activeChatMember.id ? 'Enviando...' : 'Enviar mensaje'}>
+                                          {sendingStaffMessageId === activeChatMember.id || chatUploadingFiles ? (
+                                            <span style={{ fontSize: 11, fontWeight: 800 }}>{chatUploadingFiles ? '↥' : '...'}</span>
+                                          ) : (
+                                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                              <path d="M5 12h11" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                              <path d="m12 5 7 7-7 7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                          )}
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </>
+                                ) : (
+                                  <div className="staff-chat-empty" style={{ padding: 22 }}>Seleccioná un funcionario para iniciar el chat.</div>
+                                )}
+                              </section>
+                            </div>
+                          </section>
                         </div>
                         <aside className="dashboard-side-column">
                           <section className="home-widget-shell home-side-widget-shell">
@@ -14898,26 +15021,6 @@
                                   ))}
                                   {recentActivity.length === 0 && <small>Sin actividad por el momento.</small>}
                                 </div>
-                              </article>
-                              <article className="dash-side-card dashboard-equal-card">
-                                <div className="home-chat-card-head">
-                                  <h4>Funcionarios · Chat interno</h4>
-                                  <b>{staffChatList.length} chats</b>
-                                </div>
-                                <div className="home-chat-list">
-                                  {staffChatList.slice(0, 3).map((chatItem) => (
-                                    <div key={`home-chat-${chatItem.member.id}`} className="home-chat-list-item">
-                                      <strong>{chatItem.member.nombre || chatItem.member.email || 'Funcionario'}</strong>
-                                      <small>{chatItem.lastPreview || 'Sin mensajes todavía.'}</small>
-                                      <div className="dash-kpi-row" style={{ marginTop: 4, marginBottom: 0 }}>
-                                        <span>Pendientes</span>
-                                        <b>{pendingMessagesByStaff[chatItem.member.id] || 0}</b>
-                                      </div>
-                                    </div>
-                                  ))}
-                                  {staffChatList.length === 0 && <small>No hay chats disponibles todavía.</small>}
-                                </div>
-                                <button type="button" className="home-chat-open-btn" onClick={() => setSelectedForm('funcionarios')}>Abrir módulo Funcionarios</button>
                               </article>
                             </div>
                           </section>
