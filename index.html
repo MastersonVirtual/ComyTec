@@ -1110,6 +1110,46 @@
         border-bottom: 0;
         padding-bottom: 0;
       }
+      .home-chat-card-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .home-chat-card-head b {
+        color: #0b5b5b;
+        font-size: .78rem;
+      }
+      .home-chat-list {
+        display: grid;
+        gap: 8px;
+      }
+      .home-chat-list-item {
+        border: 1px solid #dbe8e6;
+        border-radius: 12px;
+        padding: 8px;
+        background: #f8fcfb;
+      }
+      .home-chat-list-item strong {
+        display: block;
+        font-size: .82rem;
+        color: #0f172a;
+      }
+      .home-chat-list-item small {
+        color: #64748b;
+        font-size: .74rem;
+      }
+      .home-chat-open-btn {
+        margin-top: 10px;
+        width: 100%;
+        border-radius: 10px;
+        border: 1px solid rgba(0,100,101,.28);
+        background: rgba(0,100,101,.08);
+        color: #0b5b5b;
+        min-height: 34px;
+        font-weight: 700;
+        cursor: pointer;
+      }
       .home-hero-illustration {
         display: grid;
         place-items: center;
@@ -14807,6 +14847,26 @@
                                   ))}
                                   {recentActivity.length === 0 && <small>Sin actividad por el momento.</small>}
                                 </div>
+                              </article>
+                              <article className="dash-side-card dashboard-equal-card">
+                                <div className="home-chat-card-head">
+                                  <h4>Funcionarios · Chat interno</h4>
+                                  <b>{staffChatList.length} chats</b>
+                                </div>
+                                <div className="home-chat-list">
+                                  {staffChatList.slice(0, 3).map((chatItem) => (
+                                    <div key={`home-chat-${chatItem.member.id}`} className="home-chat-list-item">
+                                      <strong>{chatItem.member.nombre || chatItem.member.email || 'Funcionario'}</strong>
+                                      <small>{chatItem.lastPreview || 'Sin mensajes todavía.'}</small>
+                                      <div className="dash-kpi-row" style={{ marginTop: 4, marginBottom: 0 }}>
+                                        <span>Pendientes</span>
+                                        <b>{pendingMessagesByStaff[chatItem.member.id] || 0}</b>
+                                      </div>
+                                    </div>
+                                  ))}
+                                  {staffChatList.length === 0 && <small>No hay chats disponibles todavía.</small>}
+                                </div>
+                                <button type="button" className="home-chat-open-btn" onClick={() => setSelectedForm('funcionarios')}>Abrir módulo Funcionarios</button>
                               </article>
                             </div>
                           </section>
