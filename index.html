@@ -16735,7 +16735,7 @@
                 </div>
               )}
 
-              {activeChatMember && effectiveSelectedForm !== 'funcionarios' && (
+              {activeChatMember && effectiveSelectedForm !== 'funcionarios' && effectiveSelectedForm !== 'home' && (
                 <div className="staff-chat-modal-overlay" onClick={closeStaffChatModal}>
                   <div className="staff-chat-modal" onClick={(e) => e.stopPropagation()}>
                     <div className="staff-chat-modal-head">
