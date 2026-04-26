@@ -1124,17 +1124,56 @@
         min-height: 72px;
       }
       .home-hero-illustration {
-        display: grid;
-        place-items: center;
         min-height: 148px;
         border-radius: 18px;
         background: radial-gradient(circle at 20% 20%, rgba(78, 227, 209, .35), transparent 58%), linear-gradient(145deg, #eef8f7, #f8fbfb);
         border: 1px solid #d8ebe7;
         color: #0b6b69;
+        padding: 12px 14px;
+        overflow: auto;
       }
-      .home-hero-illustration i {
-        width: 72px;
-        height: 72px;
+      .home-hero-mail-list {
+        display: grid;
+        gap: 7px;
+      }
+      .home-hero-mail-item {
+        border: 1px solid #d7e8e6;
+        border-radius: 10px;
+        background: rgba(255,255,255,.72);
+        padding: 7px 9px;
+      }
+      .home-hero-mail-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 11px;
+        color: #46666e;
+      }
+      .home-hero-mail-from {
+        margin-top: 4px;
+        font-size: 12px;
+        color: #0f4850;
+        font-weight: 700;
+        overflow-wrap: anywhere;
+      }
+      .home-hero-mail-subject {
+        margin-top: 2px;
+        font-size: 12px;
+        color: #1f3f46;
+        overflow-wrap: anywhere;
+      }
+      .home-hero-mail-empty {
+        display: grid;
+        place-items: center;
+        min-height: 120px;
+        text-align: center;
+        color: #315962;
+        gap: 8px;
+      }
+      .home-hero-mail-empty i,
+      .home-hero-mail-empty svg {
+        width: 26px;
+        height: 26px;
       }
       @media (max-width: 1280px) {
         .home-service-cards-board { grid-template-columns: repeat(2, minmax(220px, 1fr)); }
@@ -9727,6 +9766,7 @@
         const [clientOperationId, setClientOperationId] = useState('');
         const [profileUserRequest, setProfileUserRequest] = useState('');
         const [profilePasswordRequest, setProfilePasswordRequest] = useState('');
+        const [gmailInboxPreview, setGmailInboxPreview] = useState([]);
         const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
         const [userCredentialRequests, setUserCredentialRequests] = useState([]);
         const [staffMembers, setStaffMembers] = useState([]);
@@ -11447,6 +11487,25 @@
               setUserCredentialRequests(next);
             }, (error) => {
               console.error('Error leyendo solicitudes del usuario:', error);
+            });
+          return () => unsub();
+        }, [user?.uid]);
+
+        useEffect(() => {
+          if (!user?.uid) {
+            setGmailInboxPreview([]);
+            return () => {};
+          }
+          const unsub = db.collection('users')
+            .doc(user.uid)
+            .collection('gmail_inbox')
+            .orderBy('receivedAt', 'desc')
+            .limit(6)
+            .onSnapshot((snapshot) => {
+              const next = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+              setGmailInboxPreview(next);
+            }, (error) => {
+              console.error('Error leyendo vista previa de Gmail:', error);
             });
           return () => unsub();
         }, [user?.uid]);
@@ -15313,7 +15372,26 @@
                                 <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('tickets')}>Tickets</button>
                               </div>
                             </div>
-                            <div className="home-hero-illustration"><i data-lucide="layout-dashboard" /></div>
+                            <div className="home-hero-illustration">
+                              {gmailInboxPreview.length === 0 ? (
+                                <div className="home-hero-mail-empty">
+                                  <i data-lucide="mail"></i>
+                                  <div className="hint" style={{ margin: 0 }}>Tus últimos mails van a aparecer acá.</div>
+                                </div>
+                              ) : (
+                                <div className="home-hero-mail-list">
+                                  {gmailInboxPreview.map((mail) => (
+                                    <article key={`mail-preview-${mail.id}`} className="home-hero-mail-item">
+                                      <div className="home-hero-mail-top">
+                                        <span>{mail.receivedAt ? formatRequestDateTime(mail.receivedAt) : '-'}</span>
+                                      </div>
+                                      <div className="home-hero-mail-from">{mail.from || 'Sin remitente'}</div>
+                                      <div className="home-hero-mail-subject">{mail.subject || 'Sin asunto'}</div>
+                                    </article>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
                           </article>
 
                           <section className="home-widget-shell">
