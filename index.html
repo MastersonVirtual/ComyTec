@@ -9791,7 +9791,6 @@
         const [gmailApiLoading, setGmailApiLoading] = useState(false);
         const [gmailApiError, setGmailApiError] = useState('');
         const [gmailLastRefreshAt, setGmailLastRefreshAt] = useState(null);
-        const [gmailRefreshTick, setGmailRefreshTick] = useState(0);
         const [gmailDetailModal, setGmailDetailModal] = useState({ open: false, mail: null, body: '' });
         const [gmailDetailLoading, setGmailDetailLoading] = useState(false);
         const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
@@ -11669,7 +11668,9 @@
             const provider = new firebase.auth.GoogleAuthProvider();
             provider.addScope(GMAIL_READONLY_SCOPE);
             provider.setCustomParameters({ prompt: 'consent' });
-            const result = await auth.signInWithPopup(provider);
+            const result = (auth.currentUser && typeof auth.currentUser.reauthenticateWithPopup === 'function')
+              ? await auth.currentUser.reauthenticateWithPopup(provider)
+              : await auth.signInWithPopup(provider);
             const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
             const token = credential?.accessToken
               || result?.credential?.accessToken
@@ -11686,6 +11687,24 @@
           }
         }
 
+        async function refrescarInboxGmail() {
+          if (!user?.uid || !gmailAccessToken) return;
+          try {
+            setGmailApiLoading(true);
+            setGmailApiError('');
+            await testGmailConnection(gmailAccessToken, user.uid);
+            const latestEmails = await obtenerUltimosEmails(gmailAccessToken);
+            setGmailApiEmails(latestEmails);
+            setGmailLastRefreshAt(new Date());
+          } catch (error) {
+            console.log(error);
+            setGmailApiError(String(error?.message || 'No se pudieron cargar los correos'));
+            setGmailApiEmails([]);
+          } finally {
+            setGmailApiLoading(false);
+          }
+        }
+
         useEffect(() => {
           if (!user?.uid || !gmailAccessToken) {
             setGmailApiEmails([]);
@@ -11693,29 +11712,10 @@
             setGmailApiLoading(false);
             return;
           }
-          let active = true;
-          const refrescar = async () => {
-            try {
-              setGmailApiLoading(true);
-              setGmailApiError('');
-              await testGmailConnection(gmailAccessToken, user.uid);
-              const latestEmails = await obtenerUltimosEmails(gmailAccessToken);
-              if (!active) return;
-              setGmailApiEmails(latestEmails);
-              setGmailLastRefreshAt(new Date());
-            } catch (error) {
-              console.log(error);
-              if (!active) return;
-              setGmailApiError(String(error?.message || 'No se pudieron cargar los correos'));
-              setGmailApiEmails([]);
-            } finally {
-              if (active) setGmailApiLoading(false);
-            }
-          };
-          void refrescar();
-          const intervalId = window.setInterval(() => { void refrescar(); }, 180000);
-          return () => { active = false; window.clearInterval(intervalId); };
-        }, [user?.uid, gmailAccessToken, gmailRefreshTick]);
+          void refrescarInboxGmail();
+          const intervalId = window.setInterval(() => { if (document.visibilityState === 'visible') void refrescarInboxGmail(); }, 180000);
+          return () => { window.clearInterval(intervalId); };
+        }, [user?.uid, gmailAccessToken]);
 
         useEffect(() => {
           if (!user?.uid) {
@@ -15614,7 +15614,7 @@
                                 <div className="home-hero-mail-list" id="gmail-list">
                                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
                                     <small style={{ color: '#4b6b73' }}>Actualizado: {gmailLastRefreshAt ? gmailLastRefreshAt.toLocaleTimeString('es-UY') : '-'}</small>
-                                    <button type="button" className="home-modern-action-btn" onClick={() => setGmailRefreshTick((prev) => prev + 1)}>
+                                    <button type="button" className="home-modern-action-btn" onClick={() => { void refrescarInboxGmail(); }}>
                                       Actualizar ahora
                                     </button>
                                   </div>
