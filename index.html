@@ -5781,6 +5781,25 @@
         background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.09));
         color: #111111;
       }
+      .chat-service-link {
+        border: 0;
+        padding: 0;
+        margin: 0 2px;
+        background: transparent;
+        color: #1de9c5;
+        font-weight: 800;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+      .chat-service-link:hover {
+        color: #7df7e0;
+      }
+      .staff-chat-bubble.incoming .chat-service-link {
+        color: #0d6b67;
+      }
+      .staff-chat-bubble.incoming .chat-service-link:hover {
+        color: #0a8a83;
+      }
       .staff-chat-meta {
         display: flex;
         justify-content: space-between;
@@ -12818,6 +12837,38 @@
           openServiceDetailModal(target, 'informacion');
         }
 
+        function openServiceFromChatTag(tag = '') {
+          const normalizedId = normalizeServiceId(String(tag || '').replace(/^ID/, ''));
+          if (!normalizedId) return;
+          const target = historySourceRows.find((row) => normalizeServiceId(row?.clienteId || '') === normalizedId);
+          if (!target) {
+            setNotificacion({ mensaje: `No se encontró el servicio ${tag} en la base de datos.`, tipo: 'warn' });
+            setSelectedForm('historial');
+            return;
+          }
+          openServiceDetailModal(target, 'informacion');
+        }
+
+        function renderChatMessageWithServiceLinks(text = '') {
+          const raw = String(text || '');
+          const parts = raw.split(/(ID\d+)/g);
+          return parts.map((part, index) => {
+            if (/^ID\d+$/.test(part)) {
+              return (
+                <button
+                  key={`chat-service-ref-${part}-${index}`}
+                  type="button"
+                  className="chat-service-link"
+                  onClick={() => openServiceFromChatTag(part)}
+                >
+                  {part}
+                </button>
+              );
+            }
+            return <React.Fragment key={`chat-text-${index}`}>{part}</React.Fragment>;
+          });
+        }
+
         async function notifyNewServiceApprovalRequest(serviceDocId, servicePayload = {}) {
           const normalizedServiceId = normalizeServiceId(servicePayload.clienteId || '');
           const serviceName = String(servicePayload.nombreServicio || servicePayload.razonSocial || '').trim() || 'Servicio sin nombre';
@@ -14255,7 +14306,7 @@
                                         <span>{isOutgoing ? 'Vos' : (activeChatMember.nombre || 'Funcionario')}</span>
                                         <span>{formatChatTimestamp(message.creadoEn)} · {isOutgoing ? (message?.leida ? 'Leído' : 'Enviado') : 'Recibido'}</span>
                                       </div>
-                                      <div>{message.mensaje || '-'}</div>
+                                      <div>{renderChatMessageWithServiceLinks(message.mensaje || '-')}</div>
                                       {Array.isArray(message.adjuntos) && message.adjuntos.map((adjunto) => {
                                         const mime = String(adjunto?.mimeType || '');
                                         if (mime.startsWith('image/')) return <img key={adjunto.id || adjunto.nombre} className="staff-chat-media" src={adjunto.dataUrl} alt={adjunto.nombre || 'Imagen adjunta'} onClick={() => openImageViewer(adjunto.dataUrl)} />;
@@ -16616,7 +16667,7 @@
                                 <span>{isOutgoing ? 'Vos' : (activeChatMember.nombre || 'Funcionario')}</span>
                                 <span>{formatChatTimestamp(message.creadoEn)}</span>
                               </div>
-                              <div>{message.mensaje || '-'}</div>
+                              <div>{renderChatMessageWithServiceLinks(message.mensaje || '-')}</div>
                               {Array.isArray(message.adjuntos) && message.adjuntos.map((adjunto) => {
                                 const mime = String(adjunto?.mimeType || '');
                                 if (mime.startsWith('image/')) return <img key={adjunto.id || adjunto.nombre} className="staff-chat-media" src={adjunto.dataUrl} alt={adjunto.nombre || 'Imagen adjunta'} onClick={() => openImageViewer(adjunto.dataUrl)} />;
