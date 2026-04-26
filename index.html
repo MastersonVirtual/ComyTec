@@ -4856,18 +4856,20 @@
         padding: 12px;
       }
       .sidebar {
-        background: linear-gradient(180deg, rgba(255,255,255,.92), rgba(248,253,252,.9)) !important;
-        border-right: 1px solid rgba(0, 100, 101, .18) !important;
+        background: linear-gradient(180deg, rgba(0,100,101,.96), rgba(0,86,87,.95)) !important;
+        border-right: 1px solid rgba(180,245,236,.26) !important;
         border-radius: 0 24px 24px 0;
-        box-shadow: 0 18px 34px rgba(15,23,42,.12) !important;
+        box-shadow: 0 18px 34px rgba(2,22,27,.38) !important;
         backdrop-filter: blur(10px) saturate(130%);
+        display: flex;
+        flex-direction: column;
       }
       .sidebar-header {
         display: flex;
         align-items: center;
         gap: 12px;
-        background: rgba(255,255,255,.75) !important;
-        border-bottom: 1px solid rgba(0, 100, 101, .15) !important;
+        background: rgba(0, 84, 85, .34) !important;
+        border-bottom: 1px solid rgba(180,245,236,.2) !important;
         border-radius: 0 18px 18px 0;
       }
       .sidebar-profile-avatar-wrap {
@@ -4900,9 +4902,28 @@
         text-shadow: 0 1px 0 rgba(0,0,0,.18);
       }
       .sidebar-header-sub {
-        color: #ffffff !important;
+        color: #d8fffa !important;
         font-weight: 700;
         letter-spacing: .04em;
+      }
+      .menu {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-height: 0;
+        padding-top: 18px !important;
+      }
+      .sidebar-menu-scroll {
+        display: grid;
+        gap: 9px;
+        overflow-y: auto;
+        padding-right: 6px;
+        min-height: 0;
+      }
+      .sidebar-menu-scroll::-webkit-scrollbar { width: 8px; }
+      .sidebar-menu-scroll::-webkit-scrollbar-thumb {
+        background: rgba(196, 252, 244, .35);
+        border-radius: 999px;
       }
       .menu-button, .submenu-button {
         background: linear-gradient(180deg, rgba(0,100,101,.88), rgba(0,100,101,.76)) !important;
@@ -4937,6 +4958,12 @@
         color: #d6fffa !important;
         font-weight: 800;
       }
+      .sidebar-bottom-stack {
+        margin-top: 12px;
+        display: grid;
+        gap: 10px;
+        padding-top: 8px;
+      }
       .sidebar .logout-btn {
         border-radius: 999px !important;
         background: #ffffff !important;
@@ -4945,6 +4972,12 @@
         font-weight: 800 !important;
         -webkit-text-fill-color: #006465 !important;
         text-shadow: none !important;
+        min-height: 46px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: auto;
       }
       .sidebar .logout-btn:hover {
         color: #006465 !important;
@@ -4952,26 +4985,22 @@
         border-color: rgba(0,100,101,.65) !important;
         box-shadow: 0 8px 14px rgba(0,100,101,.16);
       }
-      .sidebar-support-card {
-        background: linear-gradient(160deg, rgba(2,16,27,.9), rgba(3,25,35,.94)) !important;
-        border: 1px solid rgba(62, 111, 132, .42) !important;
-        color: #d9e6ef !important;
-        box-shadow: 0 16px 28px rgba(0,8,18,.35) !important;
-        border-radius: 22px !important;
-        padding: 16px !important;
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        overflow: hidden;
-      }
-      .sidebar-support-head {
+      .sidebar-support-toggle {
+        width: 100%;
+        border-radius: 16px;
+        border: 1px solid rgba(180,245,236,.3);
+        background: linear-gradient(160deg, rgba(0,88,90,.86), rgba(0,74,75,.9));
+        color: #e9fffd;
+        padding: 10px;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
+        text-align: left;
+        cursor: pointer;
       }
       .sidebar-support-icon {
-        width: 56px;
-        height: 56px;
+        width: 36px;
+        height: 36px;
         border-radius: 999px;
         display: inline-flex;
         align-items: center;
@@ -4983,49 +5012,54 @@
       }
       .sidebar-support-icon i,
       .sidebar-support-icon svg {
-        width: 28px;
-        height: 28px;
+        width: 18px;
+        height: 18px;
         stroke: currentColor;
       }
-      .sidebar-support-card h4 {
-        margin: 0;
-        color: #f2f8fd !important;
-        font-size: 1.35rem;
-        letter-spacing: .01em;
+      .sidebar-support-toggle-text {
+        display: grid;
+        gap: 2px;
+        flex: 1;
       }
-      .sidebar-support-card p {
-        margin: 0;
-        color: #a6b9c6 !important;
-        font-size: 1.02rem;
-        line-height: 1.35;
+      .sidebar-support-toggle-text strong {
+        color: #f2f8fd;
+        font-size: .95rem;
+      }
+      .sidebar-support-toggle-text small {
+        color: #b8d1de;
+        font-size: .73rem;
       }
       .sidebar-support-version {
-        margin-left: auto;
         border-radius: 999px;
-        padding: 6px 14px;
+        padding: 4px 10px;
         border: 1px solid rgba(14, 196, 176, .28);
         background: rgba(8, 78, 84, .35);
         color: #19dcc6;
         font-weight: 800;
-        font-size: 1.5rem;
+        font-size: 1rem;
         line-height: 1;
       }
-      .sidebar-support-links {
+      .sidebar-support-arrow {
+        color: #bcfff7;
+        font-size: .95rem;
+      }
+      .sidebar-support-dropdown {
+        background: rgba(1, 42, 54, .86);
+        border: 1px solid rgba(133, 212, 223, .28);
+        border-radius: 14px;
+        padding: 10px;
         display: grid;
-        gap: 14px;
-        margin-top: 8px;
-        padding-top: 14px;
-        border-top: 1px solid rgba(86, 122, 139, .32);
+        gap: 10px;
       }
       .sidebar-support-link {
         display: grid;
-        grid-template-columns: 58px 1fr;
+        grid-template-columns: 36px 1fr;
         align-items: center;
-        gap: 10px;
+        gap: 8px;
         color: #f2f8fd !important;
         text-decoration: none;
-        font-weight: 700;
-        font-size: 1rem;
+        font-weight: 600;
+        font-size: .85rem;
         transition: transform .24s ease, color .24s ease;
         white-space: normal;
         overflow-wrap: anywhere;
@@ -5036,9 +5070,9 @@
         height: 24px !important;
       }
       .sidebar-support-link-icon {
-        width: 56px;
-        height: 56px;
-        border-radius: 18px;
+        width: 34px;
+        height: 34px;
+        border-radius: 12px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -5048,17 +5082,12 @@
       }
       .sidebar-support-link-text {
         display: grid;
-        gap: 3px;
+        gap: 1px;
       }
       .sidebar-support-link-title {
         color: #f1f8ff !important;
-        font-size: 1.02rem;
-        font-weight: 800;
-      }
-      .sidebar-support-link-note {
-        color: #9eb5c4 !important;
-        font-size: .92rem;
-        font-weight: 500;
+        font-size: .83rem;
+        font-weight: 700;
       }
       .sidebar-support-link:hover {
         color: #36e2ce !important;
@@ -5075,20 +5104,20 @@
         stroke: currentColor;
       }
       .sidebar-support-assurance {
-        margin-top: 2px;
-        border-radius: 18px;
+        margin-top: 1px;
+        border-radius: 12px;
         border: 1px solid rgba(60, 133, 116, .44);
         background: linear-gradient(135deg, rgba(8, 74, 62, .44), rgba(4, 43, 47, .64));
-        padding: 12px;
+        padding: 8px;
         display: grid;
-        grid-template-columns: 52px 1fr;
-        gap: 10px;
+        grid-template-columns: 36px 1fr;
+        gap: 8px;
         align-items: center;
       }
       .sidebar-support-assurance-icon {
-        width: 52px;
-        height: 52px;
-        border-radius: 16px;
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -5098,26 +5127,17 @@
       }
       .sidebar-support-assurance-icon i,
       .sidebar-support-assurance-icon svg {
-        width: 24px;
-        height: 24px;
+        width: 16px;
+        height: 16px;
       }
       .sidebar-support-assurance-title {
         color: #2df4c2;
         font-weight: 800;
-        font-size: 1.02rem;
+        font-size: .82rem;
       }
       .sidebar-support-assurance-copy {
         color: #c6d8e3;
-        font-size: .92rem;
-      }
-      .sidebar-signature strong {
-        display: inline-flex;
-        border: 1px solid rgba(0,100,101,.2);
-        border-radius: 999px;
-        padding: 4px 10px;
-        background: rgba(255,255,255,.95);
-        color: #006465 !important;
-        font-weight: 700;
+        font-size: .74rem;
       }
       @media (max-width: 980px) {
         .top-actions {
@@ -9626,6 +9646,7 @@
         const [bulkCatalogSyncing, setBulkCatalogSyncing] = useState(false);
         const [homeCardView, setHomeCardView] = useState({ title: '', items: [], charla: false });
         const [homeCardStatusMenuOpen, setHomeCardStatusMenuOpen] = useState(false);
+        const [sidebarSupportOpen, setSidebarSupportOpen] = useState(false);
 
         function getStatusLabel(row) {
           return String(row?.status || row?.estado || '').trim().toLowerCase();
@@ -13913,99 +13934,101 @@
                 </div>
               </div>
               <div className="menu">
-                <button className={`menu-button ${effectiveSelectedForm === 'home' ? 'active' : ''}`} onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
-                <button className={`menu-button ${effectiveSelectedForm === 'tickets' ? 'active' : ''}`} onClick={() => { openTicketsView(); closeSidebar(); }}><span className="menu-icon">🎫</span><span>Tickets</span></button>
-                <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">🗃️</span><span>Base de datos</span></button>
-                <div className="sidebar-divider" />
-                {!isMobile && (
-                  <>
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: !p.operaciones, nuevo: false, baseDatos: false }))}><span className="menu-icon">🗂️</span><span>Operaciones</span><span className="menu-arrow">{openMenus.operaciones ? '▾' : '▸'}</span></button>
-                    <div className={`submenu ${openMenus.operaciones ? 'open' : ''}`}>
-                      <button className="submenu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}><span>Nuevo</span><span className="menu-arrow">{openMenus.nuevo ? '▾' : '▸'}</span></button>
-                      <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
-                        <button className="submenu-button" onClick={() => { selectAction('Nuevo Servicio'); closeSidebar(); }}>Servicio</button>
+                <div className="sidebar-menu-scroll">
+                  <button className={`menu-button ${effectiveSelectedForm === 'home' ? 'active' : ''}`} onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
+                  <button className={`menu-button ${effectiveSelectedForm === 'tickets' ? 'active' : ''}`} onClick={() => { openTicketsView(); closeSidebar(); }}><span className="menu-icon">🎫</span><span>Tickets</span></button>
+                  <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">🗃️</span><span>Base de datos</span></button>
+                  <div className="sidebar-divider" />
+                  {!isMobile && (
+                    <>
+                      <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: !p.operaciones, nuevo: false, baseDatos: false }))}><span className="menu-icon">🗂️</span><span>Operaciones</span><span className="menu-arrow">{openMenus.operaciones ? '▾' : '▸'}</span></button>
+                      <div className={`submenu ${openMenus.operaciones ? 'open' : ''}`}>
+                        <button className="submenu-button" onClick={() => setOpenMenus((p) => ({ ...p, nuevo: !p.nuevo }))}><span>Nuevo</span><span className="menu-arrow">{openMenus.nuevo ? '▾' : '▸'}</span></button>
+                        <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
+                          <button className="submenu-button" onClick={() => { selectAction('Nuevo Servicio'); closeSidebar(); }}>Servicio</button>
+                        </div>
+                        <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Gestión de servicios</button>
                       </div>
-                      <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Gestión de servicios</button>
-                    </div>
-                    <div className="sidebar-divider" />
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: false, nuevo: false, baseDatos: !p.baseDatos }))}><span className="menu-icon">📚</span><span>Base de datos</span><span className="menu-arrow">{openMenus.baseDatos ? '▾' : '▸'}</span></button>
-                    <div className={`submenu ${openMenus.baseDatos ? 'open' : ''}`}>
-                      <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
-                    </div>
-                    {ENABLE_CLIENT_TRACKING_VIEW && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}><span className="menu-icon">👥</span><span>Vista Clientes</span></button>}
-                  </>
-                )}
-                {canPreviewRoles && (
-                  <>
-                    <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, rolePreview: !p.rolePreview, operaciones: false, nuevo: false, baseDatos: false }))}>
-                      <span className="menu-icon">🧭</span>
-                      <span>{rolePreviewModeActive ? 'Vista de rol (activa)' : 'Vista de rol'}</span>
-                      <span className="menu-arrow">{openMenus.rolePreview ? '▾' : '▸'}</span>
-                    </button>
-                    <div className={`submenu ${openMenus.rolePreview ? 'open' : ''}`}>
-                      {rolePreviewOptions.map((option) => {
-                        const isCurrent = userRole === option.role && userArea === option.area;
-                        return (
-                          <button
-                            key={`role-preview-${option.key}`}
-                            className="submenu-button"
-                            onClick={() => { applyRolePreview(option); closeSidebar(); }}
-                          >
-                            {option.label}{isCurrent ? ' ✓' : ''}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </>
-                )}
-                <div className="sidebar-divider" />
-                <button className="menu-button" onClick={openFuncionariosView}><span className="menu-icon">🧑‍💼</span><span>Funcionarios</span></button>
-                {!isCommercialUser && <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>}
-                <button className="logout-btn" type="button" onClick={() => auth.signOut()}>Cerrar Sesión</button>
-                <div className="sidebar-support-card">
-                  <div className="sidebar-support-head">
-                    <span className="sidebar-support-icon"><i data-lucide="headphones" /></span>
-                    <div>
-                      <h4>¿Necesitas ayuda?</h4>
-                      <p>Contactá al desarrollador por los siguientes canales.</p>
-                    </div>
-                    <span className="sidebar-support-version">v2.0</span>
-                  </div>
-                  <div className="sidebar-support-links">
-                    <a className="sidebar-support-link" href="mailto:mastersoncomercialytecnica@gmail.com">
-                      <span className="sidebar-support-link-icon"><i data-lucide="mail" /></span>
-                      <span className="sidebar-support-link-text">
-                        <span className="sidebar-support-link-title">mastersoncomercialytecnica@gmail.com</span>
-                        <span className="sidebar-support-link-note">Respuesta por email</span>
-                      </span>
-                    </a>
-                    <a
-                      className="sidebar-support-link"
-                      href="https://wa.me/59891909182"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(event) => {
-                        const popup = window.open('https://wa.me/59891909182', '_blank', 'noopener,noreferrer');
-                        if (!popup) window.location.href = 'tel:+59891909182';
-                        event.preventDefault();
-                      }}
-                    >
-                      <span className="sidebar-support-link-icon"><i data-lucide="phone-call" /></span>
-                      <span className="sidebar-support-link-text">
-                        <span className="sidebar-support-link-title">+598 91 909 182</span>
-                        <span className="sidebar-support-link-note">Lunes a viernes de 8:00 a 18:00 hs</span>
-                      </span>
-                    </a>
-                  </div>
-                  <div className="sidebar-support-assurance">
-                    <span className="sidebar-support-assurance-icon"><i data-lucide="shield-check" /></span>
-                    <div>
-                      <div className="sidebar-support-assurance-title">Estamos para ayudarte</div>
-                      <div className="sidebar-support-assurance-copy">Tu consulta es importante para nosotros.</div>
-                    </div>
-                  </div>
+                      <div className="sidebar-divider" />
+                      <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: false, nuevo: false, baseDatos: !p.baseDatos }))}><span className="menu-icon">📚</span><span>Base de datos</span><span className="menu-arrow">{openMenus.baseDatos ? '▾' : '▸'}</span></button>
+                      <div className={`submenu ${openMenus.baseDatos ? 'open' : ''}`}>
+                        <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
+                      </div>
+                      {ENABLE_CLIENT_TRACKING_VIEW && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}><span className="menu-icon">👥</span><span>Vista Clientes</span></button>}
+                    </>
+                  )}
+                  {canPreviewRoles && (
+                    <>
+                      <button className="menu-button" onClick={() => setOpenMenus((p) => ({ ...p, rolePreview: !p.rolePreview, operaciones: false, nuevo: false, baseDatos: false }))}>
+                        <span className="menu-icon">🧭</span>
+                        <span>{rolePreviewModeActive ? 'Vista de rol (activa)' : 'Vista de rol'}</span>
+                        <span className="menu-arrow">{openMenus.rolePreview ? '▾' : '▸'}</span>
+                      </button>
+                      <div className={`submenu ${openMenus.rolePreview ? 'open' : ''}`}>
+                        {rolePreviewOptions.map((option) => {
+                          const isCurrent = userRole === option.role && userArea === option.area;
+                          return (
+                            <button
+                              key={`role-preview-${option.key}`}
+                              className="submenu-button"
+                              onClick={() => { applyRolePreview(option); closeSidebar(); }}
+                            >
+                              {option.label}{isCurrent ? ' ✓' : ''}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+                  <div className="sidebar-divider" />
+                  <button className="menu-button" onClick={openFuncionariosView}><span className="menu-icon">🧑‍💼</span><span>Funcionarios</span></button>
+                  {!isCommercialUser && <button className="menu-button" onClick={openTicketsView}><span className="menu-icon">🎫</span><span>Tickets</span></button>}
                 </div>
-                <div className="sidebar-signature" aria-label="signature" tabIndex={0}><strong>v2.0 | Powered by Alfonso Carballo</strong><div className="sidebar-signature-tooltip">Actualización 2.0: Orden de trabajo operativa GNS con transiciones validadas por etapa, checklist obligatorio para agendado, resolución de tickets con comentario + imágenes (pegar/arrastrar), y nuevos filtros de historial por administración y fecha de alta.</div></div>
+                <div className="sidebar-bottom-stack">
+                  <button type="button" className={`sidebar-support-toggle ${sidebarSupportOpen ? 'open' : ''}`} onClick={() => setSidebarSupportOpen((prev) => !prev)}>
+                    <span className="sidebar-support-icon"><i data-lucide="headphones" /></span>
+                    <span className="sidebar-support-toggle-text">
+                      <strong>¿Necesitas ayuda?</strong>
+                      <small>Contactá al desarrollador por los siguientes canales.</small>
+                    </span>
+                    <span className="sidebar-support-version">v2.0</span>
+                    <span className="sidebar-support-arrow">{sidebarSupportOpen ? '▴' : '▾'}</span>
+                  </button>
+                  {sidebarSupportOpen && (
+                    <div className="sidebar-support-dropdown">
+                      <a className="sidebar-support-link" href="mailto:mastersoncomercialytecnica@gmail.com">
+                        <span className="sidebar-support-link-icon"><i data-lucide="mail" /></span>
+                        <span className="sidebar-support-link-text">
+                          <span className="sidebar-support-link-title">mastersoncomercialytecnica@gmail.com</span>
+                        </span>
+                      </a>
+                      <a
+                        className="sidebar-support-link"
+                        href="https://wa.me/59891909182"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(event) => {
+                          const popup = window.open('https://wa.me/59891909182', '_blank', 'noopener,noreferrer');
+                          if (!popup) window.location.href = 'tel:+59891909182';
+                          event.preventDefault();
+                        }}
+                      >
+                        <span className="sidebar-support-link-icon"><i data-lucide="phone-call" /></span>
+                        <span className="sidebar-support-link-text">
+                          <span className="sidebar-support-link-title">+598 91 909 182</span>
+                        </span>
+                      </a>
+                      <div className="sidebar-support-assurance">
+                        <span className="sidebar-support-assurance-icon"><i data-lucide="shield-check" /></span>
+                        <div>
+                          <div className="sidebar-support-assurance-title">Estamos para ayudarte</div>
+                          <div className="sidebar-support-assurance-copy">Tu consulta es importante para nosotros.</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  <button className="logout-btn" type="button" onClick={() => auth.signOut()}><i data-lucide="log-out" /> Cerrar Sesión</button>
+                </div>
               </div>
             </aside>
 
