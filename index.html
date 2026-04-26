@@ -11345,7 +11345,6 @@
             setRoleLoading(false);
           }, 5000);
           const unsub = auth.onAuthStateChanged(async (currentUser) => {
-            window.clearTimeout(safetyTimer);
             setUser(currentUser);
             setAuthLoading(false);
 
@@ -11363,6 +11362,7 @@
               setUserData({ nombre: '', rol: '', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
               setProfileAvatarId(DEFAULT_PROFILE_AVATAR_ID);
               setRoleLoading(false);
+              window.clearTimeout(safetyTimer);
               return;
             }
 
@@ -11409,6 +11409,7 @@
               setProfileAvatarId(DEFAULT_PROFILE_AVATAR_ID);
             } finally {
               setRoleLoading(false);
+              window.clearTimeout(safetyTimer);
             }
           });
           return () => {
@@ -11521,47 +11522,19 @@
         }, []);
 
         useEffect(() => {
-          let active = true;
-          let retryTimer = null;
-          let rafId = null;
-          let observer = null;
-
-          const paintLucideIcons = () => {
-            if (!active) return;
-            if (!window.lucide?.createIcons) {
-              retryTimer = window.setTimeout(paintLucideIcons, 180);
+          let attempts = 0;
+          let timer = null;
+          const runIcons = () => {
+            attempts += 1;
+            if (window.lucide?.createIcons) {
+              window.lucide.createIcons();
               return;
             }
-            window.lucide.createIcons();
+            if (attempts < 10) timer = window.setTimeout(runIcons, 200);
           };
-
-          paintLucideIcons();
-          rafId = window.requestAnimationFrame(() => {
-            paintLucideIcons();
-            window.requestAnimationFrame(paintLucideIcons);
-          });
-
-          if (window.MutationObserver) {
-            observer = new MutationObserver((mutations) => {
-              const hasRelevantChanges = mutations.some((m) => (
-                m.type === 'childList'
-                || (m.type === 'attributes' && m.attributeName === 'data-lucide')
-              ));
-              if (hasRelevantChanges) paintLucideIcons();
-            });
-            observer.observe(document.body, {
-              childList: true,
-              subtree: true,
-              attributes: true,
-              attributeFilter: ['data-lucide'],
-            });
-          }
-
+          runIcons();
           return () => {
-            active = false;
-            if (retryTimer) window.clearTimeout(retryTimer);
-            if (rafId) window.cancelAnimationFrame(rafId);
-            if (observer) observer.disconnect();
+            if (timer) window.clearTimeout(timer);
           };
         }, [authLoading, roleLoading, mobileTab, selectedForm, fabOpen, rows.length, adminCredentialRequests.length, desktopBellOpen, desktopSearchOpen, menuOpen, isMobile]);
 
