@@ -11550,7 +11550,7 @@
         }, [user?.uid]);
 
         async function testGmailConnection(token, uid) {
-          const testUrl = 'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=3&q=in:inbox';
+          const testUrl = 'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=5&q=in:inbox';
           const res = await fetch(testUrl, {
             headers: { Authorization: `Bearer ${token}` },
           });
@@ -11713,7 +11713,7 @@
             return;
           }
           void refrescarInboxGmail();
-          const intervalId = window.setInterval(() => { if (document.visibilityState === 'visible') void refrescarInboxGmail(); }, 180000);
+          const intervalId = window.setInterval(() => { if (document.visibilityState === 'visible') void refrescarInboxGmail(); }, 60000);
           return () => { window.clearInterval(intervalId); };
         }, [user?.uid, gmailAccessToken]);
 
@@ -15612,12 +15612,7 @@
                                 </div>
                               ) : gmailApiEmails.length > 0 ? (
                                 <div className="home-hero-mail-list" id="gmail-list">
-                                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
-                                    <small style={{ color: '#4b6b73' }}>Actualizado: {gmailLastRefreshAt ? gmailLastRefreshAt.toLocaleTimeString('es-UY') : '-'}</small>
-                                    <button type="button" className="home-modern-action-btn" onClick={() => { void refrescarInboxGmail(); }}>
-                                      Actualizar ahora
-                                    </button>
-                                  </div>
+                                  <small style={{ color: '#4b6b73' }}>Actualizado: {gmailLastRefreshAt ? gmailLastRefreshAt.toLocaleTimeString('es-UY') : '-'}</small>
                                   {gmailApiEmails.map((mail) => (
                                     <article key={`mail-api-preview-${mail.id}`} className="home-hero-mail-item clickable" role="button" tabIndex={0} onClick={() => { void handleOpenGmailDetail(mail); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') void handleOpenGmailDetail(mail); }}>
                                       <div className="home-hero-mail-top">
@@ -15625,7 +15620,6 @@
                                       </div>
                                       <div className="home-hero-mail-from">{mail.from || 'Sin remitente'}</div>
                                       <div className="home-hero-mail-subject">{mail.subject || 'Sin asunto'}</div>
-                                      {!!mail.snippet && <div className="hint" style={{ margin: '4px 0 0', color: '#375861' }}>{mail.snippet}</div>}
                                     </article>
                                   ))}
                                 </div>
