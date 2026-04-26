@@ -9790,9 +9790,12 @@
         const [gmailApiEmails, setGmailApiEmails] = useState([]);
         const [gmailApiLoading, setGmailApiLoading] = useState(false);
         const [gmailApiError, setGmailApiError] = useState('');
+        const [gmailStatusText, setGmailStatusText] = useState('');
         const [gmailLastRefreshAt, setGmailLastRefreshAt] = useState(null);
         const [gmailDetailModal, setGmailDetailModal] = useState({ open: false, mail: null, body: '' });
         const [gmailDetailLoading, setGmailDetailLoading] = useState(false);
+        const gmailRefreshIntervalRef = useRef(null);
+        const [gmailNowMs, setGmailNowMs] = useState(Date.now());
         const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
         const [userCredentialRequests, setUserCredentialRequests] = useState([]);
         const [staffMembers, setStaffMembers] = useState([]);
@@ -11323,9 +11326,14 @@
             setAuthLoading(false);
 
             if (!currentUser) {
+              if (gmailRefreshIntervalRef.current) {
+                window.clearInterval(gmailRefreshIntervalRef.current);
+                gmailRefreshIntervalRef.current = null;
+              }
               setGmailAccessToken('');
               setGmailApiEmails([]);
               setGmailApiError('');
+              setGmailStatusText('');
               setUserRole('');
               setUserArea('');
               setBaseRole('');
@@ -11688,34 +11696,76 @@
         }
 
         async function refrescarInboxGmail() {
-          if (!user?.uid || !gmailAccessToken) return;
+          mostrarEstadoGmail('Actualizando...');
+          const currentUser = auth.currentUser;
+          if (!currentUser?.uid) return;
+          const token = gmailAccessToken;
+          if (!token) {
+            mostrarEstadoGmail('Reconectá Gmail para actualizar correos.');
+            return;
+          }
           try {
             setGmailApiLoading(true);
             setGmailApiError('');
-            await testGmailConnection(gmailAccessToken, user.uid);
-            const latestEmails = await obtenerUltimosEmails(gmailAccessToken);
-            setGmailApiEmails(latestEmails);
+            await testGmailConnection(token, currentUser.uid);
+            const latestEmails = await obtenerUltimosEmails(token);
+            renderizarMails(latestEmails);
             setGmailLastRefreshAt(new Date());
+            mostrarEstadoGmail('Actualizado hace unos segundos');
           } catch (error) {
             console.log(error);
             setGmailApiError(String(error?.message || 'No se pudieron cargar los correos'));
-            setGmailApiEmails([]);
+            mostrarEstadoGmail('No se pudieron actualizar los correos.');
           } finally {
             setGmailApiLoading(false);
           }
         }
 
+        function mostrarEstadoGmail(message) {
+          setGmailStatusText(String(message || ''));
+        }
+
+        function renderizarMails(mails = []) {
+          const normalized = Array.isArray(mails) ? mails.slice() : [];
+          normalized.sort((a, b) => {
+            const av = a?.receivedAt instanceof Date ? a.receivedAt.getTime() : 0;
+            const bv = b?.receivedAt instanceof Date ? b.receivedAt.getTime() : 0;
+            return bv - av;
+          });
+          setGmailApiEmails(normalized.slice(0, 5));
+        }
+
+        function getGmailUpdatedAgoLabel() {
+          if (!gmailLastRefreshAt) return '';
+          const deltaSec = Math.max(0, Math.floor((gmailNowMs - gmailLastRefreshAt.getTime()) / 1000));
+          return `Actualizado hace ${deltaSec} segundos`;
+        }
+
         useEffect(() => {
+          if (gmailRefreshIntervalRef.current) {
+            window.clearInterval(gmailRefreshIntervalRef.current);
+            gmailRefreshIntervalRef.current = null;
+          }
           if (!user?.uid || !gmailAccessToken) {
-            setGmailApiEmails([]);
             setGmailApiError('');
             setGmailApiLoading(false);
+            mostrarEstadoGmail('Reconectá Gmail para actualizar correos.');
             return;
           }
           void refrescarInboxGmail();
-          const intervalId = window.setInterval(() => { if (document.visibilityState === 'visible') void refrescarInboxGmail(); }, 60000);
-          return () => { window.clearInterval(intervalId); };
+          gmailRefreshIntervalRef.current = window.setInterval(() => { if (document.visibilityState === 'visible') void refrescarInboxGmail(); }, 60000);
+          return () => {
+            if (gmailRefreshIntervalRef.current) {
+              window.clearInterval(gmailRefreshIntervalRef.current);
+              gmailRefreshIntervalRef.current = null;
+            }
+          };
         }, [user?.uid, gmailAccessToken]);
+
+        useEffect(() => {
+          const tickId = window.setInterval(() => setGmailNowMs(Date.now()), 1000);
+          return () => window.clearInterval(tickId);
+        }, []);
 
         useEffect(() => {
           if (!user?.uid) {
@@ -15612,7 +15662,9 @@
                                 </div>
                               ) : gmailApiEmails.length > 0 ? (
                                 <div className="home-hero-mail-list" id="gmail-list">
-                                  <small style={{ color: '#4b6b73' }}>Actualizado: {gmailLastRefreshAt ? gmailLastRefreshAt.toLocaleTimeString('es-UY') : '-'}</small>
+                                  <small style={{ color: '#4b6b73' }}>
+                                    {gmailApiLoading ? 'Actualizando...' : (gmailStatusText || getGmailUpdatedAgoLabel() || 'Sin actualizar')}
+                                  </small>
                                   {gmailApiEmails.map((mail) => (
                                     <article key={`mail-api-preview-${mail.id}`} className="home-hero-mail-item clickable" role="button" tabIndex={0} onClick={() => { void handleOpenGmailDetail(mail); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') void handleOpenGmailDetail(mail); }}>
                                       <div className="home-hero-mail-top">
