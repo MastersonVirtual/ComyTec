@@ -11300,7 +11300,8 @@
         }
 
         useEffect(() => {
-          const unsub = auth.onAuthStateChanged(async (currentUser) => {
+          let cancelled = false;
+          const unsub = auth.onAuthStateChanged((currentUser) => {
             setUser(currentUser);
             setAuthLoading(false);
 
@@ -11318,41 +11319,50 @@
               return;
             }
 
-            setRoleLoading(true);
-            try {
-              const modernProfile = await upsertAuthenticatedUserProfile(currentUser);
-              let profile = modernProfile || null;
-              const byUid = await db.collection('config_usuarios').doc(currentUser.uid).get();
-              if (byUid.exists) profile = { ...(profile || {}), ...byUid.data() };
+            const fallbackName = String(currentUser.displayName || (currentUser.email || '').split('@')[0] || 'Usuario').trim();
+            setBaseRole('usuario');
+            setBaseArea('');
+            setUserRole('usuario');
+            setUserArea('');
+            setUserData({ nombre: fallbackName, rol: 'usuario', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
+            setProfileAvatarId(DEFAULT_PROFILE_AVATAR_ID);
+            setRoleLoading(false);
 
-              if (!byUid.exists && currentUser.email) {
-                const snap = await db.collection('config_usuarios').where('email', '==', currentUser.email).limit(1).get();
-                if (!snap.empty) profile = { ...(profile || {}), ...snap.docs[0].data() };
+            (async () => {
+              try {
+                const byUidPromise = db.collection('config_usuarios').doc(currentUser.uid).get();
+                const modernProfilePromise = upsertAuthenticatedUserProfile(currentUser);
+                const [byUid, modernProfile] = await Promise.all([byUidPromise, modernProfilePromise]);
+                let profile = modernProfile || null;
+                if (byUid.exists) profile = { ...(profile || {}), ...byUid.data() };
+
+                if (!byUid.exists && currentUser.email) {
+                  const snap = await db.collection('config_usuarios').where('email', '==', currentUser.email).limit(1).get();
+                  if (!snap.empty) profile = { ...(profile || {}), ...snap.docs[0].data() };
+                }
+
+                if (cancelled) return;
+                const rol = String(profile?.rol || 'usuario').toLowerCase();
+                const area = String(profile?.area || '').toLowerCase();
+                const nombre = String(profile?.nombre || profile?.displayName || currentUser.displayName || (currentUser.email || '').split('@')[0] || 'Usuario').trim();
+                const avatarId = PROFILE_AVATAR_OPTIONS.some((avatar) => avatar.id === profile?.avatarId) ? profile.avatarId : DEFAULT_PROFILE_AVATAR_ID;
+                setBaseRole(rol);
+                setBaseArea(area);
+                setUserRole(rol);
+                setUserArea(area);
+                setUserData({ nombre, rol, area, avatarId });
+                setProfileAvatarId(avatarId);
+              } catch (err) {
+                console.error('Error leyendo config_usuarios:', err);
+              } finally {
+                if (!cancelled) setRoleLoading(false);
               }
-
-              const rol = String(profile?.rol || 'usuario').toLowerCase();
-              const area = String(profile?.area || '').toLowerCase();
-              const nombre = String(profile?.nombre || profile?.displayName || currentUser.displayName || (currentUser.email || '').split('@')[0] || 'Usuario').trim();
-              const avatarId = PROFILE_AVATAR_OPTIONS.some((avatar) => avatar.id === profile?.avatarId) ? profile.avatarId : DEFAULT_PROFILE_AVATAR_ID;
-              setBaseRole(rol);
-              setBaseArea(area);
-              setUserRole(rol);
-              setUserArea(area);
-              setUserData({ nombre, rol, area, avatarId });
-              setProfileAvatarId(avatarId);
-            } catch (err) {
-              console.error('Error leyendo config_usuarios:', err);
-              setBaseRole('usuario');
-              setBaseArea('');
-              setUserRole('usuario');
-              setUserArea('');
-              setUserData({ nombre: (currentUser?.email || 'usuario').split('@')[0], rol: 'usuario', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
-              setProfileAvatarId(DEFAULT_PROFILE_AVATAR_ID);
-            } finally {
-              setRoleLoading(false);
-            }
+            })();
           });
-          return () => unsub();
+          return () => {
+            cancelled = true;
+            unsub();
+          };
         }, []);
 
         useEffect(() => {
