@@ -6061,92 +6061,307 @@
         margin: 10px 0 16px;
       }
       .ticket-create-card {
-        border: 1px solid rgba(191, 219, 224, .85);
-        border-radius: 18px;
-        background: linear-gradient(180deg, #f2f6f7 0%, #eaf1f3 100%);
-        box-shadow: 0 14px 34px rgba(0,0,0,.2);
+        max-width: min(1160px, 100%);
+        margin: 0 auto;
+        border: 1px solid #dcebed;
+        border-radius: 24px;
+        background: linear-gradient(180deg, #fcffff 0%, #f7fbfc 100%);
+        box-shadow: 0 14px 34px rgba(8, 42, 44, .12);
         color: #14353a;
-      }
-      .ticket-create-card h3 {
-        color: #0f4950;
-        font-size: 28px;
-        margin-bottom: 8px;
+        padding: clamp(20px, 2.5vw, 36px);
       }
       .ticket-create-subtitle {
-        color: #355e64;
-        font-size: 16px;
-        margin-bottom: 12px;
+        color: #557279;
+        font-size: 15px;
+        margin: 8px 0 0;
       }
       .ticket-create-form {
-        max-width: min(780px, 100%);
-        margin: 0 auto;
         display: flex;
         flex-direction: column;
-        gap: 14px;
+        gap: 24px;
       }
-      .ticket-form-surface {
-        border: 1px solid #c2d2d8;
-        border-radius: 14px;
-        background: #f7fbfc;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
-        padding: 16px;
+      .ticket-create-header {
+        display: flex;
+        align-items: stretch;
+        justify-content: space-between;
+        gap: 20px;
       }
-      .ticket-form-grid {
+      .ticket-create-header-main {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .ticket-create-icon-box {
+        width: 64px;
+        height: 64px;
+        border-radius: 18px;
+        border: 1px solid rgba(15, 118, 110, .26);
+        background: linear-gradient(145deg, #0f766e 0%, #115e59 100%);
+        color: #f0fdfa;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 20px rgba(15, 118, 110, .24);
+      }
+      .ticket-create-icon-box i,
+      .ticket-create-icon-box svg {
+        width: 30px;
+        height: 30px;
+        stroke-width: 1.8;
+      }
+      .ticket-create-title-block h3 {
+        margin: 0;
+        color: #0f172a;
+        font-size: clamp(28px, 3vw, 34px);
+        line-height: 1.08;
+      }
+      .ticket-date-card {
+        min-width: 250px;
+        border-radius: 16px;
+        border: 1px solid #dcebed;
+        background: #ffffff;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, .06);
+        padding: 14px 16px;
+      }
+      .ticket-date-card-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: .02em;
+        color: #0f766e;
+      }
+      .ticket-date-card-title i,
+      .ticket-date-card-title svg {
+        width: 17px;
+        height: 17px;
+      }
+      .ticket-date-card-value {
+        margin-top: 8px;
+        color: #0f172a;
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .ticket-main-card {
         display: grid;
-        grid-template-columns: 1fr;
-        gap: 12px;
+        grid-template-columns: minmax(250px, 320px) 1fr;
+        border: 1px solid #dcebed;
+        border-radius: 20px;
+        overflow: hidden;
+        background: #ffffff;
+      }
+      .ticket-main-aside {
+        padding: 20px 18px;
+        border-right: 1px solid #e5eff1;
+        background: linear-gradient(180deg, rgba(244, 250, 251, .7), rgba(255, 255, 255, .95));
+        position: relative;
+      }
+      .ticket-main-aside::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 16px;
+        bottom: 16px;
+        width: 4px;
+        border-radius: 999px;
+        background: linear-gradient(180deg, #2dd4bf, #0f766e);
+      }
+      .ticket-main-aside-item {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 10px 4px;
+      }
+      .ticket-main-aside-item + .ticket-main-aside-item {
+        border-top: 1px solid #e5eff1;
+      }
+      .ticket-main-aside-item i,
+      .ticket-main-aside-item svg {
+        width: 18px;
+        height: 18px;
+        color: #0f766e;
+        margin-top: 1px;
+      }
+      .ticket-main-aside-item strong {
+        display: block;
+        color: #0f172a;
+        font-size: 14px;
+      }
+      .ticket-main-aside-item span {
+        color: #527178;
+        font-size: 12px;
+      }
+      .ticket-main-fields {
+        padding: 12px 18px;
       }
       .ticket-form-field {
         display: flex;
         flex-direction: column;
         gap: 6px;
+        padding: 14px 0;
       }
-      .ticket-form-field.full { grid-column: span 1; }
-      .ticket-form-label {
-        font-size: 15px;
-        font-weight: 700;
-        color: #21464b;
-        letter-spacing: .03em;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
+      .ticket-main-fields .ticket-form-field + .ticket-form-field {
+        border-top: 1px solid #e5eff1;
       }
       .ticket-form-field input,
       .ticket-form-field select,
       .ticket-form-field textarea {
-        min-height: 48px;
-        border-radius: 13px;
-        border: 1px solid #b8c9cf;
-        background: #f4f7f8;
+        min-height: 54px;
+        border-radius: 14px;
+        border: 1px solid #d7e3e6;
+        background: #ffffff;
         color: #1c2f35;
         padding: 12px 14px;
         font-size: 16px;
-        box-shadow: inset 0 1px 0 rgba(255,255,255,.9);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,.95);
+        outline: none;
+        transition: border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+      }
+      .ticket-form-field input:focus,
+      .ticket-form-field select:focus,
+      .ticket-form-field textarea:focus {
+        border-color: #0f766e;
+        box-shadow: 0 0 0 3px rgba(45, 212, 191, .18);
       }
       .ticket-form-field textarea {
-        min-height: 140px;
+        min-height: 164px;
         resize: vertical;
+      }
+      .ticket-secondary-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+      }
+      .ticket-side-card {
+        border: 1px solid #dcebed;
+        border-radius: 18px;
+        padding: 18px;
+        background: #ffffff;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, .06);
+      }
+      .ticket-side-card-title {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #0f172a;
+        font-size: 17px;
+        margin: 0 0 12px;
+      }
+      .ticket-side-card-title i,
+      .ticket-side-card-title svg {
+        width: 18px;
+        height: 18px;
+        color: #0f766e;
+      }
+      .ticket-upload-dropzone {
+        border: 2px dashed rgba(15, 118, 110, .4);
+        border-radius: 14px;
+        padding: 20px 14px;
+        text-align: center;
+        color: #24464d;
+        background: #f8fcfc;
+        font-weight: 600;
+      }
+      .ticket-upload-dropzone i,
+      .ticket-upload-dropzone svg {
+        width: 36px;
+        height: 36px;
+        color: #0f766e;
       }
       .ticket-create-btn {
         margin-top: 4px;
-        min-height: 52px;
-        border-radius: 14px;
+        min-height: 68px;
+        border-radius: 16px;
         border: 1px solid rgba(16, 116, 110, .85);
-        background: linear-gradient(135deg, #117f81, #0e5d60);
+        background: linear-gradient(135deg, #0f766e, #115e59);
         color: #f4fffe;
-        font-size: 22px;
+        font-size: 24px;
         font-weight: 800;
         letter-spacing: .01em;
         display: inline-flex;
         align-items: center;
-        justify-content: center;
-        gap: 8px;
+        justify-content: space-between;
+        padding: 0 22px;
+        gap: 12px;
         cursor: pointer;
-        box-shadow: 0 14px 28px rgba(0,0,0,.28);
+        box-shadow: 0 14px 28px rgba(8, 42, 44, .25);
       }
       .ticket-create-btn:disabled {
         opacity: .7;
         cursor: not-allowed;
+      }
+      .ticket-create-btn-main {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .ticket-create-btn-main i,
+      .ticket-create-btn-main svg,
+      .ticket-create-btn-end i,
+      .ticket-create-btn-end svg {
+        width: 22px;
+        height: 22px;
+      }
+      .ticket-create-btn-sub {
+        display: block;
+        font-size: 12px;
+        font-weight: 500;
+        opacity: .88;
+        margin-top: 2px;
+      }
+      .ticket-file-picker-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 12px;
+      }
+      .ticket-file-picker-btn {
+        border: 1px solid #0f766e;
+        color: #0f766e;
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 10px 14px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .ticket-file-picker-meta {
+        color: #5b7480;
+        font-size: 13px;
+      }
+      .ticket-audio-visual-wrap {
+        display: grid;
+        place-items: center;
+        border: 1px solid #dcebed;
+        border-radius: 16px;
+        padding: 18px;
+        min-height: 208px;
+        background: #f9fcfc;
+      }
+      .ticket-audio-circle {
+        width: 96px;
+        height: 96px;
+        border-radius: 999px;
+        border: 8px solid rgba(45, 212, 191, .22);
+        background: linear-gradient(180deg, #0f766e, #115e59);
+        color: #ecfeff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 12px 24px rgba(15, 118, 110, .26);
+      }
+      .ticket-audio-circle i,
+      .ticket-audio-circle svg {
+        width: 28px;
+        height: 28px;
+      }
+      .ticket-audio-caption {
+        margin-top: 12px;
+        text-align: center;
+        color: #4e6d75;
+        font-size: 13px;
       }
       .ticket-filter-trigger {
         border: 1px solid rgba(45, 212, 191, .46);
@@ -6456,18 +6671,13 @@
         .ticket-filters-row { justify-content: stretch; }
         .ticket-filter-trigger { width: 100%; }
         .ticket-filters-toolbar { left: 0; right: 0; width: 100%; }
-        .ticket-form-field { grid-column: span 12; }
-        .ticket-create-card h3 { font-size: 24px; }
-        .ticket-create-btn { font-size: 18px; min-height: 48px; }
-      }
-      .ticket-upload-dropzone {
-        border: 2px dashed rgba(151,243,231,.72);
-        border-radius: 14px;
-        padding: 16px 12px;
-        text-align: center;
-        color: #24464d;
-        background: linear-gradient(145deg, rgba(17, 127, 129, .12), rgba(10, 78, 82, .08));
-        font-weight: 600;
+        .ticket-create-header { flex-direction: column; }
+        .ticket-date-card { min-width: 0; width: 100%; }
+        .ticket-main-card { grid-template-columns: 1fr; }
+        .ticket-main-aside { border-right: 0; border-bottom: 1px solid #e5eff1; }
+        .ticket-secondary-grid { grid-template-columns: 1fr; }
+        .ticket-create-title-block h3 { font-size: 26px; }
+        .ticket-create-btn { font-size: 19px; min-height: 60px; padding: 0 14px; }
       }
       .ticket-upload-dropzone.dragover {
         border-color: #4ee3d1;
@@ -6514,11 +6724,79 @@
         cursor: zoom-in;
       }
       .ticket-pdf-assistant {
-        margin-top: 14px;
-        border: 1px solid rgba(151,243,231,.28);
+        margin-top: 4px;
+        border: 1px solid #dcebed;
+        border-radius: 18px;
+        padding: 18px;
+        background: linear-gradient(160deg, #f4fbfc, #f8fcff);
+      }
+      .ticket-pdf-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+      .ticket-pdf-header i,
+      .ticket-pdf-header svg {
+        width: 19px;
+        height: 19px;
+        color: #0f766e;
+      }
+      .ticket-pdf-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .ticket-pdf-file-box {
+        border: 1px solid #dcebed;
         border-radius: 14px;
+        background: #ffffff;
         padding: 12px;
-        background: linear-gradient(145deg, rgba(9, 80, 85, .36), rgba(6, 38, 40, .26));
+      }
+      .ticket-pdf-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(15, 118, 110, .1);
+        color: #0f766e;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+      }
+      .ticket-pdf-actions-row {
+        margin-top: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .ticket-pdf-process-btn {
+        border: 1px solid #0f766e;
+        border-radius: 12px;
+        background: #ffffff;
+        color: #0f766e;
+        padding: 10px 14px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+      }
+      .ticket-pdf-process-btn:disabled {
+        opacity: .6;
+        cursor: not-allowed;
+      }
+      .ticket-pdf-process-btn i,
+      .ticket-pdf-process-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+      .ticket-pdf-help {
+        color: #5a7480;
+        font-size: 13px;
       }
       .ticket-pdf-assistant-grid {
         display: grid;
@@ -14440,68 +14718,92 @@
                       )}
                     </article>
                     <article className="profile-option ticket-create-card">
-                      <h3>Nuevo ticket</h3>
-                      <div className="ticket-create-subtitle">Ingresa los detalles para crear un nuevo ticket de forma manual.</div>
                       <form className="profile-form ticket-create-form" onSubmit={handleCreateTicket}>
-                        <div className="ticket-form-surface">
-                          <div className="ticket-form-grid">
+                        <div className="ticket-create-header">
+                          <div className="ticket-create-header-main">
+                            <div className="ticket-create-icon-box"><i data-lucide="receipt-text"></i></div>
+                            <div className="ticket-create-title-block">
+                              <h3>Crear ticket</h3>
+                              <div className="ticket-create-subtitle">Completá los datos para generar un nuevo ticket de soporte.</div>
+                            </div>
+                          </div>
+                          <div className="ticket-date-card">
+                            <div className="ticket-date-card-title"><i data-lucide="calendar-clock"></i><span>Fecha y hora</span></div>
+                            <div className="ticket-date-card-value">{formatUruguayDateTime()}</div>
+                          </div>
+                        </div>
+                        <div className="ticket-main-card">
+                          <aside className="ticket-main-aside">
+                            <div className="ticket-main-aside-item">
+                              <i data-lucide="user"></i>
+                              <div><strong>Usuario</strong><span>Nombre del solicitante</span></div>
+                            </div>
+                            <div className="ticket-main-aside-item">
+                              <i data-lucide="flag"></i>
+                              <div><strong>Prioridad</strong><span>Nivel de importancia</span></div>
+                            </div>
+                            <div className="ticket-main-aside-item">
+                              <i data-lucide="file-text"></i>
+                              <div><strong>Descripción</strong><span>Detalle del problema o solicitud</span></div>
+                            </div>
+                          </aside>
+                          <div className="ticket-main-fields">
                             <div className="ticket-form-field">
-                              <label className="ticket-form-label"><span>👤</span><span>Usuario</span></label>
                               <input type="text" value={currentUserName} readOnly />
                             </div>
                             <div className="ticket-form-field">
-                              <label className="ticket-form-label"><span>🗓️</span><span>Fecha y hora</span></label>
-                              <input type="text" value={formatUruguayDateTime()} readOnly />
-                            </div>
-                            <div className="ticket-form-field full">
-                              <label className="ticket-form-label"><span>🚩</span><span>Prioridad</span></label>
                               <select value={ticketPrioridad} onChange={(e) => setTicketPrioridad(e.target.value)}>
                                 <option>Alta</option>
                                 <option>Media</option>
                                 <option>Baja</option>
                               </select>
                             </div>
-                            <div className="ticket-form-field full">
-                              <label className="ticket-form-label"><span>📝</span><span>Descripción</span></label>
+                            <div className="ticket-form-field">
                               <textarea value={ticketComentario} onChange={(e) => setTicketComentario(e.target.value)} placeholder="Descripción del problema o solicitud..." />
                             </div>
-                            <div className="ticket-form-field full">
-                              <label className="ticket-form-label"><span>📎</span><span>Adjuntos</span></label>
-                              <input type="file" accept="image/*" multiple onChange={(e) => handleTicketFilesInput(e.target.files)} />
-                              <div
-                                className={`ticket-upload-dropzone ${ticketDragOver ? 'dragover' : ''}`}
-                                onDragOver={(e) => { e.preventDefault(); setTicketDragOver(true); }}
-                                onDragLeave={() => setTicketDragOver(false)}
-                                onDrop={handleTicketDrop}
-                              >
-                                Arrastrá imágenes aquí o seleccioná archivos.
-                              </div>
-                              <div className="ticket-audio-controls">
-                                {!ticketAudioRecording ? (
-                                  <button type="button" className="status-action-btn chat-action-btn" onClick={() => { void handleStartTicketAudioRecording(); }}>
-                                    🎙️ Grabar audio
-                                  </button>
-                                ) : (
-                                  <button type="button" className="status-action-btn reject" onClick={handleStopTicketAudioRecording}>
-                                    ⏹️ Detener grabación
-                                  </button>
-                                )}
-                                {ticketAudioDraft && (
-                                  <button type="button" className="status-action-btn" onClick={handleClearTicketAudio}>
-                                    Quitar audio
-                                  </button>
-                                )}
-                                <span className={`ticket-audio-status ${ticketAudioRecording ? 'recording' : ''}`}>
-                                  {ticketAudioRecording ? 'Grabando... permití el micrófono en Chrome.' : (ticketAudioDraft ? 'Audio listo para guardar en Firebase.' : 'Podés enviar un audio opcional con el ticket.')}
-                                </span>
-                              </div>
-                              {ticketAudioError && <div className="hint" style={{ color: '#b91c1c', marginTop: 6 }}>{ticketAudioError}</div>}
-                              {ticketAudioDraft?.dataUrl && (
-                                <div className="ticket-audio-player">
-                                  <audio controls preload="metadata" src={ticketAudioDraft.dataUrl} />
-                                </div>
+                          </div>
+                        </div>
+                        <div className="ticket-secondary-grid">
+                          <div className="ticket-side-card">
+                            <h4 className="ticket-side-card-title"><i data-lucide="paperclip"></i><span>Adjuntos</span></h4>
+                            <input id="ticket-file-input-main" type="file" accept="image/*" multiple onChange={(e) => handleTicketFilesInput(e.target.files)} style={{ display: 'none' }} />
+                            <div
+                              className={`ticket-upload-dropzone ${ticketDragOver ? 'dragover' : ''}`}
+                              onDragOver={(e) => { e.preventDefault(); setTicketDragOver(true); }}
+                              onDragLeave={() => setTicketDragOver(false)}
+                              onDrop={handleTicketDrop}
+                            >
+                              <i data-lucide="cloud-upload"></i>
+                              <div style={{ marginTop: 8 }}>Arrastrá imágenes aquí</div>
+                              <div className="ticket-file-picker-meta">o seleccioná archivos.</div>
+                            </div>
+                            <div className="ticket-file-picker-row">
+                              <label htmlFor="ticket-file-input-main" className="ticket-file-picker-btn">Elegir archivos</label>
+                              <span className="ticket-file-picker-meta">{ticketImagenes.length > 0 ? `${ticketImagenes.length} archivo(s) seleccionado(s)` : 'Sin archivos seleccionados'}</span>
+                            </div>
+                          </div>
+                          <div className="ticket-side-card">
+                            <h4 className="ticket-side-card-title"><i data-lucide="mic"></i><span>Grabar audio</span></h4>
+                            <div className="ticket-audio-visual-wrap">
+                              <button type="button" className="ticket-audio-circle" onClick={() => { if (ticketAudioRecording) handleStopTicketAudioRecording(); else void handleStartTicketAudioRecording(); }} aria-label={ticketAudioRecording ? 'Detener grabación' : 'Grabar audio'}>
+                                <i data-lucide={ticketAudioRecording ? 'square' : 'mic'}></i>
+                              </button>
+                              <div className="ticket-audio-caption">Grabá un audio opcional para agregar a tu ticket.</div>
+                              <span className={`ticket-audio-status ${ticketAudioRecording ? 'recording' : ''}`}>
+                                {ticketAudioRecording ? 'Grabando... permití el micrófono en Chrome.' : (ticketAudioDraft ? 'Audio listo para guardar en Firebase.' : 'Acción opcional.')}
+                              </span>
+                              {ticketAudioDraft && (
+                                <button type="button" className="ticket-file-picker-btn" onClick={handleClearTicketAudio}>
+                                  Quitar audio
+                                </button>
                               )}
                             </div>
+                            {ticketAudioError && <div className="hint" style={{ color: '#b91c1c', marginTop: 8 }}>{ticketAudioError}</div>}
+                            {ticketAudioDraft?.dataUrl && (
+                              <div className="ticket-audio-player">
+                                <audio controls preload="metadata" src={ticketAudioDraft.dataUrl} />
+                              </div>
+                            )}
                           </div>
                         </div>
                         {ticketImagenes.length > 0 && (
@@ -14510,14 +14812,23 @@
                           </div>
                         )}
                         <div className="ticket-pdf-assistant">
-                          <h4 style={{ margin: '0 0 6px' }}>Prueba: asistente de ticket por PDF</h4>
-                          <div className="hint" style={{ marginBottom: 8 }}>Subí un PDF, procesalo y revisá los datos detectados antes de crear el ticket.</div>
-                          <div className="ticket-pdf-assistant-grid">
-                            <div className="field">
-                              <label>Archivo PDF</label>
+                          <div className="ticket-pdf-header">
+                            <i data-lucide="file-text"></i>
+                            <h4 style={{ margin: 0 }}>Prueba: asistente de ticket por PDF</h4>
+                          </div>
+                          <div className="hint" style={{ marginBottom: 12, color: '#4f6e76' }}>Subí un PDF, procesalo y revisá los datos detectados antes de crear el ticket.</div>
+                          <div className="ticket-pdf-row">
+                            <div className="ticket-pdf-file-box">
+                              <span className="ticket-pdf-badge">Archivo PDF</span>
+                              <div className="ticket-file-picker-row">
+                                <label htmlFor="ticket-pdf-input-main" className="ticket-file-picker-btn">Seleccionar archivo</label>
+                                <span className="ticket-file-picker-meta">{ticketPdfFile?.name || 'Sin archivos seleccionados'}</span>
+                              </div>
                               <input
+                                id="ticket-pdf-input-main"
                                 type="file"
                                 accept="application/pdf,.pdf"
+                                style={{ display: 'none' }}
                                 onChange={(e) => {
                                   const nextFile = e.target.files && e.target.files[0] ? e.target.files[0] : null;
                                   setTicketPdfFile(nextFile);
@@ -14527,13 +14838,12 @@
                                 }}
                               />
                             </div>
-                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                              <button type="button" className="status-action-btn chat-action-btn" onClick={() => { void handleProcessTicketPdf(); }} disabled={!ticketPdfFile || ticketPdfParsing}>
+                            <div className="ticket-pdf-actions-row">
+                              <button type="button" className="ticket-pdf-process-btn" onClick={() => { void handleProcessTicketPdf(); }} disabled={!ticketPdfFile || ticketPdfParsing}>
+                                <i data-lucide="scan-search"></i>
                                 {ticketPdfParsing ? 'Procesando PDF...' : 'Procesar PDF'}
                               </button>
-                              <button type="button" className="status-action-btn accept" onClick={() => { void handleCreateTicketFromPdf(); }} disabled={!ticketPdfPreview || ticketPdfCreating}>
-                                {ticketPdfCreating ? 'Creando ticket...' : 'Confirmar y crear ticket'}
-                              </button>
+                              <div className="ticket-pdf-help">Subí un PDF para extraer los datos automáticamente.</div>
                             </div>
                           </div>
                           {ticketPdfError && <div className="hint" style={{ color: '#fecaca', marginTop: 8 }}>{ticketPdfError}</div>}
@@ -14592,8 +14902,14 @@
                           )}
                         </div>
                         <button className="ticket-create-btn" type="submit" disabled={ticketSaving}>
-                          <span>➕</span>
-                          <span>{ticketSaving ? 'Enviando...' : 'Crear ticket'}</span>
+                          <span className="ticket-create-btn-main">
+                            <i data-lucide="plus"></i>
+                            <span>
+                              {ticketSaving ? 'Enviando...' : 'Crear ticket'}
+                              <small className="ticket-create-btn-sub">Generar nuevo ticket de soporte</small>
+                            </span>
+                          </span>
+                          <span className="ticket-create-btn-end"><i data-lucide="chevron-right"></i></span>
                         </button>
                       </form>
                     </article>
