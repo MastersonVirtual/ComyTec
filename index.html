@@ -2957,6 +2957,57 @@
         min-height: 46px;
         font-size: 15px;
       }
+      .google-login-panel {
+        background: linear-gradient(165deg, rgba(246, 253, 252, .94), rgba(236, 248, 248, .9)) !important;
+        border: 1px solid rgba(148, 203, 199, .5) !important;
+        box-shadow: 0 18px 36px rgba(6, 47, 45, .2) !important;
+      }
+      .google-login-panel h2 {
+        color: #0b2f35 !important;
+        font-size: clamp(1.5rem, 4vw, 1.9rem);
+        margin-bottom: 6px;
+      }
+      .google-login-panel .hint {
+        color: #44626b !important;
+        margin-bottom: 18px;
+      }
+      .google-login-panel .microcopy {
+        margin-top: 12px;
+        color: #5f7d85;
+        font-size: 12px;
+        text-align: center;
+      }
+      .google-login-btn {
+        width: 100%;
+        min-height: 52px;
+        border-radius: 14px;
+        border: 1px solid #b9d4d3;
+        background: #ffffff;
+        color: #153c44;
+        font-weight: 700;
+        font-size: 15px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: transform var(--motion-fast) ease, box-shadow var(--motion-fast) ease, border-color var(--motion-fast) ease;
+      }
+      .google-login-btn:hover {
+        transform: translateY(-1px);
+        border-color: #0f766e;
+        box-shadow: 0 10px 20px rgba(15, 118, 110, .16);
+      }
+      .google-login-btn:disabled {
+        opacity: .68;
+        cursor: not-allowed;
+      }
+      .google-icon-dot {
+        width: 20px;
+        height: 20px;
+        border-radius: 999px;
+        background: conic-gradient(from 45deg, #ea4335 0 25%, #fbbc05 25% 50%, #34a853 50% 75%, #4285f4 75% 100%);
+      }
       @media (max-width: 520px) {
         .login-stack { width: 100%; }
         .login-panel { border-radius: 18px; }
@@ -7828,6 +7879,7 @@
       const db = firebase.firestore();
       const auth = firebase.auth();
       const rtdb = typeof firebase.database === 'function' ? firebase.database() : null;
+      const GMAIL_READONLY_SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
 
       async function guardarPdfEnFirestore(data = {}) {
         try {
@@ -8914,19 +8966,29 @@
       }
 
       function LoginScreen() {
-        const [email, setEmail] = useState('');
-        const [password, setPassword] = useState('');
         const [loading, setLoading] = useState(false);
         const [error, setError] = useState('');
 
-        async function handleLogin(e) {
-          e.preventDefault();
+        async function handleGoogleLogin() {
           setError('');
           try {
             setLoading(true);
-            await auth.signInWithEmailAndPassword(email.trim(), password);
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' });
+            await auth.signInWithPopup(provider);
           } catch (err) {
-            setError('No se pudo iniciar sesión. Verificá email y contraseña.');
+            if (String(err?.code || '').includes('popup')) {
+              try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.setCustomParameters({ prompt: 'select_account' });
+                await auth.signInWithRedirect(provider);
+                return;
+              } catch (redirectErr) {
+                console.error('Error con redirect de Google:', redirectErr);
+              }
+            }
+            console.error('Error iniciando sesión con Google:', err);
+            setError('No se pudo iniciar sesión con Google. Intentá nuevamente.');
           } finally {
             setLoading(false);
           }
@@ -8935,21 +8997,16 @@
         return (
           <div className="login-shell">
             <div className="login-stack">
-              <form className="login-panel" onSubmit={handleLogin}>
-                <h2>Masterson Seguridad</h2>
-                <div className="hint">Área técnica y Comercial</div>
-              {error && <div className="login-error">{error}</div>}
-              <div className="field">
-                <label>Email</label>
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              </div>
-              <div className="field">
-                <label>Contraseña</label>
-                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-              </div>
-              <button className="save-btn" type="submit" disabled={loading}>{loading ? 'Ingresando...' : 'Iniciar Sesión'}</button>
-              </form>
-
+              <section className="login-panel google-login-panel">
+                <h2>Bienvenido a Masterson</h2>
+                <div className="hint">Accedé a tu panel con tu cuenta de Google.</div>
+                {error && <div className="login-error">{error}</div>}
+                <button className="google-login-btn" type="button" onClick={handleGoogleLogin} disabled={loading}>
+                  <span className="google-icon-dot" aria-hidden="true"></span>
+                  <span>{loading ? 'Conectando...' : 'Continuar con Google'}</span>
+                </button>
+                <div className="microcopy">Si es tu primera vez, tu cuenta se creará automáticamente.</div>
+              </section>
             </div>
           </div>
         );
@@ -11001,10 +11058,10 @@
           }
           try {
             setSavingProfileAvatar(true);
-            await db.collection('config_usuarios').doc(user.email || user.uid).set({
+            await db.collection('config_usuarios').doc(user.uid).set({
               email: user.email || '',
               nombre: currentUserName || (user.email || '').split('@')[0] || 'Usuario',
-              rol: userRole || 'admin',
+              rol: userRole || 'usuario',
               area: userArea || '',
               avatarId: nextAvatarId,
               avatarUpdatedAt: firebase.firestore.FieldValue.serverTimestamp(),
@@ -11164,6 +11221,36 @@
           topSalesLeaderRef.current = salesLeader;
         }, [rows, isGerencia, isAdminUser]);
 
+        async function upsertAuthenticatedUserProfile(currentUser) {
+          if (!currentUser?.uid) return null;
+          const userRef = db.collection('users').doc(currentUser.uid);
+          const nowStamp = firebase.firestore.FieldValue.serverTimestamp();
+          const providerId = (Array.isArray(currentUser.providerData) && currentUser.providerData[0]?.providerId)
+            ? String(currentUser.providerData[0].providerId)
+            : 'google.com';
+          const baseDoc = {
+            uid: currentUser.uid,
+            email: currentUser.email || '',
+            displayName: currentUser.displayName || '',
+            photoURL: currentUser.photoURL || '',
+            provider: providerId,
+            lastLoginAt: nowStamp,
+            gmail: {
+              connected: false,
+              scope: GMAIL_READONLY_SCOPE,
+              tokenStoredServerSide: false,
+              lastSyncAt: null,
+            },
+          };
+          const existing = await userRef.get();
+          if (!existing.exists) {
+            await userRef.set({ ...baseDoc, createdAt: nowStamp }, { merge: true });
+            return { ...baseDoc, createdAt: null };
+          }
+          await userRef.set(baseDoc, { merge: true });
+          return { ...(existing.data() || {}), ...baseDoc };
+        }
+
         useEffect(() => {
           const unsub = auth.onAuthStateChanged(async (currentUser) => {
             setUser(currentUser);
@@ -11182,18 +11269,19 @@
 
             setRoleLoading(true);
             try {
-              let profile = null;
-              const byId = await db.collection('config_usuarios').doc(currentUser.email || currentUser.uid).get();
-              if (byId.exists) profile = byId.data();
+              const modernProfile = await upsertAuthenticatedUserProfile(currentUser);
+              let profile = modernProfile || null;
+              const byUid = await db.collection('config_usuarios').doc(currentUser.uid).get();
+              if (byUid.exists) profile = { ...(profile || {}), ...byUid.data() };
 
-              if (!profile && currentUser.email) {
+              if (!byUid.exists && currentUser.email) {
                 const snap = await db.collection('config_usuarios').where('email', '==', currentUser.email).limit(1).get();
-                if (!snap.empty) profile = snap.docs[0].data();
+                if (!snap.empty) profile = { ...(profile || {}), ...snap.docs[0].data() };
               }
 
-              const rol = (profile?.rol || 'admin').toLowerCase();
-              const area = (profile?.area || '').toLowerCase();
-              const nombre = String(profile?.nombre || currentUser.displayName || (currentUser.email || '').split('@')[0] || 'Usuario').trim();
+              const rol = String(profile?.rol || 'usuario').toLowerCase();
+              const area = String(profile?.area || '').toLowerCase();
+              const nombre = String(profile?.nombre || profile?.displayName || currentUser.displayName || (currentUser.email || '').split('@')[0] || 'Usuario').trim();
               const avatarId = PROFILE_AVATAR_OPTIONS.some((avatar) => avatar.id === profile?.avatarId) ? profile.avatarId : DEFAULT_PROFILE_AVATAR_ID;
               setBaseRole(rol);
               setBaseArea(area);
@@ -11203,11 +11291,11 @@
               setProfileAvatarId(avatarId);
             } catch (err) {
               console.error('Error leyendo config_usuarios:', err);
-              setBaseRole('admin');
+              setBaseRole('usuario');
               setBaseArea('');
-              setUserRole('admin');
+              setUserRole('usuario');
               setUserArea('');
-              setUserData({ nombre: (currentUser?.email || 'admin').split('@')[0], rol: 'admin', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
+              setUserData({ nombre: (currentUser?.email || 'usuario').split('@')[0], rol: 'usuario', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
               setProfileAvatarId(DEFAULT_PROFILE_AVATAR_ID);
             } finally {
               setRoleLoading(false);
