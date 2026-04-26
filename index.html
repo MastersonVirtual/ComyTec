@@ -11090,8 +11090,8 @@
             setTicketsHistorial([]);
             return () => {};
           }
-          const ticketManager = String(user?.email || '').trim().toLowerCase() === 'alfonso332estigarribia@gmail.com';
-          const ref = ticketManager
+          const isAdminSnapshot = String(userRole || '').trim().toLowerCase() === 'admin';
+          const ref = isAdminSnapshot
             ? db.collection('tickets_app').orderBy('creadoEn', 'desc').limit(200)
             : db.collection('tickets_app').where('creadoPorUid', '==', user.uid).orderBy('creadoEn', 'desc').limit(40);
           const unsub = ref.onSnapshot((snapshot) => {
@@ -11101,7 +11101,7 @@
             console.error('Error leyendo tickets_app:', error);
           });
           return () => unsub();
-        }, [user?.uid, user?.email]);
+        }, [user?.uid, user?.email, userRole]);
 
 
         useEffect(() => {
@@ -11420,8 +11420,8 @@
           });
         }, [staffMembers, staffConversations, pendingMessagesByStaff, chatPendingFlags, chatPinnedFlags, staffSearchTerm]);
         const CHAT_EMOJIS = ['😀', '😄', '😁', '😅', '😂', '😊', '😍', '🤩', '😎', '🤔', '😮', '😴', '👍', '👏', '🙌', '🙏', '🔥', '💡', '📌', '✅', '❗', '🎉', '💬', '🤝'];
-        const isTicketManager = String(user?.email || '').trim().toLowerCase() === 'alfonso332estigarribia@gmail.com';
         const isAdminUser = userRole === 'admin';
+        const isTicketManager = isAdminUser || String(user?.email || '').trim().toLowerCase() === 'alfonso332estigarribia@gmail.com';
         const unreadBellCount = useMemo(() => allNotifications.filter((item) => !item?.read).length, [allNotifications]);
         const mobileUnreadAlerts = useMemo(() => mobileAlerts.filter((a) => !a.read).length, [mobileAlerts]);
         const adminPendingRequests = useMemo(() => adminCredentialRequests.filter((r) => r?.estado === 'pendiente'), [adminCredentialRequests]);
@@ -13738,6 +13738,26 @@
           return Object.entries(groups).map(([dateLabel, items]) => ({ dateLabel, items }));
         }, [ticketsHistorial, isTicketManager, ticketFilterFrom, ticketFilterTo, ticketFilterStatus, ticketFilterOrigen]);
 
+        const groupedOwnTickets = useMemo(() => {
+          const myUid = String(user?.uid || '').trim();
+          const myEmail = String(user?.email || '').trim().toLowerCase();
+          const ownTickets = ticketsHistorial.filter((ticket) => {
+            const ticketUid = String(ticket?.creadoPorUid || '').trim();
+            const ticketEmail = String(ticket?.creadoPorEmail || '').trim().toLowerCase();
+            if (myUid && ticketUid) return ticketUid === myUid;
+            if (myEmail && ticketEmail) return ticketEmail === myEmail;
+            return false;
+          });
+          const groups = ownTickets.reduce((acc, ticket) => {
+            const dt = parseTicketDate(ticket?.creadoEn, ticket?.fechaHoraLocal);
+            const label = dt ? dt.toLocaleDateString('es-UY', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) : 'Sin fecha';
+            if (!acc[label]) acc[label] = [];
+            acc[label].push(ticket);
+            return acc;
+          }, {});
+          return Object.entries(groups).map(([dateLabel, items]) => ({ dateLabel, items }));
+        }, [ticketsHistorial, user?.uid, user?.email]);
+
         const ticketAssignableUsers = useMemo(() => {
           const map = new Map();
           staffMembers.forEach((member) => {
@@ -13757,14 +13777,15 @@
         const ticketSearchResults = useMemo(() => {
           const q = ticketSearchCode.trim().toLowerCase();
           if (!q) return [];
-          return ticketsHistorial.filter((ticket) => [
+          const source = isTicketManager ? ticketsHistorial : groupedOwnTickets.flatMap((group) => group.items);
+          return source.filter((ticket) => [
             ticket.ticketCodigo,
             ticket.comentario,
             ticket.clienteId,
             ticket.nombreServicio,
             ticket.operacionId,
           ].filter(Boolean).some((value) => String(value).toLowerCase().includes(q))).slice(0, 30);
-        }, [ticketsHistorial, ticketSearchCode]);
+        }, [ticketsHistorial, groupedOwnTickets, isTicketManager, ticketSearchCode]);
 
         function openTicketReassignModal(ticket) {
           if (!ticket?.id) return;
@@ -14722,6 +14743,68 @@
                                     )}
                                   </div>
                                 )})}
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </article>
+                    )}
+                    {!isTicketManager && (
+                      <article className="profile-option">
+                        <h3>Mis tickets</h3>
+                        <div className="hint">Viendo solo tus tickets y respuestas del desarrollador.</div>
+                        {groupedOwnTickets.length === 0 ? (
+                          <div className="ticket-empty-state">Todavía no registrás tickets propios.</div>
+                        ) : (
+                          groupedOwnTickets.map((group) => (
+                            <div key={`group-own-${group.dateLabel}`} className="ticket-date-group">
+                              <h4 className="ticket-date-title">{group.dateLabel}</h4>
+                              <div className="ticket-cards-grid">
+                                {group.items.map((ticket) => {
+                                  const ticketStatusLabel = getTicketStatusLabel(ticket);
+                                  return (
+                                    <div key={`own-${ticket.id}`} className="ticket-item-card clickable" role="button" tabIndex={0} onClick={() => openTicketDetailModal(ticket)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') openTicketDetailModal(ticket); }}>
+                                      <div className="ticket-card-header">
+                                        <h5 className="ticket-card-title">{ticket.ticketCodigo || `TICKET-${ticket.id}`}</h5>
+                                        <span className={`status-chip-inline ${
+                                          ticketStatusLabel === 'resuelto'
+                                            ? 'resolved'
+                                            : ticketStatusLabel === 'en proceso'
+                                              ? 'progress'
+                                              : 'pending'
+                                        }`}>
+                                          {ticket.estado || 'pendiente'}
+                                        </span>
+                                      </div>
+                                      <div className="ticket-card-main">
+                                        <div className="kv"><b>Fecha:</b> {ticket.fechaHoraLocal || formatRequestDateTime(ticket.creadoEn)}</div>
+                                        <div className="kv"><b>Prioridad:</b> {ticket.prioridad || '-'}</div>
+                                        <div className="kv"><b>Origen:</b> {ticket.origen === 'form-gestion' ? 'Formulario' : ticket.origen === 'pdf-asistido' ? 'PDF asistido' : 'Manual'}</div>
+                                        {ticket.origen === 'form-gestion' && <div className="kv"><b>Cliente ID:</b> {ticket.clienteId || '-'}</div>}
+                                      </div>
+                                      <div className="kv ticket-comment-block"><b>Comentario:</b> {ticket.comentario || '-'}</div>
+                                      {!!String(ticket.resolucionComentario || '').trim() && (
+                                        <div className="kv ticket-comment-block ticket-resolution-summary"><b>Respuesta del desarrollador:</b> {ticket.resolucionComentario}</div>
+                                      )}
+                                      {ticket.audioAdjunto?.dataUrl && (
+                                        <div className="ticket-audio-player" onClick={(e) => e.stopPropagation()}>
+                                          <div className="kv" style={{ marginBottom: 4 }}><b>Audio:</b> {ticket.audioAdjunto.nombre || 'Adjunto de voz'}</div>
+                                          <audio controls preload="metadata" src={ticket.audioAdjunto.dataUrl} />
+                                        </div>
+                                      )}
+                                      {Array.isArray(ticket.imagenesAdjuntas) && ticket.imagenesAdjuntas.length > 0 && (
+                                        <div className="ticket-image-grid">
+                                          {ticket.imagenesAdjuntas.map((img, idx) => (<img key={`own-hist-img-${ticket.id}-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `adj-${idx + 1}`} onClick={() => openImageViewer(img.dataUrl)} />))}
+                                        </div>
+                                      )}
+                                      {Array.isArray(ticket.resolucionImagenes) && ticket.resolucionImagenes.length > 0 && (
+                                        <div className="ticket-image-grid">
+                                          {ticket.resolucionImagenes.map((img, idx) => (<img key={`own-hist-resolution-img-${ticket.id}-${idx}`} className="ticket-thumb" src={img.dataUrl} alt={img.nombre || `res-${idx + 1}`} onClick={() => openImageViewer(img.dataUrl)} />))}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
                               </div>
                             </div>
                           ))
