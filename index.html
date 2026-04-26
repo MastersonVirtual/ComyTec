@@ -9014,16 +9014,19 @@
             setLoading(true);
             const provider = new firebase.auth.GoogleAuthProvider();
             provider.addScope(GMAIL_READONLY_SCOPE);
-            provider.setCustomParameters({ prompt: 'select_account' });
+            provider.setCustomParameters({ prompt: 'consent' });
             const result = await auth.signInWithPopup(provider);
             const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
             const accessToken = credential?.accessToken || '';
+            console.log('ACCESS TOKEN:', accessToken);
+            if (!accessToken) throw new Error('No se recibió accessToken de Google con scope Gmail.');
             if (accessToken && typeof onGoogleToken === 'function') onGoogleToken(accessToken);
           } catch (err) {
             if (String(err?.code || '').includes('popup')) {
               try {
                 const provider = new firebase.auth.GoogleAuthProvider();
-                provider.setCustomParameters({ prompt: 'select_account' });
+                provider.addScope(GMAIL_READONLY_SCOPE);
+                provider.setCustomParameters({ prompt: 'consent' });
                 await auth.signInWithRedirect(provider);
                 return;
               } catch (redirectErr) {
@@ -11361,6 +11364,7 @@
             if (!active || !result) return;
             const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
             const token = credential?.accessToken || '';
+            console.log('ACCESS TOKEN:', token);
             if (token) setGmailAccessToken(token);
           }).catch((error) => {
             console.log(error);
@@ -11525,6 +11529,10 @@
             throw new Error(`Gmail list error ${listResponse.status}: ${errorBody}`);
           }
           const listData = await listResponse.json();
+          console.log('GMAIL RESPONSE:', listData);
+          if (listData?.error) {
+            throw new Error(`Gmail API error: ${JSON.stringify(listData.error)}`);
+          }
           const messageItems = Array.isArray(listData.messages) ? listData.messages : [];
           const detailResults = await Promise.all(messageItems.map(async (item) => {
             const detailUrl = `https://gmail.googleapis.com/gmail/v1/users/me/messages/${item.id}`;
@@ -11571,7 +11579,7 @@
             } catch (error) {
               console.log(error);
               if (!active) return;
-              setGmailApiError('No se pudieron cargar los correos');
+              setGmailApiError(String(error?.message || 'No se pudieron cargar los correos'));
               setGmailApiEmails([]);
             } finally {
               if (active) setGmailApiLoading(false);
