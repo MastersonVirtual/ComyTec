@@ -2452,6 +2452,71 @@
         justify-content: flex-end;
         gap: 8px;
       }
+      .mail-detail-overlay {
+        background: rgba(20, 24, 28, .36);
+        backdrop-filter: blur(4px);
+      }
+      .mail-detail-modal {
+        width: min(860px, 96vw);
+        max-height: 88vh;
+        overflow: auto;
+        background: #f7f9fb;
+        border: 1px solid #dbe3ea;
+        border-radius: 16px;
+        color: #0f172a;
+        box-shadow: 0 24px 70px rgba(15, 23, 42, .22);
+        padding: 18px;
+      }
+      .mail-detail-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+      .mail-detail-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: #0b8f8b;
+        font-weight: 800;
+        font-size: 32px;
+      }
+      .mail-detail-title small {
+        font-size: 16px;
+        font-weight: 700;
+      }
+      .mail-detail-close {
+        border: none;
+        background: transparent;
+        color: #64748b;
+        font-size: 28px;
+        cursor: pointer;
+        line-height: 1;
+      }
+      .mail-detail-meta .kv {
+        color: #1f2937;
+        margin: 8px 0;
+      }
+      .mail-detail-body {
+        margin-top: 12px;
+        border: 1px solid #d7e2ea;
+        border-radius: 12px;
+        background: #ffffff;
+        padding: 12px 14px;
+        max-height: 360px;
+        overflow: auto;
+        white-space: pre-wrap;
+        color: #1f2937;
+      }
+      .mail-detail-actions {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 14px;
+      }
+      .mail-detail-actions .save-btn {
+        min-width: 96px;
+        border-radius: 10px;
+      }
       .client-view-modal {
         width: min(440px, 100%);
         background: rgba(10, 21, 21, .96);
@@ -17610,17 +17675,25 @@
               )}
 
               {gmailDetailModal.open && (
-                <div className="confirm-modal" onClick={() => setGmailDetailModal({ open: false, mail: null, body: '' })}>
-                  <div className="confirm-modal-card" style={{ width: 'min(760px, 96vw)', maxHeight: '86vh', overflow: 'auto' }} onClick={(e) => e.stopPropagation()}>
-                    <h3 style={{ marginTop: 0 }}>Detalle de correo</h3>
-                    <div className="kv"><b>Fecha:</b> {gmailDetailModal.mail?.dateRaw || '-'}</div>
-                    <div className="kv"><b>Remitente:</b> {gmailDetailModal.mail?.from || '-'}</div>
-                    <div className="kv"><b>Asunto:</b> {gmailDetailModal.mail?.subject || '-'}</div>
-                    <div className="ticket-detail-comment" style={{ marginTop: 10, color: '#e6fffd', whiteSpace: 'pre-wrap' }}>
+                <div className="confirm-modal mail-detail-overlay" onClick={() => setGmailDetailModal({ open: false, mail: null, body: '' })}>
+                  <div className="confirm-modal-card mail-detail-modal" onClick={(e) => e.stopPropagation()}>
+                    <div className="mail-detail-header">
+                      <div className="mail-detail-title">
+                        <span>✉️</span>
+                        <small>Detalle de correo</small>
+                      </div>
+                      <button type="button" className="mail-detail-close" onClick={() => setGmailDetailModal({ open: false, mail: null, body: '' })}>×</button>
+                    </div>
+                    <div className="mail-detail-meta">
+                      <div className="kv"><b>📅 Fecha:</b> {gmailDetailModal.mail?.dateRaw || '-'}</div>
+                      <div className="kv"><b>👤 Remitente:</b> {gmailDetailModal.mail?.from || '-'}</div>
+                      <div className="kv"><b>🏷 Asunto:</b> {gmailDetailModal.mail?.subject || '-'}</div>
+                    </div>
+                    <div className="mail-detail-body">
                       {gmailDetailLoading ? 'Cargando contenido...' : (gmailDetailModal.body || 'Sin contenido para mostrar.')}
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
-                      <button type="button" className="edit-btn" onClick={() => setGmailDetailModal({ open: false, mail: null, body: '' })}>Cerrar</button>
+                    <div className="mail-detail-actions">
+                      <button type="button" className="save-btn" onClick={() => setGmailDetailModal({ open: false, mail: null, body: '' })}>Cerrar</button>
                     </div>
                   </div>
                 </div>
