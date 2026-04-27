@@ -11396,9 +11396,51 @@
               }
 
               const hasRegisteredAccess = byUid.exists || emailProfileFound;
-              setAccessApprovalRequired(!hasRegisteredAccess);
+              let hasApprovedRequest = false;
               if (!hasRegisteredAccess) {
+                const pendingChecks = [];
+                if (currentUser.uid) {
+                  pendingChecks.push(
+                    db.collection('solicitudes_credenciales')
+                      .where('solicitanteUid', '==', currentUser.uid)
+                      .limit(25)
+                      .get()
+                  );
+                }
+                if (currentUser.email) {
+                  pendingChecks.push(
+                    db.collection('solicitudes_credenciales')
+                      .where('solicitanteEmail', '==', currentUser.email)
+                      .limit(25)
+                      .get()
+                  );
+                }
+                if (pendingChecks.length > 0) {
+                  const checks = await Promise.all(pendingChecks);
+                  hasApprovedRequest = checks.some((snap) => snap.docs.some((doc) => {
+                    const estado = String(doc.data()?.estado || '').trim().toLowerCase();
+                    return estado === 'aprobada' || estado === 'aplicada';
+                  }));
+                }
+              }
+
+              const accessAllowed = hasRegisteredAccess || hasApprovedRequest;
+              setAccessApprovalRequired(!accessAllowed);
+              if (!accessAllowed) {
                 console.warn('[AUTH] Usuario sin autorización en config_usuarios:', currentUser.email || currentUser.uid || 'sin-identificador');
+              } else if (!hasRegisteredAccess && currentUser?.uid) {
+                const bootstrapProfile = {
+                  uid: currentUser.uid,
+                  email: currentUser.email || '',
+                  nombre: currentUser.displayName || (currentUser.email || '').split('@')[0] || 'Usuario',
+                  rol: 'usuario',
+                  area: '',
+                  avatarId: DEFAULT_PROFILE_AVATAR_ID,
+                  accesoAprobado: true,
+                  actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+                };
+                await db.collection('config_usuarios').doc(currentUser.uid).set(bootstrapProfile, { merge: true });
+                profile = { ...(profile || {}), ...bootstrapProfile };
               }
 
               const rol = String(profile?.rol || 'usuario').toLowerCase();
