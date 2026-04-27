@@ -8970,6 +8970,9 @@
       const WORKERS_API_BASE = 'https://api.2workers.me/v2';
       const WORKERS_APP_KEY = 'l6GOChiU3khWkEvdYaySoPi700ec7XU';
       const WORKERS_TOKEN = 'l6GOChiU3kifhNVrKdRTTZXLQRMJWD';
+      // Recomendado: URL HTTPS de una Cloud Function/Firebase Hosting rewrite que consulte 2Workers del lado servidor.
+      // Ejemplo: 'https://us-central1-TU-PROYECTO.cloudfunctions.net/workersTasks'
+      const WORKERS_FIREBASE_PROXY_URL = '';
       const WORKERS_CORS_PROXY = 'https://corsproxy.io/?';
 
       function generarClienteId() {
@@ -11982,17 +11985,46 @@
               'X-APP-KEY': WORKERS_APP_KEY,
               'Content-Type': 'application/json',
             };
+
+            const requestChain = [];
+            if (WORKERS_FIREBASE_PROXY_URL) {
+              requestChain.push({
+                label: 'firebase-proxy',
+                url: WORKERS_FIREBASE_PROXY_URL,
+                options: { method: 'GET' },
+              });
+            }
+            requestChain.push(
+              {
+                label: 'direct',
+                url: `${WORKERS_API_BASE}/tasks`,
+                options: { headers },
+              },
+              {
+                label: 'cors-proxy',
+                url: `${WORKERS_CORS_PROXY}${encodeURIComponent(`${WORKERS_API_BASE}/tasks`)}`,
+                options: { headers },
+              },
+            );
+
             let response = null;
-            try {
-              response = await fetch(`${WORKERS_API_BASE}/tasks`, { headers });
-            } catch (directError) {
-              console.warn('Agenda API directa bloqueada por CORS/origen. Reintentando con proxy...', directError);
+            let lastError = null;
+            for (const request of requestChain) {
+              try {
+                const currentResponse = await fetch(request.url, request.options);
+                if (currentResponse.ok) {
+                  response = currentResponse;
+                  break;
+                }
+                lastError = new Error(`Agenda API ${request.label} ${currentResponse.status}`);
+                console.warn(`Agenda fallback: ${request.label} respondió ${currentResponse.status}`);
+              } catch (requestError) {
+                lastError = requestError;
+                console.warn(`Agenda fallback: fallo ${request.label}`, requestError);
+              }
             }
-            if (!response || !response.ok) {
-              const proxyUrl = `${WORKERS_CORS_PROXY}${encodeURIComponent(`${WORKERS_API_BASE}/tasks`)}`;
-              response = await fetch(proxyUrl, { headers });
-            }
-            if (!response.ok) throw new Error(`Agenda API ${response.status}`);
+
+            if (!response) throw (lastError || new Error('Agenda API sin respuesta válida'));
             const payload = await response.json();
             const rawItems = Array.isArray(payload) ? payload : (Array.isArray(payload?.tasks) ? payload.tasks : (Array.isArray(payload?.data) ? payload.data : []));
             const today = new Date();
