@@ -15570,45 +15570,6 @@
                                 <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('tickets')}>Tickets</button>
                               </div>
                             </div>
-                            <div className="home-hero-illustration" id="gmail-list">
-                              {gmailApiError ? (
-                                <div className="home-hero-mail-empty">
-                                  <i data-lucide="mail-warning"></i>
-                                  <div className="hint" style={{ margin: 0 }}>{gmailApiError}</div>
-                                  <button type="button" className="home-modern-action-btn" onClick={() => { void sincronizarVistaMail(); }}>
-                                    Sincronizar mails
-                                  </button>
-                                </div>
-                              ) : gmailApiLoading ? (
-                                <div className="home-hero-mail-empty">
-                                  <i data-lucide="loader-circle"></i>
-                                  <div className="hint" style={{ margin: 0 }}>Cargando correos...</div>
-                                </div>
-                              ) : gmailApiEmails.length > 0 ? (
-                                <div className="home-hero-mail-list">
-                                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
-                                    <button type="button" className="home-modern-action-btn" onClick={() => { void sincronizarVistaMail(); }}>
-                                      Sincronizar mails
-                                    </button>
-                                  </div>
-                                  {gmailApiEmails.map((mail) => (
-                                    <article key={`mail-api-preview-${mail.id}`} className="home-hero-mail-item">
-                                      <div className="home-hero-mail-top"><span>{mail.dateRaw || '-'}</span></div>
-                                      <div className="home-hero-mail-from">{mail.from || 'Sin remitente'}</div>
-                                      <div className="home-hero-mail-subject">{mail.subject || 'Sin asunto'}</div>
-                                    </article>
-                                  ))}
-                                </div>
-                              ) : (
-                                <div className="home-hero-mail-empty">
-                                  <i data-lucide="mail"></i>
-                                  <div className="hint" style={{ margin: 0 }}>Iniciá sesión con Google para ver los últimos correos.</div>
-                                  <button type="button" className="home-modern-action-btn" onClick={() => { void sincronizarVistaMail(); }}>
-                                    Sincronizar mails
-                                  </button>
-                                </div>
-                              )}
-                            </div>
                           </article>
 
                           <section className="home-widget-shell">
@@ -15845,6 +15806,48 @@
                                     </div>
                                   ))}
                                   {recentActivity.length === 0 && <small>Sin actividad por el momento.</small>}
+                                </div>
+                              </article>
+                              <article className="dash-side-card dashboard-equal-card">
+                                <h4>Vista de mails</h4>
+                                <div className="home-hero-illustration" id="gmail-list">
+                                  {gmailApiError ? (
+                                    <div className="home-hero-mail-empty">
+                                      <i data-lucide="mail-warning"></i>
+                                      <div className="hint" style={{ margin: 0 }}>{gmailApiError}</div>
+                                      <button type="button" className="home-modern-action-btn" onClick={() => { void sincronizarVistaMail(); }}>
+                                        Sincronizar mails
+                                      </button>
+                                    </div>
+                                  ) : gmailApiLoading ? (
+                                    <div className="home-hero-mail-empty">
+                                      <i data-lucide="loader-circle"></i>
+                                      <div className="hint" style={{ margin: 0 }}>Cargando correos...</div>
+                                    </div>
+                                  ) : gmailApiEmails.length > 0 ? (
+                                    <div className="home-hero-mail-list">
+                                      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+                                        <button type="button" className="home-modern-action-btn" onClick={() => { void sincronizarVistaMail(); }}>
+                                          Sincronizar mails
+                                        </button>
+                                      </div>
+                                      {gmailApiEmails.map((mail) => (
+                                        <article key={`mail-api-preview-${mail.id}`} className="home-hero-mail-item">
+                                          <div className="home-hero-mail-top"><span>{mail.dateRaw || '-'}</span></div>
+                                          <div className="home-hero-mail-from">{mail.from || 'Sin remitente'}</div>
+                                          <div className="home-hero-mail-subject">{mail.subject || 'Sin asunto'}</div>
+                                        </article>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <div className="home-hero-mail-empty">
+                                      <i data-lucide="mail"></i>
+                                      <div className="hint" style={{ margin: 0 }}>Iniciá sesión con Google para ver los últimos correos.</div>
+                                      <button type="button" className="home-modern-action-btn" onClick={() => { void sincronizarVistaMail(); }}>
+                                        Sincronizar mails
+                                      </button>
+                                    </div>
+                                  )}
                                 </div>
                               </article>
                             </div>
