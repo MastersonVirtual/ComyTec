@@ -1,2 +1,2 @@
 # ComyTec
-Área Comercial y Coordinación Técnica 
+Área Comercial y Coordinación Técnica
