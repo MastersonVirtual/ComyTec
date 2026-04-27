@@ -2523,6 +2523,88 @@
         background: #005f63;
         border-color: #007f84;
       }
+      .agenda-widget-card {
+        grid-column: 1 / -1;
+        padding: 0;
+        overflow: hidden;
+      }
+      .agenda-widget-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 12px 14px;
+        background: linear-gradient(135deg, #d9f3ef 0%, #c7ebe5 100%);
+        border-bottom: 1px solid #b7ddd5;
+      }
+      .agenda-widget-head h4 {
+        margin: 0;
+        color: #0a6e6b;
+      }
+      .agenda-widget-body {
+        padding: 12px 14px;
+      }
+      .agenda-widget-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+      }
+      .agenda-tab {
+        border: 1px solid #b9d3d0;
+        background: #fff;
+        color: #0f3f44;
+        border-radius: 10px;
+        padding: 6px 10px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .agenda-tab.active {
+        background: #0b8f8b;
+        color: #fff;
+        border-color: #0b8f8b;
+      }
+      .agenda-table-wrap {
+        border: 1px solid #d3e5e2;
+        border-radius: 12px;
+        overflow: auto;
+        max-height: 340px;
+        background: #fff;
+      }
+      .agenda-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 760px;
+      }
+      .agenda-table th, .agenda-table td {
+        padding: 8px 10px;
+        border-bottom: 1px solid #e6f0ef;
+        text-align: left;
+        font-size: 12px;
+        color: #1f2937;
+        vertical-align: top;
+      }
+      .agenda-table th {
+        position: sticky;
+        top: 0;
+        background: #f3fbfa;
+        color: #0a5b61;
+        z-index: 1;
+      }
+      .agenda-chip {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .agenda-priority-alta { background: #fee2e2; color: #b91c1c; }
+      .agenda-priority-media { background: #ffedd5; color: #c2410c; }
+      .agenda-priority-baja { background: #e5e7eb; color: #374151; }
+      .agenda-state-a-tiempo { background: #dcfce7; color: #166534; }
+      .agenda-state-retrasado { background: #fee2e2; color: #b91c1c; }
+      .agenda-state-próximo { background: #fef9c3; color: #92400e; }
       .client-view-modal {
         width: min(440px, 100%);
         background: rgba(10, 21, 21, .96);
@@ -9897,6 +9979,10 @@
         const [gmailApiError, setGmailApiError] = useState('');
         const [gmailDetailModal, setGmailDetailModal] = useState({ open: false, mail: null, body: '' });
         const [gmailDetailLoading, setGmailDetailLoading] = useState(false);
+        const [agendaRows, setAgendaRows] = useState([]);
+        const [agendaLoading, setAgendaLoading] = useState(false);
+        const [agendaError, setAgendaError] = useState('');
+        const [agendaTab, setAgendaTab] = useState('hoy');
         const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
         const [userCredentialRequests, setUserCredentialRequests] = useState([]);
         const [staffMembers, setStaffMembers] = useState([]);
@@ -11851,6 +11937,102 @@
           gmailLoadedTokenRef.current = marker;
           void cargarUltimosMails(gmailAccessToken);
         }, [user?.uid, gmailAccessToken]);
+
+        function parseAgendaDateTime(item) {
+          const fecha = String(item?.fecha || item?.date || '').trim();
+          const hora = String(item?.hora || item?.time || '').trim();
+          if (!fecha) return null;
+          const isoLike = fecha.includes('T') ? fecha : `${fecha}T${hora || '00:00'}`;
+          const dt = new Date(isoLike);
+          return Number.isNaN(dt.getTime()) ? null : dt;
+        }
+
+        function dayKey(date) {
+          return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        function agendaPriorityClass(value) {
+          const raw = String(value || '').trim().toLowerCase();
+          if (raw.includes('alta')) return 'agenda-priority-alta';
+          if (raw.includes('media')) return 'agenda-priority-media';
+          return 'agenda-priority-baja';
+        }
+
+        function agendaLiveStatus(row) {
+          const statusRaw = String(row?.estado || '').trim().toLowerCase();
+          if (statusRaw.includes('complete') || statusRaw.includes('resuelto')) return { label: 'A tiempo', cls: 'agenda-state-a-tiempo' };
+          const dt = row?.fechaHora;
+          if (!(dt instanceof Date)) return { label: 'A tiempo', cls: 'agenda-state-a-tiempo' };
+          const diffMs = dt.getTime() - Date.now();
+          if (diffMs < 0) return { label: 'Retrasado', cls: 'agenda-state-retrasado' };
+          if (diffMs <= 2 * 60 * 60 * 1000) return { label: 'Próximo', cls: 'agenda-state-próximo' };
+          return { label: 'A tiempo', cls: 'agenda-state-a-tiempo' };
+        }
+
+        async function fetchAgendaServicios() {
+          try {
+            setAgendaLoading(true);
+            setAgendaError('');
+            const response = await fetch('https://api.2workers.com/tasks', {
+              headers: {
+                Authorization: 'Bearer l6GOChiU3khWkEvdYaySoPi700ec7XU',
+                'Content-Type': 'application/json',
+              },
+            });
+            if (!response.ok) throw new Error(`Agenda API ${response.status}`);
+            const payload = await response.json();
+            const rawItems = Array.isArray(payload) ? payload : (Array.isArray(payload?.tasks) ? payload.tasks : (Array.isArray(payload?.data) ? payload.data : []));
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            const todayKey = dayKey(today);
+            const tomorrowKey = dayKey(tomorrow);
+            const normalized = rawItems.map((item, idx) => {
+              const fechaHora = parseAgendaDateTime(item);
+              const fechaHoraKey = fechaHora ? dayKey(fechaHora) : '';
+              return {
+                id: item?.id || item?.ticket || `${idx}-${fechaHoraKey}`,
+                fecha: item?.fecha || item?.date || '',
+                hora: item?.hora || item?.time || '',
+                tecnico: item?.tecnico || item?.tecnico_nombre || item?.technician || '-',
+                prioridad: item?.prioridad || item?.priority || 'Baja',
+                ticket: item?.ticket || item?.ticket_id || item?.id || '-',
+                direccion: item?.direccion || item?.address || '-',
+                descripcion: item?.descripcion || item?.description || '-',
+                estado: item?.estado || item?.status || '-',
+                fechaHora,
+                fechaHoraKey,
+              };
+            }).filter((item) => item.fechaHoraKey === todayKey || item.fechaHoraKey === tomorrowKey)
+              .sort((a, b) => (a?.fechaHora?.getTime?.() || 0) - (b?.fechaHora?.getTime?.() || 0));
+            setAgendaRows(normalized);
+          } catch (error) {
+            console.error('Error cargando agenda de servicios:', error);
+            setAgendaError('Sin datos');
+            setAgendaRows([]);
+          } finally {
+            setAgendaLoading(false);
+          }
+        }
+
+        useEffect(() => {
+          void fetchAgendaServicios();
+          const timer = window.setInterval(() => {
+            void fetchAgendaServicios();
+          }, 60000);
+          return () => window.clearInterval(timer);
+        }, []);
+
+        const agendaToday = useMemo(() => {
+          const today = dayKey(new Date());
+          return agendaRows.filter((row) => row.fechaHoraKey === today);
+        }, [agendaRows]);
+
+        const agendaTomorrow = useMemo(() => {
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          return agendaRows.filter((row) => row.fechaHoraKey === dayKey(tomorrow));
+        }, [agendaRows]);
 
         useEffect(() => {
           if (!user?.uid) {
@@ -15926,6 +16108,62 @@
                                   <div className="staff-chat-empty" style={{ padding: 22 }}>Seleccioná un funcionario para iniciar el chat.</div>
                                 )}
                               </section>
+                            </div>
+                          </section>
+                          <section className="home-widget-shell agenda-widget-card">
+                            <div className="agenda-widget-head">
+                              <h4>Agenda de Servicios (Hoy y Mañana)</h4>
+                              <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('historial')}>Ver todos →</button>
+                            </div>
+                            <div className="agenda-widget-body">
+                              <div className="agenda-widget-tabs">
+                                <button type="button" className={`agenda-tab ${agendaTab === 'hoy' ? 'active' : ''}`} onClick={() => setAgendaTab('hoy')}>
+                                  Hoy {new Date().toLocaleDateString('es-UY')}
+                                </button>
+                                <button type="button" className={`agenda-tab ${agendaTab === 'mañana' ? 'active' : ''}`} onClick={() => setAgendaTab('mañana')}>
+                                  Mañana {new Date(Date.now() + 24 * 60 * 60 * 1000).toLocaleDateString('es-UY')}
+                                </button>
+                              </div>
+                              {agendaLoading ? (
+                                <div className="hint">Cargando agenda…</div>
+                              ) : agendaError ? (
+                                <div className="hint">{agendaError}</div>
+                              ) : (
+                                <div className="agenda-table-wrap">
+                                  <table className="agenda-table">
+                                    <thead>
+                                      <tr>
+                                        <th>Hora</th>
+                                        <th>Técnico</th>
+                                        <th>Ticket</th>
+                                        <th>Prioridad</th>
+                                        <th>Dirección</th>
+                                        <th>Descripción</th>
+                                        <th>Estado</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {(agendaTab === 'hoy' ? agendaToday : agendaTomorrow).map((row) => {
+                                        const live = agendaLiveStatus(row);
+                                        return (
+                                          <tr key={`agenda-${row.id}`}>
+                                            <td>{row.hora || (row.fechaHora ? row.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '-')}</td>
+                                            <td>{row.tecnico || '-'}</td>
+                                            <td>#{row.ticket || '-'}</td>
+                                            <td><span className={`agenda-chip ${agendaPriorityClass(row.prioridad)}`}>{row.prioridad || 'Baja'}</span></td>
+                                            <td>{row.direccion || '-'}</td>
+                                            <td>{row.descripcion || '-'}</td>
+                                            <td><span className={`agenda-chip ${live.cls}`}>{live.label}</span></td>
+                                          </tr>
+                                        );
+                                      })}
+                                      {(agendaTab === 'hoy' ? agendaToday : agendaTomorrow).length === 0 && (
+                                        <tr><td colSpan={7}><span className="hint">Sin datos</span></td></tr>
+                                      )}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              )}
                             </div>
                           </section>
                         </div>
