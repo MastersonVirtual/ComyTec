@@ -8967,6 +8967,9 @@
       // Toggle rápido para reactivar Vista Cliente/Tracking público cuando se solicite.
       const ENABLE_CLIENT_TRACKING_VIEW = false;
       const GMAIL_READONLY_SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
+      const WORKERS_API_BASE = 'https://api.2workers.me/v2';
+      const WORKERS_APP_KEY = 'l6GOChiU3khWkEvdYaySoPi700ec7XU';
+      const WORKERS_TOKEN = 'l6GOChiU3kifhNVrKdRTTZXLQRMJWD';
 
       function generarClienteId() {
         return String(Math.floor(1000 + Math.random() * 9000));
@@ -11973,9 +11976,10 @@
           try {
             setAgendaLoading(true);
             setAgendaError('');
-            const response = await fetch('https://api.2workers.com/tasks', {
+            const response = await fetch(`${WORKERS_API_BASE}/tasks`, {
               headers: {
-                Authorization: 'Bearer l6GOChiU3khWkEvdYaySoPi700ec7XU',
+                Authorization: `Bearer ${WORKERS_TOKEN}`,
+                'X-APP-KEY': WORKERS_APP_KEY,
                 'Content-Type': 'application/json',
               },
             });
