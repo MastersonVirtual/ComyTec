@@ -2541,55 +2541,122 @@
         margin: 0;
         color: #0a6e6b;
       }
+      .agenda-widget-subtitle {
+        display: block;
+        color: #0f5a59;
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: 2px;
+      }
       .agenda-widget-body {
         padding: 12px 14px;
       }
-      .agenda-widget-tabs {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 10px;
-      }
-      .agenda-tab {
-        border: 1px solid #b9d3d0;
-        background: #fff;
-        color: #0f3f44;
-        border-radius: 10px;
-        padding: 6px 10px;
+      .agenda-widget-range {
         font-size: 12px;
         font-weight: 700;
-        cursor: pointer;
+        color: #0a5b61;
+        margin-bottom: 10px;
       }
-      .agenda-tab.active {
-        background: #0b8f8b;
-        color: #fff;
-        border-color: #0b8f8b;
+      .agenda-days-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 10px;
       }
-      .agenda-table-wrap {
+      .agenda-day-card {
         border: 1px solid #d3e5e2;
         border-radius: 12px;
-        overflow: auto;
-        max-height: 340px;
         background: #fff;
+        display: flex;
+        flex-direction: column;
+        min-height: 200px;
       }
-      .agenda-table {
-        width: 100%;
-        border-collapse: collapse;
-        min-width: 760px;
-      }
-      .agenda-table th, .agenda-table td {
-        padding: 8px 10px;
+      .agenda-day-head {
+        padding: 10px;
         border-bottom: 1px solid #e6f0ef;
-        text-align: left;
-        font-size: 12px;
-        color: #1f2937;
-        vertical-align: top;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 8px;
       }
-      .agenda-table th {
-        position: sticky;
-        top: 0;
-        background: #f3fbfa;
+      .agenda-day-head strong {
+        display: block;
         color: #0a5b61;
-        z-index: 1;
+        text-transform: capitalize;
+        font-size: 13px;
+      }
+      .agenda-day-head span {
+        color: #3e6a68;
+        font-size: 11px;
+        font-weight: 600;
+      }
+      .agenda-day-count {
+        background: #e8f4f2;
+        border: 1px solid #cae4df;
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 11px;
+        color: #0b6462;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .agenda-day-body {
+        padding: 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .agenda-empty-card {
+        border: 1px dashed #b9d3d0;
+        border-radius: 10px;
+        padding: 10px;
+        background: #f8fcfb;
+        color: #4a6b68;
+        font-size: 12px;
+        font-weight: 700;
+        text-align: center;
+      }
+      .agenda-task-row {
+        display: grid;
+        grid-template-columns: 56px 1fr auto;
+        gap: 8px;
+        border: 1px solid #e4efed;
+        border-radius: 10px;
+        padding: 8px;
+      }
+      .agenda-time-col {
+        font-size: 15px;
+        font-weight: 800;
+        color: #0b6462;
+        display: flex;
+        align-items: center;
+      }
+      .agenda-task-main {
+        min-width: 0;
+      }
+      .agenda-task-title {
+        font-size: 12px;
+        font-weight: 800;
+        color: #1f2937;
+      }
+      .agenda-task-client {
+        font-size: 12px;
+        font-weight: 700;
+        color: #0f5a59;
+        margin-top: 2px;
+      }
+      .agenda-task-meta {
+        margin-top: 2px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        font-size: 11px;
+        color: #4b5563;
+      }
+      .agenda-task-badges {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
       }
       .agenda-chip {
         display: inline-flex;
@@ -8967,13 +9034,7 @@
       // Toggle rápido para reactivar Vista Cliente/Tracking público cuando se solicite.
       const ENABLE_CLIENT_TRACKING_VIEW = false;
       const GMAIL_READONLY_SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
-      const WORKERS_API_BASE = 'https://api.2workers.me/v2';
-      const WORKERS_APP_KEY = 'l6GOChiU3khWkEvdYaySoPi700ec7XU';
-      const WORKERS_TOKEN = 'l6GOChiU3kifhNVrKdRTTZXLQRMJWD';
-      // Recomendado: URL HTTPS de una Cloud Function/Firebase Hosting rewrite que consulte 2Workers del lado servidor.
-      // Ejemplo: 'https://us-central1-TU-PROYECTO.cloudfunctions.net/workersTasks'
-      const WORKERS_FIREBASE_PROXY_URL = '';
-      const WORKERS_CORS_PROXY = 'https://corsproxy.io/?';
+      const AUVO_AGENDA_ENDPOINT = 'https://auvo-api-1050062076637.us-central1.run.app';
 
       function generarClienteId() {
         return String(Math.floor(1000 + Math.random() * 9000));
@@ -9989,7 +10050,7 @@
         const [agendaRows, setAgendaRows] = useState([]);
         const [agendaLoading, setAgendaLoading] = useState(false);
         const [agendaError, setAgendaError] = useState('');
-        const [agendaTab, setAgendaTab] = useState('hoy');
+        const [agendaRangeWarning, setAgendaRangeWarning] = useState('');
         const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
         const [userCredentialRequests, setUserCredentialRequests] = useState([]);
         const [staffMembers, setStaffMembers] = useState([]);
@@ -11945,12 +12006,9 @@
           void cargarUltimosMails(gmailAccessToken);
         }, [user?.uid, gmailAccessToken]);
 
-        function parseAgendaDateTime(item) {
-          const fecha = String(item?.fecha || item?.date || '').trim();
-          const hora = String(item?.hora || item?.time || '').trim();
-          if (!fecha) return null;
-          const isoLike = fecha.includes('T') ? fecha : `${fecha}T${hora || '00:00'}`;
-          const dt = new Date(isoLike);
+        function parseAgendaDateTime(value) {
+          if (!value) return null;
+          const dt = new Date(value);
           return Number.isNaN(dt.getTime()) ? null : dt;
         }
 
@@ -11960,100 +12018,96 @@
 
         function agendaPriorityClass(value) {
           const raw = String(value || '').trim().toLowerCase();
-          if (raw.includes('alta')) return 'agenda-priority-alta';
-          if (raw.includes('media')) return 'agenda-priority-media';
+          if (raw.includes('alta') || raw.includes('high') || raw.includes('urgente')) return 'agenda-priority-alta';
+          if (raw.includes('media') || raw.includes('medium')) return 'agenda-priority-media';
           return 'agenda-priority-baja';
         }
 
-        function agendaLiveStatus(row) {
-          const statusRaw = String(row?.estado || '').trim().toLowerCase();
-          if (statusRaw.includes('complete') || statusRaw.includes('resuelto')) return { label: 'A tiempo', cls: 'agenda-state-a-tiempo' };
-          const dt = row?.fechaHora;
-          if (!(dt instanceof Date)) return { label: 'A tiempo', cls: 'agenda-state-a-tiempo' };
-          const diffMs = dt.getTime() - Date.now();
-          if (diffMs < 0) return { label: 'Retrasado', cls: 'agenda-state-retrasado' };
-          if (diffMs <= 2 * 60 * 60 * 1000) return { label: 'Próximo', cls: 'agenda-state-próximo' };
-          return { label: 'A tiempo', cls: 'agenda-state-a-tiempo' };
+        function agendaStateClass(value) {
+          const raw = String(value || '').trim().toLowerCase();
+          if (raw.includes('resuelto') || raw.includes('finalizado') || raw.includes('complete')) return 'agenda-state-a-tiempo';
+          if (raw.includes('cancel')) return 'agenda-state-retrasado';
+          if (raw.includes('pend') || raw.includes('en curso') || raw.includes('program')) return 'agenda-state-próximo';
+          return 'agenda-state-a-tiempo';
         }
 
-        async function fetchAgendaServicios() {
+        function relativeAgendaLabel(offset) {
+          if (offset === -3) return 'Hace 3 días';
+          if (offset === -2) return 'Hace 2 días';
+          if (offset === -1) return 'Ayer';
+          if (offset === 0) return 'Hoy';
+          if (offset === 1) return 'Mañana';
+          if (offset === 2) return 'En 2 días';
+          if (offset === 3) return 'En 3 días';
+          return '';
+        }
+
+        async function fetchAuvoAgenda() {
           try {
             setAgendaLoading(true);
             setAgendaError('');
-            const headers = {
-              Authorization: `Bearer ${WORKERS_TOKEN}`,
-              'X-APP-KEY': WORKERS_APP_KEY,
-              'Content-Type': 'application/json',
-            };
+            setAgendaRangeWarning('');
 
-            const requestChain = [];
-            if (WORKERS_FIREBASE_PROXY_URL) {
-              requestChain.push({
-                label: 'firebase-proxy',
-                url: WORKERS_FIREBASE_PROXY_URL,
-                options: { method: 'GET' },
-              });
+            const response = await fetch(AUVO_AGENDA_ENDPOINT, {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' },
+            });
+
+            if (!response.ok) {
+              throw new Error(`Cloud Run ${response.status}`);
             }
-            requestChain.push(
-              {
-                label: 'direct',
-                url: `${WORKERS_API_BASE}/tasks`,
-                options: { headers },
-              },
-              {
-                label: 'cors-proxy',
-                url: `${WORKERS_CORS_PROXY}${encodeURIComponent(`${WORKERS_API_BASE}/tasks`)}`,
-                options: { headers },
-              },
-            );
 
-            let response = null;
-            let lastError = null;
-            for (const request of requestChain) {
-              try {
-                const currentResponse = await fetch(request.url, request.options);
-                if (currentResponse.ok) {
-                  response = currentResponse;
-                  break;
-                }
-                lastError = new Error(`Agenda API ${request.label} ${currentResponse.status}`);
-                console.warn(`Agenda fallback: ${request.label} respondió ${currentResponse.status}`);
-              } catch (requestError) {
-                lastError = requestError;
-                console.warn(`Agenda fallback: fallo ${request.label}`, requestError);
+            const json = await response.json();
+            if (!json?.ok) {
+              throw new Error('Respuesta inválida del endpoint de agenda');
+            }
+
+            const rawItems = Array.isArray(json?.data) ? json.data : [];
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const expectedDesde = new Date(today);
+            expectedDesde.setDate(today.getDate() - 3);
+            const expectedHasta = new Date(today);
+            expectedHasta.setDate(today.getDate() + 3);
+
+            const rangoDesde = parseAgendaDateTime(json?.rango?.desde);
+            const rangoHasta = parseAgendaDateTime(json?.rango?.hasta);
+            if (rangoDesde && rangoHasta) {
+              const expectedDesdeKey = dayKey(expectedDesde);
+              const expectedHastaKey = dayKey(expectedHasta);
+              const actualDesdeKey = dayKey(rangoDesde);
+              const actualHastaKey = dayKey(rangoHasta);
+              if (expectedDesdeKey !== actualDesdeKey || expectedHastaKey !== actualHastaKey) {
+                const warningMessage = `El endpoint devolvió rango ${actualDesdeKey} a ${actualHastaKey}; se esperaba ${expectedDesdeKey} a ${expectedHastaKey}.`;
+                setAgendaRangeWarning(warningMessage);
+                console.warn(warningMessage);
               }
             }
 
-            if (!response) throw (lastError || new Error('Agenda API sin respuesta válida'));
-            const payload = await response.json();
-            const rawItems = Array.isArray(payload) ? payload : (Array.isArray(payload?.tasks) ? payload.tasks : (Array.isArray(payload?.data) ? payload.data : []));
-            const today = new Date();
-            const tomorrow = new Date(today);
-            tomorrow.setDate(today.getDate() + 1);
-            const todayKey = dayKey(today);
-            const tomorrowKey = dayKey(tomorrow);
             const normalized = rawItems.map((item, idx) => {
-              const fechaHora = parseAgendaDateTime(item);
-              const fechaHoraKey = fechaHora ? dayKey(fechaHora) : '';
+              const fechaHora = parseAgendaDateTime(item?.fechaHora);
               return {
-                id: item?.id || item?.ticket || `${idx}-${fechaHoraKey}`,
-                fecha: item?.fecha || item?.date || '',
-                hora: item?.hora || item?.time || '',
-                tecnico: item?.tecnico || item?.tecnico_nombre || item?.technician || item?.para || '-',
-                prioridad: item?.prioridad || item?.priority || item?.nivel || 'Baja',
-                ticket: item?.ticket || item?.ticket_id || item?.codigo_ticket || item?.id || '-',
-                direccion: item?.direccion || item?.address || item?.ubicacion || '-',
-                descripcion: item?.descripcion || item?.description || item?.detalle || item?.resumen || '-',
-                estado: item?.estado || item?.status || '-',
+                id: item?.ticketId || `${item?.tecnicoId || 'sin-tecnico'}-${idx}`,
+                tecnicoId: String(item?.tecnicoId || '').trim() || 'Técnico sin asignar',
+                cliente: String(item?.cliente || '').trim() || String(item?.clienteId || '').trim() || 'Cliente sin nombre',
+                clienteId: String(item?.clienteId || '').trim(),
                 fechaHora,
-                fechaHoraKey,
+                fechaHoraKey: fechaHora ? dayKey(fechaHora) : '',
+                direccion: String(item?.direccion || '').trim() || 'Sin dirección',
+                orientacion: String(item?.orientacion || '').trim() || 'Sin descripción',
+                prioridad: String(item?.prioridad || '').trim() || 'Baja',
+                estado: String(item?.estado || '').trim() || 'Pendiente',
+                ticketId: String(item?.ticketId || '').trim(),
+                ticketTitulo: String(item?.ticketTitulo || '').trim() || String(item?.orientacion || '').trim() || 'Sin descripción',
               };
-            }).filter((item) => item.fechaHoraKey === todayKey || item.fechaHoraKey === tomorrowKey)
+            }).filter((item) => item.fechaHora instanceof Date)
               .sort((a, b) => (a?.fechaHora?.getTime?.() || 0) - (b?.fechaHora?.getTime?.() || 0));
+
             setAgendaRows(normalized);
           } catch (error) {
-            console.error('Error cargando agenda de servicios:', error);
-            setAgendaError('Sin datos (verificar CORS/API)');
+            console.error('Error cargando agenda AUVO:', error);
+            setAgendaError('No se pudo cargar la agenda de técnicos.');
             setAgendaRows([]);
           } finally {
             setAgendaLoading(false);
@@ -12061,22 +12115,32 @@
         }
 
         useEffect(() => {
-          void fetchAgendaServicios();
-          const timer = window.setInterval(() => {
-            void fetchAgendaServicios();
-          }, 60000);
-          return () => window.clearInterval(timer);
+          void fetchAuvoAgenda();
         }, []);
 
-        const agendaToday = useMemo(() => {
-          const today = dayKey(new Date());
-          return agendaRows.filter((row) => row.fechaHoraKey === today);
-        }, [agendaRows]);
+        const agendaSevenDays = useMemo(() => {
+          const base = new Date();
+          base.setHours(0, 0, 0, 0);
+          const grouped = new Map();
+          agendaRows.forEach((item) => {
+            const key = item?.fechaHoraKey;
+            if (!key) return;
+            if (!grouped.has(key)) grouped.set(key, []);
+            grouped.get(key).push(item);
+          });
 
-        const agendaTomorrow = useMemo(() => {
-          const tomorrow = new Date();
-          tomorrow.setDate(tomorrow.getDate() + 1);
-          return agendaRows.filter((row) => row.fechaHoraKey === dayKey(tomorrow));
+          return [-3, -2, -1, 0, 1, 2, 3].map((offset) => {
+            const date = new Date(base);
+            date.setDate(base.getDate() + offset);
+            const key = dayKey(date);
+            return {
+              key,
+              offset,
+              label: relativeAgendaLabel(offset),
+              dateLabel: date.toLocaleDateString('es-UY', { weekday: 'short', day: '2-digit', month: '2-digit' }),
+              tasks: grouped.get(key) || [],
+            };
+          });
         }, [agendaRows]);
 
         useEffect(() => {
@@ -16157,57 +16221,62 @@
                           </section>
                           <section className="home-widget-shell agenda-widget-card">
                             <div className="agenda-widget-head">
-                              <h4>Agenda de Servicios (Hoy y Mañana)</h4>
+                              <div>
+                                <h4>Agenda de técnicos</h4>
+                                <small className="agenda-widget-subtitle">Tareas programadas desde 2Workers</small>
+                              </div>
                               <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('historial')}>Ver todos →</button>
                             </div>
                             <div className="agenda-widget-body">
-                              <div className="agenda-widget-tabs">
-                                <button type="button" className={`agenda-tab ${agendaTab === 'hoy' ? 'active' : ''}`} onClick={() => setAgendaTab('hoy')}>
-                                  Hoy {new Date().toLocaleDateString('es-UY')}
-                                </button>
-                                <button type="button" className={`agenda-tab ${agendaTab === 'mañana' ? 'active' : ''}`} onClick={() => setAgendaTab('mañana')}>
-                                  Mañana {new Date(Date.now() + 24 * 60 * 60 * 1000).toLocaleDateString('es-UY')}
-                                </button>
-                              </div>
+                              <div className="agenda-widget-range">Últimos 3 días, hoy y próximos 3 días</div>
                               {agendaLoading ? (
                                 <div className="hint">Cargando agenda…</div>
                               ) : agendaError ? (
                                 <div className="hint">{agendaError}</div>
                               ) : (
-                                <div className="agenda-table-wrap">
-                                  <table className="agenda-table">
-                                    <thead>
-                                      <tr>
-                                        <th>Hora</th>
-                                        <th>Técnico</th>
-                                        <th>Ticket</th>
-                                        <th>Prioridad</th>
-                                        <th>Dirección</th>
-                                        <th>Descripción</th>
-                                        <th>Estado</th>
-                                      </tr>
-                                    </thead>
-                                    <tbody>
-                                      {(agendaTab === 'hoy' ? agendaToday : agendaTomorrow).map((row) => {
-                                        const live = agendaLiveStatus(row);
-                                        return (
-                                          <tr key={`agenda-${row.id}`}>
-                                            <td>{row.hora || (row.fechaHora ? row.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '-')}</td>
-                                            <td>{row.tecnico || '-'}</td>
-                                            <td>#{row.ticket || '-'}</td>
-                                            <td><span className={`agenda-chip ${agendaPriorityClass(row.prioridad)}`}>{row.prioridad || 'Baja'}</span></td>
-                                            <td>{row.direccion || '-'}</td>
-                                            <td>{row.descripcion || '-'}</td>
-                                            <td><span className={`agenda-chip ${live.cls}`}>{live.label}</span></td>
-                                          </tr>
-                                        );
-                                      })}
-                                      {(agendaTab === 'hoy' ? agendaToday : agendaTomorrow).length === 0 && (
-                                        <tr><td colSpan={7}><span className="hint">Sin datos</span></td></tr>
-                                      )}
-                                    </tbody>
-                                  </table>
+                                <div className="agenda-days-grid">
+                                  {agendaSevenDays.map((day) => (
+                                    <article key={`agenda-day-${day.key}`} className="agenda-day-card">
+                                      <header className="agenda-day-head">
+                                        <div>
+                                          <strong>{day.dateLabel}</strong>
+                                          <span>{day.label}</span>
+                                        </div>
+                                        <span className="agenda-day-count">{day.tasks.length} tareas</span>
+                                      </header>
+                                      <div className="agenda-day-body">
+                                        {day.tasks.length === 0 ? (
+                                          <div className="agenda-empty-card">Disponible para asignar</div>
+                                        ) : day.tasks.map((task) => (
+                                          <div key={`agenda-task-${day.key}-${task.id}-${task.ticketId || task.fechaHoraKey}`} className="agenda-task-row">
+                                            <div className="agenda-time-col">
+                                              {task.fechaHora ? task.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
+                                            </div>
+                                            <div className="agenda-task-main">
+                                              <div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div>
+                                              <div className="agenda-task-client">{task.cliente || 'Cliente sin nombre'}</div>
+                                              <div className="agenda-task-meta">
+                                                <span><strong>Técnico:</strong> {task.tecnicoId || 'Técnico sin asignar'}</span>
+                                                <span><strong>Dirección:</strong> {task.direccion || 'Sin dirección'}</span>
+                                              </div>
+                                              <div className="agenda-task-meta">
+                                                <span><strong>Resumen:</strong> {task.orientacion || 'Sin descripción'}</span>
+                                                {task.ticketId ? <span><strong>Ticket:</strong> #{task.ticketId}</span> : <span><strong>Ticket:</strong> Sin ticket</span>}
+                                              </div>
+                                            </div>
+                                            <div className="agenda-task-badges">
+                                              <span className={`agenda-chip ${agendaPriorityClass(task.prioridad)}`}>{task.prioridad || 'Baja'}</span>
+                                              <span className={`agenda-chip ${agendaStateClass(task.estado)}`}>{task.estado || 'Pendiente'}</span>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </article>
+                                  ))}
                                 </div>
+                              )}
+                              {!agendaLoading && !agendaError && agendaRangeWarning && (
+                                <div className="hint" style={{ marginTop: 10 }}>{agendaRangeWarning}</div>
                               )}
                             </div>
                           </section>
