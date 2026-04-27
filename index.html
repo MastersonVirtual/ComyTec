@@ -9064,24 +9064,25 @@
         );
       }
 
-      function AccessApprovalScreen() {
+      function AccessApprovalScreen({ userEmail = '', pendingRequest = null, onRequestAccess = null }) {
+        const pendingStatus = String(pendingRequest?.estado || 'pendiente').trim().toLowerCase() || 'pendiente';
         return (
           <div className="login-shell">
             <div className="login-stack">
               <section className="login-panel google-login-panel">
                 <h2>Acceso pendiente de autorización</h2>
                 <div className="hint">
-                  Detectamos tu cuenta <b>{user?.email || 'sin email'}</b>, pero todavía no está autorizada en el sistema.
+                  Detectamos tu cuenta <b>{userEmail || 'sin email'}</b>, pero todavía no está autorizada en el sistema.
                 </div>
-                {accessPendingRequest ? (
+                {pendingRequest ? (
                   <div className="login-error" style={{ background: '#eef6ff', color: '#003f77', borderColor: '#b8dcff' }}>
-                    Ya existe una solicitud en estado <b>{requestStatusLabel(accessPendingRequest.estado)}</b>.
+                    Ya existe una solicitud en estado <b>{pendingStatus}</b>.
                   </div>
                 ) : (
                   <div className="hint">Podés enviar ahora una solicitud de credenciales para que administración la apruebe.</div>
                 )}
                 <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 10 }}>
-                  <button className="google-login-btn" type="button" onClick={(e) => handleProfileCredentialsRequest(e)}>
+                  <button className="google-login-btn" type="button" onClick={() => { if (typeof onRequestAccess === 'function') onRequestAccess(); }}>
                     <span>Solicitar autorización</span>
                   </button>
                   <button className="ghost-btn" type="button" onClick={() => auth.signOut()}>
@@ -14565,7 +14566,13 @@
         }
 
         if (accessApprovalRequired) {
-          return <AccessApprovalScreen />;
+          return (
+            <AccessApprovalScreen
+              userEmail={user?.email || ''}
+              pendingRequest={accessPendingRequest}
+              onRequestAccess={() => { void handleProfileCredentialsRequest(); }}
+            />
+          );
         }
 
         return (
