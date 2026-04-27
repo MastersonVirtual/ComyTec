@@ -1142,6 +1142,14 @@
         background: rgba(255,255,255,.72);
         padding: 7px 9px;
       }
+      .home-hero-mail-item.clickable {
+        cursor: pointer;
+        transition: transform var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+      }
+      .home-hero-mail-item.clickable:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 14px rgba(15, 56, 61, .12);
+      }
       .home-hero-mail-top {
         display: flex;
         justify-content: space-between;
@@ -7918,7 +7926,6 @@
       const db = firebase.firestore();
       const auth = firebase.auth();
       const rtdb = typeof firebase.database === 'function' ? firebase.database() : null;
-      const GMAIL_READONLY_SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
 
       async function guardarPdfEnFirestore(data = {}) {
         try {
@@ -8806,6 +8813,7 @@
 
       // Toggle rápido para reactivar Vista Cliente/Tracking público cuando se solicite.
       const ENABLE_CLIENT_TRACKING_VIEW = false;
+      const GMAIL_READONLY_SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
 
       function generarClienteId() {
         return String(Math.floor(1000 + Math.random() * 9000));
@@ -9004,26 +9012,27 @@
         return 'home-status neutral';
       }
 
-      function LoginScreen({ onGoogleToken }) {
+      function LoginScreen() {
         const [loading, setLoading] = useState(false);
         const [error, setError] = useState('');
 
         async function handleGoogleLogin() {
-          setError('');
+            setError('');
           try {
             setLoading(true);
             const provider = new firebase.auth.GoogleAuthProvider();
             provider.addScope(GMAIL_READONLY_SCOPE);
-            provider.setCustomParameters({ prompt: 'select_account' });
+            provider.setCustomParameters({ prompt: 'consent' });
             const result = await auth.signInWithPopup(provider);
             const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
-            const accessToken = credential?.accessToken || '';
-            if (accessToken && typeof onGoogleToken === 'function') onGoogleToken(accessToken);
+            const token = credential?.accessToken || '';
+            if (token) window.sessionStorage.setItem('gmail_access_token', token);
           } catch (err) {
             if (String(err?.code || '').includes('popup')) {
               try {
                 const provider = new firebase.auth.GoogleAuthProvider();
-                provider.setCustomParameters({ prompt: 'select_account' });
+                provider.addScope(GMAIL_READONLY_SCOPE);
+                provider.setCustomParameters({ prompt: 'consent' });
                 await auth.signInWithRedirect(provider);
                 return;
               } catch (redirectErr) {
@@ -9049,6 +9058,36 @@
                   <span>{loading ? 'Conectando...' : 'Continuar con Google'}</span>
                 </button>
                 <div className="microcopy">Si es tu primera vez, tu cuenta se creará automáticamente.</div>
+              </section>
+            </div>
+          </div>
+        );
+      }
+
+      function AccessApprovalScreen() {
+        return (
+          <div className="login-shell">
+            <div className="login-stack">
+              <section className="login-panel google-login-panel">
+                <h2>Acceso pendiente de autorización</h2>
+                <div className="hint">
+                  Detectamos tu cuenta <b>{user?.email || 'sin email'}</b>, pero todavía no está autorizada en el sistema.
+                </div>
+                {accessPendingRequest ? (
+                  <div className="login-error" style={{ background: '#eef6ff', color: '#003f77', borderColor: '#b8dcff' }}>
+                    Ya existe una solicitud en estado <b>{requestStatusLabel(accessPendingRequest.estado)}</b>.
+                  </div>
+                ) : (
+                  <div className="hint">Podés enviar ahora una solicitud de credenciales para que administración la apruebe.</div>
+                )}
+                <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 10 }}>
+                  <button className="google-login-btn" type="button" onClick={(e) => handleProfileCredentialsRequest(e)}>
+                    <span>Solicitar autorización</span>
+                  </button>
+                  <button className="ghost-btn" type="button" onClick={() => auth.signOut()}>
+                    Cerrar sesión
+                  </button>
+                </div>
               </section>
             </div>
           </div>
@@ -9722,6 +9761,8 @@
         const [baseArea, setBaseArea] = useState('');
         const [userData, setUserData] = useState({ nombre: '', rol: '', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
         const [roleLoading, setRoleLoading] = useState(true);
+        const [accessApprovalRequired, setAccessApprovalRequired] = useState(false);
+        const [accessPendingRequest, setAccessPendingRequest] = useState(null);
         const [notificacion, setNotificacion] = useState({ mensaje: '', tipo: '' });
 
         const [tipoAccion, setTipoAccion] = useState('');
@@ -9770,7 +9811,6 @@
         const [clientOperationId, setClientOperationId] = useState('');
         const [profileUserRequest, setProfileUserRequest] = useState('');
         const [profilePasswordRequest, setProfilePasswordRequest] = useState('');
-        const [gmailInboxPreview, setGmailInboxPreview] = useState([]);
         const [gmailAccessToken, setGmailAccessToken] = useState('');
         const [gmailApiEmails, setGmailApiEmails] = useState([]);
         const [gmailApiLoading, setGmailApiLoading] = useState(false);
@@ -11283,12 +11323,6 @@
             photoURL: currentUser.photoURL || '',
             provider: providerId,
             lastLoginAt: nowStamp,
-            gmail: {
-              connected: false,
-              scope: GMAIL_READONLY_SCOPE,
-              tokenStoredServerSide: false,
-              lastSyncAt: null,
-            },
           };
           const existing = await userRef.get();
           if (!existing.exists) {
@@ -11300,15 +11334,27 @@
         }
 
         useEffect(() => {
-          let cancelled = false;
-          const unsub = auth.onAuthStateChanged((currentUser) => {
+          if (!auth || typeof auth.onAuthStateChanged !== 'function') {
+            console.error('Firebase Auth no está disponible.');
+            setAuthLoading(false);
+            setRoleLoading(false);
+            return () => {};
+          }
+          const safetyTimer = window.setTimeout(() => {
+            setAuthLoading(false);
+            setRoleLoading(false);
+          }, 5000);
+          const unsub = auth.onAuthStateChanged(async (currentUser) => {
             setUser(currentUser);
             setAuthLoading(false);
 
             if (!currentUser) {
+              setAccessApprovalRequired(false);
+              setAccessPendingRequest(null);
               setGmailAccessToken('');
               setGmailApiEmails([]);
               setGmailApiError('');
+              setGmailApiLoading(false);
               setUserRole('');
               setUserArea('');
               setBaseRole('');
@@ -11316,68 +11362,61 @@
               setUserData({ nombre: '', rol: '', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
               setProfileAvatarId(DEFAULT_PROFILE_AVATAR_ID);
               setRoleLoading(false);
+              window.clearTimeout(safetyTimer);
               return;
             }
 
-            const fallbackName = String(currentUser.displayName || (currentUser.email || '').split('@')[0] || 'Usuario').trim();
-            setBaseRole('usuario');
-            setBaseArea('');
-            setUserRole('usuario');
-            setUserArea('');
-            setUserData({ nombre: fallbackName, rol: 'usuario', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
-            setProfileAvatarId(DEFAULT_PROFILE_AVATAR_ID);
-            setRoleLoading(false);
+            setRoleLoading(true);
+            try {
+              const modernProfile = await upsertAuthenticatedUserProfile(currentUser);
+              let profile = modernProfile || null;
+              const byUid = await db.collection('config_usuarios').doc(currentUser.uid).get();
+              let emailProfileFound = false;
+              if (byUid.exists) profile = { ...(profile || {}), ...byUid.data() };
 
-            (async () => {
-              try {
-                const byUidPromise = db.collection('config_usuarios').doc(currentUser.uid).get();
-                const modernProfilePromise = upsertAuthenticatedUserProfile(currentUser);
-                const [byUid, modernProfile] = await Promise.all([byUidPromise, modernProfilePromise]);
-                let profile = modernProfile || null;
-                if (byUid.exists) profile = { ...(profile || {}), ...byUid.data() };
-
-                if (!byUid.exists && currentUser.email) {
-                  const snap = await db.collection('config_usuarios').where('email', '==', currentUser.email).limit(1).get();
-                  if (!snap.empty) profile = { ...(profile || {}), ...snap.docs[0].data() };
+              if (!byUid.exists && currentUser.email) {
+                const snap = await db.collection('config_usuarios').where('email', '==', currentUser.email).limit(1).get();
+                if (!snap.empty) {
+                  emailProfileFound = true;
+                  profile = { ...(profile || {}), ...snap.docs[0].data() };
                 }
-
-                if (cancelled) return;
-                const rol = String(profile?.rol || 'usuario').toLowerCase();
-                const area = String(profile?.area || '').toLowerCase();
-                const nombre = String(profile?.nombre || profile?.displayName || currentUser.displayName || (currentUser.email || '').split('@')[0] || 'Usuario').trim();
-                const avatarId = PROFILE_AVATAR_OPTIONS.some((avatar) => avatar.id === profile?.avatarId) ? profile.avatarId : DEFAULT_PROFILE_AVATAR_ID;
-                setBaseRole(rol);
-                setBaseArea(area);
-                setUserRole(rol);
-                setUserArea(area);
-                setUserData({ nombre, rol, area, avatarId });
-                setProfileAvatarId(avatarId);
-              } catch (err) {
-                console.error('Error leyendo config_usuarios:', err);
-              } finally {
-                if (!cancelled) setRoleLoading(false);
               }
-            })();
+
+              const hasRegisteredAccess = byUid.exists || emailProfileFound;
+              setAccessApprovalRequired(!hasRegisteredAccess);
+              if (!hasRegisteredAccess) {
+                console.warn('[AUTH] Usuario sin autorización en config_usuarios:', currentUser.email || currentUser.uid || 'sin-identificador');
+              }
+
+              const rol = String(profile?.rol || 'usuario').toLowerCase();
+              const area = String(profile?.area || '').toLowerCase();
+              const nombre = String(profile?.nombre || profile?.displayName || currentUser.displayName || (currentUser.email || '').split('@')[0] || 'Usuario').trim();
+              const avatarId = PROFILE_AVATAR_OPTIONS.some((avatar) => avatar.id === profile?.avatarId) ? profile.avatarId : DEFAULT_PROFILE_AVATAR_ID;
+              setBaseRole(rol);
+              setBaseArea(area);
+              setUserRole(rol);
+              setUserArea(area);
+              setUserData({ nombre, rol, area, avatarId });
+              setProfileAvatarId(avatarId);
+            } catch (err) {
+              console.error('Error leyendo config_usuarios:', err);
+              setAccessApprovalRequired(false);
+              setBaseRole('usuario');
+              setBaseArea('');
+              setUserRole('usuario');
+              setUserArea('');
+              setUserData({ nombre: (currentUser?.email || 'usuario').split('@')[0], rol: 'usuario', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
+              setProfileAvatarId(DEFAULT_PROFILE_AVATAR_ID);
+            } finally {
+              setRoleLoading(false);
+              window.clearTimeout(safetyTimer);
+            }
           });
           return () => {
-            cancelled = true;
+            window.clearTimeout(safetyTimer);
             unsub();
           };
         }, []);
-
-        useEffect(() => {
-          let active = true;
-          auth.getRedirectResult().then((result) => {
-            if (!active || !result) return;
-            const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
-            const token = credential?.accessToken || '';
-            if (token) setGmailAccessToken(token);
-          }).catch((error) => {
-            console.log(error);
-          });
-          return () => { active = false; };
-        }, []);
-
 
         useEffect(() => {
           if (!selectedService?.id) return;
@@ -11482,36 +11521,22 @@
           return () => window.removeEventListener('resize', onResize);
         }, []);
 
-        function refreshLucideIcons() {
-          if (!window.lucide?.createIcons) return false;
-          window.requestAnimationFrame(() => {
-            window.lucide.createIcons();
-          });
-          return true;
-        }
-
         useEffect(() => {
-          if (refreshLucideIcons()) return () => {};
-          let cancelled = false;
           let attempts = 0;
-          const maxAttempts = 40;
-          const retryTimer = window.setInterval(() => {
-            if (cancelled) return;
+          let timer = null;
+          const runIcons = () => {
             attempts += 1;
-            const loaded = refreshLucideIcons();
-            if (loaded || attempts >= maxAttempts) {
-              window.clearInterval(retryTimer);
+            if (window.lucide?.createIcons) {
+              window.lucide.createIcons();
+              return;
             }
-          }, 120);
-          return () => {
-            cancelled = true;
-            window.clearInterval(retryTimer);
+            if (attempts < 10) timer = window.setTimeout(runIcons, 200);
           };
-        }, []);
-
-        useEffect(() => {
-          refreshLucideIcons();
-        }, [mobileTab, selectedForm, fabOpen, rows.length, adminCredentialRequests.length, desktopBellOpen, desktopSearchOpen]);
+          runIcons();
+          return () => {
+            if (timer) window.clearTimeout(timer);
+          };
+        }, [authLoading, roleLoading, mobileTab, selectedForm, fabOpen, rows.length, adminCredentialRequests.length, desktopBellOpen, desktopSearchOpen, menuOpen, isMobile]);
 
         useEffect(() => {
           if (!user || userRole !== 'admin') {
@@ -11552,95 +11577,115 @@
           return () => unsub();
         }, [user?.uid]);
 
-        async function obtenerUltimosEmails(token) {
-          const listUrl = 'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=6&q=in:inbox';
-          const listResponse = await fetch(listUrl, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          if (!listResponse.ok) {
-            const errorBody = await listResponse.text();
-            throw new Error(`Gmail list error ${listResponse.status}: ${errorBody}`);
+        useEffect(() => {
+          if (!accessApprovalRequired || !user?.uid) {
+            setAccessPendingRequest(null);
+            return;
           }
-          const listData = await listResponse.json();
-          const messageItems = Array.isArray(listData.messages) ? listData.messages : [];
-          const detailResults = await Promise.all(messageItems.map(async (item) => {
-            const detailUrl = `https://gmail.googleapis.com/gmail/v1/users/me/messages/${item.id}`;
-            const detailResponse = await fetch(detailUrl, {
+          const unsub = db.collection('solicitudes_credenciales')
+            .where('solicitanteUid', '==', user.uid)
+            .limit(20)
+            .onSnapshot((snapshot) => {
+              const requests = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+              requests.sort((a, b) => (b?.creadoEn?.seconds || 0) - (a?.creadoEn?.seconds || 0));
+              const activeRequest = requests.find((req) => ['pendiente', 'aprobada'].includes(String(req?.estado || '').toLowerCase())) || null;
+              setAccessPendingRequest(activeRequest);
+            }, (error) => {
+              console.error('Error leyendo solicitud pendiente de autorización:', error);
+            });
+          return () => unsub();
+        }, [accessApprovalRequired, user?.uid]);
+
+        async function cargarUltimosMails(token) {
+          setGmailApiLoading(true);
+          setGmailApiError('');
+          try {
+            const listUrl = 'https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=5&q=in:inbox';
+            const listResponse = await fetch(listUrl, {
               headers: { Authorization: `Bearer ${token}` },
             });
-            if (!detailResponse.ok) {
-              const detailBody = await detailResponse.text();
-              throw new Error(`Gmail detail error ${detailResponse.status}: ${detailBody}`);
+            if (!listResponse.ok) {
+              const body = await listResponse.text();
+              throw new Error(`Gmail list error ${listResponse.status}: ${body}`);
             }
-            const detailData = await detailResponse.json();
-            const headers = Array.isArray(detailData?.payload?.headers) ? detailData.payload.headers : [];
-            const getHeader = (name) => (headers.find((h) => String(h?.name || '').toLowerCase() === name.toLowerCase())?.value || '').trim();
-            const from = getHeader('From');
-            const subject = getHeader('Subject');
-            const dateValue = getHeader('Date');
-            const parsedDate = new Date(dateValue);
-            return {
-              id: item.id,
-              from: from || 'Sin remitente',
-              subject: subject || 'Sin asunto',
-              dateRaw: dateValue || '',
-              receivedAt: Number.isNaN(parsedDate.getTime()) ? null : parsedDate,
-            };
-          }));
-          return detailResults
-            .slice()
-            .sort((a, b) => {
-              const av = a?.receivedAt instanceof Date ? a.receivedAt.getTime() : 0;
-              const bv = b?.receivedAt instanceof Date ? b.receivedAt.getTime() : 0;
-              return bv - av;
-            });
+            const listData = await listResponse.json();
+            const messages = Array.isArray(listData?.messages) ? listData.messages : [];
+            const mails = await Promise.all(messages.map(async (item) => {
+              const detailUrl = `https://gmail.googleapis.com/gmail/v1/users/me/messages/${item.id}`;
+              const detailResponse = await fetch(detailUrl, { headers: { Authorization: `Bearer ${token}` } });
+              if (!detailResponse.ok) throw new Error(`Gmail detail error ${detailResponse.status}`);
+              const detailData = await detailResponse.json();
+              const headers = Array.isArray(detailData?.payload?.headers) ? detailData.payload.headers : [];
+              const getHeader = (name) => (headers.find((h) => String(h?.name || '').toLowerCase() === name.toLowerCase())?.value || '').trim();
+              return {
+                id: item.id,
+                from: getHeader('From') || 'Sin remitente',
+                subject: getHeader('Subject') || 'Sin asunto',
+                dateRaw: getHeader('Date') || '',
+                snippet: String(detailData?.snippet || '').trim(),
+              };
+            }));
+            setGmailApiEmails(mails);
+          } catch (error) {
+            console.error('Error Gmail:', error);
+            setGmailApiError('No se pudieron cargar los correos.');
+          } finally {
+            setGmailApiLoading(false);
+          }
+        }
+
+        async function sincronizarVistaMail() {
+          try {
+            setGmailApiError('');
+            setGmailApiLoading(true);
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.addScope(GMAIL_READONLY_SCOPE);
+            provider.setCustomParameters({ prompt: 'consent' });
+            const result = await auth.signInWithPopup(provider);
+            const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
+            const token = credential?.accessToken || '';
+            if (!token) throw new Error('No se pudo obtener token de Gmail.');
+            window.sessionStorage.setItem('gmail_access_token', token);
+            setGmailAccessToken(token);
+            await cargarUltimosMails(token);
+          } catch (error) {
+            console.error('Error sincronizando vista de Gmail:', error);
+            setGmailApiError('No se pudieron sincronizar los correos.');
+          } finally {
+            setGmailApiLoading(false);
+          }
         }
 
         useEffect(() => {
-          if (!user?.uid || !gmailAccessToken) {
-            setGmailApiEmails([]);
-            setGmailApiError('');
-            setGmailApiLoading(false);
-            return;
-          }
           let active = true;
-          (async () => {
-            try {
-              setGmailApiLoading(true);
-              setGmailApiError('');
-              const latestEmails = await obtenerUltimosEmails(gmailAccessToken);
-              if (!active) return;
-              setGmailApiEmails(latestEmails);
-            } catch (error) {
-              console.log(error);
-              if (!active) return;
-              setGmailApiError('No se pudieron cargar los correos');
-              setGmailApiEmails([]);
-            } finally {
-              if (active) setGmailApiLoading(false);
+          auth.getRedirectResult().then((result) => {
+            if (!active || !result) return;
+            const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
+            const token = credential?.accessToken || '';
+            if (token) {
+              window.sessionStorage.setItem('gmail_access_token', token);
+              setGmailAccessToken(token);
             }
-          })();
+          }).catch((error) => {
+            console.error('Error leyendo redirect de Google:', error);
+          });
           return () => { active = false; };
-        }, [user?.uid, gmailAccessToken]);
+        }, []);
 
         useEffect(() => {
-          if (!user?.uid) {
-            setGmailInboxPreview([]);
-            return () => {};
-          }
-          const unsub = db.collection('users')
-            .doc(user.uid)
-            .collection('gmail_inbox')
-            .orderBy('receivedAt', 'desc')
-            .limit(6)
-            .onSnapshot((snapshot) => {
-              const next = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-              setGmailInboxPreview(next);
-            }, (error) => {
-              console.error('Error leyendo vista previa de Gmail:', error);
-            });
-          return () => unsub();
+          if (!user?.uid) return;
+          const token = window.sessionStorage.getItem('gmail_access_token') || '';
+          if (token) setGmailAccessToken(token);
         }, [user?.uid]);
+
+        const gmailLoadedTokenRef = useRef('');
+        useEffect(() => {
+          if (!user?.uid || !gmailAccessToken) return;
+          const marker = `${user.uid}:${gmailAccessToken}`;
+          if (gmailLoadedTokenRef.current === marker) return;
+          gmailLoadedTokenRef.current = marker;
+          void cargarUltimosMails(gmailAccessToken);
+        }, [user?.uid, gmailAccessToken]);
 
         useEffect(() => {
           if (!user?.uid) {
@@ -11814,36 +11859,6 @@
 
         const [formOpenAudit, setFormOpenAudit] = useState(null);
         const currentUserName = useMemo(() => (userData.nombre || (user?.email || '').split('@')[0] || 'Usuario').trim(), [userData, user]);
-        const latestMailView = useMemo(() => {
-          const parseStamp = (item) => {
-            const value = item?.receivedAt;
-            if (!value) return 0;
-            if (value instanceof Date) return value.getTime();
-            if (typeof value?.toDate === 'function') {
-              const dt = value.toDate();
-              return dt instanceof Date ? dt.getTime() : 0;
-            }
-            if (typeof value?.seconds === 'number') return value.seconds * 1000;
-            const asDate = new Date(value);
-            return Number.isNaN(asDate.getTime()) ? 0 : asDate.getTime();
-          };
-          const merged = [...(gmailApiEmails || []), ...(gmailInboxPreview || [])]
-            .map((item, index) => ({
-              ...item,
-              __stamp: parseStamp(item),
-              __id: String(item?.id || `${item?.from || 'mail'}-${item?.subject || 'sin-asunto'}-${index}`),
-            }))
-            .sort((a, b) => b.__stamp - a.__stamp);
-          const dedup = [];
-          const seen = new Set();
-          merged.forEach((item) => {
-            const key = item.__id || `${item.from || ''}|${item.subject || ''}|${item.__stamp || 0}`;
-            if (seen.has(key)) return;
-            seen.add(key);
-            dedup.push(item);
-          });
-          return dedup.slice(0, 6);
-        }, [gmailApiEmails, gmailInboxPreview]);
         const selectedProfileAvatar = useMemo(() => (
           PROFILE_AVATAR_OPTIONS.find((avatar) => avatar.id === profileAvatarId) || PROFILE_AVATAR_OPTIONS[0]
         ), [profileAvatarId]);
@@ -14505,16 +14520,17 @@
         }
 
         async function handleProfileCredentialsRequest(e) {
-          e.preventDefault();
+          if (e?.preventDefault) e.preventDefault();
           const nextUser = profileUserRequest.trim();
           const nextPass = profilePasswordRequest.trim();
-          if (!nextUser || !nextPass) {
+          const fromAccessPendingScreen = accessApprovalRequired && !nextUser && !nextPass;
+          if (!fromAccessPendingScreen && (!nextUser || !nextPass)) {
             setNotificacion({ mensaje: 'Ingresá usuario y contraseña para solicitar el cambio', tipo: 'error' });
             return;
           }
           try {
             await db.collection('solicitudes_credenciales').add({
-              tipo: 'cambio_usuario_password',
+              tipo: fromAccessPendingScreen ? 'solicitud_acceso_google' : 'cambio_usuario_password',
               solicitanteUid: user?.uid || '',
               solicitanteEmail: user?.email || '',
               solicitanteNombre: currentUserName,
@@ -14527,6 +14543,9 @@
             setNotificacion({ mensaje: '✔ Solicitud enviada al administrador', tipo: 'ok' });
             setProfileUserRequest('');
             setProfilePasswordRequest('');
+            if (fromAccessPendingScreen) {
+              setAccessPendingRequest({ estado: 'pendiente' });
+            }
           } catch (error) {
             console.error('Error enviando solicitud de credenciales:', error);
             setNotificacion({ mensaje: '✖ No se pudo enviar la solicitud', tipo: 'error' });
@@ -14542,7 +14561,11 @@
         }
 
         if (!user) {
-          return <LoginScreen onGoogleToken={setGmailAccessToken} />;
+          return <LoginScreen />;
+        }
+
+        if (accessApprovalRequired) {
+          return <AccessApprovalScreen />;
         }
 
         return (
@@ -15535,18 +15558,29 @@
                               </div>
                             </div>
                             <div className="home-hero-illustration" id="gmail-list">
-                              {gmailApiLoading ? (
+                              {gmailApiError ? (
+                                <div className="home-hero-mail-empty">
+                                  <i data-lucide="mail-warning"></i>
+                                  <div className="hint" style={{ margin: 0 }}>{gmailApiError}</div>
+                                  <button type="button" className="home-modern-action-btn" onClick={() => { void sincronizarVistaMail(); }}>
+                                    Sincronizar mails
+                                  </button>
+                                </div>
+                              ) : gmailApiLoading ? (
                                 <div className="home-hero-mail-empty">
                                   <i data-lucide="loader-circle"></i>
                                   <div className="hint" style={{ margin: 0 }}>Cargando correos...</div>
                                 </div>
-                              ) : latestMailView.length > 0 ? (
+                              ) : gmailApiEmails.length > 0 ? (
                                 <div className="home-hero-mail-list">
-                                  {latestMailView.map((mail, index) => (
-                                    <article key={`mail-preview-unified-${mail.id || index}`} className="home-hero-mail-item">
-                                      <div className="home-hero-mail-top">
-                                        <span>{mail.receivedAt ? formatRequestDateTime(mail.receivedAt) : (mail.dateRaw || '-')}</span>
-                                      </div>
+                                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+                                    <button type="button" className="home-modern-action-btn" onClick={() => { void sincronizarVistaMail(); }}>
+                                      Sincronizar mails
+                                    </button>
+                                  </div>
+                                  {gmailApiEmails.map((mail) => (
+                                    <article key={`mail-api-preview-${mail.id}`} className="home-hero-mail-item">
+                                      <div className="home-hero-mail-top"><span>{mail.dateRaw || '-'}</span></div>
                                       <div className="home-hero-mail-from">{mail.from || 'Sin remitente'}</div>
                                       <div className="home-hero-mail-subject">{mail.subject || 'Sin asunto'}</div>
                                     </article>
@@ -15554,9 +15588,11 @@
                                 </div>
                               ) : (
                                 <div className="home-hero-mail-empty">
-                                  <i data-lucide={gmailApiError ? 'mail-warning' : 'mail'}></i>
-                                  <div className="hint" style={{ margin: 0 }}>{gmailApiError || 'Tus últimos mails van a aparecer acá.'}</div>
-                                  {gmailApiError && <button type="button" className="home-modern-action-btn" onClick={() => auth.signOut()}>Cerrar sesión y volver a conectar</button>}
+                                  <i data-lucide="mail"></i>
+                                  <div className="hint" style={{ margin: 0 }}>Iniciá sesión con Google para ver los últimos correos.</div>
+                                  <button type="button" className="home-modern-action-btn" onClick={() => { void sincronizarVistaMail(); }}>
+                                    Sincronizar mails
+                                  </button>
                                 </div>
                               )}
                             </div>
@@ -17848,6 +17884,12 @@
 
         // Exponer para debug/manual desde consola.
         window.obtenerClima = obtenerClima;
+        window.addEventListener('error', (event) => {
+          console.error('ERROR GLOBAL:', event.error || event.message);
+        });
+        window.addEventListener('unhandledrejection', (event) => {
+          console.error('PROMESA RECHAZADA:', event.reason);
+        });
 
         ensureWidgetExists();
         actualizarHora();
