@@ -8970,6 +8970,7 @@
       const WORKERS_API_BASE = 'https://api.2workers.me/v2';
       const WORKERS_APP_KEY = 'l6GOChiU3khWkEvdYaySoPi700ec7XU';
       const WORKERS_TOKEN = 'l6GOChiU3kifhNVrKdRTTZXLQRMJWD';
+      const WORKERS_CORS_PROXY = 'https://corsproxy.io/?';
 
       function generarClienteId() {
         return String(Math.floor(1000 + Math.random() * 9000));
@@ -11976,13 +11977,21 @@
           try {
             setAgendaLoading(true);
             setAgendaError('');
-            const response = await fetch(`${WORKERS_API_BASE}/tasks`, {
-              headers: {
-                Authorization: `Bearer ${WORKERS_TOKEN}`,
-                'X-APP-KEY': WORKERS_APP_KEY,
-                'Content-Type': 'application/json',
-              },
-            });
+            const headers = {
+              Authorization: `Bearer ${WORKERS_TOKEN}`,
+              'X-APP-KEY': WORKERS_APP_KEY,
+              'Content-Type': 'application/json',
+            };
+            let response = null;
+            try {
+              response = await fetch(`${WORKERS_API_BASE}/tasks`, { headers });
+            } catch (directError) {
+              console.warn('Agenda API directa bloqueada por CORS/origen. Reintentando con proxy...', directError);
+            }
+            if (!response || !response.ok) {
+              const proxyUrl = `${WORKERS_CORS_PROXY}${encodeURIComponent(`${WORKERS_API_BASE}/tasks`)}`;
+              response = await fetch(proxyUrl, { headers });
+            }
             if (!response.ok) throw new Error(`Agenda API ${response.status}`);
             const payload = await response.json();
             const rawItems = Array.isArray(payload) ? payload : (Array.isArray(payload?.tasks) ? payload.tasks : (Array.isArray(payload?.data) ? payload.data : []));
@@ -11998,11 +12007,11 @@
                 id: item?.id || item?.ticket || `${idx}-${fechaHoraKey}`,
                 fecha: item?.fecha || item?.date || '',
                 hora: item?.hora || item?.time || '',
-                tecnico: item?.tecnico || item?.tecnico_nombre || item?.technician || '-',
-                prioridad: item?.prioridad || item?.priority || 'Baja',
-                ticket: item?.ticket || item?.ticket_id || item?.id || '-',
-                direccion: item?.direccion || item?.address || '-',
-                descripcion: item?.descripcion || item?.description || '-',
+                tecnico: item?.tecnico || item?.tecnico_nombre || item?.technician || item?.para || '-',
+                prioridad: item?.prioridad || item?.priority || item?.nivel || 'Baja',
+                ticket: item?.ticket || item?.ticket_id || item?.codigo_ticket || item?.id || '-',
+                direccion: item?.direccion || item?.address || item?.ubicacion || '-',
+                descripcion: item?.descripcion || item?.description || item?.detalle || item?.resumen || '-',
                 estado: item?.estado || item?.status || '-',
                 fechaHora,
                 fechaHoraKey,
@@ -12012,7 +12021,7 @@
             setAgendaRows(normalized);
           } catch (error) {
             console.error('Error cargando agenda de servicios:', error);
-            setAgendaError('Sin datos');
+            setAgendaError('Sin datos (verificar CORS/API)');
             setAgendaRows([]);
           } finally {
             setAgendaLoading(false);
