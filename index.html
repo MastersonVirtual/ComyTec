@@ -2453,18 +2453,18 @@
         gap: 8px;
       }
       .mail-detail-overlay {
-        background: rgba(20, 24, 28, .36);
-        backdrop-filter: blur(4px);
+        background: rgba(18, 22, 26, .72);
+        backdrop-filter: blur(2px);
       }
       .mail-detail-modal {
         width: min(860px, 96vw);
         max-height: 88vh;
         overflow: auto;
-        background: #f7f9fb;
-        border: 1px solid #dbe3ea;
+        background: #535b60;
+        border: 1px solid rgba(210, 224, 236, .55);
         border-radius: 16px;
-        color: #0f172a;
-        box-shadow: 0 24px 70px rgba(15, 23, 42, .22);
+        color: #e7eef6;
+        box-shadow: 0 24px 70px rgba(0, 0, 0, .45);
         padding: 18px;
       }
       .mail-detail-header {
@@ -2477,25 +2477,27 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        color: #0b8f8b;
+        color: #00b6b2;
         font-weight: 800;
-        font-size: 32px;
+        font-size: 28px;
       }
-      .mail-detail-title small {
-        font-size: 16px;
-        font-weight: 700;
+      .mail-detail-title .mail-detail-label {
+        font-size: 35px;
+        font-weight: 800;
+        letter-spacing: .2px;
       }
       .mail-detail-close {
         border: none;
         background: transparent;
-        color: #64748b;
+        color: #9fb0c2;
         font-size: 28px;
         cursor: pointer;
         line-height: 1;
       }
       .mail-detail-meta .kv {
-        color: #1f2937;
+        color: #f8fbff;
         margin: 8px 0;
+        font-size: 15px;
       }
       .mail-detail-body {
         margin-top: 12px;
@@ -2507,15 +2509,19 @@
         overflow: auto;
         white-space: pre-wrap;
         color: #1f2937;
+        font-size: 15px;
+        line-height: 1.45;
       }
       .mail-detail-actions {
         display: flex;
-        justify-content: flex-end;
+        justify-content: stretch;
         margin-top: 14px;
       }
       .mail-detail-actions .save-btn {
-        min-width: 96px;
+        width: 100%;
         border-radius: 10px;
+        background: #005f63;
+        border-color: #007f84;
       }
       .client-view-modal {
         width: min(440px, 100%);
@@ -17680,7 +17686,7 @@
                     <div className="mail-detail-header">
                       <div className="mail-detail-title">
                         <span>✉️</span>
-                        <small>Detalle de correo</small>
+                        <span className="mail-detail-label">Detalle de correo</span>
                       </div>
                       <button type="button" className="mail-detail-close" onClick={() => setGmailDetailModal({ open: false, mail: null, body: '' })}>×</button>
                     </div>
