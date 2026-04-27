@@ -11634,6 +11634,28 @@
           }
         }
 
+        async function sincronizarVistaMail() {
+          try {
+            setGmailApiError('');
+            setGmailApiLoading(true);
+            const provider = new firebase.auth.GoogleAuthProvider();
+            provider.addScope(GMAIL_READONLY_SCOPE);
+            provider.setCustomParameters({ prompt: 'consent' });
+            const result = await auth.signInWithPopup(provider);
+            const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
+            const token = credential?.accessToken || '';
+            if (!token) throw new Error('No se pudo obtener token de Gmail.');
+            window.sessionStorage.setItem('gmail_access_token', token);
+            setGmailAccessToken(token);
+            await cargarUltimosMails(token);
+          } catch (error) {
+            console.error('Error sincronizando vista de Gmail:', error);
+            setGmailApiError('No se pudieron sincronizar los correos.');
+          } finally {
+            setGmailApiLoading(false);
+          }
+        }
+
         useEffect(() => {
           let active = true;
           auth.getRedirectResult().then((result) => {
@@ -15540,6 +15562,9 @@
                                 <div className="home-hero-mail-empty">
                                   <i data-lucide="mail-warning"></i>
                                   <div className="hint" style={{ margin: 0 }}>{gmailApiError}</div>
+                                  <button type="button" className="home-modern-action-btn" onClick={() => { void sincronizarVistaMail(); }}>
+                                    Sincronizar mails
+                                  </button>
                                 </div>
                               ) : gmailApiLoading ? (
                                 <div className="home-hero-mail-empty">
@@ -15548,6 +15573,11 @@
                                 </div>
                               ) : gmailApiEmails.length > 0 ? (
                                 <div className="home-hero-mail-list">
+                                  <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+                                    <button type="button" className="home-modern-action-btn" onClick={() => { void sincronizarVistaMail(); }}>
+                                      Sincronizar mails
+                                    </button>
+                                  </div>
                                   {gmailApiEmails.map((mail) => (
                                     <article key={`mail-api-preview-${mail.id}`} className="home-hero-mail-item">
                                       <div className="home-hero-mail-top"><span>{mail.dateRaw || '-'}</span></div>
@@ -15560,6 +15590,9 @@
                                 <div className="home-hero-mail-empty">
                                   <i data-lucide="mail"></i>
                                   <div className="hint" style={{ margin: 0 }}>Iniciá sesión con Google para ver los últimos correos.</div>
+                                  <button type="button" className="home-modern-action-btn" onClick={() => { void sincronizarVistaMail(); }}>
+                                    Sincronizar mails
+                                  </button>
                                 </div>
                               )}
                             </div>
