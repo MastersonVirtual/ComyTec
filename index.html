@@ -9012,6 +9012,15 @@
         return 'home-status neutral';
       }
 
+      function extractGoogleAccessToken(result) {
+        if (!result) return '';
+        const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
+        return credential?.accessToken
+          || result?.credential?.accessToken
+          || result?._tokenResponse?.oauthAccessToken
+          || '';
+      }
+
       function LoginScreen() {
         const [loading, setLoading] = useState(false);
         const [error, setError] = useState('');
@@ -9024,8 +9033,7 @@
             provider.addScope(GMAIL_READONLY_SCOPE);
             provider.setCustomParameters({ prompt: 'consent' });
             const result = await auth.signInWithPopup(provider);
-            const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
-            const token = credential?.accessToken || '';
+            const token = extractGoogleAccessToken(result);
             if (token) window.sessionStorage.setItem('gmail_access_token', token);
           } catch (err) {
             if (String(err?.code || '').includes('popup')) {
@@ -11643,9 +11651,8 @@
             provider.addScope(GMAIL_READONLY_SCOPE);
             provider.setCustomParameters({ prompt: 'consent' });
             const result = await auth.signInWithPopup(provider);
-            const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
-            const token = credential?.accessToken || '';
-            if (!token) throw new Error('No se pudo obtener token de Gmail.');
+            const token = extractGoogleAccessToken(result);
+            if (!token) throw new Error('No se recibió token de Gmail.');
             window.sessionStorage.setItem('gmail_access_token', token);
             setGmailAccessToken(token);
             await cargarUltimosMails(token);
@@ -11661,8 +11668,7 @@
           let active = true;
           auth.getRedirectResult().then((result) => {
             if (!active || !result) return;
-            const credential = firebase.auth.GoogleAuthProvider.credentialFromResult(result);
-            const token = credential?.accessToken || '';
+            const token = extractGoogleAccessToken(result);
             if (token) {
               window.sessionStorage.setItem('gmail_access_token', token);
               setGmailAccessToken(token);
