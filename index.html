@@ -17010,119 +17010,101 @@
                   </>
 
                 
-                ) : effectiveSelectedForm === 'agenda-2workers' ? (
-                  <section className="panel">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                      <h2 style={{ margin: 0 }}>Agenda 2Workers · Técnicos (Gantt)</h2>
-                      <button type="button" className="home-modern-action-btn" onClick={goToHomeView}>← Volver al inicio</button>
-                    </div>
-                    <div className="hint">Vista completa tipo Gantt con métricas, filtros y grilla por día.</div>
-                    <div className="field" style={{ marginTop: 8, maxWidth: 360 }}><label>Buscar técnico/cliente/ticket</label><input value={agendaTechFilter} onChange={(e) => setAgendaTechFilter(e.target.value)} type="search" placeholder="Filtrar tareas..." /></div>
-                    <div className="agenda-stats-grid" style={{ marginTop: 10 }}>
-                      <article className="agenda-stat-card"><strong>Total de tickets</strong><b>{agendaStats.total}</b></article>
-                      <article className="agenda-stat-card"><strong>Técnicos asignados</strong><b>{agendaStats.techs}</b></article>
-                      <article className="agenda-stat-card"><strong>Tareas completadas</strong><b>{agendaStats.completed}</b></article>
-                      <article className="agenda-stat-card"><strong>Pendientes</strong><b>{agendaStats.pending}</b></article>
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: 10, marginTop: 10 }}>
-                      <aside className="home-modern-panel">
-                        <h3 style={{ marginTop: 0 }}>Responsables</h3>
-                        <div className="home-modern-list">
-                          {Array.from(new Set(agendaRows.map((t) => t.tecnicoId || 'Técnico sin asignar'))).map((tech) => {
-                            const count = agendaRows.filter((t) => (t.tecnicoId || 'Técnico sin asignar') === tech).length;
-                            return <div key={`tech-${tech}`} className="home-modern-list-item"><b>{tech}</b><small>{count} tickets</small></div>;
-                          })}
+                
+                ) : (effectiveSelectedForm === 'agenda-2workers' || effectiveSelectedForm === 'agenda-2workers-instalaciones') ? (
+                  (() => {
+                    const isInstall = effectiveSelectedForm === 'agenda-2workers-instalaciones';
+                    const title = isInstall ? 'Agenda 2Workers · Instalaciones (Gantt)' : 'Agenda 2Workers · Técnicos (Gantt)';
+                    const description = isInstall
+                      ? 'Vista de planificación para instalaciones con responsables, métricas y tareas distribuidas por fecha.'
+                      : 'Vista de planificación para técnicos con responsables, métricas y tareas distribuidas por fecha.';
+                    const filterValue = isInstall ? agendaInstallFilter : agendaTechFilter;
+                    const setFilterValue = isInstall ? setAgendaInstallFilter : setAgendaTechFilter;
+                    const stats = isInstall ? agendaInstallStats : agendaStats;
+                    const days = isInstall ? agendaInstallSevenDays : agendaSevenDays;
+                    const rows = isInstall ? agendaInstallRows : agendaRows;
+                    const emptyText = isInstall ? 'Disponible para asignar' : 'Sin tareas programadas';
+                    const filteredByQuery = (task, query) => {
+                      if (!query) return true;
+                      return [task.tecnicoId, task.cliente, task.ticketTitulo, task.ticketId, task.estado]
+                        .some((value) => String(value || '').toLowerCase().includes(query));
+                    };
+                    const responsibles = Array.from(new Set(rows.map((task) => task.tecnicoId || 'Sin asignar')))
+                      .map((name) => ({
+                        name,
+                        count: rows.filter((task) => (task.tecnicoId || 'Sin asignar') === name).length
+                      }))
+                      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+
+                    return (
+                      <section className="panel">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                          <h2 style={{ margin: 0 }}>{title}</h2>
+                          <button type="button" className="home-modern-action-btn" onClick={goToHomeView}>← Volver al inicio</button>
                         </div>
-                      </aside>
-                      <div className="agenda-days-grid">
-                      {agendaSevenDays.map((day) => (
-                        <article key={`agenda-full-${day.key}`} className="agenda-day-card">
-                          <header className="agenda-day-head">
-                            <div>
-                              <strong>{day.dateLabel}</strong>
-                              <span>{day.label}</span>
+                        <div className="hint">{description}</div>
+                        <div className="field" style={{ marginTop: 10, maxWidth: 380 }}>
+                          <label>Buscar por técnico, cliente, ticket o estado</label>
+                          <input value={filterValue} onChange={(e) => setFilterValue(e.target.value)} type="search" placeholder="Filtrar tareas..." />
+                        </div>
+                        <div className="agenda-stats-grid" style={{ marginTop: 10 }}>
+                          <article className="agenda-stat-card"><strong>Total de tickets</strong><b>{stats.total}</b></article>
+                          <article className="agenda-stat-card"><strong>Técnicos asignados</strong><b>{stats.techs}</b></article>
+                          <article className="agenda-stat-card"><strong>Tareas completadas</strong><b>{stats.completed}</b></article>
+                          <article className="agenda-stat-card"><strong>Pendientes</strong><b>{stats.pending}</b></article>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: 12, marginTop: 12 }}>
+                          <aside className="home-modern-panel">
+                            <h3 style={{ marginTop: 0, marginBottom: 8 }}>{isInstall ? 'Responsables de instalación' : 'Técnicos responsables'}</h3>
+                            <div className="home-modern-list">
+                              {responsibles.length === 0 ? (
+                                <div className="agenda-empty-card">Sin responsables para el período.</div>
+                              ) : responsibles.map((item) => (
+                                <div key={`${isInstall ? 'install' : 'tech'}-owner-${item.name}`} className="home-modern-list-item">
+                                  <b>{item.name}</b>
+                                  <small>{item.count} tickets</small>
+                                </div>
+                              ))}
                             </div>
-                            <span className="agenda-day-count">{day.tasks.length} tickets</span>
-                          </header>
-                          <div className="agenda-day-body">
-                            {day.tasks.filter((task) => {
-                              const q = agendaTechFilter.trim().toLowerCase();
-                              if (!q) return true;
-                              return [task.tecnicoId, task.cliente, task.ticketTitulo, task.ticketId, task.estado].some((v) => String(v || '').toLowerCase().includes(q));
-                            }).length === 0 ? (
-                              <div className="agenda-empty-card">Sin tareas programadas</div>
-                            ) : day.tasks.filter((task) => {
-                              const q = agendaTechFilter.trim().toLowerCase();
-                              if (!q) return true;
-                              return [task.tecnicoId, task.cliente, task.ticketTitulo, task.ticketId, task.estado].some((v) => String(v || '').toLowerCase().includes(q));
-                            }).map((task) => {
-                              const priorityClass = agendaPriorityClass(task.prioridad);
+                          </aside>
+                          <div className="agenda-days-grid">
+                            {days.map((day) => {
+                              const query = filterValue.trim().toLowerCase();
+                              const dayTasks = day.tasks.filter((task) => filteredByQuery(task, query));
                               return (
-                                <div key={`agenda-full-task-${day.key}-${task.id}-${task.ticketId || task.fechaHoraKey}`} className={`agenda-task-row ${priorityClass.replace('agenda-priority-', 'priority-')}`}>
-                                  <div className="agenda-time-col">{task.fechaHora ? task.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div>
-                                  <div className="agenda-task-main">
-                                    <div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div>
-                                    <div className="agenda-task-client">{task.tecnicoId || 'Técnico sin asignar'} · {task.cliente || 'Cliente sin nombre'}</div>
-                                    <div className="agenda-task-meta">{task.direccion || 'Sin dirección'}</div>
-                                    <div className="agenda-task-meta"><strong>Estado:</strong> {task.estado || 'Pendiente'} · <strong>Ticket:</strong> {task.ticketId || '-'}</div>
+                                <article key={`${isInstall ? 'install' : 'tech'}-gantt-${day.key}`} className="agenda-day-card">
+                                  <header className="agenda-day-head">
+                                    <div>
+                                      <strong>{day.dateLabel}</strong>
+                                      <span>{day.label}</span>
+                                    </div>
+                                    <span className="agenda-day-count">{dayTasks.length} tickets</span>
+                                  </header>
+                                  <div className="agenda-day-body">
+                                    {dayTasks.length === 0 ? (
+                                      <div className="agenda-empty-card">{emptyText}</div>
+                                    ) : dayTasks.map((task) => {
+                                      const priorityClass = agendaPriorityClass(task.prioridad);
+                                      return (
+                                        <div key={`${isInstall ? 'install' : 'tech'}-task-${day.key}-${task.id}-${task.ticketId || task.fechaHoraKey}`} className={`agenda-task-row ${priorityClass.replace('agenda-priority-', 'priority-')}`}>
+                                          <div className="agenda-time-col">{task.fechaHora ? task.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div>
+                                          <div className="agenda-task-main">
+                                            <div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div>
+                                            <div className="agenda-task-client">{task.tecnicoId || 'Técnico sin asignar'} · {task.cliente || 'Cliente sin nombre'}</div>
+                                            <div className="agenda-task-meta"><strong>Estado:</strong> {task.estado || 'Pendiente'} · <strong>Ticket:</strong> {task.ticketId || '-'}</div>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
                                   </div>
-                                </div>
+                                </article>
                               );
                             })}
                           </div>
-                        </article>
-                      ))}
-                      </div>
-                    </div>
-                  </section>
-                ) : effectiveSelectedForm === 'agenda-2workers-instalaciones' ? (
-                  <section className="panel">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                      <h2 style={{ margin: 0 }}>Agenda 2Workers · Instalaciones (Gantt)</h2>
-                      <button type="button" className="home-modern-action-btn" onClick={goToHomeView}>← Volver al inicio</button>
-                    </div>
-                    <div className="hint">Vista completa tipo Gantt con métricas, filtros y grilla por día.</div>
-                    <div className="field" style={{ marginTop: 8, maxWidth: 360 }}><label>Buscar técnico/cliente/ticket</label><input value={agendaInstallFilter} onChange={(e) => setAgendaInstallFilter(e.target.value)} type="search" placeholder="Filtrar tareas..." /></div>
-                    <div className="agenda-stats-grid" style={{ marginTop: 10 }}>
-                      <article className="agenda-stat-card"><strong>Total de tickets</strong><b>{agendaInstallStats.total}</b></article>
-                      <article className="agenda-stat-card"><strong>Técnicos asignados</strong><b>{agendaInstallStats.techs}</b></article>
-                      <article className="agenda-stat-card"><strong>Tareas completadas</strong><b>{agendaInstallStats.completed}</b></article>
-                      <article className="agenda-stat-card"><strong>Pendientes</strong><b>{agendaInstallStats.pending}</b></article>
-                    </div>
-                    <div className="agenda-days-grid" style={{ marginTop: 10 }}>
-                      {agendaInstallSevenDays.map((day) => (
-                        <article key={`agenda-install-full-${day.key}`} className="agenda-day-card">
-                          <header className="agenda-day-head"><div><strong>{day.dateLabel}</strong><span>{day.label}</span></div><span className="agenda-day-count">{day.tasks.length} tickets</span></header>
-                          <div className="agenda-day-body">
-                            {day.tasks.filter((task) => {
-                              const q = agendaInstallFilter.trim().toLowerCase();
-                              if (!q) return true;
-                              return [task.tecnicoId, task.cliente, task.ticketTitulo, task.ticketId, task.estado].some((v) => String(v || '').toLowerCase().includes(q));
-                            }).length === 0 ? (
-                              <div className="agenda-empty-card">Disponible para asignar</div>
-                            ) : day.tasks.filter((task) => {
-                              const q = agendaInstallFilter.trim().toLowerCase();
-                              if (!q) return true;
-                              return [task.tecnicoId, task.cliente, task.ticketTitulo, task.ticketId, task.estado].some((v) => String(v || '').toLowerCase().includes(q));
-                            }).map((task) => {
-                              const priorityClass = agendaPriorityClass(task.prioridad);
-                              return (
-                                <div key={`agenda-install-full-task-${day.key}-${task.id}-${task.ticketId || task.fechaHoraKey}`} className={`agenda-task-row ${priorityClass.replace('agenda-priority-', 'priority-')}`}>
-                                  <div className="agenda-time-col">{task.fechaHora ? task.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div>
-                                  <div className="agenda-task-main">
-                                    <div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div>
-                                    <div className="agenda-task-client">{task.tecnicoId || 'Técnico sin asignar'} · {task.cliente || 'Cliente sin nombre'}</div>
-                                    <div className="agenda-task-meta">{task.direccion || 'Sin dirección'}</div>
-                                    <div className="agenda-task-meta"><strong>Estado:</strong> {task.estado || 'Pendiente'} · <strong>Ticket:</strong> {task.ticketId || '-'}</div>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        </article>
-                      ))}
-                    </div>
-                  </section>
+                        </div>
+                      </section>
+                    );
+                  })()
 
 ) : effectiveSelectedForm === 'home-card-view' ? (
                   <section className="home-card-detail-shell">
