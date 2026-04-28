@@ -12464,11 +12464,16 @@
 
         useEffect(() => {
           let fallbackTimer = null;
+          let refreshInterval = null;
           let resolvedByWebhook = false;
+          const REFRESH_EVERY_MS = 5 * 60 * 1000;
 
           if (!rtdb) {
             void fetchAuvoAgenda();
-            return () => {};
+            refreshInterval = window.setInterval(() => { void fetchAuvoAgenda(); }, REFRESH_EVERY_MS);
+            return () => {
+              if (refreshInterval) window.clearInterval(refreshInterval);
+            };
           }
 
           const ref = rtdb.ref(AUVO_AGENDA_WEBHOOK_RTDB_PATH);
@@ -12505,9 +12510,12 @@
 
           setAgendaLoading(true);
           ref.on('value', handleValue, handleError);
+          void fetchAuvoAgenda();
+          refreshInterval = window.setInterval(() => { void fetchAuvoAgenda(); }, REFRESH_EVERY_MS);
 
           return () => {
             if (fallbackTimer) window.clearTimeout(fallbackTimer);
+            if (refreshInterval) window.clearInterval(refreshInterval);
             ref.off('value', handleValue);
           };
         }, []);
