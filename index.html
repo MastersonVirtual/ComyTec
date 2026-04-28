@@ -11794,7 +11794,8 @@
                 }
               }
 
-              const hasRegisteredAccess = byUid.exists || emailProfileFound;
+              const hasUsersApprovedAccess = Boolean(modernProfile?.accesoAprobado) || String(modernProfile?.rol || '').trim() !== '';
+              const hasRegisteredAccess = byUid.exists || emailProfileFound || hasUsersApprovedAccess;
               let hasApprovedRequest = false;
               let hasActiveRequest = false;
               if (!hasRegisteredAccess) {
@@ -15286,8 +15287,8 @@
                 actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
               };
 
-              await db.collection('config_usuarios').doc(profileDocId).set(profilePatch, { merge: true });
-              patch.aplicadaConfigUsuario = true;
+              await db.collection('users').doc(profileDocId).set(profilePatch, { merge: true });
+              patch.aplicadaUsuarioProfile = true;
             }
 
             await db.collection('solicitudes_credenciales').doc(req.id).set(patch, { merge: true });
