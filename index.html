@@ -9217,6 +9217,7 @@
       const GMAIL_READONLY_SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
       const GOOGLE_CALENDAR_READONLY_SCOPE = 'https://www.googleapis.com/auth/calendar.events.readonly';
       const AUVO_AGENDA_ENDPOINT = 'https://auvo-api-1050062076637.us-central1.run.app';
+      const AUVO_AGENDA_INSTALL_ENDPOINT = 'https://auvo-api-2-1050062076637.us-central1.run.app';
       const AUVO_AGENDA_WEBHOOK_RTDB_PATH = 'integraciones/2workers/agenda';
 
       function generarClienteId() {
@@ -10243,6 +10244,10 @@
         const [agendaLoading, setAgendaLoading] = useState(false);
         const [agendaError, setAgendaError] = useState('');
         const [agendaRangeWarning, setAgendaRangeWarning] = useState('');
+        const [agendaInstallRows, setAgendaInstallRows] = useState([]);
+        const [agendaInstallLoading, setAgendaInstallLoading] = useState(false);
+        const [agendaInstallError, setAgendaInstallError] = useState('');
+        const [agendaInstallRangeWarning, setAgendaInstallRangeWarning] = useState('');
         const [agendaDayModal, setAgendaDayModal] = useState({ open: false, day: null });
         const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
         const [userCredentialRequests, setUserCredentialRequests] = useState([]);
@@ -12462,6 +12467,79 @@
           }
         }
 
+        function applyAgendaInstallPayload(rawItems = [], rango = null, source = 'endpoint') {
+          const items = Array.isArray(rawItems) ? rawItems : [];
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const expectedDesde = new Date(today);
+          expectedDesde.setDate(today.getDate() - 3);
+          const expectedHasta = new Date(today);
+          expectedHasta.setDate(today.getDate() + 3);
+
+          const rangoDesde = parseAgendaDateTime(rango?.desde);
+          const rangoHasta = parseAgendaDateTime(rango?.hasta);
+          if (rangoDesde && rangoHasta) {
+            const expectedDesdeKey = dayKey(expectedDesde);
+            const expectedHastaKey = dayKey(expectedHasta);
+            const actualDesdeKey = dayKey(rangoDesde);
+            const actualHastaKey = dayKey(rangoHasta);
+            if (expectedDesdeKey !== actualDesdeKey || expectedHastaKey !== actualHastaKey) {
+              const warningMessage = `El ${source} (instalaciones) devolvió rango ${actualDesdeKey} a ${actualHastaKey}; se esperaba ${expectedDesdeKey} a ${expectedHastaKey}.`;
+              setAgendaInstallRangeWarning(warningMessage);
+              console.warn(warningMessage);
+            } else {
+              setAgendaInstallRangeWarning('');
+            }
+          } else {
+            setAgendaInstallRangeWarning('');
+          }
+
+          const normalized = items.map((item, idx) => {
+            const fechaHora = parseAgendaDateTime(item?.fechaHora);
+            const orientacion = String(item?.orientacion || '').trim();
+            const ticketTitulo = String(item?.ticketTitulo || '').trim();
+            return {
+              id: item?.ticketId || `${item?.tecnicoId || 'sin-tecnico'}-${idx}`,
+              tecnicoId: String(item?.tecnicoId || '').trim() || 'Técnico sin asignar',
+              cliente: String(item?.cliente || '').trim() || String(item?.clienteId || '').trim() || 'Cliente sin nombre',
+              clienteId: String(item?.clienteId || '').trim(),
+              fechaHora,
+              fechaHoraKey: fechaHora ? dayKey(fechaHora) : '',
+              direccion: String(item?.direccion || '').trim() || 'Sin dirección',
+              orientacion: orientacion || 'Sin descripción',
+              prioridad: String(item?.prioridad || '').trim() || 'Baja',
+              estado: String(item?.estado || '').trim() || 'Pendiente',
+              ticketId: String(item?.ticketId || '').trim(),
+              ticketTitulo: ticketTitulo || orientacion || 'Sin descripción',
+            };
+          }).filter((item) => item.fechaHora instanceof Date)
+            .sort((a, b) => (a?.fechaHora?.getTime?.() || 0) - (b?.fechaHora?.getTime?.() || 0));
+          setAgendaInstallRows(normalized);
+        }
+
+        async function fetchAuvoAgendaInstall() {
+          try {
+            setAgendaInstallLoading(true);
+            setAgendaInstallError('');
+            setAgendaInstallRangeWarning('');
+            const response = await fetch(AUVO_AGENDA_INSTALL_ENDPOINT, {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' },
+            });
+            if (!response.ok) throw new Error(`Cloud Run ${response.status}`);
+            const json = await response.json();
+            if (!json?.ok) throw new Error('Respuesta inválida del endpoint de instalaciones');
+            const rawItems = Array.isArray(json?.data) ? json.data : [];
+            applyAgendaInstallPayload(rawItems, json?.rango || null, 'endpoint');
+          } catch (error) {
+            console.error('Error cargando agenda AUVO instalaciones:', error);
+            setAgendaInstallError('No se pudo cargar 2W Instalaciones.');
+            setAgendaInstallRows([]);
+          } finally {
+            setAgendaInstallLoading(false);
+          }
+        }
+
         useEffect(() => {
           let fallbackTimer = null;
           let refreshInterval = null;
@@ -12520,6 +12598,10 @@
           };
         }, []);
 
+        useEffect(() => {
+          void fetchAuvoAgendaInstall();
+        }, []);
+
         const agendaSevenDays = useMemo(() => {
           const base = new Date();
           base.setHours(0, 0, 0, 0);
@@ -12565,6 +12647,29 @@
           const pending = Math.max(total - completed, 0);
           return { total, techs, completed, pending };
         }, [agendaRows]);
+        const agendaInstallSevenDays = useMemo(() => {
+          const base = new Date();
+          base.setHours(0, 0, 0, 0);
+          const grouped = new Map();
+          agendaInstallRows.forEach((item) => {
+            const key = item?.fechaHoraKey;
+            if (!key) return;
+            if (!grouped.has(key)) grouped.set(key, []);
+            grouped.get(key).push(item);
+          });
+          return [-3, -2, -1, 0, 1, 2, 3].map((offset) => {
+            const date = new Date(base);
+            date.setDate(base.getDate() + offset);
+            const key = dayKey(date);
+            const tasks = (grouped.get(key) || []).slice().sort((a, b) => (a?.fechaHora?.getTime?.() || 0) - (b?.fechaHora?.getTime?.() || 0));
+            return {
+              key,
+              dateLabel: date.toLocaleDateString('es-UY', { weekday: 'short', day: '2-digit', month: '2-digit' }).replace('.', ''),
+              label: relativeAgendaLabel(offset),
+              tasks,
+            };
+          });
+        }, [agendaInstallRows]);
 
         const calendarDaySections = useMemo(() => {
           const today = new Date();
@@ -16791,6 +16896,63 @@
                               )}
                               {!agendaLoading && !agendaError && agendaRangeWarning && (
                                 <div className="hint" style={{ marginTop: 10 }}>{agendaRangeWarning}</div>
+                              )}
+                            </div>
+                          </section>
+                          <section className="home-widget-shell agenda-widget-card">
+                            <div className="agenda-widget-head">
+                              <div>
+                                <h4>Agenda de Instalaciones</h4>
+                                <small className="agenda-widget-subtitle">Tareas programadas desde 2Workers</small>
+                              </div>
+                            </div>
+                            <div className="agenda-widget-body">
+                              <div className="agenda-widget-range">Últimos 3 días, hoy y próximos 3 días</div>
+                              {agendaInstallLoading ? (
+                                <div className="hint">Cargando 2W Instalaciones...</div>
+                              ) : agendaInstallError ? (
+                                <div className="hint">{agendaInstallError}</div>
+                              ) : (
+                                <div className="agenda-days-grid">
+                                  {agendaInstallSevenDays.map((day) => (
+                                    <article key={`agenda-install-day-${day.key}`} className="agenda-day-card">
+                                      <header className="agenda-day-head">
+                                        <div>
+                                          <strong>{day.dateLabel}</strong>
+                                        </div>
+                                        <span className="agenda-day-count">{day.tasks.length} tickets</span>
+                                      </header>
+                                      <div className="agenda-day-label">• {day.label}</div>
+                                      <div className="agenda-day-body">
+                                        {day.tasks.length === 0 ? (
+                                          <div className="agenda-empty-card">Disponible para asignar</div>
+                                        ) : day.tasks.map((task) => {
+                                          const priorityClass = agendaPriorityClass(task.prioridad);
+                                          return (
+                                            <div key={`agenda-install-task-${day.key}-${task.id}-${task.ticketId || task.fechaHoraKey}`} className={`agenda-task-row ${priorityClass.replace('agenda-priority-', 'priority-')}`}>
+                                              <div className="agenda-time-col">
+                                                {task.fechaHora ? task.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
+                                              </div>
+                                              <div className="agenda-task-main">
+                                                <div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div>
+                                                <div className="agenda-task-client">{task.tecnicoId || 'Técnico sin asignar'} · {task.cliente || 'Cliente sin nombre'}</div>
+                                                <div className="agenda-task-meta">{task.direccion || 'Sin dirección'}</div>
+                                                <div className="agenda-task-meta">{task.orientacion || 'Sin descripción'}</div>
+                                                <div className="agenda-task-meta"><strong>Estado:</strong> {task.estado || 'Pendiente'} · <strong>Ticket:</strong> {task.ticketId || '-'}</div>
+                                                <div className="agenda-task-badges">
+                                                  <span className={`agenda-chip ${priorityClass}`}>Prioridad {String(task.prioridad || 'Baja').toLowerCase()}</span>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </article>
+                                  ))}
+                                </div>
+                              )}
+                              {!agendaInstallLoading && !agendaInstallError && agendaInstallRangeWarning && (
+                                <div className="hint" style={{ marginTop: 10 }}>{agendaInstallRangeWarning}</div>
                               )}
                             </div>
                           </section>
