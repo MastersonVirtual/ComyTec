@@ -17286,11 +17286,18 @@
                     {grupo === 'servicio' ? (
                       <div className="service-layout">
                         <div className="service-card">
-                          <h3>Nuevo Servicio</h3>
+                          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', marginBottom: 12 }}>
+                            <h3 style={{ margin: 0 }}>Nuevo Servicio</h3>
+                            <div className="field" style={{ minWidth: 220, maxWidth: 320, marginLeft: 'auto' }}>
+                              <label>Tipo</label>
+                              <select value={normalizeServiceEntityType(servicioForm.tipoAltaServicio)} onChange={(e) => setServicioField('tipoAltaServicio', e.target.value)}>
+                                {SERVICE_ENTITY_TYPE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+                              </select>
+                            </div>
+                          </div>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID</label><input value={clienteId} readOnly type="text" /></div>
                             <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
-                            <div className="field"><label>Tipo</label><select value={normalizeServiceEntityType(servicioForm.tipoAltaServicio)} onChange={(e) => setServicioField('tipoAltaServicio', e.target.value)}>{SERVICE_ENTITY_TYPE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></div>
                           </div>
                         </div>
                         {normalizeServiceEntityType(servicioForm.tipoAltaServicio) === 'Obra' ? (
