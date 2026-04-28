@@ -9217,6 +9217,7 @@
       const GMAIL_READONLY_SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
       const GOOGLE_CALENDAR_READONLY_SCOPE = 'https://www.googleapis.com/auth/calendar.events.readonly';
       const AUVO_AGENDA_ENDPOINT = 'https://auvo-api-1050062076637.us-central1.run.app';
+      const AUVO_AGENDA_WEBHOOK_RTDB_PATH = 'integraciones/2workers/agenda';
 
       function generarClienteId() {
         return String(Math.floor(1000 + Math.random() * 9000));
@@ -12380,6 +12381,56 @@
           return '';
         }
 
+        function applyAgendaPayload(rawItems = [], rango = null, source = 'endpoint') {
+          const items = Array.isArray(rawItems) ? rawItems : [];
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const expectedDesde = new Date(today);
+          expectedDesde.setDate(today.getDate() - 3);
+          const expectedHasta = new Date(today);
+          expectedHasta.setDate(today.getDate() + 3);
+
+          const rangoDesde = parseAgendaDateTime(rango?.desde);
+          const rangoHasta = parseAgendaDateTime(rango?.hasta);
+          if (rangoDesde && rangoHasta) {
+            const expectedDesdeKey = dayKey(expectedDesde);
+            const expectedHastaKey = dayKey(expectedHasta);
+            const actualDesdeKey = dayKey(rangoDesde);
+            const actualHastaKey = dayKey(rangoHasta);
+            if (expectedDesdeKey !== actualDesdeKey || expectedHastaKey !== actualHastaKey) {
+              const warningMessage = `El ${source} devolvió rango ${actualDesdeKey} a ${actualHastaKey}; se esperaba ${expectedDesdeKey} a ${expectedHastaKey}.`;
+              setAgendaRangeWarning(warningMessage);
+              console.warn(warningMessage);
+            } else {
+              setAgendaRangeWarning('');
+            }
+          } else {
+            setAgendaRangeWarning('');
+          }
+
+          const normalized = items.map((item, idx) => {
+            const fechaHora = parseAgendaDateTime(item?.fechaHora);
+            return {
+              id: item?.ticketId || `${item?.tecnicoId || 'sin-tecnico'}-${idx}`,
+              tecnicoId: String(item?.tecnicoId || '').trim() || 'Técnico sin asignar',
+              cliente: String(item?.cliente || '').trim() || String(item?.clienteId || '').trim() || 'Cliente sin nombre',
+              clienteId: String(item?.clienteId || '').trim(),
+              fechaHora,
+              fechaHoraKey: fechaHora ? dayKey(fechaHora) : '',
+              direccion: String(item?.direccion || '').trim() || 'Sin dirección',
+              orientacion: String(item?.orientacion || '').trim() || 'Sin descripción',
+              prioridad: String(item?.prioridad || '').trim() || 'Baja',
+              estado: String(item?.estado || '').trim() || 'Pendiente',
+              ticketId: String(item?.ticketId || '').trim(),
+              ticketTitulo: String(item?.ticketTitulo || '').trim() || String(item?.orientacion || '').trim() || 'Sin descripción',
+            };
+          }).filter((item) => item.fechaHora instanceof Date)
+            .sort((a, b) => (a?.fechaHora?.getTime?.() || 0) - (b?.fechaHora?.getTime?.() || 0));
+
+          setAgendaRows(normalized);
+          return normalized.length;
+        }
+
         async function fetchAuvoAgenda() {
           try {
             setAgendaLoading(true);
@@ -12401,48 +12452,7 @@
             }
 
             const rawItems = Array.isArray(json?.data) ? json.data : [];
-
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const expectedDesde = new Date(today);
-            expectedDesde.setDate(today.getDate() - 3);
-            const expectedHasta = new Date(today);
-            expectedHasta.setDate(today.getDate() + 3);
-
-            const rangoDesde = parseAgendaDateTime(json?.rango?.desde);
-            const rangoHasta = parseAgendaDateTime(json?.rango?.hasta);
-            if (rangoDesde && rangoHasta) {
-              const expectedDesdeKey = dayKey(expectedDesde);
-              const expectedHastaKey = dayKey(expectedHasta);
-              const actualDesdeKey = dayKey(rangoDesde);
-              const actualHastaKey = dayKey(rangoHasta);
-              if (expectedDesdeKey !== actualDesdeKey || expectedHastaKey !== actualHastaKey) {
-                const warningMessage = `El endpoint devolvió rango ${actualDesdeKey} a ${actualHastaKey}; se esperaba ${expectedDesdeKey} a ${expectedHastaKey}.`;
-                setAgendaRangeWarning(warningMessage);
-                console.warn(warningMessage);
-              }
-            }
-
-            const normalized = rawItems.map((item, idx) => {
-              const fechaHora = parseAgendaDateTime(item?.fechaHora);
-              return {
-                id: item?.ticketId || `${item?.tecnicoId || 'sin-tecnico'}-${idx}`,
-                tecnicoId: String(item?.tecnicoId || '').trim() || 'Técnico sin asignar',
-                cliente: String(item?.cliente || '').trim() || String(item?.clienteId || '').trim() || 'Cliente sin nombre',
-                clienteId: String(item?.clienteId || '').trim(),
-                fechaHora,
-                fechaHoraKey: fechaHora ? dayKey(fechaHora) : '',
-                direccion: String(item?.direccion || '').trim() || 'Sin dirección',
-                orientacion: String(item?.orientacion || '').trim() || 'Sin descripción',
-                prioridad: String(item?.prioridad || '').trim() || 'Baja',
-                estado: String(item?.estado || '').trim() || 'Pendiente',
-                ticketId: String(item?.ticketId || '').trim(),
-                ticketTitulo: String(item?.ticketTitulo || '').trim() || String(item?.orientacion || '').trim() || 'Sin descripción',
-              };
-            }).filter((item) => item.fechaHora instanceof Date)
-              .sort((a, b) => (a?.fechaHora?.getTime?.() || 0) - (b?.fechaHora?.getTime?.() || 0));
-
-            setAgendaRows(normalized);
+            applyAgendaPayload(rawItems, json?.rango || null, 'endpoint');
           } catch (error) {
             console.error('Error cargando agenda AUVO:', error);
             setAgendaError('No se pudo cargar la agenda de técnicos.');
@@ -12453,7 +12463,53 @@
         }
 
         useEffect(() => {
-          void fetchAuvoAgenda();
+          let fallbackTimer = null;
+          let resolvedByWebhook = false;
+
+          if (!rtdb) {
+            void fetchAuvoAgenda();
+            return () => {};
+          }
+
+          const ref = rtdb.ref(AUVO_AGENDA_WEBHOOK_RTDB_PATH);
+          const handleValue = (snap) => {
+            try {
+              const payload = snap.val();
+              const rawItems = Array.isArray(payload?.data)
+                ? payload.data
+                : Array.isArray(payload?.items)
+                  ? payload.items
+                  : Array.isArray(payload)
+                    ? payload
+                    : [];
+              if (!rawItems.length) {
+                if (!resolvedByWebhook) {
+                  if (fallbackTimer) window.clearTimeout(fallbackTimer);
+                  fallbackTimer = window.setTimeout(() => { void fetchAuvoAgenda(); }, 350);
+                }
+                return;
+              }
+              resolvedByWebhook = true;
+              setAgendaError('');
+              setAgendaLoading(false);
+              applyAgendaPayload(rawItems, payload?.rango || null, 'webhook');
+            } catch (error) {
+              console.error('Error procesando agenda webhook 2Workers:', error);
+              if (!resolvedByWebhook) void fetchAuvoAgenda();
+            }
+          };
+          const handleError = (error) => {
+            console.error('Error escuchando agenda webhook 2Workers:', error);
+            if (!resolvedByWebhook) void fetchAuvoAgenda();
+          };
+
+          setAgendaLoading(true);
+          ref.on('value', handleValue, handleError);
+
+          return () => {
+            if (fallbackTimer) window.clearTimeout(fallbackTimer);
+            ref.off('value', handleValue);
+          };
         }, []);
 
         const agendaSevenDays = useMemo(() => {
