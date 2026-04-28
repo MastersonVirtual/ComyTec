@@ -13224,7 +13224,7 @@
             return;
           }
 
-          setSelectedForm('historial');
+          setSelectedForm('base-datos');
         }
 
         function openServiceDetailModal(service, tab = 'informacion') {
@@ -14175,7 +14175,7 @@
                       <div>{item.message}</div>
                     </div>
                   ))}
-                  <button type="button" className="mobile-link-btn" onClick={() => { setMobileTab('actividad'); setSelectedForm('historial'); }}>Ver toda la actividad</button>
+                  <button type="button" className="mobile-link-btn" onClick={() => { setMobileTab('actividad'); setSelectedForm('historial-servicios'); }}>Ver toda la actividad</button>
                 </div>
 
                 <div className="mobile-flat-card">
@@ -14193,7 +14193,7 @@
                       <small>{item.hora || item.fecha || '-'}</small>
                     </div>
                   ))}
-                  <button type="button" className="mobile-link-btn" onClick={() => { setMobileTab('servicios'); setSelectedForm('historial'); }}>Ver agenda</button>
+                  <button type="button" className="mobile-link-btn" onClick={() => { setMobileTab('servicios'); setSelectedForm('base-datos'); }}>Ver agenda</button>
                 </div>
               </div>
 
@@ -14243,7 +14243,7 @@
                 <div className="hint" style={{ marginBottom: 10 }}>Toque un servicio para abrir su detalle.</div>
               <div className="mobile-service-stack">
                 {visibleRows.slice(0, 30).map((r) => (
-                  <article key={r.id} className="mobile-service-card" onClick={() => { setSelectedService(r); setSelectedForm('historial'); }}>
+                  <article key={r.id} className="mobile-service-card" onClick={() => { setSelectedService(r); setSelectedForm('base-datos'); }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
                       <strong>{r.nombreServicio || r.cliente || 'Servicio sin nombre'}</strong>
                       <span className={statusClass(getStatusLabel(r))}>{getStatusLabel(r)}</span>
@@ -14447,7 +14447,7 @@
           });
           if (!target) {
             setNotificacion({ mensaje: 'No se encontró el servicio asociado a la notificación.', tipo: 'warn' });
-            setSelectedForm('historial');
+            setSelectedForm('base-datos');
             return;
           }
           openServiceDetailModal(target, 'informacion');
@@ -14459,7 +14459,7 @@
           const target = historySourceRows.find((row) => normalizeServiceId(row?.clienteId || '') === normalizedId);
           if (!target) {
             setNotificacion({ mensaje: `No se encontró el servicio ${tag} en la base de datos.`, tipo: 'warn' });
-            setSelectedForm('historial');
+            setSelectedForm('base-datos');
             return;
           }
           openServiceDetailModal(target, 'informacion');
@@ -15635,7 +15635,7 @@
                 <div className="sidebar-menu-scroll">
                   <button className={`menu-button ${effectiveSelectedForm === 'home' ? 'active' : ''}`} onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
                   <button className={`menu-button ${effectiveSelectedForm === 'tickets' ? 'active' : ''}`} onClick={() => { openTicketsView(); closeSidebar(); }}><span className="menu-icon">🎫</span><span>Tickets</span></button>
-                  <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">🗃️</span><span>Base de datos</span></button>
+                  <button className="menu-button" onClick={() => { setSelectedForm('base-datos'); closeSidebar(); }}><span className="menu-icon">🗃️</span><span>Base de datos</span></button>
                   <div className="sidebar-divider" />
                   {!isMobile && (
                     <>
@@ -15645,12 +15645,12 @@
                         <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
                           <button className="submenu-button" onClick={() => { selectAction('Nuevo Servicio'); closeSidebar(); }}>Servicio</button>
                         </div>
-                        <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Gestión de servicios</button>
+                        <button className="submenu-button" onClick={() => { setSelectedForm('base-datos'); closeSidebar(); }}>Gestión de servicios</button>
                       </div>
                       <div className="sidebar-divider" />
                       <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: false, nuevo: false, baseDatos: !p.baseDatos }))}><span className="menu-icon">📚</span><span>Base de datos</span><span className="menu-arrow">{openMenus.baseDatos ? '▾' : '▸'}</span></button>
                       <div className={`submenu ${openMenus.baseDatos ? 'open' : ''}`}>
-                        <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
+                        <button className="submenu-button" onClick={() => { setSelectedForm('historial-servicios'); closeSidebar(); }}>Historial de Servicios</button>
                       </div>
                       {ENABLE_CLIENT_TRACKING_VIEW && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}><span className="menu-icon">👥</span><span>Vista Clientes</span></button>}
                     </>
@@ -15767,7 +15767,7 @@
                             ) : (
                               filteredRows.slice(0, 8).map((r) => (
                                 <div key={r.id}>
-                                  <div className="search-item" onClick={() => { setSelectedService(r); setSelectedForm('historial'); setExpandedId(null); setSearchTerm(''); setDesktopSearchOpen(false); }}>
+                                  <div className="search-item" onClick={() => { setSelectedService(r); setSelectedForm('base-datos'); setExpandedId(null); setSearchTerm(''); setDesktopSearchOpen(false); }}>
                                     <strong>{r.clienteId || '-'} · {r.nombreServicio || 'Servicio sin nombre'}</strong>
                                     <small>Fecha de alta: {r.fechaAlta || '-'}</small>
                                   </div>
@@ -15821,12 +15821,12 @@
                 </button>
               </div>
 
-              <main className={`main ${grupo === 'charla-detalle' ? 'charla-main-wide' : ''} ${effectiveSelectedForm === 'funcionarios' ? 'main-chat-expanded' : ''} ${effectiveSelectedForm === 'historial' ? 'main-ops-expanded' : ''}`}>
+              <main className={`main ${grupo === 'charla-detalle' ? 'charla-main-wide' : ''} ${effectiveSelectedForm === 'funcionarios' ? 'main-chat-expanded' : ''} ${effectiveSelectedForm === 'base-datos' ? 'main-ops-expanded' : ''}`}>
                 {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'acciones' && effectiveSelectedForm === 'home' ? renderMobileActions() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : isMobile && mobileTab === 'actividad' ? (
                   <section className="mobile-section-stack">
                     <div className="mobile-section-card">
                       <h3 className="mobile-section-title">Actividad</h3>
-                      <button type="button" className="mobile-list-button" onClick={() => { setSelectedForm('historial'); setSelectedService(null); }}>Ver historial de servicios</button>
+                      <button type="button" className="mobile-list-button" onClick={() => { setSelectedForm('base-datos'); setSelectedService(null); }}>Ver base de datos</button>
                     </div>
                   </section>
                 ) : effectiveSelectedForm === 'notificaciones' ? (
@@ -16607,7 +16607,7 @@
                 ) : effectiveSelectedForm === 'dashboard-gerencia' ? (
                   <DashboardGerencia rows={visibleRows} recentActivity={recentActivity} />
                 ) : effectiveSelectedForm === 'dashboard-tecnica' ? (
-                  <DashboardTecnica rows={visibleRows} onGoToDetalle={() => setSelectedForm('historial')} />
+                  <DashboardTecnica rows={visibleRows} onGoToDetalle={() => setSelectedForm('base-datos')} />
                 ) : effectiveSelectedForm === 'home' ? (
                   <>
                     <section className="home-modern-shell">
@@ -16620,7 +16620,7 @@
                               <p>Gestioná órdenes, seguimientos y tickets con un flujo más claro, moderno y profesional para todo tu equipo.</p>
                               <div className="home-modern-actions">
                                 <button type="button" className="home-modern-action-btn primary" onClick={() => selectAction('Nuevo Servicio')}>+ Nuevo servicio</button>
-                                <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('historial')}>Base de datos</button>
+                                <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('base-datos')}>Base de datos</button>
                                 <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('tickets')}>Tickets</button>
                               </div>
                             </div>
@@ -17285,12 +17285,38 @@
                       </div>
                     )}
                   </section>
-                ) : effectiveSelectedForm === 'historial' ? (
+                ) : effectiveSelectedForm === 'historial-servicios' ? (
+                  <section className="panel">
+                    <h2>Historial de Servicios</h2>
+                    <div className="hint">Registro cronológico de cambios y movimientos aplicados a cada servicio.</div>
+                    {historyFilteredRows.length === 0 ? (
+                      <div className="hint" style={{ marginBottom: 0 }}>No hay movimientos de historial para mostrar.</div>
+                    ) : (
+                      <div className="history-list">
+                        {historyFilteredRows.slice(0, 250).map((row) => (
+                          <div className="history-row" key={`service-history-${row.id}`} role="button" tabIndex={0} onClick={() => openServiceDetailModal(row, 'historial')} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openServiceDetailModal(row, 'historial'); } }}>
+                            <button type="button" className="ranking-service-btn" onClick={(event) => { event.stopPropagation(); openServiceDetailModal(row, 'historial'); }}>
+                              <div className="history-row-main">
+                                <strong>{row.nombreServicio || row.razonSocial || 'Servicio sin nombre'}</strong>
+                                <div className="history-row-meta">
+                                  <span>ID {row.clienteId || '-'}</span><span>·</span>
+                                  <span>{row.tipoAccion || row.formulario || 'Actualización'}</span><span>·</span>
+                                  <span>{formatRequestDateTime(row.creadoEn || row.updatedAt || row.actualizadoEn)}</span>
+                                </div>
+                              </div>
+                            </button>
+                            <span className={statusClass(row.status || row.estado)}>{row.status || row.estado || 'Pendiente'}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                ) : effectiveSelectedForm === 'base-datos' ? (
                   <section className="panel service-coord-shell">
                     <div className="service-coord-head">
                       <div>
-                        <h2 className="service-coord-title">Historial y base de datos de servicios</h2>
-                        <p className="service-coord-subtitle">Vista visual por cards para coordinar más rápido estado, responsables y seguimiento.</p>
+                        <h2 className="service-coord-title">Base de datos de servicios</h2>
+                        <p className="service-coord-subtitle">Ficha completa por servicio (datos maestros + información consolidada por ID de servicio).</p>
                       </div>
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                         {isAdminUser && (
@@ -18256,7 +18282,7 @@
                 )}
               </main>
 
-              {historyDetailModalOpen && selectedService && effectiveSelectedForm === 'historial' && (
+              {historyDetailModalOpen && selectedService && effectiveSelectedForm === 'base-datos' && (
                 <div className="service-detail-modal-overlay" onClick={() => setHistoryDetailModalOpen(false)}>
                   <div className="service-detail-modal" onClick={(e) => e.stopPropagation()}>
                     {(() => {
