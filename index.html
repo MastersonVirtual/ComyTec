@@ -2559,47 +2559,47 @@
       }
       .agenda-days-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        grid-template-columns: repeat(7, minmax(210px, 1fr));
         gap: 10px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+      .agenda-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      .agenda-stat-card {
+        background: #f8fcfb;
+        border: 1px solid #dce9e7;
+        border-radius: 12px;
+        padding: 10px;
+      }
+      .agenda-stat-card strong {
+        display: block;
+        color: #0a5b61;
+        font-size: 12px;
+      }
+      .agenda-stat-card b {
+        display: block;
+        font-size: 26px;
+        line-height: 1.05;
+        margin-top: 6px;
+        color: #111827;
       }
       .agenda-day-card {
-        border: 1px solid #d3e5e2;
-        border-radius: 12px;
+        border: 1px solid #dce9e7;
+        border-radius: 14px;
         background: #fff;
         display: flex;
         flex-direction: column;
-        min-height: 200px;
-      }
-      .agenda-day-card.is-collapsed .agenda-day-body {
-        display: none;
-      }
-      .agenda-day-toggle {
+        min-height: 380px;
         width: 100%;
-        border: none;
-        background: transparent;
-        cursor: pointer;
-        text-align: left;
-        padding: 0;
-      }
-      .agenda-day-summary {
-        padding: 8px 10px;
-        border-bottom: 1px dashed #d6e8e5;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        font-size: 11px;
-        color: #355452;
-      }
-      .agenda-day-summary span {
-        background: #f2f8f7;
-        border: 1px solid #ddeceb;
-        border-radius: 999px;
-        padding: 2px 8px;
-        font-weight: 700;
       }
       .agenda-day-head {
-        padding: 10px;
-        border-bottom: 1px solid #e6f0ef;
+        padding: 12px 12px 8px;
+        border-bottom: 1px solid #edf3f2;
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
@@ -2609,22 +2609,28 @@
         display: block;
         color: #0a5b61;
         text-transform: capitalize;
-        font-size: 13px;
+        font-size: 15px;
       }
       .agenda-day-head span {
         color: #3e6a68;
-        font-size: 11px;
-        font-weight: 600;
+        font-size: 12px;
+        font-weight: 700;
       }
       .agenda-day-count {
-        background: #e8f4f2;
-        border: 1px solid #cae4df;
+        background: #ecf5f3;
+        border: 1px solid #d6e9e5;
         border-radius: 999px;
-        padding: 2px 8px;
-        font-size: 11px;
+        padding: 4px 10px;
+        font-size: 12px;
         color: #0b6462;
         font-weight: 700;
         white-space: nowrap;
+      }
+      .agenda-day-label {
+        padding: 0 12px 8px;
+        color: #0b8f8b;
+        font-size: 13px;
+        font-weight: 700;
       }
       .agenda-day-body {
         padding: 8px;
@@ -2633,57 +2639,60 @@
         gap: 8px;
       }
       .agenda-empty-card {
-        border: 1px dashed #b9d3d0;
-        border-radius: 10px;
-        padding: 10px;
-        background: #f8fcfb;
-        color: #4a6b68;
-        font-size: 12px;
-        font-weight: 700;
+        border: 1px dashed #c9dcda;
+        border-radius: 12px;
+        min-height: 230px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         text-align: center;
+        padding: 12px;
+        background: #fafdfe;
+        color: #94a3b8;
+        font-size: 13px;
+        font-weight: 700;
       }
       .agenda-task-row {
         display: grid;
-        grid-template-columns: 56px 1fr auto;
-        gap: 8px;
-        border: 1px solid #e4efed;
-        border-radius: 10px;
-        padding: 8px;
+        grid-template-columns: 1fr;
+        gap: 6px;
+        border: 1px solid #e5eceb;
+        border-left: 3px solid #0b8f8b;
+        border-radius: 12px;
+        padding: 10px;
+        background: #fcfefe;
       }
+      .agenda-task-row.priority-media { border-left-color: #f59e0b; }
+      .agenda-task-row.priority-alta { border-left-color: #3b82f6; }
       .agenda-time-col {
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 800;
         color: #0b6462;
-        display: flex;
-        align-items: center;
       }
       .agenda-task-main {
         min-width: 0;
       }
       .agenda-task-title {
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 800;
         color: #1f2937;
       }
       .agenda-task-client {
         font-size: 12px;
-        font-weight: 700;
-        color: #0f5a59;
+        font-weight: 600;
+        color: #475569;
         margin-top: 2px;
       }
       .agenda-task-meta {
         margin-top: 2px;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
         font-size: 11px;
-        color: #4b5563;
+        color: #64748b;
       }
       .agenda-task-badges {
         display: flex;
-        flex-direction: column;
-        align-items: flex-end;
-        gap: 4px;
+        align-items: center;
+        gap: 6px;
+        margin-top: 2px;
       }
       .agenda-chip {
         display: inline-flex;
@@ -5215,6 +5224,8 @@
       .home-side-widget-shell {
         padding: 12px;
       }
+      .agenda-widget-card { order: 1; }
+      .home-staff-chat-card { order: 2; }
       .home-service-cards-board {
         grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
         margin-top: 14px;
@@ -10177,7 +10188,6 @@
         const [agendaLoading, setAgendaLoading] = useState(false);
         const [agendaError, setAgendaError] = useState('');
         const [agendaRangeWarning, setAgendaRangeWarning] = useState('');
-        const [agendaExpandedDay, setAgendaExpandedDay] = useState('');
         const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
         const [userCredentialRequests, setUserCredentialRequests] = useState([]);
         const [staffMembers, setStaffMembers] = useState([]);
@@ -12363,18 +12373,16 @@
           });
         }, [agendaRows]);
 
-        useEffect(() => {
-          if (!agendaSevenDays.length) return;
-          if (!agendaExpandedDay) {
-            const todayItem = agendaSevenDays.find((day) => day.offset === 0);
-            setAgendaExpandedDay(todayItem?.key || agendaSevenDays[0].key);
-            return;
-          }
-          const stillExists = agendaSevenDays.some((day) => day.key === agendaExpandedDay);
-          if (!stillExists) {
-            setAgendaExpandedDay(agendaSevenDays[0].key);
-          }
-        }, [agendaSevenDays, agendaExpandedDay]);
+        const agendaStats = useMemo(() => {
+          const total = agendaRows.length;
+          const techs = new Set(agendaRows.map((item) => item?.tecnicoId || 'Técnico sin asignar')).size;
+          const completed = agendaRows.filter((item) => {
+            const raw = String(item?.estado || '').toLowerCase();
+            return raw.includes('resuelto') || raw.includes('finalizado') || raw.includes('complete');
+          }).length;
+          const pending = Math.max(total - completed, 0);
+          return { total, techs, completed, pending };
+        }, [agendaRows]);
 
         const calendarDaySections = useMemo(() => {
           const today = new Date();
@@ -16486,61 +16494,49 @@
                               ) : agendaError ? (
                                 <div className="hint">{agendaError}</div>
                               ) : (
-                                <div className="agenda-days-grid">
-                                  {agendaSevenDays.map((day) => {
-                                    const isExpanded = agendaExpandedDay === day.key;
-                                    return (
-                                      <article key={`agenda-day-${day.key}`} className={`agenda-day-card ${isExpanded ? 'is-expanded' : 'is-collapsed'}`}>
-                                        <button
-                                          type="button"
-                                          className="agenda-day-toggle"
-                                          onClick={() => setAgendaExpandedDay(day.key)}
-                                          aria-expanded={isExpanded}
-                                        >
-                                          <header className="agenda-day-head">
-                                            <div>
-                                              <strong>{day.dateLabel}</strong>
-                                              <span>{day.label}</span>
-                                            </div>
-                                            <span className="agenda-day-count">{day.tasks.length} tickets</span>
-                                          </header>
-                                          <div className="agenda-day-summary">
-                                            <span>Técnicos: {day.techCount}</span>
-                                            <span>Horario: {day.firstHour} - {day.lastHour}</span>
-                                            <span>Prioridad alta: {day.highPriorityCount}</span>
+                                <>
+                                  <div className="agenda-stats-grid">
+                                    <article className="agenda-stat-card"><strong>Total de tickets</strong><b>{agendaStats.total}</b></article>
+                                    <article className="agenda-stat-card"><strong>Técnicos asignados</strong><b>{agendaStats.techs}</b></article>
+                                    <article className="agenda-stat-card"><strong>Tareas completadas</strong><b>{agendaStats.completed}</b></article>
+                                    <article className="agenda-stat-card"><strong>Pendientes</strong><b>{agendaStats.pending}</b></article>
+                                  </div>
+                                  <div className="agenda-days-grid">
+                                    {agendaSevenDays.map((day) => (
+                                      <article key={`agenda-day-${day.key}`} className="agenda-day-card">
+                                        <header className="agenda-day-head">
+                                          <div>
+                                            <strong>{day.dateLabel}</strong>
                                           </div>
-                                        </button>
+                                          <span className="agenda-day-count">{day.tasks.length} tickets</span>
+                                        </header>
+                                        <div className="agenda-day-label">• {day.label}</div>
                                         <div className="agenda-day-body">
                                           {day.tasks.length === 0 ? (
-                                            <div className="agenda-empty-card">Disponible para asignar</div>
-                                          ) : day.tasks.map((task) => (
-                                            <div key={`agenda-task-${day.key}-${task.id}-${task.ticketId || task.fechaHoraKey}`} className="agenda-task-row">
-                                              <div className="agenda-time-col">
-                                                {task.fechaHora ? task.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
-                                              </div>
-                                              <div className="agenda-task-main">
-                                                <div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div>
-                                                <div className="agenda-task-client">{task.cliente || 'Cliente sin nombre'}</div>
-                                                <div className="agenda-task-meta">
-                                                  <span><strong>Técnico:</strong> {task.tecnicoId || 'Técnico sin asignar'}</span>
-                                                  <span><strong>Dirección:</strong> {task.direccion || 'Sin dirección'}</span>
+                                            <div className="agenda-empty-card">Sin tareas programadas</div>
+                                          ) : day.tasks.map((task) => {
+                                            const priorityClass = agendaPriorityClass(task.prioridad);
+                                            return (
+                                              <div key={`agenda-task-${day.key}-${task.id}-${task.ticketId || task.fechaHoraKey}`} className={`agenda-task-row ${priorityClass.replace('agenda-priority-', 'priority-')}`}>
+                                                <div className="agenda-time-col">
+                                                  {task.fechaHora ? task.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
                                                 </div>
-                                                <div className="agenda-task-meta">
-                                                  <span><strong>Resumen:</strong> {task.orientacion || 'Sin descripción'}</span>
-                                                  {task.ticketId ? <span><strong>Ticket:</strong> #{task.ticketId}</span> : <span><strong>Ticket:</strong> Sin ticket</span>}
+                                                <div className="agenda-task-main">
+                                                  <div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div>
+                                                  <div className="agenda-task-client">{task.cliente || 'Cliente sin nombre'}</div>
+                                                  <div className="agenda-task-meta">{task.direccion || 'Sin dirección'}</div>
+                                                  <div className="agenda-task-badges">
+                                                    <span className={`agenda-chip ${priorityClass}`}>Prioridad {String(task.prioridad || 'Baja').toLowerCase()}</span>
+                                                  </div>
                                                 </div>
                                               </div>
-                                              <div className="agenda-task-badges">
-                                                <span className={`agenda-chip ${agendaPriorityClass(task.prioridad)}`}>{task.prioridad || 'Baja'}</span>
-                                                <span className={`agenda-chip ${agendaStateClass(task.estado)}`}>{task.estado || 'Pendiente'}</span>
-                                              </div>
-                                            </div>
-                                          ))}
+                                            );
+                                          })}
                                         </div>
                                       </article>
-                                    );
-                                  })}
-                                </div>
+                                    ))}
+                                  </div>
+                                </>
                               )}
                               {!agendaLoading && !agendaError && agendaRangeWarning && (
                                 <div className="hint" style={{ marginTop: 10 }}>{agendaRangeWarning}</div>
@@ -16611,7 +16607,7 @@
                               </article>
                               <article className="dash-side-card dashboard-equal-card calendar-widget-card" style={{ gridColumn: '1 / -1', minHeight: 0 }}>
                                 <div className="calendar-widget-head">
-                                  <h4>Reuniones de hoy y mañana</h4>
+                                  <h4>Agenda personal</h4>
                                   <div className="calendar-widget-subtitle">Eventos del usuario autenticado en Google Calendar</div>
                                 </div>
                                 {calendarLoading ? (
