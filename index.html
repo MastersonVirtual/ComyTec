@@ -9481,6 +9481,7 @@
 
       function AccessApprovalScreen({ userEmail = '', pendingRequest = null, onRequestAccess = null }) {
         const pendingStatus = String(pendingRequest?.estado || 'pendiente').trim().toLowerCase() || 'pendiente';
+        const hasActiveRequest = ['pendiente', 'aprobada', 'aplicada'].includes(pendingStatus);
         return (
           <div className="login-shell">
             <div className="login-stack">
@@ -9497,8 +9498,8 @@
                   <div className="hint">Podés enviar ahora una solicitud de credenciales para que administración la apruebe.</div>
                 )}
                 <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 10 }}>
-                  <button className="google-login-btn" type="button" onClick={() => { if (typeof onRequestAccess === 'function') onRequestAccess(); }}>
-                    <span>Solicitar autorización</span>
+                  <button className="google-login-btn" type="button" disabled={hasActiveRequest} onClick={() => { if (typeof onRequestAccess === 'function') onRequestAccess(); }}>
+                    <span>{hasActiveRequest ? 'Solicitud ya registrada' : 'Solicitar autorización'}</span>
                   </button>
                   <button className="ghost-btn" type="button" onClick={() => auth.signOut()}>
                     Cerrar sesión
@@ -11817,6 +11818,10 @@
           let configByUidProfile = null;
           let configByEmailProfile = null;
           const requestBuckets = {};
+          const requestSnapshotReady = {
+            uid: false,
+            email: !normalizedEmail,
+          };
 
           const applyProfileState = async () => {
             if (!mounted) return;
@@ -11836,8 +11841,9 @@
               const estado = String(item?.estado || '').trim().toLowerCase();
               return estado === 'pendiente' || estado === 'aprobada' || estado === 'aplicada';
             });
+            const hasRequestSnapshotData = requestSnapshotReady.uid && requestSnapshotReady.email;
 
-            if (!hasRegisteredAccess && !hasActiveRequest && !requestCreateInFlight) {
+            if (hasRequestSnapshotData && !hasRegisteredAccess && !hasActiveRequest && !requestCreateInFlight) {
               requestCreateInFlight = true;
               try {
                 await db.collection('solicitudes_credenciales').add({
@@ -11925,6 +11931,7 @@
 
           unsubs.push(db.collection('solicitudes_credenciales').where('solicitanteUid', '==', user.uid).limit(25).onSnapshot((snapshot) => {
             requestBuckets.uid = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            requestSnapshotReady.uid = true;
             void applyProfileState();
           }, (error) => {
             console.error('Error escuchando solicitudes por uid:', error);
@@ -11933,6 +11940,7 @@
           if (normalizedEmail) {
             unsubs.push(db.collection('solicitudes_credenciales').where('solicitanteEmail', '==', normalizedEmail).limit(25).onSnapshot((snapshot) => {
               requestBuckets.email = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+              requestSnapshotReady.email = true;
               void applyProfileState();
             }, (error) => {
               console.error('Error escuchando solicitudes por email:', error);
@@ -15385,6 +15393,12 @@
           const nextUser = profileUserRequest.trim();
           const nextPass = profilePasswordRequest.trim();
           const fromAccessPendingScreen = accessApprovalRequired && !nextUser && !nextPass;
+          const accessPendingStatus = String(accessPendingRequest?.estado || '').trim().toLowerCase();
+          const hasExistingAccessRequest = ['pendiente', 'aprobada', 'aplicada'].includes(accessPendingStatus);
+          if (fromAccessPendingScreen && hasExistingAccessRequest) {
+            setNotificacion({ mensaje: 'Ya existe una solicitud activa para este usuario', tipo: 'error' });
+            return;
+          }
           if (!fromAccessPendingScreen && (!nextUser || !nextPass)) {
             setNotificacion({ mensaje: 'Ingresá usuario y contraseña para solicitar el cambio', tipo: 'error' });
             return;
@@ -18851,23 +18865,9 @@
           };
         }
 
-        // Si el widget no existe, lo crea debajo de la tarjeta de perfil sin duplicar.
+        // El widget lo renderiza React. Evitamos crear/insertar nodos manualmente para no romper el árbol virtual.
         function ensureWidgetExists() {
-          const existing = document.getElementById('weather-widget');
-          if (existing) return existing;
-          const anchor = document.querySelector('.home-side-stack, .home-modern-hero, .home-modern-user');
-          if (!anchor) return null;
-          const widget = document.createElement('div');
-          widget.id = 'weather-widget';
-          widget.innerHTML = `
-            <div id="weather-icon">☁️</div>
-            <div id="weather-temp">--°C</div>
-            <div id="weather-desc">Cargando clima...</div>
-            <div id="weather-time"></div>
-          `;
-          if (anchor.classList && anchor.classList.contains('home-side-stack')) anchor.appendChild(widget);
-          else anchor.insertAdjacentElement('afterend', widget);
-          return widget;
+          return document.getElementById('weather-widget');
         }
 
         function esNoche() {
