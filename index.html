@@ -11752,13 +11752,8 @@
             provider: providerId,
             lastLoginAt: nowStamp,
           };
-          const existing = await userRef.get();
-          if (!existing.exists) {
-            await userRef.set({ ...baseDoc, createdAt: nowStamp }, { merge: true });
-            return { ...baseDoc, createdAt: null };
-          }
           await userRef.set(baseDoc, { merge: true });
-          return { ...(existing.data() || {}), ...baseDoc };
+          return { ...baseDoc };
         }
 
         useEffect(() => {
@@ -11798,110 +11793,10 @@
 
             setRoleLoading(true);
             try {
-              const modernProfile = await upsertAuthenticatedUserProfile(currentUser);
-              let profile = modernProfile || null;
-              const byUid = await db.collection('config_usuarios').doc(currentUser.uid).get();
-              let emailProfileFound = false;
-              if (byUid.exists) profile = { ...(profile || {}), ...byUid.data() };
-
-              if (!byUid.exists && currentUser.email) {
-                const snap = await db.collection('config_usuarios').where('email', '==', currentUser.email).limit(1).get();
-                if (!snap.empty) {
-                  emailProfileFound = true;
-                  profile = { ...(profile || {}), ...snap.docs[0].data() };
-                }
-              }
-
-              const hasUsersApprovedAccess = Boolean(modernProfile?.accesoAprobado) || String(modernProfile?.rol || '').trim() !== '';
-              const hasRegisteredAccess = byUid.exists || emailProfileFound || hasUsersApprovedAccess;
-              let hasApprovedRequest = false;
-              let hasActiveRequest = false;
-              if (!hasRegisteredAccess) {
-                const pendingChecks = [];
-                if (currentUser.uid) {
-                  pendingChecks.push(
-                    db.collection('solicitudes_credenciales')
-                      .where('solicitanteUid', '==', currentUser.uid)
-                      .limit(25)
-                      .get()
-                  );
-                }
-                if (currentUser.email) {
-                  pendingChecks.push(
-                    db.collection('solicitudes_credenciales')
-                      .where('solicitanteEmail', '==', currentUser.email)
-                      .limit(25)
-                      .get()
-                  );
-                }
-                if (pendingChecks.length > 0) {
-                  const checks = await Promise.all(pendingChecks);
-                  const allDocs = checks.flatMap((snap) => snap.docs);
-                  hasApprovedRequest = allDocs.some((doc) => {
-                    const estado = String(doc.data()?.estado || '').trim().toLowerCase();
-                    return estado === 'aprobada' || estado === 'aplicada';
-                  });
-                  hasActiveRequest = allDocs.some((doc) => {
-                    const estado = String(doc.data()?.estado || '').trim().toLowerCase();
-                    return estado === 'pendiente' || estado === 'aprobada' || estado === 'aplicada';
-                  });
-                }
-
-                if (!hasActiveRequest) {
-                  await db.collection('solicitudes_credenciales').add({
-                    tipo: 'solicitud_acceso_google',
-                    solicitanteUid: currentUser.uid || '',
-                    solicitanteEmail: currentUser.email || '',
-                    solicitanteNombre: currentUser.displayName || (currentUser.email || '').split('@')[0] || 'Usuario',
-                    estado: 'pendiente',
-                    leidaPorAdmin: false,
-                    creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
-                    actualizadaEn: firebase.firestore.FieldValue.serverTimestamp(),
-                  });
-                  hasActiveRequest = true;
-                }
-              }
-
-              const accessAllowed = hasRegisteredAccess || hasApprovedRequest;
-              setAccessApprovalRequired(!accessAllowed);
-              if (!accessAllowed) {
-                console.warn('[AUTH] Usuario sin autorización en config_usuarios:', currentUser.email || currentUser.uid || 'sin-identificador');
-              } else if (!hasRegisteredAccess && currentUser?.uid) {
-                const bootstrapProfile = {
-                  uid: currentUser.uid,
-                  email: currentUser.email || '',
-                  nombre: currentUser.displayName || (currentUser.email || '').split('@')[0] || 'Usuario',
-                  rol: 'usuario',
-                  area: '',
-                  avatarId: DEFAULT_PROFILE_AVATAR_ID,
-                  accesoAprobado: true,
-                  actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
-                };
-                await db.collection('config_usuarios').doc(currentUser.uid).set(bootstrapProfile, { merge: true });
-                profile = { ...(profile || {}), ...bootstrapProfile };
-              }
-
-              const rol = String(profile?.rol || 'usuario').toLowerCase();
-              const area = String(profile?.area || '').toLowerCase();
-              const nombre = String(profile?.nombre || profile?.displayName || currentUser.displayName || (currentUser.email || '').split('@')[0] || 'Usuario').trim();
-              const avatarId = PROFILE_AVATAR_OPTIONS.some((avatar) => avatar.id === profile?.avatarId) ? profile.avatarId : DEFAULT_PROFILE_AVATAR_ID;
-              setBaseRole(rol);
-              setBaseArea(area);
-              setUserRole(rol);
-              setUserArea(area);
-              setUserData({ nombre, rol, area, avatarId });
-              setProfileAvatarId(avatarId);
+              await upsertAuthenticatedUserProfile(currentUser);
             } catch (err) {
-              console.error('Error leyendo config_usuarios:', err);
-              setAccessApprovalRequired(false);
-              setBaseRole('usuario');
-              setBaseArea('');
-              setUserRole('usuario');
-              setUserArea('');
-              setUserData({ nombre: (currentUser?.email || 'usuario').split('@')[0], rol: 'usuario', area: '', avatarId: DEFAULT_PROFILE_AVATAR_ID });
-              setProfileAvatarId(DEFAULT_PROFILE_AVATAR_ID);
+              console.error('Error actualizando perfil autenticado:', err);
             } finally {
-              setRoleLoading(false);
               window.clearTimeout(safetyTimer);
             }
           });
@@ -11910,6 +11805,145 @@
             unsub();
           };
         }, []);
+
+        useEffect(() => {
+          if (!user?.uid) return () => {};
+          let mounted = true;
+          let requestCreateInFlight = false;
+          let bootstrapInFlight = false;
+
+          const normalizedEmail = String(user.email || '').trim().toLowerCase();
+          let usersProfile = null;
+          let configByUidProfile = null;
+          let configByEmailProfile = null;
+          const requestBuckets = {};
+
+          const applyProfileState = async () => {
+            if (!mounted) return;
+            const mergedProfile = {
+              ...(usersProfile || {}),
+              ...(configByUidProfile || {}),
+              ...(configByEmailProfile || {}),
+            };
+            const allRequests = Object.values(requestBuckets).flat();
+            const hasUsersApprovedAccess = Boolean(usersProfile?.accesoAprobado) || String(usersProfile?.rol || '').trim() !== '';
+            const hasRegisteredAccess = Boolean(configByUidProfile || configByEmailProfile || hasUsersApprovedAccess);
+            const hasApprovedRequest = allRequests.some((item) => {
+              const estado = String(item?.estado || '').trim().toLowerCase();
+              return estado === 'aprobada' || estado === 'aplicada';
+            });
+            let hasActiveRequest = allRequests.some((item) => {
+              const estado = String(item?.estado || '').trim().toLowerCase();
+              return estado === 'pendiente' || estado === 'aprobada' || estado === 'aplicada';
+            });
+
+            if (!hasRegisteredAccess && !hasActiveRequest && !requestCreateInFlight) {
+              requestCreateInFlight = true;
+              try {
+                await db.collection('solicitudes_credenciales').add({
+                  tipo: 'solicitud_acceso_google',
+                  solicitanteUid: user.uid || '',
+                  solicitanteEmail: user.email || '',
+                  solicitanteNombre: user.displayName || (user.email || '').split('@')[0] || 'Usuario',
+                  estado: 'pendiente',
+                  leidaPorAdmin: false,
+                  creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+                  actualizadaEn: firebase.firestore.FieldValue.serverTimestamp(),
+                });
+                hasActiveRequest = true;
+              } catch (error) {
+                console.error('Error creando solicitud de acceso automática:', error);
+              } finally {
+                requestCreateInFlight = false;
+              }
+            }
+
+            const accessAllowed = hasRegisteredAccess || hasApprovedRequest;
+            setAccessApprovalRequired(!accessAllowed);
+
+            if (accessAllowed && !hasRegisteredAccess && user.uid && !bootstrapInFlight) {
+              bootstrapInFlight = true;
+              try {
+                const bootstrapProfile = {
+                  uid: user.uid,
+                  email: user.email || '',
+                  nombre: user.displayName || (user.email || '').split('@')[0] || 'Usuario',
+                  rol: 'usuario',
+                  area: '',
+                  avatarId: DEFAULT_PROFILE_AVATAR_ID,
+                  accesoAprobado: true,
+                  actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+                };
+                await db.collection('config_usuarios').doc(user.uid).set(bootstrapProfile, { merge: true });
+              } catch (error) {
+                console.error('Error bootstrap config_usuarios:', error);
+              } finally {
+                bootstrapInFlight = false;
+              }
+            }
+
+            if (!accessAllowed) {
+              console.warn('[AUTH] Usuario sin autorización en config_usuarios:', user.email || user.uid || 'sin-identificador');
+            }
+
+            const rol = String(mergedProfile?.rol || 'usuario').toLowerCase();
+            const area = String(mergedProfile?.area || '').toLowerCase();
+            const nombre = String(mergedProfile?.nombre || mergedProfile?.displayName || user.displayName || (user.email || '').split('@')[0] || 'Usuario').trim();
+            const avatarId = PROFILE_AVATAR_OPTIONS.some((avatar) => avatar.id === mergedProfile?.avatarId) ? mergedProfile.avatarId : DEFAULT_PROFILE_AVATAR_ID;
+            setBaseRole(rol);
+            setBaseArea(area);
+            setUserRole(rol);
+            setUserArea(area);
+            setUserData({ nombre, rol, area, avatarId });
+            setProfileAvatarId(avatarId);
+            setRoleLoading(false);
+          };
+
+          const unsubs = [];
+          unsubs.push(db.collection('users').doc(user.uid).onSnapshot((doc) => {
+            usersProfile = doc.exists ? (doc.data() || {}) : null;
+            void applyProfileState();
+          }, (error) => {
+            console.error('Error escuchando users por uid:', error);
+          }));
+
+          unsubs.push(db.collection('config_usuarios').doc(user.uid).onSnapshot((doc) => {
+            configByUidProfile = doc.exists ? (doc.data() || {}) : null;
+            void applyProfileState();
+          }, (error) => {
+            console.error('Error escuchando config_usuarios por uid:', error);
+          }));
+
+          if (normalizedEmail) {
+            unsubs.push(db.collection('config_usuarios').where('email', '==', normalizedEmail).limit(1).onSnapshot((snapshot) => {
+              configByEmailProfile = !snapshot.empty ? (snapshot.docs[0].data() || {}) : null;
+              void applyProfileState();
+            }, (error) => {
+              console.error('Error escuchando config_usuarios por email:', error);
+            }));
+          }
+
+          unsubs.push(db.collection('solicitudes_credenciales').where('solicitanteUid', '==', user.uid).limit(25).onSnapshot((snapshot) => {
+            requestBuckets.uid = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            void applyProfileState();
+          }, (error) => {
+            console.error('Error escuchando solicitudes por uid:', error);
+          }));
+
+          if (normalizedEmail) {
+            unsubs.push(db.collection('solicitudes_credenciales').where('solicitanteEmail', '==', normalizedEmail).limit(25).onSnapshot((snapshot) => {
+              requestBuckets.email = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+              void applyProfileState();
+            }, (error) => {
+              console.error('Error escuchando solicitudes por email:', error);
+            }));
+          }
+
+          return () => {
+            mounted = false;
+            unsubs.forEach((unsub) => typeof unsub === 'function' && unsub());
+          };
+        }, [user?.uid, user?.email]);
 
         useEffect(() => {
           if (!selectedService?.id) return;
