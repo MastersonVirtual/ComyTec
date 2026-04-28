@@ -18331,7 +18331,11 @@
                                 <div className="hint" style={{ marginBottom: 10 }}>
                                   Recorrido sugerido del equipo: <b>Comercial</b> → <b>Instalaciones</b> → <b>Atención al cliente</b> → <b>Operaciones</b>. También se puede devolver etapas para correcciones.
                                 </div>
-                                {detailWorkflowStage === 'Pendiente de aprobación – Coordinación de Instalaciones'
+                                {effectiveSelectedForm === 'base-datos' ? (
+                                  <div className="hint" style={{ marginBottom: 10 }}>
+                                    Vista solo lectura de base de datos: para aprobar/rechazar o mover etapas usá la sección <b>Historial de Servicios</b>.
+                                  </div>
+                                ) : detailWorkflowStage === 'Pendiente de aprobación – Coordinación de Instalaciones'
                                   && (String(detailService.tipoAccion || '').trim() === 'Nuevo Servicio' || String(detailService.formulario || '').trim() === 'nuevo-servicio-optimizado') ? (
                                     <>
                                       <div className="hint" style={{ marginBottom: 10 }}>
