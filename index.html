@@ -5090,6 +5090,96 @@
         min-height: 170px;
         height: 100%;
       }
+      .calendar-widget-card {
+        grid-column: 1 / -1;
+        background: #ffffff;
+        border: 1px solid #dce8e6;
+        border-radius: 14px;
+        box-shadow: 0 10px 22px rgba(15, 23, 42, .05);
+        padding: 16px;
+      }
+      .calendar-widget-head h4 {
+        margin: 0;
+        color: #0f5a59;
+      }
+      .calendar-widget-subtitle {
+        margin-top: 4px;
+        font-size: 12px;
+        color: #4b6c69;
+      }
+      .calendar-sections {
+        display: grid;
+        gap: 12px;
+        margin-top: 12px;
+      }
+      .calendar-day-block {
+        background: #f8fcfb;
+        border: 1px solid #e1efed;
+        border-radius: 12px;
+        padding: 10px;
+      }
+      .calendar-day-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .calendar-day-head strong {
+        color: #0f5a59;
+        font-size: 13px;
+      }
+      .calendar-day-head span {
+        font-size: 11px;
+        color: #5f7774;
+      }
+      .calendar-event-item {
+        background: #f2f8f7;
+        border: 1px solid #dfedeb;
+        border-left: 4px solid #0b8f8b;
+        border-radius: 10px;
+        padding: 8px 10px;
+        transition: transform .16s ease, box-shadow .16s ease;
+      }
+      .calendar-event-item:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 14px rgba(15, 23, 42, .08);
+      }
+      .calendar-event-time {
+        font-size: 12px;
+        font-weight: 800;
+        color: #0b6462;
+      }
+      .calendar-event-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: #1f2937;
+        margin-top: 2px;
+      }
+      .calendar-event-meta {
+        font-size: 11px;
+        color: #5b6765;
+        margin-top: 2px;
+      }
+      .calendar-empty {
+        text-align: center;
+        font-size: 12px;
+        color: #859390;
+        padding: 10px;
+      }
+      .calendar-footer-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #0b6462;
+        text-decoration: none;
+        border: 1px solid #cfe4e0;
+        border-radius: 999px;
+        padding: 6px 10px;
+        background: #f4fbfa;
+      }
       .home-widget-shell {
         border-radius: 18px;
         border: 1px solid #dfe9e8;
@@ -9061,6 +9151,7 @@
       // Toggle rápido para reactivar Vista Cliente/Tracking público cuando se solicite.
       const ENABLE_CLIENT_TRACKING_VIEW = false;
       const GMAIL_READONLY_SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
+      const GOOGLE_CALENDAR_READONLY_SCOPE = 'https://www.googleapis.com/auth/calendar.events.readonly';
       const AUVO_AGENDA_ENDPOINT = 'https://auvo-api-1050062076637.us-central1.run.app';
 
       function generarClienteId() {
@@ -9269,6 +9360,14 @@
           || '';
       }
 
+      function buildGoogleProvider() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.addScope(GMAIL_READONLY_SCOPE);
+        provider.addScope(GOOGLE_CALENDAR_READONLY_SCOPE);
+        provider.setCustomParameters({ prompt: 'consent' });
+        return provider;
+      }
+
       function LoginScreen() {
         const [loading, setLoading] = useState(false);
         const [error, setError] = useState('');
@@ -9277,18 +9376,14 @@
             setError('');
           try {
             setLoading(true);
-            const provider = new firebase.auth.GoogleAuthProvider();
-            provider.addScope(GMAIL_READONLY_SCOPE);
-            provider.setCustomParameters({ prompt: 'consent' });
+            const provider = buildGoogleProvider();
             const result = await auth.signInWithPopup(provider);
             const token = extractGoogleAccessToken(result);
             if (token) window.sessionStorage.setItem('gmail_access_token', token);
           } catch (err) {
             if (String(err?.code || '').includes('popup')) {
               try {
-                const provider = new firebase.auth.GoogleAuthProvider();
-                provider.addScope(GMAIL_READONLY_SCOPE);
-                provider.setCustomParameters({ prompt: 'consent' });
+                const provider = buildGoogleProvider();
                 await auth.signInWithRedirect(provider);
                 return;
               } catch (redirectErr) {
@@ -10074,6 +10169,10 @@
         const [gmailApiError, setGmailApiError] = useState('');
         const [gmailDetailModal, setGmailDetailModal] = useState({ open: false, mail: null, body: '' });
         const [gmailDetailLoading, setGmailDetailLoading] = useState(false);
+        const [calendarEventsToday, setCalendarEventsToday] = useState([]);
+        const [calendarEventsTomorrow, setCalendarEventsTomorrow] = useState([]);
+        const [calendarLoading, setCalendarLoading] = useState(false);
+        const [calendarError, setCalendarError] = useState('');
         const [agendaRows, setAgendaRows] = useState([]);
         const [agendaLoading, setAgendaLoading] = useState(false);
         const [agendaError, setAgendaError] = useState('');
@@ -11942,19 +12041,93 @@
           }
         }
 
+        async function fetchCalendarEvents(token) {
+          setCalendarLoading(true);
+          setCalendarError('');
+          try {
+            const today = new Date();
+            const todayStart = new Date(today);
+            todayStart.setHours(0, 0, 0, 0);
+            const tomorrowEnd = new Date(todayStart);
+            tomorrowEnd.setDate(todayStart.getDate() + 1);
+            tomorrowEnd.setHours(23, 59, 59, 999);
+
+            const params = new URLSearchParams({
+              timeMin: todayStart.toISOString(),
+              timeMax: tomorrowEnd.toISOString(),
+              singleEvents: 'true',
+              orderBy: 'startTime',
+            });
+
+            const calendarUrl = `https://www.googleapis.com/calendar/v3/calendars/primary/events?${params.toString()}`;
+            const response = await fetch(calendarUrl, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (!response.ok) {
+              const body = await response.text();
+              throw new Error(`Calendar error ${response.status}: ${body}`);
+            }
+
+            const data = await response.json();
+            const items = Array.isArray(data?.items) ? data.items : [];
+            const toDate = (value) => {
+              const parsed = new Date(value || '');
+              return Number.isNaN(parsed.getTime()) ? null : parsed;
+            };
+
+            const normalized = items.map((item, idx) => {
+              const startRaw = item?.start?.dateTime || item?.start?.date || '';
+              const endRaw = item?.end?.dateTime || item?.end?.date || '';
+              const start = toDate(startRaw);
+              const end = toDate(endRaw);
+              const attendee = Array.isArray(item?.attendees)
+                ? item.attendees.find((at) => !at?.self) || item.attendees[0]
+                : null;
+              return {
+                id: item?.id || `event-${idx}`,
+                title: String(item?.summary || '').trim() || 'Reunión sin título',
+                start,
+                end,
+                dayKey: start ? `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}` : '',
+                attendee: String(attendee?.displayName || attendee?.email || '').trim(),
+                location: String(item?.location || '').trim(),
+                meetLink: String(item?.hangoutLink || '').trim(),
+              };
+            }).filter((event) => event.start instanceof Date)
+              .sort((a, b) => (a?.start?.getTime?.() || 0) - (b?.start?.getTime?.() || 0));
+
+            const todayKey = `${todayStart.getFullYear()}-${String(todayStart.getMonth() + 1).padStart(2, '0')}-${String(todayStart.getDate()).padStart(2, '0')}`;
+            const tomorrow = new Date(todayStart);
+            tomorrow.setDate(todayStart.getDate() + 1);
+            const tomorrowKey = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')}`;
+
+            setCalendarEventsToday(normalized.filter((event) => event.dayKey === todayKey));
+            setCalendarEventsTomorrow(normalized.filter((event) => event.dayKey === tomorrowKey));
+          } catch (error) {
+            console.error('Error Calendar:', error);
+            setCalendarError('No se pudieron cargar las reuniones.');
+            setCalendarEventsToday([]);
+            setCalendarEventsTomorrow([]);
+          } finally {
+            setCalendarLoading(false);
+          }
+        }
+
         async function sincronizarVistaMail() {
           try {
             setGmailApiError('');
             setGmailApiLoading(true);
-            const provider = new firebase.auth.GoogleAuthProvider();
-            provider.addScope(GMAIL_READONLY_SCOPE);
-            provider.setCustomParameters({ prompt: 'consent' });
+            const provider = buildGoogleProvider();
             const result = await auth.signInWithPopup(provider);
             const token = extractGoogleAccessToken(result);
             if (!token) throw new Error('No se recibió token de Gmail.');
             window.sessionStorage.setItem('gmail_access_token', token);
             setGmailAccessToken(token);
-            await cargarUltimosMails(token);
+            await Promise.all([
+              cargarUltimosMails(token),
+              fetchCalendarEvents(token),
+            ]);
           } catch (error) {
             console.error('Error sincronizando vista de Gmail:', error);
             setGmailApiError('No se pudieron sincronizar los correos.');
@@ -12032,6 +12205,15 @@
           if (gmailLoadedTokenRef.current === marker) return;
           gmailLoadedTokenRef.current = marker;
           void cargarUltimosMails(gmailAccessToken);
+        }, [user?.uid, gmailAccessToken]);
+
+        const calendarLoadedTokenRef = useRef('');
+        useEffect(() => {
+          if (!user?.uid || !gmailAccessToken) return;
+          const marker = `${user.uid}:${gmailAccessToken}`;
+          if (calendarLoadedTokenRef.current === marker) return;
+          calendarLoadedTokenRef.current = marker;
+          void fetchCalendarEvents(gmailAccessToken);
         }, [user?.uid, gmailAccessToken]);
 
         function parseAgendaDateTime(value) {
@@ -12193,6 +12375,25 @@
             setAgendaExpandedDay(agendaSevenDays[0].key);
           }
         }, [agendaSevenDays, agendaExpandedDay]);
+
+        const calendarDaySections = useMemo(() => {
+          const today = new Date();
+          const tomorrow = new Date(today);
+          tomorrow.setDate(today.getDate() + 1);
+
+          return [
+            {
+              key: 'today',
+              title: `Hoy - ${today.toLocaleDateString('es-UY')}`,
+              events: calendarEventsToday,
+            },
+            {
+              key: 'tomorrow',
+              title: `Mañana - ${tomorrow.toLocaleDateString('es-UY')}`,
+              events: calendarEventsTomorrow,
+            },
+          ];
+        }, [calendarEventsToday, calendarEventsTomorrow]);
 
         useEffect(() => {
           if (!user?.uid) {
@@ -16407,6 +16608,54 @@
                                     </div>
                                   )}
                                 </div>
+                              </article>
+                              <article className="dash-side-card dashboard-equal-card calendar-widget-card" style={{ gridColumn: '1 / -1', minHeight: 0 }}>
+                                <div className="calendar-widget-head">
+                                  <h4>Reuniones de hoy y mañana</h4>
+                                  <div className="calendar-widget-subtitle">Eventos del usuario autenticado en Google Calendar</div>
+                                </div>
+                                {calendarLoading ? (
+                                  <div className="hint" style={{ marginTop: 10 }}>Cargando reuniones...</div>
+                                ) : calendarError ? (
+                                  <div className="hint" style={{ marginTop: 10 }}>{calendarError}</div>
+                                ) : (
+                                  <div className="calendar-sections">
+                                    {calendarDaySections.map((section) => (
+                                      <section key={`calendar-${section.key}`} className="calendar-day-block">
+                                        <div className="calendar-day-head">
+                                          <strong>{section.title}</strong>
+                                          <span>{section.events.length} reuniones</span>
+                                        </div>
+                                        {section.events.length === 0 ? (
+                                          <div className="calendar-empty">Sin reuniones programadas</div>
+                                        ) : (
+                                          <div style={{ display: 'grid', gap: 8 }}>
+                                            {section.events.map((event) => (
+                                              <article key={`calendar-event-${event.id}`} className="calendar-event-item">
+                                                <div className="calendar-event-time">
+                                                  {event.start ? event.start.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
+                                                  {' - '}
+                                                  {event.end ? event.end.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
+                                                </div>
+                                                <div className="calendar-event-title">{event.title || 'Reunión sin título'}</div>
+                                                {event.attendee && <div className="calendar-event-meta">con {event.attendee}</div>}
+                                                {event.location && <div className="calendar-event-meta">📍 {event.location}</div>}
+                                                {event.meetLink && (
+                                                  <a className="calendar-event-meta" href={event.meetLink} target="_blank" rel="noreferrer noopener">
+                                                    Abrir Google Meet ↗
+                                                  </a>
+                                                )}
+                                              </article>
+                                            ))}
+                                          </div>
+                                        )}
+                                      </section>
+                                    ))}
+                                  </div>
+                                )}
+                                <a className="calendar-footer-link" href="https://calendar.google.com" target="_blank" rel="noreferrer noopener">
+                                  Ver calendario completo ↗
+                                </a>
                               </article>
                             </div>
                           </section>
