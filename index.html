@@ -8342,6 +8342,12 @@
       const ACCIONES = ['Nuevo Servicio', 'Adicionales', 'Solicitud de presupuesto', 'Novación', 'Movimiento de obra', 'Baja', 'Charla informativa'];
       const STATUS_OPTIONS = ['Pendiente', 'En proceso', 'Esperando información', 'Finalizado', 'Cancelado'];
       const SERVICE_TYPE_OPTIONS = ['Monitoreo', 'Portería virtual', 'Respuesta de alarma', 'Servicio Técnico', 'Control de acceso'];
+      const ACCESS_ROLE_OPTIONS = [
+        { role: 'vendedor', area: 'comercial', label: 'Comercial' },
+        { role: 'tecnico', area: 'tecnica', label: 'Técnica' },
+        { role: 'usuario', area: '', label: 'Usuario' },
+        { role: 'admin', area: '', label: 'Admin' },
+      ];
       const GNS_WORKFLOW_STAGES = [
         'Pendiente de aprobación – Coordinación de Instalaciones',
         'Rechazado',
@@ -10240,6 +10246,7 @@
         const [internalNotifications, setInternalNotifications] = useState([]);
         const [updatingRequestId, setUpdatingRequestId] = useState('');
         const [acceptingRequestId, setAcceptingRequestId] = useState('');
+        const [adminRequestAssignments, setAdminRequestAssignments] = useState({});
         const [mobileBellOpen, setMobileBellOpen] = useState(false);
         const [mobileAlerts, setMobileAlerts] = useState([]);
         const [desktopBellOpen, setDesktopBellOpen] = useState(false);
@@ -11789,6 +11796,7 @@
 
               const hasRegisteredAccess = byUid.exists || emailProfileFound;
               let hasApprovedRequest = false;
+              let hasActiveRequest = false;
               if (!hasRegisteredAccess) {
                 const pendingChecks = [];
                 if (currentUser.uid) {
@@ -11809,10 +11817,29 @@
                 }
                 if (pendingChecks.length > 0) {
                   const checks = await Promise.all(pendingChecks);
-                  hasApprovedRequest = checks.some((snap) => snap.docs.some((doc) => {
+                  const allDocs = checks.flatMap((snap) => snap.docs);
+                  hasApprovedRequest = allDocs.some((doc) => {
                     const estado = String(doc.data()?.estado || '').trim().toLowerCase();
                     return estado === 'aprobada' || estado === 'aplicada';
-                  }));
+                  });
+                  hasActiveRequest = allDocs.some((doc) => {
+                    const estado = String(doc.data()?.estado || '').trim().toLowerCase();
+                    return estado === 'pendiente' || estado === 'aprobada' || estado === 'aplicada';
+                  });
+                }
+
+                if (!hasActiveRequest) {
+                  await db.collection('solicitudes_credenciales').add({
+                    tipo: 'solicitud_acceso_google',
+                    solicitanteUid: currentUser.uid || '',
+                    solicitanteEmail: currentUser.email || '',
+                    solicitanteNombre: currentUser.displayName || (currentUser.email || '').split('@')[0] || 'Usuario',
+                    estado: 'pendiente',
+                    leidaPorAdmin: false,
+                    creadoEn: firebase.firestore.FieldValue.serverTimestamp(),
+                    actualizadaEn: firebase.firestore.FieldValue.serverTimestamp(),
+                  });
+                  hasActiveRequest = true;
                 }
               }
 
@@ -15217,6 +15244,16 @@
           return 'Pendiente';
         }
 
+        function getRequestAssignment(req) {
+          const saved = adminRequestAssignments[req?.id] || {};
+          const fallbackRole = String(req?.rolAsignado || 'usuario').toLowerCase();
+          const fallbackArea = String(req?.areaAsignada || '').toLowerCase();
+          return {
+            role: String(saved.role || fallbackRole || 'usuario').toLowerCase(),
+            area: String(saved.area ?? fallbackArea ?? '').toLowerCase(),
+          };
+        }
+
         async function updateCredentialRequestStatus(req, nextStatus) {
           if (!isAdminUser || !req?.id) return;
           setUpdatingRequestId(req.id);
@@ -15228,13 +15265,31 @@
               resueltaPorUid: user?.uid || '',
               resueltaPorEmail: user?.email || '',
             };
+
             if (nextStatus === 'aprobada') {
-              patch.credencialesInformadas = {
-                usuario: req?.nuevoUsuarioSolicitado || '',
-                password: req?.nuevaPasswordSolicitada || '',
+              const assignment = getRequestAssignment(req);
+              patch.rolAsignado = assignment.role;
+              patch.areaAsignada = assignment.area;
+
+              const uid = String(req?.solicitanteUid || '').trim();
+              const email = String(req?.solicitanteEmail || '').trim();
+              if (!uid && !email) throw new Error('La solicitud no tiene identificador de usuario.');
+
+              const profileDocId = uid || email;
+              const profilePatch = {
+                uid,
+                email,
+                nombre: req?.solicitanteNombre || (email ? email.split('@')[0] : 'Usuario'),
+                rol: assignment.role || 'usuario',
+                area: assignment.area || '',
+                accesoAprobado: true,
+                actualizadoEn: firebase.firestore.FieldValue.serverTimestamp(),
               };
-              patch.aceptadoPorUsuario = false;
+
+              await db.collection('config_usuarios').doc(profileDocId).set(profilePatch, { merge: true });
+              patch.aplicadaConfigUsuario = true;
             }
+
             await db.collection('solicitudes_credenciales').doc(req.id).set(patch, { merge: true });
             setNotificacion({ mensaje: `✔ Solicitud marcada como ${nextStatus === 'aprobada' ? 'aprobada' : 'rechazada'}`, tipo: 'ok' });
           } catch (error) {
@@ -15575,14 +15630,31 @@
                           <div className="kv"><b>Fecha y hora de solicitud:</b> {formatRequestDateTime(item.raw.creadoEn)}</div>
                           <div className="kv"><b>Última actualización:</b> {formatRequestDateTime(item.raw.actualizadaEn)}</div>
                           {isAdminUser && item.raw.estado === 'pendiente' && (
-                            <div className="request-status-row">
-                              <button type="button" className="status-action-btn resolve" disabled={updatingRequestId === item.raw.id} onClick={() => updateCredentialRequestStatus(item.raw, 'aprobada')}>
-                                {updatingRequestId === item.raw.id ? 'Actualizando...' : 'Marcar aprobada'}
-                              </button>
-                              <button type="button" className="status-action-btn reject" disabled={updatingRequestId === item.raw.id} onClick={() => updateCredentialRequestStatus(item.raw, 'rechazada')}>
-                                {updatingRequestId === item.raw.id ? 'Actualizando...' : 'Marcar rechazada'}
-                              </button>
-                            </div>
+                            <>
+                              <div className="request-status-row" style={{ marginBottom: 8 }}>
+                                <select
+                                  value={getRequestAssignment(item.raw).role}
+                                  onChange={(e) => {
+                                    const nextRole = String(e.target.value || 'usuario').toLowerCase();
+                                    const option = ACCESS_ROLE_OPTIONS.find((opt) => opt.role === nextRole) || ACCESS_ROLE_OPTIONS[2];
+                                    setAdminRequestAssignments((prev) => ({
+                                      ...prev,
+                                      [item.raw.id]: { role: option.role, area: option.area },
+                                    }));
+                                  }}
+                                >
+                                  {ACCESS_ROLE_OPTIONS.map((opt) => <option key={`access-role-${item.raw.id}-${opt.role}`} value={opt.role}>{opt.label}</option>)}
+                                </select>
+                              </div>
+                              <div className="request-status-row">
+                                <button type="button" className="status-action-btn resolve" disabled={updatingRequestId === item.raw.id} onClick={() => updateCredentialRequestStatus(item.raw, 'aprobada')}>
+                                  {updatingRequestId === item.raw.id ? 'Actualizando...' : 'Aprobar y crear acceso'}
+                                </button>
+                                <button type="button" className="status-action-btn reject" disabled={updatingRequestId === item.raw.id} onClick={() => updateCredentialRequestStatus(item.raw, 'rechazada')}>
+                                  {updatingRequestId === item.raw.id ? 'Actualizando...' : 'Marcar rechazada'}
+                                </button>
+                              </div>
+                            </>
                           )}
                         </article>
                       ) : item.source === 'vencimiento' ? (
