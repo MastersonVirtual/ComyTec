@@ -2694,6 +2694,35 @@
         gap: 6px;
         margin-top: 2px;
       }
+      .agenda-day-head-btn {
+        width: 100%;
+        border: none;
+        background: transparent;
+        padding: 0;
+        cursor: pointer;
+        text-align: left;
+      }
+      .agenda-day-preview-btn {
+        margin-top: 6px;
+        border: 1px solid #cfe4e0;
+        background: #f4fbfa;
+        border-radius: 999px;
+        color: #0b6462;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 6px 10px;
+        cursor: pointer;
+      }
+      .agenda-day-modal {
+        width: min(860px, 96vw);
+        max-height: 88vh;
+        overflow-y: auto;
+      }
+      .agenda-day-modal-list {
+        display: grid;
+        gap: 8px;
+        margin-top: 10px;
+      }
       .agenda-chip {
         display: inline-flex;
         align-items: center;
@@ -10188,6 +10217,7 @@
         const [agendaLoading, setAgendaLoading] = useState(false);
         const [agendaError, setAgendaError] = useState('');
         const [agendaRangeWarning, setAgendaRangeWarning] = useState('');
+        const [agendaDayModal, setAgendaDayModal] = useState({ open: false, day: null });
         const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
         const [userCredentialRequests, setUserCredentialRequests] = useState([]);
         const [staffMembers, setStaffMembers] = useState([]);
@@ -16485,7 +16515,7 @@
                                 <h4>Agenda de técnicos</h4>
                                 <small className="agenda-widget-subtitle">Tareas programadas desde 2Workers</small>
                               </div>
-                              <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('historial')}>Ver todos →</button>
+                              <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('agenda-2workers')}>Ver todos →</button>
                             </div>
                             <div className="agenda-widget-body">
                               <div className="agenda-widget-range">Últimos 3 días, hoy y próximos 3 días</div>
@@ -16502,39 +16532,50 @@
                                     <article className="agenda-stat-card"><strong>Pendientes</strong><b>{agendaStats.pending}</b></article>
                                   </div>
                                   <div className="agenda-days-grid">
-                                    {agendaSevenDays.map((day) => (
-                                      <article key={`agenda-day-${day.key}`} className="agenda-day-card">
-                                        <header className="agenda-day-head">
-                                          <div>
-                                            <strong>{day.dateLabel}</strong>
-                                          </div>
-                                          <span className="agenda-day-count">{day.tasks.length} tickets</span>
-                                        </header>
-                                        <div className="agenda-day-label">• {day.label}</div>
-                                        <div className="agenda-day-body">
-                                          {day.tasks.length === 0 ? (
-                                            <div className="agenda-empty-card">Sin tareas programadas</div>
-                                          ) : day.tasks.map((task) => {
-                                            const priorityClass = agendaPriorityClass(task.prioridad);
-                                            return (
-                                              <div key={`agenda-task-${day.key}-${task.id}-${task.ticketId || task.fechaHoraKey}`} className={`agenda-task-row ${priorityClass.replace('agenda-priority-', 'priority-')}`}>
-                                                <div className="agenda-time-col">
-                                                  {task.fechaHora ? task.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
-                                                </div>
-                                                <div className="agenda-task-main">
-                                                  <div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div>
-                                                  <div className="agenda-task-client">{task.cliente || 'Cliente sin nombre'}</div>
-                                                  <div className="agenda-task-meta">{task.direccion || 'Sin dirección'}</div>
-                                                  <div className="agenda-task-badges">
-                                                    <span className={`agenda-chip ${priorityClass}`}>Prioridad {String(task.prioridad || 'Baja').toLowerCase()}</span>
+                                    {agendaSevenDays.map((day) => {
+                                      const dayPreview = day.tasks.slice(0, 3);
+                                      const pendingCount = Math.max(day.tasks.length - dayPreview.length, 0);
+                                      return (
+                                        <article key={`agenda-day-${day.key}`} className="agenda-day-card">
+                                          <button type="button" className="agenda-day-head-btn" onClick={() => setAgendaDayModal({ open: true, day })}>
+                                            <header className="agenda-day-head">
+                                              <div>
+                                                <strong>{day.dateLabel}</strong>
+                                              </div>
+                                              <span className="agenda-day-count">{day.tasks.length} tickets</span>
+                                            </header>
+                                          </button>
+                                          <div className="agenda-day-label">• {day.label}</div>
+                                          <div className="agenda-day-body">
+                                            {day.tasks.length === 0 ? (
+                                              <div className="agenda-empty-card">Sin tareas programadas</div>
+                                            ) : dayPreview.map((task) => {
+                                              const priorityClass = agendaPriorityClass(task.prioridad);
+                                              return (
+                                                <div key={`agenda-task-${day.key}-${task.id}-${task.ticketId || task.fechaHoraKey}`} className={`agenda-task-row ${priorityClass.replace('agenda-priority-', 'priority-')}`}>
+                                                  <div className="agenda-time-col">
+                                                    {task.fechaHora ? task.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
+                                                  </div>
+                                                  <div className="agenda-task-main">
+                                                    <div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div>
+                                                    <div className="agenda-task-client">{task.cliente || 'Cliente sin nombre'}</div>
+                                                    <div className="agenda-task-meta">{task.direccion || 'Sin dirección'}</div>
+                                                    <div className="agenda-task-badges">
+                                                      <span className={`agenda-chip ${priorityClass}`}>Prioridad {String(task.prioridad || 'Baja').toLowerCase()}</span>
+                                                    </div>
                                                   </div>
                                                 </div>
-                                              </div>
-                                            );
-                                          })}
-                                        </div>
-                                      </article>
-                                    ))}
+                                              );
+                                            })}
+                                            {pendingCount > 0 && (
+                                              <button type="button" className="agenda-day-preview-btn" onClick={() => setAgendaDayModal({ open: true, day })}>
+                                                Ver {pendingCount} tareas más
+                                              </button>
+                                            )}
+                                          </div>
+                                        </article>
+                                      );
+                                    })}
                                   </div>
                                 </>
                               )}
@@ -16660,7 +16701,54 @@
                     </section>
                   </>
 
-                ) : effectiveSelectedForm === 'home-card-view' ? (
+                
+                ) : effectiveSelectedForm === 'agenda-2workers' ? (
+                  <section className="panel">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                      <h2 style={{ margin: 0 }}>Agenda 2Workers</h2>
+                      <button type="button" className="home-modern-action-btn" onClick={goToHomeView}>← Volver al inicio</button>
+                    </div>
+                    <div className="hint">Vista completa y detallada de tareas por día.</div>
+                    <div className="agenda-stats-grid" style={{ marginTop: 10 }}>
+                      <article className="agenda-stat-card"><strong>Total de tickets</strong><b>{agendaStats.total}</b></article>
+                      <article className="agenda-stat-card"><strong>Técnicos asignados</strong><b>{agendaStats.techs}</b></article>
+                      <article className="agenda-stat-card"><strong>Tareas completadas</strong><b>{agendaStats.completed}</b></article>
+                      <article className="agenda-stat-card"><strong>Pendientes</strong><b>{agendaStats.pending}</b></article>
+                    </div>
+                    <div className="agenda-days-grid" style={{ marginTop: 10 }}>
+                      {agendaSevenDays.map((day) => (
+                        <article key={`agenda-full-${day.key}`} className="agenda-day-card">
+                          <header className="agenda-day-head">
+                            <div>
+                              <strong>{day.dateLabel}</strong>
+                              <span>{day.label}</span>
+                            </div>
+                            <span className="agenda-day-count">{day.tasks.length} tickets</span>
+                          </header>
+                          <div className="agenda-day-body">
+                            {day.tasks.length === 0 ? (
+                              <div className="agenda-empty-card">Sin tareas programadas</div>
+                            ) : day.tasks.map((task) => {
+                              const priorityClass = agendaPriorityClass(task.prioridad);
+                              return (
+                                <div key={`agenda-full-task-${day.key}-${task.id}-${task.ticketId || task.fechaHoraKey}`} className={`agenda-task-row ${priorityClass.replace('agenda-priority-', 'priority-')}`}>
+                                  <div className="agenda-time-col">{task.fechaHora ? task.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div>
+                                  <div className="agenda-task-main">
+                                    <div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div>
+                                    <div className="agenda-task-client">{task.cliente || 'Cliente sin nombre'}</div>
+                                    <div className="agenda-task-meta">{task.direccion || 'Sin dirección'}</div>
+                                    <div className="agenda-task-meta"><strong>Técnico:</strong> {task.tecnicoId || 'Técnico sin asignar'} · <strong>Ticket:</strong> {task.ticketId || 'Sin ticket'}</div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+
+) : effectiveSelectedForm === 'home-card-view' ? (
                   <section className="home-card-detail-shell">
                     <div className="home-card-detail-head">
                       <h2>{homeCardView.title || 'Detalle de cargas'}</h2>
@@ -18076,6 +18164,37 @@
                         </>
                       );
                     })()}
+                  </div>
+                </div>
+              )}
+
+
+              {agendaDayModal.open && agendaDayModal.day && (
+                <div className="confirm-modal ticket-detail-overlay" onClick={() => setAgendaDayModal({ open: false, day: null })}>
+                  <div className="confirm-modal-card ticket-detail-modal agenda-day-modal" onClick={(e) => e.stopPropagation()}>
+                    <h3 style={{ marginTop: 0 }}>Agenda · {agendaDayModal.day.dateLabel}</h3>
+                    <div className="hint" style={{ marginBottom: 10 }}>{agendaDayModal.day.label} · {agendaDayModal.day.tasks.length} tickets</div>
+                    <div className="agenda-day-modal-list">
+                      {agendaDayModal.day.tasks.length === 0 ? (
+                        <div className="agenda-empty-card" style={{ minHeight: 140 }}>Sin tareas programadas</div>
+                      ) : agendaDayModal.day.tasks.map((task) => {
+                        const priorityClass = agendaPriorityClass(task.prioridad);
+                        return (
+                          <article key={`agenda-modal-task-${task.id}-${task.ticketId || task.fechaHoraKey}`} className={`agenda-task-row ${priorityClass.replace('agenda-priority-', 'priority-')}`}>
+                            <div className="agenda-time-col">{task.fechaHora ? task.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div>
+                            <div className="agenda-task-main">
+                              <div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div>
+                              <div className="agenda-task-client">{task.cliente || 'Cliente sin nombre'}</div>
+                              <div className="agenda-task-meta">{task.direccion || 'Sin dirección'}</div>
+                              <div className="agenda-task-meta"><strong>Técnico:</strong> {task.tecnicoId || 'Técnico sin asignar'} · <strong>Ticket:</strong> {task.ticketId || 'Sin ticket'}</div>
+                            </div>
+                          </article>
+                        );
+                      })}
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
+                      <button type="button" className="edit-btn" onClick={() => setAgendaDayModal({ open: false, day: null })}>Cerrar</button>
+                    </div>
                   </div>
                 </div>
               )}
