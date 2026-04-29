@@ -303,19 +303,28 @@
       .service-card h3::before { content: '◆'; color: var(--accent); font-size: 12px; }
       .form-global-main .service-card {
         background: #ffffff;
-        border: 1px solid #d8ebe7;
+        border: 1px solid #e3eceb;
         border-radius: 16px;
-        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
-        padding: 18px;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+        padding: 20px 22px;
       }
       .form-global-main .service-card h3 {
         color: #0e6e67;
-        font-size: 1.05rem;
+        font-size: 1.75rem;
+        line-height: 1.2;
+        margin-bottom: 14px;
       }
       .form-global-main .service-card h3::before {
         content: '◉';
         color: #10a392;
-        font-size: 11px;
+        font-size: 12px;
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #e8f7f4;
       }
       .form-global-main .field label {
         color: #3b5f66;
@@ -328,7 +337,8 @@
         border: 1px solid #d2e6e2;
         color: #1f2937;
         border-radius: 10px;
-        min-height: 42px;
+        min-height: 48px;
+        padding: 11px 14px;
       }
       .form-global-main input:focus,
       .form-global-main select:focus,
@@ -340,6 +350,16 @@
         border: 1px dashed #b9dfd8;
         background: #fbfffe;
         border-radius: 12px;
+      }
+      .form-global-side .service-card {
+        background: #ffffff;
+        border: 1px solid #e3eceb;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, .05);
+        padding: 18px;
+      }
+      .form-global-side .home-modern-action-btn {
+        min-height: 46px;
       }
       .card-grid { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 10px; }
 
