@@ -244,6 +244,20 @@
       .hint { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
 
       .service-layout { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px; }
+      .baja-wizard-layout { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(290px, 0.75fr); gap: 16px; align-items: start; }
+      .baja-wizard-main { max-height: calc(100vh - 120px); overflow-y: auto; padding-right: 6px; }
+      .baja-wizard-side { position: sticky; top: 20px; max-height: calc(100vh - 40px); overflow: auto; display: grid; gap: 12px; }
+      .baja-wizard-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+      .baja-wizard-title { display: flex; align-items: center; gap: 12px; }
+      .baja-wizard-badge { width: 58px; height: 58px; border-radius: 16px; background: linear-gradient(145deg,#0c988d,#0a6c66); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size: 28px; }
+      .baja-progress-steps { display: grid; gap: 8px; margin-top: 10px; }
+      .baja-progress-step { display:flex; align-items:center; gap:10px; color:#60707f; font-weight:700; }
+      .baja-progress-dot { width: 16px; height: 16px; border-radius: 999px; border: 2px solid #b8c5d1; }
+      .baja-progress-step.done { color: #0a6e6b; }
+      .baja-progress-step.done .baja-progress-dot { border-color:#0a9888; background:#0a9888; }
+      .baja-progress-step.active .baja-progress-dot { border-color:#0a9888; }
+      .baja-tip { border-left: 4px solid #0a9888; background: #ecfaf7; border-radius: 10px; padding: 10px; color:#24565a; font-weight:600; }
+      @media (max-width: 1080px) { .baja-wizard-layout { grid-template-columns: 1fr; } .baja-wizard-main { max-height:none; overflow:visible; } .baja-wizard-side { position: static; max-height: none; } }
       .service-card {
         grid-column: span 12;
         background: linear-gradient(135deg, rgba(255,255,255,.13), rgba(255,255,255,.04));
@@ -18209,7 +18223,36 @@
                         <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     ) : grupo === 'baja-detalle' ? (
-                      <div className="service-layout">
+                      (() => {
+                        const bajaSteps = [
+                          { key: 'base', label: 'Baja de Servicio', done: !!clienteIdAsociado && !!status },
+                          { key: 'id', label: 'Identificación del Servicio', done: !!bajaForm.nombreServicio && !!(clienteIdAsociado || bajaForm.servicioIdSeleccionado) && !!bajaForm.direccionServicio },
+                          { key: 'fecha', label: 'Fecha', done: !!bajaForm.fechaIngresoAuto },
+                          { key: 'solicitud', label: 'Solicitud', done: !!bajaForm.quienSolicita && !!bajaForm.nombreCliente && !!bajaForm.telefono },
+                          { key: 'motivo', label: 'Motivo de Baja', done: !!bajaForm.motivoBajaCategoria },
+                          { key: 'internet', label: 'Internet', done: !!bajaForm.internetResponsable },
+                          { key: 'equipamiento', label: 'Equipamiento', done: !!bajaForm.propietarioEquipamiento },
+                          { key: 'review', label: 'Revisión y envío', done: !!bajaForm.motivoBajaCategoria && !!bajaForm.nombreServicio },
+                        ];
+                        const doneSteps = bajaSteps.filter((s) => s.done).length;
+                        const progress = Math.round((doneSteps / bajaSteps.length) * 100);
+                        return (
+                      <div className="baja-wizard-layout">
+                        <div className="baja-wizard-main">
+                          <div className="baja-wizard-header">
+                            <div className="baja-wizard-title">
+                              <span className="baja-wizard-badge">📋</span>
+                              <div>
+                                <h2 style={{ margin: 0 }}>Formulario Operativo • Gestión de Acciones</h2>
+                                <div className="hint" style={{ margin: 0 }}>Completá la solicitud de baja con validación y progreso en tiempo real.</div>
+                              </div>
+                            </div>
+                            <div style={{ display: 'flex', gap: 8 }}>
+                              <button type="button" className="home-modern-action-btn">Guardar borrador</button>
+                              <button type="submit" className="home-modern-action-btn primary">{saving ? 'Guardando...' : 'Enviar solicitud'}</button>
+                            </div>
+                          </div>
+                        <div className="service-layout">
                         <div className="service-card">
                           <h3>Baja de Servicio</h3>
                           <div className="card-grid">
@@ -18313,8 +18356,32 @@
                           </div>
                         </div>
 
-                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
+                        <div className="service-card" style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                          <button type="button" className="home-modern-action-btn" onClick={resetFields}>Limpiar formulario</button>
+                          <button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Enviar solicitud'}</button>
+                        </div>
+                        </div>
+                        </div>
+                        <aside className="baja-wizard-side">
+                          <section className="service-card">
+                            <h3>Progreso del formulario</h3>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                              <div style={{ width: 78, height: 78, borderRadius: '50%', border: '8px solid #d6ece8', display: 'grid', placeItems: 'center', fontWeight: 900, color: '#0a6e6b' }}>{progress}%</div>
+                              <div className="hint" style={{ margin: 0 }}>Completa todos los campos para enviar la solicitud.</div>
+                            </div>
+                            <div className="baja-progress-steps">
+                              {bajaSteps.map((step, idx) => <div key={`baja-step-${step.key}`} className={`baja-progress-step ${step.done ? 'done' : (idx === doneSteps ? 'active' : '')}`}><span className="baja-progress-dot"></span><span>{step.label}</span></div>)}
+                            </div>
+                          </section>
+                          <section className="service-card">
+                            <h3>Ayuda rápida</h3>
+                            <div className="hint">Completá cada bloque para evitar rechazos operativos.</div>
+                            <div className="baja-tip">💡 Consejo: La dirección se completa automáticamente al seleccionar el servicio.</div>
+                          </section>
+                        </aside>
                       </div>
+                      );
+                      })()
                     ) : grupo === 'charla-detalle' ? (
                       <div className="charla-studio">
                         <section className="charla-card context">
