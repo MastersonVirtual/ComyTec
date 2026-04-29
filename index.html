@@ -266,8 +266,12 @@
       .form-step-row .dot { width:14px; height:14px; border-radius:16px; border:2px solid #b7c4cf; }
       .form-step-row.done { color:#0a6e6b; }
       .form-step-row.done .dot { background:#0a9888; border-color:#0a9888; }
+      .form-global-layout { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(290px, .75fr); gap: 16px; align-items: start; }
+      .form-global-main { min-width: 0; }
+      .form-global-side { position: sticky; top: 20px; display: grid; gap: 12px; max-height: calc(100vh - 40px); overflow: auto; }
       @media (max-width: 1080px) { .form-wizard-layout { grid-template-columns:1fr; } .form-wizard-main { max-height:none; overflow:visible; } .form-wizard-side { position:static; } }
       @media (max-width: 1080px) { .baja-wizard-layout { grid-template-columns: 1fr; } .baja-wizard-main { max-height:none; overflow:visible; } .baja-wizard-side { position: static; max-height: none; } }
+      @media (max-width: 1080px) { .form-global-layout { grid-template-columns: 1fr; } .form-global-side { position: static; max-height: none; } }
       .service-card {
         grid-column: span 12;
         background: linear-gradient(135deg, rgba(255,255,255,.13), rgba(255,255,255,.04));
@@ -278,6 +282,14 @@
         transition: transform var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
       }
       .service-card:hover { transform: translateY(-2px); box-shadow: 0 16px 32px rgba(0,0,0,.26); }
+      .service-card:hover,
+      .menu-button:hover,
+      .submenu-button:hover,
+      .agenda-stat-card:hover,
+      .service-card-action-btn:hover,
+      .home-modern-action-btn:hover {
+        transform: none !important;
+      }
       .service-card h3 {
         margin: 0 0 12px;
         font-size: 15px;
@@ -17655,6 +17667,8 @@
                   </div>
 
                   <form onSubmit={handleSubmit}>
+                    <div className="form-global-layout">
+                      <div className="form-global-main">
                     {grupo === 'servicio' ? (
                       <div className="service-layout">
                         <div className="service-card">
@@ -18257,10 +18271,7 @@
                                 <div className="hint" style={{ margin: 0 }}>Completá la solicitud de baja con validación y progreso en tiempo real.</div>
                               </div>
                             </div>
-                            <div style={{ display: 'flex', gap: 8 }}>
-                              <button type="button" className="home-modern-action-btn">Guardar borrador</button>
-                              <button type="submit" className="home-modern-action-btn primary">{saving ? 'Guardando...' : 'Enviar solicitud'}</button>
-                            </div>
+                            <div className="hint" style={{ margin: 0 }}>Las acciones de guardado y envío están en el panel de progreso.</div>
                           </div>
                         <div className="service-layout">
                         <div className="service-card">
@@ -18452,6 +18463,46 @@
                         <div className="field full"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     )}
+                      </div>
+                      <aside className="form-global-side">
+                        {(() => {
+                          const currentData = grupo === 'baja-detalle' ? bajaForm
+                            : grupo === 'servicio' ? servicioForm
+                              : grupo === 'movimiento-detalle' ? movimientoForm
+                                : grupo === 'novacion-detalle' ? novacionForm
+                                  : grupo === 'adicionales-detalle' ? adicionalesForm
+                                    : grupo === 'presupuesto-detalle' ? presupuestoForm
+                                      : charlaForm;
+                          const fields = Object.values(currentData || {});
+                          const completed = fields.filter((v) => String(v || '').trim().length > 0).length;
+                          const total = Math.max(fields.length, 1);
+                          const pct = Math.round((completed / total) * 100);
+                          const steps = ['Baja de Servicio', 'Identificación del Servicio', 'Fecha', 'Solicitud', 'Motivo de Baja', 'Internet', 'Equipamiento', 'Revisión y envío'];
+                          return (
+                            <>
+                              <section className="service-card">
+                                <h3>Progreso del formulario</h3>
+                                <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 8 }}>
+                                  <div style={{ width: 70, height: 70, borderRadius: 16, border: '2px solid #0a9888', display: 'grid', placeItems: 'center', fontWeight: 900 }}>{pct}%</div>
+                                  <div className="hint" style={{ margin: 0 }}>Completá todos los campos para enviar la solicitud.</div>
+                                </div>
+                                <div className="baja-progress-steps">
+                                  {steps.map((step, idx) => <div key={`global-step-${step}`} className={`baja-progress-step ${idx < Math.round((pct / 100) * steps.length) ? 'done' : ''}`}><span className="baja-progress-dot"></span><span>{step}</span></div>)}
+                                </div>
+                              </section>
+                              <section className="service-card">
+                                <h3>Ayuda rápida</h3>
+                                <div className="baja-tip">Consejo: validá ID y estado antes de enviar para evitar retrabajos.</div>
+                              </section>
+                              <section className="service-card" style={{ display: 'grid', gap: 8 }}>
+                                <button type="button" className="home-modern-action-btn">Guardar borrador</button>
+                                <button type="submit" className="home-modern-action-btn primary" disabled={saving}>{saving ? 'Guardando...' : 'Enviar solicitud'}</button>
+                              </section>
+                            </>
+                          );
+                        })()}
+                      </aside>
+                    </div>
                   </form>
 
                   <section className="form-history-shell">
