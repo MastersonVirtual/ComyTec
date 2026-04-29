@@ -301,6 +301,46 @@
         gap: 8px;
       }
       .service-card h3::before { content: '◆'; color: var(--accent); font-size: 12px; }
+      .form-global-main .service-card {
+        background: #ffffff;
+        border: 1px solid #d8ebe7;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+        padding: 18px;
+      }
+      .form-global-main .service-card h3 {
+        color: #0e6e67;
+        font-size: 1.05rem;
+      }
+      .form-global-main .service-card h3::before {
+        content: '◉';
+        color: #10a392;
+        font-size: 11px;
+      }
+      .form-global-main .field label {
+        color: #3b5f66;
+        font-weight: 700;
+      }
+      .form-global-main input,
+      .form-global-main select,
+      .form-global-main textarea {
+        background: #f8fcfb;
+        border: 1px solid #d2e6e2;
+        color: #1f2937;
+        border-radius: 10px;
+        min-height: 42px;
+      }
+      .form-global-main input:focus,
+      .form-global-main select:focus,
+      .form-global-main textarea:focus {
+        border-color: #12a596;
+        box-shadow: 0 0 0 3px rgba(18, 165, 150, 0.14);
+      }
+      .form-global-main .ticket-upload-dropzone {
+        border: 1px dashed #b9dfd8;
+        background: #fbfffe;
+        border-radius: 12px;
+      }
       .card-grid { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 10px; }
 
       .field { display: flex; flex-direction: column; gap: 6px; }
