@@ -2527,35 +2527,58 @@
         grid-column: 1 / -1;
         padding: 0;
         overflow: hidden;
+        background: #ffffff;
+        border-radius: 24px;
+        border: 1px solid #d9ebe8;
+        box-shadow: 0 12px 30px rgba(8, 44, 42, 0.08);
+        margin-bottom: 10px;
       }
       .agenda-widget-head {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 10px;
-        padding: 12px 14px;
-        background: linear-gradient(135deg, #d9f3ef 0%, #c7ebe5 100%);
+        gap: 12px;
+        padding: 18px 20px;
+        background: linear-gradient(135deg, #e7f7f4 0%, #d7f0ec 100%);
         border-bottom: 1px solid #b7ddd5;
       }
+      .agenda-widget-head-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .agenda-widget-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        background: linear-gradient(160deg, #0b8d86, #0f6f6a);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 10px 20px rgba(6, 47, 45, 0.28);
+      }
+      .agenda-widget-icon svg { width: 30px; height: 30px; stroke: currentColor; }
       .agenda-widget-head h4 {
         margin: 0;
         color: #0a6e6b;
+        font-size: 1.9rem;
       }
       .agenda-widget-subtitle {
         display: block;
         color: #0f5a59;
-        font-size: 12px;
+        font-size: 1rem;
         font-weight: 600;
-        margin-top: 2px;
+        margin-top: 3px;
       }
       .agenda-widget-body {
-        padding: 12px 14px;
+        padding: 18px 20px 20px;
       }
       .agenda-widget-range {
-        font-size: 12px;
+        font-size: 1.25rem;
         font-weight: 700;
         color: #0a5b61;
-        margin-bottom: 10px;
+        margin-bottom: 14px;
       }
       .agenda-days-grid {
         display: grid;
@@ -2566,27 +2589,66 @@
       }
       .agenda-stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 10px;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 14px;
         margin-bottom: 12px;
       }
       .agenda-stat-card {
-        background: #f8fcfb;
+        background: #fbfffe;
         border: 1px solid #dce9e7;
-        border-radius: 12px;
-        padding: 10px;
+        border-radius: 18px;
+        padding: 16px 16px 12px;
+        transition: transform .18s ease, box-shadow .18s ease;
+      }
+      .agenda-stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 18px rgba(6, 47, 45, 0.1);
+      }
+      .agenda-stat-top {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .agenda-stat-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .agenda-stat-icon svg {
+        width: 30px;
+        height: 30px;
+        stroke: currentColor;
       }
       .agenda-stat-card strong {
         display: block;
-        color: #0a5b61;
-        font-size: 12px;
+        color: #1f3340;
+        font-size: 14px;
       }
       .agenda-stat-card b {
         display: block;
-        font-size: 26px;
+        font-size: 56px;
         line-height: 1.05;
-        margin-top: 6px;
+        margin-top: 8px;
         color: #111827;
+      }
+      .agenda-stat-sub {
+        margin-top: 8px;
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .agenda-sparkline {
+        width: 100%;
+        height: 44px;
+        margin-top: 10px;
+      }
+      .agenda-empty-note {
+        margin-top: 8px;
+        color: #5b7370;
+        font-size: 13px;
+        font-weight: 600;
       }
       .agenda-day-card {
         border: 1px solid #dce9e7;
@@ -12639,26 +12701,39 @@
           });
         }, [agendaRows]);
 
-        const agendaStats = useMemo(() => {
-          const total = agendaRows.length;
-          const techs = new Set(agendaRows.map((item) => item?.tecnicoId || 'Técnico sin asignar')).size;
-          const completed = agendaRows.filter((item) => {
-            const raw = String(item?.estado || '').toLowerCase();
-            return raw.includes('resuelto') || raw.includes('finalizado') || raw.includes('complete');
-          }).length;
+        const isTaskCompleted = (item) => {
+          const estadoRaw = String(item?.estado ?? item?.status ?? '').toLowerCase().trim();
+          const numericEstado = Number(item?.estado);
+          return numericEstado === 5 || estadoRaw.includes('resuelto') || estadoRaw.includes('finalizado') || estadoRaw.includes('complete');
+        };
+        const buildAgendaDashboardMetrics = (rows) => {
+          const base = new Date();
+          base.setHours(0, 0, 0, 0);
+          const range = [-3, -2, -1, 0, 1, 2, 3].map((offset) => {
+            const date = new Date(base);
+            date.setDate(base.getDate() + offset);
+            return { key: dayKey(date), label: relativeAgendaLabel(offset), date };
+          });
+          const grouped = new Map(range.map((d) => [d.key, []]));
+          rows.forEach((item) => {
+            const key = item?.fechaHoraKey;
+            if (key && grouped.has(key)) grouped.get(key).push(item);
+          });
+          const daily = range.map((day) => {
+            const items = grouped.get(day.key) || [];
+            const completed = items.filter((item) => isTaskCompleted(item)).length;
+            const pending = Math.max(items.length - completed, 0);
+            const techs = new Set(items.map((item) => String(item?.tecnicoId || '').trim()).filter(Boolean)).size;
+            return { ...day, total: items.length, completed, pending, techs };
+          });
+          const total = rows.length;
+          const techs = new Set(rows.map((item) => String(item?.tecnicoId || '').trim()).filter(Boolean)).size;
+          const completed = rows.filter((item) => isTaskCompleted(item)).length;
           const pending = Math.max(total - completed, 0);
-          return { total, techs, completed, pending };
-        }, [agendaRows]);
-        const agendaInstallStats = useMemo(() => {
-          const total = agendaInstallRows.length;
-          const techs = new Set(agendaInstallRows.map((item) => item?.tecnicoId || 'Técnico sin asignar')).size;
-          const completed = agendaInstallRows.filter((item) => {
-            const raw = String(item?.estado || '').toLowerCase();
-            return raw.includes('resuelto') || raw.includes('finalizado') || raw.includes('complete');
-          }).length;
-          const pending = Math.max(total - completed, 0);
-          return { total, techs, completed, pending };
-        }, [agendaInstallRows]);
+          return { total, techs, completed, pending, daily, hasData: total > 0 };
+        };
+        const agendaStats = useMemo(() => buildAgendaDashboardMetrics(agendaRows), [agendaRows]);
+        const agendaInstallStats = useMemo(() => buildAgendaDashboardMetrics(agendaInstallRows), [agendaInstallRows]);
         const agendaInstallSevenDays = useMemo(() => {
           const base = new Date();
           base.setHours(0, 0, 0, 0);
@@ -12682,6 +12757,32 @@
             };
           });
         }, [agendaInstallRows]);
+        const buildSparkPath = (series, width = 240, height = 44) => {
+          const points = Array.isArray(series) && series.length ? series : [0, 0, 0, 0, 0, 0, 0];
+          const max = Math.max(...points, 0);
+          const min = Math.min(...points, 0);
+          const span = max - min || 1;
+          return points.map((value, index) => {
+            const x = points.length === 1 ? width / 2 : (index / (points.length - 1)) * width;
+            const y = height - ((value - min) / span) * (height - 4) - 2;
+            return `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`;
+          }).join(' ');
+        };
+        const renderAgendaMetricCard = ({ label, value, sublabel, series, color, icon, border }) => (
+          <article className="agenda-stat-card" style={{ borderColor: border }}>
+            <div className="agenda-stat-top">
+              <span className="agenda-stat-icon" style={{ color, background: `${color}1a` }}>{icon}</span>
+              <div>
+                <strong>{label}</strong>
+                <b>{value}</b>
+              </div>
+            </div>
+            <div className="agenda-stat-sub" style={{ color }}>{sublabel}</div>
+            <svg className="agenda-sparkline" viewBox="0 0 240 44" preserveAspectRatio="none" aria-hidden="true">
+              <path d={buildSparkPath(series)} fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </article>
+        );
 
         const calendarDaySections = useMemo(() => {
           const today = new Date();
@@ -16838,11 +16939,16 @@
                           </section>
                           <section className="home-widget-shell agenda-widget-card">
                             <div className="agenda-widget-head">
-                              <div>
-                                <h4>Agenda de técnicos</h4>
-                                <small className="agenda-widget-subtitle">Tareas programadas desde 2Workers</small>
+                              <div className="agenda-widget-head-left">
+                                <span className="agenda-widget-icon" aria-hidden="true">
+                                  <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7.5" r="3.3" strokeWidth="2" /><path d="M5 19c0-3.3 2.9-5.1 7-5.1s7 1.8 7 5.1" strokeWidth="2" strokeLinecap="round" /></svg>
+                                </span>
+                                <div>
+                                  <h4>Agenda de técnicos</h4>
+                                  <small className="agenda-widget-subtitle">Tareas programadas desde 2Workers</small>
+                                </div>
                               </div>
-                              <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('agenda-2workers')}>Ver más →</button>
+                              <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('agenda-2workers')}>Ver agenda completa →</button>
                             </div>
                             <div className="agenda-widget-body">
                               <div className="agenda-widget-range">Resumen compacto · últimos 7 días operativos</div>
@@ -16852,12 +16958,13 @@
                                 <div className="hint">{agendaError}</div>
                               ) : (
                                 <div className="agenda-stats-grid">
-                                  <article className="agenda-stat-card"><strong>Total de tickets</strong><b>{agendaStats.total}</b></article>
-                                  <article className="agenda-stat-card"><strong>Técnicos asignados</strong><b>{agendaStats.techs}</b></article>
-                                  <article className="agenda-stat-card"><strong>Tareas completadas</strong><b>{agendaStats.completed}</b></article>
-                                  <article className="agenda-stat-card"><strong>Pendientes</strong><b>{agendaStats.pending}</b></article>
+                                  {renderAgendaMetricCard({ label: 'Total de tickets', value: agendaStats.total, sublabel: `${agendaStats.daily.reduce((acc, d) => acc + d.total, 0)} en rango`, series: agendaStats.daily.map((d) => d.total), color: '#0f9b8d', border: '#bfe6de', icon: <svg viewBox="0 0 24 24" fill="none"><path d="M7 3h10l4 4v14H3V3h4Z" strokeWidth="2" /><path d="M8 12h8M8 16h8M8 8h4" strokeWidth="2" strokeLinecap="round" /></svg> })}
+                                  {renderAgendaMetricCard({ label: 'Técnicos asignados', value: agendaStats.techs, sublabel: `${agendaStats.techs ? 'Cobertura activa' : 'Sin técnicos asignados'}`, series: agendaStats.daily.map((d) => d.techs), color: '#3a7fe0', border: '#cfe1ff', icon: <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" strokeWidth="2" /><path d="M4.5 20c0-3.4 2.8-5.4 7.5-5.4s7.5 2 7.5 5.4" strokeWidth="2" strokeLinecap="round" /></svg> })}
+                                  {renderAgendaMetricCard({ label: 'Tareas completadas', value: agendaStats.completed, sublabel: `${agendaStats.total ? Math.round((agendaStats.completed / agendaStats.total) * 100) : 0}% del total`, series: agendaStats.daily.map((d) => d.completed), color: '#7b4ed8', border: '#ddd2f4', icon: <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" strokeWidth="2" /><path d="m8.5 12.4 2.3 2.4 4.7-5.2" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg> })}
+                                  {renderAgendaMetricCard({ label: 'Pendientes', value: agendaStats.pending, sublabel: `${agendaStats.total ? Math.round((agendaStats.pending / agendaStats.total) * 100) : 0}% del total`, series: agendaStats.daily.map((d) => d.pending), color: '#e67d21', border: '#f2ddc7', icon: <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" strokeWidth="2" /><path d="M12 7.8V12l3 2" strokeWidth="2.2" strokeLinecap="round" /></svg> })}
                                 </div>
                               )}
+                              {!agendaLoading && !agendaError && !agendaStats.hasData && <div className="agenda-empty-note">Sin registros en el rango.</div>}
                               {!agendaLoading && !agendaError && agendaRangeWarning && (
                                 <div className="hint" style={{ marginTop: 10 }}>{agendaRangeWarning}</div>
                               )}
@@ -16865,10 +16972,16 @@
                           </section>
                           <section className="home-widget-shell agenda-widget-card">
                             <div className="agenda-widget-head">
-                              <div>
-                                <h4>Agenda de Instalaciones</h4>
-                                <small className="agenda-widget-subtitle">Tareas programadas desde 2Workers</small>
+                              <div className="agenda-widget-head-left">
+                                <span className="agenda-widget-icon" aria-hidden="true">
+                                  <svg viewBox="0 0 24 24" fill="none"><path d="m14.5 4.5 5 5-2.2 2.2-5-5 2.2-2.2Z" strokeWidth="2" /><path d="m3.5 20.5 6.9-6.9 2 2-6.9 6.9H3.5v-2Z" strokeWidth="2" strokeLinejoin="round" /></svg>
+                                </span>
+                                <div>
+                                  <h4>Agenda de Instalaciones</h4>
+                                  <small className="agenda-widget-subtitle">Tareas programadas desde 2Workers</small>
+                                </div>
                               </div>
+                              <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('agenda-2workers-instalaciones')}>Ver agenda completa →</button>
                             </div>
                             <div className="agenda-widget-body">
                               <div className="agenda-widget-range">Resumen compacto · últimos 7 días operativos</div>
@@ -16878,18 +16991,16 @@
                                 <div className="hint">{agendaInstallError}</div>
                               ) : (
                                 <div className="agenda-stats-grid">
-                                  <article className="agenda-stat-card"><strong>Total de tickets</strong><b>{agendaInstallStats.total}</b></article>
-                                  <article className="agenda-stat-card"><strong>Técnicos asignados</strong><b>{agendaInstallStats.techs}</b></article>
-                                  <article className="agenda-stat-card"><strong>Tareas completadas</strong><b>{agendaInstallStats.completed}</b></article>
-                                  <article className="agenda-stat-card"><strong>Pendientes</strong><b>{agendaInstallStats.pending}</b></article>
+                                  {renderAgendaMetricCard({ label: 'Total de tickets', value: agendaInstallStats.total, sublabel: `${agendaInstallStats.daily.reduce((acc, d) => acc + d.total, 0)} en rango`, series: agendaInstallStats.daily.map((d) => d.total), color: '#0f9b8d', border: '#bfe6de', icon: <svg viewBox="0 0 24 24" fill="none"><path d="M7 3h10l4 4v14H3V3h4Z" strokeWidth="2" /><path d="M8 12h8M8 16h8M8 8h4" strokeWidth="2" strokeLinecap="round" /></svg> })}
+                                  {renderAgendaMetricCard({ label: 'Técnicos asignados', value: agendaInstallStats.techs, sublabel: `${agendaInstallStats.techs ? 'Cobertura activa' : 'Sin técnicos asignados'}`, series: agendaInstallStats.daily.map((d) => d.techs), color: '#3a7fe0', border: '#cfe1ff', icon: <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" strokeWidth="2" /><path d="M4.5 20c0-3.4 2.8-5.4 7.5-5.4s7.5 2 7.5 5.4" strokeWidth="2" strokeLinecap="round" /></svg> })}
+                                  {renderAgendaMetricCard({ label: 'Tareas completadas', value: agendaInstallStats.completed, sublabel: `${agendaInstallStats.total ? Math.round((agendaInstallStats.completed / agendaInstallStats.total) * 100) : 0}% del total`, series: agendaInstallStats.daily.map((d) => d.completed), color: '#7b4ed8', border: '#ddd2f4', icon: <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" strokeWidth="2" /><path d="m8.5 12.4 2.3 2.4 4.7-5.2" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg> })}
+                                  {renderAgendaMetricCard({ label: 'Pendientes', value: agendaInstallStats.pending, sublabel: `${agendaInstallStats.total ? Math.round((agendaInstallStats.pending / agendaInstallStats.total) * 100) : 0}% del total`, series: agendaInstallStats.daily.map((d) => d.pending), color: '#e67d21', border: '#f2ddc7', icon: <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" strokeWidth="2" /><path d="M12 7.8V12l3 2" strokeWidth="2.2" strokeLinecap="round" /></svg> })}
                                 </div>
                               )}
+                              {!agendaInstallLoading && !agendaInstallError && !agendaInstallStats.hasData && <div className="agenda-empty-note">Sin registros en el rango.</div>}
                               {!agendaInstallLoading && !agendaInstallError && agendaInstallRangeWarning && (
                                 <div className="hint" style={{ marginTop: 10 }}>{agendaInstallRangeWarning}</div>
                               )}
-                              <div style={{ marginTop: 10 }}>
-                                <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('agenda-2workers-instalaciones')}>Ver más →</button>
-                              </div>
                             </div>
                           </section>
                         </div>
