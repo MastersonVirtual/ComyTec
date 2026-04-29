@@ -10357,6 +10357,8 @@
         const [agendaInstallViewMode, setAgendaInstallViewMode] = useState('week');
         const [agendaTechSelectedTaskId, setAgendaTechSelectedTaskId] = useState('');
         const [agendaInstallSelectedTaskId, setAgendaInstallSelectedTaskId] = useState('');
+        const [agendaTechExpandedTechId, setAgendaTechExpandedTechId] = useState('');
+        const [agendaInstallExpandedTechId, setAgendaInstallExpandedTechId] = useState('');
         const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
         const [userCredentialRequests, setUserCredentialRequests] = useState([]);
         const [staffMembers, setStaffMembers] = useState([]);
@@ -17214,6 +17216,8 @@
                     const setViewMode = isInstall ? setAgendaInstallViewMode : setAgendaTechViewMode;
                     const selectedTaskId = isInstall ? agendaInstallSelectedTaskId : agendaTechSelectedTaskId;
                     const setSelectedTaskId = isInstall ? setAgendaInstallSelectedTaskId : setAgendaTechSelectedTaskId;
+                    const expandedTechId = isInstall ? agendaInstallExpandedTechId : agendaTechExpandedTechId;
+                    const setExpandedTechId = isInstall ? setAgendaInstallExpandedTechId : setAgendaTechExpandedTechId;
                     const stats = isInstall ? agendaInstallStats : agendaStats;
                     const days = isInstall ? agendaInstallSevenDays : agendaSevenDays;
                     const rows = isInstall ? agendaInstallRows : agendaRows;
@@ -17318,15 +17322,24 @@
                             {activeDays.map((day) => <div key={`head-${day.key}`} className="agenda-day-head"><strong>{day.dateLabel}</strong><span>{day.offset === 0 ? 'Hoy' : day.label}</span></div>)}
                             {groupedByTech.map((tech) => (
                               <React.Fragment key={`row-${tech.id}`}>
-                                <div className="agenda-day-card" style={{ minHeight: 90, padding: 10 }}><strong>{tech.name}</strong><span className="hint">{tech.count} tareas</span></div>
+                                <div className="agenda-day-card" style={{ minHeight: 90, padding: 10 }}>
+                                  <strong>{tech.name}</strong>
+                                  <span className="hint">{tech.count} tareas</span>
+                                  <button type="button" className="home-modern-action-btn" style={{ marginTop: 6, width: '100%' }} onClick={() => setExpandedTechId((prev) => prev === tech.id ? '' : tech.id)}>
+                                    {expandedTechId === tech.id ? 'Ver resumen (2 por día)' : 'Ver agenda completa'}
+                                  </button>
+                                </div>
                                 {tech.tasksByDay.filter((d) => activeDays.some((a) => a.key === d.key)).map((day) => (
                                   <div key={`cell-${tech.id}-${day.key}`} className="agenda-day-card" style={{ minHeight: 90, padding: 8, borderStyle: day.offset === 0 ? 'dashed' : 'solid' }}>
-                                    {day.tasks.map((task) => (
+                                    {(expandedTechId === tech.id ? day.tasks : day.tasks.slice(0, 2)).map((task) => (
                                       <button type="button" onClick={() => setSelectedTaskId(task.id)} key={`task-${task.id}`} className="agenda-task-row" style={{ width: '100%', textAlign: 'left', marginBottom: 6 }}>
                                         <div className="agenda-time-col">{task.fechaHora ? task.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div>
                                         <div className="agenda-task-main"><div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div><div className="agenda-task-client">{task.cliente || 'Cliente sin nombre'}</div><div className="agenda-task-meta">{task.estado || 'Pendiente'} · {task.prioridad || 'Baja'}</div></div>
                                       </button>
                                     ))}
+                                    {expandedTechId !== tech.id && day.tasks.length > 2 && (
+                                      <div className="hint" style={{ margin: 0, fontSize: 12 }}>+{day.tasks.length - 2} tickets más</div>
+                                    )}
                                   </div>
                                 ))}
                               </React.Fragment>
