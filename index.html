@@ -17024,10 +17024,34 @@
                     const days = isInstall ? agendaInstallSevenDays : agendaSevenDays;
                     const rows = isInstall ? agendaInstallRows : agendaRows;
                     const emptyText = isInstall ? 'Disponible para asignar' : 'Sin tareas programadas';
+                    const normalizeForSearch = (value) => String(value || '')
+                      .normalize('NFD')
+                      .replace(/[\u0300-\u036f]/g, '')
+                      .toLowerCase();
+                    const toWordTokens = (value) => normalizeForSearch(value).match(/[a-z0-9]+/g) || [];
                     const filteredByQuery = (task, query) => {
                       if (!query) return true;
-                      return [task.tecnicoId, task.cliente, task.ticketTitulo, task.ticketId, task.estado]
-                        .some((value) => String(value || '').toLowerCase().includes(query));
+                      const trimmed = query.trim();
+                      if (!trimmed) return true;
+
+                      const queryTokens = toWordTokens(trimmed);
+                      if (queryTokens.length === 0) return true;
+
+                      const haystackTokens = toWordTokens([
+                        task.tecnicoId,
+                        task.cliente,
+                        task.ticketTitulo,
+                        task.ticketId,
+                        task.estado,
+                        task.direccion,
+                      ].join(' '));
+                      const haystackSet = new Set(haystackTokens);
+
+                      return queryTokens.every((token) => {
+                        if (/^\d+$/.test(token)) return haystackSet.has(token);
+                        if (token.length === 1) return haystackSet.has(token);
+                        return haystackSet.has(token);
+                      });
                     };
                     const responsibles = Array.from(new Set(rows.map((task) => task.tecnicoId || 'Sin asignar')))
                       .map((name) => ({
