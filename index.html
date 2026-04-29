@@ -12474,6 +12474,37 @@
           if (raw.includes('media') || raw.includes('medium')) return 'agenda-priority-media';
           return 'agenda-priority-baja';
         }
+        const TECHNICIAN_NAME_MAP = {
+          '78907': 'Félix Vincentt',
+          '9139': 'Guardia Virtual',
+          '88850': 'Guardia Virtual',
+          '83911': 'Federico Fuentes',
+          '78934': 'Yoinel Ravelo',
+          '83769': 'Noel Padilla',
+          '78873': 'Víctor da Silva',
+          '86348': 'Java Blandín',
+        };
+        const INSTALL_TECHNICIAN_NAME_MAP = {
+          '86896': '86896',
+          '86897': '86897',
+          '86898': '86898',
+          '86899': '86899',
+          '86348': 'Java Blandín',
+        };
+        function resolvePriorityLabel(value) {
+          const raw = String(value ?? '').trim().toLowerCase();
+          if (raw === '3' || raw.includes('alta')) return 'Alta';
+          if (raw === '2' || raw.includes('media')) return 'Media';
+          if (raw === '1' || raw.includes('baja')) return 'Baja';
+          return String(value || 'Baja').trim() || 'Baja';
+        }
+        function resolveTechnicianDisplayName(tecnicoId, map = TECHNICIAN_NAME_MAP) {
+          const normalized = String(tecnicoId || '').trim();
+          if (!normalized) return 'Técnico sin asignar';
+          const mapped = map[normalized];
+          if (mapped) return mapped;
+          return `Técnico #${normalized}`;
+        }
 
         function agendaStateClass(value) {
           const raw = String(value || '').trim().toLowerCase();
@@ -12526,13 +12557,14 @@
             return {
               id: item?.ticketId || `${item?.tecnicoId || 'sin-tecnico'}-${idx}`,
               tecnicoId: String(item?.tecnicoId || '').trim() || 'Técnico sin asignar',
+              tecnicoNombre: resolveTechnicianDisplayName(item?.tecnicoId, TECHNICIAN_NAME_MAP),
               cliente: String(item?.cliente || '').trim() || String(item?.clienteId || '').trim() || 'Cliente sin nombre',
               clienteId: String(item?.clienteId || '').trim(),
               fechaHora,
               fechaHoraKey: fechaHora ? dayKey(fechaHora) : '',
               direccion: String(item?.direccion || '').trim() || 'Sin dirección',
               orientacion: String(item?.orientacion || '').trim() || 'Sin descripción',
-              prioridad: String(item?.prioridad || '').trim() || 'Baja',
+              prioridad: resolvePriorityLabel(item?.prioridad),
               estado: String(item?.estado || '').trim() || 'Pendiente',
               ticketId: String(item?.ticketId || '').trim(),
               ticketTitulo: String(item?.ticketTitulo || '').trim() || String(item?.orientacion || '').trim() || 'Sin descripción',
@@ -12609,13 +12641,14 @@
             return {
               id: item?.ticketId || `${item?.tecnicoId || 'sin-tecnico'}-${idx}`,
               tecnicoId: String(item?.tecnicoId || '').trim() || 'Técnico sin asignar',
+              tecnicoNombre: resolveTechnicianDisplayName(item?.tecnicoId, INSTALL_TECHNICIAN_NAME_MAP),
               cliente: String(item?.cliente || '').trim() || String(item?.clienteId || '').trim() || 'Cliente sin nombre',
               clienteId: String(item?.clienteId || '').trim(),
               fechaHora,
               fechaHoraKey: fechaHora ? dayKey(fechaHora) : '',
               direccion: String(item?.direccion || '').trim() || 'Sin dirección',
               orientacion: orientacion || 'Sin descripción',
-              prioridad: String(item?.prioridad || '').trim() || 'Baja',
+              prioridad: resolvePriorityLabel(item?.prioridad),
               estado: String(item?.estado || '').trim() || 'Pendiente',
               ticketId: String(item?.ticketId || '').trim(),
               ticketTitulo: ticketTitulo || orientacion || 'Sin descripción',
@@ -17217,7 +17250,7 @@
                     const responsibles = Array.from(new Set(rows.map((task) => task.tecnicoId || 'Sin asignar')))
                       .map((name) => ({
                         id: name,
-                        name: /^tecnico/i.test(name) ? name : `Técnico #${name}`,
+                        name: rows.find((task) => (task.tecnicoId || 'Sin asignar') === name)?.tecnicoNombre || (/^tecnico/i.test(name) ? name : `Técnico #${name}`),
                         count: rows.filter((task) => (task.tecnicoId || 'Sin asignar') === name).length
                       }))
                       .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
@@ -17301,7 +17334,7 @@
                           </div>
                         </div>
                         <div className="agenda-stat-card" style={{ marginTop: 12 }}>
-                          {selectedTask ? <div className="service-layout" style={{ gridTemplateColumns: 'repeat(7,minmax(0,1fr))' }}><div><b>Hora</b><div>{selectedTask.fechaHora ? selectedTask.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div></div><div><b>Cliente</b><div>{selectedTask.cliente || '-'}</div></div><div><b>Técnico</b><div>{selectedTask.tecnicoId || '-'}</div></div><div><b>Ticket ID</b><div>{selectedTask.ticketId || '-'}</div></div><div><b>Prioridad</b><div>{selectedTask.prioridad || '-'}</div></div><div><b>Estado</b><div>{selectedTask.estado || '-'}</div></div><div><b>Descripción</b><div>{selectedTask.orientacion || '-'}</div></div></div> : <div className="hint" style={{ margin: 0 }}>Seleccioná una tarea para ver el detalle.</div>}
+                          {selectedTask ? <div className="service-layout" style={{ gridTemplateColumns: 'repeat(7,minmax(0,1fr))' }}><div><b>Hora</b><div>{selectedTask.fechaHora ? selectedTask.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div></div><div><b>Cliente</b><div>{selectedTask.cliente || '-'}</div></div><div><b>Técnico</b><div>{selectedTask.tecnicoNombre || selectedTask.tecnicoId || '-'}</div></div><div><b>Ticket ID</b><div>{selectedTask.ticketId || '-'}</div></div><div><b>Prioridad</b><div>{selectedTask.prioridad || '-'}</div></div><div><b>Estado</b><div>{selectedTask.estado || '-'}</div></div><div><b>Descripción</b><div>{selectedTask.orientacion || '-'}</div></div></div> : <div className="hint" style={{ margin: 0 }}>Seleccioná una tarea para ver el detalle.</div>}
                         </div>
                       </section>
                     );
@@ -18876,7 +18909,7 @@
                               <div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div>
                               <div className="agenda-task-client">{task.cliente || 'Cliente sin nombre'}</div>
                               <div className="agenda-task-meta">{task.direccion || 'Sin dirección'}</div>
-                              <div className="agenda-task-meta"><strong>Técnico:</strong> {task.tecnicoId || 'Técnico sin asignar'} · <strong>Ticket:</strong> {task.ticketId || 'Sin ticket'}</div>
+                              <div className="agenda-task-meta"><strong>Técnico:</strong> {task.tecnicoNombre || task.tecnicoId || 'Técnico sin asignar'} · <strong>Ticket:</strong> {task.ticketId || 'Sin ticket'}</div>
                             </div>
                           </article>
                         );
