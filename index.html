@@ -18599,6 +18599,7 @@
                       </div>
                     )}
                       </div>
+                      {grupo !== 'baja-detalle' && (
                       <aside className="form-global-side">
                         {(() => {
                           const currentData = grupo === 'baja-detalle' ? bajaForm
@@ -18630,6 +18631,7 @@
                                 <div className="baja-tip">Consejo: validá ID y estado antes de enviar para evitar retrabajos.</div>
                               </section>
                               <section className="service-card" style={{ display: 'grid', gap: 8 }}>
+                                <button type="button" className="home-modern-action-btn" onClick={resetFields}>Limpiar formulario</button>
                                 <button type="button" className="home-modern-action-btn">Guardar borrador</button>
                                 <button type="submit" className="home-modern-action-btn primary" disabled={saving}>{saving ? 'Guardando...' : 'Enviar solicitud'}</button>
                               </section>
@@ -18637,6 +18639,7 @@
                           );
                         })()}
                       </aside>
+                      )}
                     </div>
                   </form>
 
