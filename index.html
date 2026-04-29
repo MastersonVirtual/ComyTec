@@ -10313,6 +10313,14 @@
         const [agendaDayModal, setAgendaDayModal] = useState({ open: false, day: null });
         const [agendaTechFilter, setAgendaTechFilter] = useState('');
         const [agendaInstallFilter, setAgendaInstallFilter] = useState('');
+        const [agendaTechStatusFilter, setAgendaTechStatusFilter] = useState('all');
+        const [agendaInstallStatusFilter, setAgendaInstallStatusFilter] = useState('all');
+        const [agendaTechResponsibleFilter, setAgendaTechResponsibleFilter] = useState('all');
+        const [agendaInstallResponsibleFilter, setAgendaInstallResponsibleFilter] = useState('all');
+        const [agendaTechViewMode, setAgendaTechViewMode] = useState('week');
+        const [agendaInstallViewMode, setAgendaInstallViewMode] = useState('week');
+        const [agendaTechSelectedTaskId, setAgendaTechSelectedTaskId] = useState('');
+        const [agendaInstallSelectedTaskId, setAgendaInstallSelectedTaskId] = useState('');
         const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
         const [userCredentialRequests, setUserCredentialRequests] = useState([]);
         const [staffMembers, setStaffMembers] = useState([]);
@@ -17125,16 +17133,22 @@
                 ) : (effectiveSelectedForm === 'agenda-2workers' || effectiveSelectedForm === 'agenda-2workers-instalaciones') ? (
                   (() => {
                     const isInstall = effectiveSelectedForm === 'agenda-2workers-instalaciones';
-                    const title = isInstall ? 'Agenda 2Workers · Instalaciones (Gantt)' : 'Agenda 2Workers · Técnicos (Gantt)';
-                    const description = isInstall
-                      ? 'Vista de planificación para instalaciones con responsables, métricas y tareas distribuidas por fecha.'
-                      : 'Vista de planificación para técnicos con responsables, métricas y tareas distribuidas por fecha.';
+                    const title = isInstall ? 'Agenda de Instalaciones' : 'Agenda de técnicos';
+                    const description = 'Tareas programadas desde 2Workers';
                     const filterValue = isInstall ? agendaInstallFilter : agendaTechFilter;
                     const setFilterValue = isInstall ? setAgendaInstallFilter : setAgendaTechFilter;
+                    const statusFilter = isInstall ? agendaInstallStatusFilter : agendaTechStatusFilter;
+                    const setStatusFilter = isInstall ? setAgendaInstallStatusFilter : setAgendaTechStatusFilter;
+                    const responsibleFilter = isInstall ? agendaInstallResponsibleFilter : agendaTechResponsibleFilter;
+                    const setResponsibleFilter = isInstall ? setAgendaInstallResponsibleFilter : setAgendaTechResponsibleFilter;
+                    const viewMode = isInstall ? agendaInstallViewMode : agendaTechViewMode;
+                    const setViewMode = isInstall ? setAgendaInstallViewMode : setAgendaTechViewMode;
+                    const selectedTaskId = isInstall ? agendaInstallSelectedTaskId : agendaTechSelectedTaskId;
+                    const setSelectedTaskId = isInstall ? setAgendaInstallSelectedTaskId : setAgendaTechSelectedTaskId;
                     const stats = isInstall ? agendaInstallStats : agendaStats;
                     const days = isInstall ? agendaInstallSevenDays : agendaSevenDays;
                     const rows = isInstall ? agendaInstallRows : agendaRows;
-                    const emptyText = isInstall ? 'Disponible para asignar' : 'Sin tareas programadas';
+                    const refreshAgenda = isInstall ? fetchAuvoAgendaInstall : fetchAuvoAgenda;
                     const normalizeForSearch = (value) => String(value || '')
                       .normalize('NFD')
                       .replace(/[\u0300-\u036f]/g, '')
@@ -17166,35 +17180,63 @@
                     };
                     const responsibles = Array.from(new Set(rows.map((task) => task.tecnicoId || 'Sin asignar')))
                       .map((name) => ({
-                        name,
+                        id: name,
+                        name: /^tecnico/i.test(name) ? name : `Técnico #${name}`,
                         count: rows.filter((task) => (task.tecnicoId || 'Sin asignar') === name).length
                       }))
                       .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+                    const statusOptions = ['all', ...Array.from(new Set(rows.map((r) => String(r?.estado || 'Pendiente'))))];
+                    const selectedTask = rows.find((item) => item.id === selectedTaskId) || null;
+                    const applyFilters = (task) => {
+                      const query = filterValue.trim().toLowerCase();
+                      if (!filteredByQuery(task, query)) return false;
+                      if (responsibleFilter !== 'all' && (task.tecnicoId || 'Sin asignar') !== responsibleFilter) return false;
+                      if (statusFilter !== 'all' && String(task.estado || 'Pendiente') !== statusFilter) return false;
+                      return true;
+                    };
+                    const groupedByTech = responsibles.map((tech) => ({
+                      ...tech,
+                      tasksByDay: days.map((day) => {
+                        const tasks = rows.filter((task) => task.fechaHoraKey === day.key && (task.tecnicoId || 'Sin asignar') === tech.id && applyFilters(task))
+                          .sort((a, b) => (a?.fechaHora?.getTime?.() || 0) - (b?.fechaHora?.getTime?.() || 0));
+                        return { ...day, tasks };
+                      }),
+                    })).filter((tech) => tech.tasksByDay.some((d) => d.tasks.length > 0) || responsibleFilter === 'all');
+                    const activeDays = viewMode === 'day' ? days.filter((d) => d.offset === 0) : days;
 
                     return (
                       <section className="panel">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                          <h2 style={{ margin: 0 }}>{title}</h2>
-                          <button type="button" className="home-modern-action-btn" onClick={goToHomeView}>← Volver al inicio</button>
+                        <div className="agenda-widget-range" style={{ marginBottom: 8 }}>{`Dashboard > ${title}`}</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                          <div className="agenda-widget-head-left">
+                            <span className="agenda-widget-icon" aria-hidden="true">{isInstall ? '🔧' : '👤'}</span>
+                            <div><h2 style={{ margin: 0 }}>{title}</h2><div className="hint" style={{ margin: 0 }}>{description}</div></div>
+                          </div>
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <button type="button" className="home-modern-action-btn" onClick={goToHomeView}>← Volver al resumen</button>
+                            <button type="button" className="home-modern-action-btn primary" onClick={() => { void refreshAgenda(); }}>Actualizar</button>
+                          </div>
                         </div>
-                        <div className="hint">{description}</div>
-                        <div className="field" style={{ marginTop: 10, maxWidth: 380 }}>
-                          <label>Buscar por técnico, cliente, ticket o estado</label>
-                          <input value={filterValue} onChange={(e) => setFilterValue(e.target.value)} type="search" placeholder="Filtrar tareas..." />
+                        <div className="agenda-stat-card" style={{ marginBottom: 12 }}>
+                          <div className="service-layout" style={{ gridTemplateColumns: 'repeat(5,minmax(0,1fr))' }}>
+                            <label className="field"><span>Rango de fechas</span><input readOnly value={`${activeDays[0]?.dateLabel || '-'} → ${activeDays[activeDays.length - 1]?.dateLabel || '-'}`} /></label>
+                            <label className="field"><span>Vista</span><select value={viewMode} onChange={(e) => setViewMode(e.target.value)}><option value="week">Semana</option><option value="day">Día</option></select></label>
+                            <label className="field"><span>Técnico</span><select value={responsibleFilter} onChange={(e) => setResponsibleFilter(e.target.value)}><option value="all">Todos los técnicos</option>{responsibles.map((r) => <option key={`${r.id}-opt`} value={r.id}>{r.name}</option>)}</select></label>
+                            <label className="field"><span>Estado</span><select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>{statusOptions.map((status) => <option key={`${status}-status`} value={status}>{status === 'all' ? 'Todos los estados' : status}</option>)}</select></label>
+                            <div className="field"><span>&nbsp;</span><button type="button" className="home-modern-action-btn">Filtros avanzados</button></div>
+                          </div>
                         </div>
                         <div className="agenda-stats-grid" style={{ marginTop: 10 }}>
-                          <article className="agenda-stat-card"><strong>Total de tickets</strong><b>{stats.total}</b></article>
-                          <article className="agenda-stat-card"><strong>Técnicos asignados</strong><b>{stats.techs}</b></article>
-                          <article className="agenda-stat-card"><strong>Tareas completadas</strong><b>{stats.completed}</b></article>
-                          <article className="agenda-stat-card"><strong>Pendientes</strong><b>{stats.pending}</b></article>
+                          {renderAgendaMetricCard({ label: 'Total de tickets', value: stats.total, sublabel: 'Carga operativa en el rango', series: stats.daily.map((d) => d.total), color: '#0f9b8d', border: '#bfe6de', icon: '📄' })}
+                          {renderAgendaMetricCard({ label: 'Técnicos asignados', value: stats.techs, sublabel: 'Cobertura de agenda', series: stats.daily.map((d) => d.techs), color: '#3a7fe0', border: '#cfe1ff', icon: '👤' })}
+                          {renderAgendaMetricCard({ label: 'Tareas completadas', value: stats.completed, sublabel: `${stats.total ? Math.round((stats.completed / stats.total) * 100) : 0}% del total`, series: stats.daily.map((d) => d.completed), color: '#2f9e6d', border: '#cdecd9', icon: '✅' })}
+                          {renderAgendaMetricCard({ label: 'Pendientes', value: stats.pending, sublabel: `${stats.total ? Math.round((stats.pending / stats.total) * 100) : 0}% del total`, series: stats.daily.map((d) => d.pending), color: '#e67d21', border: '#f2ddc7', icon: '⏱️' })}
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: 12, marginTop: 12 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 12, marginTop: 12 }}>
                           <aside className="home-modern-panel">
-                            <h3 style={{ marginTop: 0, marginBottom: 8 }}>{isInstall ? 'Responsables de instalación' : 'Técnicos responsables'}</h3>
+                            <label className="field"><span>Buscar técnico…</span><input value={filterValue} onChange={(e) => setFilterValue(e.target.value)} type="search" placeholder="Buscar técnico..." /></label>
                             <div className="home-modern-list">
-                              {responsibles.length === 0 ? (
-                                <div className="agenda-empty-card">Sin responsables para el período.</div>
-                              ) : responsibles.map((item) => (
+                              {groupedByTech.length === 0 ? <div className="agenda-empty-card">Disponible para asignar<br />No hay tareas programadas en este rango.</div> : groupedByTech.map((item) => (
                                 <div key={`${isInstall ? 'install' : 'tech'}-owner-${item.name}`} className="home-modern-list-item">
                                   <b>{item.name}</b>
                                   <small>{item.count} tickets</small>
@@ -17202,40 +17244,28 @@
                               ))}
                             </div>
                           </aside>
-                          <div className="agenda-days-grid">
-                            {days.map((day) => {
-                              const query = filterValue.trim().toLowerCase();
-                              const dayTasks = day.tasks.filter((task) => filteredByQuery(task, query));
-                              return (
-                                <article key={`${isInstall ? 'install' : 'tech'}-gantt-${day.key}`} className="agenda-day-card">
-                                  <header className="agenda-day-head">
-                                    <div>
-                                      <strong>{day.dateLabel}</strong>
-                                      <span>{day.label}</span>
-                                    </div>
-                                    <span className="agenda-day-count">{dayTasks.length} tickets</span>
-                                  </header>
-                                  <div className="agenda-day-body">
-                                    {dayTasks.length === 0 ? (
-                                      <div className="agenda-empty-card">{emptyText}</div>
-                                    ) : dayTasks.map((task) => {
-                                      const priorityClass = agendaPriorityClass(task.prioridad);
-                                      return (
-                                        <div key={`${isInstall ? 'install' : 'tech'}-task-${day.key}-${task.id}-${task.ticketId || task.fechaHoraKey}`} className={`agenda-task-row ${priorityClass.replace('agenda-priority-', 'priority-')}`}>
-                                          <div className="agenda-time-col">{task.fechaHora ? task.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div>
-                                          <div className="agenda-task-main">
-                                            <div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div>
-                                            <div className="agenda-task-client">{task.tecnicoId || 'Técnico sin asignar'} · {task.cliente || 'Cliente sin nombre'}</div>
-                                            <div className="agenda-task-meta"><strong>Estado:</strong> {task.estado || 'Pendiente'} · <strong>Ticket:</strong> {task.ticketId || '-'}</div>
-                                          </div>
-                                        </div>
-                                      );
-                                    })}
+                          <div className="agenda-days-grid" style={{ gridTemplateColumns: `220px repeat(${activeDays.length}, minmax(220px,1fr))` }}>
+                            <div className="agenda-day-head"><strong>Técnicos</strong><span>{groupedByTech.length}</span></div>
+                            {activeDays.map((day) => <div key={`head-${day.key}`} className="agenda-day-head"><strong>{day.dateLabel}</strong><span>{day.offset === 0 ? 'Hoy' : day.label}</span></div>)}
+                            {groupedByTech.map((tech) => (
+                              <React.Fragment key={`row-${tech.id}`}>
+                                <div className="agenda-day-card" style={{ minHeight: 90, padding: 10 }}><strong>{tech.name}</strong><span className="hint">{tech.count} tareas</span></div>
+                                {tech.tasksByDay.filter((d) => activeDays.some((a) => a.key === d.key)).map((day) => (
+                                  <div key={`cell-${tech.id}-${day.key}`} className="agenda-day-card" style={{ minHeight: 90, padding: 8, borderStyle: day.offset === 0 ? 'dashed' : 'solid' }}>
+                                    {day.tasks.map((task) => (
+                                      <button type="button" onClick={() => setSelectedTaskId(task.id)} key={`task-${task.id}`} className="agenda-task-row" style={{ width: '100%', textAlign: 'left', marginBottom: 6 }}>
+                                        <div className="agenda-time-col">{task.fechaHora ? task.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div>
+                                        <div className="agenda-task-main"><div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div><div className="agenda-task-client">{task.cliente || 'Cliente sin nombre'}</div><div className="agenda-task-meta">{task.estado || 'Pendiente'} · {task.prioridad || 'Baja'}</div></div>
+                                      </button>
+                                    ))}
                                   </div>
-                                </article>
-                              );
-                            })}
+                                ))}
+                              </React.Fragment>
+                            ))}
                           </div>
+                        </div>
+                        <div className="agenda-stat-card" style={{ marginTop: 12 }}>
+                          {selectedTask ? <div className="service-layout" style={{ gridTemplateColumns: 'repeat(7,minmax(0,1fr))' }}><div><b>Hora</b><div>{selectedTask.fechaHora ? selectedTask.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div></div><div><b>Cliente</b><div>{selectedTask.cliente || '-'}</div></div><div><b>Técnico</b><div>{selectedTask.tecnicoId || '-'}</div></div><div><b>Ticket ID</b><div>{selectedTask.ticketId || '-'}</div></div><div><b>Prioridad</b><div>{selectedTask.prioridad || '-'}</div></div><div><b>Estado</b><div>{selectedTask.estado || '-'}</div></div><div><b>Descripción</b><div>{selectedTask.orientacion || '-'}</div></div></div> : <div className="hint" style={{ margin: 0 }}>Seleccioná una tarea para ver el detalle.</div>}
                         </div>
                       </section>
                     );
