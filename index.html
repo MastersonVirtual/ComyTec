@@ -10359,6 +10359,8 @@
         const [agendaInstallSelectedTaskId, setAgendaInstallSelectedTaskId] = useState('');
         const [agendaTechExpandedTechId, setAgendaTechExpandedTechId] = useState('');
         const [agendaInstallExpandedTechId, setAgendaInstallExpandedTechId] = useState('');
+        const [agendaTechSelectedTechId, setAgendaTechSelectedTechId] = useState('');
+        const [agendaInstallSelectedTechId, setAgendaInstallSelectedTechId] = useState('');
         const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
         const [userCredentialRequests, setUserCredentialRequests] = useState([]);
         const [staffMembers, setStaffMembers] = useState([]);
@@ -17218,6 +17220,8 @@
                     const setSelectedTaskId = isInstall ? setAgendaInstallSelectedTaskId : setAgendaTechSelectedTaskId;
                     const expandedTechId = isInstall ? agendaInstallExpandedTechId : agendaTechExpandedTechId;
                     const setExpandedTechId = isInstall ? setAgendaInstallExpandedTechId : setAgendaTechExpandedTechId;
+                    const selectedTechId = isInstall ? agendaInstallSelectedTechId : agendaTechSelectedTechId;
+                    const setSelectedTechId = isInstall ? setAgendaInstallSelectedTechId : setAgendaTechSelectedTechId;
                     const stats = isInstall ? agendaInstallStats : agendaStats;
                     const days = isInstall ? agendaInstallSevenDays : agendaSevenDays;
                     const rows = isInstall ? agendaInstallRows : agendaRows;
@@ -17275,7 +17279,14 @@
                         return { ...day, tasks };
                       }),
                     })).filter((tech) => tech.tasksByDay.some((d) => d.tasks.length > 0) || responsibleFilter === 'all');
+                    const visibleTechRows = selectedTechId ? groupedByTech.filter((tech) => tech.id === selectedTechId) : groupedByTech;
                     const activeDays = viewMode === 'day' ? days.filter((d) => d.offset === 0) : days;
+                    const avatarColor = (key) => {
+                      const palette = ['#0f9b8d', '#3a7fe0', '#7b4ed8', '#e67d21', '#1f8d5d', '#6b7280'];
+                      const base = String(key || '').split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+                      return palette[base % palette.length];
+                    };
+                    const initialsFor = (name) => String(name || 'T').split(' ').filter(Boolean).slice(0, 2).map((v) => v[0]).join('').toUpperCase();
 
                     return (
                       <section className="panel">
@@ -17307,38 +17318,47 @@
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 12, marginTop: 12 }}>
                           <aside className="home-modern-panel">
+                            <button type="button" className="home-modern-action-btn" style={{ width: '100%', marginBottom: 8, background: selectedTechId ? '#fff' : '#e8f7f3', borderColor: '#8fd8cc' }} onClick={() => { setSelectedTechId(''); setExpandedTechId(''); }}>
+                              Todos
+                            </button>
                             <label className="field"><span>Buscar técnico…</span><input value={filterValue} onChange={(e) => setFilterValue(e.target.value)} type="search" placeholder="Buscar técnico..." /></label>
                             <div className="home-modern-list">
                               {groupedByTech.length === 0 ? <div className="agenda-empty-card">Disponible para asignar<br />No hay tareas programadas en este rango.</div> : groupedByTech.map((item) => (
-                                <div key={`${isInstall ? 'install' : 'tech'}-owner-${item.name}`} className="home-modern-list-item">
-                                  <b>{item.name}</b>
-                                  <small>{item.count} tickets</small>
-                                </div>
+                                <button type="button" key={`${isInstall ? 'install' : 'tech'}-owner-${item.name}`} className="home-modern-list-item" style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 10, borderLeft: selectedTechId === item.id ? '4px solid #0f9b8d' : '4px solid transparent', background: selectedTechId === item.id ? '#eaf8f5' : '#fff' }} onClick={() => { setSelectedTechId(item.id); setExpandedTechId(item.id); }}>
+                                  <span style={{ width: 32, height: 32, borderRadius: '50%', background: `${avatarColor(item.id)}1f`, color: avatarColor(item.id), display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>{initialsFor(item.name)}</span>
+                                  <span style={{ flex: 1 }}><b>{item.name}</b><small style={{ display: 'block' }}>{item.count} tickets</small></span>
+                                  <span style={{ color: '#7a8c9d' }}>›</span>
+                                </button>
                               ))}
                             </div>
                           </aside>
                           <div className="agenda-days-grid" style={{ gridTemplateColumns: `220px repeat(${activeDays.length}, minmax(220px,1fr))` }}>
-                            <div className="agenda-day-head"><strong>Técnicos</strong><span>{groupedByTech.length}</span></div>
-                            {activeDays.map((day) => <div key={`head-${day.key}`} className="agenda-day-head"><strong>{day.dateLabel}</strong><span>{day.offset === 0 ? 'Hoy' : day.label}</span></div>)}
-                            {groupedByTech.map((tech) => (
+                            <div className="agenda-day-head"><strong>Técnicos</strong><span>{visibleTechRows.length}</span></div>
+                            {activeDays.map((day) => <div key={`head-${day.key}`} className="agenda-day-head" style={day.offset === 0 ? { background: '#eaf8f5', border: '1px solid #8fd8cc' } : {}}><strong>{day.dateLabel}</strong><span>{day.offset === 0 ? 'Hoy' : day.label}</span></div>)}
+                            {visibleTechRows.map((tech) => (
                               <React.Fragment key={`row-${tech.id}`}>
                                 <div className="agenda-day-card" style={{ minHeight: 90, padding: 10 }}>
                                   <strong>{tech.name}</strong>
                                   <span className="hint">{tech.count} tareas</span>
-                                  <button type="button" className="home-modern-action-btn" style={{ marginTop: 6, width: '100%' }} onClick={() => setExpandedTechId((prev) => prev === tech.id ? '' : tech.id)}>
-                                    {expandedTechId === tech.id ? 'Ver resumen (2 por día)' : 'Ver agenda completa'}
+                                  <button type="button" className="home-modern-action-btn" style={{ marginTop: 6, width: '100%' }} onClick={() => setExpandedTechId((prev) => {
+                                    const next = prev === tech.id ? '' : tech.id;
+                                    if (!next) setSelectedTechId('');
+                                    else setSelectedTechId(tech.id);
+                                    return next;
+                                  })}>
+                                    {expandedTechId === tech.id ? 'Volver a Todos' : 'Ver agenda completa'}
                                   </button>
                                 </div>
                                 {tech.tasksByDay.filter((d) => activeDays.some((a) => a.key === d.key)).map((day) => (
-                                  <div key={`cell-${tech.id}-${day.key}`} className="agenda-day-card" style={{ minHeight: 90, padding: 8, borderStyle: day.offset === 0 ? 'dashed' : 'solid' }}>
-                                    {(expandedTechId === tech.id ? day.tasks : day.tasks.slice(0, 2)).map((task) => (
+                                  <div key={`cell-${tech.id}-${day.key}`} className="agenda-day-card" style={{ minHeight: 90, padding: 8, borderStyle: day.offset === 0 ? 'dashed' : 'solid', background: day.offset === 0 ? '#f5fffc' : '#fff' }}>
+                                    {((selectedTechId === tech.id || expandedTechId === tech.id) ? day.tasks : day.tasks.slice(0, 2)).map((task) => (
                                       <button type="button" onClick={() => setSelectedTaskId(task.id)} key={`task-${task.id}`} className="agenda-task-row" style={{ width: '100%', textAlign: 'left', marginBottom: 6 }}>
                                         <div className="agenda-time-col">{task.fechaHora ? task.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div>
                                         <div className="agenda-task-main"><div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div><div className="agenda-task-client">{task.cliente || 'Cliente sin nombre'}</div><div className="agenda-task-meta">{task.estado || 'Pendiente'} · {task.prioridad || 'Baja'}</div></div>
                                       </button>
                                     ))}
-                                    {expandedTechId !== tech.id && day.tasks.length > 2 && (
-                                      <div className="hint" style={{ margin: 0, fontSize: 12 }}>+{day.tasks.length - 2} tickets más</div>
+                                    {!selectedTechId && expandedTechId !== tech.id && day.tasks.length > 2 && (
+                                      <div className="hint" style={{ margin: 0, fontSize: 12 }}>+{day.tasks.length - 2} más</div>
                                     )}
                                   </div>
                                 ))}
