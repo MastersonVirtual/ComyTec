@@ -5321,11 +5321,11 @@
         border: 1px solid #dfe9e8;
         background: #ffffff;
         box-shadow: 0 12px 24px rgba(15, 23, 42, .06);
-        padding: 14px;
+        padding: 18px;
       }
       .home-modern-hero {
-        padding: clamp(24px, 4vw, 36px);
-        border-radius: 22px;
+        padding: clamp(28px, 4vw, 40px);
+        border-radius: 20px;
         border: 1px solid #e2e8f0;
         box-shadow: 0 14px 28px rgba(15, 23, 42, .08);
         background: #ffffff;
@@ -5336,20 +5336,49 @@
         width: 100%;
       }
       .dashboard-main-layout {
-        grid-template-columns: minmax(0, 1fr) minmax(300px, .38fr);
+        grid-template-columns: minmax(0, 1.7fr) minmax(320px, .75fr);
         align-items: start;
+        gap: 18px;
       }
       .dashboard-main-column {
         gap: 16px;
       }
       .dashboard-side-column {
         display: grid;
-        gap: 14px;
+        gap: 16px;
         position: sticky;
         top: 84px;
       }
       .home-side-widget-shell {
-        padding: 12px;
+        padding: 14px;
+      }
+      .home-modern-badge {
+        background: #e7f7f4;
+        color: #0d6f68;
+        border: 1px solid #bfe6de;
+        border-radius: 12px;
+        padding: 6px 12px;
+      }
+      .home-modern-action-btn {
+        min-height: 44px;
+        border-radius: 12px;
+      }
+      .home-modern-action-btn.primary {
+        background: linear-gradient(135deg, #0f9b8d, #0b7d72);
+        color: #fff;
+        border: none;
+      }
+      .dashboard-equal-card {
+        border-radius: 18px;
+        border: 1px solid #dfe9e8;
+        background: #ffffff;
+        box-shadow: 0 10px 22px rgba(15, 23, 42, .06);
+      }
+      .home-hero-mail-item {
+        border-radius: 12px;
+        border: 1px solid #e2ecea;
+        background: #ffffff;
+        margin-bottom: 8px;
       }
       .agenda-widget-card { order: 1; }
       .home-staff-chat-card { order: 2; }
