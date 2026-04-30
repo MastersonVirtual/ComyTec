@@ -12374,6 +12374,7 @@
             const tareasInstalaciones = docs
               .filter((doc) => normalizeTipoAgenda(doc.data()?.tipoAgenda) === 'instalaciones')
               .map((doc, idx) => mapFirestoreTask(doc, idx, INSTALL_TECHNICIAN_NAME_MAP, 'instalacion'))
+              .filter((item) => String(item?.tecnicoId || '').trim() === '86348')
               .filter((item) => item.fechaHora instanceof Date)
               .sort(sortByDateAsc);
 
