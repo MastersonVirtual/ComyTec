@@ -362,6 +362,26 @@
         min-height: 46px;
       }
       @media (max-width: 768px) {
+        .dashboard-main-layout,
+        .home-modern-shell,
+        .dashboard-main-column,
+        .dashboard-side-column,
+        .dashboard-right-panel {
+          display: grid !important;
+          grid-template-columns: 1fr !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          gap: 10px !important;
+        }
+        .dashboard-side-column { order: 2 !important; position: static !important; top: auto !important; }
+        .dashboard-main-column { order: 1 !important; }
+        .home-service-cards-board { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+        .home-service-card-primary { min-height: 120px !important; }
+        .home-service-card-primary .home-service-card-body,
+        .home-service-card-primary .home-service-card-row-grid,
+        .home-service-card-primary .home-service-card-row { display: none !important; }
+        .home-service-card-primary .home-service-card-footer { margin-top: auto !important; }
+
         .topbar { padding: 8px 10px !important; gap: 8px !important; }
         .top-titles h1 { font-size: 0 !important; line-height: 1; }
         .top-titles h1::after { content: "Hola, Alfonso"; font-size: 1.05rem; color: #e6fffd; font-weight: 800; }
@@ -373,9 +393,9 @@
         .home-modern-actions .home-modern-action-btn.primary { grid-column: 1 / -1; }
         .home-modern-actions .home-modern-action-btn { min-height: 40px !important; font-size: 13px !important; }
 
-        #weather-widget { display: none !important; }
+        #weather-widget,
+        .dashboard-right-panel article:has(#gmail-list),
         #gmail-list { display: none !important; }
-        #gmail-list.closest, .dashboard-right-panel article:has(#gmail-list) { display: none !important; }
 
         .home-service-cards-board { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
         .home-service-card { min-height: 120px !important; padding: 10px !important; }
@@ -393,8 +413,9 @@
         .calendar-event-item { padding: 8px !important; }
         .calendar-widget-card .calendar-sections section:nth-child(n+3) { display: none !important; }
 
-        .mobile-bottom-nav { display: grid !important; grid-template-columns: repeat(4, 1fr); }
-        .mobile-fab { display: grid !important; }
+        .mobile-bottom-nav { display: grid !important; grid-template-columns: repeat(4, 1fr); position: fixed !important; left: 0; right: 0; bottom: 0; z-index: 1500; }
+        .mobile-fab { display: grid !important; position: fixed !important; bottom: 64px !important; z-index: 1501 !important; }
+        body { overflow-x: hidden !important; }
       }
       .card-grid { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 10px; }
 
