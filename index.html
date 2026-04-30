@@ -19787,5 +19787,24 @@
         setInterval(obtenerClima, 10 * 60 * 1000);
       })();
     </script>
+    <style>
+      @media (max-width: 768px) {
+        .dashboard-main-layout,
+        .dashboard-main-column,
+        .dashboard-side-column,
+        .dashboard-right-panel { grid-template-columns: 1fr !important; display: grid !important; }
+        .dashboard-side-column { position: static !important; order: 2 !important; }
+        .dashboard-main-column { order: 1 !important; }
+        #weather-widget, .dashboard-right-panel article:has(#gmail-list), #gmail-list { display: none !important; }
+        .home-service-cards-board { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
+        .home-service-card { min-height: 132px !important; padding: 8px !important; }
+        .home-service-card .home-service-card-row-grid,
+        .home-service-card .home-service-card-row,
+        .home-service-card .hint { display: none !important; }
+        .home-service-card .home-service-card-footer { margin-top: 8px !important; }
+        .home-modern-actions { grid-template-columns: 1fr 1fr !important; }
+        .home-modern-actions .home-modern-action-btn.primary { grid-column: 1 / -1 !important; }
+      }
+    </style>
   </body>
 </html>
