@@ -12120,6 +12120,19 @@
           const dt = new Date(value);
           return Number.isNaN(dt.getTime()) ? null : dt;
         }
+        function parseFirestoreDateTime(value) {
+          if (!value) return null;
+          if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+          if (typeof value?.toDate === 'function') {
+            const dt = value.toDate();
+            return dt instanceof Date && !Number.isNaN(dt.getTime()) ? dt : null;
+          }
+          if (typeof value === 'number') {
+            const dt = new Date(value);
+            return Number.isNaN(dt.getTime()) ? null : dt;
+          }
+          return parseAgendaDateTime(value);
+        }
 
         function dayKey(date) {
           return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -12237,28 +12250,14 @@
           try {
             setAgendaLoading(true);
             setAgendaError('');
-            setAgendaRangeWarning('');
-
             const response = await fetch(AUVO_AGENDA_ENDPOINT, {
               method: 'GET',
               headers: { 'Content-Type': 'application/json' },
             });
-
-            if (!response.ok) {
-              throw new Error(`Cloud Run ${response.status}`);
-            }
-
-            const json = await response.json();
-            if (!json?.ok) {
-              throw new Error('Respuesta inválida del endpoint de agenda');
-            }
-
-            const rawItems = Array.isArray(json?.data) ? json.data : [];
-            applyAgendaPayload(rawItems, json?.rango || null, 'endpoint');
+            if (!response.ok) throw new Error(`Cloud Run ${response.status}`);
           } catch (error) {
-            console.error('Error cargando agenda AUVO:', error);
-            setAgendaError('No se pudo cargar la agenda de técnicos.');
-            setAgendaRows([]);
+            console.error('Error sincronizando agenda AUVO:', error);
+            setAgendaError('No se pudo forzar la sincronización de agenda.');
           } finally {
             setAgendaLoading(false);
           }
@@ -12319,85 +12318,103 @@
           try {
             setAgendaInstallLoading(true);
             setAgendaInstallError('');
-            setAgendaInstallRangeWarning('');
             const response = await fetch(AUVO_AGENDA_INSTALL_ENDPOINT, {
               method: 'GET',
               headers: { 'Content-Type': 'application/json' },
             });
             if (!response.ok) throw new Error(`Cloud Run ${response.status}`);
-            const json = await response.json();
-            if (!json?.ok) throw new Error('Respuesta inválida del endpoint de instalaciones');
-            const rawItems = Array.isArray(json?.data) ? json.data : [];
-            applyAgendaInstallPayload(rawItems, json?.rango || null, 'endpoint');
           } catch (error) {
-            console.error('Error cargando agenda AUVO instalaciones:', error);
-            setAgendaInstallError('No se pudo cargar 2W Instalaciones.');
-            setAgendaInstallRows([]);
+            console.error('Error sincronizando agenda AUVO instalaciones:', error);
+            setAgendaInstallError('No se pudo forzar la sincronización de instalaciones.');
           } finally {
             setAgendaInstallLoading(false);
           }
         }
 
         useEffect(() => {
-          let fallbackTimer = null;
-          let refreshInterval = null;
-          let resolvedByWebhook = false;
-          const REFRESH_EVERY_MS = 5 * 60 * 1000;
-
-          if (!rtdb) {
-            void fetchAuvoAgenda();
-            refreshInterval = window.setInterval(() => { void fetchAuvoAgenda(); }, REFRESH_EVERY_MS);
-            return () => {
-              if (refreshInterval) window.clearInterval(refreshInterval);
-            };
-          }
-
-          const ref = rtdb.ref(AUVO_AGENDA_WEBHOOK_RTDB_PATH);
-          const handleValue = (snap) => {
-            try {
-              const payload = snap.val();
-              const rawItems = Array.isArray(payload?.data)
-                ? payload.data
-                : Array.isArray(payload?.items)
-                  ? payload.items
-                  : Array.isArray(payload)
-                    ? payload
-                    : [];
-              if (!rawItems.length) {
-                if (!resolvedByWebhook) {
-                  if (fallbackTimer) window.clearTimeout(fallbackTimer);
-                  fallbackTimer = window.setTimeout(() => { void fetchAuvoAgenda(); }, 350);
-                }
-                return;
-              }
-              resolvedByWebhook = true;
-              setAgendaError('');
-              setAgendaLoading(false);
-              applyAgendaPayload(rawItems, payload?.rango || null, 'webhook');
-            } catch (error) {
-              console.error('Error procesando agenda webhook 2Workers:', error);
-              if (!resolvedByWebhook) void fetchAuvoAgenda();
-            }
-          };
-          const handleError = (error) => {
-            console.error('Error escuchando agenda webhook 2Workers:', error);
-            if (!resolvedByWebhook) void fetchAuvoAgenda();
-          };
-
           setAgendaLoading(true);
-          ref.on('value', handleValue, handleError);
-          void fetchAuvoAgenda();
-          refreshInterval = window.setInterval(() => { void fetchAuvoAgenda(); }, REFRESH_EVERY_MS);
-
+          const ref = db.collection('auvo_tasks')
+            .where('tipoAgenda', '==', 'tecnicos')
+            .orderBy('fechaHora', 'asc');
+          const unsub = ref.onSnapshot((snapshot) => {
+            const tareasTecnicos = snapshot.docs.map((doc, idx) => {
+              const item = doc.data() || {};
+              const fechaHora = parseFirestoreDateTime(item?.fechaHora);
+              return {
+                id: String(item?.taskId || item?.ticketId || doc.id || `tecnico-${idx}`),
+                taskId: String(item?.taskId || '').trim(),
+                tecnicoId: String(item?.tecnicoId || '').trim() || '0',
+                tecnicoNombre: resolveTechnicianDisplayName(item?.tecnicoId, TECHNICIAN_NAME_MAP),
+                cliente: String(item?.cliente || '').trim() || String(item?.clienteId || '').trim() || 'Cliente sin nombre',
+                clienteId: String(item?.clienteId || '').trim(),
+                fechaHora,
+                fechaHoraKey: fechaHora ? dayKey(fechaHora) : '',
+                direccion: String(item?.direccion || '').trim() || 'Sin dirección',
+                orientacion: String(item?.orientacion || '').trim() || 'Sin descripción',
+                prioridad: resolvePriorityLabel(item?.prioridad),
+                estado: item?.estado ?? 'Pendiente',
+                ticketId: String(item?.ticketId || '').trim(),
+                ticketTitulo: String(item?.ticketTitulo || '').trim() || String(item?.orientacion || '').trim() || 'Sin descripción',
+                sourceService: String(item?.sourceService || '').trim(),
+              };
+            }).filter((item) => item.fechaHora instanceof Date);
+            console.log('Agenda técnicos Firestore:', tareasTecnicos);
+            setAgendaRangeWarning('');
+            setAgendaError('');
+            setAgendaRows(tareasTecnicos);
+            setAgendaLoading(false);
+          }, (error) => {
+            console.error('Error leyendo agenda técnicos Firestore:', error);
+            setAgendaError('No se pudo leer agenda técnicos desde Firestore.');
+            setAgendaRows([]);
+            setAgendaLoading(false);
+          });
           return () => {
-            if (fallbackTimer) window.clearTimeout(fallbackTimer);
-            if (refreshInterval) window.clearInterval(refreshInterval);
-            ref.off('value', handleValue);
+            unsub();
           };
         }, []);
 
         useEffect(() => {
-          void fetchAuvoAgendaInstall();
+          setAgendaInstallLoading(true);
+          const ref = db.collection('auvo_tasks')
+            .where('tipoAgenda', '==', 'instalaciones')
+            .orderBy('fechaHora', 'asc');
+          const unsub = ref.onSnapshot((snapshot) => {
+            const tareasInstalaciones = snapshot.docs.map((doc, idx) => {
+              const item = doc.data() || {};
+              const fechaHora = parseFirestoreDateTime(item?.fechaHora);
+              const orientacion = String(item?.orientacion || '').trim();
+              const ticketTitulo = String(item?.ticketTitulo || '').trim();
+              return {
+                id: String(item?.taskId || item?.ticketId || doc.id || `instalacion-${idx}`),
+                taskId: String(item?.taskId || '').trim(),
+                tecnicoId: String(item?.tecnicoId || '').trim() || '0',
+                tecnicoNombre: resolveTechnicianDisplayName(item?.tecnicoId, INSTALL_TECHNICIAN_NAME_MAP),
+                cliente: String(item?.cliente || '').trim() || String(item?.clienteId || '').trim() || 'Cliente sin nombre',
+                clienteId: String(item?.clienteId || '').trim(),
+                fechaHora,
+                fechaHoraKey: fechaHora ? dayKey(fechaHora) : '',
+                direccion: String(item?.direccion || '').trim() || 'Sin dirección',
+                orientacion: orientacion || 'Sin descripción',
+                prioridad: resolvePriorityLabel(item?.prioridad),
+                estado: item?.estado ?? 'Pendiente',
+                ticketId: String(item?.ticketId || '').trim(),
+                ticketTitulo: ticketTitulo || orientacion || 'Sin descripción',
+                sourceService: String(item?.sourceService || '').trim(),
+              };
+            }).filter((item) => item.fechaHora instanceof Date);
+            console.log('Agenda instalaciones Firestore:', tareasInstalaciones);
+            setAgendaInstallRangeWarning('');
+            setAgendaInstallError('');
+            setAgendaInstallRows(tareasInstalaciones);
+            setAgendaInstallLoading(false);
+          }, (error) => {
+            console.error('Error leyendo agenda instalaciones Firestore:', error);
+            setAgendaInstallError('No se pudo leer agenda instalaciones desde Firestore.');
+            setAgendaInstallRows([]);
+            setAgendaInstallLoading(false);
+          });
+          return () => unsub();
         }, []);
 
         const agendaSevenDays = useMemo(() => {
@@ -12457,11 +12474,11 @@
             const items = grouped.get(day.key) || [];
             const completed = items.filter((item) => isTaskCompleted(item)).length;
             const pending = Math.max(items.length - completed, 0);
-            const techs = new Set(items.map((item) => String(item?.tecnicoId || '').trim()).filter(Boolean)).size;
+            const techs = new Set(items.map((item) => String(item?.tecnicoId || '').trim()).filter((id) => id && id !== '0')).size;
             return { ...day, total: items.length, completed, pending, techs };
           });
           const total = rows.length;
-          const techs = new Set(rows.map((item) => String(item?.tecnicoId || '').trim()).filter(Boolean)).size;
+          const techs = new Set(rows.map((item) => String(item?.tecnicoId || '').trim()).filter((id) => id && id !== '0')).size;
           const completed = rows.filter((item) => isTaskCompleted(item)).length;
           const pending = Math.max(total - completed, 0);
           return { total, techs, completed, pending, daily, hasData: total > 0 };
