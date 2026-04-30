@@ -12334,11 +12334,6 @@
         useEffect(() => {
           setAgendaLoading(true);
           setAgendaInstallLoading(true);
-          const normalizeTipoAgenda = (value) => String(value || '')
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .toLowerCase()
-            .trim();
           const mapFirestoreTask = (doc, idx, map, prefix) => {
             const item = doc.data() || {};
             const fechaHora = parseFirestoreDateTime(item?.fechaHora);
@@ -12363,41 +12358,51 @@
             };
           };
           const sortByDateAsc = (a, b) => (a?.fechaHora?.getTime?.() || 0) - (b?.fechaHora?.getTime?.() || 0);
+          const techRef = db.collection('auvo_tasks')
+            .where('tipoAgenda', '==', 'tecnicos')
+            .orderBy('fechaHora', 'asc');
+          const instRef = db.collection('auvo_tasks')
+            .where('tipoAgenda', '==', 'instalaciones')
+            .orderBy('fechaHora', 'asc');
 
-          const unsub = db.collection('auvo_tasks').onSnapshot((snapshot) => {
-            const docs = snapshot.docs || [];
-            const tareasTecnicos = docs
-              .filter((doc) => normalizeTipoAgenda(doc.data()?.tipoAgenda) === 'tecnicos')
+          const unsubTech = techRef.onSnapshot((snapshot) => {
+            const tareasTecnicos = (snapshot.docs || [])
               .map((doc, idx) => mapFirestoreTask(doc, idx, TECHNICIAN_NAME_MAP, 'tecnico'))
               .filter((item) => item.fechaHora instanceof Date)
               .sort(sortByDateAsc);
-            const tareasInstalaciones = docs
-              .filter((doc) => normalizeTipoAgenda(doc.data()?.tipoAgenda) === 'instalaciones')
+            console.log('Agenda técnicos Firestore:', tareasTecnicos);
+            setAgendaRangeWarning('');
+            setAgendaError('');
+            setAgendaRows(tareasTecnicos);
+            setAgendaLoading(false);
+          }, (error) => {
+            console.error('Error leyendo agenda técnicos Firestore:', error);
+            setAgendaError('No se pudo leer agenda técnicos desde Firestore.');
+            setAgendaRows([]);
+            setAgendaLoading(false);
+          });
+
+          const unsubInstall = instRef.onSnapshot((snapshot) => {
+            const tareasInstalaciones = (snapshot.docs || [])
               .map((doc, idx) => mapFirestoreTask(doc, idx, INSTALL_TECHNICIAN_NAME_MAP, 'instalacion'))
-              .filter((item) => String(item?.tecnicoId || '').trim() === '86348')
               .filter((item) => item.fechaHora instanceof Date)
               .sort(sortByDateAsc);
-
-            console.log('Agenda técnicos Firestore:', tareasTecnicos);
             console.log('Agenda instalaciones Firestore:', tareasInstalaciones);
-            setAgendaRangeWarning('');
             setAgendaInstallRangeWarning('');
-            setAgendaError('');
             setAgendaInstallError('');
-            setAgendaRows(tareasTecnicos);
             setAgendaInstallRows(tareasInstalaciones);
-            setAgendaLoading(false);
             setAgendaInstallLoading(false);
           }, (error) => {
-            console.error('Error leyendo auvo_tasks Firestore:', error);
-            setAgendaError('No se pudo leer agenda técnicos desde Firestore.');
+            console.error('Error leyendo agenda instalaciones Firestore:', error);
             setAgendaInstallError('No se pudo leer agenda instalaciones desde Firestore.');
-            setAgendaRows([]);
             setAgendaInstallRows([]);
-            setAgendaLoading(false);
             setAgendaInstallLoading(false);
           });
-          return () => unsub();
+
+          return () => {
+            unsubTech();
+            unsubInstall();
+          };
         }, []);
 
         const agendaSevenDays = useMemo(() => {
