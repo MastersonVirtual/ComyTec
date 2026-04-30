@@ -10278,6 +10278,7 @@
         const [pendingProfileAvatarId, setPendingProfileAvatarId] = useState(DEFAULT_PROFILE_AVATAR_ID);
         const [recentActivity, setRecentActivity] = useState([]);
         const [upcomingInstallations, setUpcomingInstallations] = useState([]);
+        const [deferredBootReady, setDeferredBootReady] = useState(false);
         const [catalogSyncing, setCatalogSyncing] = useState(false);
         const [showManualCatalogForm, setShowManualCatalogForm] = useState(false);
         const [savingManualCatalogService, setSavingManualCatalogService] = useState(false);
@@ -11724,6 +11725,38 @@
           };
         }, [user?.uid, user?.email]);
 
+
+        useEffect(() => {
+          let cancelled = false;
+          const activateDeferredBoot = () => {
+            if (cancelled) return;
+            setDeferredBootReady(true);
+          };
+          if (document.readyState === 'complete') {
+            if (window.requestIdleCallback) {
+              const id = window.requestIdleCallback(activateDeferredBoot, { timeout: 2200 });
+              return () => {
+                cancelled = true;
+                if (window.cancelIdleCallback) window.cancelIdleCallback(id);
+              };
+            }
+            const timer = window.setTimeout(activateDeferredBoot, 900);
+            return () => { cancelled = true; window.clearTimeout(timer); };
+          }
+          const onLoad = () => {
+            if (window.requestIdleCallback) {
+              window.requestIdleCallback(activateDeferredBoot, { timeout: 2200 });
+            } else {
+              window.setTimeout(activateDeferredBoot, 900);
+            }
+          };
+          window.addEventListener('load', onLoad, { once: true });
+          return () => {
+            cancelled = true;
+            window.removeEventListener('load', onLoad);
+          };
+        }, []);
+
         useEffect(() => {
           if (!selectedService?.id) return;
           const fresh = rows.find((r) => r.id === selectedService.id);
@@ -11738,7 +11771,7 @@
         }, [rows, selectedService?.id]);
 
         useEffect(() => {
-          if (!rtdb) {
+          if (!deferredBootReady || !rtdb) {
             setRecentActivity([]);
             return () => {};
           }
@@ -11772,10 +11805,10 @@
             return { ref, handler };
           });
           return () => handlers.forEach(({ ref, handler }) => ref.off('value', handler));
-        }, []);
+        }, [deferredBootReady]);
 
         useEffect(() => {
-          if (!rtdb) {
+          if (!deferredBootReady || !rtdb) {
             setUpcomingInstallations([]);
             return () => {};
           }
@@ -11808,7 +11841,7 @@
             return { ref, handler };
           });
           return () => handlers.forEach(({ ref, handler }) => ref.off('value', handler));
-        }, []);
+        }, [deferredBootReady]);
 
         useEffect(() => {
           if (!notificacion.mensaje) return;
@@ -11845,7 +11878,7 @@
         }, [authLoading, roleLoading, mobileTab, selectedForm, fabOpen, rows.length, adminCredentialRequests.length, desktopBellOpen, desktopSearchOpen, menuOpen, isMobile]);
 
         useEffect(() => {
-          if (!user || userRole !== 'admin') {
+          if (!deferredBootReady || !user || userRole !== 'admin') {
             setAdminCredentialRequests([]);
             return;
           }
@@ -11859,10 +11892,10 @@
               console.error('Error leyendo solicitudes_credenciales:', error);
             });
           return () => unsub();
-        }, [user, userRole]);
+        }, [deferredBootReady, user, userRole]);
 
         useEffect(() => {
-          if (!user?.uid) {
+          if (!deferredBootReady || !user?.uid) {
             setUserCredentialRequests([]);
             return;
           }
@@ -11881,10 +11914,10 @@
               console.error('Error leyendo solicitudes del usuario:', error);
             });
           return () => unsub();
-        }, [user?.uid]);
+        }, [deferredBootReady, user?.uid]);
 
         useEffect(() => {
-          if (!accessApprovalRequired || !user?.uid) {
+          if (!deferredBootReady || !accessApprovalRequired || !user?.uid) {
             setAccessPendingRequest(null);
             return;
           }
@@ -11900,7 +11933,7 @@
               console.error('Error leyendo solicitud pendiente de autorización:', error);
             });
           return () => unsub();
-        }, [accessApprovalRequired, user?.uid]);
+        }, [deferredBootReady, accessApprovalRequired, user?.uid]);
 
         async function cargarUltimosMails(token) {
           setGmailApiLoading(true);
@@ -12077,6 +12110,7 @@
         }
 
         useEffect(() => {
+          if (!deferredBootReady) return;
           let active = true;
           auth.getRedirectResult().then((result) => {
             if (!active || !result) return;
@@ -12089,31 +12123,31 @@
             console.error('Error leyendo redirect de Google:', error);
           });
           return () => { active = false; };
-        }, []);
+        }, [deferredBootReady]);
 
         useEffect(() => {
-          if (!user?.uid) return;
+          if (!deferredBootReady || !user?.uid) return;
           const token = window.sessionStorage.getItem('gmail_access_token') || '';
           if (token) setGmailAccessToken(token);
-        }, [user?.uid]);
+        }, [deferredBootReady, user?.uid]);
 
         const gmailLoadedTokenRef = useRef('');
         useEffect(() => {
-          if (!user?.uid || !gmailAccessToken) return;
+          if (!deferredBootReady || !user?.uid || !gmailAccessToken) return;
           const marker = `${user.uid}:${gmailAccessToken}`;
           if (gmailLoadedTokenRef.current === marker) return;
           gmailLoadedTokenRef.current = marker;
           void cargarUltimosMails(gmailAccessToken);
-        }, [user?.uid, gmailAccessToken]);
+        }, [deferredBootReady, user?.uid, gmailAccessToken]);
 
         const calendarLoadedTokenRef = useRef('');
         useEffect(() => {
-          if (!user?.uid || !gmailAccessToken) return;
+          if (!deferredBootReady || !user?.uid || !gmailAccessToken) return;
           const marker = `${user.uid}:${gmailAccessToken}`;
           if (calendarLoadedTokenRef.current === marker) return;
           calendarLoadedTokenRef.current = marker;
           void fetchCalendarEvents(gmailAccessToken);
-        }, [user?.uid, gmailAccessToken]);
+        }, [deferredBootReady, user?.uid, gmailAccessToken]);
 
         function parseAgendaDateTime(value) {
           if (!value) return null;
