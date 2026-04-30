@@ -12333,85 +12333,67 @@
 
         useEffect(() => {
           setAgendaLoading(true);
-          const ref = db.collection('auvo_tasks')
-            .where('tipoAgenda', '==', 'tecnicos')
-            .orderBy('fechaHora', 'asc');
-          const unsub = ref.onSnapshot((snapshot) => {
-            const tareasTecnicos = snapshot.docs.map((doc, idx) => {
-              const item = doc.data() || {};
-              const fechaHora = parseFirestoreDateTime(item?.fechaHora);
-              return {
-                id: String(item?.taskId || item?.ticketId || doc.id || `tecnico-${idx}`),
-                taskId: String(item?.taskId || '').trim(),
-                tecnicoId: String(item?.tecnicoId || '').trim() || '0',
-                tecnicoNombre: resolveTechnicianDisplayName(item?.tecnicoId, TECHNICIAN_NAME_MAP),
-                cliente: String(item?.cliente || '').trim() || String(item?.clienteId || '').trim() || 'Cliente sin nombre',
-                clienteId: String(item?.clienteId || '').trim(),
-                fechaHora,
-                fechaHoraKey: fechaHora ? dayKey(fechaHora) : '',
-                direccion: String(item?.direccion || '').trim() || 'Sin dirección',
-                orientacion: String(item?.orientacion || '').trim() || 'Sin descripción',
-                prioridad: resolvePriorityLabel(item?.prioridad),
-                estado: item?.estado ?? 'Pendiente',
-                ticketId: String(item?.ticketId || '').trim(),
-                ticketTitulo: String(item?.ticketTitulo || '').trim() || String(item?.orientacion || '').trim() || 'Sin descripción',
-                sourceService: String(item?.sourceService || '').trim(),
-              };
-            }).filter((item) => item.fechaHora instanceof Date);
-            console.log('Agenda técnicos Firestore:', tareasTecnicos);
-            setAgendaRangeWarning('');
-            setAgendaError('');
-            setAgendaRows(tareasTecnicos);
-            setAgendaLoading(false);
-          }, (error) => {
-            console.error('Error leyendo agenda técnicos Firestore:', error);
-            setAgendaError('No se pudo leer agenda técnicos desde Firestore.');
-            setAgendaRows([]);
-            setAgendaLoading(false);
-          });
-          return () => {
-            unsub();
-          };
-        }, []);
-
-        useEffect(() => {
           setAgendaInstallLoading(true);
-          const ref = db.collection('auvo_tasks')
-            .where('tipoAgenda', '==', 'instalaciones')
-            .orderBy('fechaHora', 'asc');
-          const unsub = ref.onSnapshot((snapshot) => {
-            const tareasInstalaciones = snapshot.docs.map((doc, idx) => {
-              const item = doc.data() || {};
-              const fechaHora = parseFirestoreDateTime(item?.fechaHora);
-              const orientacion = String(item?.orientacion || '').trim();
-              const ticketTitulo = String(item?.ticketTitulo || '').trim();
-              return {
-                id: String(item?.taskId || item?.ticketId || doc.id || `instalacion-${idx}`),
-                taskId: String(item?.taskId || '').trim(),
-                tecnicoId: String(item?.tecnicoId || '').trim() || '0',
-                tecnicoNombre: resolveTechnicianDisplayName(item?.tecnicoId, INSTALL_TECHNICIAN_NAME_MAP),
-                cliente: String(item?.cliente || '').trim() || String(item?.clienteId || '').trim() || 'Cliente sin nombre',
-                clienteId: String(item?.clienteId || '').trim(),
-                fechaHora,
-                fechaHoraKey: fechaHora ? dayKey(fechaHora) : '',
-                direccion: String(item?.direccion || '').trim() || 'Sin dirección',
-                orientacion: orientacion || 'Sin descripción',
-                prioridad: resolvePriorityLabel(item?.prioridad),
-                estado: item?.estado ?? 'Pendiente',
-                ticketId: String(item?.ticketId || '').trim(),
-                ticketTitulo: ticketTitulo || orientacion || 'Sin descripción',
-                sourceService: String(item?.sourceService || '').trim(),
-              };
-            }).filter((item) => item.fechaHora instanceof Date);
+          const normalizeTipoAgenda = (value) => String(value || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .trim();
+          const mapFirestoreTask = (doc, idx, map, prefix) => {
+            const item = doc.data() || {};
+            const fechaHora = parseFirestoreDateTime(item?.fechaHora);
+            const orientacion = String(item?.orientacion || '').trim();
+            const ticketTitulo = String(item?.ticketTitulo || '').trim();
+            return {
+              id: String(item?.taskId || item?.ticketId || doc.id || `${prefix}-${idx}`),
+              taskId: String(item?.taskId || '').trim(),
+              tecnicoId: String(item?.tecnicoId || '').trim() || '0',
+              tecnicoNombre: resolveTechnicianDisplayName(item?.tecnicoId, map),
+              cliente: String(item?.cliente || '').trim() || String(item?.clienteId || '').trim() || 'Cliente sin nombre',
+              clienteId: String(item?.clienteId || '').trim(),
+              fechaHora,
+              fechaHoraKey: fechaHora ? dayKey(fechaHora) : '',
+              direccion: String(item?.direccion || '').trim() || 'Sin dirección',
+              orientacion: orientacion || 'Sin descripción',
+              prioridad: resolvePriorityLabel(item?.prioridad),
+              estado: item?.estado ?? 'Pendiente',
+              ticketId: String(item?.ticketId || '').trim(),
+              ticketTitulo: ticketTitulo || orientacion || 'Sin descripción',
+              sourceService: String(item?.sourceService || '').trim(),
+            };
+          };
+          const sortByDateAsc = (a, b) => (a?.fechaHora?.getTime?.() || 0) - (b?.fechaHora?.getTime?.() || 0);
+
+          const unsub = db.collection('auvo_tasks').onSnapshot((snapshot) => {
+            const docs = snapshot.docs || [];
+            const tareasTecnicos = docs
+              .filter((doc) => normalizeTipoAgenda(doc.data()?.tipoAgenda) === 'tecnicos')
+              .map((doc, idx) => mapFirestoreTask(doc, idx, TECHNICIAN_NAME_MAP, 'tecnico'))
+              .filter((item) => item.fechaHora instanceof Date)
+              .sort(sortByDateAsc);
+            const tareasInstalaciones = docs
+              .filter((doc) => normalizeTipoAgenda(doc.data()?.tipoAgenda) === 'instalaciones')
+              .map((doc, idx) => mapFirestoreTask(doc, idx, INSTALL_TECHNICIAN_NAME_MAP, 'instalacion'))
+              .filter((item) => item.fechaHora instanceof Date)
+              .sort(sortByDateAsc);
+
+            console.log('Agenda técnicos Firestore:', tareasTecnicos);
             console.log('Agenda instalaciones Firestore:', tareasInstalaciones);
+            setAgendaRangeWarning('');
             setAgendaInstallRangeWarning('');
+            setAgendaError('');
             setAgendaInstallError('');
+            setAgendaRows(tareasTecnicos);
             setAgendaInstallRows(tareasInstalaciones);
+            setAgendaLoading(false);
             setAgendaInstallLoading(false);
           }, (error) => {
-            console.error('Error leyendo agenda instalaciones Firestore:', error);
+            console.error('Error leyendo auvo_tasks Firestore:', error);
+            setAgendaError('No se pudo leer agenda técnicos desde Firestore.');
             setAgendaInstallError('No se pudo leer agenda instalaciones desde Firestore.');
+            setAgendaRows([]);
             setAgendaInstallRows([]);
+            setAgendaLoading(false);
             setAgendaInstallLoading(false);
           });
           return () => unsub();
