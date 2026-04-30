@@ -12358,6 +12358,47 @@
             };
           };
           const sortByDateAsc = (a, b) => (a?.fechaHora?.getTime?.() || 0) - (b?.fechaHora?.getTime?.() || 0);
+          const applyDocsToAgendas = (docs = []) => {
+            const allDocs = Array.isArray(docs) ? docs : [];
+            const tareasTecnicos = allDocs
+              .filter((doc) => String(doc?.data?.()?.tipoAgenda || '').toLowerCase().trim() === 'tecnicos')
+              .map((doc, idx) => mapFirestoreTask(doc, idx, TECHNICIAN_NAME_MAP, 'tecnico'))
+              .filter((item) => item.fechaHora instanceof Date)
+              .sort(sortByDateAsc);
+            const tareasInstalaciones = allDocs
+              .filter((doc) => String(doc?.data?.()?.tipoAgenda || '').toLowerCase().trim() === 'instalaciones')
+              .map((doc, idx) => mapFirestoreTask(doc, idx, INSTALL_TECHNICIAN_NAME_MAP, 'instalacion'))
+              .filter((item) => item.fechaHora instanceof Date)
+              .sort(sortByDateAsc);
+            console.log('Agenda técnicos Firestore:', tareasTecnicos);
+            console.log('Agenda instalaciones Firestore:', tareasInstalaciones);
+            setAgendaRangeWarning('');
+            setAgendaInstallRangeWarning('');
+            setAgendaError('');
+            setAgendaInstallError('');
+            setAgendaRows(tareasTecnicos);
+            setAgendaInstallRows(tareasInstalaciones);
+            setAgendaLoading(false);
+            setAgendaInstallLoading(false);
+          };
+
+          let fallbackUnsub = null;
+          let refreshTimer = null;
+          const attachFallbackListener = () => {
+            if (fallbackUnsub) return;
+            fallbackUnsub = db.collection('auvo_tasks').onSnapshot((snapshot) => {
+              applyDocsToAgendas(snapshot.docs || []);
+            }, (error) => {
+              console.error('Error leyendo auvo_tasks Firestore (fallback):', error);
+              setAgendaError('No se pudo leer agenda técnicos desde Firestore.');
+              setAgendaInstallError('No se pudo leer agenda instalaciones desde Firestore.');
+              setAgendaRows([]);
+              setAgendaInstallRows([]);
+              setAgendaLoading(false);
+              setAgendaInstallLoading(false);
+            });
+          };
+
           const techRef = db.collection('auvo_tasks')
             .where('tipoAgenda', '==', 'tecnicos')
             .orderBy('fechaHora', 'asc');
@@ -12377,9 +12418,7 @@
             setAgendaLoading(false);
           }, (error) => {
             console.error('Error leyendo agenda técnicos Firestore:', error);
-            setAgendaError('No se pudo leer agenda técnicos desde Firestore.');
-            setAgendaRows([]);
-            setAgendaLoading(false);
+            attachFallbackListener();
           });
 
           const unsubInstall = instRef.onSnapshot((snapshot) => {
@@ -12394,14 +12433,23 @@
             setAgendaInstallLoading(false);
           }, (error) => {
             console.error('Error leyendo agenda instalaciones Firestore:', error);
-            setAgendaInstallError('No se pudo leer agenda instalaciones desde Firestore.');
-            setAgendaInstallRows([]);
-            setAgendaInstallLoading(false);
+            attachFallbackListener();
           });
+
+          refreshTimer = window.setInterval(async () => {
+            try {
+              const snap = await db.collection('auvo_tasks').get();
+              applyDocsToAgendas(snap.docs || []);
+            } catch (error) {
+              console.error('Error refrescando agenda Firestore (2 min):', error);
+            }
+          }, 2 * 60 * 1000);
 
           return () => {
             unsubTech();
             unsubInstall();
+            if (fallbackUnsub) fallbackUnsub();
+            if (refreshTimer) window.clearInterval(refreshTimer);
           };
         }, []);
 
