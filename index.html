@@ -618,7 +618,7 @@
       }
       .dashboard-info-card {
         border: 1px solid rgba(11, 78, 73, .16);
-        border-radius: 999px;
+        border-radius: 16px;
         background: linear-gradient(180deg, #f9fcfc 0%, #eef4f4 100%);
         box-shadow: 0 10px 20px rgba(9, 47, 46, .09);
         padding: 14px;
@@ -757,7 +757,7 @@
       }
       #weather-widget {
         width: min(220px, 100%);
-        border-radius: 999px;
+        border-radius: 16px;
         border: 1px solid #d9ece9;
         background: linear-gradient(160deg, #ffffff, #f3fbf9);
         box-shadow: 0 10px 22px rgba(0, 0, 0, 0.08);
@@ -845,7 +845,7 @@
         gap: 12px;
       }
       .home-modern-stat-card {
-        border-radius: 999px;
+        border-radius: 14px;
         border: 1px solid #e5e7eb;
         background: #ffffff;
         padding: 12px;
@@ -1076,7 +1076,7 @@
         top: 86px;
       }
       .dash-side-card {
-        border-radius: 999px;
+        border-radius: 16px;
         border: 1px solid #deece9;
         background: #fff;
         padding: 12px;
@@ -2175,7 +2175,7 @@
         margin-top: 14px;
         background: #ffffff;
         border: 1px solid rgba(173, 202, 208, .72);
-        border-radius: 999px;
+        border-radius: 16px;
         box-shadow: 0 12px 30px rgba(15, 23, 42, .09);
         padding: 16px;
       }
@@ -5091,7 +5091,7 @@
       .topbar-back-btn,
       .topbar-home-btn,
       .burger {
-        border-radius: 999px !important;
+        border-radius: 12px !important;
         background: #f8fafc !important;
         border: 1px solid #dbe3ec !important;
         box-shadow: 0 6px 14px rgba(15,23,42,.10) !important;
@@ -5270,7 +5270,7 @@
       .home-service-card {
         background: #ffffff;
         border: 1px solid #e2e8f0;
-        border-radius: 999px;
+        border-radius: 18px;
         box-shadow: 0 8px 18px rgba(15, 23, 42, .07);
       }
       .home-service-card-primary {
@@ -5404,11 +5404,11 @@
         background: linear-gradient(180deg, rgba(0,100,101,.88), rgba(0,100,101,.76)) !important;
         color: #0f172a !important;
         border: 1px solid rgba(180,245,236,.35) !important;
-        border-radius: 999px !important;
+        border-radius: 12px !important;
         box-shadow: 0 6px 14px rgba(15,23,42,.16) !important;
       }
       .menu-icon {
-        border-radius: 999px !important;
+        border-radius: 10px !important;
         background: #e6f4f3 !important;
         color: #006465 !important;
         border: 1px solid rgba(0,100,101,.15);
@@ -6418,7 +6418,7 @@
       }
       .profile-option {
         border: 1px solid rgba(11, 78, 73, .16);
-        border-radius: 999px;
+        border-radius: 18px;
         padding: 18px;
         background: #f9fcfc;
         box-shadow: 0 10px 20px rgba(12, 45, 44, .08);
@@ -6593,7 +6593,7 @@
       }
       .ticket-date-card {
         min-width: 250px;
-        border-radius: 999px;
+        border-radius: 14px;
         border: 1px solid #dcebed;
         background: #ffffff;
         box-shadow: 0 8px 20px rgba(15, 23, 42, .06);
@@ -6748,7 +6748,7 @@
       .ticket-create-btn {
         margin-top: 4px;
         min-height: 68px;
-        border-radius: 999px;
+        border-radius: 14px;
         border: 1px solid rgba(16, 116, 110, .85);
         background: linear-gradient(135deg, #0f766e, #115e59);
         color: #f4fffe;
@@ -6810,7 +6810,7 @@
         display: grid;
         place-items: center;
         border: 1px solid #dcebed;
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 18px;
         min-height: 208px;
         background: #f9fcfc;
@@ -6903,7 +6903,7 @@
         flex-direction: column;
         gap: 10px;
         border: 1px solid rgba(230,255,253,.26);
-        border-radius: 999px;
+        border-radius: 18px;
         padding: 14px;
         background: linear-gradient(150deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
         box-shadow: 0 10px 26px rgba(0,0,0,.21);
@@ -9217,6 +9217,8 @@
       const GMAIL_READONLY_SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
       const GOOGLE_CALENDAR_READONLY_SCOPE = 'https://www.googleapis.com/auth/calendar.events.readonly';
       const AUVO_AGENDA_ENDPOINT = 'https://auvo-api-1050062076637.us-central1.run.app';
+      const AUVO_AGENDA_INSTALL_ENDPOINT = 'https://auvo-api-2-1050062076637.us-central1.run.app';
+      const AUVO_AGENDA_WEBHOOK_RTDB_PATH = 'integraciones/2workers/agenda';
 
       function generarClienteId() {
         return String(Math.floor(1000 + Math.random() * 9000));
@@ -9481,6 +9483,7 @@
 
       function AccessApprovalScreen({ userEmail = '', pendingRequest = null, onRequestAccess = null }) {
         const pendingStatus = String(pendingRequest?.estado || 'pendiente').trim().toLowerCase() || 'pendiente';
+        const hasActiveRequest = ['pendiente', 'aprobada', 'aplicada'].includes(pendingStatus);
         return (
           <div className="login-shell">
             <div className="login-stack">
@@ -9497,8 +9500,8 @@
                   <div className="hint">Podés enviar ahora una solicitud de credenciales para que administración la apruebe.</div>
                 )}
                 <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 10 }}>
-                  <button className="google-login-btn" type="button" onClick={() => { if (typeof onRequestAccess === 'function') onRequestAccess(); }}>
-                    <span>Solicitar autorización</span>
+                  <button className="google-login-btn" type="button" disabled={hasActiveRequest} onClick={() => { if (typeof onRequestAccess === 'function') onRequestAccess(); }}>
+                    <span>{hasActiveRequest ? 'Solicitud ya registrada' : 'Solicitar autorización'}</span>
                   </button>
                   <button className="ghost-btn" type="button" onClick={() => auth.signOut()}>
                     Cerrar sesión
@@ -10241,7 +10244,14 @@
         const [agendaLoading, setAgendaLoading] = useState(false);
         const [agendaError, setAgendaError] = useState('');
         const [agendaRangeWarning, setAgendaRangeWarning] = useState('');
+        const [agendaInstallRows, setAgendaInstallRows] = useState([]);
+        const [agendaInstallLoading, setAgendaInstallLoading] = useState(false);
+        const [agendaInstallError, setAgendaInstallError] = useState('');
+        const [agendaInstallRangeWarning, setAgendaInstallRangeWarning] = useState('');
         const [agendaDayModal, setAgendaDayModal] = useState({ open: false, day: null });
+        const [agendaTechFilter, setAgendaTechFilter] = useState('');
+        const [agendaInstallFilter, setAgendaInstallFilter] = useState('');
+        const [startupLoadPhase, setStartupLoadPhase] = useState('core');
         const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
         const [userCredentialRequests, setUserCredentialRequests] = useState([]);
         const [staffMembers, setStaffMembers] = useState([]);
@@ -11817,6 +11827,10 @@
           let configByUidProfile = null;
           let configByEmailProfile = null;
           const requestBuckets = {};
+          const requestSnapshotReady = {
+            uid: false,
+            email: !normalizedEmail,
+          };
 
           const applyProfileState = async () => {
             if (!mounted) return;
@@ -11836,8 +11850,9 @@
               const estado = String(item?.estado || '').trim().toLowerCase();
               return estado === 'pendiente' || estado === 'aprobada' || estado === 'aplicada';
             });
+            const hasRequestSnapshotData = requestSnapshotReady.uid && requestSnapshotReady.email;
 
-            if (!hasRegisteredAccess && !hasActiveRequest && !requestCreateInFlight) {
+            if (hasRequestSnapshotData && !hasRegisteredAccess && !hasActiveRequest && !requestCreateInFlight) {
               requestCreateInFlight = true;
               try {
                 await db.collection('solicitudes_credenciales').add({
@@ -11925,6 +11940,7 @@
 
           unsubs.push(db.collection('solicitudes_credenciales').where('solicitanteUid', '==', user.uid).limit(25).onSnapshot((snapshot) => {
             requestBuckets.uid = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+            requestSnapshotReady.uid = true;
             void applyProfileState();
           }, (error) => {
             console.error('Error escuchando solicitudes por uid:', error);
@@ -11933,6 +11949,7 @@
           if (normalizedEmail) {
             unsubs.push(db.collection('solicitudes_credenciales').where('solicitanteEmail', '==', normalizedEmail).limit(25).onSnapshot((snapshot) => {
               requestBuckets.email = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+              requestSnapshotReady.email = true;
               void applyProfileState();
             }, (error) => {
               console.error('Error escuchando solicitudes por email:', error);
@@ -12372,6 +12389,75 @@
           return '';
         }
 
+        function applyAgendaPayload(rawItems = [], rango = null, source = 'endpoint') {
+          const items = Array.isArray(rawItems) ? rawItems : [];
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const expectedDesde = new Date(today);
+          expectedDesde.setDate(today.getDate() - 3);
+          const expectedHasta = new Date(today);
+          expectedHasta.setDate(today.getDate() + 3);
+
+          const rangoDesde = parseAgendaDateTime(rango?.desde);
+          const rangoHasta = parseAgendaDateTime(rango?.hasta);
+          if (rangoDesde && rangoHasta) {
+            const expectedDesdeKey = dayKey(expectedDesde);
+            const expectedHastaKey = dayKey(expectedHasta);
+            const actualDesdeKey = dayKey(rangoDesde);
+            const actualHastaKey = dayKey(rangoHasta);
+            if (expectedDesdeKey !== actualDesdeKey || expectedHastaKey !== actualHastaKey) {
+              const warningMessage = `El ${source} devolvió rango ${actualDesdeKey} a ${actualHastaKey}; se esperaba ${expectedDesdeKey} a ${expectedHastaKey}.`;
+              setAgendaRangeWarning(warningMessage);
+              console.warn(warningMessage);
+            } else {
+              setAgendaRangeWarning('');
+            }
+          } else {
+            setAgendaRangeWarning('');
+          }
+
+          const normalized = items.map((item, idx) => {
+            const fechaHora = parseAgendaDateTime(item?.fechaHora);
+            return {
+              id: item?.ticketId || `${item?.tecnicoId || 'sin-tecnico'}-${idx}`,
+              tecnicoId: String(item?.tecnicoId || '').trim() || 'Técnico sin asignar',
+              cliente: String(item?.cliente || '').trim() || String(item?.clienteId || '').trim() || 'Cliente sin nombre',
+              clienteId: String(item?.clienteId || '').trim(),
+              fechaHora,
+              fechaHoraKey: fechaHora ? dayKey(fechaHora) : '',
+              direccion: String(item?.direccion || '').trim() || 'Sin dirección',
+              orientacion: String(item?.orientacion || '').trim() || 'Sin descripción',
+              prioridad: String(item?.prioridad || '').trim() || 'Baja',
+              estado: String(item?.estado || '').trim() || 'Pendiente',
+              ticketId: String(item?.ticketId || '').trim(),
+              ticketTitulo: String(item?.ticketTitulo || '').trim() || String(item?.orientacion || '').trim() || 'Sin descripción',
+            };
+          }).filter((item) => item.fechaHora instanceof Date)
+            .sort((a, b) => (a?.fechaHora?.getTime?.() || 0) - (b?.fechaHora?.getTime?.() || 0));
+
+          setAgendaRows(normalized);
+          return normalized.length;
+        }
+
+
+        const startupPhaseRank = useMemo(() => ({
+          core: 0,
+          agendaTech: 1,
+          agendaInstall: 2,
+          background: 3,
+        }), []);
+
+        useEffect(() => {
+          const t1 = window.setTimeout(() => setStartupLoadPhase('agendaTech'), 250);
+          const t2 = window.setTimeout(() => setStartupLoadPhase('agendaInstall'), 1200);
+          const t3 = window.setTimeout(() => setStartupLoadPhase('background'), 2500);
+          return () => {
+            window.clearTimeout(t1);
+            window.clearTimeout(t2);
+            window.clearTimeout(t3);
+          };
+        }, []);
+
         async function fetchAuvoAgenda() {
           try {
             setAgendaLoading(true);
@@ -12393,48 +12479,7 @@
             }
 
             const rawItems = Array.isArray(json?.data) ? json.data : [];
-
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const expectedDesde = new Date(today);
-            expectedDesde.setDate(today.getDate() - 3);
-            const expectedHasta = new Date(today);
-            expectedHasta.setDate(today.getDate() + 3);
-
-            const rangoDesde = parseAgendaDateTime(json?.rango?.desde);
-            const rangoHasta = parseAgendaDateTime(json?.rango?.hasta);
-            if (rangoDesde && rangoHasta) {
-              const expectedDesdeKey = dayKey(expectedDesde);
-              const expectedHastaKey = dayKey(expectedHasta);
-              const actualDesdeKey = dayKey(rangoDesde);
-              const actualHastaKey = dayKey(rangoHasta);
-              if (expectedDesdeKey !== actualDesdeKey || expectedHastaKey !== actualHastaKey) {
-                const warningMessage = `El endpoint devolvió rango ${actualDesdeKey} a ${actualHastaKey}; se esperaba ${expectedDesdeKey} a ${expectedHastaKey}.`;
-                setAgendaRangeWarning(warningMessage);
-                console.warn(warningMessage);
-              }
-            }
-
-            const normalized = rawItems.map((item, idx) => {
-              const fechaHora = parseAgendaDateTime(item?.fechaHora);
-              return {
-                id: item?.ticketId || `${item?.tecnicoId || 'sin-tecnico'}-${idx}`,
-                tecnicoId: String(item?.tecnicoId || '').trim() || 'Técnico sin asignar',
-                cliente: String(item?.cliente || '').trim() || String(item?.clienteId || '').trim() || 'Cliente sin nombre',
-                clienteId: String(item?.clienteId || '').trim(),
-                fechaHora,
-                fechaHoraKey: fechaHora ? dayKey(fechaHora) : '',
-                direccion: String(item?.direccion || '').trim() || 'Sin dirección',
-                orientacion: String(item?.orientacion || '').trim() || 'Sin descripción',
-                prioridad: String(item?.prioridad || '').trim() || 'Baja',
-                estado: String(item?.estado || '').trim() || 'Pendiente',
-                ticketId: String(item?.ticketId || '').trim(),
-                ticketTitulo: String(item?.ticketTitulo || '').trim() || String(item?.orientacion || '').trim() || 'Sin descripción',
-              };
-            }).filter((item) => item.fechaHora instanceof Date)
-              .sort((a, b) => (a?.fechaHora?.getTime?.() || 0) - (b?.fechaHora?.getTime?.() || 0));
-
-            setAgendaRows(normalized);
+            applyAgendaPayload(rawItems, json?.rango || null, 'endpoint');
           } catch (error) {
             console.error('Error cargando agenda AUVO:', error);
             setAgendaError('No se pudo cargar la agenda de técnicos.');
@@ -12444,9 +12489,142 @@
           }
         }
 
+        function applyAgendaInstallPayload(rawItems = [], rango = null, source = 'endpoint') {
+          const items = Array.isArray(rawItems) ? rawItems : [];
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const expectedDesde = new Date(today);
+          expectedDesde.setDate(today.getDate() - 3);
+          const expectedHasta = new Date(today);
+          expectedHasta.setDate(today.getDate() + 3);
+
+          const rangoDesde = parseAgendaDateTime(rango?.desde);
+          const rangoHasta = parseAgendaDateTime(rango?.hasta);
+          if (rangoDesde && rangoHasta) {
+            const expectedDesdeKey = dayKey(expectedDesde);
+            const expectedHastaKey = dayKey(expectedHasta);
+            const actualDesdeKey = dayKey(rangoDesde);
+            const actualHastaKey = dayKey(rangoHasta);
+            if (expectedDesdeKey !== actualDesdeKey || expectedHastaKey !== actualHastaKey) {
+              const warningMessage = `El ${source} (instalaciones) devolvió rango ${actualDesdeKey} a ${actualHastaKey}; se esperaba ${expectedDesdeKey} a ${expectedHastaKey}.`;
+              setAgendaInstallRangeWarning(warningMessage);
+              console.warn(warningMessage);
+            } else {
+              setAgendaInstallRangeWarning('');
+            }
+          } else {
+            setAgendaInstallRangeWarning('');
+          }
+
+          const normalized = items.map((item, idx) => {
+            const fechaHora = parseAgendaDateTime(item?.fechaHora);
+            const orientacion = String(item?.orientacion || '').trim();
+            const ticketTitulo = String(item?.ticketTitulo || '').trim();
+            return {
+              id: item?.ticketId || `${item?.tecnicoId || 'sin-tecnico'}-${idx}`,
+              tecnicoId: String(item?.tecnicoId || '').trim() || 'Técnico sin asignar',
+              cliente: String(item?.cliente || '').trim() || String(item?.clienteId || '').trim() || 'Cliente sin nombre',
+              clienteId: String(item?.clienteId || '').trim(),
+              fechaHora,
+              fechaHoraKey: fechaHora ? dayKey(fechaHora) : '',
+              direccion: String(item?.direccion || '').trim() || 'Sin dirección',
+              orientacion: orientacion || 'Sin descripción',
+              prioridad: String(item?.prioridad || '').trim() || 'Baja',
+              estado: String(item?.estado || '').trim() || 'Pendiente',
+              ticketId: String(item?.ticketId || '').trim(),
+              ticketTitulo: ticketTitulo || orientacion || 'Sin descripción',
+            };
+          }).filter((item) => item.fechaHora instanceof Date)
+            .sort((a, b) => (a?.fechaHora?.getTime?.() || 0) - (b?.fechaHora?.getTime?.() || 0));
+          setAgendaInstallRows(normalized);
+        }
+
+        async function fetchAuvoAgendaInstall() {
+          try {
+            setAgendaInstallLoading(true);
+            setAgendaInstallError('');
+            setAgendaInstallRangeWarning('');
+            const response = await fetch(AUVO_AGENDA_INSTALL_ENDPOINT, {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' },
+            });
+            if (!response.ok) throw new Error(`Cloud Run ${response.status}`);
+            const json = await response.json();
+            if (!json?.ok) throw new Error('Respuesta inválida del endpoint de instalaciones');
+            const rawItems = Array.isArray(json?.data) ? json.data : [];
+            applyAgendaInstallPayload(rawItems, json?.rango || null, 'endpoint');
+          } catch (error) {
+            console.error('Error cargando agenda AUVO instalaciones:', error);
+            setAgendaInstallError('No se pudo cargar 2W Instalaciones.');
+            setAgendaInstallRows([]);
+          } finally {
+            setAgendaInstallLoading(false);
+          }
+        }
+
         useEffect(() => {
+          if ((startupPhaseRank[startupLoadPhase] || 0) < startupPhaseRank.agendaTech) return () => {};
+          let fallbackTimer = null;
+          let refreshInterval = null;
+          let resolvedByWebhook = false;
+          const REFRESH_EVERY_MS = 5 * 60 * 1000;
+
+          if (!rtdb) {
+            void fetchAuvoAgenda();
+            refreshInterval = window.setInterval(() => { void fetchAuvoAgenda(); }, REFRESH_EVERY_MS);
+            return () => {
+              if (refreshInterval) window.clearInterval(refreshInterval);
+            };
+          }
+
+          const ref = rtdb.ref(AUVO_AGENDA_WEBHOOK_RTDB_PATH);
+          const handleValue = (snap) => {
+            try {
+              const payload = snap.val();
+              const rawItems = Array.isArray(payload?.data)
+                ? payload.data
+                : Array.isArray(payload?.items)
+                  ? payload.items
+                  : Array.isArray(payload)
+                    ? payload
+                    : [];
+              if (!rawItems.length) {
+                if (!resolvedByWebhook) {
+                  if (fallbackTimer) window.clearTimeout(fallbackTimer);
+                  fallbackTimer = window.setTimeout(() => { void fetchAuvoAgenda(); }, 350);
+                }
+                return;
+              }
+              resolvedByWebhook = true;
+              setAgendaError('');
+              setAgendaLoading(false);
+              applyAgendaPayload(rawItems, payload?.rango || null, 'webhook');
+            } catch (error) {
+              console.error('Error procesando agenda webhook 2Workers:', error);
+              if (!resolvedByWebhook) void fetchAuvoAgenda();
+            }
+          };
+          const handleError = (error) => {
+            console.error('Error escuchando agenda webhook 2Workers:', error);
+            if (!resolvedByWebhook) void fetchAuvoAgenda();
+          };
+
+          setAgendaLoading(true);
+          ref.on('value', handleValue, handleError);
           void fetchAuvoAgenda();
-        }, []);
+          refreshInterval = window.setInterval(() => { void fetchAuvoAgenda(); }, REFRESH_EVERY_MS);
+
+          return () => {
+            if (fallbackTimer) window.clearTimeout(fallbackTimer);
+            if (refreshInterval) window.clearInterval(refreshInterval);
+            ref.off('value', handleValue);
+          };
+        }, [startupLoadPhase, startupPhaseRank]);
+
+        useEffect(() => {
+          if ((startupPhaseRank[startupLoadPhase] || 0) < startupPhaseRank.agendaInstall) return;
+          void fetchAuvoAgendaInstall();
+        }, [startupLoadPhase, startupPhaseRank]);
 
         const agendaSevenDays = useMemo(() => {
           const base = new Date();
@@ -12493,6 +12671,39 @@
           const pending = Math.max(total - completed, 0);
           return { total, techs, completed, pending };
         }, [agendaRows]);
+        const agendaInstallStats = useMemo(() => {
+          const total = agendaInstallRows.length;
+          const techs = new Set(agendaInstallRows.map((item) => item?.tecnicoId || 'Técnico sin asignar')).size;
+          const completed = agendaInstallRows.filter((item) => {
+            const raw = String(item?.estado || '').toLowerCase();
+            return raw.includes('resuelto') || raw.includes('finalizado') || raw.includes('complete');
+          }).length;
+          const pending = Math.max(total - completed, 0);
+          return { total, techs, completed, pending };
+        }, [agendaInstallRows]);
+        const agendaInstallSevenDays = useMemo(() => {
+          const base = new Date();
+          base.setHours(0, 0, 0, 0);
+          const grouped = new Map();
+          agendaInstallRows.forEach((item) => {
+            const key = item?.fechaHoraKey;
+            if (!key) return;
+            if (!grouped.has(key)) grouped.set(key, []);
+            grouped.get(key).push(item);
+          });
+          return [-3, -2, -1, 0, 1, 2, 3].map((offset) => {
+            const date = new Date(base);
+            date.setDate(base.getDate() + offset);
+            const key = dayKey(date);
+            const tasks = (grouped.get(key) || []).slice().sort((a, b) => (a?.fechaHora?.getTime?.() || 0) - (b?.fechaHora?.getTime?.() || 0));
+            return {
+              key,
+              dateLabel: date.toLocaleDateString('es-UY', { weekday: 'short', day: '2-digit', month: '2-digit' }).replace('.', ''),
+              label: relativeAgendaLabel(offset),
+              tasks,
+            };
+          });
+        }, [agendaInstallRows]);
 
         const calendarDaySections = useMemo(() => {
           const today = new Date();
@@ -13047,7 +13258,7 @@
             return;
           }
 
-          setSelectedForm('historial');
+          setSelectedForm('base-datos');
         }
 
         function openServiceDetailModal(service, tab = 'informacion') {
@@ -13998,7 +14209,7 @@
                       <div>{item.message}</div>
                     </div>
                   ))}
-                  <button type="button" className="mobile-link-btn" onClick={() => { setMobileTab('actividad'); setSelectedForm('historial'); }}>Ver toda la actividad</button>
+                  <button type="button" className="mobile-link-btn" onClick={() => { setMobileTab('actividad'); setSelectedForm('historial-servicios'); }}>Ver toda la actividad</button>
                 </div>
 
                 <div className="mobile-flat-card">
@@ -14016,7 +14227,7 @@
                       <small>{item.hora || item.fecha || '-'}</small>
                     </div>
                   ))}
-                  <button type="button" className="mobile-link-btn" onClick={() => { setMobileTab('servicios'); setSelectedForm('historial'); }}>Ver agenda</button>
+                  <button type="button" className="mobile-link-btn" onClick={() => { setMobileTab('servicios'); setSelectedForm('base-datos'); }}>Ver agenda</button>
                 </div>
               </div>
 
@@ -14066,7 +14277,7 @@
                 <div className="hint" style={{ marginBottom: 10 }}>Toque un servicio para abrir su detalle.</div>
               <div className="mobile-service-stack">
                 {visibleRows.slice(0, 30).map((r) => (
-                  <article key={r.id} className="mobile-service-card" onClick={() => { setSelectedService(r); setSelectedForm('historial'); }}>
+                  <article key={r.id} className="mobile-service-card" onClick={() => { setSelectedService(r); setSelectedForm('base-datos'); }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center' }}>
                       <strong>{r.nombreServicio || r.cliente || 'Servicio sin nombre'}</strong>
                       <span className={statusClass(getStatusLabel(r))}>{getStatusLabel(r)}</span>
@@ -14270,7 +14481,7 @@
           });
           if (!target) {
             setNotificacion({ mensaje: 'No se encontró el servicio asociado a la notificación.', tipo: 'warn' });
-            setSelectedForm('historial');
+            setSelectedForm('base-datos');
             return;
           }
           openServiceDetailModal(target, 'informacion');
@@ -14282,7 +14493,7 @@
           const target = historySourceRows.find((row) => normalizeServiceId(row?.clienteId || '') === normalizedId);
           if (!target) {
             setNotificacion({ mensaje: `No se encontró el servicio ${tag} en la base de datos.`, tipo: 'warn' });
-            setSelectedForm('historial');
+            setSelectedForm('base-datos');
             return;
           }
           openServiceDetailModal(target, 'informacion');
@@ -15385,6 +15596,12 @@
           const nextUser = profileUserRequest.trim();
           const nextPass = profilePasswordRequest.trim();
           const fromAccessPendingScreen = accessApprovalRequired && !nextUser && !nextPass;
+          const accessPendingStatus = String(accessPendingRequest?.estado || '').trim().toLowerCase();
+          const hasExistingAccessRequest = ['pendiente', 'aprobada', 'aplicada'].includes(accessPendingStatus);
+          if (fromAccessPendingScreen && hasExistingAccessRequest) {
+            setNotificacion({ mensaje: 'Ya existe una solicitud activa para este usuario', tipo: 'error' });
+            return;
+          }
           if (!fromAccessPendingScreen && (!nextUser || !nextPass)) {
             setNotificacion({ mensaje: 'Ingresá usuario y contraseña para solicitar el cambio', tipo: 'error' });
             return;
@@ -15452,7 +15669,7 @@
                 <div className="sidebar-menu-scroll">
                   <button className={`menu-button ${effectiveSelectedForm === 'home' ? 'active' : ''}`} onClick={goToHomeView}><span className="menu-icon">🏠</span><span>Inicio</span></button>
                   <button className={`menu-button ${effectiveSelectedForm === 'tickets' ? 'active' : ''}`} onClick={() => { openTicketsView(); closeSidebar(); }}><span className="menu-icon">🎫</span><span>Tickets</span></button>
-                  <button className="menu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}><span className="menu-icon">🗃️</span><span>Base de datos</span></button>
+                  <button className="menu-button" onClick={() => { setSelectedForm('base-datos'); closeSidebar(); }}><span className="menu-icon">🗃️</span><span>Base de datos</span></button>
                   <div className="sidebar-divider" />
                   {!isMobile && (
                     <>
@@ -15462,12 +15679,12 @@
                         <div className={`submenu ${openMenus.nuevo ? 'open' : ''}`}>
                           <button className="submenu-button" onClick={() => { selectAction('Nuevo Servicio'); closeSidebar(); }}>Servicio</button>
                         </div>
-                        <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Gestión de servicios</button>
+                        <button className="submenu-button" onClick={() => { setSelectedForm('base-datos'); closeSidebar(); }}>Gestión de servicios</button>
                       </div>
                       <div className="sidebar-divider" />
                       <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: false, nuevo: false, baseDatos: !p.baseDatos }))}><span className="menu-icon">📚</span><span>Base de datos</span><span className="menu-arrow">{openMenus.baseDatos ? '▾' : '▸'}</span></button>
                       <div className={`submenu ${openMenus.baseDatos ? 'open' : ''}`}>
-                        <button className="submenu-button" onClick={() => { setSelectedForm('historial'); closeSidebar(); }}>Historial de Servicios</button>
+                        <button className="submenu-button" onClick={() => { setSelectedForm('historial-servicios'); closeSidebar(); }}>Historial de Servicios</button>
                       </div>
                       {ENABLE_CLIENT_TRACKING_VIEW && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}><span className="menu-icon">👥</span><span>Vista Clientes</span></button>}
                     </>
@@ -15584,7 +15801,7 @@
                             ) : (
                               filteredRows.slice(0, 8).map((r) => (
                                 <div key={r.id}>
-                                  <div className="search-item" onClick={() => { setSelectedService(r); setSelectedForm('historial'); setExpandedId(null); setSearchTerm(''); setDesktopSearchOpen(false); }}>
+                                  <div className="search-item" onClick={() => { setSelectedService(r); setSelectedForm('base-datos'); setExpandedId(null); setSearchTerm(''); setDesktopSearchOpen(false); }}>
                                     <strong>{r.clienteId || '-'} · {r.nombreServicio || 'Servicio sin nombre'}</strong>
                                     <small>Fecha de alta: {r.fechaAlta || '-'}</small>
                                   </div>
@@ -15638,12 +15855,12 @@
                 </button>
               </div>
 
-              <main className={`main ${grupo === 'charla-detalle' ? 'charla-main-wide' : ''} ${effectiveSelectedForm === 'funcionarios' ? 'main-chat-expanded' : ''} ${effectiveSelectedForm === 'historial' ? 'main-ops-expanded' : ''}`}>
+              <main className={`main ${grupo === 'charla-detalle' ? 'charla-main-wide' : ''} ${effectiveSelectedForm === 'funcionarios' ? 'main-chat-expanded' : ''} ${effectiveSelectedForm === 'base-datos' ? 'main-ops-expanded' : ''}`}>
                 {isMobile && mobileTab === 'home' && effectiveSelectedForm === 'home' ? renderMobileHome() : isMobile && mobileTab === 'acciones' && effectiveSelectedForm === 'home' ? renderMobileActions() : isMobile && mobileTab === 'servicios' ? renderMobileServices() : isMobile && mobileTab === 'actividad' ? (
                   <section className="mobile-section-stack">
                     <div className="mobile-section-card">
                       <h3 className="mobile-section-title">Actividad</h3>
-                      <button type="button" className="mobile-list-button" onClick={() => { setSelectedForm('historial'); setSelectedService(null); }}>Ver historial de servicios</button>
+                      <button type="button" className="mobile-list-button" onClick={() => { setSelectedForm('base-datos'); setSelectedService(null); }}>Ver base de datos</button>
                     </div>
                   </section>
                 ) : effectiveSelectedForm === 'notificaciones' ? (
@@ -16424,7 +16641,7 @@
                 ) : effectiveSelectedForm === 'dashboard-gerencia' ? (
                   <DashboardGerencia rows={visibleRows} recentActivity={recentActivity} />
                 ) : effectiveSelectedForm === 'dashboard-tecnica' ? (
-                  <DashboardTecnica rows={visibleRows} onGoToDetalle={() => setSelectedForm('historial')} />
+                  <DashboardTecnica rows={visibleRows} onGoToDetalle={() => setSelectedForm('base-datos')} />
                 ) : effectiveSelectedForm === 'home' ? (
                   <>
                     <section className="home-modern-shell">
@@ -16437,7 +16654,7 @@
                               <p>Gestioná órdenes, seguimientos y tickets con un flujo más claro, moderno y profesional para todo tu equipo.</p>
                               <div className="home-modern-actions">
                                 <button type="button" className="home-modern-action-btn primary" onClick={() => selectAction('Nuevo Servicio')}>+ Nuevo servicio</button>
-                                <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('historial')}>Base de datos</button>
+                                <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('base-datos')}>Base de datos</button>
                                 <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('tickets')}>Tickets</button>
                               </div>
                             </div>
@@ -16647,73 +16864,54 @@
                                 <h4>Agenda de técnicos</h4>
                                 <small className="agenda-widget-subtitle">Tareas programadas desde 2Workers</small>
                               </div>
-                              <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('agenda-2workers')}>Ver todos →</button>
+                              <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('agenda-2workers')}>Ver más →</button>
                             </div>
                             <div className="agenda-widget-body">
-                              <div className="agenda-widget-range">Últimos 3 días, hoy y próximos 3 días</div>
+                              <div className="agenda-widget-range">Resumen compacto · últimos 7 días operativos</div>
                               {agendaLoading ? (
                                 <div className="hint">Cargando agenda…</div>
                               ) : agendaError ? (
                                 <div className="hint">{agendaError}</div>
                               ) : (
-                                <>
-                                  <div className="agenda-stats-grid">
-                                    <article className="agenda-stat-card"><strong>Total de tickets</strong><b>{agendaStats.total}</b></article>
-                                    <article className="agenda-stat-card"><strong>Técnicos asignados</strong><b>{agendaStats.techs}</b></article>
-                                    <article className="agenda-stat-card"><strong>Tareas completadas</strong><b>{agendaStats.completed}</b></article>
-                                    <article className="agenda-stat-card"><strong>Pendientes</strong><b>{agendaStats.pending}</b></article>
-                                  </div>
-                                  <div className="agenda-days-grid">
-                                    {agendaSevenDays.map((day) => {
-                                      const dayPreview = day.tasks.slice(0, 3);
-                                      const pendingCount = Math.max(day.tasks.length - dayPreview.length, 0);
-                                      return (
-                                        <article key={`agenda-day-${day.key}`} className="agenda-day-card">
-                                          <button type="button" className="agenda-day-head-btn" onClick={() => setAgendaDayModal({ open: true, day })}>
-                                            <header className="agenda-day-head">
-                                              <div>
-                                                <strong>{day.dateLabel}</strong>
-                                              </div>
-                                              <span className="agenda-day-count">{day.tasks.length} tickets</span>
-                                            </header>
-                                          </button>
-                                          <div className="agenda-day-label">• {day.label}</div>
-                                          <div className="agenda-day-body">
-                                            {day.tasks.length === 0 ? (
-                                              <div className="agenda-empty-card">Sin tareas programadas</div>
-                                            ) : dayPreview.map((task) => {
-                                              const priorityClass = agendaPriorityClass(task.prioridad);
-                                              return (
-                                                <div key={`agenda-task-${day.key}-${task.id}-${task.ticketId || task.fechaHoraKey}`} className={`agenda-task-row ${priorityClass.replace('agenda-priority-', 'priority-')}`}>
-                                                  <div className="agenda-time-col">
-                                                    {task.fechaHora ? task.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
-                                                  </div>
-                                                  <div className="agenda-task-main">
-                                                    <div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div>
-                                                    <div className="agenda-task-client">{task.cliente || 'Cliente sin nombre'}</div>
-                                                    <div className="agenda-task-meta">{task.direccion || 'Sin dirección'}</div>
-                                                    <div className="agenda-task-badges">
-                                                      <span className={`agenda-chip ${priorityClass}`}>Prioridad {String(task.prioridad || 'Baja').toLowerCase()}</span>
-                                                    </div>
-                                                  </div>
-                                                </div>
-                                              );
-                                            })}
-                                            {pendingCount > 0 && (
-                                              <button type="button" className="agenda-day-preview-btn" onClick={() => setAgendaDayModal({ open: true, day })}>
-                                                Ver {pendingCount} tareas más
-                                              </button>
-                                            )}
-                                          </div>
-                                        </article>
-                                      );
-                                    })}
-                                  </div>
-                                </>
+                                <div className="agenda-stats-grid">
+                                  <article className="agenda-stat-card"><strong>Total de tickets</strong><b>{agendaStats.total}</b></article>
+                                  <article className="agenda-stat-card"><strong>Técnicos asignados</strong><b>{agendaStats.techs}</b></article>
+                                  <article className="agenda-stat-card"><strong>Tareas completadas</strong><b>{agendaStats.completed}</b></article>
+                                  <article className="agenda-stat-card"><strong>Pendientes</strong><b>{agendaStats.pending}</b></article>
+                                </div>
                               )}
                               {!agendaLoading && !agendaError && agendaRangeWarning && (
                                 <div className="hint" style={{ marginTop: 10 }}>{agendaRangeWarning}</div>
                               )}
+                            </div>
+                          </section>
+                          <section className="home-widget-shell agenda-widget-card">
+                            <div className="agenda-widget-head">
+                              <div>
+                                <h4>Agenda de Instalaciones</h4>
+                                <small className="agenda-widget-subtitle">Tareas programadas desde 2Workers</small>
+                              </div>
+                            </div>
+                            <div className="agenda-widget-body">
+                              <div className="agenda-widget-range">Resumen compacto · últimos 7 días operativos</div>
+                              {agendaInstallLoading ? (
+                                <div className="hint">Cargando 2W Instalaciones...</div>
+                              ) : agendaInstallError ? (
+                                <div className="hint">{agendaInstallError}</div>
+                              ) : (
+                                <div className="agenda-stats-grid">
+                                  <article className="agenda-stat-card"><strong>Total de tickets</strong><b>{agendaInstallStats.total}</b></article>
+                                  <article className="agenda-stat-card"><strong>Técnicos asignados</strong><b>{agendaInstallStats.techs}</b></article>
+                                  <article className="agenda-stat-card"><strong>Tareas completadas</strong><b>{agendaInstallStats.completed}</b></article>
+                                  <article className="agenda-stat-card"><strong>Pendientes</strong><b>{agendaInstallStats.pending}</b></article>
+                                </div>
+                              )}
+                              {!agendaInstallLoading && !agendaInstallError && agendaInstallRangeWarning && (
+                                <div className="hint" style={{ marginTop: 10 }}>{agendaInstallRangeWarning}</div>
+                              )}
+                              <div style={{ marginTop: 10 }}>
+                                <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('agenda-2workers-instalaciones')}>Ver más →</button>
+                              </div>
                             </div>
                           </section>
                         </div>
@@ -16834,51 +17032,125 @@
                   </>
 
                 
-                ) : effectiveSelectedForm === 'agenda-2workers' ? (
-                  <section className="panel">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                      <h2 style={{ margin: 0 }}>Agenda 2Workers</h2>
-                      <button type="button" className="home-modern-action-btn" onClick={goToHomeView}>← Volver al inicio</button>
-                    </div>
-                    <div className="hint">Vista completa y detallada de tareas por día.</div>
-                    <div className="agenda-stats-grid" style={{ marginTop: 10 }}>
-                      <article className="agenda-stat-card"><strong>Total de tickets</strong><b>{agendaStats.total}</b></article>
-                      <article className="agenda-stat-card"><strong>Técnicos asignados</strong><b>{agendaStats.techs}</b></article>
-                      <article className="agenda-stat-card"><strong>Tareas completadas</strong><b>{agendaStats.completed}</b></article>
-                      <article className="agenda-stat-card"><strong>Pendientes</strong><b>{agendaStats.pending}</b></article>
-                    </div>
-                    <div className="agenda-days-grid" style={{ marginTop: 10 }}>
-                      {agendaSevenDays.map((day) => (
-                        <article key={`agenda-full-${day.key}`} className="agenda-day-card">
-                          <header className="agenda-day-head">
-                            <div>
-                              <strong>{day.dateLabel}</strong>
-                              <span>{day.label}</span>
-                            </div>
-                            <span className="agenda-day-count">{day.tasks.length} tickets</span>
-                          </header>
-                          <div className="agenda-day-body">
-                            {day.tasks.length === 0 ? (
-                              <div className="agenda-empty-card">Sin tareas programadas</div>
-                            ) : day.tasks.map((task) => {
-                              const priorityClass = agendaPriorityClass(task.prioridad);
-                              return (
-                                <div key={`agenda-full-task-${day.key}-${task.id}-${task.ticketId || task.fechaHoraKey}`} className={`agenda-task-row ${priorityClass.replace('agenda-priority-', 'priority-')}`}>
-                                  <div className="agenda-time-col">{task.fechaHora ? task.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div>
-                                  <div className="agenda-task-main">
-                                    <div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div>
-                                    <div className="agenda-task-client">{task.cliente || 'Cliente sin nombre'}</div>
-                                    <div className="agenda-task-meta">{task.direccion || 'Sin dirección'}</div>
-                                    <div className="agenda-task-meta"><strong>Técnico:</strong> {task.tecnicoId || 'Técnico sin asignar'} · <strong>Ticket:</strong> {task.ticketId || 'Sin ticket'}</div>
-                                  </div>
+                
+                ) : (effectiveSelectedForm === 'agenda-2workers' || effectiveSelectedForm === 'agenda-2workers-instalaciones') ? (
+                  (() => {
+                    const isInstall = effectiveSelectedForm === 'agenda-2workers-instalaciones';
+                    const title = isInstall ? 'Agenda 2Workers · Instalaciones (Gantt)' : 'Agenda 2Workers · Técnicos (Gantt)';
+                    const description = isInstall
+                      ? 'Vista de planificación para instalaciones con responsables, métricas y tareas distribuidas por fecha.'
+                      : 'Vista de planificación para técnicos con responsables, métricas y tareas distribuidas por fecha.';
+                    const filterValue = isInstall ? agendaInstallFilter : agendaTechFilter;
+                    const setFilterValue = isInstall ? setAgendaInstallFilter : setAgendaTechFilter;
+                    const stats = isInstall ? agendaInstallStats : agendaStats;
+                    const days = isInstall ? agendaInstallSevenDays : agendaSevenDays;
+                    const rows = isInstall ? agendaInstallRows : agendaRows;
+                    const emptyText = isInstall ? 'Disponible para asignar' : 'Sin tareas programadas';
+                    const normalizeForSearch = (value) => String(value || '')
+                      .normalize('NFD')
+                      .replace(/[\u0300-\u036f]/g, '')
+                      .toLowerCase();
+                    const toWordTokens = (value) => normalizeForSearch(value).match(/[a-z0-9]+/g) || [];
+                    const filteredByQuery = (task, query) => {
+                      if (!query) return true;
+                      const trimmed = query.trim();
+                      if (!trimmed) return true;
+
+                      const queryTokens = toWordTokens(trimmed);
+                      if (queryTokens.length === 0) return true;
+
+                      const haystackTokens = toWordTokens([
+                        task.tecnicoId,
+                        task.cliente,
+                        task.ticketTitulo,
+                        task.ticketId,
+                        task.estado,
+                        task.direccion,
+                      ].join(' '));
+                      const haystackSet = new Set(haystackTokens);
+
+                      return queryTokens.every((token) => {
+                        if (/^\d+$/.test(token)) return haystackSet.has(token);
+                        if (token.length === 1) return haystackSet.has(token);
+                        return haystackSet.has(token);
+                      });
+                    };
+                    const responsibles = Array.from(new Set(rows.map((task) => task.tecnicoId || 'Sin asignar')))
+                      .map((name) => ({
+                        name,
+                        count: rows.filter((task) => (task.tecnicoId || 'Sin asignar') === name).length
+                      }))
+                      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+
+                    return (
+                      <section className="panel">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                          <h2 style={{ margin: 0 }}>{title}</h2>
+                          <button type="button" className="home-modern-action-btn" onClick={goToHomeView}>← Volver al inicio</button>
+                        </div>
+                        <div className="hint">{description}</div>
+                        <div className="field" style={{ marginTop: 10, maxWidth: 380 }}>
+                          <label>Buscar por técnico, cliente, ticket o estado</label>
+                          <input value={filterValue} onChange={(e) => setFilterValue(e.target.value)} type="search" placeholder="Filtrar tareas..." />
+                        </div>
+                        <div className="agenda-stats-grid" style={{ marginTop: 10 }}>
+                          <article className="agenda-stat-card"><strong>Total de tickets</strong><b>{stats.total}</b></article>
+                          <article className="agenda-stat-card"><strong>Técnicos asignados</strong><b>{stats.techs}</b></article>
+                          <article className="agenda-stat-card"><strong>Tareas completadas</strong><b>{stats.completed}</b></article>
+                          <article className="agenda-stat-card"><strong>Pendientes</strong><b>{stats.pending}</b></article>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: 12, marginTop: 12 }}>
+                          <aside className="home-modern-panel">
+                            <h3 style={{ marginTop: 0, marginBottom: 8 }}>{isInstall ? 'Responsables de instalación' : 'Técnicos responsables'}</h3>
+                            <div className="home-modern-list">
+                              {responsibles.length === 0 ? (
+                                <div className="agenda-empty-card">Sin responsables para el período.</div>
+                              ) : responsibles.map((item) => (
+                                <div key={`${isInstall ? 'install' : 'tech'}-owner-${item.name}`} className="home-modern-list-item">
+                                  <b>{item.name}</b>
+                                  <small>{item.count} tickets</small>
                                 </div>
+                              ))}
+                            </div>
+                          </aside>
+                          <div className="agenda-days-grid">
+                            {days.map((day) => {
+                              const query = filterValue.trim().toLowerCase();
+                              const dayTasks = day.tasks.filter((task) => filteredByQuery(task, query));
+                              return (
+                                <article key={`${isInstall ? 'install' : 'tech'}-gantt-${day.key}`} className="agenda-day-card">
+                                  <header className="agenda-day-head">
+                                    <div>
+                                      <strong>{day.dateLabel}</strong>
+                                      <span>{day.label}</span>
+                                    </div>
+                                    <span className="agenda-day-count">{dayTasks.length} tickets</span>
+                                  </header>
+                                  <div className="agenda-day-body">
+                                    {dayTasks.length === 0 ? (
+                                      <div className="agenda-empty-card">{emptyText}</div>
+                                    ) : dayTasks.map((task) => {
+                                      const priorityClass = agendaPriorityClass(task.prioridad);
+                                      return (
+                                        <div key={`${isInstall ? 'install' : 'tech'}-task-${day.key}-${task.id}-${task.ticketId || task.fechaHoraKey}`} className={`agenda-task-row ${priorityClass.replace('agenda-priority-', 'priority-')}`}>
+                                          <div className="agenda-time-col">{task.fechaHora ? task.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div>
+                                          <div className="agenda-task-main">
+                                            <div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div>
+                                            <div className="agenda-task-client">{task.tecnicoId || 'Técnico sin asignar'} · {task.cliente || 'Cliente sin nombre'}</div>
+                                            <div className="agenda-task-meta"><strong>Estado:</strong> {task.estado || 'Pendiente'} · <strong>Ticket:</strong> {task.ticketId || '-'}</div>
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </article>
                               );
                             })}
                           </div>
-                        </article>
-                      ))}
-                    </div>
-                  </section>
+                        </div>
+                      </section>
+                    );
+                  })()
 
 ) : effectiveSelectedForm === 'home-card-view' ? (
                   <section className="home-card-detail-shell">
@@ -17045,12 +17317,38 @@
                       </div>
                     )}
                   </section>
-                ) : effectiveSelectedForm === 'historial' ? (
+                ) : effectiveSelectedForm === 'historial-servicios' ? (
+                  <section className="panel">
+                    <h2>Historial de Servicios</h2>
+                    <div className="hint">Registro cronológico de cambios y movimientos aplicados a cada servicio.</div>
+                    {historyFilteredRows.length === 0 ? (
+                      <div className="hint" style={{ marginBottom: 0 }}>No hay movimientos de historial para mostrar.</div>
+                    ) : (
+                      <div className="history-list">
+                        {historyFilteredRows.slice(0, 250).map((row) => (
+                          <div className="history-row" key={`service-history-${row.id}`} role="button" tabIndex={0} onClick={() => openServiceDetailModal(row, 'historial')} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openServiceDetailModal(row, 'historial'); } }}>
+                            <button type="button" className="ranking-service-btn" onClick={(event) => { event.stopPropagation(); openServiceDetailModal(row, 'historial'); }}>
+                              <div className="history-row-main">
+                                <strong>{row.nombreServicio || row.razonSocial || 'Servicio sin nombre'}</strong>
+                                <div className="history-row-meta">
+                                  <span>ID {row.clienteId || '-'}</span><span>·</span>
+                                  <span>{row.tipoAccion || row.formulario || 'Actualización'}</span><span>·</span>
+                                  <span>{formatRequestDateTime(row.creadoEn || row.updatedAt || row.actualizadoEn)}</span>
+                                </div>
+                              </div>
+                            </button>
+                            <span className={statusClass(row.status || row.estado)}>{row.status || row.estado || 'Pendiente'}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </section>
+                ) : effectiveSelectedForm === 'base-datos' ? (
                   <section className="panel service-coord-shell">
                     <div className="service-coord-head">
                       <div>
-                        <h2 className="service-coord-title">Historial y base de datos de servicios</h2>
-                        <p className="service-coord-subtitle">Vista visual por cards para coordinar más rápido estado, responsables y seguimiento.</p>
+                        <h2 className="service-coord-title">Base de datos de servicios</h2>
+                        <p className="service-coord-subtitle">Ficha completa por servicio (datos maestros + información consolidada por ID de servicio).</p>
                       </div>
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                         {isAdminUser && (
@@ -17163,7 +17461,7 @@
                                     <h5>Seguimiento</h5>
                                     <p><b>Estado:</b> {rawStatus}</p>
                                     <p><b>Responsable:</b> {row.representanteComercial || 'Sin encargado'}</p>
-                                    <small>Última actualización: {formatDateTime(row.actualizadoEn || row.creadoEn)}</small>
+                                    <small>Última actualización: {formatRequestDateTime(row.actualizadoEn || row.creadoEn)}</small>
                                   </div>
                                   <div className="service-coord-expanded-card">
                                     <h5>Acciones rápidas</h5>
@@ -17203,6 +17501,15 @@
                 <section className="panel">
                   <h2>Formulario Operativo · Gestión de Acciones</h2>
                   <div className="hint">Nuevo incluye: Servicio, Adicionales, Solicitud de presupuesto, Novación, Movimiento de obra, Baja de servicio y Charla informativa.</div>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+                    <button type="button" className={`home-modern-action-btn ${tipoAccion === 'Nuevo Servicio' ? 'primary' : ''}`} onClick={() => selectAction('Nuevo Servicio')}>Nuevo Servicio</button>
+                    <button type="button" className={`home-modern-action-btn ${tipoAccion === 'Obra' ? 'primary' : ''}`} onClick={() => { setTipoAccion('Obra'); setSelectedForm('other'); resetFields(); }}>Nueva obra</button>
+                    <button type="button" className={`home-modern-action-btn ${tipoAccion === 'Novación' ? 'primary' : ''}`} onClick={() => selectAction('Novación')}>Novación</button>
+                    <button type="button" className={`home-modern-action-btn ${tipoAccion === 'Adicionales' ? 'primary' : ''}`} onClick={() => selectAction('Adicionales')}>Solicitud adicionales</button>
+                    <button type="button" className={`home-modern-action-btn ${tipoAccion === 'Movimiento de obra' ? 'primary' : ''}`} onClick={() => selectAction('Movimiento de obra')}>Movimiento de obra</button>
+                    <button type="button" className={`home-modern-action-btn ${tipoAccion === 'Solicitud de presupuesto' ? 'primary' : ''}`} onClick={() => selectAction('Solicitud de presupuesto')}>Solicitud de presupuesto</button>
+                    <button type="button" className={`home-modern-action-btn ${tipoAccion === 'Baja' ? 'primary' : ''}`} onClick={() => selectAction('Baja')}>Solicitud de baja de servicio</button>
+                  </div>
 
                   <form onSubmit={handleSubmit}>
                     {grupo === 'servicio' ? (
@@ -18007,7 +18314,7 @@
                 )}
               </main>
 
-              {historyDetailModalOpen && selectedService && effectiveSelectedForm === 'historial' && (
+              {historyDetailModalOpen && selectedService && effectiveSelectedForm === 'base-datos' && (
                 <div className="service-detail-modal-overlay" onClick={() => setHistoryDetailModalOpen(false)}>
                   <div className="service-detail-modal" onClick={(e) => e.stopPropagation()}>
                     {(() => {
@@ -18056,7 +18363,11 @@
                                 <div className="hint" style={{ marginBottom: 10 }}>
                                   Recorrido sugerido del equipo: <b>Comercial</b> → <b>Instalaciones</b> → <b>Atención al cliente</b> → <b>Operaciones</b>. También se puede devolver etapas para correcciones.
                                 </div>
-                                {detailWorkflowStage === 'Pendiente de aprobación – Coordinación de Instalaciones'
+                                {effectiveSelectedForm === 'base-datos' ? (
+                                  <div className="hint" style={{ marginBottom: 10 }}>
+                                    Vista solo lectura de base de datos: para aprobar/rechazar o mover etapas usá la sección <b>Historial de Servicios</b>.
+                                  </div>
+                                ) : detailWorkflowStage === 'Pendiente de aprobación – Coordinación de Instalaciones'
                                   && (String(detailService.tipoAccion || '').trim() === 'Nuevo Servicio' || String(detailService.formulario || '').trim() === 'nuevo-servicio-optimizado') ? (
                                     <>
                                       <div className="hint" style={{ marginBottom: 10 }}>
@@ -18851,23 +19162,9 @@
           };
         }
 
-        // Si el widget no existe, lo crea debajo de la tarjeta de perfil sin duplicar.
+        // El widget lo renderiza React. Evitamos crear/insertar nodos manualmente para no romper el árbol virtual.
         function ensureWidgetExists() {
-          const existing = document.getElementById('weather-widget');
-          if (existing) return existing;
-          const anchor = document.querySelector('.home-side-stack, .home-modern-hero, .home-modern-user');
-          if (!anchor) return null;
-          const widget = document.createElement('div');
-          widget.id = 'weather-widget';
-          widget.innerHTML = `
-            <div id="weather-icon">☁️</div>
-            <div id="weather-temp">--°C</div>
-            <div id="weather-desc">Cargando clima...</div>
-            <div id="weather-time"></div>
-          `;
-          if (anchor.classList && anchor.classList.contains('home-side-stack')) anchor.appendChild(widget);
-          else anchor.insertAdjacentElement('afterend', widget);
-          return widget;
+          return document.getElementById('weather-widget');
         }
 
         function esNoche() {
@@ -19022,11 +19319,13 @@
           console.error('PROMESA RECHAZADA:', event.reason);
         });
 
-        ensureWidgetExists();
-        actualizarHora();
-        obtenerClima();
-        setInterval(actualizarHora, 1000);
-        setInterval(obtenerClima, 10 * 60 * 1000);
+        const bootUiTimer = window.setTimeout(() => {
+          ensureWidgetExists();
+          actualizarHora();
+          window.setTimeout(() => { obtenerClima(); }, 500);
+          setInterval(actualizarHora, 1000);
+          setInterval(obtenerClima, 10 * 60 * 1000);
+        }, 120);
       })();
     </script>
   </body>
