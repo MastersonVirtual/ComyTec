@@ -12334,6 +12334,7 @@
         useEffect(() => {
           setAgendaLoading(true);
           setAgendaInstallLoading(true);
+          let hasStartedInstallLoad = false;
           const mapFirestoreTask = (doc, idx, map, prefix) => {
             const item = doc.data() || {};
             const fechaHora = parseFirestoreDateTime(item?.fechaHora);
@@ -12406,6 +12407,26 @@
             .where('tipoAgenda', '==', 'instalaciones')
             .orderBy('fechaHora', 'asc');
 
+          let unsubInstall = null;
+          const startInstallAgendaLoad = () => {
+            if (hasStartedInstallLoad) return;
+            hasStartedInstallLoad = true;
+            unsubInstall = instRef.onSnapshot((snapshot) => {
+              const tareasInstalaciones = (snapshot.docs || [])
+                .map((doc, idx) => mapFirestoreTask(doc, idx, INSTALL_TECHNICIAN_NAME_MAP, 'instalacion'))
+                .filter((item) => item.fechaHora instanceof Date)
+                .sort(sortByDateAsc);
+              console.log('Agenda instalaciones Firestore:', tareasInstalaciones);
+              setAgendaInstallRangeWarning('');
+              setAgendaInstallError('');
+              setAgendaInstallRows(tareasInstalaciones);
+              setAgendaInstallLoading(false);
+            }, (error) => {
+              console.error('Error leyendo agenda instalaciones Firestore:', error);
+              attachFallbackListener();
+            });
+          };
+
           const unsubTech = techRef.onSnapshot((snapshot) => {
             const tareasTecnicos = (snapshot.docs || [])
               .map((doc, idx) => mapFirestoreTask(doc, idx, TECHNICIAN_NAME_MAP, 'tecnico'))
@@ -12416,25 +12437,19 @@
             setAgendaError('');
             setAgendaRows(tareasTecnicos);
             setAgendaLoading(false);
+            window.setTimeout(() => {
+              startInstallAgendaLoad();
+            }, 0);
           }, (error) => {
             console.error('Error leyendo agenda técnicos Firestore:', error);
             attachFallbackListener();
           });
 
-          const unsubInstall = instRef.onSnapshot((snapshot) => {
-            const tareasInstalaciones = (snapshot.docs || [])
-              .map((doc, idx) => mapFirestoreTask(doc, idx, INSTALL_TECHNICIAN_NAME_MAP, 'instalacion'))
-              .filter((item) => item.fechaHora instanceof Date)
-              .sort(sortByDateAsc);
-            console.log('Agenda instalaciones Firestore:', tareasInstalaciones);
-            setAgendaInstallRangeWarning('');
-            setAgendaInstallError('');
-            setAgendaInstallRows(tareasInstalaciones);
-            setAgendaInstallLoading(false);
-          }, (error) => {
-            console.error('Error leyendo agenda instalaciones Firestore:', error);
-            attachFallbackListener();
-          });
+          if (window.requestIdleCallback) {
+            window.requestIdleCallback(() => startInstallAgendaLoad(), { timeout: 1800 });
+          } else {
+            window.setTimeout(() => startInstallAgendaLoad(), 1200);
+          }
 
           refreshTimer = window.setInterval(async () => {
             try {
@@ -12447,7 +12462,7 @@
 
           return () => {
             unsubTech();
-            unsubInstall();
+            if (unsubInstall) unsubInstall();
             if (fallbackUnsub) fallbackUnsub();
             if (refreshTimer) window.clearInterval(refreshTimer);
           };
