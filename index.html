@@ -244,16 +244,52 @@
       .hint { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
 
       .service-layout { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 12px; }
+      .baja-wizard-layout { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(290px, 0.75fr); gap: 16px; align-items: start; }
+      .baja-wizard-main { max-height: calc(100vh - 120px); overflow-y: auto; padding-right: 6px; }
+      .baja-wizard-side { position: sticky; top: 20px; max-height: calc(100vh - 40px); overflow: auto; display: grid; gap: 12px; }
+      .baja-wizard-side .service-card { border-radius: 16px !important; box-shadow: 0 10px 22px rgba(6,47,45,.12); }
+      .baja-wizard-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+      .baja-wizard-title { display: flex; align-items: center; gap: 12px; }
+      .baja-wizard-badge { width: 58px; height: 58px; border-radius: 16px; background: linear-gradient(145deg,#0c988d,#0a6c66); color:#fff; display:inline-flex; align-items:center; justify-content:center; font-size: 28px; }
+      .baja-progress-steps { display: grid; gap: 8px; margin-top: 10px; }
+      .baja-progress-step { display:flex; align-items:center; gap:10px; color:#60707f; font-weight:700; }
+      .baja-progress-dot { width: 16px; height: 16px; border-radius: 16px; border: 2px solid #b8c5d1; }
+      .baja-progress-step.done { color: #0a6e6b; }
+      .baja-progress-step.done .baja-progress-dot { border-color:#0a9888; background:#0a9888; }
+      .baja-progress-step.active .baja-progress-dot { border-color:#0a9888; }
+      .baja-tip { border-left: 4px solid #0a9888; background: #ecfaf7; border-radius: 10px; padding: 10px; color:#24565a; font-weight:600; }
+      .form-wizard-layout { display:grid; grid-template-columns:minmax(0,1.7fr) minmax(280px,.75fr); gap:16px; align-items:start; }
+      .form-wizard-main { max-height: calc(100vh - 120px); overflow-y:auto; padding-right:6px; }
+      .form-wizard-side { position: sticky; top:20px; display:grid; gap:12px; }
+      .form-wizard-side .service-card { border-radius: 16px !important; }
+      .form-step-row { display:flex; align-items:center; gap:10px; margin:8px 0; font-weight:700; color:#5f7283; }
+      .form-step-row .dot { width:14px; height:14px; border-radius:16px; border:2px solid #b7c4cf; }
+      .form-step-row.done { color:#0a6e6b; }
+      .form-step-row.done .dot { background:#0a9888; border-color:#0a9888; }
+      .form-global-layout { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(290px, .75fr); gap: 16px; align-items: start; }
+      .form-global-main { min-width: 0; }
+      .form-global-side { position: sticky; top: 20px; display: grid; gap: 12px; max-height: calc(100vh - 40px); overflow: auto; }
+      @media (max-width: 1080px) { .form-wizard-layout { grid-template-columns:1fr; } .form-wizard-main { max-height:none; overflow:visible; } .form-wizard-side { position:static; } }
+      @media (max-width: 1080px) { .baja-wizard-layout { grid-template-columns: 1fr; } .baja-wizard-main { max-height:none; overflow:visible; } .baja-wizard-side { position: static; max-height: none; } }
+      @media (max-width: 1080px) { .form-global-layout { grid-template-columns: 1fr; } .form-global-side { position: static; max-height: none; } }
       .service-card {
         grid-column: span 12;
         background: linear-gradient(135deg, rgba(255,255,255,.13), rgba(255,255,255,.04));
         border: 1px solid rgba(255,255,255,.24);
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 14px;
         box-shadow: 0 10px 20px rgba(0,0,0,.2);
         transition: transform var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
       }
       .service-card:hover { transform: translateY(-2px); box-shadow: 0 16px 32px rgba(0,0,0,.26); }
+      .service-card:hover,
+      .menu-button:hover,
+      .submenu-button:hover,
+      .agenda-stat-card:hover,
+      .service-card-action-btn:hover,
+      .home-modern-action-btn:hover {
+        transform: none !important;
+      }
       .service-card h3 {
         margin: 0 0 12px;
         font-size: 15px;
@@ -265,6 +301,193 @@
         gap: 8px;
       }
       .service-card h3::before { content: '◆'; color: var(--accent); font-size: 12px; }
+      .form-global-main .service-card {
+        background: #ffffff;
+        border: 1px solid #e3eceb;
+        border-radius: 16px;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+        padding: 20px 22px;
+      }
+      .form-global-main .service-card h3 {
+        color: #0e6e67;
+        font-size: 1.75rem;
+        line-height: 1.2;
+        margin-bottom: 14px;
+      }
+      .form-global-main .service-card h3::before {
+        content: '◉';
+        color: #10a392;
+        font-size: 12px;
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #e8f7f4;
+      }
+      .form-global-main .field label {
+        color: #3b5f66;
+        font-weight: 700;
+      }
+      .form-global-main input,
+      .form-global-main select,
+      .form-global-main textarea {
+        background: #f8fcfb;
+        border: 1px solid #d2e6e2;
+        color: #1f2937;
+        border-radius: 10px;
+        min-height: 48px;
+        padding: 11px 14px;
+      }
+      .form-global-main input:focus,
+      .form-global-main select:focus,
+      .form-global-main textarea:focus {
+        border-color: #12a596;
+        box-shadow: 0 0 0 3px rgba(18, 165, 150, 0.14);
+      }
+      .form-global-main .ticket-upload-dropzone {
+        border: 1px dashed #b9dfd8;
+        background: #fbfffe;
+        border-radius: 12px;
+      }
+      .form-global-side .service-card {
+        background: #ffffff;
+        border: 1px solid #e3eceb;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, .05);
+        padding: 18px;
+      }
+      .form-global-side .home-modern-action-btn {
+        min-height: 46px;
+      }
+      @media (max-width: 768px) {
+        body {
+          background: #e9f3f2 !important;
+          color: #0f2f33 !important;
+          overflow-x: hidden !important;
+        }
+        .content {
+          background: #e9f3f2 !important;
+        }
+        .dashboard-main-layout,
+        .home-modern-shell,
+        .dashboard-main-column,
+        .dashboard-side-column,
+        .dashboard-right-panel {
+          display: grid !important;
+          grid-template-columns: 1fr !important;
+          width: 100% !important;
+          max-width: 100% !important;
+          gap: 10px !important;
+        }
+        .dashboard-side-column { order: 2 !important; position: static !important; top: auto !important; }
+        .dashboard-main-column { order: 1 !important; }
+        .home-service-cards-board { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+        .home-service-card-primary { min-height: 120px !important; }
+        .home-service-card-primary .home-service-card-body,
+        .home-service-card-primary .home-service-card-row-grid,
+        .home-service-card-primary .home-service-card-row { display: none !important; }
+        .home-service-card-primary .home-service-card-footer { margin-top: auto !important; }
+
+        .topbar {
+          position: sticky !important;
+          top: 0 !important;
+          padding: 10px 12px !important;
+          gap: 8px !important;
+          background: linear-gradient(180deg, #0a8c87 0%, #08746f 100%) !important;
+          border-bottom: 0 !important;
+          box-shadow: 0 8px 20px rgba(8, 74, 71, .32) !important;
+        }
+        .burger {
+          width: 38px !important;
+          height: 38px !important;
+          border-radius: 10px !important;
+          color: #ffffff !important;
+          background: rgba(255,255,255,.18) !important;
+          border-color: rgba(255,255,255,.3) !important;
+        }
+        .top-titles h1 { font-size: 0 !important; line-height: 1; }
+        .top-titles h1::after { content: "Hola, Alfonso"; font-size: 1.05rem; color: #efffff; font-weight: 800; }
+        .top-titles p { display: none !important; }
+        .main { margin: 0 auto !important; padding: 10px 10px 90px !important; }
+        .panel {
+          background: #ffffff !important;
+          border: 1px solid #d9e9e8 !important;
+          box-shadow: 0 8px 22px rgba(14, 72, 70, .08) !important;
+          border-radius: 16px !important;
+          color: #15363a !important;
+        }
+        .home-modern-hero {
+          padding: 18px !important;
+          border-radius: 18px !important;
+          background: linear-gradient(160deg, #1ab0a6 0%, #118d87 52%, #0a6b69 100%) !important;
+          border: 0 !important;
+          box-shadow: 0 14px 26px rgba(7, 89, 84, .28) !important;
+        }
+        .home-modern-hero h2 { font-size: 1.5rem !important; color: #f2ffff !important; }
+        .home-modern-hero p { color: rgba(236,255,254,.94) !important; }
+        .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; }
+        .kpi-card {
+          border-radius: 14px !important;
+          background: #ffffff !important;
+          border: 1px solid #d7e9e7 !important;
+          box-shadow: 0 8px 18px rgba(15,66,65,.10) !important;
+          min-height: 112px !important;
+        }
+        .kpi-label, .kpi-value, .kpi-breakdown, .kpi-breakdown-item, .kpi-breakdown-count { color: #17393d !important; }
+        .home-modern-actions { display: grid !important; grid-template-columns: 1fr 1fr; gap: 8px !important; }
+        .home-modern-actions .home-modern-action-btn.primary { grid-column: 1 / -1; }
+        .home-modern-actions .home-modern-action-btn { min-height: 40px !important; font-size: 13px !important; }
+
+        #weather-widget,
+        .dashboard-right-panel article:has(#gmail-list),
+        #gmail-list { display: none !important; }
+
+        .home-service-cards-board { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
+        .home-service-card { min-height: 120px !important; padding: 10px !important; }
+        .home-service-card .hint, .home-service-card-row-grid, .home-service-card-row { display: none !important; }
+        .home-service-card-head { align-items: center !important; }
+
+        .agenda-widget-card { padding: 0 !important; }
+        .agenda-widget-head { padding: 12px !important; }
+        .agenda-widget-head h4 { font-size: 1.2rem !important; }
+        .agenda-widget-subtitle { font-size: .84rem !important; }
+        .agenda-widget-body { display: none !important; }
+        .agenda-widget-card { border-radius: 14px !important; }
+
+        .calendar-day-block { padding: 8px !important; }
+        .calendar-event-item { padding: 8px !important; }
+        .calendar-widget-card .calendar-sections section:nth-child(n+3) { display: none !important; }
+
+        .mobile-bottom-nav {
+          display: grid !important;
+          grid-template-columns: repeat(4, 1fr);
+          position: fixed !important;
+          left: 10px;
+          right: 10px;
+          bottom: 10px;
+          z-index: 1500;
+          background: #ffffff !important;
+          border: 1px solid #cfe3e1 !important;
+          border-radius: 16px !important;
+          box-shadow: 0 10px 25px rgba(11,62,60,.2) !important;
+          padding: 4px !important;
+        }
+        .mobile-bottom-nav button,
+        .mobile-bottom-nav .menu-button {
+          background: transparent !important;
+          border: 0 !important;
+          color: #1d4f52 !important;
+          border-radius: 12px !important;
+          min-height: 44px !important;
+        }
+        .mobile-bottom-nav button.active {
+          background: rgba(17, 141, 135, .14) !important;
+          color: #08746f !important;
+        }
+        .mobile-fab { display: grid !important; position: fixed !important; bottom: 64px !important; z-index: 1501 !important; }
+      }
       .card-grid { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 10px; }
 
       .field { display: flex; flex-direction: column; gap: 6px; }
@@ -293,7 +516,7 @@
       .radio-row, .switch-row, .state-row { display: flex; gap: 12px; flex-wrap: wrap; }
       .radio-pill, .state-pill {
         border: 1px solid rgba(255,255,255,.28);
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 8px 10px;
         cursor: pointer;
         background: #ffffff;
@@ -322,7 +545,7 @@
       .detail-box { white-space: pre-wrap; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #d8efef; line-height: 1.45; }
       .link-btn { border: 1px solid rgba(255,255,255,.28); background: #ffffff; color: #eaf7f7; border-radius: 8px; padding: 6px 8px; cursor: pointer; }
       th { position: sticky; top: 0; background: rgba(255,255,255,.18); }
-      .chip { display: inline-block; padding: 4px 8px; border-radius: 999px; color: #0f172a; font-size: 12px; font-weight: 700; }
+      .chip { display: inline-block; padding: 4px 8px; border-radius: 16px; color: #0f172a; font-size: 12px; font-weight: 700; }
       .status-ongoing { background: var(--ok); }
       .status-pausa { background: var(--pause); }
       .status-default { background: var(--chip); }
@@ -332,7 +555,7 @@
       .widget {
         background: linear-gradient(135deg, rgba(255,255,255,.16), rgba(255,255,255,.06));
         border: 1px solid rgba(255,255,255,.28);
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 13px;
         box-shadow: var(--shadow-soft);
         position: relative;
@@ -582,7 +805,7 @@
       .welcome-avatar {
         width: 98px;
         height: 98px;
-        border-radius: 999px;
+        border-radius: 16px;
         object-fit: cover;
         border: 3px solid rgba(0, 100, 101, .24);
         box-shadow: 0 8px 14px rgba(11,78,73,.16);
@@ -669,7 +892,7 @@
         top: 14px;
         width: 8px;
         height: 8px;
-        border-radius: 999px;
+        border-radius: 16px;
         background: #006465;
       }
       .home-modern-shell {
@@ -692,7 +915,7 @@
       .home-modern-badge {
         display: inline-flex;
         padding: 6px 10px;
-        border-radius: 999px;
+        border-radius: 16px;
         border: 1px solid #ffd4ad;
         background: #fff1e6;
         color: #b45309;
@@ -1022,7 +1245,7 @@
       .home-status {
         display: inline-flex;
         align-items: center;
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 1px 8px;
         border: 1px solid transparent;
       }
@@ -1312,7 +1535,7 @@
       .activity-trend-legend i {
         width: 12px;
         height: 3px;
-        border-radius: 999px;
+        border-radius: 16px;
         display: inline-block;
       }
       .activity-trend-labels {
@@ -1381,7 +1604,7 @@
         width: 100%;
       }
       .kpi-card {
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 28px 20px;
         text-align: center;
         cursor: pointer;
@@ -1442,7 +1665,7 @@
       .kpi-dot {
         width: 10px;
         height: 10px;
-        border-radius: 999px;
+        border-radius: 16px;
         background: var(--dot-color, #22c55e);
         box-shadow: 0 0 0 2px rgba(255,255,255,.18);
       }
@@ -1655,7 +1878,7 @@
       .seller-service-card {
         background: #ffffff;
         border: 1px solid rgba(11, 78, 73, .14);
-        border-radius: 999px;
+        border-radius: 16px;
         box-shadow: 0 8px 18px rgba(10, 58, 58, .10);
         padding: 14px;
         display: grid;
@@ -1768,7 +1991,7 @@
       }
       .history-list-shell {
         border: 1px solid rgba(0, 100, 101, 0.30);
-        border-radius: 999px;
+        border-radius: 16px;
         overflow: hidden;
         background: linear-gradient(180deg, rgba(255,255,255,.84), rgba(244,252,252,.7));
         box-shadow: 0 14px 30px rgba(0,0,0,.12);
@@ -1841,7 +2064,7 @@
       }
       .history-status-badge {
         justify-self: start;
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 7px 12px;
         font-size: 12px;
         font-weight: 700;
@@ -1951,7 +2174,7 @@
         gap: 10px;
         background: #ffffff;
         border: 1px solid rgba(178, 206, 212, .78);
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 14px;
         box-shadow: 0 10px 24px rgba(8, 29, 35, .08);
       }
@@ -1959,7 +2182,7 @@
         color: #ff8a2a;
         background: #edf1f3;
         border: 1px solid rgba(196, 205, 210, .95);
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 4px 10px;
         display: inline-flex;
         align-items: center;
@@ -2135,7 +2358,7 @@
         border: 1px dashed rgba(167, 194, 199, .85);
       }
       .service-coord-status {
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 6px 12px;
         font-size: 12px;
         font-weight: 700;
@@ -2200,7 +2423,7 @@
         border: 1px solid rgba(13, 122, 124, .24);
         background: rgba(13, 122, 124, .1);
         color: #0a5759;
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 7px 14px;
         font-size: 12px;
         font-weight: 700;
@@ -2328,7 +2551,7 @@
         margin-top: 18px;
         background: #ffffff;
         border: 1px solid rgba(190, 214, 224, .75);
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 14px;
         box-shadow: 0 12px 22px rgba(10, 31, 35, .08);
       }
@@ -2353,7 +2576,7 @@
         background: rgba(0,100,101,.11);
         border: 1px solid rgba(0,100,101,.28);
         color: #0f5e60;
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 4px 10px;
         font-size: 12px;
         font-weight: 700;
@@ -2441,7 +2664,7 @@
         width: min(520px, 100%);
         background: #0a1515;
         border: 1px solid var(--line);
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 16px;
         color: #0f172a;
         box-shadow: var(--shadow-deep);
@@ -2462,7 +2685,7 @@
         overflow: auto;
         background: #535b60;
         border: 1px solid rgba(210, 224, 236, .55);
-        border-radius: 999px;
+        border-radius: 16px;
         color: #e7eef6;
         box-shadow: 0 24px 70px rgba(0, 0, 0, .45);
         padding: 18px;
@@ -2527,35 +2750,58 @@
         grid-column: 1 / -1;
         padding: 0;
         overflow: hidden;
+        background: #ffffff;
+        border-radius: 24px;
+        border: 1px solid #d9ebe8;
+        box-shadow: 0 12px 30px rgba(8, 44, 42, 0.08);
+        margin-bottom: 10px;
       }
       .agenda-widget-head {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 10px;
-        padding: 12px 14px;
-        background: linear-gradient(135deg, #d9f3ef 0%, #c7ebe5 100%);
+        gap: 12px;
+        padding: 18px 20px;
+        background: linear-gradient(135deg, #e7f7f4 0%, #d7f0ec 100%);
         border-bottom: 1px solid #b7ddd5;
       }
+      .agenda-widget-head-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .agenda-widget-icon {
+        width: 58px;
+        height: 58px;
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        background: linear-gradient(160deg, #0b8d86, #0f6f6a);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 10px 20px rgba(6, 47, 45, 0.28);
+      }
+      .agenda-widget-icon svg { width: 30px; height: 30px; stroke: currentColor; }
       .agenda-widget-head h4 {
         margin: 0;
         color: #0a6e6b;
+        font-size: 1.9rem;
       }
       .agenda-widget-subtitle {
         display: block;
         color: #0f5a59;
-        font-size: 12px;
+        font-size: 1rem;
         font-weight: 600;
-        margin-top: 2px;
+        margin-top: 3px;
       }
       .agenda-widget-body {
-        padding: 12px 14px;
+        padding: 18px 20px 20px;
       }
       .agenda-widget-range {
-        font-size: 12px;
+        font-size: 1.25rem;
         font-weight: 700;
         color: #0a5b61;
-        margin-bottom: 10px;
+        margin-bottom: 14px;
       }
       .agenda-days-grid {
         display: grid;
@@ -2566,27 +2812,66 @@
       }
       .agenda-stats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 10px;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 14px;
         margin-bottom: 12px;
       }
       .agenda-stat-card {
-        background: #f8fcfb;
+        background: #fbfffe;
         border: 1px solid #dce9e7;
-        border-radius: 12px;
-        padding: 10px;
+        border-radius: 18px;
+        padding: 16px 16px 12px;
+        transition: transform .18s ease, box-shadow .18s ease;
+      }
+      .agenda-stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 18px rgba(6, 47, 45, 0.1);
+      }
+      .agenda-stat-top {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .agenda-stat-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .agenda-stat-icon svg {
+        width: 30px;
+        height: 30px;
+        stroke: currentColor;
       }
       .agenda-stat-card strong {
         display: block;
-        color: #0a5b61;
-        font-size: 12px;
+        color: #1f3340;
+        font-size: 14px;
       }
       .agenda-stat-card b {
         display: block;
-        font-size: 26px;
+        font-size: 56px;
         line-height: 1.05;
-        margin-top: 6px;
+        margin-top: 8px;
         color: #111827;
+      }
+      .agenda-stat-sub {
+        margin-top: 8px;
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .agenda-sparkline {
+        width: 100%;
+        height: 44px;
+        margin-top: 10px;
+      }
+      .agenda-empty-note {
+        margin-top: 8px;
+        color: #5b7370;
+        font-size: 13px;
+        font-weight: 600;
       }
       .agenda-day-card {
         border: 1px solid #dce9e7;
@@ -2619,7 +2904,7 @@
       .agenda-day-count {
         background: #ecf5f3;
         border: 1px solid #d6e9e5;
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 4px 10px;
         font-size: 12px;
         color: #0b6462;
@@ -2706,7 +2991,7 @@
         margin-top: 6px;
         border: 1px solid #cfe4e0;
         background: #f4fbfa;
-        border-radius: 999px;
+        border-radius: 16px;
         color: #0b6462;
         font-size: 12px;
         font-weight: 700;
@@ -2726,7 +3011,7 @@
       .agenda-chip {
         display: inline-flex;
         align-items: center;
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 2px 8px;
         font-size: 11px;
         font-weight: 700;
@@ -2741,7 +3026,7 @@
         width: min(440px, 100%);
         background: rgba(10, 21, 21, .96);
         border: 1px solid #006465;
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 16px;
         color: #e6fffd;
         box-shadow: var(--shadow-deep);
@@ -2778,7 +3063,7 @@
         right: 0;
         width: 120px;
         height: 120px;
-        border-radius: 999px;
+        border-radius: 16px;
         border: 0.5px solid rgba(0,100,101,.7);
         background: url('https://i.postimg.cc/0jMF5Jpk/Chat-GPT-Image-21-feb-2026-06-45-24-p-m.png') center/cover no-repeat;
       }
@@ -2789,7 +3074,7 @@
       }
       .tracking-card {
         grid-column: span 4;
-        border-radius: 999px;
+        border-radius: 16px;
         background: rgba(15,25,25,.72);
         border: 0.5px solid rgba(0,100,101,.75);
         backdrop-filter: blur(12px);
@@ -2800,7 +3085,7 @@
       .tracking-progress {
         width: 100%;
         height: 10px;
-        border-radius: 999px;
+        border-radius: 16px;
         background: rgba(255,255,255,.1);
         overflow: hidden;
       }
@@ -2969,7 +3254,7 @@
       .gerencia-card,
       .gerencia-chart-card,
       .ranking-section {
-        border-radius: 999px;
+        border-radius: 16px;
         background: rgba(15, 25, 25, 0.7) !important;
         border: 1px solid rgba(0, 100, 101, 0.42) !important;
         backdrop-filter: blur(12px);
@@ -3036,7 +3321,7 @@
         letter-spacing: .02em;
         color: #ffb46a;
         background: rgba(52, 57, 62, .9);
-        border-radius: 999px;
+        border-radius: 16px;
         border: 1px solid rgba(255, 164, 82, .45);
         z-index: 1;
       }
@@ -3147,7 +3432,7 @@
         align-items: center;
         justify-content: center;
         padding: 8px 12px;
-        border-radius: 999px;
+        border-radius: 16px;
         background: rgba(0, 14, 14, .42);
         border: 1px solid rgba(0,251,255,.24);
         color: #00fbff;
@@ -3337,7 +3622,7 @@
       .google-icon-dot {
         width: 20px;
         height: 20px;
-        border-radius: 999px;
+        border-radius: 16px;
         background: conic-gradient(from 45deg, #ea4335 0 25%, #fbbc05 25% 50%, #34a853 50% 75%, #4285f4 75% 100%);
       }
       @media (max-width: 520px) {
@@ -3357,7 +3642,7 @@
       .gerencia-widget {
         background: #0a1515;
         border: 1px solid var(--line);
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 20px;
         box-shadow: var(--shadow-soft);
         color: #0f172a;
@@ -3371,7 +3656,7 @@
       .gerencia-widget-toggle {
         all: unset;
         display: inline-block;
-        border-radius: 999px;
+        border-radius: 16px;
         border: 1px solid var(--line);
         color: #0f172a;
         font-size: .76rem;
@@ -3495,7 +3780,7 @@
       .legend-dot {
         width: 10px;
         height: 10px;
-        border-radius: 999px;
+        border-radius: 16px;
         background: var(--legend-color, #e6fffd);
       }
 
@@ -3507,7 +3792,7 @@
       .gerencia-mobile-card {
         background: rgba(4, 22, 22, 0.92);
         border: 1px solid rgba(0, 148, 150, 0.45);
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 14px;
         color: #e6fffd;
         box-shadow: 0 8px 20px rgba(0,0,0,.24);
@@ -3529,7 +3814,7 @@
       .gerencia-mobile-tag {
         font-size: 11px;
         border: 1px solid rgba(230,255,253,.28);
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 3px 8px;
         color: #d1faf5;
       }
@@ -3597,7 +3882,7 @@
       .executive-kpi-card {
         background: rgba(242, 255, 254, 0.95);
         color: #0a3131;
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 14px;
         display: grid;
         grid-template-columns: 38px 1fr;
@@ -3709,7 +3994,7 @@
         top: 7px;
         width: 8px;
         height: 8px;
-        border-radius: 999px;
+        border-radius: 16px;
         background: #ff8425;
       }
       .executive-muted { color: #6d8d8c; font-size: .84rem; }
@@ -3873,7 +4158,7 @@
       .status-badge {
         display: inline-flex;
         padding: 4px 8px;
-        border-radius: 999px;
+        border-radius: 16px;
         font-size: 11px;
         font-weight: 700;
         color: #022;
@@ -3892,7 +4177,7 @@
         gap: 6px;
       }
       .mobile-meta-pill {
-        border-radius: 999px;
+        border-radius: 16px;
         border: 1px solid rgba(0,100,101,.2);
         background: rgba(255,255,255,.74);
         color: #006465;
@@ -3911,7 +4196,7 @@
       .mobile-avatar {
         width: 54px;
         height: 54px;
-        border-radius: 999px;
+        border-radius: 16px;
         border: 2px solid rgba(255,255,255,.58);
         display: block;
         object-fit: cover;
@@ -3922,7 +4207,7 @@
       .mobile-welcome-date { margin-top: 12px; font-size: .85rem; color: #e5fffd !important; }
       .mobile-kpi-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
       .mobile-kpi-card {
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 12px;
         border: 1px solid rgba(0,100,101,.12);
         background: #f4fbfb;
@@ -3971,7 +4256,7 @@
       .mobile-install-main { display: flex; gap: 8px; align-items: center; }
       .mobile-quick-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
       .mobile-quick-btn {
-        border-radius: 999px;
+        border-radius: 16px;
         border: 1px solid rgba(0,100,101,.18);
         min-height: 84px;
         background: #ffffff;
@@ -3987,7 +4272,7 @@
       .mobile-progress {
         width: 100%;
         height: 8px;
-        border-radius: 999px;
+        border-radius: 16px;
         background: #d3e5e5;
         overflow: hidden;
         margin: 8px 0;
@@ -4012,7 +4297,7 @@
       .mobile-quick-btn.accent { background: #fff7df; }
       .mobile-quick-menu {
         grid-column: 1 / -1;
-        border-radius: 999px;
+        border-radius: 16px;
         border: 1px solid rgba(0,100,101,.16);
         background: #ffffff;
         box-shadow: 0 14px 26px rgba(0, 58, 60, 0.16);
@@ -4242,7 +4527,7 @@
           bottom: 84px;
           width: 58px;
           height: 58px;
-          border-radius: 999px;
+          border-radius: 16px;
           border: 1px solid var(--line);
           background: linear-gradient(135deg, #0d8f88, #0a6f6a);
           color: #0f172a;
@@ -4259,9 +4544,9 @@
           z-index: 1208;
           display: block;
         }
-        .panel { padding: 14px; border-radius: 999px; }
+        .panel { padding: 14px; border-radius: 16px; }
         .service-card { padding: 12px; border-radius: 14px; }
-        .hero { padding: 34px 14px; border-radius: 999px; }
+        .hero { padding: 34px 14px; border-radius: 16px; }
         .topbar {
           flex-wrap: nowrap;
           align-items: center;
@@ -4475,7 +4760,7 @@
       .burger {
         width: 56px !important;
         height: 56px !important;
-        border-radius: 999px !important;
+        border-radius: 16px !important;
         background: #006465 !important;
         color: #0f172a !important;
         border: 1px solid #006465 !important;
@@ -4501,7 +4786,7 @@
       .burger-icon {
         width: 100%;
         height: 100%;
-        border-radius: 999px;
+        border-radius: 16px;
         overflow: hidden;
         display: flex;
         flex-direction: column;
@@ -4512,7 +4797,7 @@
       .burger-icon span {
         width: 62%;
         height: 4px;
-        border-radius: 999px;
+        border-radius: 16px;
         background: #ffffff;
         display: block;
       }
@@ -4521,7 +4806,7 @@
         width: 84px;
         height: 84px;
         margin: 14px auto 0;
-        border-radius: 999px;
+        border-radius: 16px;
         border: 7px solid rgba(0, 100, 101, 0.22);
         border-top-color: #006465;
         border-right-color: #006465;
@@ -4563,7 +4848,7 @@
 
       .dashboard-gerencia-panel .legend-dot,
       .dashboard-gerencia-panel .kpi-dot {
-        border-radius: 999px !important;
+        border-radius: 16px !important;
       }
 
       .dashboard-gerencia-panel .gerencia-widget-toggle {
@@ -4859,7 +5144,7 @@
         right: -4px;
         min-width: 22px;
         height: 22px;
-        border-radius: 999px;
+        border-radius: 16px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -4980,7 +5265,7 @@
         right: -5px;
         min-width: 16px;
         height: 16px;
-        border-radius: 999px;
+        border-radius: 16px;
         background: #ef4444;
         color: #0f172a;
         font-size: 10px;
@@ -5066,7 +5351,7 @@
         align-items: center;
         gap: 10px;
         padding: 8px;
-        border-radius: 999px;
+        border-radius: 16px;
         background: rgba(255,255,255,.9);
         border: 1px solid #e2e8f0;
         box-shadow: 0 10px 24px rgba(15, 23, 42, .10);
@@ -5214,7 +5499,7 @@
         color: #0b6462;
         text-decoration: none;
         border: 1px solid #cfe4e0;
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 6px 10px;
         background: #f4fbfa;
       }
@@ -5223,11 +5508,11 @@
         border: 1px solid #dfe9e8;
         background: #ffffff;
         box-shadow: 0 12px 24px rgba(15, 23, 42, .06);
-        padding: 14px;
+        padding: 18px;
       }
       .home-modern-hero {
-        padding: clamp(24px, 4vw, 36px);
-        border-radius: 22px;
+        padding: clamp(28px, 4vw, 40px);
+        border-radius: 20px;
         border: 1px solid #e2e8f0;
         box-shadow: 0 14px 28px rgba(15, 23, 42, .08);
         background: #ffffff;
@@ -5238,20 +5523,49 @@
         width: 100%;
       }
       .dashboard-main-layout {
-        grid-template-columns: minmax(0, 1fr) minmax(300px, .38fr);
+        grid-template-columns: minmax(0, 1.7fr) minmax(320px, .75fr);
         align-items: start;
+        gap: 18px;
       }
       .dashboard-main-column {
         gap: 16px;
       }
       .dashboard-side-column {
         display: grid;
-        gap: 14px;
+        gap: 16px;
         position: sticky;
         top: 84px;
       }
       .home-side-widget-shell {
-        padding: 12px;
+        padding: 14px;
+      }
+      .home-modern-badge {
+        background: #e7f7f4;
+        color: #0d6f68;
+        border: 1px solid #bfe6de;
+        border-radius: 12px;
+        padding: 6px 12px;
+      }
+      .home-modern-action-btn {
+        min-height: 44px;
+        border-radius: 12px;
+      }
+      .home-modern-action-btn.primary {
+        background: linear-gradient(135deg, #0f9b8d, #0b7d72);
+        color: #fff;
+        border: none;
+      }
+      .dashboard-equal-card {
+        border-radius: 18px;
+        border: 1px solid #dfe9e8;
+        background: #ffffff;
+        box-shadow: 0 10px 22px rgba(15, 23, 42, .06);
+      }
+      .home-hero-mail-item {
+        border-radius: 12px;
+        border: 1px solid #e2ecea;
+        background: #ffffff;
+        margin-bottom: 8px;
       }
       .agenda-widget-card { order: 1; }
       .home-staff-chat-card { order: 2; }
@@ -5285,7 +5599,7 @@
         justify-content: center;
         min-width: 28px;
         height: 28px;
-        border-radius: 999px;
+        border-radius: 16px;
         background: #eff6ff;
         color: #1d4ed8;
         font-size: .75rem;
@@ -5356,7 +5670,7 @@
       .sidebar-profile-avatar {
         width: 100%;
         height: 100%;
-        border-radius: 999px;
+        border-radius: 16px;
         object-fit: cover;
         border: 2px solid rgba(0,100,101,.2);
         background: #fff;
@@ -5367,7 +5681,7 @@
         bottom: 2px;
         width: 12px;
         height: 12px;
-        border-radius: 999px;
+        border-radius: 16px;
         background: #22c55e;
         border: 2px solid #fff;
       }
@@ -5398,7 +5712,7 @@
       .sidebar-menu-scroll::-webkit-scrollbar { width: 8px; }
       .sidebar-menu-scroll::-webkit-scrollbar-thumb {
         background: rgba(196, 252, 244, .35);
-        border-radius: 999px;
+        border-radius: 16px;
       }
       .menu-button, .submenu-button {
         background: linear-gradient(180deg, rgba(0,100,101,.88), rgba(0,100,101,.76)) !important;
@@ -5440,7 +5754,7 @@
         padding-top: 8px;
       }
       .sidebar .logout-btn {
-        border-radius: 999px !important;
+        border-radius: 16px !important;
         background: #ffffff !important;
         border: 1px solid rgba(0,100,101,.45) !important;
         color: #006465 !important;
@@ -5464,7 +5778,7 @@
       }
       .sidebar-support-toggle {
         width: 100%;
-        border-radius: 999px;
+        border-radius: 16px;
         border: 1px solid rgba(180,245,236,.3);
         background: linear-gradient(160deg, rgba(0,88,90,.86), rgba(0,74,75,.9));
         color: #e9fffd;
@@ -5478,7 +5792,7 @@
       .sidebar-support-icon {
         width: 36px;
         height: 36px;
-        border-radius: 999px;
+        border-radius: 16px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -5507,7 +5821,7 @@
         font-size: .73rem;
       }
       .sidebar-support-version {
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 4px 10px;
         border: 1px solid rgba(14, 196, 176, .28);
         background: rgba(8, 78, 84, .35);
@@ -5685,7 +5999,7 @@
         position: relative;
         width: 108px;
         height: 108px;
-        border-radius: 999px;
+        border-radius: 16px;
         overflow: hidden;
         flex: 0 0 auto;
         border: 3px solid rgba(0, 100, 101, .24);
@@ -5725,7 +6039,7 @@
       .profile-avatar-option img {
         width: 60px;
         height: 60px;
-        border-radius: 999px;
+        border-radius: 16px;
         object-fit: cover;
         box-shadow: 0 6px 14px rgba(15,23,42,.12);
       }
@@ -5765,7 +6079,7 @@
         width: 22px;
         height: 22px;
         padding: 6px;
-        border-radius: 999px;
+        border-radius: 16px;
         background: rgba(0, 100, 101, .86);
       }
       .profile-identity-title {
@@ -5810,7 +6124,7 @@
         gap: 12px;
       }
       .staff-card {
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 12px;
         border: 1px solid rgba(255,255,255,.18);
         background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.05));
@@ -5947,7 +6261,7 @@
       .staff-chat-list-unread {
         min-width: 18px;
         height: 18px;
-        border-radius: 999px;
+        border-radius: 16px;
         background: #0b8f8b;
         color: #ffffff;
         font-size: 10px;
@@ -6060,7 +6374,7 @@
       .staff-chat-modal-avatar {
         width: 48px;
         height: 48px;
-        border-radius: 999px;
+        border-radius: 16px;
         object-fit: cover;
         border: 1px solid rgba(255,255,255,.2);
       }
@@ -6130,7 +6444,7 @@
         align-items: center;
         gap: 6px;
         max-width: 100%;
-        border-radius: 999px;
+        border-radius: 16px;
         padding: 4px 10px;
         font-size: 11px;
         border: 1px solid rgba(11,100,98,.22);
@@ -6226,7 +6540,7 @@
         min-width: 20px;
         height: 20px;
         padding: 0 6px;
-        border-radius: 999px;
+        border-radius: 16px;
         background: rgba(248, 113, 113, .22);
         color: #fee2e2;
         font-size: 11px;
@@ -6322,7 +6636,7 @@
         min-width: 48px;
         height: 48px;
         min-height: 48px;
-        border-radius: 999px;
+        border-radius: 16px;
         align-self: flex-end;
         display: inline-flex;
         align-items: center;
@@ -6504,7 +6818,7 @@
         display: inline-flex;
         align-items: center;
         padding: 3px 8px;
-        border-radius: 999px;
+        border-radius: 16px;
         font-size: 11px;
         font-weight: 700;
       }
@@ -6640,7 +6954,7 @@
         top: 16px;
         bottom: 16px;
         width: 4px;
-        border-radius: 999px;
+        border-radius: 16px;
         background: linear-gradient(180deg, #2dd4bf, #0f766e);
       }
       .ticket-main-aside-item {
@@ -6818,7 +7132,7 @@
       .ticket-audio-circle {
         width: 96px;
         height: 96px;
-        border-radius: 999px;
+        border-radius: 16px;
         border: 8px solid rgba(45, 212, 191, .22);
         background: linear-gradient(180deg, #0f766e, #115e59);
         color: #ecfeff;
@@ -6858,7 +7172,7 @@
         grid-template-columns: repeat(12, minmax(0, 1fr));
         gap: 10px;
         padding: 14px;
-        border-radius: 999px;
+        border-radius: 16px;
         border: 1px solid rgba(230,255,253,.35);
         background: linear-gradient(140deg, rgba(6, 43, 42, .98), rgba(6, 31, 32, .98));
         box-shadow: 0 16px 34px rgba(0,0,0,.34);
@@ -7233,7 +7547,7 @@
         display: inline-flex;
         align-items: center;
         padding: 4px 10px;
-        border-radius: 999px;
+        border-radius: 16px;
         background: rgba(15, 118, 110, .1);
         color: #0f766e;
         font-size: 11px;
@@ -7374,7 +7688,7 @@
       .ticket-detail-extracted::-webkit-scrollbar-track,
       .ticket-detail-json pre::-webkit-scrollbar-track {
         background: rgba(3, 17, 18, .88);
-        border-radius: 999px;
+        border-radius: 16px;
       }
       .ticket-detail-modal::-webkit-scrollbar-thumb,
       .ticket-quote-modal::-webkit-scrollbar-thumb,
@@ -7382,7 +7696,7 @@
       .ticket-detail-extracted::-webkit-scrollbar-thumb,
       .ticket-detail-json pre::-webkit-scrollbar-thumb {
         background: linear-gradient(180deg, rgba(78, 227, 209, .92), rgba(27, 169, 155, .92));
-        border-radius: 999px;
+        border-radius: 16px;
         border: 2px solid rgba(3, 17, 18, .88);
       }
       .image-viewer-modal {
@@ -7417,7 +7731,7 @@
       }
       .charla-card {
         border: 1px solid rgba(230,255,253,.24);
-        border-radius: 999px;
+        border-radius: 16px;
         background: linear-gradient(145deg, rgba(0, 82, 85, .50), rgba(15, 23, 42, .34));
         padding: 14px;
         box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 10px 22px rgba(0,0,0,.16);
@@ -7621,7 +7935,7 @@
         }
 
         .mobile-section-card {
-          border-radius: 999px;
+          border-radius: 16px;
           background: var(--mobile-surface) !important;
           border: 1px solid var(--mobile-line) !important;
           box-shadow: 0 6px 16px rgba(15, 47, 46, .06);
@@ -8427,134 +8741,8 @@
         if (normalized.includes('edificio')) return 'Edificio';
         return 'Edificio';
       }
-      const PRELOADED_SERVICES_BASE = [
-        { numero: '0001', nombreServicio: 'Tropicana', direccionServicio: 'Roque Graseras 936', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
-        { numero: '0002', nombreServicio: 'Oficentro Lugano', direccionServicio: 'Plaza Independencia 822, esq. Florida', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
-        { numero: '0004', nombreServicio: 'Administración Ciriacos', direccionServicio: 'Libertador 1807 y Nueva York', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
-        { numero: '0005', nombreServicio: 'El Libertador', direccionServicio: 'Asunción 1282 Esq. Libertador', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
-        { numero: '0006', nombreServicio: 'Gala Trend', direccionServicio: 'Ellauri 560', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
-        { numero: '0007', nombreServicio: 'UP Rivera', direccionServicio: 'Avenida Rivera 2620', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
-        { numero: '0008', nombreServicio: 'Gala Point', direccionServicio: '8 de Octubre 2775', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
-        { numero: '0009', nombreServicio: 'Alpha Place', direccionServicio: 'Almirante Harwood 6509', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
-        { numero: '0010', nombreServicio: 'Giulianova II', direccionServicio: 'Bulevar España 2575', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
-        { numero: '0012', nombreServicio: 'Maui', direccionServicio: '26 de Marzo 3213', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
-        { numero: '0019', nombreServicio: 'Berro', direccionServicio: 'Pedro Fco. Berro 1178, esq. Ramon Masini', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
-        { numero: '0020', nombreServicio: 'Rocamadour', direccionServicio: 'Echevarriarza 3496', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Gonzalo Claudio', atencionCliente: 'MARIA JOSE RIVERO' },
-        { numero: '0024', nombreServicio: 'Green Port', direccionServicio: 'Juan Pedro Beranger 2279', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
-        { numero: '0034', nombreServicio: 'Vilago', direccionServicio: 'Av. De las Américas 5027 (Canelones)', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Julio Castro', atencionCliente: 'DAVID GENTA' },
-        { numero: '0044', nombreServicio: 'First Tower', direccionServicio: '26 de Marzo 3438', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
-        { numero: '0055', nombreServicio: 'Zermatt', direccionServicio: 'Bulevar Artigas 4009', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
-        { numero: '0075', nombreServicio: 'Parking Torre Tres', direccionServicio: 'Dr. Puey 2528', tipoServicioBrindar: 'SOPORTE DE VIDEO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIANA SPOSITO' },
-        { numero: '0094', nombreServicio: 'Puerto Pirata', direccionServicio: 'Sarmiento 2332', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Mariana Sposito', atencionCliente: 'DAVID GENTA' },
-        { numero: '0109', nombreServicio: 'Newland (Rivera y Soca)', direccionServicio: 'Av. Dr. Francisco Soca 1420', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Gonzalo Claudio', atencionCliente: 'MARIANA SPOSITO' },
-        { numero: '0124', nombreServicio: 'Natumar (Masterson Cerro)', direccionServicio: 'Egipto y Rep. Argentina', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIANA SPOSITO' },
-        { numero: '0132', nombreServicio: 'Topaj SA - Berkes', direccionServicio: 'Fortet 2179 entre Colman y Lopez', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Martín Vazquez', atencionCliente: 'MARIANA SPOSITO' },
-        { numero: '0146', nombreServicio: 'MVD 21', direccionServicio: '21 de septiembre 2622', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
-        { numero: '0168', nombreServicio: 'Cenit', direccionServicio: 'Luis A de Herrera 3785', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
-        { numero: '0171', nombreServicio: 'La Llum', direccionServicio: 'San Lucar 1643 esq Rivera', tipoServicioBrindar: 'MONITOREO / PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'DAVID GENTA' },
-        { numero: '0184', nombreServicio: 'Nobleza Naviera', direccionServicio: 'Puerto Montevideo', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'Francisco Bartellone' },
-        { numero: '0203', nombreServicio: 'Isla de las Gaviotas', direccionServicio: 'Rbla. República de Chile 4525', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Julio Castro', atencionCliente: 'DAVID GENTA' },
-        { numero: '0221', nombreServicio: 'Site Italia', direccionServicio: 'Av Italia 3034', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
-        { numero: '0247', nombreServicio: 'Chucarro', direccionServicio: 'Chucarro 1329', tipoServicioBrindar: 'RESPUESTA DE ALARMA', representanteComercial: 'Gonzalo Claudio', atencionCliente: 'MARIANA SPOSITO' },
-        { numero: '0283', nombreServicio: 'Patria Golf', direccionServicio: 'Patria 511', tipoServicioBrindar: 'CONTROL DE ACCESO', representanteComercial: 'Gonzalo Claudio', atencionCliente: 'DAVID GENTA' },
-        { numero: '0305', nombreServicio: 'MBC - Montevideo Bussines Center', direccionServicio: 'Cebollati 1474', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Gastón Silva', atencionCliente: 'MARIANA SPOSITO' },
-        { numero: '0327', nombreServicio: 'Sudeste', direccionServicio: 'Calle 24 y 21 peninsula', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Fernando Grubert', atencionCliente: 'DAVID GENTA' },
-        { numero: '0344', nombreServicio: 'Casa Masterson', direccionServicio: 'Vanguardia y Rivera', tipoServicioBrindar: 'RESPUESTA DE ALARMA', representanteComercial: '', atencionCliente: 'MARIANA SPOSITO' },
-        { numero: '0379', nombreServicio: 'Renaissance', direccionServicio: 'José L.Osorio 1185, esq. 26 de Marzo', tipoServicioBrindar: 'PORTERIA VIRTUAL', representanteComercial: 'Francisco Bartellone', atencionCliente: 'MARIA JOSE RIVERO' },
-        { numero: '0400', nombreServicio: 'Fabrica Pan de Azucar (PLANTA DE CANNABIS)', direccionServicio: 'Ruta 37 KM 20 Pan de Azucar', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Fernando Grubert', atencionCliente: 'MARIANA SPOSITO' },
-        { numero: '0422', nombreServicio: 'Galería London', direccionServicio: 'Av. 18 de julio 1066', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Gastón Silva', atencionCliente: 'MARIA JOSE RIVERO' },
-        { numero: '0451', nombreServicio: 'Nostrum Bay', direccionServicio: 'La Paz 1020', tipoServicioBrindar: 'MONITOREO', representanteComercial: 'Gastón Silva', atencionCliente: 'DAVID GENTA' },
-      ];
-
-      const EXTRA_PRELOADED_SERVICES_RAW = `Numero	Servicio	Dirección	Tipo de Servicio	Comercial	Atencion al cliente
-0045	Ebro	Miguel Barreiro 3281	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0046	León	Andes 1358	PORTERIA VIRTUAL	Francisco Bartellone	DAVID GENTA
-0047	Altos de Brasil II	Av. Brasil 2723	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0048	Toulouse II	M.Barreiro 3343	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0049	Flaminio Palatino	Av. Italia 2982, esq. Juan Spikerman	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0053	Guaruja	A. Chucarro 1235	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
-0054	Sigma II	J. Manuel Errazquin 2368	PORTERIA VIRTUAL	Francisco Bartellone	MARIA JOSE RIVERO
-0055	Zermatt	Bulevar Artigas 4009	MONITOREO	Francisco Bartellone	MARIA JOSE RIVERO
-0056	Carmel	Juan A. Rodriguez 1424	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
-0057	Residencial Dino	21 de Setiembre 3065	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0059	Garibaldi Plaza	Garibaldi 2678	PORTERIA VIRTUAL	Francisco Bartellone	DAVID GENTA
-0060	Alamos de Carrasco	Alamos 2301 y Av. Bolivia	PORTERIA VIRTUAL	Julio Castro	MARIA JOSE RIVERO
-0061	Arrayan	Agracida 2774 - Alfredo García Morales 1116	PORTERIA VIRTUAL	Francisco Bartellone	DAVID GENTA
-0062	Solano Antuña I	Solano Antuña 2930	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0063	My Suites	Benito Blanco 674	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
-0065	Nariño	Antonio Bachini 7170	PORTERIA VIRTUAL	Francisco Bartellone	MARIANA SPOSITO
-0066	Omikron	Benito Blanco 620	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0067	Torre de los Pocitos	Buxareo 1166	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0070	Villa Romana	Scoseria 2854 Esq. Roque Graseras	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0071	Cascada	Berro 1013	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0072	Residencial Setiembre	Pedro Berro 653 Esq. 21 de Setiembre	PORTERIA VIRTUAL	Francisco Bartellone	MARIA JOSE RIVERO
-0073	Carrera	Av. Brasil 3092	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0074	Mont Cervin	Millan 3359 esq. Cisplatina	PORTERIA VIRTUAL	Francisco Bartellone	DAVID GENTA
-0075	Parking Torre Tres	Dr. Puey 2528	SOPORTE DE VIDEO	Francisco Bartellone	MARIANA SPOSITO
-0077	Bahia Esmeralda	Av. Brasil 2740 Torre B y Av. Brasil 2730 Torre A	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0078	Le Vieux Paris	Bulevar España 2721 Esq. Sarmiento	PORTERIA VIRTUAL	Francisco Bartellone	MARIA JOSE RIVERO
-0079	Marco Polo	Jose Martí 3419	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
-0080	Waterloo	Pedro Berro 1238	PORTERIA VIRTUAL	Francisco Bartellone	MARIA JOSE RIVERO
-0081	Aquum	José L Osorio 1201	MONITOREO	Gonzalo Claudio	DAVID GENTA
-0082	Nuevos vientos Golf	Ramón Fernández 230	PORTERIA VIRTUAL	Gastón Silva	MARIA JOSE RIVERO
-0085	Parque Esmeralda	Av. Italia 2857	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
-0086	YES	26 de marzo 3420	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
-0088	Lift EME	Ana Monterroso de la Lavalleja 2190	MONITOREO	Gonzalo Claudio	MARIA JOSE RIVERO
-0089	Lift Monterroso	Ana Monterroso de la Lavalleja 2032	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
-0091	Luna del Lago	26 de Marzo 1287	PORTERIA VIRTUAL	Francisco Bartellone	DAVID GENTA
-0092	Maria Pita	Bulevar España 2175	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
-0093	UCM	Bulevar Artigas 2003	PORTERIA VIRTUAL	Francisco Bartellone	MARIANA SPOSITO
-0094	Puerto Pirata	Sarmiento 2332	PORTERIA VIRTUAL	Mariana Sposito	DAVID GENTA
-0095	Playa Oriente	26 de Marzo 1306	PORTERIA VIRTUAL	Mariana Sposito	DAVID GENTA
-0096	Residencial Artigas	Av. Bulevar Artigas. Esq. 18 de Julio	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
-0097	Chapalco	Terú 546	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0098	Atenea	26 de Marzo 3407	PORTERIA VIRTUAL	Francisco Bartellone	MARIA JOSE RIVERO
-0099	Via 21	Obligado 860	PORTERIA VIRTUAL	Julio Castro	DAVID GENTA
-0100	Internacional II	Dr. Arturo Baliñas 1387	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
-0101	Puerta del Sol IV	Av. Brasil 2689	PORTERIA VIRTUAL	Mariana Sposito	MARIA JOSE RIVERO
-0102	Kyoto	Jaime Zudañez 2760	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0104	Austral	Hector Gutierrez Ruiz 1296. Esq. San Jose	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0105	Lancaster	Dr. Enrique Tarigo 1332/34 /Plaza Cagancha)	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0106	Golino	Francisco Vidal 785	PORTERIA VIRTUAL	Francisco Bartellone	DAVID GENTA
-0108	Canaro	Francisco Canaro 2282	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0109	Newland (Rivera y Soca)	Av. Dr. Francisco Soca 1420	MONITOREO	Gonzalo Claudio	MARIANA SPOSITO
-0111	Aloa	Magallanes 1418	MONITOREO	Gonzalo Claudio	DAVID GENTA
-0112	Palmas de Carrasco	Alberdi 6337	MONITOREO	Gonzalo Claudio	MARIA JOSE RIVERO
-0113	La Strada	Sarmiento 2686	PORTERIA VIRTUAL	Francisco Bartellone	DAVID GENTA
-0114	Regulus	Benito Blanco 861	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0115	Puerto Vallarta	Rambla Rep. Del Peru 981 esq. Jose Marti	PORTERIA VIRTUAL		MARIA JOSE RIVERO
-0116	Parque Miramar	Av. Gabriela Mistral 2218	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0117	Soleil Playa	Juan Maria Perez 2857	PORTERIA VIRTUAL	Francisco Bartellone	DAVID GENTA
-0118	Avita Libertador	Av. Libertador 1760, esq. Valparaiso	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0119	Uniq	Scoseria 2672	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0120	Torre Modelo	Jose Batlle Ordoñez 3090 esq Centenario	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0122	Marejada	Juan Maria Perez 2924	PORTERIA VIRTUAL	Mariana Sposito	MARIA JOSE RIVERO
-0123	Cap Camarat	Samuel Blixen 4480	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
-0124	Natumar (Masterson Cerro)	Egipto y Rep. Argentina	MONITOREO	Francisco Bartellone	MARIANA SPOSITO
-0125	La Selva	Rafael Eguren 3344	MONITOREO		MARIANA SPOSITO
-0126	Swing 23	Julio Maria Sosa 2325	MONITOREO	Francisco Bartellone	DAVID GENTA
-0127	Mon Reve	AMERICO RICALDONI 2527	PORTERIA VIRTUAL	Gonzalo Claudio	DAVID GENTA
-0128	Diagonal	Av. Libertador 1839. esq. Nueva York	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0129	Cala Mayor	Julio Maria Sosa 2327	PORTERIA VIRTUAL	Gonzalo Claudio	MARIA JOSE RIVERO
-0130	Coopefhi	Missisipi 1536	MONITOREO	Gonzalo Claudio	MARIA JOSE RIVERO
-0131	Torre Independencia	Andes 1365 entre 18 y Colonia	MONITOREO	Francisco Bartellone	MARIA JOSE RIVERO
-0132	Topaj SA - Berkes	Fortet 2179 entre Colman y Lopez	MONITOREO	Martín Vazquez	MARIANA SPOSITO
-0146	MVD 21	21 de septiembre 2622	PORTERIA VIRTUAL	Francisco Bartellone	DAVID GENTA
-0168	Cenit	Luis A de Herrera 3785	MONITOREO	Francisco Bartellone	DAVID GENTA
-0171	La Llum	San Lucar 1643 esq Rivera	MONITOREO / PORTERIA VIRTUAL	Francisco Bartellone	DAVID GENTA
-0184	Nobleza Naviera	Puerto Montevideo	MONITOREO	Francisco Bartellone	Francisco Bartellone
-0203	Isla de las Gaviotas	Rbla. República de Chile 4525	MONITOREO	Julio Castro	DAVID GENTA
-0221	Site Italia	Av Italia 3034	MONITOREO	Francisco Bartellone	MARIA JOSE RIVERO
-0247	Chucarro	Chucarro 1329	RESPUESTA DE ALARMA	Gonzalo Claudio	MARIANA SPOSITO
-0283	Patria Golf	Patria 511	CONTROL DE ACCESO	Gonzalo Claudio	DAVID GENTA
-0305	MBC - Montevideo Bussines Center	Cebollati 1474	PORTERIA VIRTUAL	Gastón Silva	MARIANA SPOSITO
-0327	Sudeste	Calle 24 y 21 peninsula	PORTERIA VIRTUAL	Fernando Grubert	DAVID GENTA
-0344	Casa Masterson	Vanguardia y Rivera	RESPUESTA DE ALARMA		MARIANA SPOSITO
-0379	Renaissance	José L.Osorio 1185, esq. 26 de Marzo	PORTERIA VIRTUAL	Francisco Bartellone	MARIA JOSE RIVERO
-0400	Fabrica Pan de Azucar (PLANTA DE CANNABIS)	Ruta 37 KM 20 Pan de Azucar	MONITOREO	Fernando Grubert	MARIANA SPOSITO
-0422	Galería London	Av. 18 de julio 1066	MONITOREO	Gastón Silva	MARIA JOSE RIVERO
-0451	Nostrum Bay	La Paz 1020	MONITOREO	Gastón Silva	DAVID GENTA
-0452	San Felipe y Santiago	Lima 1288 // LIBERTADOR 1937	PORTERIA VIRTUAL	Gonzalo Cluadio	`;
+      const PRELOADED_SERVICES_BASE = [];
+      const EXTRA_PRELOADED_SERVICES_RAW = '';
 
       function normalizeCatalogNumero(value) {
         const digits = String(value || '').replace(/\D/g, '');
@@ -8727,444 +8915,7 @@
       const DEFAULT_PROFILE_AVATAR_ID = PROFILE_AVATAR_OPTIONS[0].id;
 
 
-      const SERVICE_DATES_RAW = `1 - 1/9/2018
-2 - 21/12/2017
-5 - 2/2/2018
-6 - 1/3/2018
-7 - 1/10/2017
-8 - 1/5/2019
-9 - 1/11/2019
-10 - 1/2/2020
-11 -
-12 - 1/1/2022
-13 - 1/9/2019
-14 - 15/2/2019
-15 - 10/9/2019
-16 - 1/4/2019
-17 - 15/5/2020
-18 - 1/6/2023
-19 - 1/8/2020
-20 - 15/9/2020
-21 - 19/10/2020
-22 - 05/11/2020
-23 - 9/11/2020
-24 - 16/11/2020
-25 - 28/11/2020
-26 - 01/10/2024
-27 - 24/11/2020
-28 - 1/12/2020
-29 - 8/12/2020
-30 - 4/12/2020
-31 - 1/1/2021
-32 - 1/1/2021
-33 - 7/1/2021
-34 - 01/09/2023
-35 - 1/12/2020
-36 - 4/1/2024
-37 - 9/2/2021
-38 - 5/3/2021
-39 - 6/3/2021
-40 - 17/03/2021
-41 - 1/3/2021
-42 - 22/3/2021
-43 - 31/3/2021
-44 - 01/07/2024
-45 - 5/4/2021
-46 - 23/4/2021
-47 - 13/4/2021
-48 - 28/4/2021
-49 - 3/5/2021
-50 - 20/5/2021
-51 - 10/05/2021
-52 - 9/6/2021
-53 - 1/6/2021
-54 - 26/5/2021
-55 - 20/5/2021
-56 - 11/6/2021
-57 - 14/7/2021
-58 - 30/07/2021
-59 - 30/7/2021
-60 - 16/8/2021
-61 - 16/8/2021
-62 - 27/8/2021
-63 - 20/8/2021
-64 - 30/10/2021
-65 - 20/8/2021
-66 - 10/9/2021
-67 - 7/9/2021
-68 - 10/09/2021
-69 - 15/09/2021
-70 - 21/9/2021
-71 - 1/10/2021
-72 - 8/10/2021
-73 - 10/10/2021
-74 - 15/10/2021
-75 - 27/10/2021
-76 - 10/11/2021
-77 - 11/10/2021
-78 - 19/11/2021
-79 - 24/11/2021
-80 - 30/11/2021
-81 - 5/1/2022
-82 - 23/12/2021
-83 - 09/12/2021
-84 - 01/02/2022
-85 - 2/1/2021
-86 - 25/2/2022
-87 - 17/01/2022
-88 - 21/12/2021
-89 - 23/12/2021
-90 - 14/02/2022
-91 - 3/2/2022
-92 - 3/3/2022
-93 - 17/2/2022
-94 - 1/6/2022
-95 - 26/3/2022
-96 - 11/3/2022
-97 - 8/3/2022
-98 - 25/4/2022
-99 - 28/9/2022
-100 - 1/1/2023
-101 - 28/4/2022
-102 - 1/6/2022
-103 - 09/04/2022
-104 - 1/4/2022
-105 - 1/4/2022
-106 - 27/4/2022
-107 - 01/06/2022
-109 - 23/3/2024
-111 - 20/5/2022
-112 - 1/8/2022
-113 - 20/7/2022
-114 - 16/8/2022
-115 - 24/6/2022
-116 - 3/8/2022
-117 - 28/9/2022
-118 - 10/10/2022
-119 - 10/10/2022
-120 - 23/8/2022
-121 - 2022
-122 - 19/9/2022
-123 - 5/10/2022
-124 - 10/8/2022
-125 - 13/9/2022
-126 - 12/10/2022
-127 - 17/10/2022
-128 - 1/11/2022
-129 - 2/1/2023
-130 - 9/11/2022
-131 - 11/11/2022
-132 - 1/12/2022
-133 - 1/12/2022
-134 - 9/12/2022
-135 - 12/1/2023
-136 - 23/12/2022
-137 - 23/12/2022
-138 - 15/1/2023
-139 - 08/01/2021
-140 - 2/1/2023
-141 - 1/2/2023
-142 - 25/2/2023
-143 - 1/3/2023
-144 - 17/2/2023
-145 - 03/03/2023
-146 - 17/3/2023
-147 - 7/3/2023
-148 - 10/03/2023
-149 - 1/4/2023
-150 - 7/4/2023
-151 - 8/4/2024
-152 - 8/6/2023
-153 - 25/4/2023
-154 - 1/7/2023
-155 - 10/5/2023
-156 - 20/5/2023
-157 - 18/5/2023
-158 - 25/5/2023
-159 - 1/6/2023
-160 - 1/3/2023
-162 - 22/6/2023
-163 - 1/10/2023
-164 - 11/7/2023
-165 - 1/7/2023
-166 - 28/7/2023
-167 - 2/7/2023
-168 - 12/7/2023
-169 - 1/8/2023
-170 - 12/7/2023
-171 - 4/7/2023
-172 - 4/8/2023
-173 - 24/7/2023
-174 - 19/10/2023
-175 - 18/10/2023
-176 - 28/7/2023
-177 - 2/8/2023
-178 - 7/8/2023
-179 - 1/9/2023
-180 - 1/9/2023
-181 - 2/10/2023
-182 - 1/10/2023
-183 - 6/9/2023
-184 - 31/8/2023
-185 - 8/9/2023
-186 - 19/9/2023
-187 - 22/12/2023
-188 -
-189 - 9/10/2023
-190 - 27/10/2023
-191 - 8/12/2023
-192 - 3/11/2023
-193 - 22/12/2023
-194 - 13/11/2023
-195 - 11/1/2024
-196 -
-197 -
-198 - 11/12/2023
-199 - 27/11/2023
-200 - 8/12/2023
-201 - 28/12/2023
-202 - 19/12/2023
-203 - pi
-204 - 3/1/2024
-205 - 9/1/2023
-206 - 11/1/2024
-207 - 30/11/2023
-209 - 22/12/2023
-210 - 01/08/2022
-211 - 5/1/2024
-212 - 22/12/2023
-213 - 1/3/2023
-214 - 11/1/2024
-215 - 8/1/2024
-216 - 11/2/2024
-217 - 5/4/2024
-218 - 9/3/2024
-219 - 9/3/2024
-220 - 7/2/2024
-221 - 5/2/2024
-222 - 21/3/2024
-223 - 31/01/2024
-224 - 11/3/2024
-225 - 8/3/2024
-226 - 16/2/2024
-227 - 6/6/2024
-228 - 16/5/2024
-229 - 18/03/2024
-230 - 7/3/2024
-231 - 25/3/2024
-232 - 26/2/2024
-233 - 28/3/2024
-234 - 26/4/2024
-235 - 19/4/2024
-236 -
-237 - 24/5/2024
-238 - 24/5/2024
-239 - 11/5/2024
-240 -
-241 - 21/5/2024
-242 - 22/6/2024
-243 - 15/5/2024
-244 - 18/6/2024
-245 - 27/6/2024
-246 - 1/1/2024
-247 - 1/1/2024
-248 - 5/7/2024
-249 - 14/6/2024
-250 - 23/07/2024
-251 - 21/6/2024
-252 - 21/6/2024
-253 - 21/06/2024
-254 - 17/9/2024
-255 - 26/6/2024
-256 - 4/7/2024
-257 - 11/7/2024
-258 - 15/07/2024
-259 - 15/7/2024
-260 - 15/07/2024
-261 - 15/7/2024
-262 - 15/07/2024
-263 - 15/07/2024
-264 - 15/07/2024
-265 - 15/8/2024
-266 - 17/7/2024
-267 - 19/8/2024
-268 - 24/7/2024
-269 - 2/8/2024
-270 - 9/8/2024
-271 - 20/8/2024
-272 -
-273 - 14/8/2024
-274 - 15/8/2024
-275 - 16/8/2024
-276 - 19/8/2024
-277 - 21/8/2024
-278 - 22/8/2024
-279 - 22/8/2024
-280 - 22/8/2024
-281 - 28/8/2024
-282 - 19/8/2024
-283 - 29/8/2024
-284 - 1/9/2024
-285 - 6/9/2024
-286 - 9/9/2024
-287 - 9/9/2024
-288 - 11/9/2024
-289 - 23/9/2024
-290 - -
-291 - 30/9/2024
-292 - 30/9/2024
-293 - 30/9/2024
-294 - 2/10/2024
-295 - 8/10/2024
-296 - 9/10/2024
-297 - 16/2/2023
-298 - 16/10/2024
-299 - 17/10/2024
-300 - 17/10/2024
-301 - 18/10/2024
-302 - 21/10/2024
-303 - 23/10/2024
-304 - 24/10/2024
-305 - 24/10/2024
-306 - 28/10/2024
-307 - 29/10/2024
-308 - 30/10/2024
-309 - 31/10/2024
-310 - 8/11/2024
-311 - 8/11/2024
-312 - 8/11/2024
-313 - 8/11/2024
-314 - 12/11/2024
-315 - 14/11/2024
-316 - 15/11/2024
-317 - 2/12/2024
-318 - 9/12/2024
-319 - 10/12/2024
-320 - 16/12/2024
-321 -
-322 - 27/12/2024
-323 - 27/12/2024
-324 - 20/12/2024
-325 - 1/1/2025
-326 - 27/12/2024
-327 - 8/1/2025
-328 - 27/12/2024
-329 - 9/1/2025
-330 - 14/1/2025
-331 - 15/1/2025
-332 - 15/1/2025
-333 - 21/1/2025
-334 - 3/2/2025
-335 - 23/1/2025
-336 - 12/2/2025
-337 - 19/2/2025
-338 - 19/2/2025
-339 - 5/3/2025
-340 - 21/3/2025
-341 - 24/3/2025
-342 - 25/3/2025
-343 - 28/3/2025
-344 - 22/10/2025
-345 - 3/4/2025
-346 - 4/4/2025
-347 - 05/08/2022
-348 - 23/01/2025
-349 - 30/04/2025
-350 - 05/05/2025
-351 - 08/05/2025
-352 - 12/05/2025
-353 - 13/05/2025
-354 - 14/05/2025
-355 - 14/05/2025
-356 - 13/05/2025
-357 - 09/05/2025
-358 - 26/05/2025
-359 - 02/06/2025
-360 - 18/06/2025
-361 - 02/06/2025
-362 - 09/06/2025
-363 - 11/06/2025
-364 - 18/06/2025
-366 - 01/10/2024
-370 - 18/06/2025
-371 - 18/06/2025
-372 - 18/06/2025
-373 - 23/06/2025
-374 - 25/06/2025
-375 - 30/06/2025
-376 - 01/07/2025
-379 - 1/9/2023
-383 - 08/07/2025
-384 - 12/06/2024
-385 - 11/07/2025
-386 - 01/05/2025
-387 - 16/07/2025
-388 - 10/11/2023
-389 - 31/07/2025
-390 - 01/05/2019
-391 - 25/07/2025
-392 - 31/07/2025
-393 - 31/07/2025
-394 - 01/08/2025
-395 - 07/08/2025
-396 - 15/08/2025
-397 - 15/08/2025
-398 - 04/09/2025
-399 - 05/09/2025
-400 - 09/09/2025
-401 - 12/09/2025
-402 - 12/09/2025
-403 - 23/09/2025
-404 - 25/09/2025
-405 - 01/10/2025
-406 - 03/10/2025
-407 - 08/10/2025
-408 - 07/10/2025
-409 - 20/10/2025
-410 - 20/10/2025
-411 - 20/10/2025
-412 - 22/10/2025
-413 - 22/10/2025
-414 - 24/10/2025
-415 - 25/11/2025
-416 - 11/11/2025
-417 - 13/11/2025
-418 - 21/11/2025
-419 - 24/11/2025
-420 - 04/12/2025
-421 - 5/12/2025
-422 - 5/12/2025
-423 - 5/12/2025
-424 - 10/12/2025
-425 - 10/12/2025
-426 - 11/12/2025
-427 - 18/12/2025
-428 - 18/12/2025
-429 - 18/12/2025
-430 - 18/12/2025
-431 - 18/12/2025
-432 - 19/12/2025
-433 - 19/12/2025
-434 - 22/12/2025
-435 - 22/12/2025
-436 - 23/12/2025
-437 - 06/01/2026
-438 - 09/01/2026
-439 - 13/01/2026
-440 - 19/01/2026
-441 - 16/01/2026
-442 - 16/01/2026
-443 - 16/01/2026
-444 - 05/02/2026
-445 - 13/02/2026
-446 - 13/02/2026
-447 - 13/02/2026
-448 - 16/02/2026
-449 - 26/02/2026
-450 - 02/03/2026
-451 - 06/03/2026
-452 - 12/03/2026
-453 - 13/03/2026`;
+      const SERVICE_DATES_RAW = '';
 
       function normalizeProvidedDate(value) {
         const raw = String(value || '').trim();
@@ -10194,7 +9945,7 @@
         const [fechaCarga, setFechaCarga] = useState('');
         const [tiempoInstalacion, setTiempoInstalacion] = useState('');
         const [costo, setCosto] = useState('');
-        const [status, setStatus] = useState('Pendiente');
+        const [status, setStatus] = useState('Pendiente de agenda');
         const [fechaAlta, setFechaAlta] = useState('');
         const [cobro, setCobro] = useState('');
         const [fechaRealizado, setFechaRealizado] = useState('');
@@ -10251,6 +10002,18 @@
         const [agendaDayModal, setAgendaDayModal] = useState({ open: false, day: null });
         const [agendaTechFilter, setAgendaTechFilter] = useState('');
         const [agendaInstallFilter, setAgendaInstallFilter] = useState('');
+        const [agendaTechStatusFilter, setAgendaTechStatusFilter] = useState('all');
+        const [agendaInstallStatusFilter, setAgendaInstallStatusFilter] = useState('all');
+        const [agendaTechResponsibleFilter, setAgendaTechResponsibleFilter] = useState('all');
+        const [agendaInstallResponsibleFilter, setAgendaInstallResponsibleFilter] = useState('all');
+        const [agendaTechViewMode, setAgendaTechViewMode] = useState('week');
+        const [agendaInstallViewMode, setAgendaInstallViewMode] = useState('week');
+        const [agendaTechSelectedTaskId, setAgendaTechSelectedTaskId] = useState('');
+        const [agendaInstallSelectedTaskId, setAgendaInstallSelectedTaskId] = useState('');
+        const [agendaTechExpandedTechId, setAgendaTechExpandedTechId] = useState('');
+        const [agendaInstallExpandedTechId, setAgendaInstallExpandedTechId] = useState('');
+        const [agendaTechSelectedTechId, setAgendaTechSelectedTechId] = useState('');
+        const [agendaInstallSelectedTechId, setAgendaInstallSelectedTechId] = useState('');
         const [adminCredentialRequests, setAdminCredentialRequests] = useState([]);
         const [userCredentialRequests, setUserCredentialRequests] = useState([]);
         const [staffMembers, setStaffMembers] = useState([]);
@@ -12357,6 +12120,19 @@
           const dt = new Date(value);
           return Number.isNaN(dt.getTime()) ? null : dt;
         }
+        function parseFirestoreDateTime(value) {
+          if (!value) return null;
+          if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+          if (typeof value?.toDate === 'function') {
+            const dt = value.toDate();
+            return dt instanceof Date && !Number.isNaN(dt.getTime()) ? dt : null;
+          }
+          if (typeof value === 'number') {
+            const dt = new Date(value);
+            return Number.isNaN(dt.getTime()) ? null : dt;
+          }
+          return parseAgendaDateTime(value);
+        }
 
         function dayKey(date) {
           return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -12367,6 +12143,37 @@
           if (raw.includes('alta') || raw.includes('high') || raw.includes('urgente')) return 'agenda-priority-alta';
           if (raw.includes('media') || raw.includes('medium')) return 'agenda-priority-media';
           return 'agenda-priority-baja';
+        }
+        const TECHNICIAN_NAME_MAP = {
+          '78907': 'Félix Vincentt',
+          '9139': 'Guardia Virtual',
+          '88850': 'Guardia Virtual',
+          '83911': 'Federico Fuentes',
+          '78934': 'Yoinel Ravelo',
+          '83769': 'Noel Padilla',
+          '78873': 'Víctor da Silva',
+          '86348': 'Java Blandín',
+        };
+        const INSTALL_TECHNICIAN_NAME_MAP = {
+          '86896': '86896',
+          '86897': '86897',
+          '86898': '86898',
+          '86899': '86899',
+          '86348': 'Java Blandín',
+        };
+        function resolvePriorityLabel(value) {
+          const raw = String(value ?? '').trim().toLowerCase();
+          if (raw === '3' || raw.includes('alta')) return 'Alta';
+          if (raw === '2' || raw.includes('media')) return 'Media';
+          if (raw === '1' || raw.includes('baja')) return 'Baja';
+          return String(value || 'Baja').trim() || 'Baja';
+        }
+        function resolveTechnicianDisplayName(tecnicoId, map = TECHNICIAN_NAME_MAP) {
+          const normalized = String(tecnicoId || '').trim();
+          if (!normalized) return 'Técnico sin asignar';
+          const mapped = map[normalized];
+          if (mapped) return mapped;
+          return `Técnico #${normalized}`;
         }
 
         function agendaStateClass(value) {
@@ -12420,13 +12227,14 @@
             return {
               id: item?.ticketId || `${item?.tecnicoId || 'sin-tecnico'}-${idx}`,
               tecnicoId: String(item?.tecnicoId || '').trim() || 'Técnico sin asignar',
+              tecnicoNombre: resolveTechnicianDisplayName(item?.tecnicoId, TECHNICIAN_NAME_MAP),
               cliente: String(item?.cliente || '').trim() || String(item?.clienteId || '').trim() || 'Cliente sin nombre',
               clienteId: String(item?.clienteId || '').trim(),
               fechaHora,
               fechaHoraKey: fechaHora ? dayKey(fechaHora) : '',
               direccion: String(item?.direccion || '').trim() || 'Sin dirección',
               orientacion: String(item?.orientacion || '').trim() || 'Sin descripción',
-              prioridad: String(item?.prioridad || '').trim() || 'Baja',
+              prioridad: resolvePriorityLabel(item?.prioridad),
               estado: String(item?.estado || '').trim() || 'Pendiente',
               ticketId: String(item?.ticketId || '').trim(),
               ticketTitulo: String(item?.ticketTitulo || '').trim() || String(item?.orientacion || '').trim() || 'Sin descripción',
@@ -12442,28 +12250,14 @@
           try {
             setAgendaLoading(true);
             setAgendaError('');
-            setAgendaRangeWarning('');
-
             const response = await fetch(AUVO_AGENDA_ENDPOINT, {
               method: 'GET',
               headers: { 'Content-Type': 'application/json' },
             });
-
-            if (!response.ok) {
-              throw new Error(`Cloud Run ${response.status}`);
-            }
-
-            const json = await response.json();
-            if (!json?.ok) {
-              throw new Error('Respuesta inválida del endpoint de agenda');
-            }
-
-            const rawItems = Array.isArray(json?.data) ? json.data : [];
-            applyAgendaPayload(rawItems, json?.rango || null, 'endpoint');
+            if (!response.ok) throw new Error(`Cloud Run ${response.status}`);
           } catch (error) {
-            console.error('Error cargando agenda AUVO:', error);
-            setAgendaError('No se pudo cargar la agenda de técnicos.');
-            setAgendaRows([]);
+            console.error('Error sincronizando agenda AUVO:', error);
+            setAgendaError('No se pudo forzar la sincronización de agenda.');
           } finally {
             setAgendaLoading(false);
           }
@@ -12503,13 +12297,14 @@
             return {
               id: item?.ticketId || `${item?.tecnicoId || 'sin-tecnico'}-${idx}`,
               tecnicoId: String(item?.tecnicoId || '').trim() || 'Técnico sin asignar',
+              tecnicoNombre: resolveTechnicianDisplayName(item?.tecnicoId, INSTALL_TECHNICIAN_NAME_MAP),
               cliente: String(item?.cliente || '').trim() || String(item?.clienteId || '').trim() || 'Cliente sin nombre',
               clienteId: String(item?.clienteId || '').trim(),
               fechaHora,
               fechaHoraKey: fechaHora ? dayKey(fechaHora) : '',
               direccion: String(item?.direccion || '').trim() || 'Sin dirección',
               orientacion: orientacion || 'Sin descripción',
-              prioridad: String(item?.prioridad || '').trim() || 'Baja',
+              prioridad: resolvePriorityLabel(item?.prioridad),
               estado: String(item?.estado || '').trim() || 'Pendiente',
               ticketId: String(item?.ticketId || '').trim(),
               ticketTitulo: ticketTitulo || orientacion || 'Sin descripción',
@@ -12523,85 +12318,91 @@
           try {
             setAgendaInstallLoading(true);
             setAgendaInstallError('');
-            setAgendaInstallRangeWarning('');
             const response = await fetch(AUVO_AGENDA_INSTALL_ENDPOINT, {
               method: 'GET',
               headers: { 'Content-Type': 'application/json' },
             });
             if (!response.ok) throw new Error(`Cloud Run ${response.status}`);
-            const json = await response.json();
-            if (!json?.ok) throw new Error('Respuesta inválida del endpoint de instalaciones');
-            const rawItems = Array.isArray(json?.data) ? json.data : [];
-            applyAgendaInstallPayload(rawItems, json?.rango || null, 'endpoint');
           } catch (error) {
-            console.error('Error cargando agenda AUVO instalaciones:', error);
-            setAgendaInstallError('No se pudo cargar 2W Instalaciones.');
-            setAgendaInstallRows([]);
+            console.error('Error sincronizando agenda AUVO instalaciones:', error);
+            setAgendaInstallError('No se pudo forzar la sincronización de instalaciones.');
           } finally {
             setAgendaInstallLoading(false);
           }
         }
 
         useEffect(() => {
-          let fallbackTimer = null;
-          let refreshInterval = null;
-          let resolvedByWebhook = false;
-          const REFRESH_EVERY_MS = 5 * 60 * 1000;
-
-          if (!rtdb) {
-            void fetchAuvoAgenda();
-            refreshInterval = window.setInterval(() => { void fetchAuvoAgenda(); }, REFRESH_EVERY_MS);
-            return () => {
-              if (refreshInterval) window.clearInterval(refreshInterval);
-            };
-          }
-
-          const ref = rtdb.ref(AUVO_AGENDA_WEBHOOK_RTDB_PATH);
-          const handleValue = (snap) => {
-            try {
-              const payload = snap.val();
-              const rawItems = Array.isArray(payload?.data)
-                ? payload.data
-                : Array.isArray(payload?.items)
-                  ? payload.items
-                  : Array.isArray(payload)
-                    ? payload
-                    : [];
-              if (!rawItems.length) {
-                if (!resolvedByWebhook) {
-                  if (fallbackTimer) window.clearTimeout(fallbackTimer);
-                  fallbackTimer = window.setTimeout(() => { void fetchAuvoAgenda(); }, 350);
-                }
-                return;
-              }
-              resolvedByWebhook = true;
-              setAgendaError('');
-              setAgendaLoading(false);
-              applyAgendaPayload(rawItems, payload?.rango || null, 'webhook');
-            } catch (error) {
-              console.error('Error procesando agenda webhook 2Workers:', error);
-              if (!resolvedByWebhook) void fetchAuvoAgenda();
-            }
-          };
-          const handleError = (error) => {
-            console.error('Error escuchando agenda webhook 2Workers:', error);
-            if (!resolvedByWebhook) void fetchAuvoAgenda();
-          };
-
           setAgendaLoading(true);
-          ref.on('value', handleValue, handleError);
-          void fetchAuvoAgenda();
-          refreshInterval = window.setInterval(() => { void fetchAuvoAgenda(); }, REFRESH_EVERY_MS);
+          setAgendaInstallLoading(true);
+          const mapFirestoreTask = (doc, idx, map, prefix) => {
+            const item = doc.data() || {};
+            const fechaHora = parseFirestoreDateTime(item?.fechaHora);
+            const orientacion = String(item?.orientacion || '').trim();
+            const ticketTitulo = String(item?.ticketTitulo || '').trim();
+            return {
+              id: String(item?.taskId || item?.ticketId || doc.id || `${prefix}-${idx}`),
+              taskId: String(item?.taskId || '').trim(),
+              tecnicoId: String(item?.tecnicoId || '').trim() || '0',
+              tecnicoNombre: resolveTechnicianDisplayName(item?.tecnicoId, map),
+              cliente: String(item?.cliente || '').trim() || String(item?.clienteId || '').trim() || 'Cliente sin nombre',
+              clienteId: String(item?.clienteId || '').trim(),
+              fechaHora,
+              fechaHoraKey: fechaHora ? dayKey(fechaHora) : '',
+              direccion: String(item?.direccion || '').trim() || 'Sin dirección',
+              orientacion: orientacion || 'Sin descripción',
+              prioridad: resolvePriorityLabel(item?.prioridad),
+              estado: item?.estado ?? 'Pendiente',
+              ticketId: String(item?.ticketId || '').trim(),
+              ticketTitulo: ticketTitulo || orientacion || 'Sin descripción',
+              sourceService: String(item?.sourceService || '').trim(),
+            };
+          };
+          const sortByDateAsc = (a, b) => (a?.fechaHora?.getTime?.() || 0) - (b?.fechaHora?.getTime?.() || 0);
+          const techRef = db.collection('auvo_tasks')
+            .where('tipoAgenda', '==', 'tecnicos')
+            .orderBy('fechaHora', 'asc');
+          const instRef = db.collection('auvo_tasks')
+            .where('tipoAgenda', '==', 'instalaciones')
+            .orderBy('fechaHora', 'asc');
+
+          const unsubTech = techRef.onSnapshot((snapshot) => {
+            const tareasTecnicos = (snapshot.docs || [])
+              .map((doc, idx) => mapFirestoreTask(doc, idx, TECHNICIAN_NAME_MAP, 'tecnico'))
+              .filter((item) => item.fechaHora instanceof Date)
+              .sort(sortByDateAsc);
+            console.log('Agenda técnicos Firestore:', tareasTecnicos);
+            setAgendaRangeWarning('');
+            setAgendaError('');
+            setAgendaRows(tareasTecnicos);
+            setAgendaLoading(false);
+          }, (error) => {
+            console.error('Error leyendo agenda técnicos Firestore:', error);
+            setAgendaError('No se pudo leer agenda técnicos desde Firestore.');
+            setAgendaRows([]);
+            setAgendaLoading(false);
+          });
+
+          const unsubInstall = instRef.onSnapshot((snapshot) => {
+            const tareasInstalaciones = (snapshot.docs || [])
+              .map((doc, idx) => mapFirestoreTask(doc, idx, INSTALL_TECHNICIAN_NAME_MAP, 'instalacion'))
+              .filter((item) => item.fechaHora instanceof Date)
+              .sort(sortByDateAsc);
+            console.log('Agenda instalaciones Firestore:', tareasInstalaciones);
+            setAgendaInstallRangeWarning('');
+            setAgendaInstallError('');
+            setAgendaInstallRows(tareasInstalaciones);
+            setAgendaInstallLoading(false);
+          }, (error) => {
+            console.error('Error leyendo agenda instalaciones Firestore:', error);
+            setAgendaInstallError('No se pudo leer agenda instalaciones desde Firestore.');
+            setAgendaInstallRows([]);
+            setAgendaInstallLoading(false);
+          });
 
           return () => {
-            if (fallbackTimer) window.clearTimeout(fallbackTimer);
-            if (refreshInterval) window.clearInterval(refreshInterval);
-            ref.off('value', handleValue);
+            unsubTech();
+            unsubInstall();
           };
-        }, []);
-
-        useEffect(() => {
-          void fetchAuvoAgendaInstall();
         }, []);
 
         const agendaSevenDays = useMemo(() => {
@@ -12639,26 +12440,39 @@
           });
         }, [agendaRows]);
 
-        const agendaStats = useMemo(() => {
-          const total = agendaRows.length;
-          const techs = new Set(agendaRows.map((item) => item?.tecnicoId || 'Técnico sin asignar')).size;
-          const completed = agendaRows.filter((item) => {
-            const raw = String(item?.estado || '').toLowerCase();
-            return raw.includes('resuelto') || raw.includes('finalizado') || raw.includes('complete');
-          }).length;
+        const isTaskCompleted = (item) => {
+          const estadoRaw = String(item?.estado ?? item?.status ?? '').toLowerCase().trim();
+          const numericEstado = Number(item?.estado);
+          return numericEstado === 5 || estadoRaw.includes('resuelto') || estadoRaw.includes('finalizado') || estadoRaw.includes('complete');
+        };
+        const buildAgendaDashboardMetrics = (rows) => {
+          const base = new Date();
+          base.setHours(0, 0, 0, 0);
+          const range = [-3, -2, -1, 0, 1, 2, 3].map((offset) => {
+            const date = new Date(base);
+            date.setDate(base.getDate() + offset);
+            return { key: dayKey(date), label: relativeAgendaLabel(offset), date };
+          });
+          const grouped = new Map(range.map((d) => [d.key, []]));
+          rows.forEach((item) => {
+            const key = item?.fechaHoraKey;
+            if (key && grouped.has(key)) grouped.get(key).push(item);
+          });
+          const daily = range.map((day) => {
+            const items = grouped.get(day.key) || [];
+            const completed = items.filter((item) => isTaskCompleted(item)).length;
+            const pending = Math.max(items.length - completed, 0);
+            const techs = new Set(items.map((item) => String(item?.tecnicoId || '').trim()).filter((id) => id && id !== '0')).size;
+            return { ...day, total: items.length, completed, pending, techs };
+          });
+          const total = rows.length;
+          const techs = new Set(rows.map((item) => String(item?.tecnicoId || '').trim()).filter((id) => id && id !== '0')).size;
+          const completed = rows.filter((item) => isTaskCompleted(item)).length;
           const pending = Math.max(total - completed, 0);
-          return { total, techs, completed, pending };
-        }, [agendaRows]);
-        const agendaInstallStats = useMemo(() => {
-          const total = agendaInstallRows.length;
-          const techs = new Set(agendaInstallRows.map((item) => item?.tecnicoId || 'Técnico sin asignar')).size;
-          const completed = agendaInstallRows.filter((item) => {
-            const raw = String(item?.estado || '').toLowerCase();
-            return raw.includes('resuelto') || raw.includes('finalizado') || raw.includes('complete');
-          }).length;
-          const pending = Math.max(total - completed, 0);
-          return { total, techs, completed, pending };
-        }, [agendaInstallRows]);
+          return { total, techs, completed, pending, daily, hasData: total > 0 };
+        };
+        const agendaStats = useMemo(() => buildAgendaDashboardMetrics(agendaRows), [agendaRows]);
+        const agendaInstallStats = useMemo(() => buildAgendaDashboardMetrics(agendaInstallRows), [agendaInstallRows]);
         const agendaInstallSevenDays = useMemo(() => {
           const base = new Date();
           base.setHours(0, 0, 0, 0);
@@ -12682,6 +12496,32 @@
             };
           });
         }, [agendaInstallRows]);
+        const buildSparkPath = (series, width = 240, height = 44) => {
+          const points = Array.isArray(series) && series.length ? series : [0, 0, 0, 0, 0, 0, 0];
+          const max = Math.max(...points, 0);
+          const min = Math.min(...points, 0);
+          const span = max - min || 1;
+          return points.map((value, index) => {
+            const x = points.length === 1 ? width / 2 : (index / (points.length - 1)) * width;
+            const y = height - ((value - min) / span) * (height - 4) - 2;
+            return `${index === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`;
+          }).join(' ');
+        };
+        const renderAgendaMetricCard = ({ label, value, sublabel, series, color, icon, border }) => (
+          <article className="agenda-stat-card" style={{ borderColor: border }}>
+            <div className="agenda-stat-top">
+              <span className="agenda-stat-icon" style={{ color, background: `${color}1a` }}>{icon}</span>
+              <div>
+                <strong>{label}</strong>
+                <b>{value}</b>
+              </div>
+            </div>
+            <div className="agenda-stat-sub" style={{ color }}>{sublabel}</div>
+            <svg className="agenda-sparkline" viewBox="0 0 240 44" preserveAspectRatio="none" aria-hidden="true">
+              <path d={buildSparkPath(series)} fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </article>
+        );
 
         const calendarDaySections = useMemo(() => {
           const today = new Date();
@@ -13323,7 +13163,7 @@
         }, [effectiveSelectedForm]);
 
         function resetFields() {
-          setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('Pendiente');
+          setCliente(''); setFechaCarga(''); setTiempoInstalacion(''); setCosto(''); setStatus('Pendiente de agenda');
           setFechaAlta(''); setCobro(''); setFechaRealizado(''); setVerificado(''); setFechaCharla(''); setHora(''); setLugar('');
           setEditingServiceId(null);
           const stamp = formatUruguayDateTime();
@@ -16838,11 +16678,16 @@
                           </section>
                           <section className="home-widget-shell agenda-widget-card">
                             <div className="agenda-widget-head">
-                              <div>
-                                <h4>Agenda de técnicos</h4>
-                                <small className="agenda-widget-subtitle">Tareas programadas desde 2Workers</small>
+                              <div className="agenda-widget-head-left">
+                                <span className="agenda-widget-icon" aria-hidden="true">
+                                  <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7.5" r="3.3" strokeWidth="2" /><path d="M5 19c0-3.3 2.9-5.1 7-5.1s7 1.8 7 5.1" strokeWidth="2" strokeLinecap="round" /></svg>
+                                </span>
+                                <div>
+                                  <h4>Agenda de técnicos</h4>
+                                  <small className="agenda-widget-subtitle">Tareas programadas desde 2Workers</small>
+                                </div>
                               </div>
-                              <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('agenda-2workers')}>Ver más →</button>
+                              <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('agenda-2workers')}>Ver agenda completa →</button>
                             </div>
                             <div className="agenda-widget-body">
                               <div className="agenda-widget-range">Resumen compacto · últimos 7 días operativos</div>
@@ -16852,12 +16697,13 @@
                                 <div className="hint">{agendaError}</div>
                               ) : (
                                 <div className="agenda-stats-grid">
-                                  <article className="agenda-stat-card"><strong>Total de tickets</strong><b>{agendaStats.total}</b></article>
-                                  <article className="agenda-stat-card"><strong>Técnicos asignados</strong><b>{agendaStats.techs}</b></article>
-                                  <article className="agenda-stat-card"><strong>Tareas completadas</strong><b>{agendaStats.completed}</b></article>
-                                  <article className="agenda-stat-card"><strong>Pendientes</strong><b>{agendaStats.pending}</b></article>
+                                  {renderAgendaMetricCard({ label: 'Total de tickets', value: agendaStats.total, sublabel: `${agendaStats.daily.reduce((acc, d) => acc + d.total, 0)} en rango`, series: agendaStats.daily.map((d) => d.total), color: '#0f9b8d', border: '#bfe6de', icon: <svg viewBox="0 0 24 24" fill="none"><path d="M7 3h10l4 4v14H3V3h4Z" strokeWidth="2" /><path d="M8 12h8M8 16h8M8 8h4" strokeWidth="2" strokeLinecap="round" /></svg> })}
+                                  {renderAgendaMetricCard({ label: 'Técnicos asignados', value: agendaStats.techs, sublabel: `${agendaStats.techs ? 'Cobertura activa' : 'Sin técnicos asignados'}`, series: agendaStats.daily.map((d) => d.techs), color: '#3a7fe0', border: '#cfe1ff', icon: <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" strokeWidth="2" /><path d="M4.5 20c0-3.4 2.8-5.4 7.5-5.4s7.5 2 7.5 5.4" strokeWidth="2" strokeLinecap="round" /></svg> })}
+                                  {renderAgendaMetricCard({ label: 'Tareas completadas', value: agendaStats.completed, sublabel: `${agendaStats.total ? Math.round((agendaStats.completed / agendaStats.total) * 100) : 0}% del total`, series: agendaStats.daily.map((d) => d.completed), color: '#7b4ed8', border: '#ddd2f4', icon: <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" strokeWidth="2" /><path d="m8.5 12.4 2.3 2.4 4.7-5.2" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg> })}
+                                  {renderAgendaMetricCard({ label: 'Pendientes', value: agendaStats.pending, sublabel: `${agendaStats.total ? Math.round((agendaStats.pending / agendaStats.total) * 100) : 0}% del total`, series: agendaStats.daily.map((d) => d.pending), color: '#e67d21', border: '#f2ddc7', icon: <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" strokeWidth="2" /><path d="M12 7.8V12l3 2" strokeWidth="2.2" strokeLinecap="round" /></svg> })}
                                 </div>
                               )}
+                              {!agendaLoading && !agendaError && !agendaStats.hasData && <div className="agenda-empty-note">Sin registros en el rango.</div>}
                               {!agendaLoading && !agendaError && agendaRangeWarning && (
                                 <div className="hint" style={{ marginTop: 10 }}>{agendaRangeWarning}</div>
                               )}
@@ -16865,10 +16711,16 @@
                           </section>
                           <section className="home-widget-shell agenda-widget-card">
                             <div className="agenda-widget-head">
-                              <div>
-                                <h4>Agenda de Instalaciones</h4>
-                                <small className="agenda-widget-subtitle">Tareas programadas desde 2Workers</small>
+                              <div className="agenda-widget-head-left">
+                                <span className="agenda-widget-icon" aria-hidden="true">
+                                  <svg viewBox="0 0 24 24" fill="none"><path d="m14.5 4.5 5 5-2.2 2.2-5-5 2.2-2.2Z" strokeWidth="2" /><path d="m3.5 20.5 6.9-6.9 2 2-6.9 6.9H3.5v-2Z" strokeWidth="2" strokeLinejoin="round" /></svg>
+                                </span>
+                                <div>
+                                  <h4>Agenda de Instalaciones</h4>
+                                  <small className="agenda-widget-subtitle">Tareas programadas desde 2Workers</small>
+                                </div>
                               </div>
+                              <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('agenda-2workers-instalaciones')}>Ver agenda completa →</button>
                             </div>
                             <div className="agenda-widget-body">
                               <div className="agenda-widget-range">Resumen compacto · últimos 7 días operativos</div>
@@ -16878,18 +16730,16 @@
                                 <div className="hint">{agendaInstallError}</div>
                               ) : (
                                 <div className="agenda-stats-grid">
-                                  <article className="agenda-stat-card"><strong>Total de tickets</strong><b>{agendaInstallStats.total}</b></article>
-                                  <article className="agenda-stat-card"><strong>Técnicos asignados</strong><b>{agendaInstallStats.techs}</b></article>
-                                  <article className="agenda-stat-card"><strong>Tareas completadas</strong><b>{agendaInstallStats.completed}</b></article>
-                                  <article className="agenda-stat-card"><strong>Pendientes</strong><b>{agendaInstallStats.pending}</b></article>
+                                  {renderAgendaMetricCard({ label: 'Total de tickets', value: agendaInstallStats.total, sublabel: `${agendaInstallStats.daily.reduce((acc, d) => acc + d.total, 0)} en rango`, series: agendaInstallStats.daily.map((d) => d.total), color: '#0f9b8d', border: '#bfe6de', icon: <svg viewBox="0 0 24 24" fill="none"><path d="M7 3h10l4 4v14H3V3h4Z" strokeWidth="2" /><path d="M8 12h8M8 16h8M8 8h4" strokeWidth="2" strokeLinecap="round" /></svg> })}
+                                  {renderAgendaMetricCard({ label: 'Técnicos asignados', value: agendaInstallStats.techs, sublabel: `${agendaInstallStats.techs ? 'Cobertura activa' : 'Sin técnicos asignados'}`, series: agendaInstallStats.daily.map((d) => d.techs), color: '#3a7fe0', border: '#cfe1ff', icon: <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" strokeWidth="2" /><path d="M4.5 20c0-3.4 2.8-5.4 7.5-5.4s7.5 2 7.5 5.4" strokeWidth="2" strokeLinecap="round" /></svg> })}
+                                  {renderAgendaMetricCard({ label: 'Tareas completadas', value: agendaInstallStats.completed, sublabel: `${agendaInstallStats.total ? Math.round((agendaInstallStats.completed / agendaInstallStats.total) * 100) : 0}% del total`, series: agendaInstallStats.daily.map((d) => d.completed), color: '#7b4ed8', border: '#ddd2f4', icon: <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" strokeWidth="2" /><path d="m8.5 12.4 2.3 2.4 4.7-5.2" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg> })}
+                                  {renderAgendaMetricCard({ label: 'Pendientes', value: agendaInstallStats.pending, sublabel: `${agendaInstallStats.total ? Math.round((agendaInstallStats.pending / agendaInstallStats.total) * 100) : 0}% del total`, series: agendaInstallStats.daily.map((d) => d.pending), color: '#e67d21', border: '#f2ddc7', icon: <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.5" strokeWidth="2" /><path d="M12 7.8V12l3 2" strokeWidth="2.2" strokeLinecap="round" /></svg> })}
                                 </div>
                               )}
+                              {!agendaInstallLoading && !agendaInstallError && !agendaInstallStats.hasData && <div className="agenda-empty-note">Sin registros en el rango.</div>}
                               {!agendaInstallLoading && !agendaInstallError && agendaInstallRangeWarning && (
                                 <div className="hint" style={{ marginTop: 10 }}>{agendaInstallRangeWarning}</div>
                               )}
-                              <div style={{ marginTop: 10 }}>
-                                <button type="button" className="home-modern-action-btn" onClick={() => setSelectedForm('agenda-2workers-instalaciones')}>Ver más →</button>
-                              </div>
                             </div>
                           </section>
                         </div>
@@ -17014,16 +16864,26 @@
                 ) : (effectiveSelectedForm === 'agenda-2workers' || effectiveSelectedForm === 'agenda-2workers-instalaciones') ? (
                   (() => {
                     const isInstall = effectiveSelectedForm === 'agenda-2workers-instalaciones';
-                    const title = isInstall ? 'Agenda 2Workers · Instalaciones (Gantt)' : 'Agenda 2Workers · Técnicos (Gantt)';
-                    const description = isInstall
-                      ? 'Vista de planificación para instalaciones con responsables, métricas y tareas distribuidas por fecha.'
-                      : 'Vista de planificación para técnicos con responsables, métricas y tareas distribuidas por fecha.';
+                    const title = isInstall ? 'Agenda de Instalaciones' : 'Agenda de técnicos';
+                    const description = 'Tareas programadas desde 2Workers';
                     const filterValue = isInstall ? agendaInstallFilter : agendaTechFilter;
                     const setFilterValue = isInstall ? setAgendaInstallFilter : setAgendaTechFilter;
+                    const statusFilter = isInstall ? agendaInstallStatusFilter : agendaTechStatusFilter;
+                    const setStatusFilter = isInstall ? setAgendaInstallStatusFilter : setAgendaTechStatusFilter;
+                    const responsibleFilter = isInstall ? agendaInstallResponsibleFilter : agendaTechResponsibleFilter;
+                    const setResponsibleFilter = isInstall ? setAgendaInstallResponsibleFilter : setAgendaTechResponsibleFilter;
+                    const viewMode = isInstall ? agendaInstallViewMode : agendaTechViewMode;
+                    const setViewMode = isInstall ? setAgendaInstallViewMode : setAgendaTechViewMode;
+                    const selectedTaskId = isInstall ? agendaInstallSelectedTaskId : agendaTechSelectedTaskId;
+                    const setSelectedTaskId = isInstall ? setAgendaInstallSelectedTaskId : setAgendaTechSelectedTaskId;
+                    const expandedTechId = isInstall ? agendaInstallExpandedTechId : agendaTechExpandedTechId;
+                    const setExpandedTechId = isInstall ? setAgendaInstallExpandedTechId : setAgendaTechExpandedTechId;
+                    const selectedTechId = isInstall ? agendaInstallSelectedTechId : agendaTechSelectedTechId;
+                    const setSelectedTechId = isInstall ? setAgendaInstallSelectedTechId : setAgendaTechSelectedTechId;
                     const stats = isInstall ? agendaInstallStats : agendaStats;
                     const days = isInstall ? agendaInstallSevenDays : agendaSevenDays;
                     const rows = isInstall ? agendaInstallRows : agendaRows;
-                    const emptyText = isInstall ? 'Disponible para asignar' : 'Sin tareas programadas';
+                    const refreshAgenda = isInstall ? fetchAuvoAgendaInstall : fetchAuvoAgenda;
                     const normalizeForSearch = (value) => String(value || '')
                       .normalize('NFD')
                       .replace(/[\u0300-\u036f]/g, '')
@@ -17055,76 +16915,117 @@
                     };
                     const responsibles = Array.from(new Set(rows.map((task) => task.tecnicoId || 'Sin asignar')))
                       .map((name) => ({
-                        name,
+                        id: name,
+                        name: rows.find((task) => (task.tecnicoId || 'Sin asignar') === name)?.tecnicoNombre || (/^tecnico/i.test(name) ? name : `Técnico #${name}`),
                         count: rows.filter((task) => (task.tecnicoId || 'Sin asignar') === name).length
                       }))
                       .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
+                    const statusOptions = ['all', ...Array.from(new Set(rows.map((r) => String(r?.estado || 'Pendiente'))))];
+                    const selectedTask = rows.find((item) => item.id === selectedTaskId) || null;
+                    const applyFilters = (task) => {
+                      const query = filterValue.trim().toLowerCase();
+                      if (!filteredByQuery(task, query)) return false;
+                      if (responsibleFilter !== 'all' && (task.tecnicoId || 'Sin asignar') !== responsibleFilter) return false;
+                      if (statusFilter !== 'all' && String(task.estado || 'Pendiente') !== statusFilter) return false;
+                      return true;
+                    };
+                    const groupedByTech = responsibles.map((tech) => ({
+                      ...tech,
+                      tasksByDay: days.map((day) => {
+                        const tasks = rows.filter((task) => task.fechaHoraKey === day.key && (task.tecnicoId || 'Sin asignar') === tech.id && applyFilters(task))
+                          .sort((a, b) => (a?.fechaHora?.getTime?.() || 0) - (b?.fechaHora?.getTime?.() || 0));
+                        return { ...day, tasks };
+                      }),
+                    })).filter((tech) => tech.tasksByDay.some((d) => d.tasks.length > 0) || responsibleFilter === 'all');
+                    const visibleTechRows = selectedTechId ? groupedByTech.filter((tech) => tech.id === selectedTechId) : groupedByTech;
+                    const activeDays = viewMode === 'day' ? days.filter((d) => d.offset === 0) : days;
+                    const avatarColor = (key) => {
+                      const palette = ['#0f9b8d', '#3a7fe0', '#7b4ed8', '#e67d21', '#1f8d5d', '#6b7280'];
+                      const base = String(key || '').split('').reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+                      return palette[base % palette.length];
+                    };
+                    const initialsFor = (name) => String(name || 'T').split(' ').filter(Boolean).slice(0, 2).map((v) => v[0]).join('').toUpperCase();
 
                     return (
                       <section className="panel">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-                          <h2 style={{ margin: 0 }}>{title}</h2>
-                          <button type="button" className="home-modern-action-btn" onClick={goToHomeView}>← Volver al inicio</button>
+                        <div className="agenda-widget-range" style={{ marginBottom: 8 }}>{`Dashboard > ${title}`}</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                          <div className="agenda-widget-head-left">
+                            <span className="agenda-widget-icon" aria-hidden="true">{isInstall ? '🔧' : '👤'}</span>
+                            <div><h2 style={{ margin: 0 }}>{title}</h2><div className="hint" style={{ margin: 0 }}>{description}</div></div>
+                          </div>
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <button type="button" className="home-modern-action-btn" onClick={goToHomeView}>← Volver al resumen</button>
+                            <button type="button" className="home-modern-action-btn primary" onClick={() => { void refreshAgenda(); }}>Actualizar</button>
+                          </div>
                         </div>
-                        <div className="hint">{description}</div>
-                        <div className="field" style={{ marginTop: 10, maxWidth: 380 }}>
-                          <label>Buscar por técnico, cliente, ticket o estado</label>
-                          <input value={filterValue} onChange={(e) => setFilterValue(e.target.value)} type="search" placeholder="Filtrar tareas..." />
+                        <div className="agenda-stat-card" style={{ marginBottom: 12 }}>
+                          <div className="service-layout" style={{ gridTemplateColumns: 'repeat(5,minmax(0,1fr))' }}>
+                            <label className="field"><span>Rango de fechas</span><input readOnly value={`${activeDays[0]?.dateLabel || '-'} → ${activeDays[activeDays.length - 1]?.dateLabel || '-'}`} /></label>
+                            <label className="field"><span>Vista</span><select value={viewMode} onChange={(e) => setViewMode(e.target.value)}><option value="week">Semana</option><option value="day">Día</option></select></label>
+                            <label className="field"><span>Técnico</span><select value={responsibleFilter} onChange={(e) => setResponsibleFilter(e.target.value)}><option value="all">Todos los técnicos</option>{responsibles.map((r) => <option key={`${r.id}-opt`} value={r.id}>{r.name}</option>)}</select></label>
+                            <label className="field"><span>Estado</span><select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>{statusOptions.map((status) => <option key={`${status}-status`} value={status}>{status === 'all' ? 'Todos los estados' : status}</option>)}</select></label>
+                            <div className="field"><span>&nbsp;</span><button type="button" className="home-modern-action-btn">Filtros avanzados</button></div>
+                          </div>
                         </div>
                         <div className="agenda-stats-grid" style={{ marginTop: 10 }}>
-                          <article className="agenda-stat-card"><strong>Total de tickets</strong><b>{stats.total}</b></article>
-                          <article className="agenda-stat-card"><strong>Técnicos asignados</strong><b>{stats.techs}</b></article>
-                          <article className="agenda-stat-card"><strong>Tareas completadas</strong><b>{stats.completed}</b></article>
-                          <article className="agenda-stat-card"><strong>Pendientes</strong><b>{stats.pending}</b></article>
+                          {renderAgendaMetricCard({ label: 'Total de tickets', value: stats.total, sublabel: 'Carga operativa en el rango', series: stats.daily.map((d) => d.total), color: '#0f9b8d', border: '#bfe6de', icon: '📄' })}
+                          {renderAgendaMetricCard({ label: 'Técnicos asignados', value: stats.techs, sublabel: 'Cobertura de agenda', series: stats.daily.map((d) => d.techs), color: '#3a7fe0', border: '#cfe1ff', icon: '👤' })}
+                          {renderAgendaMetricCard({ label: 'Tareas completadas', value: stats.completed, sublabel: `${stats.total ? Math.round((stats.completed / stats.total) * 100) : 0}% del total`, series: stats.daily.map((d) => d.completed), color: '#2f9e6d', border: '#cdecd9', icon: '✅' })}
+                          {renderAgendaMetricCard({ label: 'Pendientes', value: stats.pending, sublabel: `${stats.total ? Math.round((stats.pending / stats.total) * 100) : 0}% del total`, series: stats.daily.map((d) => d.pending), color: '#e67d21', border: '#f2ddc7', icon: '⏱️' })}
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: 12, marginTop: 12 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 12, marginTop: 12 }}>
                           <aside className="home-modern-panel">
-                            <h3 style={{ marginTop: 0, marginBottom: 8 }}>{isInstall ? 'Responsables de instalación' : 'Técnicos responsables'}</h3>
+                            <button type="button" className="home-modern-action-btn" style={{ width: '100%', marginBottom: 8, background: selectedTechId ? '#fff' : '#e8f7f3', borderColor: '#8fd8cc' }} onClick={() => { setSelectedTechId(''); setExpandedTechId(''); }}>
+                              Todos
+                            </button>
+                            <label className="field"><span>Buscar técnico…</span><input value={filterValue} onChange={(e) => setFilterValue(e.target.value)} type="search" placeholder="Buscar técnico..." /></label>
                             <div className="home-modern-list">
-                              {responsibles.length === 0 ? (
-                                <div className="agenda-empty-card">Sin responsables para el período.</div>
-                              ) : responsibles.map((item) => (
-                                <div key={`${isInstall ? 'install' : 'tech'}-owner-${item.name}`} className="home-modern-list-item">
-                                  <b>{item.name}</b>
-                                  <small>{item.count} tickets</small>
-                                </div>
+                              {groupedByTech.length === 0 ? <div className="agenda-empty-card">Disponible para asignar<br />No hay tareas programadas en este rango.</div> : groupedByTech.map((item) => (
+                                <button type="button" key={`${isInstall ? 'install' : 'tech'}-owner-${item.name}`} className="home-modern-list-item" style={{ width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 10, borderLeft: selectedTechId === item.id ? '4px solid #0f9b8d' : '4px solid transparent', background: selectedTechId === item.id ? '#eaf8f5' : '#fff' }} onClick={() => { setSelectedTechId(item.id); setExpandedTechId(item.id); }}>
+                                  <span style={{ width: 32, height: 32, borderRadius: '50%', background: `${avatarColor(item.id)}1f`, color: avatarColor(item.id), display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>{initialsFor(item.name)}</span>
+                                  <span style={{ flex: 1 }}><b>{item.name}</b><small style={{ display: 'block' }}>{item.count} tickets</small></span>
+                                  <span style={{ color: '#7a8c9d' }}>›</span>
+                                </button>
                               ))}
                             </div>
                           </aside>
-                          <div className="agenda-days-grid">
-                            {days.map((day) => {
-                              const query = filterValue.trim().toLowerCase();
-                              const dayTasks = day.tasks.filter((task) => filteredByQuery(task, query));
-                              return (
-                                <article key={`${isInstall ? 'install' : 'tech'}-gantt-${day.key}`} className="agenda-day-card">
-                                  <header className="agenda-day-head">
-                                    <div>
-                                      <strong>{day.dateLabel}</strong>
-                                      <span>{day.label}</span>
-                                    </div>
-                                    <span className="agenda-day-count">{dayTasks.length} tickets</span>
-                                  </header>
-                                  <div className="agenda-day-body">
-                                    {dayTasks.length === 0 ? (
-                                      <div className="agenda-empty-card">{emptyText}</div>
-                                    ) : dayTasks.map((task) => {
-                                      const priorityClass = agendaPriorityClass(task.prioridad);
-                                      return (
-                                        <div key={`${isInstall ? 'install' : 'tech'}-task-${day.key}-${task.id}-${task.ticketId || task.fechaHoraKey}`} className={`agenda-task-row ${priorityClass.replace('agenda-priority-', 'priority-')}`}>
-                                          <div className="agenda-time-col">{task.fechaHora ? task.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div>
-                                          <div className="agenda-task-main">
-                                            <div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div>
-                                            <div className="agenda-task-client">{task.tecnicoId || 'Técnico sin asignar'} · {task.cliente || 'Cliente sin nombre'}</div>
-                                            <div className="agenda-task-meta"><strong>Estado:</strong> {task.estado || 'Pendiente'} · <strong>Ticket:</strong> {task.ticketId || '-'}</div>
-                                          </div>
-                                        </div>
-                                      );
-                                    })}
+                          <div className="agenda-days-grid" style={{ gridTemplateColumns: `220px repeat(${activeDays.length}, minmax(220px,1fr))` }}>
+                            <div className="agenda-day-head"><strong>Técnicos</strong><span>{visibleTechRows.length}</span></div>
+                            {activeDays.map((day) => <div key={`head-${day.key}`} className="agenda-day-head" style={day.offset === 0 ? { background: '#eaf8f5', border: '1px solid #8fd8cc' } : {}}><strong>{day.dateLabel}</strong><span>{day.offset === 0 ? 'Hoy' : day.label}</span></div>)}
+                            {visibleTechRows.map((tech) => (
+                              <React.Fragment key={`row-${tech.id}`}>
+                                <div className="agenda-day-card" style={{ minHeight: 90, padding: 10 }}>
+                                  <strong>{tech.name}</strong>
+                                  <span className="hint">{tech.count} tareas</span>
+                                  <button type="button" className="home-modern-action-btn" style={{ marginTop: 6, width: '100%' }} onClick={() => setExpandedTechId((prev) => {
+                                    const next = prev === tech.id ? '' : tech.id;
+                                    if (!next) setSelectedTechId('');
+                                    else setSelectedTechId(tech.id);
+                                    return next;
+                                  })}>
+                                    {expandedTechId === tech.id ? 'Volver a Todos' : 'Ver agenda completa'}
+                                  </button>
+                                </div>
+                                {tech.tasksByDay.filter((d) => activeDays.some((a) => a.key === d.key)).map((day) => (
+                                  <div key={`cell-${tech.id}-${day.key}`} className="agenda-day-card" style={{ minHeight: 90, padding: 8, borderStyle: day.offset === 0 ? 'dashed' : 'solid', background: day.offset === 0 ? '#f5fffc' : '#fff' }}>
+                                    {((selectedTechId === tech.id || expandedTechId === tech.id) ? day.tasks : day.tasks.slice(0, 2)).map((task) => (
+                                      <button type="button" onClick={() => setSelectedTaskId(task.id)} key={`task-${task.id}`} className="agenda-task-row" style={{ width: '100%', textAlign: 'left', marginBottom: 6 }}>
+                                        <div className="agenda-time-col">{task.fechaHora ? task.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div>
+                                        <div className="agenda-task-main"><div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div><div className="agenda-task-client">{task.cliente || 'Cliente sin nombre'}</div><div className="agenda-task-meta">{task.estado || 'Pendiente'} · {task.prioridad || 'Baja'}</div></div>
+                                      </button>
+                                    ))}
+                                    {!selectedTechId && expandedTechId !== tech.id && day.tasks.length > 2 && (
+                                      <div className="hint" style={{ margin: 0, fontSize: 12 }}>+{day.tasks.length - 2} más</div>
+                                    )}
                                   </div>
-                                </article>
-                              );
-                            })}
+                                ))}
+                              </React.Fragment>
+                            ))}
                           </div>
+                        </div>
+                        <div className="agenda-stat-card" style={{ marginTop: 12 }}>
+                          {selectedTask ? <div className="service-layout" style={{ gridTemplateColumns: 'repeat(7,minmax(0,1fr))' }}><div><b>Hora</b><div>{selectedTask.fechaHora ? selectedTask.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div></div><div><b>Cliente</b><div>{selectedTask.cliente || '-'}</div></div><div><b>Técnico</b><div>{selectedTask.tecnicoNombre || selectedTask.tecnicoId || '-'}</div></div><div><b>Ticket ID</b><div>{selectedTask.ticketId || '-'}</div></div><div><b>Prioridad</b><div>{selectedTask.prioridad || '-'}</div></div><div><b>Estado</b><div>{selectedTask.estado || '-'}</div></div><div><b>Descripción</b><div>{selectedTask.orientacion || '-'}</div></div></div> : <div className="hint" style={{ margin: 0 }}>Seleccioná una tarea para ver el detalle.</div>}
                         </div>
                       </section>
                     );
@@ -17490,13 +17391,15 @@
                   </div>
 
                   <form onSubmit={handleSubmit}>
+                    <div className="form-global-layout">
+                      <div className="form-global-main">
                     {grupo === 'servicio' ? (
                       <div className="service-layout">
                         <div className="service-card">
                           <h3>Nuevo Servicio</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID</label><input value={clienteId} readOnly type="text" /></div>
-                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                            <div className="field"><label>Status</label><input value="Pendiente de agenda" type="text" readOnly /></div>
                             <div className="field"><label>Tipo</label><select value={normalizeServiceEntityType(servicioForm.tipoAltaServicio)} onChange={(e) => setServicioField('tipoAltaServicio', e.target.value)}>{SERVICE_ENTITY_TYPE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></div>
                           </div>
                         </div>
@@ -17507,7 +17410,7 @@
                               <div className="card-grid">
                                 <div className="field span-2"><label>Nombre del servicio</label><input value={servicioForm.nombreServicio} onChange={(e) => setServicioField('nombreServicio', e.target.value)} type="text" /></div>
                                 <div className="field span-2"><label>Dirección del servicio</label><input value={servicioForm.direccionServicio} onChange={(e) => setServicioField('direccionServicio', e.target.value)} type="text" /></div>
-                                <div className="field"><label>Tipo de servicio</label><select value={servicioForm.tipoServicioBrindar} onChange={(e) => setServicioField('tipoServicioBrindar', e.target.value)}><option value="">Seleccionar...</option><option value="Monitoreo">Monitoreo</option><option value="Respuesta de Alarma">Respuesta de alarma</option></select></div>
+                                <div className="field"><label>Tipo de servicio</label><select value={servicioForm.tipoServicioBrindar} onChange={(e) => setServicioField('tipoServicioBrindar', e.target.value)}><option value="">Seleccionar...</option><option value="Monitoreo">Monitoreo</option><option value="Respuesta de alarma - Botti">Respuesta de alarma - Botti</option></select></div>
                               </div>
                             </div>
 
@@ -17593,7 +17496,7 @@
                               <div className="card-grid">
                                 <div className="field span-2"><label>Nombre de servicio</label><input value={servicioForm.nombreServicio} onChange={(e) => setServicioField('nombreServicio', e.target.value)} type="text" /></div>
                                 <div className="field span-2"><label>Dirección de servicio</label><input value={servicioForm.direccionServicio} onChange={(e) => setServicioField('direccionServicio', e.target.value)} type="text" /></div>
-                                <div className="field"><label>Tipo de servicio a brindar</label><select value={servicioForm.tipoServicioBrindar} onChange={(e) => setServicioField('tipoServicioBrindar', e.target.value)}><option value="">Seleccionar...</option><option value="Portería Virtual">Portería Virtual</option><option value="Monitoreo">Monitoreo</option><option value="Control de acceso">Control de acceso</option><option value="Respuesta de Alarma">Respuesta de Alarma</option></select></div>
+                                <div className="field"><label>Tipo de servicio a brindar</label><select value={servicioForm.tipoServicioBrindar} onChange={(e) => setServicioField('tipoServicioBrindar', e.target.value)}><option value="">Seleccionar...</option><option value="Portería Virtual">Portería Virtual</option><option value="Monitoreo">Monitoreo</option><option value="Control de acceso">Control de acceso</option><option value="Respuesta de alarma - Botti">Respuesta de alarma - Botti</option></select></div>
                                 <div className="field"><label>Horario del servicio contratado</label><input value={servicioForm.horarioServicioContratado || ''} onChange={(e) => setServicioField('horarioServicioContratado', e.target.value)} type="text" placeholder="Ej: 24 horas / Lun a Vie 08:00-18:00" /></div>
                               </div>
                             </div>
@@ -17627,10 +17530,10 @@
                             </div>
                             <div className="service-card"><h3>5. App y Tecnología</h3><div className="card-grid"><div className="field span-2"><label>¿El servicio usará App de Akuvox?</label><select value={servicioForm.appAkuvox || ''} onChange={(e) => setServicioField('appAkuvox', e.target.value)}><option value="">Seleccionar...</option><option value="Sí, con apertura remota">Sí, con apertura remota</option><option value="Sí, sin apertura remota">Sí, sin apertura remota</option><option value="El cliente no usará la app">El cliente no usará la app</option></select></div></div></div>
                             <div className="service-card"><h3>6. Comercial</h3><div className="card-grid"><div className="field"><label>Representante comercial</label><select value={servicioForm.representanteComercial} onChange={(e) => setServicioField('representanteComercial', e.target.value)} disabled={lockCommercialField}><option value="">Seleccionar...</option><option value="Gastón Silva">Gastón Silva</option><option value="Gonzalo Claudio">Gonzalo Claudio</option><option value="Francisco Bartellone">Francisco Bartellone</option><option value="Nicolás Leguizamón">Nicolás Leguizamón</option></select></div><div className="field"><label>Condiciones comerciales del equipamiento</label><select value={servicioForm.condicionesComercialesEquipamiento || ''} onChange={(e) => setServicioField('condicionesComercialesEquipamiento', e.target.value)}><option value="">Seleccionar...</option><option value="Compra">Compra</option><option value="Arrendamiento">Arrendamiento</option><option value="Otro">Otro</option></select></div><div className="field span-2"><label>Descuentos negociados</label><textarea value={servicioForm.descuentosNegociados} onChange={(e) => setServicioField('descuentosNegociados', e.target.value)} /></div><div className="field"><label>Duración del contrato (meses)</label><input value={servicioForm.duracionContratoMeses} onChange={(e) => setServicioField('duracionContratoMeses', e.target.value)} type="number" min="0" /></div></div></div>
-                            <div className="service-card"><h3>7. Facturación</h3><div className="card-grid"><div className="field"><label>Costo de instalación en USD (sin IVA)</label><input value={servicioForm.costoInstalacionUsdSinIva} onChange={(e) => setServicioField('costoInstalacionUsdSinIva', e.target.value)} type="number" min="0" /></div><div className="field"><label>Importe mensual en pesos por servicio (sin IVA)</label><input value={servicioForm.importeMensualServicioSinIva} onChange={(e) => setServicioField('importeMensualServicioSinIva', e.target.value)} type="number" min="0" /></div><div className="field"><label>Importe mensual en pesos por arrendamiento de equipos</label><input value={servicioForm.importeMensualArrendamiento} onChange={(e) => setServicioField('importeMensualArrendamiento', e.target.value)} type="number" min="0" /></div><div className="field"><label>Importe en USD por compra de equipamiento</label><input value={servicioForm.importeCompraEquipamiento} onChange={(e) => setServicioField('importeCompraEquipamiento', e.target.value)} type="number" min="0" /></div></div></div>
+                            <div className="service-card"><h3>7. Facturación</h3><div className="card-grid"><div className="field"><label>Importe mensual en pesos por servicio (sin IVA)</label><input value={servicioForm.importeMensualServicioSinIva} onChange={(e) => setServicioField('importeMensualServicioSinIva', e.target.value)} type="number" min="0" /></div><div className="field"><label>Importe mensual en pesos por arrendamiento de equipos</label><input value={servicioForm.importeMensualArrendamiento} onChange={(e) => setServicioField('importeMensualArrendamiento', e.target.value)} type="number" min="0" /></div><div className="field"><label>Importe en USD por compra de equipamiento</label><input value={servicioForm.importeCompraEquipamiento} onChange={(e) => setServicioField('importeCompraEquipamiento', e.target.value)} type="number" min="0" /></div></div></div>
                             <div className="service-card"><h3>8. Datos de Facturación</h3><div className="card-grid"><div className="field"><label>Razón Social</label><input value={servicioForm.razonSocial} onChange={(e) => setServicioField('razonSocial', e.target.value)} type="text" /></div><div className="field"><label>RUT</label><input value={servicioForm.rut} onChange={(e) => setServicioField('rut', e.target.value)} type="text" /></div><div className="field span-2"><label>Mail para facturación</label><input value={servicioForm.mailFacturacion} onChange={(e) => setServicioField('mailFacturacion', e.target.value)} type="email" /></div></div></div>
                             <div className="service-card"><h3>9. Administración</h3><div className="card-grid"><div className="field span-2"><label>Administración</label><input value={servicioForm.administracion} onChange={(e) => setServicioField('administracion', e.target.value)} type="text" /></div></div></div>
-                            <div className="service-card"><h3>10. Servicios del Grupo</h3><div className="card-grid"><div className="field span-2"><label>¿El servicio cuenta con otro servicio del grupo?</label><select value={servicioForm.serviciosGrupo || ''} onChange={(e) => setServicioField('serviciosGrupo', e.target.value)}><option value="">Seleccionar...</option><option value="Portería Física Masterson">Portería Física Masterson</option><option value="Limpieza de Onesta">Limpieza de Onesta</option><option value="TecnoBombas">TecnoBombas</option><option value="Automatismos de Alse">Automatismos de Alse</option><option value="No tiene otro servicio del grupo">No tiene otro servicio del grupo</option></select></div><div className="field span-3"><label>Observaciones y comentarios</label><textarea value={servicioForm.observacionesComentarios} onChange={(e) => setServicioField('observacionesComentarios', e.target.value)} /></div><div className="field"><label>FACTURADO</label><select value={servicioForm.facturado} onChange={(e) => setServicioField('facturado', e.target.value)}><option>Sí</option><option>No</option></select></div></div></div>
+                            <div className="service-card"><h3>10. Servicios del Grupo</h3><div className="card-grid"><div className="field span-3"><label>¿El servicio cuenta con otro servicio del grupo? (podés seleccionar más de uno)</label><div style={{ display: 'grid', gap: 8 }}>{['Portería Física Masterson', 'Limpieza de Onesta', 'TecnoBombas', 'Automatismos de Alse', 'No tiene otro servicio del grupo'].map((option) => { const selected = Array.isArray(servicioForm.serviciosGrupo) ? servicioForm.serviciosGrupo : String(servicioForm.serviciosGrupo || '').split('|').filter(Boolean); const checked = selected.includes(option); return <label key={`serv-grupo-${option}`} style={{ display: 'flex', alignItems: 'center', gap: 8, border: '1px solid #d9e5e3', borderRadius: 10, padding: '8px 10px', background: checked ? '#e9f7f4' : '#fff' }}><input type="checkbox" checked={checked} onChange={(e) => { let next = selected.filter((value) => value !== option); if (e.target.checked) { if (option === 'No tiene otro servicio del grupo') next = ['No tiene otro servicio del grupo']; else next = [...next.filter((value) => value !== 'No tiene otro servicio del grupo'), option]; } setServicioField('serviciosGrupo', next); }} /><span>{option}</span></label>; })}</div></div><div className="field span-3"><label>Observaciones y comentarios</label><textarea value={servicioForm.observacionesComentarios} onChange={(e) => setServicioField('observacionesComentarios', e.target.value)} /></div></div></div>
                           </>
                         )}
 
@@ -17642,7 +17545,7 @@
                           <h3>Nueva Obra</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID</label><input value={clienteId} readOnly type="text" /></div>
-                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                            <div className="field"><label>Status</label><input value="Pendiente de agenda" type="text" readOnly /></div>
                             <div className="field"><label>Representante Comercial</label><input value={obraForm.representanteComercial} onChange={(e) => setObraField('representanteComercial', e.target.value)} type="text" readOnly={lockCommercialField} /></div>
                           </div>
                         </div>
@@ -17682,7 +17585,7 @@
                           <h3>Novación</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" /></div>
-                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                            <div className="field"><label>Status</label><input value="Pendiente de agenda" type="text" readOnly /></div>
                           </div>
                         </div>
 
@@ -17793,7 +17696,7 @@
                           <h3>Adicionales</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => { setClienteIdAsociado(e.target.value); setAgregadoField('idServicio', e.target.value); }} type="text" placeholder="ID del servicio existente" /></div>
-                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                            <div className="field"><label>Status</label><input value="Pendiente de agenda" type="text" readOnly /></div>
                           </div>
                         </div>
 
@@ -17896,7 +17799,7 @@
                                 ))}
                               </select>
                             </div>
-                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                            <div className="field"><label>Status</label><input value="Pendiente de agenda" type="text" readOnly /></div>
                           </div>
                         </div>
 
@@ -17982,7 +17885,7 @@
                           <h3>Movimiento de obra</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => { setClienteIdAsociado(e.target.value); setMovimientoField('servicioIdSeleccionado', e.target.value); }} type="text" placeholder="ID del servicio existente" /></div>
-                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                            <div className="field"><label>Status</label><input value="Pendiente de agenda" type="text" readOnly /></div>
                           </div>
                         </div>
 
@@ -18068,12 +17971,38 @@
                         <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     ) : grupo === 'baja-detalle' ? (
-                      <div className="service-layout">
+                      (() => {
+                        const bajaSteps = [
+                          { key: 'base', label: 'Baja de Servicio', done: !!clienteIdAsociado && !!status },
+                          { key: 'id', label: 'Identificación del Servicio', done: !!bajaForm.nombreServicio && !!(clienteIdAsociado || bajaForm.servicioIdSeleccionado) && !!bajaForm.direccionServicio },
+                          { key: 'fecha', label: 'Fecha', done: !!bajaForm.fechaIngresoAuto },
+                          { key: 'solicitud', label: 'Solicitud', done: !!bajaForm.quienSolicita && !!bajaForm.nombreCliente && !!bajaForm.telefono },
+                          { key: 'motivo', label: 'Motivo de Baja', done: !!bajaForm.motivoBajaCategoria },
+                          { key: 'internet', label: 'Internet', done: !!bajaForm.internetResponsable },
+                          { key: 'equipamiento', label: 'Equipamiento', done: !!bajaForm.propietarioEquipamiento },
+                          { key: 'review', label: 'Revisión y envío', done: !!bajaForm.motivoBajaCategoria && !!bajaForm.nombreServicio },
+                        ];
+                        const doneSteps = bajaSteps.filter((s) => s.done).length;
+                        const progress = Math.round((doneSteps / bajaSteps.length) * 100);
+                        return (
+                      <div className="baja-wizard-layout">
+                        <div className="baja-wizard-main">
+                          <div className="baja-wizard-header">
+                            <div className="baja-wizard-title">
+                              <span className="baja-wizard-badge">📋</span>
+                              <div>
+                                <h2 style={{ margin: 0 }}>Formulario Operativo • Gestión de Acciones</h2>
+                                <div className="hint" style={{ margin: 0 }}>Completá la solicitud de baja con validación y progreso en tiempo real.</div>
+                              </div>
+                            </div>
+                            <div className="hint" style={{ margin: 0 }}>Las acciones de guardado y envío están en el panel de progreso.</div>
+                          </div>
+                        <div className="service-layout">
                         <div className="service-card">
                           <h3>Baja de Servicio</h3>
                           <div className="card-grid">
                             <div className="field"><label>Cliente ID asociado</label><input value={clienteIdAsociado} onChange={(e) => { setClienteIdAsociado(e.target.value); setBajaField('servicioIdSeleccionado', e.target.value); }} type="text" placeholder="ID del servicio existente" /></div>
-                            <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                            <div className="field"><label>Status</label><input value="Pendiente de agenda" type="text" readOnly /></div>
                           </div>
                         </div>
 
@@ -18172,8 +18101,32 @@
                           </div>
                         </div>
 
-                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
+                        <div className="service-card" style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                          <button type="button" className="home-modern-action-btn" onClick={resetFields}>Limpiar formulario</button>
+                          <button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : 'Enviar solicitud'}</button>
+                        </div>
+                        </div>
+                        </div>
+                        <aside className="baja-wizard-side">
+                          <section className="service-card">
+                            <h3>Progreso del formulario</h3>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                              <div style={{ width: 78, height: 78, borderRadius: '50%', border: '8px solid #d6ece8', display: 'grid', placeItems: 'center', fontWeight: 900, color: '#0a6e6b' }}>{progress}%</div>
+                              <div className="hint" style={{ margin: 0 }}>Completa todos los campos para enviar la solicitud.</div>
+                            </div>
+                            <div className="baja-progress-steps">
+                              {bajaSteps.map((step, idx) => <div key={`baja-step-${step.key}`} className={`baja-progress-step ${step.done ? 'done' : (idx === doneSteps ? 'active' : '')}`}><span className="baja-progress-dot"></span><span>{step.label}</span></div>)}
+                            </div>
+                          </section>
+                          <section className="service-card">
+                            <h3>Ayuda rápida</h3>
+                            <div className="hint">Completá cada bloque para evitar rechazos operativos.</div>
+                            <div className="baja-tip">💡 Consejo: La dirección se completa automáticamente al seleccionar el servicio.</div>
+                          </section>
+                        </aside>
                       </div>
+                      );
+                      })()
                     ) : grupo === 'charla-detalle' ? (
                       <div className="charla-studio">
                         <section className="charla-card context">
@@ -18225,7 +18178,7 @@
                       <div className="compact-grid">
                         <div className="field"><label>Tipo de Acción</label><select value={tipoAccion} onChange={(e) => { setTipoAccion(e.target.value); resetFields(); }}>{ACCIONES.map((a) => <option key={a} value={a}>{ACTION_LABELS[a] || a}</option>)}</select></div>
                         <div className="field"><label>{autoIdMode ? "Cliente ID" : "Cliente ID asociado"}</label>{autoIdMode ? <input value={clienteId} readOnly type="text" /> : <input value={clienteIdAsociado} onChange={(e) => setClienteIdAsociado(e.target.value)} type="text" placeholder="ID del servicio existente" />}</div>
-                        <div className="field"><label>Status</label><select value={status} onChange={(e) => setStatus(e.target.value)}>{STATUS_OPTIONS.map((st) => <option key={st} value={st}>{st}</option>)}</select></div>
+                        <div className="field"><label>Status</label><input value="Pendiente de agenda" type="text" readOnly /></div>
 
                         {grupo === 'base' && <><div className="field"><label>Cliente</label><input value={cliente} onChange={(e) => setCliente(e.target.value)} /></div><div className="field"><label>Fecha Carga</label><input value={fechaCarga} onChange={(e) => setFechaCarga(e.target.value)} type="date" /></div><div className="field"><label>Tiempo Instalación</label><input value={tiempoInstalacion} onChange={(e) => setTiempoInstalacion(e.target.value)} /></div><div className="field"><label>Fecha Alta</label><input value={fechaAlta} onChange={(e) => setFechaAlta(e.target.value)} type="date" /></div><div className="field"><label>Cobro</label><input value={cobro} onChange={(e) => setCobro(e.target.value)} /></div></>}
 
@@ -18234,6 +18187,49 @@
                         <div className="field full"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
                       </div>
                     )}
+                      </div>
+                      {grupo !== 'baja-detalle' && (
+                      <aside className="form-global-side">
+                        {(() => {
+                          const currentData = grupo === 'baja-detalle' ? bajaForm
+                            : grupo === 'servicio' ? servicioForm
+                              : grupo === 'movimiento-detalle' ? movimientoForm
+                                : grupo === 'novacion-detalle' ? novacionForm
+                                  : grupo === 'adicionales-detalle' ? adicionalesForm
+                                    : grupo === 'presupuesto-detalle' ? presupuestoForm
+                                      : charlaForm;
+                          const fields = Object.values(currentData || {});
+                          const completed = fields.filter((v) => String(v || '').trim().length > 0).length;
+                          const total = Math.max(fields.length, 1);
+                          const pct = Math.round((completed / total) * 100);
+                          const steps = ['Baja de Servicio', 'Identificación del Servicio', 'Fecha', 'Solicitud', 'Motivo de Baja', 'Internet', 'Equipamiento', 'Revisión y envío'];
+                          return (
+                            <>
+                              <section className="service-card">
+                                <h3>Progreso del formulario</h3>
+                                <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 8 }}>
+                                  <div style={{ width: 70, height: 70, borderRadius: 16, border: '2px solid #0a9888', display: 'grid', placeItems: 'center', fontWeight: 900 }}>{pct}%</div>
+                                  <div className="hint" style={{ margin: 0 }}>Completá todos los campos para enviar la solicitud.</div>
+                                </div>
+                                <div className="baja-progress-steps">
+                                  {steps.map((step, idx) => <div key={`global-step-${step}`} className={`baja-progress-step ${idx < Math.round((pct / 100) * steps.length) ? 'done' : ''}`}><span className="baja-progress-dot"></span><span>{step}</span></div>)}
+                                </div>
+                              </section>
+                              <section className="service-card">
+                                <h3>Ayuda rápida</h3>
+                                <div className="baja-tip">Consejo: validá ID y estado antes de enviar para evitar retrabajos.</div>
+                              </section>
+                              <section className="service-card" style={{ display: 'grid', gap: 8 }}>
+                                <button type="button" className="home-modern-action-btn" onClick={resetFields}>Limpiar formulario</button>
+                                <button type="button" className="home-modern-action-btn">Guardar borrador</button>
+                                <button type="submit" className="home-modern-action-btn primary" disabled={saving}>{saving ? 'Guardando...' : 'Enviar solicitud'}</button>
+                              </section>
+                            </>
+                          );
+                        })()}
+                      </aside>
+                      )}
+                    </div>
                   </form>
 
                   <section className="form-history-shell">
@@ -18607,7 +18603,7 @@
                               <div className="agenda-task-title">{task.ticketTitulo || 'Sin descripción'}</div>
                               <div className="agenda-task-client">{task.cliente || 'Cliente sin nombre'}</div>
                               <div className="agenda-task-meta">{task.direccion || 'Sin dirección'}</div>
-                              <div className="agenda-task-meta"><strong>Técnico:</strong> {task.tecnicoId || 'Técnico sin asignar'} · <strong>Ticket:</strong> {task.ticketId || 'Sin ticket'}</div>
+                              <div className="agenda-task-meta"><strong>Técnico:</strong> {task.tecnicoNombre || task.tecnicoId || 'Técnico sin asignar'} · <strong>Ticket:</strong> {task.ticketId || 'Sin ticket'}</div>
                             </div>
                           </article>
                         );
@@ -19304,5 +19300,24 @@
         setInterval(obtenerClima, 10 * 60 * 1000);
       })();
     </script>
+    <style>
+      @media (max-width: 768px) {
+        .dashboard-main-layout,
+        .dashboard-main-column,
+        .dashboard-side-column,
+        .dashboard-right-panel { grid-template-columns: 1fr !important; display: grid !important; }
+        .dashboard-side-column { position: static !important; order: 2 !important; }
+        .dashboard-main-column { order: 1 !important; }
+        #weather-widget, .dashboard-right-panel article:has(#gmail-list), #gmail-list { display: none !important; }
+        .home-service-cards-board { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
+        .home-service-card { min-height: 132px !important; padding: 8px !important; }
+        .home-service-card .home-service-card-row-grid,
+        .home-service-card .home-service-card-row,
+        .home-service-card .hint { display: none !important; }
+        .home-service-card .home-service-card-footer { margin-top: 8px !important; }
+        .home-modern-actions { grid-template-columns: 1fr 1fr !important; }
+        .home-modern-actions .home-modern-action-btn.primary { grid-column: 1 / -1 !important; }
+      }
+    </style>
   </body>
 </html>
