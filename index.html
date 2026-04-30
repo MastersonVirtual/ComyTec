@@ -361,6 +361,41 @@
       .form-global-side .home-modern-action-btn {
         min-height: 46px;
       }
+      @media (max-width: 768px) {
+        .topbar { padding: 8px 10px !important; gap: 8px !important; }
+        .top-titles h1 { font-size: 0 !important; line-height: 1; }
+        .top-titles h1::after { content: "Hola, Alfonso"; font-size: 1.05rem; color: #e6fffd; font-weight: 800; }
+        .top-titles p { display: none !important; }
+        .main { margin: 10px auto !important; padding: 0 8px 84px !important; }
+        .home-modern-hero { padding: 16px !important; border-radius: 16px !important; }
+        .home-modern-hero h2 { font-size: 1.5rem !important; }
+        .home-modern-actions { display: grid !important; grid-template-columns: 1fr 1fr; gap: 8px !important; }
+        .home-modern-actions .home-modern-action-btn.primary { grid-column: 1 / -1; }
+        .home-modern-actions .home-modern-action-btn { min-height: 40px !important; font-size: 13px !important; }
+
+        #weather-widget { display: none !important; }
+        #gmail-list { display: none !important; }
+        #gmail-list.closest, .dashboard-right-panel article:has(#gmail-list) { display: none !important; }
+
+        .home-service-cards-board { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
+        .home-service-card { min-height: 120px !important; padding: 10px !important; }
+        .home-service-card .hint, .home-service-card-row-grid, .home-service-card-row { display: none !important; }
+        .home-service-card-head { align-items: center !important; }
+
+        .agenda-widget-card { padding: 0 !important; }
+        .agenda-widget-head { padding: 12px !important; }
+        .agenda-widget-head h4 { font-size: 1.2rem !important; }
+        .agenda-widget-subtitle { font-size: .84rem !important; }
+        .agenda-widget-body { display: none !important; }
+        .agenda-widget-card { border-radius: 14px !important; }
+
+        .calendar-day-block { padding: 8px !important; }
+        .calendar-event-item { padding: 8px !important; }
+        .calendar-widget-card .calendar-sections section:nth-child(n+3) { display: none !important; }
+
+        .mobile-bottom-nav { display: grid !important; grid-template-columns: repeat(4, 1fr); }
+        .mobile-fab { display: grid !important; }
+      }
       .card-grid { display: grid; grid-template-columns: repeat(3, minmax(180px, 1fr)); gap: 10px; }
 
       .field { display: flex; flex-direction: column; gap: 6px; }
