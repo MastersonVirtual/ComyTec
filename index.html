@@ -14218,7 +14218,7 @@
                       <div>{item.message}</div>
                     </div>
                   ))}
-                  <button type="button" className="mobile-link-btn" onClick={() => { setMobileTab('actividad'); setSelectedForm('historial-servicios'); }}>Ver toda la actividad</button>
+                  
                 </div>
 
                 <div className="mobile-flat-card">
@@ -15693,7 +15693,7 @@
                       <div className="sidebar-divider" />
                       <button className="menu-button" onClick={() => setOpenMenus((p) => ({ operaciones: false, nuevo: false, baseDatos: !p.baseDatos }))}><span className="menu-icon">📚</span><span>Base de datos</span><span className="menu-arrow">{openMenus.baseDatos ? '▾' : '▸'}</span></button>
                       <div className={`submenu ${openMenus.baseDatos ? 'open' : ''}`}>
-                        <button className="submenu-button" onClick={() => { setSelectedForm('historial-servicios'); closeSidebar(); }}>Historial de Servicios</button>
+                        
                       </div>
                       {ENABLE_CLIENT_TRACKING_VIEW && <button className="menu-button" onClick={() => { setShowClientViewModal(true); closeSidebar(); }}><span className="menu-icon">👥</span><span>Vista Clientes</span></button>}
                     </>
@@ -17449,28 +17449,7 @@
                 ) : effectiveSelectedForm === 'historial-servicios' ? (
                   <section className="panel">
                     <h2>Historial de Servicios</h2>
-                    <div className="hint">Registro cronológico de cambios y movimientos aplicados a cada servicio.</div>
-                    {historyFilteredRows.length === 0 ? (
-                      <div className="hint" style={{ marginBottom: 0 }}>No hay movimientos de historial para mostrar.</div>
-                    ) : (
-                      <div className="history-list">
-                        {historyFilteredRows.slice(0, 250).map((row) => (
-                          <div className="history-row" key={`service-history-${row.id}`} role="button" tabIndex={0} onClick={() => openServiceDetailModal(row, 'historial')} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openServiceDetailModal(row, 'historial'); } }}>
-                            <button type="button" className="ranking-service-btn" onClick={(event) => { event.stopPropagation(); openServiceDetailModal(row, 'historial'); }}>
-                              <div className="history-row-main">
-                                <strong>{row.nombreServicio || row.razonSocial || 'Servicio sin nombre'}</strong>
-                                <div className="history-row-meta">
-                                  <span>ID {row.clienteId || '-'}</span><span>·</span>
-                                  <span>{row.tipoAccion || row.formulario || 'Actualización'}</span><span>·</span>
-                                  <span>{formatRequestDateTime(row.creadoEn || row.updatedAt || row.actualizadoEn)}</span>
-                                </div>
-                              </div>
-                            </button>
-                            <span className={statusClass(row.status || row.estado)}>{row.status || row.estado || 'Pendiente'}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    <div className="hint" style={{ marginBottom: 0 }}>Módulo deshabilitado: se eliminó la visual, data y botón de historial de servicios.</div>
                   </section>
                 ) : effectiveSelectedForm === 'base-datos' ? (
                   <section className="panel service-coord-shell">
