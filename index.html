@@ -3046,6 +3046,27 @@
         .agenda-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         .agenda-detail-item.span-2 { grid-column: span 2; }
       }
+      .ticket-summary-shell {
+        border: 1px solid #d6e8e4;
+        border-radius: 18px;
+        background: linear-gradient(140deg, #ffffff 0%, #f3fbf9 100%);
+        padding: 16px;
+        box-shadow: 0 12px 24px rgba(6,58,55,.08);
+      }
+      .ticket-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .ticket-summary-item {
+        background: #fff;
+        border: 1px solid #dfebe8;
+        border-radius: 12px;
+        padding: 10px;
+      }
+      .ticket-summary-item small { display:block; color:#59707d; font-weight:700; }
+      .ticket-summary-item strong { font-size: 30px; color:#0f172a; line-height:1.1; }
+      @media (max-width: 900px) { .ticket-summary-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
       .agenda-task-badges {
         display: flex;
         align-items: center;
@@ -16695,6 +16716,48 @@
                                 </article>
                               ))}
                             </div>
+                          </section>
+                          <section className="home-widget-shell ticket-summary-shell">
+                            {(() => {
+                              const startOfWeek = (date) => {
+                                const d = new Date(date);
+                                const day = (d.getDay() + 6) % 7;
+                                d.setHours(0, 0, 0, 0);
+                                d.setDate(d.getDate() - day);
+                                return d;
+                              };
+                              const now = new Date();
+                              const currentWeekStart = startOfWeek(now);
+                              const previousWeekStart = new Date(currentWeekStart);
+                              previousWeekStart.setDate(previousWeekStart.getDate() - 7);
+                              const previousWeekEnd = new Date(currentWeekStart);
+                              const allTickets = [...(agendaRows || []), ...(agendaInstallRows || [])];
+                              const previousWeekTickets = allTickets.filter((task) => {
+                                const ts = task?.fechaHora?.getTime?.();
+                                if (!ts) return false;
+                                return ts >= previousWeekStart.getTime() && ts < previousWeekEnd.getTime();
+                              });
+                              const solved = previousWeekTickets.filter((task) => /complet|resuelt|cerrad/i.test(String(task?.estado || ''))).length;
+                              const pending = previousWeekTickets.filter((task) => /pendient|abiert/i.test(String(task?.estado || ''))).length;
+                              const inProgress = Math.max(0, previousWeekTickets.length - solved - pending);
+                              const rangeLabel = `${previousWeekStart.toLocaleDateString('es-UY')} - ${new Date(previousWeekEnd.getTime() - 1).toLocaleDateString('es-UY')}`;
+                              return (
+                                <>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, alignItems: 'center', marginBottom: 10 }}>
+                                    <div>
+                                      <h3 className="home-card-group-title" style={{ margin: 0 }}>Resumen semanal de tickets</h3>
+                                      <small className="hint" style={{ margin: 0 }}>Semana anterior · {rangeLabel}</small>
+                                    </div>
+                                  </div>
+                                  <div className="ticket-summary-grid">
+                                    <div className="ticket-summary-item"><small>Total</small><strong>{previousWeekTickets.length}</strong></div>
+                                    <div className="ticket-summary-item"><small>Resueltas</small><strong>{solved}</strong></div>
+                                    <div className="ticket-summary-item"><small>Pendientes</small><strong>{pending}</strong></div>
+                                    <div className="ticket-summary-item"><small>En curso</small><strong>{inProgress}</strong></div>
+                                  </div>
+                                </>
+                              );
+                            })()}
                           </section>
                           <section className="home-widget-shell home-staff-chat-card">
                             <h3 className="home-card-group-title">Funcionarios · Chat interno</h3>
