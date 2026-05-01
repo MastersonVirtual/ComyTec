@@ -8786,19 +8786,12 @@
         { role: 'usuario', area: '', label: 'Usuario' },
         { role: 'admin', area: '', label: 'Admin' },
       ];
+      const WORKFLOW_V2_ENABLED = false;
       const GNS_WORKFLOW_STAGES = [
-        'Pendiente de aprobación – Coordinación de Instalaciones',
-        'Rechazado',
-        'En proceso de instalación',
-        'Alta de Servicio en configuración',
-        'Activo',
+        'Pendiente',
       ];
       const GNS_WORKFLOW_TRANSITIONS = Object.freeze({
-        'Pendiente de aprobación – Coordinación de Instalaciones': ['En proceso de instalación', 'Rechazado'],
-        Rechazado: ['Pendiente de aprobación – Coordinación de Instalaciones'],
-        'En proceso de instalación': ['Alta de Servicio en configuración', 'Pendiente de aprobación – Coordinación de Instalaciones'],
-        'Alta de Servicio en configuración': ['Activo', 'En proceso de instalación'],
-        Activo: ['En proceso de instalación'],
+        Pendiente: [],
       });
       const INSTALLATION_REQUIRED_TASKS = [
         { key: 'mailInicioInstalacion', label: 'Mail de inicio de instalación' },
@@ -8810,7 +8803,7 @@
       ];
       function resolveWorkflowOwner(stage) {
         const current = String(stage || '').trim();
-        if (current === 'Rechazado' || current === 'Pendiente de aprobación – Coordinación de Instalaciones') return 'Comercial';
+        if (current === 'Rechazado' || current === 'Pendiente') return 'Comercial';
         if (current === 'En proceso de instalación') return 'Instalaciones';
         if (current === 'Alta de Servicio en configuración') return 'Atención al cliente';
         if (current === 'Activo') return 'Operaciones';
@@ -10486,8 +10479,8 @@
 
         function getDefaultWorkflowStage(action = '') {
           const clean = String(action || '').trim();
-          if (clean === 'Nuevo Servicio') return 'Pendiente de aprobación – Coordinación de Instalaciones';
-          return 'Pendiente de aprobación – Coordinación de Instalaciones';
+          if (clean === 'Nuevo Servicio') return 'Pendiente';
+          return 'Pendiente';
         }
 
         function canTransitionWorkflowStage(fromStage, toStage) {
@@ -10518,7 +10511,7 @@
         }
 
         function getWorkflowDraftDefaults(service = {}) {
-          const currentStage = normalizeWorkflowStage(service.workflowStage) || 'Pendiente de aprobación – Coordinación de Instalaciones';
+          const currentStage = normalizeWorkflowStage(service.workflowStage) || 'Pendiente';
           const nextOptions = GNS_WORKFLOW_TRANSITIONS[currentStage] || [];
           const existingInstallTasks = service.workflowInstallTasks || {};
           const existingTaskMeta = service.workflowInstallTaskMeta || {};
@@ -13700,7 +13693,7 @@
         async function handleWorkflowTransition(service) {
           if (!service?.id) return;
           const serviceId = String(service.id || '').trim();
-          const currentStage = normalizeWorkflowStage(service.workflowStage) || 'Pendiente de aprobación – Coordinación de Instalaciones';
+          const currentStage = normalizeWorkflowStage(service.workflowStage) || 'Pendiente';
           const draft = workflowTransitionDrafts[serviceId] || getWorkflowDraftDefaults(service);
           const nextStage = normalizeWorkflowStage(draft.nextStage);
           if (!nextStage) {
@@ -13712,7 +13705,7 @@
             return;
           }
           if (
-            currentStage === 'Pendiente de aprobación – Coordinación de Instalaciones'
+            currentStage === 'Pendiente'
             && (nextStage === 'En proceso de instalación' || nextStage === 'Rechazado')
             && !isAdminUser
             && !isCoordinationUser
@@ -13758,7 +13751,7 @@
             workflowAvailableNextStages: GNS_WORKFLOW_TRANSITIONS[nextStage] || [],
             workflowTimeline: [...existingTimeline, workflowEvent],
             workflowInstallTasks: draft.installTasks || {},
-            workflowRejectionReason: nextStage === 'Rechazado' ? String(draft.rejectionReason || '').trim() : (nextStage === 'Pendiente de aprobación – Coordinación de Instalaciones' ? '' : (service.workflowRejectionReason || '')),
+            workflowRejectionReason: nextStage === 'Rechazado' ? String(draft.rejectionReason || '').trim() : (nextStage === 'Pendiente' ? '' : (service.workflowRejectionReason || '')),
             workflowClientRecordCompleted: !!draft.clientRecordCompleted,
             workflowCurrentOwner: resolveWorkflowOwner(nextStage),
             status: stageToOperationalStatus(nextStage),
@@ -13795,8 +13788,8 @@
             setNotificacion({ mensaje: 'Solo Técnica, Coordinación o Admin pueden aprobar/rechazar nuevos servicios.', tipo: 'warn' });
             return;
           }
-          const currentStage = normalizeWorkflowStage(service.workflowStage) || 'Pendiente de aprobación – Coordinación de Instalaciones';
-          if (currentStage !== 'Pendiente de aprobación – Coordinación de Instalaciones') {
+          const currentStage = normalizeWorkflowStage(service.workflowStage) || 'Pendiente';
+          if (currentStage !== 'Pendiente') {
             setNotificacion({ mensaje: 'Este servicio ya fue procesado en la instancia de aprobación inicial.', tipo: 'warn' });
             return;
           }
@@ -13931,7 +13924,7 @@
               auditoriaApertura: formOpenAudit,
             });
             if (tipoAccion === 'Nuevo Servicio') {
-              doc.workflowStage = 'Pendiente de aprobación – Coordinación de Instalaciones';
+              doc.workflowStage = 'Pendiente';
               doc.status = 'Pendiente';
               doc.estado = 'Pendiente';
             }
@@ -17555,7 +17548,7 @@
                               >
                                 <span className="service-coord-main-service">
                                   <strong><span className="service-coord-inline-id">ID {row.clienteId || '-'}</span>{row.nombreServicio || row.cliente || 'Servicio sin nombre'}</strong>
-                                  <small>{normalizeWorkflowStage(row.workflowStage) || 'Pendiente de aprobación – Coordinación de Instalaciones'}</small>
+                                  <small>{normalizeWorkflowStage(row.workflowStage) || 'Pendiente'}</small>
                                 </span>
                                 <span>{row.cliente || row.razonSocial || '-'}</span>
                                 <span>{row.representanteComercial || 'Sin encargado'}</span>
@@ -18502,7 +18495,7 @@
                       const serviceTickets = ticketsHistorial
                         .filter((ticket) => String(ticket.clienteId || '').trim() === detailServiceId)
                         .slice(0, 8);
-                      const detailWorkflowStage = normalizeWorkflowStage(detailService.workflowStage) || 'Pendiente de aprobación – Coordinación de Instalaciones';
+                      const detailWorkflowStage = normalizeWorkflowStage(detailService.workflowStage) || 'Pendiente';
                       const detailWorkflowNextOptions = GNS_WORKFLOW_TRANSITIONS[detailWorkflowStage] || [];
                       const workflowDraft = workflowTransitionDrafts[detailService.id] || getWorkflowDraftDefaults(detailService);
                       return (
@@ -18542,7 +18535,7 @@
                                   <div className="hint" style={{ marginBottom: 10 }}>
                                     Vista solo lectura de base de datos: para aprobar/rechazar o mover etapas usá la sección <b>Historial de Servicios</b>.
                                   </div>
-                                ) : detailWorkflowStage === 'Pendiente de aprobación – Coordinación de Instalaciones'
+                                ) : detailWorkflowStage === 'Pendiente'
                                   && (String(detailService.tipoAccion || '').trim() === 'Nuevo Servicio' || String(detailService.formulario || '').trim() === 'nuevo-servicio-optimizado') ? (
                                     <>
                                       <div className="hint" style={{ marginBottom: 10 }}>
@@ -18746,7 +18739,7 @@
                                   </div>
                                 )}
 
-                                {(detailWorkflowStage !== 'Pendiente de aprobación – Coordinación de Instalaciones'
+                                {(detailWorkflowStage !== 'Pendiente'
                                   || (String(detailService.tipoAccion || '').trim() !== 'Nuevo Servicio' && String(detailService.formulario || '').trim() !== 'nuevo-servicio-optimizado')) && (
                                   <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
                                     <button type="button" className="save-btn" onClick={() => handleWorkflowTransition(detailService)} disabled={!detailWorkflowNextOptions.length}>Aplicar transición</button>
