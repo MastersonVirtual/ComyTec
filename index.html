@@ -18441,7 +18441,8 @@
                           const completed = fields.filter((v) => String(v || '').trim().length > 0).length;
                           const total = Math.max(fields.length, 1);
                           const pct = Math.round((completed / total) * 100);
-                          const mapAddress = (currentData?.direccionServicio || currentData?.direccion || currentData?.direccionInstalacion || '').trim();
+                          const linkedCatalog = getServiceCatalogById(clienteIdAsociado || currentData?.servicioIdSeleccionado || currentData?.idServicio || '');
+                          const mapAddress = (currentData?.direccionServicio || currentData?.direccion || currentData?.direccionInstalacion || linkedCatalog?.direccionServicio || '').trim();
                           const mapUrl = mapAddress ? `https://www.google.com/maps?q=${encodeURIComponent(mapAddress)}&output=embed` : '';
                           const steps = ['Baja de Servicio', 'Identificación del Servicio', 'Fecha', 'Solicitud', 'Motivo de Baja', 'Internet', 'Equipamiento', 'Revisión y envío'];
                           return (
