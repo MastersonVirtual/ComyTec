@@ -17776,7 +17776,7 @@
                           </>
                         )}
 
-                        <div className="service-card"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
+                        
                       </div>
                     ) : grupo === 'obra' ? (
                       <div className="service-layout">
@@ -18411,7 +18411,7 @@
                           <div className="charla-summary-item"><small>Dirección</small><strong>{charlaForm.direccion || '-'}</strong></div>
                         </section>
 
-                        <section className="charla-card save"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></section>
+                        
                       </div>
 ) : (
                       <div className="compact-grid">
@@ -18423,7 +18423,7 @@
 
 
 
-                        <div className="field full"><button className="save-btn" type="submit" disabled={saving}>{saving ? 'Guardando...' : (editingServiceId ? 'Actualizar Operación' : 'Guardar Operación')}</button></div>
+                        
                       </div>
                     )}
                       </div>
@@ -18481,58 +18481,7 @@
                     </div>
                   </form>
 
-                  <section className="form-history-shell">
-                    <div className="form-history-head">
-                      <div>
-                        <h3>Historial operativo de esta sección</h3>
-                        <p>Todo lo que se guarda queda visible acá para seguimiento y asignación por Comercial / Atención al cliente.</p>
-                      </div>
-                      <span className="form-history-count">{formHistoryRows.length} registro{formHistoryRows.length === 1 ? '' : 's'}</span>
-                    </div>
-                    <div className="form-history-table-wrap">
-                      <table className="form-history-table">
-                        <thead>
-                          <tr>
-                            <th>ID</th>
-                            <th>Servicio</th>
-                            <th>Estado</th>
-                            <th>Comercial</th>
-                            <th>Atención al cliente</th>
-                            <th>Última actualización</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {formHistoryRows.length === 0 ? (
-                            <tr><td colSpan={6} className="form-history-empty">Todavía no hay registros para esta sección.</td></tr>
-                          ) : (
-                            formHistoryRows.map((row) => (
-                              <tr key={`form-history-${row.id}`}>
-                                <td>{row.clienteId || '-'}</td>
-                                <td>
-                                  <strong>{row.nombreServicio || row.cliente || 'Servicio sin nombre'}</strong>
-                                  <small>{row.direccionServicio || '-'}</small>
-                                </td>
-                                <td><span className={statusClass(getStatusLabel(row))}>{getStatusLabel(row)}</span></td>
-                                <td>
-                                  <select value={row.representanteComercial || ''} onChange={(e) => handleAssignServiceField(row, 'representanteComercial', e.target.value)}>
-                                    <option value="">Sin asignar</option>
-                                    {historyCommercialOptions.map((opt) => <option key={`assg-com-${row.id}-${opt}`} value={opt}>{opt}</option>)}
-                                  </select>
-                                </td>
-                                <td>
-                                  <select value={row.atencionCliente || ''} onChange={(e) => handleAssignServiceField(row, 'atencionCliente', e.target.value)}>
-                                    <option value="">Sin asignar</option>
-                                    {historyAtencionOptions.map((opt) => <option key={`assg-ate-${row.id}-${opt}`} value={opt}>{opt}</option>)}
-                                  </select>
-                                </td>
-                                <td>{new Date((row.actualizadoEn?.seconds || row.creadoEn?.seconds || Date.now() / 1000) * 1000).toLocaleDateString('es-UY')}</td>
-                              </tr>
-                            ))
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </section>
+                  
                 </section>
                 )}
               </main>
