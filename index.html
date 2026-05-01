@@ -367,9 +367,11 @@
         overflow: hidden;
         background: #f6fcfa;
         box-shadow: 0 10px 20px rgba(6,47,45,.1);
+        display: flex;
+        flex-direction: column;
       }
       .form-mini-map-head { padding: 10px 12px; border-bottom: 1px solid #e2efec; font-weight: 800; color: #0a6e6b; background: #fff; }
-      .form-mini-map iframe { width: 100%; height: 180px; border: 0; display: block; }
+      .form-mini-map iframe { width: 100% !important; min-width: 100% !important; height: 210px; border: 0; display: block; flex: 1 1 auto; }
       .form-mini-map-foot { padding: 8px 12px; font-size: 12px; color: #4b5f6d; background: #fff; }
       @media (max-width: 768px) {
         body {
