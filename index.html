@@ -2993,6 +2993,59 @@
         padding: 7px 8px;
         text-align: center;
       }
+      .agenda-detail-card {
+        border: 1px solid #d7e9e5;
+        border-radius: 16px;
+        background: linear-gradient(180deg, #ffffff, #f7fcfb);
+        box-shadow: 0 10px 24px rgba(6, 58, 55, 0.08);
+        padding: 12px;
+      }
+      .agenda-detail-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .agenda-detail-item {
+        border: 1px solid #e1ece9;
+        border-radius: 12px;
+        padding: 10px;
+        background: #fff;
+      }
+      .agenda-detail-item.span-2 { grid-column: span 2; }
+      .agenda-detail-item b {
+        display: block;
+        font-size: 12px;
+        color: #4e6775;
+        margin-bottom: 3px;
+      }
+      .agenda-detail-item div {
+        font-size: 16px;
+        font-weight: 800;
+        color: #17242f;
+        line-height: 1.25;
+      }
+      .agenda-detail-item p {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #334a58;
+      }
+      .agenda-pill {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .agenda-pill-priority-baja { background: #dbeafe; color: #1d4ed8; }
+      .agenda-pill-priority-media { background: #ffedd5; color: #c2410c; }
+      .agenda-pill-priority-alta { background: #fee2e2; color: #b91c1c; }
+      .agenda-pill-state { background: #dcfce7; color: #166534; }
+      @media (max-width: 1120px) {
+        .agenda-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .agenda-detail-item.span-2 { grid-column: span 2; }
+      }
       .agenda-task-badges {
         display: flex;
         align-items: center;
@@ -17143,8 +17196,23 @@
                             ))}
                           </div>
                         </div>
-                        <div className="agenda-stat-card" style={{ marginTop: 12 }}>
-                          {selectedTask ? <div className="service-layout" style={{ gridTemplateColumns: 'repeat(7,minmax(0,1fr))' }}><div><b>Hora</b><div>{selectedTask.fechaHora ? selectedTask.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div></div><div><b>Cliente</b><div>{selectedTask.cliente || '-'}</div></div><div><b>Técnico</b><div>{selectedTask.tecnicoNombre || selectedTask.tecnicoId || '-'}</div></div><div><b>Ticket ID</b><div>{selectedTask.ticketId || '-'}</div></div><div><b>Prioridad</b><div>{selectedTask.prioridad || '-'}</div></div><div><b>Estado</b><div>{selectedTask.estado || '-'}</div></div><div><b>Descripción</b><div>{selectedTask.orientacion || '-'}</div></div></div> : <div className="hint" style={{ margin: 0 }}>Seleccioná una tarea para ver el detalle.</div>}
+                        <div className="agenda-stat-card agenda-detail-card" style={{ marginTop: 12 }}>
+                          {selectedTask ? (
+                            <div className="agenda-detail-grid">
+                              <div className="agenda-detail-item"><b>Hora</b><div>{selectedTask.fechaHora ? selectedTask.fechaHora.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : '--:--'}</div></div>
+                              <div className="agenda-detail-item"><b>Cliente</b><p>{selectedTask.cliente || '-'}</p></div>
+                              <div className="agenda-detail-item"><b>Técnico</b><p>{selectedTask.tecnicoNombre || selectedTask.tecnicoId || '-'}</p></div>
+                              <div className="agenda-detail-item"><b>Ticket ID</b><p>{selectedTask.ticketId || '-'}</p></div>
+                              <div className="agenda-detail-item">
+                                <b>Prioridad</b>
+                                <span className={`agenda-pill ${String(selectedTask.prioridad || '').toLowerCase() === 'alta' ? 'agenda-pill-priority-alta' : String(selectedTask.prioridad || '').toLowerCase() === 'media' ? 'agenda-pill-priority-media' : 'agenda-pill-priority-baja'}`}>
+                                  {selectedTask.prioridad || 'Baja'}
+                                </span>
+                              </div>
+                              <div className="agenda-detail-item"><b>Estado</b><span className="agenda-pill agenda-pill-state">{selectedTask.estado || '-'}</span></div>
+                              <div className="agenda-detail-item span-2"><b>Descripción</b><p>{selectedTask.orientacion || '-'}</p></div>
+                            </div>
+                          ) : <div className="hint" style={{ margin: 0 }}>Seleccioná una tarea para ver el detalle.</div>}
                         </div>
                       </section>
                     );
