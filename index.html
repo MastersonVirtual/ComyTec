@@ -266,9 +266,9 @@
       .form-step-row .dot { width:14px; height:14px; border-radius:16px; border:2px solid #b7c4cf; }
       .form-step-row.done { color:#0a6e6b; }
       .form-step-row.done .dot { background:#0a9888; border-color:#0a9888; }
-      .form-global-layout { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(290px, .75fr); gap: 16px; align-items: start; height: calc(100vh - 110px); overflow: hidden; }
-      .form-global-main { min-width: 0; overflow-y: auto; max-height: calc(100vh - 110px); padding-right: 6px; }
-      .form-global-side { position: sticky; top: 20px; display: grid; gap: 12px; max-height: calc(100vh - 130px); overflow: auto; }
+      .form-global-layout { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(280px, .72fr); gap: 12px; align-items: start; height: calc(100vh - 104px); overflow: hidden; }
+      .form-global-main { min-width: 0; overflow-y: auto; max-height: calc(100vh - 104px); padding-right: 6px; }
+      .form-global-side { position: sticky; top: 16px; display: grid; gap: 8px; max-height: 100vh; overflow: visible; }
       @media (max-width: 1080px) { .form-wizard-layout { grid-template-columns:1fr; } .form-wizard-main { max-height:none; overflow:visible; } .form-wizard-side { position:static; } }
       @media (max-width: 1080px) { .baja-wizard-layout { grid-template-columns: 1fr; } .baja-wizard-main { max-height:none; overflow:visible; } .baja-wizard-side { position: static; max-height: none; } }
       @media (max-width: 1080px) { .form-global-layout { grid-template-columns: 1fr; } .form-global-side { position: static; max-height: none; } }
@@ -356,10 +356,10 @@
         border: 1px solid #e3eceb;
         border-radius: 16px;
         box-shadow: 0 8px 20px rgba(15, 23, 42, .05);
-        padding: 18px;
+        padding: 12px;
       }
       .form-global-side .home-modern-action-btn {
-        min-height: 46px;
+        min-height: 40px;
       }
       .form-mini-map {
         border: 1px solid #d1e8e2;
@@ -369,7 +369,7 @@
         box-shadow: 0 10px 20px rgba(6,47,45,.1);
       }
       .form-mini-map-head { padding: 10px 12px; border-bottom: 1px solid #e2efec; font-weight: 800; color: #0a6e6b; background: #fff; }
-      .form-mini-map iframe { width: 100%; height: 220px; border: 0; display: block; }
+      .form-mini-map iframe { width: 100%; height: 180px; border: 0; display: block; }
       .form-mini-map-foot { padding: 8px 12px; font-size: 12px; color: #4b5f6d; background: #fff; }
       @media (max-width: 768px) {
         body {
@@ -18448,11 +18448,11 @@
                             <>
                               <section className="service-card">
                                 <h3>Progreso del formulario</h3>
-                                <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 8 }}>
-                                  <div style={{ width: 70, height: 70, borderRadius: 16, border: '2px solid #0a9888', display: 'grid', placeItems: 'center', fontWeight: 900 }}>{pct}%</div>
+                                <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 6 }}>
+                                  <div style={{ width: 58, height: 58, borderRadius: 14, border: '2px solid #0a9888', display: 'grid', placeItems: 'center', fontWeight: 900, fontSize: 15 }}>{pct}%</div>
                                   <div className="hint" style={{ margin: 0 }}>Completá todos los campos para enviar la solicitud.</div>
                                 </div>
-                                <div style={{ height: 10, borderRadius: 10, background: '#e5f3f0', overflow: 'hidden', marginBottom: 10 }}>
+                                <div style={{ height: 8, borderRadius: 10, background: '#e5f3f0', overflow: 'hidden', marginBottom: 8 }}>
                                   <div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg,#0fa595,#0b7c73)' }}></div>
                                 </div>
                                 <div className="baja-progress-steps">
