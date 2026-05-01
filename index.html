@@ -15965,8 +15965,35 @@
                           <div className="kv"><b>Mensaje:</b> {getInternalNotificationSummary(item.raw).status || item.raw.mensaje || '-'}</div>
                           <div className="kv"><b>Recibido:</b> {formatRequestDateTime(item.raw.creadoEn)}</div>
                           {['nuevo_servicio_aprobacion', 'servicio_aprobado_comercial', 'servicio_rechazado_comercial'].includes(String(item.raw?.tipo || '').trim().toLowerCase()) ? (
-                            <div className="request-status-row">
+                            <div className="request-status-row" style={{ flexWrap: 'wrap' }}>
                               <button type="button" className="status-action-btn chat-action-btn" onClick={() => openServiceFromNotification(item.raw)}>Ver servicio</button>
+                              <button type="button" className="status-action-btn chat-action-btn" onClick={() => { const target = rows.find((r) => String(r?.clienteId || '') === String(item.raw?.clienteId || item.raw?.serviceId || '').trim()) || rows.find((r) => String(r?.id || '') === String(item.raw?.serviceDocId || '').trim()); if (target) openServiceDetailModal(target, 'tickets'); else setNotificacion({ mensaje: 'No se encontró el servicio para ver tickets.', tipo: 'error' }); }}>Ver tickets</button>
+                              {String(item.raw?.tipo || '').trim().toLowerCase() === 'nuevo_servicio_aprobacion' && (userArea === 'tecnica' || isAdminUser) && (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="status-action-btn resolve"
+                                    onClick={() => {
+                                      const target = rows.find((r) => String(r?.clienteId || '') === String(item.raw?.clienteId || item.raw?.serviceId || '').trim()) || rows.find((r) => String(r?.id || '') === String(item.raw?.serviceDocId || '').trim());
+                                      if (!target) { setNotificacion({ mensaje: 'No se encontró el servicio de la notificación.', tipo: 'error' }); return; }
+                                      void handleWorkflowApprovalAction(target, 'approve');
+                                    }}
+                                  >
+                                    Aprobar
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="status-action-btn reject"
+                                    onClick={() => {
+                                      const target = rows.find((r) => String(r?.clienteId || '') === String(item.raw?.clienteId || item.raw?.serviceId || '').trim()) || rows.find((r) => String(r?.id || '') === String(item.raw?.serviceDocId || '').trim());
+                                      if (!target) { setNotificacion({ mensaje: 'No se encontró el servicio de la notificación.', tipo: 'error' }); return; }
+                                      void handleWorkflowApprovalAction(target, 'reject');
+                                    }}
+                                  >
+                                    Rechazar
+                                  </button>
+                                </>
+                              )}
                             </div>
                           ) : getStaffMemberFromMessage(item.raw) && (
                             <div className="request-status-row">
